@@ -1,0 +1,55 @@
+<div *ngIf="item">
+  <!-- progress -->
+  <div *ngIf="busy">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+
+  <!-- toolbar -->
+  <div id="toolbar">
+    <dl>
+      <dt>item</dt>
+      <dd>{{ item.title }}</dd>
+      <dt>item ID</dt>
+      <dd>{{ item.id }}</dd>
+      <dt>part ID</dt>
+      <dd>{{ source!.partId }}</dd>
+    </dl>
+    <div>
+      <mat-form-field *ngIf="layers?.length">
+        <mat-label>layer</mat-label>
+        <mat-select [formControl]="selectedLayer">
+          <mat-option [value]="{ id: 'all' }">all</mat-option>
+          <mat-option *ngFor="let l of layers" [value]="l">{{
+            l.roleId | flatLookup: typeEntries:"id":"value"
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span style="margin-left: 6px" *ngIf="selectedLayer.value">{{
+        selectedLayer.value.fragmentCount
+      }}</span>
+    </div>
+  </div>
+
+  <!-- preview -->
+  <div id="preview" *ngIf="rows?.length">
+    <div *ngFor="let row of rows; let i = index">
+      <div class="row-nr">{{ i + 1 }}</div>
+      <cadmus-text-block-view
+        [blocks]="row.blocks"
+        (blockClick)="onBlockClick($event)"
+      ></cadmus-text-block-view>
+    </div>
+  </div>
+
+  <!-- fragments -->
+  <div id="fragments" *ngIf="frHtml?.length">
+    <mat-tab-group>
+      <mat-tab
+        *ngFor="let html of frHtml; let i = index"
+        [label]="$any(frLabels[i] | flatLookup: typeEntries:'id':'value')"
+      >
+        <div [innerHtml]="html | safeHtml: 'html'"></div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

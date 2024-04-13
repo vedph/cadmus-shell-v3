@@ -1,0 +1,78 @@
+<form [formGroup]="form" (submit)="save()">
+  <div class="form-row">
+    <!-- id -->
+    <mat-form-field class="input-nr">
+      <mat-label>ID</mat-label>
+      <mat-select [formControl]="id">
+        <mat-option *ngFor="let n of flagNumbers" [value]="n">{{
+          n
+        }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="$any(id.errors)?.required && (id.dirty || id.touched)"
+        >ID required</mat-error
+      >
+    </mat-form-field>
+
+    <!-- label -->
+    <mat-form-field>
+      <mat-label>label</mat-label>
+      <input matInput [formControl]="label" />
+      <mat-error
+        *ngIf="$any(label.errors)?.required && (label.dirty || label.touched)"
+        >label required</mat-error
+      >
+      <mat-error
+        *ngIf="$any(label.errors)?.maxLength && (label.dirty || label.touched)"
+        >label too long</mat-error
+      >
+    </mat-form-field>
+
+    <!-- colorKey -->
+    <mat-form-field class="input-color">
+      <mat-label>color</mat-label>
+      <input matInput type="color" [formControl]="colorKey" />
+    </mat-form-field>
+  </div>
+  <div>
+    <!-- description -->
+    <mat-form-field class="dsc">
+      <mat-label>description</mat-label>
+      <textarea matInput rows="2" [formControl]="description"></textarea>
+      <mat-error
+        *ngIf="
+          $any(description.errors)?.required &&
+          (description.dirty || description.touched)
+        "
+        >description required</mat-error
+      >
+      <mat-error
+        *ngIf="
+          $any(description.errors)?.maxLength &&
+          (description.dirty || description.touched)
+        "
+        >description too long</mat-error
+      >
+    </mat-form-field>
+  </div>
+  <!-- buttons -->
+  <div>
+    <button
+      type="button"
+      color="warn"
+      mat-icon-button
+      matTooltip="Discard changes"
+      (click)="cancel()"
+    >
+      <mat-icon>clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      color="primary"
+      mat-icon-button
+      matTooltip="Accept changes"
+      [disabled]="form.invalid || form.pristine"
+    >
+      <mat-icon>check_circle</mat-icon>
+    </button>
+  </div>
+</form>

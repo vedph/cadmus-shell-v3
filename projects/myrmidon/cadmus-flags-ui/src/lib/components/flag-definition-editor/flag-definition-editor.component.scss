@@ -1,0 +1,19 @@
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}
+.input-nr {
+  width: 5em;
+}
+.input-color {
+  width: 6em;
+}
+.dsc {
+  width: 100%;
+  max-width: 800px;
+}

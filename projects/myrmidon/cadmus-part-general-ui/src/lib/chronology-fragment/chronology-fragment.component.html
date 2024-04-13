@@ -1,0 +1,90 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title
+        >Chronology Fragment {{ data?.value?.location }}</mat-card-title
+      >
+      <mat-card-subtitle>
+        {{ data?.value?.baseText }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- free tag -->
+      <div *ngIf="!tagEntries">
+        <mat-form-field>
+          <mat-label>tag</mat-label>
+          <input type="text" matInput formControlName="tag" />
+          <mat-error
+            *ngIf="tag.hasError('maxLength') && (tag.dirty || tag.touched)"
+            >tag too long</mat-error
+          >
+        </mat-form-field>
+      </div>
+      <!-- bound tag -->
+      <div *ngIf="tagEntries">
+        <mat-form-field>
+          <mat-label>tag</mat-label>
+          <mat-select formControlName="tag">
+            <mat-option *ngFor="let e of tagEntries" [value]="e.id">{{
+              e.value
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- label -->
+      <div>
+        <mat-form-field>
+          <mat-label>label</mat-label>
+          <input matInput type="text" formControlName="label" />
+          <mat-error
+            *ngIf="
+              label.hasError('maxLength') && (label.dirty || label.touched)
+            "
+            >label too long</mat-error
+          >
+        </mat-form-field>
+      </div>
+
+      <!-- event ID -->
+      <div>
+        <mat-form-field>
+          <mat-label>event ID</mat-label>
+          <input
+            matInput
+            type="text"
+            formControlName="eventId"
+            spellcheck="false"
+          />
+          <mat-error
+            *ngIf="
+              eventId.hasError('maxLength') &&
+              (eventId.dirty || eventId.touched)
+            "
+            >event ID too long</mat-error
+          >
+        </mat-form-field>
+      </div>
+
+      <!-- date -->
+      <div>
+        <cadmus-refs-historical-date
+          [date]="date.value || undefined"
+          (dateChange)="onDateChange($event)"
+        ></cadmus-refs-historical-date>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

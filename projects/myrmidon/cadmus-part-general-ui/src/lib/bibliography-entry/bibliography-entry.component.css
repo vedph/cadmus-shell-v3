@@ -1,0 +1,8 @@
+.long-text {
+  width: 90%;
+  max-width: 800px;
+}
+th {
+  font-weight: normal;
+  color: silver;
+}

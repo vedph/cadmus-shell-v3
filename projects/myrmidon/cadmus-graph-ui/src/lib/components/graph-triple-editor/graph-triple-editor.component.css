@@ -1,0 +1,32 @@
+#row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+#row fieldset {
+  flex: 1 1 auto;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+fieldset#s {
+  border-color: green;
+  color: green;
+}
+fieldset#p {
+  border-color: orange;
+  color: orange;
+}
+fieldset#o {
+  border-color: royalblue;
+  color: royalblue;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}

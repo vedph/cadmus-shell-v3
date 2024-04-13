@@ -1,0 +1,117 @@
+<form [formGroup]="form" (submit)="apply()" ng-disabled="disabled">
+  <!-- paginator -->
+  <mat-paginator
+    *ngIf="hasPager"
+    [length]="total"
+    [pageSize]="pageSize.value || 10"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPageChange($event)"
+    aria-label="Select page"
+  >
+  </mat-paginator>
+
+  <!-- label -->
+  <div>
+    <mat-form-field>
+      <input matInput [formControl]="label" placeholder="label" />
+    </mat-form-field>
+  </div>
+  <!-- uid -->
+  <div>
+    <mat-form-field>
+      <input matInput [formControl]="uid" placeholder="UID" />
+    </mat-form-field>
+  </div>
+  <!-- isClass -->
+  <div>
+    <mat-form-field>
+      <mat-select [formControl]="isClass" placeholder="class">
+        <mat-option [value]="0">(any)</mat-option>
+        <mat-option [value]="1">not-class</mat-option>
+        <mat-option [value]="2">class</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <!-- tag -->
+  <div>
+    <mat-form-field>
+      <input matInput [formControl]="tag" placeholder="tag" />
+    </mat-form-field>
+  </div>
+  <!-- sourceType -->
+  <div>
+    <mat-form-field>
+      <mat-select [formControl]="sourceType" placeholder="source type">
+        <mat-option [value]="null">(any)</mat-option>
+        <mat-option [value]="0">user</mat-option>
+        <mat-option [value]="1">item</mat-option>
+        <mat-option [value]="2">part</mat-option>
+        <mat-option [value]="3">thesaurus</mat-option>
+        <mat-option [value]="4">implicit</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div>
+    <!-- sid -->
+    <div>
+      <mat-form-field>
+        <input matInput [formControl]="sid" placeholder="SID" />
+      </mat-form-field>
+
+      <!-- isSidPrefix -->
+      <mat-checkbox [formControl]="isSidPrefix">prefix</mat-checkbox>
+    </div>
+  </div>
+  <!-- classes -->
+  <div>
+    <fieldset>
+      <legend>classes</legend>
+      <cadmus-ref-lookup
+        label="class"
+        [service]="lookupService"
+        [baseFilter]="{ isClass: true }"
+        (itemChange)="onClassAdd($event)"
+      ></cadmus-ref-lookup>
+
+      <mat-chip-listbox *ngIf="classes.value?.length">
+        <mat-chip-option
+          *ngFor="let node of classes.value"
+          [removable]="true"
+          (removed)="onClassRemove(node)"
+          matTooltip="{{ node.uri }}"
+          >{{ node.label }}
+          <button type="button" matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </fieldset>
+  </div>
+
+  <div
+    class="btn-group"
+    role="group"
+    aria-label="toolbar"
+    style="margin-bottom: 10px"
+  >
+    <button
+      mat-icon-button
+      type="button"
+      (click)="reset()"
+      color="warn"
+      matTooltip="Reset filters"
+      [disabled]="disabled"
+    >
+      <mat-icon>clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      mat-icon-button
+      color="primary"
+      [disabled]="disabled"
+      matTooltip="Apply filters"
+    >
+      <mat-icon>check_circle</mat-icon>
+    </button>
+  </div>
+</form>

@@ -1,0 +1,29 @@
+dl {
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+dt {
+  color: silver;
+}
+#toolbar {
+  margin: 8px;
+  padding: 6px;
+}
+#preview {
+  margin: 8px;
+  padding: 6px;
+  border: 1px solid silver;
+  border-radius: 6px;
+}
+#fragment {
+  margin: 8px;
+  padding: 6px;
+  border: 1px solid silver;
+  border-radius: 6px;
+}
+.row-nr {
+  font-size: 95%;
+  color: silver;
+  margin-bottom: 6px;
+  border-top: 1px solid silver;
+}

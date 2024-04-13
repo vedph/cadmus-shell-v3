@@ -1,0 +1,46 @@
+.node {
+  margin-top: 8px;
+  border-radius: 4px 10px 10px 4px;
+  background-color: #f0f0f0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.node-ind {
+  margin-left: 8px;
+  font-size: 150%;
+  letter-spacing: 2px;
+  vertical-align: middle;
+  color: silver;
+  flex: 0 0 auto;
+}
+.node-ord {
+  font-size: 90%;
+  color: silver;
+  margin: 0 4px 0 8px;
+  flex: 0 0 auto;
+}
+.node-id {
+  background-color: #0aa668;
+  color: white;
+  border-radius: 6px;
+  padding: 4px;
+  margin: 0 4px;
+  flex: 0 0 auto;
+}
+.node-value {
+  flex: 0 0 auto;
+}
+.node-btn {
+  opacity: 0.15;
+  flex: 0 0 auto;
+}
+.node-btn:hover {
+  opacity: 1;
+}
+form {
+  border: 1px solid silver;
+  padding: 0 8px;
+  border-radius: 6px;
+}

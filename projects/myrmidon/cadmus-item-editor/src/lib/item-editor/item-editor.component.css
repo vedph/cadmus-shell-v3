@@ -1,0 +1,59 @@
+.full-width {
+  width: 100%;
+}
+th {
+  font-weight: normal;
+  color: silver;
+}
+#layers td {
+  padding: 0 6px;
+}
+div.new-part {
+  margin-left: 32px;
+}
+span.new-part-role {
+  color: #808080;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+span.new-part-icon {
+  margin: 0 4px;
+  vertical-align: middle;
+}
+td.count-n {
+  text-align: center;
+  color: #03c03c;
+}
+td.count-z {
+  text-align: center;
+  color: #f34f41;
+}
+input.id {
+  font-family: "Courier New", Courier, monospace;
+  color: gray;
+  min-width: 22em;
+}
+.flag {
+  margin-left: 10px;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}
+fieldset {
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 6px;
+  margin: 8px 0;
+}
+/* xs */
+@media only screen and (max-width: 599px) {
+  .noif-lt-xs {
+    display: none;
+  }
+}

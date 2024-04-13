@@ -1,0 +1,9 @@
+th {
+  font-weight: normal;
+  color: silver;
+}
+fieldset {
+  border: 1px solid silver;
+  border-radius: 8px;
+  padding: 8px;
+}

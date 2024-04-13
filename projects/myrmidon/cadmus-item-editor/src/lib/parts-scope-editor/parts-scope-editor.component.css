@@ -1,0 +1,29 @@
+th {
+  font-weight: normal;
+  color: silver;
+  text-align: left;
+}
+td {
+  padding: 0 6px;
+}
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}
+span.model-type {
+  padding: 4px;
+  border-radius: 6px;
+}
+table#parts {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}

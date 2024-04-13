@@ -1,0 +1,31 @@
+{
+  "name": "@myrmidon/cadmus-graph-ui-ex",
+  "version": "8.0.0",
+  "description": "Cadmus - extensions to semantic graph components.",
+  "keywords": [
+    "Cadmus"
+  ],
+  "homepage": "https://github.com/vedph/cadmus-graph-shell-v3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vedph/cadmus-graph-shell-v3"
+  },
+  "author": {
+    "name": "Daniele Fusi"
+  },
+  "peerDependencies": {
+    "@angular/common": "^17.3.0",
+    "@angular/core": "^17.3.0",
+    "@swimlane/ngx-graph": "^8.3.0",
+    "@myrmidon/ng-tools": "^3.0.0",
+    "@myrmidon/ng-mat-tools": "^3.0.0",
+    "@myrmidon/cadmus-refs-lookup": "^5.0.0",
+    "@myrmidon/cadmus-core": "^8.0.0",
+    "@myrmidon/cadmus-api": "^8.0.0",
+    "@myrmidon/cadmus-graph-ui": "^8.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.5.0"
+  },
+  "sideEffects": false
+}

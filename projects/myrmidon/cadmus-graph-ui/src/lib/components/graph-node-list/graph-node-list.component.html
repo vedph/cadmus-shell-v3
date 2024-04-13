@@ -1,0 +1,124 @@
+<div id="container">
+  <!-- filters -->
+  <div id="filters">
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <cadmus-graph-node-filter
+          [disabled]="(loading$ | async) ? true : false"
+        ></cadmus-graph-node-filter>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- list -->
+  <div id="list" *ngIf="page$ | async as page">
+    <div *ngIf="loading$ | async">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+    <!-- list -->
+    <div *ngIf="page">
+      <table>
+        <thead>
+          <th></th>
+          <th>id</th>
+          <th>cls</th>
+          <th>label</th>
+          <th>uri</th>
+          <th class="noif-lt-md">srct</th>
+          <th class="noif-lt-md">sid</th>
+          <th class="noif-lt-md">tag</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of page.items">
+            <td class="fit-width">
+              <button
+                *ngIf="hasWalker"
+                mat-icon-button
+                type="button"
+                color="primary"
+                matTooltip="Walk node"
+                (click)="walkNode(d)"
+              >
+                <mat-icon>flare</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                color="primary"
+                matTooltip="Edit node"
+                (click)="editNode(d)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                matTooltip="Delete node"
+                (click)="deleteNode(d)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+            <td>{{ d.id }}</td>
+            <td>{{ d.isClass ? "C" : "" }}</td>
+            <td>{{ d.label }}</td>
+            <td>{{ d.uri }}</td>
+            <td class="noif-lt-md">{{ "UIPTX"[d.sourceType] }}</td>
+            <td class="noif-lt-md">{{ d.sid }}</td>
+            <td class="noif-lt-md">{{ d.tag }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div>
+        <button
+          color="primary"
+          type="button"
+          mat-flat-button
+          (click)="addNode()"
+        >
+          <mat-icon>add_circle</mat-icon>
+          add node
+        </button>
+      </div>
+
+      <!-- pagination -->
+      <div class="form-row">
+        <button
+          color="primary"
+          type="button"
+          mat-icon-button
+          matTooltip="Reset list"
+          (click)="reset()"
+          color="warn"
+        >
+          <mat-icon>autorenew</mat-icon>
+        </button>
+
+        <mat-paginator
+          [length]="page.total"
+          [pageIndex]="page.pageNumber - 1"
+          [pageSize]="page.pageSize"
+          [pageSizeOptions]="[5, 10, 20, 50, 100]"
+          (page)="onPageChange($event)"
+          [showFirstLastButtons]="true"
+        ></mat-paginator>
+      </div>
+    </div>
+
+    <!-- editor -->
+    <mat-expansion-panel
+      [expanded]="editedNode ? true : false"
+      [disabled]="editedNode ? false : true"
+      id="editor"
+    >
+      <mat-expansion-panel-header>Node</mat-expansion-panel-header>
+      <cadmus-graph-node-editor
+        [node]="editedNode"
+        [tagEntries]="tagEntries"
+        (nodeChange)="onNodeChange($event)"
+        (editorClose)="onEditorClose()"
+      ></cadmus-graph-node-editor>
+    </mat-expansion-panel>
+  </div>
+</div>

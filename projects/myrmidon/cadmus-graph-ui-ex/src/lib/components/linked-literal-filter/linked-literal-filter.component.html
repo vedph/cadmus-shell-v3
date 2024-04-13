@@ -1,0 +1,97 @@
+<form [formGroup]="form" (submit)="apply()" ng-disabled="disabled">
+  <!-- paginator -->
+  <mat-paginator
+    *ngIf="hasPager"
+    [length]="total"
+    [pageSize]="pageSize.value || 10"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPageChange($event)"
+    aria-label="Select page"
+  >
+  </mat-paginator>
+
+  <!-- subject ID -->
+  <div>
+    <cadmus-ref-lookup
+      label="subject"
+      [service]="lookupService"
+      (itemChange)="onSubjectNodeChange($event)"
+    ></cadmus-ref-lookup>
+  </div>
+
+  <!-- predicate ID -->
+  <div>
+    <cadmus-ref-lookup
+      label="predicate"
+      [service]="lookupService"
+      [baseFilter]="{ tag: 'property' }"
+      (itemChange)="onPredicateNodeChange($event)"
+    ></cadmus-ref-lookup>
+  </div>
+
+  <!-- LITERAL -->
+  <!-- litPattern -->
+  <div>
+    <mat-form-field>
+      <input matInput [formControl]="litPattern" placeholder="pattern" />
+    </mat-form-field>
+  </div>
+  <!-- litType -->
+  <div>
+    <mat-form-field>
+      <input matInput [formControl]="litType" placeholder="type" />
+    </mat-form-field>
+  </div>
+  <!-- litLanguage-->
+  <div>
+    <mat-form-field>
+      <input matInput [formControl]="litLanguage" placeholder="language" />
+    </mat-form-field>
+  </div>
+  <!-- minLitNumber, maxLitNumber -->
+  <div>
+    <mat-form-field style="width: 5em">
+      <input
+        matInput
+        type="number"
+        [formControl]="minLitNumber"
+        placeholder="min."
+      />
+    </mat-form-field>
+    -
+    <mat-form-field style="width: 5em">
+      <input
+        matInput
+        type="number"
+        [formControl]="maxLitNumber"
+        placeholder="max."
+      />
+    </mat-form-field>
+  </div>
+  <div
+    class="btn-group"
+    role="group"
+    aria-label="toolbar"
+    style="margin-bottom: 10px"
+  >
+    <button
+      mat-icon-button
+      type="button"
+      (click)="reset()"
+      color="warn"
+      matTooltip="Reset filters"
+      [disabled]="disabled"
+    >
+      <mat-icon>clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      mat-icon-button
+      color="primary"
+      [disabled]="disabled"
+      matTooltip="Apply filters"
+    >
+      <mat-icon>check_circle</mat-icon>
+    </button>
+  </div>
+</form>

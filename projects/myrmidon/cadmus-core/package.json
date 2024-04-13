@@ -1,0 +1,24 @@
+{
+  "name": "@myrmidon/cadmus-core",
+  "version": "8.0.0",
+  "description": "Cadmus - core.",
+  "keywords": [
+    "Cadmus"
+  ],
+  "homepage": "https://github.com/vedph/cadmus-shell-v3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vedph/cadmus-shell-v3"
+  },
+  "author": {
+    "name": "Daniele Fusi"
+  },
+  "peerDependencies": {
+    "@angular/common": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@myrmidon/ng-tools": "^3.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.5.0"
+  }
+}

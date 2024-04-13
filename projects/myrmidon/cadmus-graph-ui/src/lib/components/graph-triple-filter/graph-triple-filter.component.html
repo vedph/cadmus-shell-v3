@@ -1,0 +1,103 @@
+<form [formGroup]="form" (submit)="apply()" ng-disabled="disabled">
+  <!-- subject -->
+  <div class="form-row">
+    <cadmus-ref-lookup
+      [service]="lookupService"
+      [item]="subjectNode$ | async"
+      label="subject"
+      (itemChange)="onSubjectNodeChange($event)"
+    ></cadmus-ref-lookup>
+    <button
+      type="button"
+      mat-icon-button
+      color="warn"
+      style="margin-top: 20px"
+      (click)="clearSubjectNode()"
+    >
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+  <!-- predicate -->
+  <div class="form-row">
+    <cadmus-ref-lookup
+      [service]="lookupService"
+      label="predicate"
+      [item]="predicateNode$ | async"
+      [baseFilter]="{ tag: 'property' }"
+      (itemChange)="onPredicateNodeChange($event)"
+    ></cadmus-ref-lookup>
+    <button
+      type="button"
+      mat-icon-button
+      color="warn"
+      style="margin-top: 20px"
+      (click)="clearPredicateNode()"
+    >
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+  <!-- object, objectLit -->
+  <div>
+    <mat-checkbox [formControl]="literal">literal</mat-checkbox>
+  </div>
+  <div *ngIf="literal?.value">
+    <mat-label>literal</mat-label>
+    <mat-form-field>
+      <input matInput [formControl]="objectLit" maxlength="500" />
+    </mat-form-field>
+  </div>
+  <div *ngIf="!literal?.value" class="form-row">
+    <cadmus-ref-lookup
+      [service]="lookupService"
+      [item]="objectNode$ | async"
+      label="object"
+      (itemChange)="onObjectNodeChange($event)"
+    ></cadmus-ref-lookup>
+    <button
+      type="button"
+      mat-icon-button
+      color="warn"
+      style="margin-top: 20px"
+      (click)="clearObjectNode()"
+    >
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+  <!-- sid, sidPrefix -->
+  <div>
+    <mat-form-field>
+      <mat-label>sid</mat-label>
+      <input matInput [formControl]="sid" maxlength="500" />
+    </mat-form-field>
+    &nbsp;
+    <mat-checkbox [formControl]="sidPrefix">prefix</mat-checkbox>
+  </div>
+  <!-- tag -->
+  <br />
+  <div
+    class="btn-group"
+    role="group"
+    aria-label="toolbar"
+    style="margin-bottom: 10px"
+  >
+    <button
+      mat-icon-button
+      type="button"
+      (click)="reset()"
+      color="warn"
+      matTooltip="Reset filters"
+      [disabled]="disabled"
+    >
+      <mat-icon>clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      mat-icon-button
+      color="primary"
+      [disabled]="disabled"
+      matTooltip="Apply filters"
+    >
+      <mat-icon>check_circle</mat-icon>
+    </button>
+  </div>
+</form>

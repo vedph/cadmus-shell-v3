@@ -1,0 +1,62 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title>Token Text Part</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div id="container">
+        <div id="cit">
+          <!-- citation -->
+          <mat-form-field>
+            <mat-label>citation</mat-label>
+            <input matInput [formControl]="citation" />
+          </mat-form-field>
+        </div>
+
+        <!-- transforms -->
+        <div id="trs">
+          <mat-form-field>
+            <mat-label>operation</mat-label>
+            <mat-select [formControl]="transform">
+              <mat-option value="ws">normalize ws</mat-option>
+              <mat-option value="split">split at stops</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button
+            type="button"
+            mat-icon-button
+            color="warn"
+            matTooltip="Apply the selected text transformation"
+            (click)="applyTransform()"
+          >
+            <mat-icon>find_replace</mat-icon>
+          </button>
+        </div>
+
+        <!-- text -->
+        <div id="txt">
+          <nge-monaco-editor
+            style="--editor-height: 800px"
+            (ready)="onCreateEditor($event)"
+          />
+          <mat-error
+            *ngIf="text.hasError('required') && (text.touched || text.dirty)"
+            >please enter some text</mat-error
+          >
+        </div>
+      </div>
+
+      <mat-card-actions>
+        <cadmus-close-save-buttons
+          [form]="form"
+          [noSave]="userLevel < 2"
+          (closeRequest)="close()"
+        ></cadmus-close-save-buttons>
+      </mat-card-actions>
+    </mat-card-content>
+  </mat-card>
+</form>

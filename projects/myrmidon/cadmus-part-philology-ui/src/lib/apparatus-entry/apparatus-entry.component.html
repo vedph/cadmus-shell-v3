@@ -1,0 +1,393 @@
+<form [formGroup]="form" (submit)="submit()">
+  <!-- type -->
+  <div>
+    <mat-form-field>
+      <mat-label>type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="0">replacement</mat-option>
+        <mat-option [value]="1">addition before</mat-option>
+        <mat-option [value]="2">addition after</mat-option>
+        <mat-option [value]="3">note</mat-option>
+      </mat-select>
+      <mat-error
+        *ngIf="type.hasError('required') && (type.dirty || type.touched)"
+      ></mat-error>
+    </mat-form-field>
+  </div>
+
+  <div>
+    <!-- value -->
+    <mat-form-field>
+      <mat-label>value</mat-label>
+      <input matInput type="text" formControlName="value" />
+      <mat-error
+        *ngIf="value.hasError('maxLength') && (value.dirty || value.touched)"
+        >too long</mat-error
+      >
+    </mat-form-field>
+
+    <!-- normValue -->
+    &nbsp;
+    <mat-form-field>
+      <mat-label>normalized value</mat-label>
+      <input matInput type="text" formControlName="normValue" />
+      <mat-error
+        *ngIf="
+          normValue.hasError('maxLength') &&
+          (normValue.dirty || normValue.touched)
+        "
+        >too long</mat-error
+      >
+    </mat-form-field>
+
+    <!-- accepted -->
+    &nbsp;
+    <mat-checkbox formControlName="accepted">accepted</mat-checkbox>
+
+    <!-- subrange -->
+    &nbsp;
+    <mat-form-field style="width: 8em">
+      <mat-label>subrange</mat-label>
+      <input matInput [formControl]="subrange" />
+      <mat-error
+        *ngIf="
+          subrange.hasError('pattern') && (subrange.dirty || subrange.touched)
+        "
+        >invalid</mat-error
+      >
+    </mat-form-field>
+  </div>
+
+  <!-- tag -->
+  <div *ngIf="tagEntries?.length">
+    <mat-form-field>
+      <mat-label>tag</mat-label>
+      <mat-select formControlName="tag">
+        <mat-option [value]="null">(none)</mat-option>
+        <mat-option *ngFor="let e of tagEntries" [value]="e.id">
+          {{ e.value }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div *ngIf="!tagEntries?.length">
+    <mat-form-field>
+      <mat-label>tag</mat-label>
+      <input matInput type="text" formControlName="tag" />
+      <mat-error *ngIf="tag.hasError('maxLength') && (tag.dirty || tag.touched)"
+        >too long</mat-error
+      >
+    </mat-form-field>
+
+    <!-- groupId -->
+    &nbsp;
+    <mat-form-field>
+      <mat-label>group ID</mat-label>
+      <input matInput type="text" formControlName="groupId" />
+      <mat-error
+        *ngIf="
+          groupId.hasError('maxLength') && (groupId.dirty || groupId.touched)
+        "
+        >too long</mat-error
+      >
+    </mat-form-field>
+  </div>
+
+  <!-- note -->
+  <div>
+    <mat-form-field class="long-text">
+      <mat-label>note</mat-label>
+      <textarea matInput formControlName="note" spellcheck="false"></textarea>
+      <mat-error
+        *ngIf="note.hasError('maxLength') && (note.dirty || note.touched)"
+        >too long</mat-error
+      >
+    </mat-form-field>
+  </div>
+
+  <!-- witnesses -->
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>witnesses</mat-panel-title>
+      <mat-panel-description>{{
+        entry?.witnesses?.length || 0
+      }}</mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div formArrayName="witnesses">
+      <div
+        *ngFor="
+          let item of witnesses.controls;
+          let i = index;
+          let first = first;
+          let last = last
+        "
+      >
+        <div [formGroupName]="i">
+          {{ i + 1 }}.
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Move this witness up"
+            [disabled]="first"
+            (click)="moveWitnessUp(i)"
+          >
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Move this witness down"
+            [disabled]="last"
+            (click)="moveWitnessDown(i)"
+          >
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Remove this witness"
+            color="warn"
+            (click)="removeWitness(i)"
+          >
+            <mat-icon>remove_circle</mat-icon>
+          </button>
+          <!-- witness: value (thesaurus) -->
+          <mat-form-field *ngIf="witEntries?.length">
+            <mat-label>value</mat-label>
+            <mat-select formControlName="value">
+              <mat-option *ngFor="let e of witEntries" [value]="e.id">{{
+                e.value
+              }}</mat-option>
+            </mat-select>
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].value.errors?.required &&
+                ($any(item)['controls'].value.dirty ||
+                  $any(item)['controls'].value.touched)
+              "
+              >value required</mat-error
+            >
+          </mat-form-field>
+          <!-- witness: value (free) -->
+          <mat-form-field *ngIf="!witEntries?.length">
+            <mat-label>value</mat-label>
+            <input matInput formControlName="value" />
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].value.errors?.required &&
+                ($any(item)['controls'].value.dirty ||
+                  $any(item)['controls'].value.touched)
+              "
+              >value required</mat-error
+            >
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].value.errors?.maxLength &&
+                ($any(item)['controls'].value.dirty ||
+                  $any(item)['controls'].value.touched)
+              "
+              >value too long</mat-error
+            >
+          </mat-form-field>
+          &nbsp;
+          <!-- witness: note -->
+          <mat-form-field>
+            <mat-label>note</mat-label>
+            <input matInput formControlName="note" />
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].note.errors?.maxLength &&
+                ($any(item)['controls'].note.dirty ||
+                  $any(item)['controls'].note.touched)
+              "
+              >note too long</mat-error
+            >
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+    <button
+      type="button"
+      mat-flat-button
+      color="primary"
+      (click)="addWitness()"
+    >
+      <mat-icon>add_circle</mat-icon> witness
+    </button>
+  </mat-expansion-panel>
+
+  <!-- authors -->
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>authors</mat-panel-title>
+      <mat-panel-description>{{
+        entry?.authors?.length || 0
+      }}</mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div formArrayName="authors">
+      <div
+        *ngFor="
+          let item of authors.controls;
+          let i = index;
+          let first = first;
+          let last = last
+        "
+      >
+        <div [formGroupName]="i">
+          {{ i + 1 }}.
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Move this author up"
+            [disabled]="first"
+            (click)="moveAuthorUp(i)"
+          >
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Move this author down"
+            [disabled]="last"
+            (click)="moveAuthorDown(i)"
+          >
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Remove this author"
+            color="warn"
+            (click)="removeAuthor(i)"
+          >
+            <mat-icon>remove_circle</mat-icon>
+          </button>
+          <!-- author: value (thesaurus) -->
+          <mat-form-field *ngIf="authEntries?.length">
+            <mat-label>value</mat-label>
+            <mat-select formControlName="value">
+              <mat-option *ngFor="let e of authEntries" [value]="e.id">{{
+                e.value
+              }}</mat-option>
+            </mat-select>
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].value.errors?.required &&
+                ($any(item)['controls'].value.dirty ||
+                  $any(item)['controls'].value.touched)
+              "
+              >value required</mat-error
+            >
+          </mat-form-field>
+          <!-- author: value (free) -->
+          <mat-form-field *ngIf="!authEntries?.length">
+            <mat-label>value</mat-label>
+            <input matInput formControlName="value" />
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].value.errors?.required &&
+                ($any(item)['controls'].value.dirty ||
+                  $any(item)['controls'].value.touched)
+              "
+              >value required</mat-error
+            >
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].value.errors?.maxLength &&
+                ($any(item)['controls'].value.dirty ||
+                  $any(item)['controls'].value.touched)
+              "
+              >value too long</mat-error
+            >
+          </mat-form-field>
+          &nbsp;
+          <!-- author: location -->
+          <mat-form-field style="width: 8em">
+            <mat-label>location</mat-label>
+            <input matInput formControlName="location" />
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].location.errors?.maxLength &&
+                ($any(item)['controls'].location.dirty ||
+                  $any(item)['controls'].location.touched)
+              "
+              >loc. too long</mat-error
+            >
+          </mat-form-field>
+          &nbsp;
+          <!-- author: tag (thesaurus) -->
+          <mat-form-field *ngIf="authTagEntries?.length" style="width: 10em">
+            <mat-label>tag</mat-label>
+            <mat-select formControlName="tag">
+              <mat-option *ngFor="let e of authTagEntries" [value]="e.id">{{
+                e.value
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <!-- author: tag (free) -->
+          <mat-form-field *ngIf="!authTagEntries?.length" style="width: 8em">
+            <mat-label>tag</mat-label>
+            <input matInput formControlName="tag" />
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].tag.errors?.maxLength &&
+                ($any(item)['controls'].tag.dirty ||
+                  $any(item)['controls'].tag.touched)
+              "
+              >tag too long</mat-error
+            >
+          </mat-form-field>
+          &nbsp;
+          <!-- author: note -->
+          <mat-form-field>
+            <mat-label>note</mat-label>
+            <input matInput formControlName="note" />
+            <mat-error
+              *ngIf="
+                $any(item)['controls'].note.errors?.maxLength &&
+                ($any(item)['controls'].note.dirty ||
+                  $any(item)['controls'].note.touched)
+              "
+              >note too long</mat-error
+            >
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+    <button type="button" mat-flat-button color="primary" (click)="addAuthor()">
+      <mat-icon>add_circle</mat-icon> author
+    </button>
+    <div *ngIf="workEntries?.length">
+      <cadmus-thesaurus-tree
+        [entries]="workEntries"
+        rootLabel="works"
+        [renderLabel]="renderLabel"
+        (entryChange)="onEntryChange($event)"
+      ></cadmus-thesaurus-tree>
+    </div>
+  </mat-expansion-panel>
+
+  <!-- buttons -->
+  <div>
+    <button
+      type="button"
+      mat-icon-button
+      color="warn"
+      matTooltip="Close entry"
+      (click)="cancel()"
+    >
+      <mat-icon>cancel</mat-icon>
+    </button>
+    <button
+      type="submit"
+      [disabled]="form.invalid || form.pristine"
+      mat-icon-button
+      color="primary"
+      matTooltip="Save entry"
+    >
+      <mat-icon>check_circle</mat-icon>
+    </button>
+  </div>
+</form>

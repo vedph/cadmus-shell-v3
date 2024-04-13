@@ -1,0 +1,51 @@
+table {
+  width: 100%;
+}
+tr:nth-child(odd) {
+  background-color: #eaeaea;
+}
+th {
+  text-align: left;
+  font-weight: normal;
+  color: silver;
+}
+td.command {
+  width: 24px;
+}
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}
+
+div#container {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "filters list";
+  gap: 16px;
+}
+#filters {
+  grid-area: filters;
+  max-width: 230px;
+}
+#list {
+  grid-area: list;
+}
+
+/* lt-md */
+@media only screen and (max-width: 959px) {
+  div#container {
+    grid-template-rows: 1fr auto;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "list"
+      "filters";
+  }
+  #filters {
+    max-width: none;
+  }
+  .noif-lt-md {
+    display: none;
+  }
+}

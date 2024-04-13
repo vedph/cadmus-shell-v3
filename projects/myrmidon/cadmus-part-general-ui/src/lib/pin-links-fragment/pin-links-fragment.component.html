@@ -1,0 +1,34 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card>
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>textsms</mat-icon>
+      </div>
+      <mat-card-title>Pin Links Fragment </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <cadmus-refs-asserted-composite-ids
+        [ids]="links.value || []"
+        [idScopeEntries]="idScopeEntries"
+        [idTagEntries]="idTagEntries"
+        [assTagEntries]="assTagEntries"
+        [refTypeEntries]="refTypeEntries"
+        [refTagEntries]="refTagEntries"
+        [pinByTypeMode]="pinByTypeMode"
+        [canSwitchMode]="canSwitchMode"
+        [canEditTarget]="canEditTarget"
+        [internalDefault]="true"
+        (idsChange)="onIdsChange($event)"
+      ></cadmus-refs-asserted-composite-ids>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

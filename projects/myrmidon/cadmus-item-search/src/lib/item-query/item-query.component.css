@@ -1,0 +1,23 @@
+.query-help {
+  min-width: 200px;
+  max-height: 400px;
+  overflow-y: scroll;
+}
+.query-help h4 {
+  font-weight: bold;
+  border-bottom: 1px solid silver;
+}
+.query-help code {
+  color:chocolate;
+}
+.full-width {
+  width: 100%;
+}
+table.pins tbody tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+table.pins th {
+  text-align: left;
+  font-weight: normal;
+  color: silver;
+}

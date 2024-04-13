@@ -1,0 +1,107 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title>Names Part</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div>
+        <button
+          type="button"
+          mat-flat-button
+          color="primary"
+          (click)="addName()"
+        >
+          <mat-icon>add_circle</mat-icon> name
+        </button>
+      </div>
+      <table *ngIf="names?.value?.length">
+        <thead>
+          <tr>
+            <th></th>
+            <th>name</th>
+            <th>rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="
+              let name of names?.value;
+              let i = index;
+              let first = first;
+              let last = last
+            "
+          >
+            <td>
+              <button
+                type="button"
+                mat-icon-button
+                color="primary"
+                matTooltip="Edit this name"
+                (click)="editName(i)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this name up"
+                [disabled]="first"
+                (click)="moveNameUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this name down"
+                [disabled]="last"
+                (click)="moveNameDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                color="warn"
+                matTooltip="Delete this name"
+                (click)="deleteName(i)"
+              >
+                <mat-icon>remove_circle</mat-icon>
+              </button>
+            </td>
+            <td>{{ name | cadmusProperName }}</td>
+            <td>{{ name.assertion?.rank || 0 }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- name editor -->
+      <mat-expansion-panel *ngIf="editedName" [expanded]="editedName">
+        <mat-expansion-panel-header>{{
+          editedName | cadmusProperName
+        }}</mat-expansion-panel-header>
+        <cadmus-refs-proper-name
+          [langEntries]="langEntries"
+          [tagEntries]="tagEntries"
+          [typeEntries]="typeEntries"
+          [assTagEntries]="assTagEntries"
+          [refTagEntries]="refTagEntries"
+          [refTypeEntries]="refTypeEntries"
+          [name]="editedName"
+          (nameChange)="onNameChange($event)"
+        >
+        </cadmus-refs-proper-name>
+      </mat-expansion-panel>
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

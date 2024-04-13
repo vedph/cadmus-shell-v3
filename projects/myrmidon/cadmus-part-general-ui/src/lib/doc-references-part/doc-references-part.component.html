@@ -1,0 +1,25 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title>Document References Part</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <cadmus-refs-doc-references
+        [references]="references.value"
+        [typeEntries]="typeEntries"
+        [tagEntries]="tagEntries"
+        (referencesChange)="onReferencesChange($event)"
+      ></cadmus-refs-doc-references>
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

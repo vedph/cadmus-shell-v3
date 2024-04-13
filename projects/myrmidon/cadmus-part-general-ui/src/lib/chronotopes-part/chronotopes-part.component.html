@@ -1,0 +1,122 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title>Chronotopes Part</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-tab-group [(selectedIndex)]="tabIndex">
+        <mat-tab label="chronotopes">
+          <div>
+            <button
+              type="button"
+              mat-flat-button
+              color="primary"
+              (click)="addChronotope()"
+            >
+              <mat-icon>add_circle</mat-icon> chronotope
+            </button>
+          </div>
+          <table *ngIf="chronotopes?.value?.length">
+            <thead>
+              <tr>
+                <th></th>
+                <th>place</th>
+                <th>date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="
+                  let entry of chronotopes?.value;
+                  let i = index;
+                  let first = first;
+                  let last = last
+                "
+              >
+                <td>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="primary"
+                    matTooltip="Edit this chronotope"
+                    (click)="editChronotope(entry, i)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this chronotope up"
+                    [disabled]="first"
+                    (click)="moveChronotopeUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this chronotope down"
+                    [disabled]="last"
+                    (click)="moveChronotopeDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="warn"
+                    matTooltip="Delete this chronotope"
+                    (click)="deleteChronotope(i)"
+                  >
+                    <mat-icon>remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>{{ entry.place?.value }}</td>
+                <td>{{ entry.date | historicalDate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </mat-tab>
+
+        <mat-tab label="chronotope" *ngIf="editedChronotope">
+          <cadmus-refs-asserted-chronotope
+            [tagEntries]="tagEntries"
+            [assTagEntries]="assTagEntries"
+            [refTagEntries]="refTagEntries"
+            [refTypeEntries]="refTypeEntries"
+            [chronotope]="editedChronotope"
+            (chronotopeChange)="onChronotopeChange($event)"
+          ></cadmus-refs-asserted-chronotope>
+          <div>
+            <button
+              type="button"
+              (click)="closeChronotope()"
+              mat-icon-button
+              color="warn"
+            >
+              <mat-icon>cancel</mat-icon>
+            </button>
+            <button
+              type="button"
+              (click)="saveChronotope()"
+              mat-icon-button
+              color="primary"
+            >
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

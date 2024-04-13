@@ -1,0 +1,73 @@
+version: '3.7'
+services:
+  # MongoDB
+  cadmus-mongo:
+    image: mongo
+    container_name: cadmus-mongo
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    command: mongod --logpath=/dev/null # --quiet
+    ports:
+      - 27017:27017
+    networks:
+      - cadmus-network
+
+  # PostgreSQL
+  cadmus-pgsql:
+    image: postgres
+    container_name: cadmus-pgsql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    networks:
+      - cadmus-network
+    # volumes:
+      # ensure you have created the var/db/pgsql folder in the host
+      # https://hub.docker.com/r/postgis/postgis
+      # - /var/db/pgsql:/var/lib/postgresql/data
+
+  # Cadmus API
+  cadmus-api:
+    image: vedph2020/cadmus-api:8.0.12
+    container_name: cadmus-api
+    ports:
+      - 60380:80
+    depends_on:
+      - cadmus-mongo
+      - cadmus-pgsql
+    environment:
+      # for Windows use : as separator, for non Windows use __
+      # (see https://github.com/aspnet/Configuration/issues/469)
+      - CONNECTIONSTRINGS__DEFAULT=mongodb://cadmus-mongo:27017/{0}
+      - CONNECTIONSTRINGS__INDEX=Server=cadmus-pgsql;port=5432;Database={0};User Id=postgres;Password=postgres;Include Error Detail=True
+      - SEED__INDEXDELAY=35
+      - MESSAGING__APIROOTURL=http://cadmusapi.azurewebsites.net
+      - MESSAGING__APPROOTURL=http://cadmusapi.com/
+      - MESSAGING__SUPPORTEMAIL=support@cadmus.com
+      - SENDGRID__ISENABLED=true
+      - SENDGRID__SENDEREMAIL=info@cadmus.com
+      - SENDGRID__SENDERNAME=cadmus
+      - SENDGRID__APIKEY=todo
+      - SERILOG__CONNECTIONSTRING=mongodb://cadmus-mongo:27017/cadmus-logs
+      - STOCKUSERS__0__PASSWORD=P4ss-W0rd!
+    networks:
+      - cadmus-network
+
+  # Cadmus App
+  cadmus-app:
+    image: vedph2020/cadmus-shell:6.0.2
+    container_name: cadmus-app
+    ports:
+      - 4200:80
+    depends_on:
+      - cadmus-api
+    networks:
+      - cadmus-network
+
+networks:
+  cadmus-network:
+    driver: bridge

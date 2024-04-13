@@ -1,0 +1,55 @@
+div#filter-head {
+  border: 1px solid #f8f1ae;
+  border-radius: 4px;
+  padding: 4px;
+  margin-bottom: 4px;
+  background-color: #f8f1ae;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.muted {
+  color: silver;
+}
+.selected {
+  stroke-width: 2px;
+  stroke: #e7d211;
+}
+#container {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "tools graph";
+  gap: 8px;
+}
+#graph {
+  grid-area: graph;
+}
+#tools {
+  grid-area: tools;
+  padding: 8px;
+  border: 1px solid silver;
+  height: 100%;
+  max-height: 100%;
+  min-width: 324px;
+  background-color: #fdfdfd;
+}
+#tools #bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+/* lt-md */
+@media only screen and (max-width: 959px) {
+  #container {
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "tools"
+      "graph";
+  }
+}

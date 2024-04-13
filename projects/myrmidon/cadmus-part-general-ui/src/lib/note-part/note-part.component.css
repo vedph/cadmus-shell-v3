@@ -1,0 +1,38 @@
+div#pvw {
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 6px;
+  margin: 16px 0;
+}
+
+/* div#container {
+  display: grid;
+  min-height: 800px;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "tga tga"
+    "txt pvw";
+  gap: 8px;
+}
+div#tga {
+  grid-area: tga;
+}
+div#txt {
+  grid-area: txt;
+  min-height: 800px;
+}
+div#pvw {
+  grid-area: pvw;
+}
+
+/* @media only screen and (max-width: 959px) {
+  div#container {
+    grid-template-rows: auto 1fr 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "tga"
+      "txt"
+      "pvw";
+  }
+} */

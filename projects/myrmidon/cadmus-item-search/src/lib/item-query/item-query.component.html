@@ -1,0 +1,206 @@
+<mat-card appearance="outlined">
+  <mat-card-content>
+    <form [formGroup]="form" (submit)="submitQuery()">
+      <div>
+        <!-- query -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>query</mat-label>
+          <textarea
+            #queryta
+            matInput
+            rows="3"
+            [formControl]="queryCtl"
+            spellcheck="false"
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="4"
+            (keydown.enter)="submitQuery(); (false)"
+          ></textarea>
+          <mat-error
+            *ngIf="
+              queryCtl.hasError('required') &&
+              (queryCtl.dirty || queryCtl.touched)
+            "
+            >enter a query</mat-error
+          >
+        </mat-form-field>
+        <button
+          type="button"
+          color="warn"
+          mat-icon-button
+          matTooltip="Clear query"
+          (click)="queryCtl.reset()"
+        >
+          <mat-icon>clear</mat-icon>
+        </button>
+        <button
+          type="submit"
+          color="primary"
+          mat-button
+          matTooltip="Search items"
+          [disabled]="disabled || form.invalid"
+        >
+          <mat-icon>search</mat-icon>
+          search
+        </button>
+      </div>
+      <br />
+      <!-- history -->
+      <div *ngIf="lastQueries?.length">
+        <mat-form-field class="full-width">
+          <mat-label>history</mat-label>
+          <mat-select [formControl]="history">
+            <mat-option *ngFor="let q of lastQueries" [value]="q">
+              {{ q }}
+            </mat-option>
+          </mat-select>
+          <button
+            matSuffix
+            type="button"
+            mat-icon-button
+            matTooltip="Copy to query"
+            [disabled]="!history.value"
+            (click)="setQuery(history.value)"
+          >
+            <mat-icon>check_circle</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+      <br />
+
+      <!-- parts/frr list -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Pins Reference</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div *ngIf="partDefs?.length">
+          <mat-form-field>
+            <mat-label>part/fr.</mat-label>
+            <mat-select [formControl]="partDef">
+              <mat-option
+                *ngFor="let def of partDefs"
+                [value]="def.typeId"
+                [matTooltip]="def.description"
+              >
+                {{ def.name }} ({{ def.typeId.startsWith("fr.") ? "F" : "P" }})
+              </mat-option>
+            </mat-select>
+            &nbsp;
+            <mat-spinner
+              [diameter]="16"
+              [strokeWidth]="2"
+              *ngIf="loadingPinDefs"
+            ></mat-spinner>
+          </mat-form-field>
+          <!-- selected part's pins -->
+          <table class="pins" *ngIf="pinDefs?.length">
+            <thead>
+              <tr>
+                <th></th>
+                <th>name</th>
+                <th>type</th>
+                <th>tip</th>
+                <th>attrs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let pd of pinDefs">
+                <td>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    color="primary"
+                    matTooltip="Copy name"
+                    (click)="copyToClipboard(pd.name)"
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                </td>
+                <td>{{ pd.name }}</td>
+                <td>{{ pinTypeIdToString(pd.type) }}</td>
+                <td style="max-width: 20em">{{ pd.tip }}</td>
+                <td>{{ pd.attributes }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- help -->
+      <br />
+      <mat-expansion-panel [expanded]="false">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Quick Help</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="query-help">
+          <p>
+            Pairs are between <code>[]</code>. Each pair has field name +
+            operator + field value. Connect multiple pairs with
+            <code>AND</code> and <code>OR</code>, and group them using brackets.
+            Example:
+            <code>[title*=test] AND ([facet=default] OR [facet=tiled])</code>.
+          </p>
+          <h4>Fields</h4>
+          <ul>
+            <li><code>t</code>, <code>title</code>: item's title.</li>
+            <li>
+              <code>dsc</code>, <code>description</code>: item's description.
+            </li>
+            <li><code>facet</code>, <code>facetId</code>: item's facet ID.</li>
+            <li><code>group</code>, <code>groupId</code>: item's group ID.</li>
+            <li><code>sortKey</code>: item's sort key.</li>
+            <li><code>flags</code>: item's flags.</li>
+            <li>
+              <code>type</code>, <code>partType</code>, <code>partTypeId</code>:
+              part type ID.
+            </li>
+            <li><code>role</code>, <code>roleId</code>: part role ID.</li>
+            <li><code>n</code>, <code>name</code>: pin's name.</li>
+            <li><code>v</code>, <code>value</code>: pin's value.</li>
+          </ul>
+          <h4>Operators</h4>
+          <ul>
+            <li><code>=</code>: equal to.</li>
+            <li><code>&lt;&gt;</code>: not equal to.</li>
+            <li><code>*=</code>: contains.</li>
+            <li><code>^=</code>: starts with.</li>
+            <li><code>$=</code>: ends with.</li>
+            <li>
+              <code>?=</code>: wildcards: <code>?</code>=any single character,
+              <code>*</code>=0-N characters.
+            </li>
+            <li><code>~=</code>: regular expression.</li>
+            <li>
+              <code>%=</code>: fuzzy matching. The value is followed by
+              <code>:</code> and the minimum similarity treshold.
+            </li>
+            <li><code>==</code>: equal (numeric).</li>
+            <li><code>!=</code>: not equal (numeric).</li>
+            <li><code>&lt;</code>: less-than (numeric).</li>
+            <li><code>&gt;</code>: greater-than (numeric).</li>
+            <li><code>&lt;=</code>: less-than or equal (numeric).</li>
+            <li><code>&gt;=</code>: greater-than or equal (numeric).</li>
+            <li>
+              <code>:</code> (flags): any the specified flags (comma-separated)
+              must be present.
+            </li>
+            <li>
+              <code>&amp;:</code> (flags): all the specified flags
+              (comma-separated) must be present.
+            </li>
+            <li>
+              <code>!:</code> (flags): none of the specified flags
+              (comma-separated) must be present.
+            </li>
+          </ul>
+          <p>Flags can be specified either with name or value.</p>
+          <p>
+            Value escapes: <code>\[</code>=<code>[</code>,
+            <code>\]</code>=<code>]</code>, <code>\HHHH</code>=Unicode 16-bits
+            character code.
+          </p>
+        </div>
+      </mat-expansion-panel>
+    </form>
+  </mat-card-content>
+</mat-card>

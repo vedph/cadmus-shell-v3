@@ -1,0 +1,24 @@
+/* https://stackoverflow.com/questions/36265026/angular-2-innerhtml-styling */
+:host ::ng-deep div#text {
+  counter-reset: text-y-counter;
+}
+
+:host ::ng-deep div#text p:before {
+  content: counter(text-y-counter);
+  counter-increment: text-y-counter;
+  margin-right: 6px;
+  color: #A0A0A0;
+}
+
+:host ::ng-deep span.fr {
+  background-color: yellow;
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 0 4px;
+}
+
+:host ::ng-deep span.fr-sel {
+  background-color: orange;
+  font-weight: bold;
+  border: 1px solid #404040;
+}

@@ -1,0 +1,33 @@
+.long-text {
+  width: 90%;
+  max-width: 800px;
+}
+th {
+  font-weight: normal;
+  color: silver;
+}
+fieldset {
+  border: 1px solid silver;
+  border-radius: 8px;
+  padding: 8px;
+}
+.sel-type {
+  background-color: #e1e7fb;
+  border-radius: 4px;
+  padding: 6px;
+  margin-bottom: 8px;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}
+.button-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}

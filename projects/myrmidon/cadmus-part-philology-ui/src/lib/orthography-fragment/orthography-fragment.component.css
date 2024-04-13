@@ -1,0 +1,22 @@
+.base-text {
+  margin-left: 1em;
+  background-color: #c2381f;
+  color: white;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+div#container {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "editor tags";
+  gap: 8px;
+}
+@media only screen and (max-width: 959px) {
+  div#container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "editor"
+      "tags";
+  }
+}

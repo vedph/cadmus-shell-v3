@@ -1,0 +1,59 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title
+        [matBadge]="categories.value.length"
+        matBadgeOverlap="false"
+        >Categories Part</mat-card-title
+      >
+    </mat-card-header>
+    <mat-card-content>
+      <div id="container">
+        <!-- available categories (from thesaurus) -->
+        <div id="picker">
+          <h3>Available Categories</h3>
+          <cadmus-thesaurus-tree
+            [entries]="entries"
+            rootLabel="categories"
+            [renderLabel]="renderLabel"
+            (entryChange)="onEntryChange($event)"
+          ></cadmus-thesaurus-tree>
+        </div>
+
+        <!-- categories -->
+        <fieldset id="list" *ngIf="categories.value?.length">
+          <legend>Assigned Categories</legend>
+          <table>
+            <tbody>
+              <tr *ngFor="let entry of categories.value; let i = index">
+                <td>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    matTooltip="Remove this category"
+                    (click)="removeCategory(i)"
+                  >
+                    <mat-icon>remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td [matTooltip]="entry.id">{{ entry.value }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </fieldset>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

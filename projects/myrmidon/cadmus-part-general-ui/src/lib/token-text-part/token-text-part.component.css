@@ -1,0 +1,30 @@
+div#container {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "cit trs"
+    "txt txt";
+  gap: 8px;
+}
+div#cit {
+  grid-area: cit;
+}
+div#trs {
+  grid-area: trs;
+}
+div#txt {
+  grid-area: txt;
+}
+
+/* lt-md */
+@media only screen and (max-width: 959px) {
+  div#container {
+    grid-template-rows: auto auto 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "cit"
+      "trs"
+      "txt";
+  }
+}

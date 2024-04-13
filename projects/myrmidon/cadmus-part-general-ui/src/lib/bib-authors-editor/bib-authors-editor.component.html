@@ -1,0 +1,111 @@
+<form *ngIf="parentForm" [formGroup]="parentForm">
+  <div [formArrayName]="controlName">
+    <div *ngIf="!authors || !authors.length" style="margin: 8px 0">
+      <button
+        type="button"
+        mat-flat-button
+        (click)="addAuthor()"
+        color="primary"
+      >
+        <mat-icon>add_circle</mat-icon>
+        author
+      </button>
+    </div>
+    <div
+      *ngFor="
+        let item of authors?.controls;
+        let i = index;
+        let first = first;
+        let last = last
+      "
+    >
+      <!-- child form -->
+      <div [formGroupName]="i">
+        <!-- child actions -->
+        {{ i + 1 }}.
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Remove this author"
+          color="warn"
+          (click)="removeAuthor(i)"
+        >
+          <mat-icon>remove_circle</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Add author below"
+          color="primary"
+          (click)="addAuthorBelow(i)"
+        >
+          <mat-icon>add_circle</mat-icon>
+        </button>
+        <button
+          [disabled]="first"
+          mat-icon-button
+          type="button"
+          matTooltip="Move author up"
+          (click)="moveAuthorUp(i)"
+        >
+          <mat-icon>arrow_upward</mat-icon>
+        </button>
+        <button
+          [disabled]="last"
+          mat-icon-button
+          type="button"
+          matTooltip="Move author down"
+          (click)="moveAuthorDown(i)"
+        >
+          <mat-icon>arrow_downward</mat-icon>
+        </button>
+        <!-- child controls -->
+        <!-- last -->
+        <mat-form-field>
+          <mat-label>last name</mat-label>
+          <input
+            matInput
+            formControlName="lastName"
+            spellcheck="false"
+            autofocus
+          />
+          <mat-error
+            *ngIf="
+              item.get('lastName')?.hasError('required') &&
+              (item.get('lastName')?.dirty || item.get('lastName')?.touched)
+            "
+            >last name required</mat-error
+          >
+          <mat-error
+            *ngIf="
+              item.get('lastName')?.hasError('maxLength') &&
+              (item.get('lastName')?.dirty || item.get('lastName')?.touched)
+            "
+            >too long</mat-error
+          >
+        </mat-form-field>
+        <!-- first -->
+        <mat-form-field>
+          <mat-label>first name</mat-label>
+          <input matInput formControlName="firstName" spellcheck="false" />
+          <mat-error>too long</mat-error>
+        </mat-form-field>
+        <!-- roleId -->
+        <mat-form-field *ngIf="roleEntries?.length">
+          <mat-label>role</mat-label>
+          <mat-select formControlName="roleId">
+            <mat-option [value]="null">(no role)</mat-option>
+            <mat-option *ngFor="let e of roleEntries" [value]="e.id">{{
+              e.value
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="!roleEntries?.length">
+          <mat-label>role</mat-label>
+          <input matInput formControlName="roleId" spellcheck="false" />
+          <mat-error>too long</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,26 @@
+{
+  "name": "@myrmidon/cadmus-flags-pg",
+  "version": "8.0.0",
+  "description": "Cadmus - item flags UI wrapper.",
+  "keywords": [
+    "Cadmus"
+  ],
+  "homepage": "https://github.com/vedph/cadmus-shell-v3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vedph/cadmus-shell-v3"
+  },
+  "author": {
+    "name": "Daniele Fusi"
+  },
+  "peerDependencies": {
+    "@angular/common": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@myrmidon/auth-jwt-login": "^3.0.0",
+    "@myrmidon/cadmus-flags-ui": "^8.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.5.0"
+  },
+  "sideEffects": false
+}
