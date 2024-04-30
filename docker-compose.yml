@@ -60,7 +60,7 @@ services:
 
   # Cadmus App
   cadmus-app:
-    image: vedph2020/cadmus-shell:8.0.1
+    image: vedph2020/cadmus-shell:8.0.2
     container_name: cadmus-app
     ports:
       - 4200:80
