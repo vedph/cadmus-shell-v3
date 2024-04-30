@@ -64,6 +64,7 @@ import { TextTileComponent } from './text-tile/text-tile.component';
 import { TiledDataComponent } from './tiled-data/tiled-data.component';
 import { TiledTextPartComponent } from './tiled-text-part/tiled-text-part.component';
 import { RelatedEntityComponent } from './related-entity/related-entity.component';
+import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
 
 @NgModule({
   imports: [
@@ -159,5 +160,8 @@ import { RelatedEntityComponent } from './related-entity/related-entity.componen
     TiledTextPartComponent,
     TokenTextPartComponent,
   ],
+  providers: [
+    CadmusTextEdService,
+  ]
 })
 export class CadmusPartGeneralUiModule {}

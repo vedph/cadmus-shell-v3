@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -17,6 +17,11 @@ import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { DocReference } from '@myrmidon/cadmus-refs-doc-references';
 import { AssertedCompositeId } from '@myrmidon/cadmus-refs-asserted-ids';
+import {
+  CADMUS_TEXT_ED_BINDINGS_TOKEN,
+  CadmusTextEdBindings,
+  CadmusTextEdService,
+} from '@myrmidon/cadmus-text-ed';
 
 import { Comment, CommentPart, COMMENT_PART_TYPEID } from '../comment-part';
 import { IndexKeyword } from '../index-keywords-part';
@@ -83,7 +88,14 @@ export class CommentEditorComponent
   // edit-target: true/false
   public canEditTarget?: boolean;
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
+  constructor(
+    authService: AuthJwtService,
+    formBuilder: FormBuilder,
+    private _editService: CadmusTextEdService,
+    @Inject(CADMUS_TEXT_ED_BINDINGS_TOKEN)
+    @Optional()
+    private _editorBindings?: CadmusTextEdBindings
+  ) {
     super(authService, formBuilder);
     // form
     this.tag = formBuilder.control(null, Validators.maxLength(50));
@@ -104,6 +116,29 @@ export class CommentEditorComponent
   public override ngOnDestroy() {
     super.ngOnDestroy();
     this._disposables.forEach((d) => d.dispose());
+  }
+
+  private async applyEdit(selector: string) {
+    if (!this._editor) {
+      return;
+    }
+    const selection = this._editor.getSelection();
+    const text = selection
+      ? this._editor.getModel()!.getValueInRange(selection)
+      : '';
+
+    const result = await this._editService.edit({
+      selector,
+      text: text,
+    });
+
+    this._editor.executeEdits('my-source', [
+      {
+        range: selection!,
+        text: result.text,
+        forceMoveMarkers: true,
+      },
+    ]);
   }
 
   public onCreateEditor(editor: monaco.editor.IEditor) {
@@ -127,6 +162,17 @@ export class CommentEditorComponent
         this.text.updateValueAndValidity();
       })
     );
+
+    // plugins
+    if (this._editorBindings) {
+      Object.keys(this._editorBindings).forEach((key) => {
+        const n = parseInt(key, 10);
+        console.log('Binding ' + n + ' to ' + this._editorBindings![key as any]);
+        this._editor!.addCommand(n, () => {
+          this.applyEdit(this._editorBindings![key as any]);
+        });
+      });
+    }
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
