@@ -11,10 +11,15 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 1. `npm run build-lib`;
 2. update version in `env.js` (and Docker files), and then `ng build --configuration=production`;
-3. `docker build . -t vedph2020/cadmus-shell:8.0.0 -t vedph2020/cadmus-shell:latest` (replace with the current version).
+3. `docker build . -t vedph2020/cadmus-shell:8.0.1 -t vedph2020/cadmus-shell:latest` (replace with the current version).
 
 ## History
 
+### 8.0.1
+
+- 2024-04-30:
+  - added plugins support to comment editor.
+  - updated Angular.
 - 2024-04-13: **V3 shell**:
   - migrated to [V2 bricks](https://github.com/vedph/cadmus-bricks-shell-v2#migration-from-v1). All the libraries of V2 repository start from version number 5.x.x and have dropped modules, thus using standalone components, directives, and pipes.
   - ⚠️ replaced `ngx-monaco-editor-v2` and `ngx-markdown` with NG essentials, affecting:
