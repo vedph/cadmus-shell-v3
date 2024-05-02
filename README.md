@@ -15,6 +15,8 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-05-02: added plugins support to note editor.
+
 ### 8.0.2
 
 - 2024-04-30:

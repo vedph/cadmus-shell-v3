@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -10,6 +10,11 @@ import {
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  CadmusTextEdService,
+  CADMUS_TEXT_ED_BINDINGS_TOKEN,
+  CadmusTextEdBindings,
+} from '@myrmidon/cadmus-text-ed';
 
 import { NotePart, NOTE_PART_TYPEID } from '../note-part';
 
@@ -36,7 +41,14 @@ export class NotePartComponent
 
   public tagEntries?: ThesaurusEntry[];
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
+  constructor(
+    authService: AuthJwtService,
+    formBuilder: FormBuilder,
+    private _editService: CadmusTextEdService,
+    @Inject(CADMUS_TEXT_ED_BINDINGS_TOKEN)
+    @Optional()
+    private _editorBindings?: CadmusTextEdBindings
+  ) {
     super(authService, formBuilder);
     // form
     this.tag = formBuilder.control(null, Validators.maxLength(100));
@@ -52,13 +64,36 @@ export class NotePartComponent
     this._disposables.forEach((d) => d.dispose());
   }
 
+  private async applyEdit(selector: string) {
+    if (!this._editor) {
+      return;
+    }
+    const selection = this._editor.getSelection();
+    const text = selection
+      ? this._editor.getModel()!.getValueInRange(selection)
+      : '';
+
+    const result = await this._editService.edit({
+      selector,
+      text: text,
+    });
+
+    this._editor.executeEdits('my-source', [
+      {
+        range: selection!,
+        text: result.text,
+        forceMoveMarkers: true,
+      },
+    ]);
+  }
+
   public onCreateEditor(editor: monaco.editor.IEditor) {
     editor.updateOptions({
       minimap: {
         side: 'right',
       },
       wordWrap: 'on',
-      automaticLayout: true
+      automaticLayout: true,
     });
     this._editorModel =
       this._editorModel ||
@@ -73,6 +108,19 @@ export class NotePartComponent
         this.text.updateValueAndValidity();
       })
     );
+
+    // plugins
+    if (this._editorBindings) {
+      Object.keys(this._editorBindings).forEach((key) => {
+        const n = parseInt(key, 10);
+        console.log(
+          'Binding ' + n + ' to ' + this._editorBindings![key as any]
+        );
+        this._editor!.addCommand(n, () => {
+          this.applyEdit(this._editorBindings![key as any]);
+        });
+      });
+    }
   }
 
   // @HostListener('window:resize', ['$event'])
