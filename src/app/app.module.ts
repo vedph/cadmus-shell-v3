@@ -61,10 +61,10 @@ import {
 } from '@myrmidon/cadmus-text-ed';
 import {
   MdBoldCtePlugin,
-  MdEmojiCtePlugin,
   MdItalicCtePlugin,
   MdLinkCtePlugin,
 } from '@myrmidon/cadmus-text-ed-md';
+import {TxtEmojiCtePlugin} from '@myrmidon/cadmus-text-ed-txt';
 
 // libraries in this workspace
 // notice that when you import the libraries into another workspace, you must change
@@ -194,21 +194,21 @@ import { environment } from 'src/environments/environment';
     // https://github.com/vedph/cadmus-bricks-shell-v2/blob/master/projects/myrmidon/cadmus-text-ed/README.md
     MdBoldCtePlugin,
     MdItalicCtePlugin,
-    MdEmojiCtePlugin,
+    TxtEmojiCtePlugin,
     MdLinkCtePlugin,
     {
       provide: CADMUS_TEXT_ED_SERVICE_OPTIONS_TOKEN,
       useFactory: (
         mdBoldCtePlugin: MdBoldCtePlugin,
         mdItalicCtePlugin: MdItalicCtePlugin,
-        mdEmojiCtePlugin: MdEmojiCtePlugin,
+        txtEmojiCtePlugin: TxtEmojiCtePlugin,
         mdLinkCtePlugin: MdLinkCtePlugin
       ) => {
         return {
           plugins: [
             mdBoldCtePlugin,
             mdItalicCtePlugin,
-            mdEmojiCtePlugin,
+            txtEmojiCtePlugin,
             mdLinkCtePlugin,
           ],
         };
@@ -216,7 +216,7 @@ import { environment } from 'src/environments/environment';
       deps: [
         MdBoldCtePlugin,
         MdItalicCtePlugin,
-        MdEmojiCtePlugin,
+        TxtEmojiCtePlugin,
         MdLinkCtePlugin,
       ],
     },
@@ -230,7 +230,7 @@ import { environment } from 'src/environments/environment';
       useValue: {
         2080: 'md.bold', // Ctrl+B
         2087: 'md.italic', // Ctrl+I
-        2083: 'md.emoji', // Ctrl+E
+        2083: 'txt.emoji', // Ctrl+E
         2090: 'md.link', // Ctrl+L
       },
     },
