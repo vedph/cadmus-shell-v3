@@ -3,11 +3,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import {
-  HttpClientModule,
-  HTTP_INTERCEPTORS,
-  HttpClientJsonpModule,
-} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withJsonpSupport } from '@angular/common/http';
 
 // material
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -90,151 +86,139 @@ import { ITEM_BROWSER_KEYS } from './item-browser-keys';
 import { GEONAMES_USERNAME_TOKEN } from '@myrmidon/cadmus-refs-geonames-lookup';
 import { environment } from 'src/environments/environment';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    LoginPageComponent,
-    ManageUsersPageComponent,
-    RegisterUserPageComponent,
-    ResetPasswordComponent,
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    RouterModule,
-    FormsModule,
-    ReactiveFormsModule,
-    HttpClientJsonpModule,
-    HttpClientModule,
-    // routing
-    AppRoutingModule,
-    // material
-    DragDropModule,
-    MatAutocompleteModule,
-    MatBadgeModule,
-    MatButtonModule,
-    MatCardModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    MatDatepickerModule,
-    MatDialogModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatListModule,
-    MatMenuModule,
-    MatNativeDateModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatRadioModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatSliderModule,
-    MatSnackBarModule,
-    MatTableModule,
-    MatTabsModule,
-    MatTooltipModule,
-    MatToolbarModule,
-    MatTreeModule,
-    ClipboardModule,
-    // vendor
-    NgeMonacoModule.forRoot({}),
-    // myrmidon
-    NgToolsModule,
-    NgMatToolsModule,
-    AuthJwtLoginModule,
-    AuthJwtAdminModule,
-    PagedDataBrowsersModule,
-    // cadmus
-    CadmusApiModule,
-    CadmusCoreModule,
-    CadmusProfileCoreModule,
-    CadmusStateModule,
-    CadmusUiModule,
-    CadmusUiPgModule,
-  ],
-  providers: [
-    // environment service
-    EnvServiceProvider,
-    // parts and fragments type IDs to editor group keys mappings
-    // https://github.com/nrwl/nx/issues/208#issuecomment-384102058
-    // inject like: @Inject('partEditorKeys') partEditorKeys: PartEditorKeys
-    {
-      provide: 'partEditorKeys',
-      useValue: PART_EDITOR_KEYS,
-    },
-    // index lookup definitions
-    {
-      provide: 'indexLookupDefinitions',
-      useValue: INDEX_LOOKUP_DEFINITIONS,
-    },
-    // item browsers IDs to editor keys mappings
-    // inject like: @Inject('itemBrowserKeys') itemBrowserKeys: { [key: string]: string }
-    {
-      provide: 'itemBrowserKeys',
-      useValue: ITEM_BROWSER_KEYS,
-    },
-    // HTTP interceptor
-    // https://medium.com/@ryanchenkie_40935/angular-authentication-using-the-http-client-and-http-interceptors-2f9d1540eb8
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthJwtInterceptor,
-      multi: true,
-    },
-    // GeoNames lookup (see environment.prod.ts for the username)
-    {
-      provide: GEONAMES_USERNAME_TOKEN,
-      useValue: environment.geoNamesUserName,
-    },
-    // text editor plugins
-    // https://github.com/vedph/cadmus-bricks-shell-v2/blob/master/projects/myrmidon/cadmus-text-ed/README.md
-    MdBoldCtePlugin,
-    MdItalicCtePlugin,
-    TxtEmojiCtePlugin,
-    MdLinkCtePlugin,
-    {
-      provide: CADMUS_TEXT_ED_SERVICE_OPTIONS_TOKEN,
-      useFactory: (
-        mdBoldCtePlugin: MdBoldCtePlugin,
-        mdItalicCtePlugin: MdItalicCtePlugin,
-        txtEmojiCtePlugin: TxtEmojiCtePlugin,
-        mdLinkCtePlugin: MdLinkCtePlugin
-      ) => {
-        return {
-          plugins: [
-            mdBoldCtePlugin,
-            mdItalicCtePlugin,
-            txtEmojiCtePlugin,
-            mdLinkCtePlugin,
-          ],
-        };
-      },
-      deps: [
+@NgModule({ declarations: [
+        AppComponent,
+        HomeComponent,
+        LoginPageComponent,
+        ManageUsersPageComponent,
+        RegisterUserPageComponent,
+        ResetPasswordComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        BrowserAnimationsModule,
+        RouterModule,
+        FormsModule,
+        ReactiveFormsModule,
+        // routing
+        AppRoutingModule,
+        // material
+        DragDropModule,
+        MatAutocompleteModule,
+        MatBadgeModule,
+        MatButtonModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatChipsModule,
+        MatDatepickerModule,
+        MatDialogModule,
+        MatDividerModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        MatListModule,
+        MatMenuModule,
+        MatNativeDateModule,
+        MatPaginatorModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+        MatRadioModule,
+        MatSelectModule,
+        MatSlideToggleModule,
+        MatSliderModule,
+        MatSnackBarModule,
+        MatTableModule,
+        MatTabsModule,
+        MatTooltipModule,
+        MatToolbarModule,
+        MatTreeModule,
+        ClipboardModule,
+        // vendor
+        NgeMonacoModule.forRoot({}),
+        // myrmidon
+        NgToolsModule,
+        NgMatToolsModule,
+        AuthJwtLoginModule,
+        AuthJwtAdminModule,
+        PagedDataBrowsersModule,
+        // cadmus
+        CadmusApiModule,
+        CadmusCoreModule,
+        CadmusProfileCoreModule,
+        CadmusStateModule,
+        CadmusUiModule,
+        CadmusUiPgModule], providers: [
+        // environment service
+        EnvServiceProvider,
+        // parts and fragments type IDs to editor group keys mappings
+        // https://github.com/nrwl/nx/issues/208#issuecomment-384102058
+        // inject like: @Inject('partEditorKeys') partEditorKeys: PartEditorKeys
+        {
+            provide: 'partEditorKeys',
+            useValue: PART_EDITOR_KEYS,
+        },
+        // index lookup definitions
+        {
+            provide: 'indexLookupDefinitions',
+            useValue: INDEX_LOOKUP_DEFINITIONS,
+        },
+        // item browsers IDs to editor keys mappings
+        // inject like: @Inject('itemBrowserKeys') itemBrowserKeys: { [key: string]: string }
+        {
+            provide: 'itemBrowserKeys',
+            useValue: ITEM_BROWSER_KEYS,
+        },
+        // HTTP interceptor
+        // https://medium.com/@ryanchenkie_40935/angular-authentication-using-the-http-client-and-http-interceptors-2f9d1540eb8
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthJwtInterceptor,
+            multi: true,
+        },
+        // GeoNames lookup (see environment.prod.ts for the username)
+        {
+            provide: GEONAMES_USERNAME_TOKEN,
+            useValue: environment.geoNamesUserName,
+        },
+        // text editor plugins
+        // https://github.com/vedph/cadmus-bricks-shell-v2/blob/master/projects/myrmidon/cadmus-text-ed/README.md
         MdBoldCtePlugin,
         MdItalicCtePlugin,
         TxtEmojiCtePlugin,
         MdLinkCtePlugin,
-      ],
-    },
-    // monaco bindings for plugins
-    // 2080 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB;
-    // 2087 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI;
-    // 2083 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE;
-    // 2090 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL;
-    {
-      provide: CADMUS_TEXT_ED_BINDINGS_TOKEN,
-      useValue: {
-        2080: 'md.bold', // Ctrl+B
-        2087: 'md.italic', // Ctrl+I
-        2083: 'txt.emoji', // Ctrl+E
-        2090: 'md.link', // Ctrl+L
-      },
-    },
-  ],
-  bootstrap: [AppComponent],
-})
+        {
+            provide: CADMUS_TEXT_ED_SERVICE_OPTIONS_TOKEN,
+            useFactory: (mdBoldCtePlugin: MdBoldCtePlugin, mdItalicCtePlugin: MdItalicCtePlugin, txtEmojiCtePlugin: TxtEmojiCtePlugin, mdLinkCtePlugin: MdLinkCtePlugin) => {
+                return {
+                    plugins: [
+                        mdBoldCtePlugin,
+                        mdItalicCtePlugin,
+                        txtEmojiCtePlugin,
+                        mdLinkCtePlugin,
+                    ],
+                };
+            },
+            deps: [
+                MdBoldCtePlugin,
+                MdItalicCtePlugin,
+                TxtEmojiCtePlugin,
+                MdLinkCtePlugin,
+            ],
+        },
+        // monaco bindings for plugins
+        // 2080 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB;
+        // 2087 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI;
+        // 2083 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE;
+        // 2090 = monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL;
+        {
+            provide: CADMUS_TEXT_ED_BINDINGS_TOKEN,
+            useValue: {
+                2080: 'md.bold', // Ctrl+B
+                2087: 'md.italic', // Ctrl+I
+                2083: 'txt.emoji', // Ctrl+E
+                2090: 'md.link', // Ctrl+L
+            },
+        },
+        provideHttpClient(withInterceptorsFromDi(), withJsonpSupport()),
+    ] })
 export class AppModule {}
