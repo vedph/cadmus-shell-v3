@@ -6,7 +6,13 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { FormBuilder, FormGroup, UntypedFormGroup } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  PristineChangeEvent,
+  UntypedFormGroup,
+} from '@angular/forms';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { deepCopy } from '@myrmidon/ng-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
@@ -17,14 +23,6 @@ import {
   TextLayerPart,
   ThesauriSet,
 } from '@myrmidon/cadmus-core';
-import { dirtyCheck, HasDirty } from '@myrmidon/ngx-dirty-check';
-import {
-  BehaviorSubject,
-  distinctUntilChanged,
-  Observable,
-  of,
-  Subscription,
-} from 'rxjs';
 
 /**
  * The identifiers for an edited part.
@@ -66,14 +64,11 @@ export interface EditedObject<T extends Part | Fragment> {
   template: '',
 })
 export abstract class ModelEditorComponentBase<T extends Part | Fragment>
-  implements OnInit, OnDestroy, HasDirty
+  implements OnInit, OnDestroy
 {
-  private _dirtySub?: Subscription;
-  private _dirtyEvSub?: Subscription;
-  private _authSub?: Subscription;
+  private readonly _mebSubs: Subscription[] = [];
   private _identity: PartIdentity | FragmentIdentity | undefined;
   private _data?: EditedObject<T>;
-  private _dirtyStore$: BehaviorSubject<object>;
 
   /**
    * The root form of the editor.
@@ -93,7 +88,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   /**
    * An observable with the current dirty state of the editor.
    */
-  public isDirty$: Observable<boolean>;
+  public isDirty$: BehaviorSubject<boolean>;
 
   /**
    * The identity of the edited model.
@@ -123,7 +118,6 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   public set data(value: EditedObject<T> | undefined) {
     this._data = value;
     this.onDataSet(value);
-    this._dirtyStore$.next(this.form.value);
   }
 
   /**
@@ -173,8 +167,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
     this.dirtyChange = new EventEmitter<boolean>();
     this.form = formBuilder.group({});
     this.userLevel = 0;
-    this._dirtyStore$ = new BehaviorSubject<object>({});
-    this.isDirty$ = of(false);
+    this.isDirty$ = new BehaviorSubject<boolean>(false);
   }
 
   public ngOnInit(): void {
@@ -182,26 +175,27 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
     this.form = this.buildForm(this.formBuilder);
 
     // dirty check on form
-    this.isDirty$ = dirtyCheck(this.form, this._dirtyStore$);
-    this._dirtyEvSub = this.isDirty$
-      .pipe(distinctUntilChanged())
-      .subscribe((v) => {
-        this.dirtyChange.emit(v);
-      });
+    this._mebSubs.push(
+      this.form.events.subscribe((e) => {
+        if (e instanceof PristineChangeEvent) {
+          console.log('dirty change: ', !e.pristine);
+          this.isDirty$.next(!e.pristine);
+          this.dirtyChange.emit(this.isDirty$.value);
+        }
+      })
+    );
 
     // auth service
     this.userLevel = this.getCurrentUserLevel();
-    this._authSub = this.authService.currentUser$.subscribe(
-      (user: User | null) => {
+    this._mebSubs.push(
+      this.authService.currentUser$.subscribe((user: User | null) => {
         this.updateUserProperties(user);
-      }
+      })
     );
   }
 
   public ngOnDestroy(): void {
-    this._dirtySub?.unsubscribe();
-    this._dirtyEvSub?.unsubscribe();
-    this._authSub?.unsubscribe();
+    this._mebSubs.forEach((s) => s.unsubscribe());
   }
 
   /**
@@ -257,7 +251,6 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
    */
   protected updateValue(value: T): void {
     this._data = { ...(this._data || { thesauri: {} }), value: value };
-    this._dirtyStore$.next(this.form.value);
     this.dataChange.emit(value);
   }
 

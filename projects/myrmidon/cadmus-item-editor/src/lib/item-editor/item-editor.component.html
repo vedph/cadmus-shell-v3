@@ -243,6 +243,7 @@
                     color="primary"
                     [disabled]="busy"
                     (click)="editPart(part)"
+                    matTooltip="Edit this part"
                   >
                     <mat-icon>create</mat-icon>
                   </button>
@@ -258,6 +259,7 @@
                         user?.roles?.includes('editor') ||
                         user?.roles?.includes('operator'))
                     "
+                    matTooltip="Delete this part"
                   >
                     <mat-icon color="warn">delete</mat-icon>
                   </button>
