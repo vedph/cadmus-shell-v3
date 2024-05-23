@@ -71,24 +71,26 @@
           [service]="lookupService"
           (itemChange)="onLinkedNodeSet($event)"
         ></cadmus-ref-lookup>
-        <div *ngIf="linkedNode$ | async">
-          <mat-form-field>
-            <mat-label>role</mat-label>
-            <mat-select [formControl]="linkedNodeRole">
-              <mat-option value="S">subject</mat-option>
-              <mat-option value="O">object</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <button
-            type="button"
-            mat-icon-button
-            color="warn"
-            matTooltip="Reset linked node"
-            (click)="clearLinkedNode()"
-          >
-            <mat-icon>clear</mat-icon>
-          </button>
-        </div>
+        @if (linkedNode$ | async) {
+          <div>
+            <mat-form-field>
+              <mat-label>role</mat-label>
+              <mat-select [formControl]="linkedNodeRole">
+                <mat-option value="S">subject</mat-option>
+                <mat-option value="O">object</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button
+              type="button"
+              mat-icon-button
+              color="warn"
+              matTooltip="Reset linked node"
+              (click)="clearLinkedNode()"
+              >
+              <mat-icon>clear</mat-icon>
+            </button>
+          </div>
+        }
       </fieldset>
     </div>
 
@@ -102,18 +104,21 @@
           [baseFilter]="{ isClass: true }"
           (itemChange)="onClassAdd($event)"
         ></cadmus-ref-lookup>
-        <mat-chip-listbox *ngIf="classNodes$ | async as classNodes">
-          <mat-chip-option
-            *ngFor="let node of classNodes"
-            [removable]="true"
-            (removed)="onClassRemove(node.id)"
-            matTooltip="{{ node.uri }}"
-            >{{ node.label }}
-            <button type="button" matChipRemove>
-              <mat-icon>clear</mat-icon>
-            </button>
-          </mat-chip-option>
-        </mat-chip-listbox>
+        @if (classNodes$ | async; as classNodes) {
+          <mat-chip-listbox>
+            @for (node of classNodes; track node) {
+              <mat-chip-option
+                [removable]="true"
+                (removed)="onClassRemove(node.id)"
+                matTooltip="{{ node.uri }}"
+                >{{ node.label }}
+                <button type="button" matChipRemove>
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        }
       </fieldset>
     </div>
   </div>
@@ -126,7 +131,7 @@
       color="warn"
       matTooltip="Reset filters"
       [disabled]="disabled"
-    >
+      >
       <mat-icon>clear</mat-icon>
     </button>
     <button
@@ -135,7 +140,7 @@
       color="primary"
       [disabled]="disabled"
       matTooltip="Apply filters"
-    >
+      >
       <mat-icon>check_circle</mat-icon>
     </button>
   </div>

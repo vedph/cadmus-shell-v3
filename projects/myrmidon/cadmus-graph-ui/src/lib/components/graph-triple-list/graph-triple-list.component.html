@@ -11,103 +11,105 @@
   </div>
 
   <!-- list -->
-  <div id="list" *ngIf="page$ | async as page">
-    <div *ngIf="loading$ | async">
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    </div>
-
-    <!-- list -->
-    <div>
-      <table>
-        <thead>
-          <th></th>
-          <th>ID</th>
-          <th>S</th>
-          <th>P</th>
-          <th>O</th>
-          <th class="noif-lt-md">sid</th>
-          <th class="noif-lt-md">tag</th>
-        </thead>
-        <tbody>
-          <tr *ngFor="let d of page.items">
-            <td class="fit-width">
-              <button
-                mat-icon-button
-                type="button"
-                color="primary"
-                matTooltip="Edit triple"
-                (click)="editTriple(d)"
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                color="warn"
-                matTooltip="Delete triple"
-                (click)="deleteTriple(d)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-            <td>{{ d.id }}</td>
-            <td>{{ d.subjectUri }}</td>
-            <td>{{ d.predicateUri }}</td>
-            <td>{{ d.objectUri ?? d.objectLiteral | ellipsis }}</td>
-            <td class="noif-lt-md">{{ d.sid }}</td>
-            <td class="noif-lt-md">{{ d.tag }}</td>
-          </tr>
-        </tbody>
-      </table>
+  @if (page$ | async; as page) {
+    <div id="list">
+      @if (loading$ | async) {
+        <div>
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
+      }
+      <!-- list -->
       <div>
-        <button
-          color="primary"
-          type="button"
-          mat-flat-button
-          (click)="addTriple()"
-        >
-          <mat-icon>add_circle</mat-icon>
-          add triple
-        </button>
+        <table>
+          <thead>
+            <th></th>
+            <th>ID</th>
+            <th>S</th>
+            <th>P</th>
+            <th>O</th>
+            <th class="noif-lt-md">sid</th>
+            <th class="noif-lt-md">tag</th>
+          </thead>
+          <tbody>
+            @for (d of page.items; track d) {
+              <tr>
+                <td class="fit-width">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    color="primary"
+                    matTooltip="Edit triple"
+                    (click)="editTriple(d)"
+                    >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    color="warn"
+                    matTooltip="Delete triple"
+                    (click)="deleteTriple(d)"
+                    >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+                <td>{{ d.id }}</td>
+                <td>{{ d.subjectUri }}</td>
+                <td>{{ d.predicateUri }}</td>
+                <td>{{ d.objectUri ?? d.objectLiteral | ellipsis }}</td>
+                <td class="noif-lt-md">{{ d.sid }}</td>
+                <td class="noif-lt-md">{{ d.tag }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div>
+          <button
+            color="primary"
+            type="button"
+            mat-flat-button
+            (click)="addTriple()"
+            >
+            <mat-icon>add_circle</mat-icon>
+            add triple
+          </button>
+        </div>
+        <!-- pagination -->
+        <div id="paginator" class="form-row">
+          <button
+            color="primary"
+            type="button"
+            mat-icon-button
+            matTooltip="Reset list"
+            (click)="reset()"
+            color="warn"
+            >
+            <mat-icon>autorenew</mat-icon>
+          </button>
+          <mat-paginator
+            [length]="page.total"
+            [pageIndex]="page.pageNumber - 1"
+            [pageSize]="page.pageSize"
+            [pageSizeOptions]="[5, 10, 20, 50, 100]"
+            (page)="onPageChange($event)"
+            [showFirstLastButtons]="true"
+          ></mat-paginator>
+        </div>
       </div>
-
-      <!-- pagination -->
-      <div id="paginator" class="form-row">
-        <button
-          color="primary"
-          type="button"
-          mat-icon-button
-          matTooltip="Reset list"
-          (click)="reset()"
-          color="warn"
+      <!-- editor -->
+      <mat-expansion-panel
+        id="editor"
+        [expanded]="editedTriple"
+        [disabled]="!editedTriple"
         >
-          <mat-icon>autorenew</mat-icon>
-        </button>
-
-        <mat-paginator
-          [length]="page.total"
-          [pageIndex]="page.pageNumber - 1"
-          [pageSize]="page.pageSize"
-          [pageSizeOptions]="[5, 10, 20, 50, 100]"
-          (page)="onPageChange($event)"
-          [showFirstLastButtons]="true"
-        ></mat-paginator>
-      </div>
+        <mat-expansion-panel-header>Triple</mat-expansion-panel-header>
+        <cadmus-graph-triple-editor
+          [triple]="editedTriple"
+          [tagEntries]="tagEntries"
+          (tripleChange)="onTripleChange($event)"
+          (editorClose)="onEditorClose()"
+        ></cadmus-graph-triple-editor>
+      </mat-expansion-panel>
     </div>
-
-    <!-- editor -->
-    <mat-expansion-panel
-      id="editor"
-      [expanded]="editedTriple"
-      [disabled]="!editedTriple"
-    >
-      <mat-expansion-panel-header>Triple</mat-expansion-panel-header>
-      <cadmus-graph-triple-editor
-        [triple]="editedTriple"
-        [tagEntries]="tagEntries"
-        (tripleChange)="onTripleChange($event)"
-        (editorClose)="onEditorClose()"
-      ></cadmus-graph-triple-editor>
-    </mat-expansion-panel>
-  </div>
+  }
 </div>

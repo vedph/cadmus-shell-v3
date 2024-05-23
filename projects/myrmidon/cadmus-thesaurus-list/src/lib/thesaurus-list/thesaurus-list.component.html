@@ -10,97 +10,106 @@
       </div>
 
       <!-- list -->
-      <div id="list" *ngIf="page$ | async as page">
-        <div *ngIf="loading$ | async">
-          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      @if (page$ | async; as page) {
+        <div id="list">
+          @if (loading$ | async) {
+            <div>
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </div>
+          }
+          <table>
+            <thead>
+              <th></th>
+              <th>id</th>
+              <th>entries</th>
+            </thead>
+            <tbody>
+              @for (thesaurus of page.items; track thesaurus) {
+                <tr>
+                  <td class="fit-width">
+                    <button
+                      mat-icon-button
+                      type="button"
+                      matTooltip="Edit {{ thesaurus.id }}"
+                      color="primary"
+                      (click)="editThesaurus(thesaurus)"
+                      >
+                      <mat-icon>mode_edit</mat-icon>
+                    </button>
+                    @if (userLevel > 2) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        matTooltip="Delete {{ thesaurus.id }}"
+                        color="warn"
+                        (click)="deleteThesaurus(thesaurus)"
+                        >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Download this thesaurus"
+                      [disabled]="downloading"
+                      (click)="downloadThesaurus(thesaurus.id)"
+                      >
+                      <mat-icon>download</mat-icon>
+                    </button>
+                  </td>
+                  <td>{{ thesaurus.id }}</td>
+                  <td>
+                    {{ thesaurus.entries?.length || 0 }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <!-- pagination -->
+          <mat-paginator
+            [length]="page.total"
+            [pageIndex]="page.pageNumber - 1"
+            [pageSize]="page.pageSize"
+            [pageSizeOptions]="[5, 10, 20, 50, 100]"
+            (page)="onPageChange($event)"
+            [showFirstLastButtons]="true"
+          ></mat-paginator>
+          <!-- importer -->
+          @if (importEnabled) {
+            <div>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Import thesauri</mat-panel-title>
+                </mat-expansion-panel-header>
+                <cadmus-thesaurus-import
+                  (uploadEnd)="onUploadEnd()"
+                ></cadmus-thesaurus-import>
+              </mat-expansion-panel>
+            </div>
+          }
         </div>
-        <table>
-          <thead>
-            <th></th>
-            <th>id</th>
-            <th>entries</th>
-          </thead>
-          <tbody>
-            <tr *ngFor="let thesaurus of page.items">
-              <td class="fit-width">
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Edit {{ thesaurus.id }}"
-                  color="primary"
-                  (click)="editThesaurus(thesaurus)"
-                >
-                  <mat-icon>mode_edit</mat-icon>
-                </button>
-                <button
-                  *ngIf="userLevel > 2"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Delete {{ thesaurus.id }}"
-                  color="warn"
-                  (click)="deleteThesaurus(thesaurus)"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Download this thesaurus"
-                  [disabled]="downloading"
-                  (click)="downloadThesaurus(thesaurus.id)"
-                >
-                  <mat-icon>download</mat-icon>
-                </button>
-              </td>
-              <td>{{ thesaurus.id }}</td>
-              <td>
-                {{ thesaurus.entries?.length || 0 }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- pagination -->
-        <mat-paginator
-          [length]="page.total"
-          [pageIndex]="page.pageNumber - 1"
-          [pageSize]="page.pageSize"
-          [pageSizeOptions]="[5, 10, 20, 50, 100]"
-          (page)="onPageChange($event)"
-          [showFirstLastButtons]="true"
-        ></mat-paginator>
-
-        <!-- importer -->
-        <div *ngIf="importEnabled">
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>Import thesauri</mat-panel-title>
-            </mat-expansion-panel-header>
-            <cadmus-thesaurus-import
-              (uploadEnd)="onUploadEnd()"
-            ></cadmus-thesaurus-import>
-          </mat-expansion-panel>
-        </div>
-      </div>
+      }
     </div>
   </mat-card-content>
-  <mat-card-actions
-    *ngIf="
-      user?.roles?.includes('admin') ||
-      user?.roles?.includes('editor') ||
-      user?.roles?.includes('operator')
-    "
-  >
-    <button
-      *ngIf="userLevel > 1"
-      type="button"
-      color="primary"
-      mat-flat-button
-      matTooltip="Add a new thesaurus"
-      (click)="addThesaurus()"
-    >
-      <mat-icon>add_circle</mat-icon>
-      thesaurus
-    </button>
-  </mat-card-actions>
+  @if (
+    user?.roles?.includes('admin') ||
+    user?.roles?.includes('editor') ||
+    user?.roles?.includes('operator')
+    ) {
+    <mat-card-actions
+      >
+      @if (userLevel > 1) {
+        <button
+          type="button"
+          color="primary"
+          mat-flat-button
+          matTooltip="Add a new thesaurus"
+          (click)="addThesaurus()"
+          >
+          <mat-icon>add_circle</mat-icon>
+          thesaurus
+        </button>
+      }
+    </mat-card-actions>
+  }
 </mat-card>

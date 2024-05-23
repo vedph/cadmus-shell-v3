@@ -17,52 +17,57 @@
     </div>
 
     <!-- facet -->
-    <ng-container *ngIf="app.facets$ | async as facets">
+    @if (app.facets$ | async; as facets) {
       <div>
         <mat-form-field>
           <mat-label>facet</mat-label>
           <mat-select [formControl]="facet">
             <mat-option [value]="null">(any)</mat-option>
-            <mat-option *ngFor="let f of facets" [value]="f.id">
-              {{ f.label }}
-            </mat-option>
+            @for (f of facets; track f) {
+              <mat-option [value]="f.id">
+                {{ f.label }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>
-
       <div>
         <mat-form-field>
           <mat-label>group ID</mat-label>
           <input type="text" matInput [formControl]="group" />
         </mat-form-field>
       </div>
-
       <!-- flags -->
-      <div *ngIf="app.flags$ | async as flags">
+      @if (app.flags$ | async; as flags) {
         <div>
-          <mat-form-field>
-            <mat-label>flags</mat-label>
-            <mat-select [formControl]="flagMatching">
-              <mat-option value="-1">(flags ignored)</mat-option>
-              <mat-option value="0">all set</mat-option>
-              <mat-option value="1">any set</mat-option>
-              <mat-option value="2">all clear</mat-option>
-              <mat-option value="3">any clear</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div>
+            <mat-form-field>
+              <mat-label>flags</mat-label>
+              <mat-select [formControl]="flagMatching">
+                <mat-option value="-1">(flags ignored)</mat-option>
+                <mat-option value="0">all set</mat-option>
+                <mat-option value="1">any set</mat-option>
+                <mat-option value="2">all clear</mat-option>
+                <mat-option value="3">any clear</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          @if (flagMatching.value > -1) {
+            <div>
+              <mat-form-field>
+                <mat-label>flags value</mat-label>
+                <mat-select multiple="true" formControlName="flags">
+                  @for (f of flags; track f) {
+                    <mat-option [value]="f.id">
+                      {{ f.label }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          }
         </div>
-        <div *ngIf="flagMatching.value > -1">
-          <mat-form-field>
-            <mat-label>flags value</mat-label>
-            <mat-select multiple="true" formControlName="flags">
-              <mat-option *ngFor="let f of flags" [value]="f.id">
-                {{ f.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </div>
-
+      }
       <!-- user -->
       <div>
         <cadmus-ref-lookup
@@ -73,7 +78,7 @@
           (itemChange)="onUserChange($event)"
         ></cadmus-ref-lookup>
       </div>
-    </ng-container>
+    }
 
     <!-- min date -->
     <div>
@@ -83,53 +88,53 @@
           matInput
           [matDatepicker]="minPicker"
           [formControl]="minModified"
-        />
-        <mat-datepicker-toggle
-          matSuffix
-          [for]="minPicker"
-        ></mat-datepicker-toggle>
-      </mat-form-field>
-      <mat-datepicker #minPicker></mat-datepicker>
-    </div>
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="minPicker"
+          ></mat-datepicker-toggle>
+        </mat-form-field>
+        <mat-datepicker #minPicker></mat-datepicker>
+      </div>
 
-    <!-- max date -->
-    <div>
-      <mat-form-field>
-        <mat-label>max.date</mat-label>
-        <input
-          matInput
-          [matDatepicker]="maxPicker"
-          [formControl]="maxModified"
-        />
-        <mat-datepicker-toggle
-          matSuffix
-          [for]="maxPicker"
-        ></mat-datepicker-toggle>
-      </mat-form-field>
-      <mat-datepicker #maxPicker></mat-datepicker>
-    </div>
-  </div>
+      <!-- max date -->
+      <div>
+        <mat-form-field>
+          <mat-label>max.date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="maxPicker"
+            [formControl]="maxModified"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="maxPicker"
+            ></mat-datepicker-toggle>
+          </mat-form-field>
+          <mat-datepicker #maxPicker></mat-datepicker>
+        </div>
+      </div>
 
-  <div>
-    <div>
-      <button
-        type="button"
-        mat-icon-button
-        (click)="reset()"
-        color="warn"
-        matTooltip="Reset all the filters"
-      >
-        <mat-icon>clear</mat-icon>
-      </button>
-      <button
-        type="submit"
-        mat-icon-button
-        color="primary"
-        [disabled]="form.invalid"
-        matTooltip="Apply filters"
-      >
-        <mat-icon>check_circle</mat-icon>
-      </button>
-    </div>
-  </div>
-</form>
+      <div>
+        <div>
+          <button
+            type="button"
+            mat-icon-button
+            (click)="reset()"
+            color="warn"
+            matTooltip="Reset all the filters"
+            >
+            <mat-icon>clear</mat-icon>
+          </button>
+          <button
+            type="submit"
+            mat-icon-button
+            color="primary"
+            [disabled]="form.invalid"
+            matTooltip="Apply filters"
+            >
+            <mat-icon>check_circle</mat-icon>
+          </button>
+        </div>
+      </div>
+    </form>

@@ -10,130 +10,152 @@
         type="file"
         class="hidden"
         (change)="onFileSelected($event)"
-      />
+        />
       <button
         type="button"
         mat-flat-button
         color="primary"
         (click)="fileInput.click()"
         [disabled]="uploading"
-      >
+        >
         Select File
       </button>
       <span class="file-name">{{ file.value?.name }}</span>
-      <span class="error" *ngIf="$any(file).errors?.required"
-        >file required</span
-      >
-      <span class="error" *ngIf="$any(file).errors?.invalidExtension"
-        >invalid file type</span
-      >
-    </div>
-    <br />
-
-    <!-- mode -->
-    <div class="form-row">
-      <mat-form-field>
-        <mat-label>mode</mat-label>
-        <mat-select [formControl]="mode">
-          <mat-option value="R">replace</mat-option>
-          <mat-option value="P">patch</mat-option>
-          <mat-option value="S">synch</mat-option>
-        </mat-select>
-        <mat-hint>
-          <span *ngIf="mode.value === 'R'"
-            >if the imported thesaurus already exists, it is fully replaced by
-            the new one.</span
+      @if ($any(file).errors?.required) {
+        <span class="error"
+          >file required</span
           >
-          <span *ngIf="mode.value === 'P'"
-            >the existing thesaurus is patched with the imported one: any
-            existing entry has its value overwritten; any non existing entry is
-            just added.</span
-          >
-          <span *ngIf="mode.value === 'S'"
-            >equal to patch, with the addition that any existing entry not found
-            in the imported thesaurus is removed.</span
-          >
-        </mat-hint>
-        <mat-error
-          *ngIf="$any(mode).errors?.required && (mode.dirty || mode.touched)"
-          >mode required</mat-error
-        >
-      </mat-form-field>
-
-      <!-- dry -->
-      <mat-checkbox [formControl]="dryRun">dry run</mat-checkbox>
-    </div>
-
-    <!-- Excel -->
-    <div
-      *ngIf="
-        file.value?.name?.endsWith('.xlsx') ||
-        file.value?.name?.endsWith('.xls')
-      "
-    >
-      <fieldset>
-        <legend>Excel</legend>
-        <div class="form-row">
-          <!-- excelSheet -->
-          <mat-form-field class="nr-input">
-            <mat-label>sheet</mat-label>
-            <input matInput type="number" min="1" [formControl]="excelSheet" />
-          </mat-form-field>
-          <!-- excelRow -->
-          <mat-form-field class="nr-input">
-            <mat-label>1st row</mat-label>
-            <input matInput type="number" min="1" [formControl]="excelRow" />
-          </mat-form-field>
-          <!-- excelColumn -->
-          <mat-form-field class="nr-input">
-            <mat-label>1st column</mat-label>
-            <input matInput type="number" min="1" [formControl]="excelColumn" />
-          </mat-form-field>
+        }
+        @if ($any(file).errors?.invalidExtension) {
+          <span class="error"
+            >invalid file type</span
+            >
+          }
         </div>
-      </fieldset>
-    </div>
+        <br />
 
-    <!-- submit -->
-    <div style="margin-top: 16px">
-      <button
-        type="submit"
-        mat-flat-button
-        color="warn"
-        [disabled]="uploading || form.invalid"
-      >
-        Upload
-      </button>
-    </div>
-  </fieldset>
-</form>
+        <!-- mode -->
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>mode</mat-label>
+            <mat-select [formControl]="mode">
+              <mat-option value="R">replace</mat-option>
+              <mat-option value="P">patch</mat-option>
+              <mat-option value="S">synch</mat-option>
+            </mat-select>
+            <mat-hint>
+              @if (mode.value === 'R') {
+                <span
+                  >if the imported thesaurus already exists, it is fully replaced by
+                  the new one.</span
+                  >
+                }
+                @if (mode.value === 'P') {
+                  <span
+                    >the existing thesaurus is patched with the imported one: any
+                    existing entry has its value overwritten; any non existing entry is
+                    just added.</span
+                    >
+                  }
+                  @if (mode.value === 'S') {
+                    <span
+                      >equal to patch, with the addition that any existing entry not found
+                      in the imported thesaurus is removed.</span
+                      >
+                    }
+                  </mat-hint>
+                  @if ($any(mode).errors?.required && (mode.dirty || mode.touched)) {
+                    <mat-error
+                      >mode required</mat-error
+                      >
+                    }
+                  </mat-form-field>
 
-<!-- uploading -->
-<div *ngIf="uploading">
-  <div>
-    <button type="button" mat-flat-button color="warn" (click)="onCancel()">
-      Cancel
-    </button>
-  </div>
-  <div style="margin-top: 16px">
-    <mat-progress-bar max="100" [value]="uploadProgress"></mat-progress-bar>
-  </div>
-</div>
+                  <!-- dry -->
+                  <mat-checkbox [formControl]="dryRun">dry run</mat-checkbox>
+                </div>
 
-<!-- result -->
-<div *ngIf="result">
-  <div *ngIf="result.error" class="error">{{ result.error }}</div>
-  <div *ngIf="result.importedIds?.length">
-    <div>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Imported IDs</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <ol>
-            <li *ngFor="let id of result.importedIds">{{ id }}</li>
-          </ol>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </div>
-</div>
+                <!-- Excel -->
+                @if (
+                  file.value?.name?.endsWith('.xlsx') ||
+                  file.value?.name?.endsWith('.xls')
+                  ) {
+                  <div
+                    >
+                    <fieldset>
+                      <legend>Excel</legend>
+                      <div class="form-row">
+                        <!-- excelSheet -->
+                        <mat-form-field class="nr-input">
+                          <mat-label>sheet</mat-label>
+                          <input matInput type="number" min="1" [formControl]="excelSheet" />
+                        </mat-form-field>
+                        <!-- excelRow -->
+                        <mat-form-field class="nr-input">
+                          <mat-label>1st row</mat-label>
+                          <input matInput type="number" min="1" [formControl]="excelRow" />
+                        </mat-form-field>
+                        <!-- excelColumn -->
+                        <mat-form-field class="nr-input">
+                          <mat-label>1st column</mat-label>
+                          <input matInput type="number" min="1" [formControl]="excelColumn" />
+                        </mat-form-field>
+                      </div>
+                    </fieldset>
+                  </div>
+                }
+
+                <!-- submit -->
+                <div style="margin-top: 16px">
+                  <button
+                    type="submit"
+                    mat-flat-button
+                    color="warn"
+                    [disabled]="uploading || form.invalid"
+                    >
+                    Upload
+                  </button>
+                </div>
+              </fieldset>
+            </form>
+
+            <!-- uploading -->
+            @if (uploading) {
+              <div>
+                <div>
+                  <button type="button" mat-flat-button color="warn" (click)="onCancel()">
+                    Cancel
+                  </button>
+                </div>
+                <div style="margin-top: 16px">
+                  <mat-progress-bar max="100" [value]="uploadProgress"></mat-progress-bar>
+                </div>
+              </div>
+            }
+
+            <!-- result -->
+            @if (result) {
+              <div>
+                @if (result.error) {
+                  <div class="error">{{ result.error }}</div>
+                }
+                @if (result.importedIds?.length) {
+                  <div>
+                    <div>
+                      <mat-card>
+                        <mat-card-header>
+                          <mat-card-title>Imported IDs</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <ol>
+                            @for (id of result.importedIds; track id) {
+                              <li>{{ id }}</li>
+                            }
+                          </ol>
+                        </mat-card-content>
+                      </mat-card>
+                    </div>
+                  </div>
+                }
+              </div>
+            }

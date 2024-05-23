@@ -11,58 +11,62 @@
       <div id="container">
         <div id="tga">
           @if (!tagEntries) {
-          <!-- free tag -->
-          <mat-form-field>
-            <mat-label>tag</mat-label>
-            <input
-              type="text"
-              matInput
-              [formControl]="tag"
-              spellcheck="false"
-            />
-            <mat-error
-              *ngIf="tag.hasError('maxLength') && (tag.dirty || tag.touched)"
-              >tag too long</mat-error
-            >
-          </mat-form-field>
-          } @else {
-          <!-- bound tag -->
-          <mat-form-field>
-            <mat-label>tag</mat-label>
-            <mat-select [formControl]="tag">
-              <mat-option *ngFor="let e of tagEntries" [value]="e.id">{{
-                e.value
-              }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          }
-        </div>
+            <!-- free tag -->
+            <mat-form-field>
+              <mat-label>tag</mat-label>
+              <input
+                type="text"
+                matInput
+                [formControl]="tag"
+                spellcheck="false"
+                />
+                @if (tag.hasError('maxLength') && (tag.dirty || tag.touched)) {
+                  <mat-error
+                    >tag too long</mat-error
+                    >
+                }
+              </mat-form-field>
+            } @else {
+              <!-- bound tag -->
+              <mat-form-field>
+                <mat-label>tag</mat-label>
+                <mat-select [formControl]="tag">
+                  @for (e of tagEntries; track e) {
+                    <mat-option [value]="e.id">{{
+                      e.value
+                    }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+          </div>
 
-        <!-- text -->
-        <div id="txt">
-          <nge-monaco-editor
-            style="--editor-height: 800px"
-            (ready)="onCreateEditor($event)"
-          />
-          <mat-error
-            *ngIf="text.hasError('required') && (text.touched || text.dirty)"
-            >please enter some text</mat-error
-          >
-        </div>
+          <!-- text -->
+          <div id="txt">
+            <nge-monaco-editor
+              style="--editor-height: 800px"
+              (ready)="onCreateEditor($event)"
+              />
+              @if (text.hasError('required') && (text.touched || text.dirty)) {
+                <mat-error
+                  >please enter some text</mat-error
+                  >
+                }
+              </div>
 
-        <!-- preview -->
-        <div id="pvw">
-          <nge-markdown [data]="text.value || undefined"/>
-        </div>
-      </div>
-    </mat-card-content>
+              <!-- preview -->
+              <div id="pvw">
+                <nge-markdown [data]="text.value || undefined"/>
+              </div>
+            </div>
+          </mat-card-content>
 
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
-    </mat-card-actions>
-  </mat-card>
-</form>
+          <mat-card-actions>
+            <cadmus-close-save-buttons
+              [form]="form"
+              [noSave]="userLevel < 2"
+              (closeRequest)="close()"
+            ></cadmus-close-save-buttons>
+          </mat-card-actions>
+        </mat-card>
+      </form>

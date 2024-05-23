@@ -1,6 +1,7 @@
-<mat-progress-bar
-  *ngIf="(loading$ | async) || (saving$ | async)"
-></mat-progress-bar>
+@if ((loading$ | async) || (saving$ | async)) {
+  <mat-progress-bar
+  ></mat-progress-bar>
+}
 <cadmus-thesaurus-editor
   [thesaurus]="thesaurus"
   [lookupFn]="wrapLookup(thesService)"

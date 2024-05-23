@@ -6,214 +6,236 @@
         <mat-form-field>
           <mat-label>EID</mat-label>
           <input matInput [formControl]="eid" />
-          <mat-error
-            *ngIf="$any(eid).errors?.required && (eid.dirty || eid.touched)"
-            >EID required</mat-error
-          >
-          <mat-error
-            *ngIf="$any(eid).errors?.maxLength && (eid.dirty || eid.touched)"
-            >EID too long</mat-error
-          >
-        </mat-form-field>
-
-        <!-- type (bound) -->
-        <div *ngIf="eventTypeEntries?.length">
-          <cadmus-thesaurus-tree
-            [entries]="eventTypeEntries"
-            rootLabel="types"
-            [renderLabel]="renderLabel"
-            (entryChange)="onTypeEntryChange($event)"
-          ></cadmus-thesaurus-tree>
-          <mat-error
-            *ngIf="$any(type).errors?.required && (type.dirty || type.touched)"
-            >type required</mat-error
-          >
-          <div *ngIf="type.value" class="sel-type">
-            {{ type.value | flatLookup : eventTypeEntries : "id" : "value" }}
-          </div>
-        </div>
-        <!-- type (free) -->
-        <mat-form-field *ngIf="!eventTypeEntries?.length">
-          <mat-label>type</mat-label>
-          <input matInput [formControl]="type" />
-          <mat-error
-            *ngIf="$any(type).errors?.required && (type.dirty || type.touched)"
-            >type required</mat-error
-          >
-          <mat-error
-            *ngIf="$any(type).errors?.maxLength && (type.dirty || type.touched)"
-            >type too long</mat-error
-          >
-        </mat-form-field>
-
-        <!-- tag (bound) -->
-        <mat-form-field *ngIf="eventTagEntries?.length">
-          <mat-label>tag</mat-label>
-          <mat-select [formControl]="tag">
-            <mat-option *ngFor="let e of eventTagEntries" [value]="e.id">{{
-              e.value
-            }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <!-- tag (free) -->
-        <mat-form-field *ngIf="!eventTagEntries?.length">
-          <mat-label>tag</mat-label>
-          <input matInput [formControl]="tag" />
-          <mat-error
-            *ngIf="$any(tag).errors?.maxLength && (tag.dirty || tag.touched)"
-            >tag too long</mat-error
-          >
-        </mat-form-field>
-      </div>
-      <div>
-        <!-- description -->
-        <mat-form-field class="long-text">
-          <mat-label>description</mat-label>
-          <textarea matInput [formControl]="description"></textarea>
-          <mat-error
-            *ngIf="
-              $any(description).errors?.maxLength &&
-              (description.dirty || description.touched)
-            "
-            >description too long</mat-error
-          >
-        </mat-form-field>
-      </div>
-      <div>
-        <!-- note -->
-        <mat-form-field class="long-text">
-          <mat-label>note</mat-label>
-          <textarea matInput [formControl]="note"></textarea>
-          <mat-error
-            *ngIf="$any(note).errors?.maxLength && (note.dirty || note.touched)"
-            >note too long</mat-error
-          >
-        </mat-form-field>
-      </div>
-      <!-- chronotopes -->
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>chronotopes</mat-expansion-panel-header>
-        <fieldset>
-          <legend>chronotopes</legend>
-          <cadmus-asserted-chronotope-set
-            [tagEntries]="ctTagEntries"
-            [assTagEntries]="assTagEntries"
-            [refTagEntries]="refTagEntries"
-            [refTypeEntries]="refTypeEntries"
-            [chronotopes]="chronotopes.value || undefined"
-            (chronotopesChange)="onChronotopesChange($event)"
-          ></cadmus-asserted-chronotope-set>
-        </fieldset>
-      </mat-expansion-panel>
-
-      <!-- assertion -->
-      <mat-checkbox [formControl]="hasAssertion">assertion</mat-checkbox>
-      <mat-expansion-panel
-        [expanded]="hasAssertion.value"
-        [disabled]="!hasAssertion.value"
-      >
-        <fieldset>
-          <legend>assertion</legend>
-          <cadmus-refs-assertion
-            [assTagEntries]="assTagEntries"
-            [refTagEntries]="refTagEntries"
-            [refTypeEntries]="refTypeEntries"
-            [assertion]="assertion.value"
-            (assertionChange)="onAssertionChange($event)"
-          >
-          </cadmus-refs-assertion>
-        </fieldset>
-      </mat-expansion-panel>
-    </mat-tab>
-
-    <mat-tab label="related">
-      <!-- list -->
-      <div>
-        <button
-          type="button"
-          mat-flat-button
-          color="primary"
-          (click)="addEntity()"
-        >
-          <mat-icon>add_circle</mat-icon> related
-        </button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>relation</th>
-            <th>ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let e of relatedEntities.value; let i = index">
-            <td>
-              <button
-                type="button"
-                mat-icon-button
-                color="primary"
-                (click)="editEntity(e, i)"
-                matTooltip="Edit this entity"
+          @if ($any(eid).errors?.required && (eid.dirty || eid.touched)) {
+            <mat-error
+              >EID required</mat-error
               >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                color="warn"
-                (click)="deleteEntity(i)"
-                matTooltip="Delete this entity"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-            <td>
-              {{ e.relation | flatLookup : relationEntries : "id" : "value" }}
-            </td>
-            <td>{{ e.id.target.label }}</td>
-          </tr>
-        </tbody>
-      </table>
+            }
+            @if ($any(eid).errors?.maxLength && (eid.dirty || eid.touched)) {
+              <mat-error
+                >EID too long</mat-error
+                >
+              }
+            </mat-form-field>
 
-      <!-- entity editor -->
-      <mat-expansion-panel [disabled]="!editedEntity" [expanded]="editedEntity">
-        <mat-expansion-panel-header>entity</mat-expansion-panel-header>
-        <fieldset>
-          <cadmus-related-entity
-            [relationEntries]="currentRelEntries"
-            [idScopeEntries]="idScopeEntries"
-            [idTagEntries]="idTagEntries"
-            [assTagEntries]="assTagEntries"
-            [refTagEntries]="refTagEntries"
-            [refTypeEntries]="refTypeEntries"
-            [pinByTypeMode]="pinByTypeMode"
-            [canSwitchMode]="canSwitchMode"
-            [canEditTarget]="canEditTarget"
-            [entity]="editedEntity"
-            (entityChange)="onEntityChange($event)"
-            (editorClose)="closeEntity()"
-          ></cadmus-related-entity>
-        </fieldset>
-      </mat-expansion-panel>
-    </mat-tab>
-  </mat-tab-group>
+            <!-- type (bound) -->
+            @if (eventTypeEntries?.length) {
+              <div>
+                <cadmus-thesaurus-tree
+                  [entries]="eventTypeEntries"
+                  rootLabel="types"
+                  [renderLabel]="renderLabel"
+                  (entryChange)="onTypeEntryChange($event)"
+                ></cadmus-thesaurus-tree>
+                @if ($any(type).errors?.required && (type.dirty || type.touched)) {
+                  <mat-error
+                    >type required</mat-error
+                    >
+                  }
+                  @if (type.value) {
+                    <div class="sel-type">
+                      {{ type.value | flatLookup : eventTypeEntries : "id" : "value" }}
+                    </div>
+                  }
+                </div>
+              }
+              <!-- type (free) -->
+              @if (!eventTypeEntries?.length) {
+                <mat-form-field>
+                  <mat-label>type</mat-label>
+                  <input matInput [formControl]="type" />
+                  @if ($any(type).errors?.required && (type.dirty || type.touched)) {
+                    <mat-error
+                      >type required</mat-error
+                      >
+                    }
+                    @if ($any(type).errors?.maxLength && (type.dirty || type.touched)) {
+                      <mat-error
+                        >type too long</mat-error
+                        >
+                      }
+                    </mat-form-field>
+                  }
 
-  <!-- buttons -->
-  <hr />
-  <div class="button-row">
-    <button type="button" color="warn" mat-icon-button (click)="cancel()">
-      <mat-icon>clear</mat-icon>
-    </button>
-    <button
-      type="submit"
-      color="primary"
-      mat-icon-button
-      matTooltip="Save event"
-      [disabled]="form.invalid || form.pristine"
-    >
-      <mat-icon>check_circle</mat-icon>
-    </button>
-    <span>event</span>
-  </div>
-</form>
+                  <!-- tag (bound) -->
+                  @if (eventTagEntries?.length) {
+                    <mat-form-field>
+                      <mat-label>tag</mat-label>
+                      <mat-select [formControl]="tag">
+                        @for (e of eventTagEntries; track e) {
+                          <mat-option [value]="e.id">{{
+                            e.value
+                          }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  }
+                  <!-- tag (free) -->
+                  @if (!eventTagEntries?.length) {
+                    <mat-form-field>
+                      <mat-label>tag</mat-label>
+                      <input matInput [formControl]="tag" />
+                      @if ($any(tag).errors?.maxLength && (tag.dirty || tag.touched)) {
+                        <mat-error
+                          >tag too long</mat-error
+                          >
+                        }
+                      </mat-form-field>
+                    }
+                  </div>
+                  <div>
+                    <!-- description -->
+                    <mat-form-field class="long-text">
+                      <mat-label>description</mat-label>
+                      <textarea matInput [formControl]="description"></textarea>
+                      @if (
+                        $any(description).errors?.maxLength &&
+                        (description.dirty || description.touched)
+                        ) {
+                        <mat-error
+                          >description too long</mat-error
+                          >
+                        }
+                      </mat-form-field>
+                    </div>
+                    <div>
+                      <!-- note -->
+                      <mat-form-field class="long-text">
+                        <mat-label>note</mat-label>
+                        <textarea matInput [formControl]="note"></textarea>
+                        @if ($any(note).errors?.maxLength && (note.dirty || note.touched)) {
+                          <mat-error
+                            >note too long</mat-error
+                            >
+                          }
+                        </mat-form-field>
+                      </div>
+                      <!-- chronotopes -->
+                      <mat-expansion-panel>
+                        <mat-expansion-panel-header>chronotopes</mat-expansion-panel-header>
+                        <fieldset>
+                          <legend>chronotopes</legend>
+                          <cadmus-asserted-chronotope-set
+                            [tagEntries]="ctTagEntries"
+                            [assTagEntries]="assTagEntries"
+                            [refTagEntries]="refTagEntries"
+                            [refTypeEntries]="refTypeEntries"
+                            [chronotopes]="chronotopes.value || undefined"
+                            (chronotopesChange)="onChronotopesChange($event)"
+                          ></cadmus-asserted-chronotope-set>
+                        </fieldset>
+                      </mat-expansion-panel>
+
+                      <!-- assertion -->
+                      <mat-checkbox [formControl]="hasAssertion">assertion</mat-checkbox>
+                      <mat-expansion-panel
+                        [expanded]="hasAssertion.value"
+                        [disabled]="!hasAssertion.value"
+                        >
+                        <fieldset>
+                          <legend>assertion</legend>
+                          <cadmus-refs-assertion
+                            [assTagEntries]="assTagEntries"
+                            [refTagEntries]="refTagEntries"
+                            [refTypeEntries]="refTypeEntries"
+                            [assertion]="assertion.value"
+                            (assertionChange)="onAssertionChange($event)"
+                            >
+                          </cadmus-refs-assertion>
+                        </fieldset>
+                      </mat-expansion-panel>
+                    </mat-tab>
+
+                    <mat-tab label="related">
+                      <!-- list -->
+                      <div>
+                        <button
+                          type="button"
+                          mat-flat-button
+                          color="primary"
+                          (click)="addEntity()"
+                          >
+                          <mat-icon>add_circle</mat-icon> related
+                        </button>
+                      </div>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>relation</th>
+                            <th>ID</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (e of relatedEntities.value; track e; let i = $index) {
+                            <tr>
+                              <td>
+                                <button
+                                  type="button"
+                                  mat-icon-button
+                                  color="primary"
+                                  (click)="editEntity(e, i)"
+                                  matTooltip="Edit this entity"
+                                  >
+                                  <mat-icon>edit</mat-icon>
+                                </button>
+                                <button
+                                  type="button"
+                                  mat-icon-button
+                                  color="warn"
+                                  (click)="deleteEntity(i)"
+                                  matTooltip="Delete this entity"
+                                  >
+                                  <mat-icon>delete</mat-icon>
+                                </button>
+                              </td>
+                              <td>
+                                {{ e.relation | flatLookup : relationEntries : "id" : "value" }}
+                              </td>
+                              <td>{{ e.id.target.label }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+
+                      <!-- entity editor -->
+                      <mat-expansion-panel [disabled]="!editedEntity" [expanded]="editedEntity">
+                        <mat-expansion-panel-header>entity</mat-expansion-panel-header>
+                        <fieldset>
+                          <cadmus-related-entity
+                            [relationEntries]="currentRelEntries"
+                            [idScopeEntries]="idScopeEntries"
+                            [idTagEntries]="idTagEntries"
+                            [assTagEntries]="assTagEntries"
+                            [refTagEntries]="refTagEntries"
+                            [refTypeEntries]="refTypeEntries"
+                            [pinByTypeMode]="pinByTypeMode"
+                            [canSwitchMode]="canSwitchMode"
+                            [canEditTarget]="canEditTarget"
+                            [entity]="editedEntity"
+                            (entityChange)="onEntityChange($event)"
+                            (editorClose)="closeEntity()"
+                          ></cadmus-related-entity>
+                        </fieldset>
+                      </mat-expansion-panel>
+                    </mat-tab>
+                  </mat-tab-group>
+
+                  <!-- buttons -->
+                  <hr />
+                  <div class="button-row">
+                    <button type="button" color="warn" mat-icon-button (click)="cancel()">
+                      <mat-icon>clear</mat-icon>
+                    </button>
+                    <button
+                      type="submit"
+                      color="primary"
+                      mat-icon-button
+                      matTooltip="Save event"
+                      [disabled]="form.invalid || form.pristine"
+                      >
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <span>event</span>
+                  </div>
+                </form>

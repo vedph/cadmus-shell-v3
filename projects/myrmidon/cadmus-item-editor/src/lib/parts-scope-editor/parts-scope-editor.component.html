@@ -11,55 +11,58 @@
       </tr>
     </thead>
     <tbody>
-      <tr
-        formArrayName="checks"
-        *ngFor="let ctl of checks.controls; let i = index"
-      >
-        <td class="fit-width">
-          <mat-checkbox [formControlName]="i"></mat-checkbox>
-        </td>
-        <td>
-          <span
-            class="model-type"
+      @for (ctl of checks.controls; track ctl; let i = $index) {
+        <tr
+          formArrayName="checks"
+          >
+          <td class="fit-width">
+            <mat-checkbox [formControlName]="i"></mat-checkbox>
+          </td>
+          <td>
+            <span
+              class="model-type"
             [style.background-color]="
               getPartColor($any(parts)[i].typeId, $any(parts)[i].roleId)
             "
             [style.color]="
               getContrastColor($any(parts)[i].typeId, $any(parts)[i].roleId)
             "
-            >{{ getTypeIdName($any(parts)[i].typeId) }}</span
-          >
-        </td>
-        <td>{{ getRoleIdName($any(parts)[i].roleId) }}</td>
-        <td>{{ $any(parts)[i].thesaurusScope }}</td>
-        <td>
-          {{ $any(parts)[i].timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
-        </td>
-        <td>{{ $any(parts)[i].userId }}</td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="form-row">
-    <mat-form-field>
-      <mat-label>scope</mat-label>
-      <input matInput formControlName="scope" />
-      <mat-error
-        *ngIf="scope.hasError('maxLength') && (scope.dirty || scope.touched)"
-        >too long</mat-error
-      >
-      <mat-error
-        *ngIf="scope.hasError('pattern') && (scope.dirty || scope.touched)"
-        >invalid scope</mat-error
-      >
-    </mat-form-field>
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      [disabled]="form.invalid || readonly"
-      matTooltip="Assign the scope to the checked parts"
-    >
-      assign
-    </button>
-  </div>
-</form>
+              >{{ getTypeIdName($any(parts)[i].typeId) }}</span
+              >
+            </td>
+            <td>{{ getRoleIdName($any(parts)[i].roleId) }}</td>
+            <td>{{ $any(parts)[i].thesaurusScope }}</td>
+            <td>
+              {{ $any(parts)[i].timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
+            </td>
+            <td>{{ $any(parts)[i].userId }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="form-row">
+      <mat-form-field>
+        <mat-label>scope</mat-label>
+        <input matInput formControlName="scope" />
+        @if (scope.hasError('maxLength') && (scope.dirty || scope.touched)) {
+          <mat-error
+            >too long</mat-error
+            >
+          }
+          @if (scope.hasError('pattern') && (scope.dirty || scope.touched)) {
+            <mat-error
+              >invalid scope</mat-error
+              >
+            }
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid || readonly"
+            matTooltip="Assign the scope to the checked parts"
+            >
+            assign
+          </button>
+        </div>
+      </form>

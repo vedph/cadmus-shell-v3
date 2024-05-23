@@ -15,7 +15,13 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
-- 2024-05-23: updated to Angular 18.
+### 8.1.0
+
+- 2024-05-23:
+  - ⚠️ updated to Angular 18.
+  - bumped all the library versions to 8.1.0 and updated their peer dependencies for Angular 18.
+  - migrated to new control flow syntax via `ng g @angular/core:control-flow`.
+  - removed `@myrmidon/ngx-dirty-check` package, replacing it with an implementation based on Angular 18 `AbstractControl`'s `events`. This just listens for changes of the pristine state in the root editor form, and updates the dirty property while also emitting the corresponding event.
 - 2024-05-22: updated packages and Angular.
 - 2024-05-14: updated packages and Angular.
 - 2024-05-02: added plugins support to note editor.

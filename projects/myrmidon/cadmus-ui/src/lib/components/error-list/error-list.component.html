@@ -1,3 +1,7 @@
-<ul *ngIf="errors">
-  <li *ngFor="let error of errors">{{error}}</li>
-</ul>
+@if (errors) {
+  <ul>
+    @for (error of errors; track error) {
+      <li>{{error}}</li>
+    }
+  </ul>
+}

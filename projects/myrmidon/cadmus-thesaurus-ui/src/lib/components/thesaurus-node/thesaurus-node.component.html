@@ -1,159 +1,174 @@
-<div *ngIf="node">
-  <!-- display -->
-  <div *ngIf="!editing" class="node">
-    <!-- indent -->
-    <span class="node-ind">{{ indent }}</span>
-    <!-- node -->
-    <span class="node-ord">{{ node.ordinal }}</span>
-    <span class="node-id">{{ node.id }}</span>
-    <span class="node-value">{{ node.value }}</span>
-    <!-- buttons -->
-    <span class="node-btn">
-      <!-- edit -->
-      <button
-        type="button"
-        mat-icon-button
-        color="primary"
-        matTooltip="Edit this entry"
-        (click)="toggleEdit(true)"
-      >
-        <mat-icon>edit</mat-icon>
-      </button>
-      <!-- expand -->
-      <button
-        *ngIf="node.collapsed && node.hasChildren"
-        type="button"
-        mat-icon-button
-        matTooltip="Expand this node"
-        (click)="emitSignal('expand')"
-      >
-        <mat-icon>expand_more</mat-icon>
-      </button>
-      <!-- collapse -->
-      <button
-        *ngIf="!node.collapsed && node.hasChildren"
-        type="button"
-        mat-icon-button
-        matTooltip="Collapse this node"
-        (click)="emitSignal('collapse')"
-      >
-        <mat-icon>expand_less</mat-icon>
-      </button>
-      <!-- <button
-        type="button"
-        mat-icon-button
-        matTooltip="Make this entry child of the preceding one"
-      >
-        <mat-icon>subdirectory_arrow_right</mat-icon>
-      </button> -->
-      <!-- move up -->
-      <button
-        type="button"
-        mat-icon-button
-        matTooltip="Move this entry up"
-        *ngIf="(node.ordinal || 0) > 1"
-        (click)="emitSignal('move-up')"
-      >
-        <mat-icon>arrow_upward</mat-icon>
-      </button>
-      <!-- move down -->
-      <button
-        type="button"
-        mat-icon-button
-        matTooltip="Move this entry down"
-        *ngIf="!node.lastSibling"
-        (click)="emitSignal('move-down')"
-      >
-        <mat-icon>arrow_downward</mat-icon>
-      </button>
-      <!-- delete -->
-      <button
-        type="button"
-        mat-icon-button
-        color="warn"
-        matTooltip="Delete this entry"
-        (click)="emitSignal('delete')"
-      >
-        <mat-icon>remove_circle</mat-icon>
-      </button>
-      <!-- add sibling -->
-      <button
-        type="button"
-        mat-icon-button
-        color="primary"
-        matTooltip="Add a sibling after this node"
-        (click)="emitSignal('add-sibling')"
-      >
-        <mat-icon>add_box</mat-icon>
-      </button>
-      <!-- add child -->
-      <button
-        type="button"
-        mat-icon-button
-        matTooltip="Add a child of this node"
-        (click)="emitSignal('add-child')"
-      >
-        <mat-icon>library_add</mat-icon>
-      </button>
-    </span>
-  </div>
-
+@if (node) {
+  <div>
+    <!-- display -->
+    @if (!editing) {
+      <div class="node">
+        <!-- indent -->
+        <span class="node-ind">{{ indent }}</span>
+        <!-- node -->
+        <span class="node-ord">{{ node.ordinal }}</span>
+        <span class="node-id">{{ node.id }}</span>
+        <span class="node-value">{{ node.value }}</span>
+        <!-- buttons -->
+        <span class="node-btn">
+          <!-- edit -->
+          <button
+            type="button"
+            mat-icon-button
+            color="primary"
+            matTooltip="Edit this entry"
+            (click)="toggleEdit(true)"
+            >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <!-- expand -->
+          @if (node.collapsed && node.hasChildren) {
+            <button
+              type="button"
+              mat-icon-button
+              matTooltip="Expand this node"
+              (click)="emitSignal('expand')"
+              >
+              <mat-icon>expand_more</mat-icon>
+            </button>
+          }
+          <!-- collapse -->
+          @if (!node.collapsed && node.hasChildren) {
+            <button
+              type="button"
+              mat-icon-button
+              matTooltip="Collapse this node"
+              (click)="emitSignal('collapse')"
+              >
+              <mat-icon>expand_less</mat-icon>
+            </button>
+          }
+          <!-- <button
+          type="button"
+          mat-icon-button
+          matTooltip="Make this entry child of the preceding one"
+          >
+          <mat-icon>subdirectory_arrow_right</mat-icon>
+        </button> -->
+        <!-- move up -->
+        @if ((node.ordinal || 0) > 1) {
+          <button
+            type="button"
+            mat-icon-button
+            matTooltip="Move this entry up"
+            (click)="emitSignal('move-up')"
+            >
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+        }
+        <!-- move down -->
+        @if (!node.lastSibling) {
+          <button
+            type="button"
+            mat-icon-button
+            matTooltip="Move this entry down"
+            (click)="emitSignal('move-down')"
+            >
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+        }
+        <!-- delete -->
+        <button
+          type="button"
+          mat-icon-button
+          color="warn"
+          matTooltip="Delete this entry"
+          (click)="emitSignal('delete')"
+          >
+          <mat-icon>remove_circle</mat-icon>
+        </button>
+        <!-- add sibling -->
+        <button
+          type="button"
+          mat-icon-button
+          color="primary"
+          matTooltip="Add a sibling after this node"
+          (click)="emitSignal('add-sibling')"
+          >
+          <mat-icon>add_box</mat-icon>
+        </button>
+        <!-- add child -->
+        <button
+          type="button"
+          mat-icon-button
+          matTooltip="Add a child of this node"
+          (click)="emitSignal('add-child')"
+          >
+          <mat-icon>library_add</mat-icon>
+        </button>
+      </span>
+    </div>
+  }
   <!-- edit -->
-  <div *ngIf="editing">
-    <form
-      [formGroup]="form"
-      (submit)="save()"
-      (keydown.esc)="toggleEdit(false)"
-    >
-      <!-- id -->
-      <mat-form-field>
-        <mat-label>ID</mat-label>
-        <input matInput [formControl]="id" />
-        <mat-error *ngIf="id.hasError('required') && (id.dirty || id.touched)"
-          >ID required</mat-error
+  @if (editing) {
+    <div>
+      <form
+        [formGroup]="form"
+        (submit)="save()"
+        (keydown.esc)="toggleEdit(false)"
         >
-        <mat-error *ngIf="id.hasError('maxLength') && (id.dirty || id.touched)"
-          >ID too long</mat-error
-        >
-        <mat-error *ngIf="id.hasError('pattern') && (id.dirty || id.touched)"
-          >invalid ID</mat-error
-        >
-      </mat-form-field>
-
-      <!-- value -->
-      &nbsp;
-      <mat-form-field style="min-width: 300px">
-        <mat-label>value</mat-label>
-        <input matInput [formControl]="value" #nodeVal />
-        <mat-error
-          *ngIf="value.hasError('required') && (value.dirty || value.touched)"
-          >value required</mat-error
-        >
-        <mat-error
-          *ngIf="value.hasError('maxLength') && (value.dirty || value.touched)"
-          >value too long</mat-error
-        >
-      </mat-form-field>
-
-      &nbsp;
-      <button
-        type="button"
-        mat-icon-button
-        color="warn"
-        matTooltip="Discard changes"
-        (click)="toggleEdit(false)"
-      >
-        <mat-icon>clear</mat-icon>
-      </button>
-      <button
-        type="submit"
-        mat-icon-button
-        [disabled]="form.pristine || form.invalid"
-        color="primary"
-        matTooltip="Save changes"
-      >
-        <mat-icon>check_circle</mat-icon>
-      </button>
-    </form>
-  </div>
-</div>
+        <!-- id -->
+        <mat-form-field>
+          <mat-label>ID</mat-label>
+          <input matInput [formControl]="id" />
+          @if (id.hasError('required') && (id.dirty || id.touched)) {
+            <mat-error
+              >ID required</mat-error
+              >
+            }
+            @if (id.hasError('maxLength') && (id.dirty || id.touched)) {
+              <mat-error
+                >ID too long</mat-error
+                >
+              }
+              @if (id.hasError('pattern') && (id.dirty || id.touched)) {
+                <mat-error
+                  >invalid ID</mat-error
+                  >
+                }
+              </mat-form-field>
+              <!-- value -->
+              &nbsp;
+              <mat-form-field style="min-width: 300px">
+                <mat-label>value</mat-label>
+                <input matInput [formControl]="value" #nodeVal />
+                @if (value.hasError('required') && (value.dirty || value.touched)) {
+                  <mat-error
+                    >value required</mat-error
+                    >
+                  }
+                  @if (value.hasError('maxLength') && (value.dirty || value.touched)) {
+                    <mat-error
+                      >value too long</mat-error
+                      >
+                    }
+                  </mat-form-field>
+                  &nbsp;
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="warn"
+                    matTooltip="Discard changes"
+                    (click)="toggleEdit(false)"
+                    >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                  <button
+                    type="submit"
+                    mat-icon-button
+                    [disabled]="form.pristine || form.invalid"
+                    color="primary"
+                    matTooltip="Save changes"
+                    >
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                </form>
+              </div>
+            }
+          </div>
+        }

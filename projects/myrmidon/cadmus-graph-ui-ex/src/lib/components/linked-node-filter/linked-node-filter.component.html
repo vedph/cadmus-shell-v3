@@ -1,14 +1,15 @@
 <form [formGroup]="form" (submit)="apply()" ng-disabled="disabled">
   <!-- paginator -->
-  <mat-paginator
-    *ngIf="hasPager"
-    [length]="total"
-    [pageSize]="pageSize.value || 10"
-    [pageSizeOptions]="[5, 10, 20]"
-    (page)="onPageChange($event)"
-    aria-label="Select page"
-  >
-  </mat-paginator>
+  @if (hasPager) {
+    <mat-paginator
+      [length]="total"
+      [pageSize]="pageSize.value || 10"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPageChange($event)"
+      aria-label="Select page"
+      >
+    </mat-paginator>
+  }
 
   <!-- label -->
   <div>
@@ -73,18 +74,21 @@
         (itemChange)="onClassAdd($event)"
       ></cadmus-ref-lookup>
 
-      <mat-chip-listbox *ngIf="classes.value?.length">
-        <mat-chip-option
-          *ngFor="let node of classes.value"
-          [removable]="true"
-          (removed)="onClassRemove(node)"
-          matTooltip="{{ node.uri }}"
-          >{{ node.label }}
-          <button type="button" matChipRemove>
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip-option>
-      </mat-chip-listbox>
+      @if (classes.value?.length) {
+        <mat-chip-listbox>
+          @for (node of classes.value; track node) {
+            <mat-chip-option
+              [removable]="true"
+              (removed)="onClassRemove(node)"
+              matTooltip="{{ node.uri }}"
+              >{{ node.label }}
+              <button type="button" matChipRemove>
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-option>
+          }
+        </mat-chip-listbox>
+      }
     </fieldset>
   </div>
 
@@ -93,7 +97,7 @@
     role="group"
     aria-label="toolbar"
     style="margin-bottom: 10px"
-  >
+    >
     <button
       mat-icon-button
       type="button"
@@ -101,7 +105,7 @@
       color="warn"
       matTooltip="Reset filters"
       [disabled]="disabled"
-    >
+      >
       <mat-icon>clear</mat-icon>
     </button>
     <button
@@ -110,7 +114,7 @@
       color="primary"
       [disabled]="disabled"
       matTooltip="Apply filters"
-    >
+      >
       <mat-icon>check_circle</mat-icon>
     </button>
   </div>

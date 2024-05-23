@@ -6,149 +6,153 @@
       </div>
       <mat-card-title
         >Orthography Fragment {{ data?.value?.location }}</mat-card-title
-      >
-      <mat-card-subtitle>
-        {{ frText }}
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div id="container">
-        <div style="grid-area: editor">
-          <!-- standard -->
-          <mat-form-field>
-            <mat-label>standard</mat-label>
-            <input type="text" matInput formControlName="standard" autofocus />
-            <mat-error
-              *ngIf="
+        >
+        <mat-card-subtitle>
+          {{ frText }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div id="container">
+          <div style="grid-area: editor">
+            <!-- standard -->
+            <mat-form-field>
+              <mat-label>standard</mat-label>
+              <input type="text" matInput formControlName="standard" autofocus />
+              @if (
                 standard.hasError('required') &&
                 (standard.touched || standard.dirty)
-              "
-              >standard orthography required</mat-error
-            >
-            <mat-error
-              *ngIf="
-                standard.hasError('maxLength') &&
-                (standard.touched || standard.dirty)
-              "
-              >too long</mat-error
-            >
-          </mat-form-field>
-
-          <!-- toolbar -->
-          <mat-toolbar>
-            <button
-              type="button"
-              color="primary"
-              mat-flat-button
-              matTooltip="Add a new operation"
-              (click)="addOperation()"
-            >
-              <mat-icon>add_circle</mat-icon> operation
-            </button>
-            <button
-              type="button"
-              mat-icon-button
-              matTooltip="Automatically set operations from differences"
-              [disabled]="!standard.value || !data?.baseText"
-              (click)="autoAddOperations()"
-            >
-              <mat-icon>queue</mat-icon>
-            </button>
-            <button
-              type="button"
-              color="warn"
-              mat-icon-button
-              matTooltip="Delete all the operations"
-              [disabled]="operations.length === 0"
-              (click)="clearOperations()"
-            >
-              <mat-icon>delete_sweep</mat-icon>
-            </button>
-          </mat-toolbar>
-
-          <!-- operations -->
-          <div formArrayName="operations">
-            <ol
-              *ngFor="
-                let item of operations.controls;
-                let i = index;
-                let first = first;
-                let last = last
-              "
-            >
-              <!-- child form -->
-              <li [formGroupName]="i">
-                <!-- child controls -->
-                <mat-form-field>
-                  <mat-label>operation</mat-label>
-                  <input matInput formControlName="text" autofocus />
+                ) {
+                <mat-error
+                  >standard orthography required</mat-error
+                  >
+                }
+                @if (
+                  standard.hasError('maxLength') &&
+                  (standard.touched || standard.dirty)
+                  ) {
+                  <mat-error
+                    >too long</mat-error
+                    >
+                  }
                 </mat-form-field>
-                <!-- child actions -->
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Edit this operation"
-                  color="primary"
-                  (click)="editOperation(i)"
-                >
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Delete this operation"
-                  color="warn"
-                  (click)="deleteOperation(i)"
-                >
-                  <mat-icon>remove_circle</mat-icon>
-                </button>
-                <button
-                  [disabled]="first"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move this operation up"
-                  (click)="moveOperationUp(i)"
-                >
-                  <mat-icon>arrow_upward</mat-icon>
-                </button>
-                <button
-                  [disabled]="last"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move this operation down"
-                  (click)="moveOperationDown(i)"
-                >
-                  <mat-icon>arrow_downward</mat-icon>
-                </button>
-              </li>
-            </ol>
-          </div>
 
-          <!-- operations -->
-          <div *ngIf="currentOperation" [@slideInOut]>
-            <cadmus-msp-operation
-              [operation]="currentOperation"
-              (operationChange)="currentOperationSaved($event)"
-              (operationClose)="currentOperationClosed()"
-            ></cadmus-msp-operation>
-          </div>
-        </div>
-        <div style="grid-area: tags" *ngIf="tagEntries?.length">
-          <cadmus-thesaurus-tree
-            [entries]="tagEntries"
-            rootLabel="tags"
-            [renderLabel]="renderLabel"
-            (entryChange)="onTagChange($event)"
-          ></cadmus-thesaurus-tree>
-        </div>
-      </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
-    </mat-card-actions>
-  </mat-card>
-</form>
+                <!-- toolbar -->
+                <mat-toolbar>
+                  <button
+                    type="button"
+                    color="primary"
+                    mat-flat-button
+                    matTooltip="Add a new operation"
+                    (click)="addOperation()"
+                    >
+                    <mat-icon>add_circle</mat-icon> operation
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Automatically set operations from differences"
+                    [disabled]="!standard.value || !data?.baseText"
+                    (click)="autoAddOperations()"
+                    >
+                    <mat-icon>queue</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    color="warn"
+                    mat-icon-button
+                    matTooltip="Delete all the operations"
+                    [disabled]="operations.length === 0"
+                    (click)="clearOperations()"
+                    >
+                    <mat-icon>delete_sweep</mat-icon>
+                  </button>
+                </mat-toolbar>
+
+                <!-- operations -->
+                <div formArrayName="operations">
+                  @for (
+                    item of operations.controls; track
+                    item; let i = $index; let first = $first; let last = $last) {
+                    <ol
+                      >
+                      <!-- child form -->
+                      <li [formGroupName]="i">
+                        <!-- child controls -->
+                        <mat-form-field>
+                          <mat-label>operation</mat-label>
+                          <input matInput formControlName="text" autofocus />
+                        </mat-form-field>
+                        <!-- child actions -->
+                        <button
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Edit this operation"
+                          color="primary"
+                          (click)="editOperation(i)"
+                          >
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Delete this operation"
+                          color="warn"
+                          (click)="deleteOperation(i)"
+                          >
+                          <mat-icon>remove_circle</mat-icon>
+                        </button>
+                        <button
+                          [disabled]="first"
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Move this operation up"
+                          (click)="moveOperationUp(i)"
+                          >
+                          <mat-icon>arrow_upward</mat-icon>
+                        </button>
+                        <button
+                          [disabled]="last"
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Move this operation down"
+                          (click)="moveOperationDown(i)"
+                          >
+                          <mat-icon>arrow_downward</mat-icon>
+                        </button>
+                      </li>
+                    </ol>
+                  }
+                </div>
+
+                <!-- operations -->
+                @if (currentOperation) {
+                  <div [@slideInOut]>
+                    <cadmus-msp-operation
+                      [operation]="currentOperation"
+                      (operationChange)="currentOperationSaved($event)"
+                      (operationClose)="currentOperationClosed()"
+                    ></cadmus-msp-operation>
+                  </div>
+                }
+              </div>
+              @if (tagEntries?.length) {
+                <div style="grid-area: tags">
+                  <cadmus-thesaurus-tree
+                    [entries]="tagEntries"
+                    rootLabel="tags"
+                    [renderLabel]="renderLabel"
+                    (entryChange)="onTagChange($event)"
+                  ></cadmus-thesaurus-tree>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <cadmus-close-save-buttons
+              [form]="form"
+              [noSave]="userLevel < 2"
+              (closeRequest)="close()"
+            ></cadmus-close-save-buttons>
+          </mat-card-actions>
+        </mat-card>
+      </form>

@@ -1,5 +1,7 @@
 <div>
-  <h3 *ngIf="title">{{ title }}</h3>
+  @if (title) {
+    <h3>{{ title }}</h3>
+  }
   <form [formGroup]="filterForm">
     <mat-form-field>
       <mat-label>filter</mat-label>
@@ -8,106 +10,112 @@
         type="text"
         spellcheck="false"
         formControlName="keyFilter"
-      />
-      <button
-        mat-button
-        *ngIf="keyFilter.value"
-        matSuffix
-        mat-icon-button
-        aria-label="Clear"
-        (click)="keyFilter.setValue('')"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-    </mat-form-field>
-  </form>
-  <form [formGroup]="form" (submit)="save()">
-    <table>
-      <tbody>
-        <tr *ngFor="let key of keys">
-          <ng-container *ngIf="key.visible">
-            <td>
+        />
+        @if (keyFilter.value) {
+          <button
+            mat-button
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="keyFilter.setValue('')"
+            >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    </form>
+    <form [formGroup]="form" (submit)="save()">
+      <table>
+        <tbody>
+          @for (key of keys; track key) {
+            <tr>
+              @if (key.visible) {
+                <td>
+                  <button
+                    type="button"
+                    color="warn"
+                    (click)="deleteDatum(key)"
+                    mat-icon-button
+                    matTooltip="Remove this datum"
+                    >
+                    <mat-icon>remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td class="key-label">
+                  {{ key.value }}
+                </td>
+                <td>
+                  <mat-form-field>
+                    <input
+                      matInput
+                      spellcheck="false"
+                      [formControlName]="key.value"
+                      />
+                    </mat-form-field>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div>
+          <form [formGroup]="newForm" (submit)="addDatum()">
+            <mat-form-field>
+              <mat-label>key</mat-label>
+              <input matInput type="text" formControlName="newKey" />
+              @if (
+                newKey.hasError('required') && (newKey.dirty || newKey.touched)
+                ) {
+                <mat-error
+                  >enter a key</mat-error
+                  >
+              }
+              @if (
+                newKey.hasError('pattern') && (newKey.dirty || newKey.touched)
+                ) {
+                <mat-error
+                  >invalid key</mat-error
+                  >
+                }
+              </mat-form-field>
+              &nbsp;
+              <mat-form-field>
+                <mat-label>value</mat-label>
+                <input matInput type="text" formControlName="newValue" />
+                @if (
+                  newValue.hasError('maxLength') &&
+                  (newValue.dirty || newValue.touched)
+                  ) {
+                  <mat-error
+                    >too long</mat-error
+                    >
+                  }
+                </mat-form-field>
+                <button type="submit" matTooltip="Add new datum" mat-icon-button>
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              </form>
+            </div>
+            <div>
               <button
                 type="button"
-                color="warn"
-                (click)="deleteDatum(key)"
                 mat-icon-button
-                matTooltip="Remove this datum"
-              >
-                <mat-icon>remove_circle</mat-icon>
+                color="warn"
+                (click)="close()"
+                matTooltip="Close without saving"
+                >
+                <mat-icon>clear</mat-icon>
               </button>
-            </td>
-            <td class="key-label">
-              {{ key.value }}
-            </td>
-            <td>
-              <mat-form-field>
-                <input
-                  matInput
-                  spellcheck="false"
-                  [formControlName]="key.value"
-                />
-              </mat-form-field>
-            </td>
-          </ng-container>
-        </tr>
-      </tbody>
-    </table>
-    <div>
-      <form [formGroup]="newForm" (submit)="addDatum()">
-        <mat-form-field>
-          <mat-label>key</mat-label>
-          <input matInput type="text" formControlName="newKey" />
-          <mat-error
-            *ngIf="
-              newKey.hasError('required') && (newKey.dirty || newKey.touched)
-            "
-            >enter a key</mat-error
-          >
-          <mat-error
-            *ngIf="
-              newKey.hasError('pattern') && (newKey.dirty || newKey.touched)
-            "
-            >invalid key</mat-error
-          >
-        </mat-form-field>
-        &nbsp;
-        <mat-form-field>
-          <mat-label>value</mat-label>
-          <input matInput type="text" formControlName="newValue" />
-          <mat-error
-            *ngIf="
-              newValue.hasError('maxLength') &&
-              (newValue.dirty || newValue.touched)
-            "
-            >too long</mat-error
-          >
-        </mat-form-field>
-        <button type="submit" matTooltip="Add new datum" mat-icon-button>
-          <mat-icon>add_circle</mat-icon>
-        </button>
-      </form>
-    </div>
-    <div>
-      <button
-        type="button"
-        mat-icon-button
-        color="warn"
-        (click)="close()"
-        matTooltip="Close without saving"
-      >
-        <mat-icon>clear</mat-icon>
-      </button>
-      <button
-        type="submit"
-        mat-button
-        color="primary"
-        [disabled]="form.invalid"
-        matTooltip="Save data"
-      >
-        <mat-icon>check_circle</mat-icon>
-        save data
-      </button>
-    </div>
-  </form>
-</div>
+              <button
+                type="submit"
+                mat-button
+                color="primary"
+                [disabled]="form.invalid"
+                matTooltip="Save data"
+                >
+                <mat-icon>check_circle</mat-icon>
+                save data
+              </button>
+            </div>
+          </form>
+        </div>

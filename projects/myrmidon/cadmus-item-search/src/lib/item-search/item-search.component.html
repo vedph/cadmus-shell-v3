@@ -14,90 +14,99 @@
       </div>
 
       <!-- list -->
-      <div id="list" *ngIf="page$ | async as page">
-        <div *ngIf="loading$ | async">
-          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      @if (page$ | async; as page) {
+        <div id="list">
+          @if (loading$ | async) {
+            <div>
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </div>
+          }
+          @if (error$ | async; as error) {
+            <div>{{ error }}</div>
+          }
+          @if (page.items.length) {
+            <table>
+              <thead>
+                <th></th>
+                <th>facet</th>
+                <th>flags</th>
+                <th>title</th>
+                <th>description</th>
+                <th class="noif-lt-md">group</th>
+                <th class="noif-lt-md">user</th>
+                <th class="noif-lt-md">last saved</th>
+                <th class="noif-lt-md">creator</th>
+              </thead>
+              <tbody>
+                @for (item of page.items; track item) {
+                  <tr>
+                    <td class="fit-width">
+                      <button
+                        mat-icon-button
+                        type="button"
+                        color="primary"
+                        (click)="editItem(item)"
+                        matTooltip="Edit this item"
+                        >
+                        <mat-icon>mode_edit</mat-icon>
+                      </button>
+                      @if (userLevel > 2) {
+                        <button
+                          mat-icon-button
+                          type="button"
+                          color="warn"
+                          (click)="deleteItem(item)"
+                          matTooltip="Delete this item"
+                          >
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      }
+                    </td>
+                    <td class="fit-width">
+                      <cadmus-facet-badge
+                        [data]="{ definitions: facets, facetId: item.facetId }"
+                      ></cadmus-facet-badge>
+                    </td>
+                    <td class="fit-width">
+                      <cadmus-flags-badge
+                        [data]="{ definitions: flags, flags: item.flags }"
+                      ></cadmus-flags-badge>
+                    </td>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.description }}</td>
+                    <td class="noif-lt-md">{{ item.groupId }}</td>
+                    <td class="noif-lt-md">{{ item.userId }}</td>
+                    <td class="noif-lt-md">
+                      {{ item.timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
+                    </td>
+                    <td class="noif-lt-md">{{ item.creatorId }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+          <!-- paginator -->
+          <div class="form-row">
+            <button
+              type="button"
+              mat-icon-button
+              color="warn"
+              matTooltip="Reset list"
+              (click)="reset()"
+              >
+              <mat-icon>autorenew</mat-icon>
+            </button>
+            <mat-paginator
+              [length]="page.total"
+              [pageIndex]="page.pageNumber - 1"
+              [pageSize]="page.pageSize"
+              [pageSizeOptions]="[5, 10, 20, 50, 100]"
+              (page)="onPageChange($event)"
+              [showFirstLastButtons]="true"
+            ></mat-paginator>
+          </div>
         </div>
-        <div *ngIf="error$ | async as error">{{ error }}</div>
-        <table *ngIf="page.items.length">
-          <thead>
-            <th></th>
-            <th>facet</th>
-            <th>flags</th>
-            <th>title</th>
-            <th>description</th>
-            <th class="noif-lt-md">group</th>
-            <th class="noif-lt-md">user</th>
-            <th class="noif-lt-md">last saved</th>
-            <th class="noif-lt-md">creator</th>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of page.items">
-              <td class="fit-width">
-                <button
-                  mat-icon-button
-                  type="button"
-                  color="primary"
-                  (click)="editItem(item)"
-                  matTooltip="Edit this item"
-                >
-                  <mat-icon>mode_edit</mat-icon>
-                </button>
-                <button
-                  *ngIf="userLevel > 2"
-                  mat-icon-button
-                  type="button"
-                  color="warn"
-                  (click)="deleteItem(item)"
-                  matTooltip="Delete this item"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-              <td class="fit-width">
-                <cadmus-facet-badge
-                  [data]="{ definitions: facets, facetId: item.facetId }"
-                ></cadmus-facet-badge>
-              </td>
-              <td class="fit-width">
-                <cadmus-flags-badge
-                  [data]="{ definitions: flags, flags: item.flags }"
-                ></cadmus-flags-badge>
-              </td>
-              <td>{{ item.title }}</td>
-              <td>{{ item.description }}</td>
-              <td class="noif-lt-md">{{ item.groupId }}</td>
-              <td class="noif-lt-md">{{ item.userId }}</td>
-              <td class="noif-lt-md">
-                {{ item.timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
-              </td>
-              <td class="noif-lt-md">{{ item.creatorId }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- paginator -->
-        <div class="form-row">
-          <button
-            type="button"
-            mat-icon-button
-            color="warn"
-            matTooltip="Reset list"
-            (click)="reset()"
-          >
-            <mat-icon>autorenew</mat-icon>
-          </button>
-
-          <mat-paginator
-            [length]="page.total"
-            [pageIndex]="page.pageNumber - 1"
-            [pageSize]="page.pageSize"
-            [pageSizeOptions]="[5, 10, 20, 50, 100]"
-            (page)="onPageChange($event)"
-            [showFirstLastButtons]="true"
-          ></mat-paginator>
-        </div>
-      </div>
+      }
     </div>
   </mat-card-content>
 </mat-card>

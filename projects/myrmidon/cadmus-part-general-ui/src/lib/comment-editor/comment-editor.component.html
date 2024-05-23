@@ -11,299 +11,330 @@
         <mat-tab label="comment">
           <!-- tag (bound) -->
           <div>
-            <mat-form-field *ngIf="comTagEntries?.length">
-              <mat-label>tag</mat-label>
-              <mat-select [formControl]="tag">
-                <mat-option *ngFor="let e of comTagEntries" [value]="e.id">{{
-                  e.value
-                }}</mat-option>
-              </mat-select>
-            </mat-form-field>
+            @if (comTagEntries?.length) {
+              <mat-form-field>
+                <mat-label>tag</mat-label>
+                <mat-select [formControl]="tag">
+                  @for (e of comTagEntries; track e) {
+                    <mat-option [value]="e.id">{{
+                      e.value
+                    }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
 
             <!-- tag (free) -->
-            <mat-form-field *ngIf="!comTagEntries?.length">
-              <mat-label>tag</mat-label>
-              <input matInput [formControl]="tag" />
-              <mat-error
-                *ngIf="tag.hasError('maxLength') && (tag.dirty || tag.touched)"
-                >tag too long</mat-error
-              >
-            </mat-form-field>
-          </div>
-          <!-- text -->
-          <div>
-            <nge-monaco-editor
-              style="--editor-height: 800px"
-              (ready)="onCreateEditor($event)"
-            />
-            <mat-error
-              *ngIf="text.hasError('required') && (text.touched || text.dirty)"
-              >text required</mat-error
-            >
-          </div>
-          <div id="pvw">
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>preview</mat-expansion-panel-header>
-              <nge-markdown [data]="text.value || undefined"/>
-            </mat-expansion-panel>
-          </div>
-        </mat-tab>
+            @if (!comTagEntries?.length) {
+              <mat-form-field>
+                <mat-label>tag</mat-label>
+                <input matInput [formControl]="tag" />
+                @if (tag.hasError('maxLength') && (tag.dirty || tag.touched)) {
+                  <mat-error
+                    >tag too long</mat-error
+                    >
+                  }
+                </mat-form-field>
+              }
+            </div>
+            <!-- text -->
+            <div>
+              <nge-monaco-editor
+                style="--editor-height: 800px"
+                (ready)="onCreateEditor($event)"
+                />
+                @if (text.hasError('required') && (text.touched || text.dirty)) {
+                  <mat-error
+                    >text required</mat-error
+                    >
+                  }
+                </div>
+                <div id="pvw">
+                  <mat-expansion-panel>
+                    <mat-expansion-panel-header>preview</mat-expansion-panel-header>
+                    <nge-markdown [data]="text.value || undefined"/>
+                  </mat-expansion-panel>
+                </div>
+              </mat-tab>
 
-        <mat-tab label="references">
-          <!-- references -->
-          <fieldset>
-            <legend>references</legend>
-            <cadmus-refs-doc-references
-              [references]="references.value"
-              [tagEntries]="refTagEntries"
-              [typeEntries]="refTypeEntries"
-              (referencesChange)="onReferencesChange($event)"
-            >
-            </cadmus-refs-doc-references>
-          </fieldset>
+              <mat-tab label="references">
+                <!-- references -->
+                <fieldset>
+                  <legend>references</legend>
+                  <cadmus-refs-doc-references
+                    [references]="references.value"
+                    [tagEntries]="refTagEntries"
+                    [typeEntries]="refTypeEntries"
+                    (referencesChange)="onReferencesChange($event)"
+                    >
+                  </cadmus-refs-doc-references>
+                </fieldset>
 
-          <!-- links -->
-          <fieldset>
-            <legend>links</legend>
-            <cadmus-refs-asserted-composite-ids
-              [idScopeEntries]="idScopeEntries"
-              [idTagEntries]="idTagEntries"
-              [assTagEntries]="assTagEntries"
-              [refTypeEntries]="refTypeEntries"
-              [refTagEntries]="refTagEntries"
-              [pinByTypeMode]="pinByTypeMode"
-              [canSwitchMode]="canSwitchMode"
-              [canEditTarget]="canEditTarget"
-              [ids]="links.value"
-              (idsChange)="onIdsChange($event)"
-            >
-            </cadmus-refs-asserted-composite-ids>
-          </fieldset>
-        </mat-tab>
+                <!-- links -->
+                <fieldset>
+                  <legend>links</legend>
+                  <cadmus-refs-asserted-composite-ids
+                    [idScopeEntries]="idScopeEntries"
+                    [idTagEntries]="idTagEntries"
+                    [assTagEntries]="assTagEntries"
+                    [refTypeEntries]="refTypeEntries"
+                    [refTagEntries]="refTagEntries"
+                    [pinByTypeMode]="pinByTypeMode"
+                    [canSwitchMode]="canSwitchMode"
+                    [canEditTarget]="canEditTarget"
+                    [ids]="links.value"
+                    (idsChange)="onIdsChange($event)"
+                    >
+                  </cadmus-refs-asserted-composite-ids>
+                </fieldset>
+              </mat-tab>
 
-        <!-- categories -->
-        <mat-tab label="categories" *ngIf="catEntries?.length">
-          <cadmus-thesaurus-tree
-            [entries]="catEntries"
-            rootLabel="categories"
-            [renderLabel]="renderLabel"
-            (entryChange)="onCategoryChange($event)"
-          ></cadmus-thesaurus-tree>
-          <hr />
-          <div *ngIf="categories.value?.length">
-            <table>
-              <tbody>
-                <tr *ngFor="let entry of categories.value; let i = index">
-                  <td>
+              <!-- categories -->
+              @if (catEntries?.length) {
+                <mat-tab label="categories">
+                  <cadmus-thesaurus-tree
+                    [entries]="catEntries"
+                    rootLabel="categories"
+                    [renderLabel]="renderLabel"
+                    (entryChange)="onCategoryChange($event)"
+                  ></cadmus-thesaurus-tree>
+                  <hr />
+                  @if (categories.value?.length) {
+                    <div>
+                      <table>
+                        <tbody>
+                          @for (entry of categories.value; track entry; let i = $index) {
+                            <tr>
+                              <td>
+                                <button
+                                  type="button"
+                                  mat-icon-button
+                                  color="warn"
+                                  type="button"
+                                  matTooltip="Remove this category"
+                                  (click)="removeCategory(i)"
+                                  >
+                                  <mat-icon>remove_circle</mat-icon>
+                                </button>
+                              </td>
+                              <td [matTooltip]="entry.id">{{ entry.value }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+                </mat-tab>
+              }
+
+              <!-- keywords -->
+              <mat-tab label="keywords">
+                <div formArrayName="keywords">
+                  <div>
                     <button
                       type="button"
-                      mat-icon-button
-                      color="warn"
-                      type="button"
-                      matTooltip="Remove this category"
-                      (click)="removeCategory(i)"
-                    >
-                      <mat-icon>remove_circle</mat-icon>
+                      mat-flat-button
+                      color="primary"
+                      (click)="addKeyword()"
+                      >
+                      <mat-icon>add_circle</mat-icon>
+                      keyword
                     </button>
-                  </td>
-                  <td [matTooltip]="entry.id">{{ entry.value }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </mat-tab>
-
-        <!-- keywords -->
-        <mat-tab label="keywords">
-          <div formArrayName="keywords">
-            <div>
-              <button
-                type="button"
-                mat-flat-button
-                color="primary"
-                (click)="addKeyword()"
-              >
-                <mat-icon>add_circle</mat-icon>
-                keyword
-              </button>
-            </div>
-            <!-- keyword -->
-            <div
-              *ngFor="
-                let item of keywords.controls;
-                let i = index;
-                let first = first;
-                let last = last
-              "
-            >
-              <!-- child form -->
-              <div [formGroupName]="i" class="form-row">
-                <!-- child actions -->
-                <span>{{ i + 1 }}.</span>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Remove this keyword"
-                  color="warn"
-                  (click)="removeKeyword(i)"
-                >
-                  <mat-icon>remove_circle</mat-icon>
-                </button>
-                <button
-                  [disabled]="first"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move keyword up"
-                  (click)="moveKeywordUp(i)"
-                >
-                  <mat-icon>arrow_upward</mat-icon>
-                </button>
-                <button
-                  [disabled]="last"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move keyword down"
-                  (click)="moveKeywordDown(i)"
-                >
-                  <mat-icon>arrow_downward</mat-icon>
-                </button>
-
-                <!-- child controls -->
-                <!-- indexId (bound) -->
-                <mat-form-field *ngIf="idxEntries?.length">
-                  <mat-label>index</mat-label>
-                  <mat-select formControlName="indexId">
-                    <mat-option *ngFor="let e of idxEntries" [value]="e.id">{{
-                      e.value
-                    }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <!-- indexId (free) -->
-                <mat-form-field *ngIf="!idxEntries?.length">
-                  <mat-label>index</mat-label>
-                  <input matInput formControlName="indexId" />
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].indexId.errors?.maxLength &&
-                      ($any(item)['controls'].indexId.dirty ||
-                        $any(item)['controls'].indexId.touched)
-                    "
-                    >ID too long</mat-error
-                  >
-                </mat-form-field>
-
-                <!-- tag (bound) -->
-                <mat-form-field *ngIf="keyTagEntries?.length">
-                  <mat-label>tag</mat-label>
-                  <mat-select formControlName="tag">
-                    <mat-option
-                      *ngFor="let e of keyTagEntries"
-                      [value]="e.id"
-                      >{{ e.value }}</mat-option
-                    >
-                  </mat-select>
-                </mat-form-field>
-                <!-- tag (free) -->
-                <mat-form-field *ngIf="!keyTagEntries?.length">
-                  <mat-label>tag</mat-label>
-                  <input matInput formControlName="tag" />
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].tag.errors?.maxLength &&
-                      ($any(item)['controls'].tag.dirty ||
-                        $any(item)['controls'].tag.touched)
-                    "
-                    >tag too long</mat-error
-                  >
-                </mat-form-field>
-
-                <!-- language (bound) -->
-                <mat-form-field *ngIf="langEntries?.length">
-                  <mat-label>language</mat-label>
-                  <mat-select formControlName="language">
-                    <mat-option *ngFor="let e of langEntries" [value]="e.id">{{
-                      e.value
-                    }}</mat-option>
-                  </mat-select>
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].language.errors?.required &&
-                      ($any(item)['controls'].language.dirty ||
-                        $any(item)['controls'].language.touched)
-                    "
-                    >language required</mat-error
-                  >
-                </mat-form-field>
-
-                <!-- language (free) -->
-                <mat-form-field *ngIf="!langEntries?.length">
-                  <mat-label>language</mat-label>
-                  <input matInput formControlName="language" />
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].language.errors?.required &&
-                      ($any(item)['controls'].language.dirty ||
-                        $any(item)['controls'].language.touched)
-                    "
-                    >language required</mat-error
-                  >
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].language.errors?.maxLength &&
-                      ($any(item)['controls'].language.dirty ||
-                        $any(item)['controls'].language.touched)
-                    "
-                    >language too long</mat-error
-                  >
-                </mat-form-field>
-
-                <!-- value -->
-                <mat-form-field>
-                  <mat-label>value</mat-label>
-                  <input matInput formControlName="value" />
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].value.errors?.required &&
-                      ($any(item)['controls'].value.dirty ||
-                        $any(item)['controls'].value.touched)
-                    "
-                    >value required</mat-error
-                  >
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].value.errors?.maxLength &&
-                      ($any(item)['controls'].value.dirty ||
-                        $any(item)['controls'].value.touched)
-                    "
-                    >value too long</mat-error
-                  >
-                </mat-form-field>
-
-                <!-- note -->
-                <mat-form-field>
-                  <mat-label>note</mat-label>
-                  <input matInput formControlName="note" />
-                  <mat-error
-                    *ngIf="
-                      $any(item)['controls'].note.errors?.maxLength &&
-                      ($any(item)['controls'].note.dirty ||
-                        $any(item)['controls'].note.touched)
-                    "
-                    >note too long</mat-error
-                  >
-                </mat-form-field>
-              </div>
-            </div>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
-    </mat-card-actions>
-  </mat-card>
-</form>
+                  </div>
+                  <!-- keyword -->
+                  @for (
+                    item of keywords.controls; track
+                    item; let i = $index; let first = $first; let last = $last) {
+                    <div
+                      >
+                      <!-- child form -->
+                      <div [formGroupName]="i" class="form-row">
+                        <!-- child actions -->
+                        <span>{{ i + 1 }}.</span>
+                        <button
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Remove this keyword"
+                          color="warn"
+                          (click)="removeKeyword(i)"
+                          >
+                          <mat-icon>remove_circle</mat-icon>
+                        </button>
+                        <button
+                          [disabled]="first"
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Move keyword up"
+                          (click)="moveKeywordUp(i)"
+                          >
+                          <mat-icon>arrow_upward</mat-icon>
+                        </button>
+                        <button
+                          [disabled]="last"
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Move keyword down"
+                          (click)="moveKeywordDown(i)"
+                          >
+                          <mat-icon>arrow_downward</mat-icon>
+                        </button>
+                        <!-- child controls -->
+                        <!-- indexId (bound) -->
+                        @if (idxEntries?.length) {
+                          <mat-form-field>
+                            <mat-label>index</mat-label>
+                            <mat-select formControlName="indexId">
+                              @for (e of idxEntries; track e) {
+                                <mat-option [value]="e.id">{{
+                                  e.value
+                                }}</mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                        }
+                        <!-- indexId (free) -->
+                        @if (!idxEntries?.length) {
+                          <mat-form-field>
+                            <mat-label>index</mat-label>
+                            <input matInput formControlName="indexId" />
+                            @if (
+                              $any(item)['controls'].indexId.errors?.maxLength &&
+                              ($any(item)['controls'].indexId.dirty ||
+                              $any(item)['controls'].indexId.touched)
+                              ) {
+                              <mat-error
+                                >ID too long</mat-error
+                                >
+                              }
+                            </mat-form-field>
+                          }
+                          <!-- tag (bound) -->
+                          @if (keyTagEntries?.length) {
+                            <mat-form-field>
+                              <mat-label>tag</mat-label>
+                              <mat-select formControlName="tag">
+                                @for (e of keyTagEntries; track e) {
+                                  <mat-option
+                                    [value]="e.id"
+                                    >{{ e.value }}</mat-option
+                                    >
+                                  }
+                                </mat-select>
+                              </mat-form-field>
+                            }
+                            <!-- tag (free) -->
+                            @if (!keyTagEntries?.length) {
+                              <mat-form-field>
+                                <mat-label>tag</mat-label>
+                                <input matInput formControlName="tag" />
+                                @if (
+                                  $any(item)['controls'].tag.errors?.maxLength &&
+                                  ($any(item)['controls'].tag.dirty ||
+                                  $any(item)['controls'].tag.touched)
+                                  ) {
+                                  <mat-error
+                                    >tag too long</mat-error
+                                    >
+                                  }
+                                </mat-form-field>
+                              }
+                              <!-- language (bound) -->
+                              @if (langEntries?.length) {
+                                <mat-form-field>
+                                  <mat-label>language</mat-label>
+                                  <mat-select formControlName="language">
+                                    @for (e of langEntries; track e) {
+                                      <mat-option [value]="e.id">{{
+                                        e.value
+                                      }}</mat-option>
+                                    }
+                                  </mat-select>
+                                  @if (
+                                    $any(item)['controls'].language.errors?.required &&
+                                    ($any(item)['controls'].language.dirty ||
+                                    $any(item)['controls'].language.touched)
+                                    ) {
+                                    <mat-error
+                                      >language required</mat-error
+                                      >
+                                    }
+                                  </mat-form-field>
+                                }
+                                <!-- language (free) -->
+                                @if (!langEntries?.length) {
+                                  <mat-form-field>
+                                    <mat-label>language</mat-label>
+                                    <input matInput formControlName="language" />
+                                    @if (
+                                      $any(item)['controls'].language.errors?.required &&
+                                      ($any(item)['controls'].language.dirty ||
+                                      $any(item)['controls'].language.touched)
+                                      ) {
+                                      <mat-error
+                                        >language required</mat-error
+                                        >
+                                      }
+                                      @if (
+                                        $any(item)['controls'].language.errors?.maxLength &&
+                                        ($any(item)['controls'].language.dirty ||
+                                        $any(item)['controls'].language.touched)
+                                        ) {
+                                        <mat-error
+                                          >language too long</mat-error
+                                          >
+                                        }
+                                      </mat-form-field>
+                                    }
+                                    <!-- value -->
+                                    <mat-form-field>
+                                      <mat-label>value</mat-label>
+                                      <input matInput formControlName="value" />
+                                      @if (
+                                        $any(item)['controls'].value.errors?.required &&
+                                        ($any(item)['controls'].value.dirty ||
+                                        $any(item)['controls'].value.touched)
+                                        ) {
+                                        <mat-error
+                                          >value required</mat-error
+                                          >
+                                        }
+                                        @if (
+                                          $any(item)['controls'].value.errors?.maxLength &&
+                                          ($any(item)['controls'].value.dirty ||
+                                          $any(item)['controls'].value.touched)
+                                          ) {
+                                          <mat-error
+                                            >value too long</mat-error
+                                            >
+                                          }
+                                        </mat-form-field>
+                                        <!-- note -->
+                                        <mat-form-field>
+                                          <mat-label>note</mat-label>
+                                          <input matInput formControlName="note" />
+                                          @if (
+                                            $any(item)['controls'].note.errors?.maxLength &&
+                                            ($any(item)['controls'].note.dirty ||
+                                            $any(item)['controls'].note.touched)
+                                            ) {
+                                            <mat-error
+                                              >note too long</mat-error
+                                              >
+                                            }
+                                          </mat-form-field>
+                                        </div>
+                                      </div>
+                                    }
+                                  </div>
+                                </mat-tab>
+                              </mat-tab-group>
+                            </mat-card-content>
+                            <mat-card-actions>
+                              <cadmus-close-save-buttons
+                                [form]="form"
+                                [noSave]="userLevel < 2"
+                                (closeRequest)="close()"
+                              ></cadmus-close-save-buttons>
+                            </mat-card-actions>
+                          </mat-card>
+                        </form>

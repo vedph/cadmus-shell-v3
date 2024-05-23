@@ -1,12 +1,13 @@
 <form [formGroup]="form">
   <mat-autocomplete #lookupAuto="matAutocomplete">
-    <mat-option
-      *ngFor="let id of ids$ | async"
-      [value]="id"
-      (onSelectionChange)="pickId(id)"
-    >
-      {{ id }}
-    </mat-option>
+    @for (id of ids$ | async; track id) {
+      <mat-option
+        [value]="id"
+        (onSelectionChange)="pickId(id)"
+        >
+        {{ id }}
+      </mat-option>
+    }
   </mat-autocomplete>
 
   <mat-form-field>
@@ -16,16 +17,16 @@
       [placeholder]="label"
       [formControl]="lookup"
       [matAutocomplete]="lookupAuto"
-    />
-  </mat-form-field>
-  <button
-    type="button"
-    mat-icon-button
-    color="warn"
-    (click)="clear()"
-    [disabled]="!id"
-    matTooltip="Clear"
-  >
-    <mat-icon>clear</mat-icon>
-  </button>
-</form>
+      />
+    </mat-form-field>
+    <button
+      type="button"
+      mat-icon-button
+      color="warn"
+      (click)="clear()"
+      [disabled]="!id"
+      matTooltip="Clear"
+      >
+      <mat-icon>clear</mat-icon>
+    </button>
+  </form>

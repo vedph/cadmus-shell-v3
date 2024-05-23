@@ -1,14 +1,15 @@
 <form [formGroup]="form" (submit)="apply()" ng-disabled="disabled">
   <!-- paginator -->
-  <mat-paginator
-    *ngIf="hasPager"
-    [length]="total"
-    [pageSize]="pageSize.value || 10"
-    [pageSizeOptions]="[5, 10, 20]"
-    (page)="onPageChange($event)"
-    aria-label="Select page"
-  >
-  </mat-paginator>
+  @if (hasPager) {
+    <mat-paginator
+      [length]="total"
+      [pageSize]="pageSize.value || 10"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPageChange($event)"
+      aria-label="Select page"
+      >
+    </mat-paginator>
+  }
   <mat-tab-group>
     <!-- TRIPLE -->
     <mat-tab label="triple">
@@ -30,37 +31,45 @@
         ></cadmus-ref-lookup>
         <mat-checkbox [formControl]="isNotPred">not</mat-checkbox>
         <!-- notPreds -->
-        <div *ngIf="isNotPred?.value">
-          <mat-list dense>
-            <mat-list-item *ngFor="let n of notPreds.value">
-              <span>{{ n.label }}</span>
-              <button
-                type="button"
-                mat-icon-button
-                color="warn"
-                (click)="deleteNotPred(n)"
-              >
-                <mat-icon>clear</mat-icon>
-              </button>
-            </mat-list-item>
-          </mat-list>
-        </div>
+        @if (isNotPred?.value) {
+          <div>
+            <mat-list dense>
+              @for (n of notPreds.value; track n) {
+                <mat-list-item>
+                  <span>{{ n.label }}</span>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="warn"
+                    (click)="deleteNotPred(n)"
+                    >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                </mat-list-item>
+              }
+            </mat-list>
+          </div>
+        }
         <!-- preds -->
-        <div *ngIf="!isNotPred?.value">
-          <mat-list dense>
-            <mat-list-item *ngFor="let n of preds.value">
-              <span>{{ n.label }}</span>
-              <button
-                type="button"
-                mat-icon-button
-                color="warn"
-                (click)="deletePred(n)"
-              >
-                <mat-icon>clear</mat-icon>
-              </button>
-            </mat-list-item>
-          </mat-list>
-        </div>
+        @if (!isNotPred?.value) {
+          <div>
+            <mat-list dense>
+              @for (n of preds.value; track n) {
+                <mat-list-item>
+                  <span>{{ n.label }}</span>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="warn"
+                    (click)="deletePred(n)"
+                    >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                </mat-list-item>
+              }
+            </mat-list>
+          </div>
+        }
       </div>
       <!-- object ID -->
       <div>
@@ -78,89 +87,89 @@
             [formControl]="sid"
             placeholder="sid"
             maxlength="500"
-          />
-        </mat-form-field>
-        &nbsp;
-        <mat-checkbox [formControl]="isSidPrefix">prefix</mat-checkbox>
-      </div>
-      <!-- tag -->
-      <div>
-        <mat-form-field>
-          <input
-            matInput
-            [formControl]="tag"
-            placeholder="tag"
-            maxlength="50"
-          />
-        </mat-form-field>
-      </div>
-    </mat-tab>
-    <!-- LITERAL -->
-    <mat-tab label="literal">
-      <!-- litPattern -->
-      <div>
-        <mat-form-field>
-          <input matInput [formControl]="litPattern" placeholder="pattern" />
-        </mat-form-field>
-      </div>
-      <!-- litType -->
-      <div>
-        <mat-form-field>
-          <input matInput [formControl]="litType" placeholder="type" />
-        </mat-form-field>
-      </div>
-      <!-- litLanguage-->
-      <div>
-        <mat-form-field>
-          <input matInput [formControl]="litLanguage" placeholder="language" />
-        </mat-form-field>
-      </div>
-      <!-- minLitNumber, maxLitNumber -->
-      <div>
-        <mat-form-field style="width: 4em">
-          <input
-            matInput
-            type="number"
-            [formControl]="minLitNumber"
-            placeholder="min."
-          />
-        </mat-form-field>
-        -
-        <mat-form-field style="width: 4em">
-          <input
-            matInput
-            type="number"
-            [formControl]="maxLitNumber"
-            placeholder="max."
-          />
-        </mat-form-field>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-  <div
-    class="btn-group"
-    role="group"
-    aria-label="toolbar"
-    style="margin-bottom: 10px"
-  >
-    <button
-      mat-icon-button
-      type="button"
-      (click)="reset()"
-      color="warn"
-      matTooltip="Reset filters"
-      [disabled]="disabled"
-    >
-      <mat-icon>clear</mat-icon>
-    </button>
-    <button
-      type="submit"
-      mat-icon-button
-      color="primary"
-      [disabled]="disabled"
-      matTooltip="Apply filters"
-    >
-      <mat-icon>check_circle</mat-icon>
-    </button>
-  </div>
-</form>
+            />
+          </mat-form-field>
+          &nbsp;
+          <mat-checkbox [formControl]="isSidPrefix">prefix</mat-checkbox>
+        </div>
+        <!-- tag -->
+        <div>
+          <mat-form-field>
+            <input
+              matInput
+              [formControl]="tag"
+              placeholder="tag"
+              maxlength="50"
+              />
+            </mat-form-field>
+          </div>
+        </mat-tab>
+        <!-- LITERAL -->
+        <mat-tab label="literal">
+          <!-- litPattern -->
+          <div>
+            <mat-form-field>
+              <input matInput [formControl]="litPattern" placeholder="pattern" />
+            </mat-form-field>
+          </div>
+          <!-- litType -->
+          <div>
+            <mat-form-field>
+              <input matInput [formControl]="litType" placeholder="type" />
+            </mat-form-field>
+          </div>
+          <!-- litLanguage-->
+          <div>
+            <mat-form-field>
+              <input matInput [formControl]="litLanguage" placeholder="language" />
+            </mat-form-field>
+          </div>
+          <!-- minLitNumber, maxLitNumber -->
+          <div>
+            <mat-form-field style="width: 4em">
+              <input
+                matInput
+                type="number"
+                [formControl]="minLitNumber"
+                placeholder="min."
+                />
+              </mat-form-field>
+              -
+              <mat-form-field style="width: 4em">
+                <input
+                  matInput
+                  type="number"
+                  [formControl]="maxLitNumber"
+                  placeholder="max."
+                  />
+                </mat-form-field>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+          <div
+            class="btn-group"
+            role="group"
+            aria-label="toolbar"
+            style="margin-bottom: 10px"
+            >
+            <button
+              mat-icon-button
+              type="button"
+              (click)="reset()"
+              color="warn"
+              matTooltip="Reset filters"
+              [disabled]="disabled"
+              >
+              <mat-icon>clear</mat-icon>
+            </button>
+            <button
+              type="submit"
+              mat-icon-button
+              color="primary"
+              [disabled]="disabled"
+              matTooltip="Apply filters"
+              >
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          </div>
+        </form>

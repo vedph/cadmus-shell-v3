@@ -1,21 +1,25 @@
-<div *ngIf="missingDefinitions.length">
-  <h3><mat-icon color="warn">warning</mat-icon>&nbsp; Missing Parts</h3>
-  <table>
-    <tbody>
-      <tr *ngFor="let def of missingDefinitions">
-        <td>
-          <button type="button" mat-icon-button matTooltip="Add this part">
-            <mat-icon>add_circle</mat-icon>
-          </button>
-        </td>
-        <td matTooltip="def.description">
-          <cadmus-part-badge
-            [partTypeIds]="def"
-            [facetDefinition]="$any(def)"
-            [typeThesaurus]="typeThesaurus"
-          ></cadmus-part-badge>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+@if (missingDefinitions.length) {
+  <div>
+    <h3><mat-icon color="warn">warning</mat-icon>&nbsp; Missing Parts</h3>
+    <table>
+      <tbody>
+        @for (def of missingDefinitions; track def) {
+          <tr>
+            <td>
+              <button type="button" mat-icon-button matTooltip="Add this part">
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </td>
+            <td matTooltip="def.description">
+              <cadmus-part-badge
+                [partTypeIds]="def"
+                [facetDefinition]="$any(def)"
+                [typeThesaurus]="typeThesaurus"
+              ></cadmus-part-badge>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
