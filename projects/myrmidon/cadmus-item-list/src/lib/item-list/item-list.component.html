@@ -30,7 +30,7 @@
               <th class="noif-lt-md">creator</th>
             </thead>
             <tbody>
-              @for (item of page.items; track item) {
+              @for (item of page.items; track item.id) {
                 <tr>
                   <td class="fit-width">
                     <button

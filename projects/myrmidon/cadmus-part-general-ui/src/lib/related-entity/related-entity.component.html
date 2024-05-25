@@ -1,71 +1,59 @@
 <form [formGroup]="form" class="form-row" (submit)="save()">
   <!-- relation (bound) -->
   @if (relationEntries?.length) {
-    <mat-form-field>
-      <mat-label>relation</mat-label>
-      <mat-select [formControl]="relation">
-        @for (e of relationEntries; track e) {
-          <mat-option [value]="e.id">{{
-            e.value
-          }}</mat-option>
-        }
-      </mat-select>
-      @if (
-        $any(relation).errors?.required && (relation.dirty || relation.touched)
-        ) {
-        <mat-error
-          >relation required</mat-error
-          >
-        }
-      </mat-form-field>
+  <mat-form-field>
+    <mat-label>relation</mat-label>
+    <mat-select [formControl]="relation">
+      @for (e of relationEntries; track e.id) {
+      <mat-option [value]="e.id">{{ e.value }}</mat-option>
+      }
+    </mat-select>
+    @if ( $any(relation).errors?.required && (relation.dirty ||
+    relation.touched) ) {
+    <mat-error>relation required</mat-error>
     }
-    <!-- relation (free) -->
-    @if (!relationEntries?.length) {
-      <mat-form-field>
-        <mat-label>relation</mat-label>
-        <input matInput [formControl]="relation" />
-        @if (
-          $any(relation).errors?.required && (relation.dirty || relation.touched)
-          ) {
-          <mat-error
-            >relation required</mat-error
-            >
-          }
-          @if (
-            $any(relation).errors?.maxLength && (relation.dirty || relation.touched)
-            ) {
-            <mat-error
-              >relation too long</mat-error
-              >
-            }
-          </mat-form-field>
-        }
+  </mat-form-field>
+  }
+  <!-- relation (free) -->
+  @if (!relationEntries?.length) {
+  <mat-form-field>
+    <mat-label>relation</mat-label>
+    <input matInput [formControl]="relation" />
+    @if ( $any(relation).errors?.required && (relation.dirty ||
+    relation.touched) ) {
+    <mat-error>relation required</mat-error>
+    } @if ( $any(relation).errors?.maxLength && (relation.dirty ||
+    relation.touched) ) {
+    <mat-error>relation too long</mat-error>
+    }
+  </mat-form-field>
+  }
 
-        <!-- id -->
-        <cadmus-refs-asserted-composite-id
-          [idScopeEntries]="idScopeEntries"
-          [idTagEntries]="idTagEntries"
-          [assTagEntries]="assTagEntries"
-          [refTagEntries]="refTagEntries"
-          [refTypeEntries]="refTypeEntries"
-          [pinByTypeMode]="pinByTypeMode"
-          [canSwitchMode]="canSwitchMode"
-          [canEditTarget]="canEditTarget"
-          [id]="id.value"
-          [internalDefault]="true"
-          (idChange)="onIdChange($event)"
-          >
-        </cadmus-refs-asserted-composite-id>
+  <!-- id -->
+  <cadmus-refs-asserted-composite-id
+    [idScopeEntries]="idScopeEntries"
+    [idTagEntries]="idTagEntries"
+    [assTagEntries]="assTagEntries"
+    [refTagEntries]="refTagEntries"
+    [refTypeEntries]="refTypeEntries"
+    [pinByTypeMode]="pinByTypeMode"
+    [canSwitchMode]="canSwitchMode"
+    [canEditTarget]="canEditTarget"
+    [id]="id.value"
+    [internalDefault]="true"
+    (idChange)="onIdChange($event)"
+  >
+  </cadmus-refs-asserted-composite-id>
 
-        <button mat-icon-button type="button" color="warn" (click)="cancel()">
-          <mat-icon>close</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          type="submit"
-          color="primary"
-          matTooltip="Save entity"
-          >
-          <mat-icon>check_circle</mat-icon>
-        </button>
-      </form>
+  <button mat-icon-button type="button" color="warn" (click)="cancel()">
+    <mat-icon>close</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    type="submit"
+    color="primary"
+    matTooltip="Save entity"
+  >
+    <mat-icon>check_circle</mat-icon>
+  </button>
+</form>

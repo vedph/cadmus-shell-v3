@@ -33,7 +33,7 @@
               <mat-form-field>
                 <mat-label>tag</mat-label>
                 <mat-select formControlName="tag">
-                  @for (e of tagEntries; track e) {
+                  @for (e of tagEntries; track e.id) {
                     <mat-option [value]="e.id">{{
                       e.value
                     }}</mat-option>

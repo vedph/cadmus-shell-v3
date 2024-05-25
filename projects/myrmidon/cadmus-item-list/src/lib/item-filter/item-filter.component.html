@@ -23,7 +23,7 @@
           <mat-label>facet</mat-label>
           <mat-select [formControl]="facet">
             <mat-option [value]="null">(any)</mat-option>
-            @for (f of facets; track f) {
+            @for (f of facets; track f.id) {
               <mat-option [value]="f.id">
                 {{ f.label }}
               </mat-option>
@@ -57,7 +57,7 @@
               <mat-form-field>
                 <mat-label>flags value</mat-label>
                 <mat-select multiple="true" formControlName="flags">
-                  @for (f of flags; track f) {
+                  @for (f of flags; track f.id) {
                     <mat-option [value]="f.id">
                       {{ f.label }}
                     </mat-option>

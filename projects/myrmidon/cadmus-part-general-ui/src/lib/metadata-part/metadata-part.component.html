@@ -14,154 +14,119 @@
             mat-flat-button
             color="primary"
             (click)="addMetadatum()"
-            >
+          >
             <mat-icon>add_circle</mat-icon> metadatum
           </button>
         </div>
-        @for (
-          g of metadata.controls; track
-          g; let i = $index; let first = $first; let last = $last) {
-          <div
-            >
-            <!-- child form -->
-            <div [formGroupName]="i" class="form-row">
-              <!-- child actions -->
-              <span style="flex: 0 0 auto;">
-                {{ i + 1 }}.
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Remove this metadatum"
-                  color="warn"
-                  (click)="removeMetadatum(i)"
-                  >
-                  <mat-icon>remove_circle</mat-icon>
-                </button>
-                <button
-                  [disabled]="first"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move metadatum up"
-                  (click)="moveMetadatumUp(i)"
-                  >
-                  <mat-icon>arrow_upward</mat-icon>
-                </button>
-                <button
-                  [disabled]="last"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move metadatum down"
-                  (click)="moveMetadatumDown(i)"
-                  >
-                  <mat-icon>arrow_downward</mat-icon>
-                </button>
-              </span>
-              <!-- child controls -->
-              <!-- type (bound) -->
-              @if (typeEntries?.length) {
-                <mat-form-field>
-                  <mat-label>type</mat-label>
-                  <mat-select formControlName="type">
-                    @for (e of typeEntries; track e) {
-                      <mat-option [value]="e.id">{{
-                        e.value
-                      }}</mat-option>
-                    }
-                  </mat-select>
-                  @if (
-                    $any(g)['controls'].type.errors?.required &&
-                    ($any(g)['controls'].type.dirty ||
-                    $any(g)['controls'].type.touched)
-                    ) {
-                    <mat-error
-                      >type required</mat-error
-                      >
-                    }
-                  </mat-form-field>
+        @for ( g of metadata.controls; track g; let i = $index; let first =
+        $first; let last = $last) {
+        <div>
+          <!-- child form -->
+          <div [formGroupName]="i" class="form-row">
+            <!-- child actions -->
+            <span style="flex: 0 0 auto">
+              {{ i + 1 }}.
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Remove this metadatum"
+                color="warn"
+                (click)="removeMetadatum(i)"
+              >
+                <mat-icon>remove_circle</mat-icon>
+              </button>
+              <button
+                [disabled]="first"
+                mat-icon-button
+                type="button"
+                matTooltip="Move metadatum up"
+                (click)="moveMetadatumUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                [disabled]="last"
+                mat-icon-button
+                type="button"
+                matTooltip="Move metadatum down"
+                (click)="moveMetadatumDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+            </span>
+            <!-- child controls -->
+            <!-- type (bound) -->
+            @if (typeEntries?.length) {
+            <mat-form-field>
+              <mat-label>type</mat-label>
+              <mat-select formControlName="type">
+                @for (e of typeEntries; track e.id) {
+                <mat-option [value]="e.id">{{ e.value }}</mat-option>
                 }
-                <!-- type (free) -->
-                @if (!typeEntries?.length) {
-                  <mat-form-field>
-                    <mat-label>type</mat-label>
-                    <input matInput formControlName="type" />
-                    @if (
-                      $any(g)['controls'].type.errors?.required &&
-                      ($any(g)['controls'].type.dirty ||
-                      $any(g)['controls'].type.touched)
-                      ) {
-                      <mat-error
-                        >type required</mat-error
-                        >
-                      }
-                      @if (
-                        $any(g)['controls'].type.errors?.maxLength &&
-                        ($any(g)['controls'].type.dirty ||
-                        $any(g)['controls'].type.touched)
-                        ) {
-                        <mat-error
-                          >type too long</mat-error
-                          >
-                        }
-                      </mat-form-field>
-                    }
-                    <!-- name -->
-                    <mat-form-field>
-                      <mat-label>name</mat-label>
-                      <input matInput formControlName="name" />
-                      <mat-hint>eid = entity ID</mat-hint>
-                      @if (
-                        $any(g)['controls'].name.errors?.required &&
-                        ($any(g)['controls'].name.dirty ||
-                        $any(g)['controls'].name.touched)
-                        ) {
-                        <mat-error
-                          >name required</mat-error
-                          >
-                        }
-                        @if (
-                          $any(g)['controls'].name.errors?.maxLength &&
-                          ($any(g)['controls'].name.dirty ||
-                          $any(g)['controls'].name.touched)
-                          ) {
-                          <mat-error
-                            >name too long</mat-error
-                            >
-                          }
-                        </mat-form-field>
-                        <!-- value -->
-                        <mat-form-field>
-                          <mat-label>value</mat-label>
-                          <input matInput formControlName="value" />
-                          @if (
-                            $any(g)['controls'].value.errors?.required &&
-                            ($any(g)['controls'].value.dirty ||
-                            $any(g)['controls'].value.touched)
-                            ) {
-                            <mat-error
-                              >value required</mat-error
-                              >
-                            }
-                            @if (
-                              $any(g)['controls'].value.errors?.maxLength &&
-                              ($any(g)['controls'].value.dirty ||
-                              $any(g)['controls'].value.touched)
-                              ) {
-                              <mat-error
-                                >value too long</mat-error
-                                >
-                              }
-                            </mat-form-field>
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  </mat-card-content>
-                  <mat-card-actions>
-                    <cadmus-close-save-buttons
-                      [form]="form"
-                      [noSave]="userLevel < 2"
-                      (closeRequest)="close()"
-                    ></cadmus-close-save-buttons>
-                  </mat-card-actions>
-                </mat-card>
-              </form>
+              </mat-select>
+              @if ( $any(g)['controls'].type.errors?.required &&
+              ($any(g)['controls'].type.dirty ||
+              $any(g)['controls'].type.touched) ) {
+              <mat-error>type required</mat-error>
+              }
+            </mat-form-field>
+            }
+            <!-- type (free) -->
+            @if (!typeEntries?.length) {
+            <mat-form-field>
+              <mat-label>type</mat-label>
+              <input matInput formControlName="type" />
+              @if ( $any(g)['controls'].type.errors?.required &&
+              ($any(g)['controls'].type.dirty ||
+              $any(g)['controls'].type.touched) ) {
+              <mat-error>type required</mat-error>
+              } @if ( $any(g)['controls'].type.errors?.maxLength &&
+              ($any(g)['controls'].type.dirty ||
+              $any(g)['controls'].type.touched) ) {
+              <mat-error>type too long</mat-error>
+              }
+            </mat-form-field>
+            }
+            <!-- name -->
+            <mat-form-field>
+              <mat-label>name</mat-label>
+              <input matInput formControlName="name" />
+              <mat-hint>eid = entity ID</mat-hint>
+              @if ( $any(g)['controls'].name.errors?.required &&
+              ($any(g)['controls'].name.dirty ||
+              $any(g)['controls'].name.touched) ) {
+              <mat-error>name required</mat-error>
+              } @if ( $any(g)['controls'].name.errors?.maxLength &&
+              ($any(g)['controls'].name.dirty ||
+              $any(g)['controls'].name.touched) ) {
+              <mat-error>name too long</mat-error>
+              }
+            </mat-form-field>
+            <!-- value -->
+            <mat-form-field>
+              <mat-label>value</mat-label>
+              <input matInput formControlName="value" />
+              @if ( $any(g)['controls'].value.errors?.required &&
+              ($any(g)['controls'].value.dirty ||
+              $any(g)['controls'].value.touched) ) {
+              <mat-error>value required</mat-error>
+              } @if ( $any(g)['controls'].value.errors?.maxLength &&
+              ($any(g)['controls'].value.dirty ||
+              $any(g)['controls'].value.touched) ) {
+              <mat-error>value too long</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+        }
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

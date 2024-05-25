@@ -2,84 +2,68 @@
   <!-- uri (readonly if not new) -->
   <div class="form-row">
     @if (isNew) {
-      <mat-form-field>
-        <mat-label>uri</mat-label>
-        <input matInput [formControl]="uri" />
-        @if ($any(uri).errors?.required && (uri.dirty || uri.touched)) {
-          <mat-error
-            >uri required</mat-error
-            >
-          }
-          @if ($any(uri).errors?.maxLength && (uri.dirty || uri.touched)) {
-            <mat-error
-              >uri too long</mat-error
-              >
-            }
-          </mat-form-field>
+    <mat-form-field>
+      <mat-label>uri</mat-label>
+      <input matInput [formControl]="uri" />
+      @if ($any(uri).errors?.required && (uri.dirty || uri.touched)) {
+      <mat-error>uri required</mat-error>
+      } @if ($any(uri).errors?.maxLength && (uri.dirty || uri.touched)) {
+      <mat-error>uri too long</mat-error>
+      }
+    </mat-form-field>
+    } @if (!isNew) {
+    <span style="color: silver">{{ uri.value }} </span>
+    }
+
+    <!-- label -->
+    <mat-form-field>
+      <mat-label>label</mat-label>
+      <input matInput [formControl]="label" />
+      @if ($any(label).errors?.required && (label.dirty || label.touched)) {
+      <mat-error>label required</mat-error>
+      } @if ($any(label).errors?.maxLength && (label.dirty || label.touched)) {
+      <mat-error>label too long</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- class -->
+    <mat-checkbox [formControl]="isClass">is class</mat-checkbox>
+
+    <!-- tag -->
+    @if (tagEntries?.length) {
+    <mat-form-field style="width: 8em">
+      <mat-label>tag</mat-label>
+      <mat-select [formControl]="tag">
+        <mat-option [value]="null">(no tag)</mat-option>
+        @for (e of tagEntries; track e.id) {
+        <mat-option [value]="e.id">{{ e.value }}</mat-option>
         }
-        @if (!isNew) {
-          <span style="color: silver">{{ uri.value }} </span>
-        }
+      </mat-select>
+    </mat-form-field>
+    } @if (!tagEntries?.length) {
+    <mat-form-field>
+      <mat-label>tag</mat-label>
+      <input matInput [formControl]="tag" />
+      @if ($any(tag).errors?.maxLength && (tag.dirty || tag.touched)) {
+      <mat-error>tag too long</mat-error>
+      }
+    </mat-form-field>
+    }
+  </div>
 
-        <!-- label -->
-        <mat-form-field>
-          <mat-label>label</mat-label>
-          <input matInput [formControl]="label" />
-          @if ($any(label).errors?.required && (label.dirty || label.touched)) {
-            <mat-error
-              >label required</mat-error
-              >
-            }
-            @if ($any(label).errors?.maxLength && (label.dirty || label.touched)) {
-              <mat-error
-                >label too long</mat-error
-                >
-              }
-            </mat-form-field>
-
-            <!-- class -->
-            <mat-checkbox [formControl]="isClass">is class</mat-checkbox>
-
-            <!-- tag -->
-            @if (tagEntries?.length) {
-              <mat-form-field style="width: 8em">
-                <mat-label>tag</mat-label>
-                <mat-select [formControl]="tag">
-                  <mat-option [value]="null">(no tag)</mat-option>
-                  @for (e of tagEntries; track e) {
-                    <mat-option [value]="e.id">{{
-                      e.value
-                    }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            }
-            @if (!tagEntries?.length) {
-              <mat-form-field>
-                <mat-label>tag</mat-label>
-                <input matInput [formControl]="tag" />
-                @if ($any(tag).errors?.maxLength && (tag.dirty || tag.touched)) {
-                  <mat-error
-                    >tag too long</mat-error
-                    >
-                  }
-                </mat-form-field>
-              }
-            </div>
-
-            <!-- buttons -->
-            <div>
-              <button color="warn" mat-icon-button type="button" (click)="cancel()">
-                <mat-icon>cancel</mat-icon>
-              </button>
-              &nbsp;
-              <button
-                color="primary"
-                mat-icon-button
-                type="submit"
-                [disabled]="form.invalid"
-                >
-                <mat-icon>check_circle</mat-icon>
-              </button>
-            </div>
-          </form>
+  <!-- buttons -->
+  <div>
+    <button color="warn" mat-icon-button type="button" (click)="cancel()">
+      <mat-icon>cancel</mat-icon>
+    </button>
+    &nbsp;
+    <button
+      color="primary"
+      mat-icon-button
+      type="submit"
+      [disabled]="form.invalid"
+    >
+      <mat-icon>check_circle</mat-icon>
+    </button>
+  </div>
+</form>

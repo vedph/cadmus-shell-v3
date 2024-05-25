@@ -33,7 +33,7 @@
               <th class="noif-lt-md">tag</th>
             </thead>
             <tbody>
-              @for (d of page.items; track d) {
+              @for (d of page.items; track d.id) {
                 <tr>
                   <td class="fit-width">
                     @if (hasWalker) {

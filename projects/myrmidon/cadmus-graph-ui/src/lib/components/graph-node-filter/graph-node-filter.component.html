@@ -106,7 +106,7 @@
         ></cadmus-ref-lookup>
         @if (classNodes$ | async; as classNodes) {
           <mat-chip-listbox>
-            @for (node of classNodes; track node) {
+            @for (node of classNodes; track node.id) {
               <mat-chip-option
                 [removable]="true"
                 (removed)="onClassRemove(node.id)"

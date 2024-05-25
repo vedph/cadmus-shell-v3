@@ -6,80 +6,80 @@
       </div>
       <mat-card-title [matBadge]="keywords.value.length" matBadgeOverlap="false"
         >Index Keywords Part</mat-card-title
+      >
+    </mat-card-header>
+    <mat-card-content>
+      <div>
+        <button
+          type="button"
+          mat-flat-button
+          color="primary"
+          (click)="addNewKeyword()"
         >
-      </mat-card-header>
-      <mat-card-content>
-        <div>
-          <button
-            type="button"
-            mat-flat-button
-            color="primary"
-            (click)="addNewKeyword()"
-            >
-            <mat-icon>add_circle</mat-icon> keyword
-          </button>
-        </div>
+          <mat-icon>add_circle</mat-icon> keyword
+        </button>
+      </div>
 
-        <mat-expansion-panel
-          [disabled]="!editedKeyword"
-          [expanded]="editedKeyword"
-          >
-          <cadmus-index-keyword
-            [keyword]="editedKeyword"
-            [idxEntries]="idxEntries"
-            [langEntries]="langEntries"
-            [tagEntries]="tagEntries"
-            (editorClose)="onKeywordClose()"
-            (save)="onKeywordSave($event)"
-          ></cadmus-index-keyword>
-        </mat-expansion-panel>
+      <mat-expansion-panel
+        [disabled]="!editedKeyword"
+        [expanded]="editedKeyword"
+      >
+        <cadmus-index-keyword
+          [keyword]="editedKeyword"
+          [idxEntries]="idxEntries"
+          [langEntries]="langEntries"
+          [tagEntries]="tagEntries"
+          (editorClose)="onKeywordClose()"
+          (save)="onKeywordSave($event)"
+        ></cadmus-index-keyword>
+      </mat-expansion-panel>
 
-        @if (keywords.value?.length) {
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>index</th>
-                <th>lang.</th>
-                <th>keyword</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (k of keywords.value; track k) {
-                <tr>
-                  <td>
-                    <button
-                      mat-icon-button
-                      type="button"
-                      matTooltip="Edit this keyword"
-                      (click)="editKeyword(k)"
-                      >
-                      <mat-icon color="primary">edit</mat-icon>
-                    </button>
-                    <button
-                      mat-icon-button
-                      type="button"
-                      matTooltip="Delete this keyword"
-                      (click)="deleteKeyword(k)"
-                      >
-                      <mat-icon color="warn">remove_circle</mat-icon>
-                    </button>
-                  </td>
-                  <td>{{ k.indexId }}</td>
-                  <td>{{ k.language }}</td>
-                  <td>{{ k.value }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
-      </mat-card-content>
-      <mat-card-actions>
-        <cadmus-close-save-buttons
-          [form]="form"
-          [noSave]="userLevel < 2"
-          (closeRequest)="close()"
-        ></cadmus-close-save-buttons>
-      </mat-card-actions>
-    </mat-card>
-  </form>
+      @if (keywords.value?.length) {
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>index</th>
+            <th>lang.</th>
+            <th>keyword</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (k of keywords.value; track k) {
+          <tr>
+            <td>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Edit this keyword"
+                (click)="editKeyword(k)"
+              >
+                <mat-icon color="primary">edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Delete this keyword"
+                (click)="deleteKeyword(k)"
+              >
+                <mat-icon color="warn">remove_circle</mat-icon>
+              </button>
+            </td>
+            <td>{{ k.indexId }}</td>
+            <td>{{ k.language }}</td>
+            <td>{{ k.value }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

@@ -8,16 +8,24 @@
   border-bottom: 1px solid silver;
 }
 .query-help code {
-  color:chocolate;
+  color: chocolate;
 }
 .full-width {
   width: 100%;
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
 table.pins tbody tr:nth-child(odd) {
-  background-color: #fafafa;
+  background-color: #dedcdc;
 }
 table.pins th {
   text-align: left;
   font-weight: normal;
   color: silver;
+}
+table.pins td {
+  padding: 2px 4px;
+  border: 1px solid silver;
 }

@@ -15,6 +15,12 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+### 8.1.1
+
+- 2024-05-25:
+  - updated packages.
+  - added property to `@for` track where possible.
+
 ### 8.1.0
 
 - 2024-05-23:

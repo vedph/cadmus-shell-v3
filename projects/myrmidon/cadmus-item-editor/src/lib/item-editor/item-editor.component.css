@@ -5,6 +5,10 @@ th {
   font-weight: normal;
   color: silver;
 }
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}
 #layers td {
   padding: 0 6px;
 }
