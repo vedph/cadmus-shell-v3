@@ -15,6 +15,10 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-06-05:
+  - added opt-in for role-dependent thesauri for external IDs part in `@myrmidon/cadmus-part-general-pg`.
+  - updated packages.
+
 ### 8.1.1
 
 - 2024-05-25:
