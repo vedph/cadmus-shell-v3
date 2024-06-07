@@ -12,6 +12,7 @@
           type="button"
           mat-flat-button
           color="primary"
+          class="mat-primary"
           (click)="addName()"
         >
           <mat-icon>add_circle</mat-icon> name
@@ -38,7 +39,7 @@
                 matTooltip="Edit this name"
                 (click)="editName(i)"
               >
-                <mat-icon>edit</mat-icon>
+                <mat-icon class="mat-primary">edit</mat-icon>
               </button>
               <button
                 type="button"
@@ -65,7 +66,7 @@
                 matTooltip="Delete this name"
                 (click)="deleteName(i)"
               >
-                <mat-icon>remove_circle</mat-icon>
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
             </td>
             <td>{{ name | cadmusProperName }}</td>

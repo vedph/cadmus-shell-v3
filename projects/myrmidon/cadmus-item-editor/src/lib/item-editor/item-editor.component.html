@@ -142,6 +142,7 @@
               type="submit"
               mat-raised-button
               color="primary"
+              class="mat-primary"
               [disabled]="userLevel < 2 || busy"
               matTooltip="Save metadata"
             >
@@ -178,13 +179,14 @@
             <button
               mat-stroked-button
               color="primary"
+              class="mat-primary"
               type="button"
               [disabled]="userLevel < 2 || busy || !newPart.valid"
               (click)="addPart()"
               matTooltip="Add a new part of the selected type"
             >
               <mat-icon>add_circle</mat-icon>
-              add part
+              part
             </button>
           </form>
         </div>
@@ -222,7 +224,7 @@
                     (click)="editPart(part)"
                     matTooltip="Edit this part"
                   >
-                    <mat-icon>create</mat-icon>
+                    <mat-icon class="mat-primary">create</mat-icon>
                   </button>
                   <!-- delete -->
                   @if ( user?.roles?.length && (user?.roles?.includes('admin')
@@ -235,7 +237,7 @@
                     (click)="deletePart(part)"
                     matTooltip="Delete this part"
                   >
-                    <mat-icon color="warn">delete</mat-icon>
+                    <mat-icon color="warn" class="mat-warn">delete</mat-icon>
                   </button>
                   }
                   <!-- copy -->
@@ -316,7 +318,7 @@
                   matTooltip="Edit this layer part"
                   (click)="editPart(part)"
                 >
-                  <mat-icon>edit</mat-icon>
+                  <mat-icon class="mat-primary">edit</mat-icon>
                 </button>
                 } @if (part.isAbsent) {
                 <button
@@ -327,7 +329,7 @@
                   [disabled]="userLevel < 2"
                   (click)="addLayerPart(part)"
                 >
-                  <mat-icon>add_circle</mat-icon>
+                  <mat-icon class="mat-primary">add_circle</mat-icon>
                 </button>
                 } @if (!part.isAbsent) {
                 <button
@@ -338,7 +340,7 @@
                   [disabled]="userLevel < 2"
                   (click)="deletePart(part)"
                 >
-                  <mat-icon>delete</mat-icon>
+                  <mat-icon class="mat-warn">delete</mat-icon>
                 </button>
                 } @if (!part.isAbsent) {
                 <button

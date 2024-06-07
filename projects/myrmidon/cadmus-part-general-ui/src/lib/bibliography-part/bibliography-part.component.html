@@ -14,86 +14,85 @@
             type="button"
             mat-flat-button
             color="primary"
+            class="mat-primary"
             (click)="addEntry()"
-            >
+          >
             <mat-icon>add_circle</mat-icon> entry
           </button>
           @if (entries.value.length) {
-            <table>
-              <thead>
-                <tr>
-                  <th style="min-width: 160px"></th>
-                  <th>type</th>
-                  <th>author(s)</th>
-                  <th>title</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (
-                  entry of entries.value; track
-                  entry; let i = $index; let first = $first; let last = $last) {
-                  <tr
-                    >
-                    <td>
-                      <button
-                        mat-icon-button
-                        type="button"
-                        matTooltip="Edit entry"
-                        color="primary"
-                        (click)="editEntry(entry, i)"
-                        >
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button
-                        mat-icon-button
-                        type="button"
-                        matTooltip="Move entry up"
-                        [disabled]="first"
-                        (click)="moveEntryUp(i)"
-                        >
-                        <mat-icon>arrow_upward</mat-icon>
-                      </button>
-                      <button
-                        mat-icon-button
-                        type="button"
-                        matTooltip="Move entry down"
-                        [disabled]="last"
-                        (click)="moveEntryDown(i)"
-                        >
-                        <mat-icon>arrow_downward</mat-icon>
-                      </button>
-                      <button
-                        mat-icon-button
-                        type="button"
-                        matTooltip="Remove this entry"
-                        color="warn"
-                        (click)="removeEntry(i)"
-                        >
-                        <mat-icon>remove_circle</mat-icon>
-                      </button>
-                    </td>
-                    <td>{{ entryTypeToString(entry.typeId) }}</td>
-                    <td>{{ getAuthors(entry.authors || []) }}</td>
-                    <td>{{ entry.title }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+          <table>
+            <thead>
+              <tr>
+                <th style="min-width: 160px"></th>
+                <th>type</th>
+                <th>author(s)</th>
+                <th>title</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for ( entry of entries.value; track entry; let i = $index; let
+              first = $first; let last = $last) {
+              <tr>
+                <td>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Edit entry"
+                    color="primary"
+                    (click)="editEntry(entry, i)"
+                  >
+                    <mat-icon class="mat-primary">edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Move entry up"
+                    [disabled]="first"
+                    (click)="moveEntryUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Move entry down"
+                    [disabled]="last"
+                    (click)="moveEntryDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Remove this entry"
+                    color="warn"
+                    (click)="removeEntry(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>{{ entryTypeToString(entry.typeId) }}</td>
+                <td>{{ getAuthors(entry.authors || []) }}</td>
+                <td>{{ entry.title }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
           }
         </mat-tab>
         <!-- entry editor -->
         @if (editedEntry) {
-          <mat-tab label="Entry">
-            <cadmus-bibliography-entry
-              [entry]="editedEntry"
-              [langEntries]="langEntries"
-              [typeEntries]="typeEntries"
-              [tagEntries]="tagEntries"
-              [roleEntries]="roleEntries"
-              (editorClose)="closeEntry()"
-              (entryChange)="saveEntry($event)"
-            ></cadmus-bibliography-entry>
-          </mat-tab>
+        <mat-tab label="Entry">
+          <cadmus-bibliography-entry
+            [entry]="editedEntry"
+            [langEntries]="langEntries"
+            [typeEntries]="typeEntries"
+            [tagEntries]="tagEntries"
+            [roleEntries]="roleEntries"
+            (editorClose)="closeEntry()"
+            (entryChange)="saveEntry($event)"
+          ></cadmus-bibliography-entry>
+        </mat-tab>
         }
       </mat-tab-group>
     </mat-card-content>

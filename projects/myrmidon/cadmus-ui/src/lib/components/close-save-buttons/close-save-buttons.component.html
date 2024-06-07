@@ -1,18 +1,24 @@
 @if (form) {
-  <button type="button" mat-raised-button color="warn" (click)="close()">
-    <mat-icon>cancel</mat-icon>
-    close
-  </button>
-  @if (!noSave) {
-    <button
-      type="submit"
-      [disabled]="form.invalid"
-      mat-raised-button
-      color="primary"
-      style="margin-left:8px"
-      >
-      <mat-icon>check_circle</mat-icon>
-      save
-    </button>
-  }
-}
+<button
+  type="button"
+  mat-raised-button
+  color="warn"
+  class="mat-warn"
+  (click)="close()"
+>
+  <mat-icon>cancel</mat-icon>
+  close
+</button>
+@if (!noSave) {
+<button
+  type="submit"
+  [disabled]="form.invalid"
+  mat-raised-button
+  color="primary"
+  class="mat-primary"
+  style="margin-left: 8px"
+>
+  <mat-icon>check_circle</mat-icon>
+  save
+</button>
+} }

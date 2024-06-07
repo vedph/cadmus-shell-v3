@@ -15,94 +15,90 @@
             <mat-form-field style="min-width: 400px">
               <mat-label>citation</mat-label>
               <input matInput formControlName="citation" />
-              @if (
-                citation.hasError('maxLength') &&
-                (citation.dirty || citation.touched)
-                ) {
-                <mat-error
-                ></mat-error>
+              @if ( citation.hasError('maxLength') && (citation.dirty ||
+              citation.touched) ) {
+              <mat-error></mat-error>
               }
             </mat-form-field>
           </div>
 
           <!-- rows -->
           @if (rows) {
-            <div cdkDropListGroup>
-              <!-- row -->
-              @for (
-                row of rows.value; track
-                row; let i = $index; let first = $first; let last = $last) {
-                <div
-                  cdkDropList
-                  cdkDropListOrientation="horizontal"
-                  (cdkDropListDropped)="drop($any($event), row)"
-                  style="display: flex; flex-flow: row wrap"
-                  >
-                  <!-- nr -->
-                  <span class="row-nr">{{ i + 1 }}</span>
-                  <!-- tile -->
-                  @for (tile of row.tiles || []; track tile) {
-                    <cadmus-text-tile
-                      [tile]="tile"
-                      [selected]="tile === selectedTile"
-                      cdkDrag
-                      style="flex: 0 0 auto"
-                      (click)="selectedTile = tile"
-                      (editData)="editTileData(tile)"
-                      (tileChange)="onTileChange($event)"
-                      >
-                      <div class="tile-placeholder" *cdkDragPlaceholder></div>
-                    </cadmus-text-tile>
-                  }
-                  <!-- row tail buttons -->
-                  <div class="unmuted-hovering">
-                    <button
-                      type="button"
-                      mat-icon-button
-                      (click)="addTile(row)"
-                      matTooltip="Append new tile"
-                      >
-                      <mat-icon>add_circle</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      (click)="moveRowUp(i)"
-                      [disabled]="first"
-                      matTooltip="Move this row up"
-                      >
-                      <mat-icon>arrow_upward</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      (click)="moveRowDown(i)"
-                      [disabled]="last"
-                      matTooltip="Move this row down"
-                      >
-                      <mat-icon>arrow_downward</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      matTooltip="Delete whole row"
-                      color="warn"
-                      (click)="deleteRow(i)"
-                      >
-                      <mat-icon>remove_circle</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      matTooltip="Edit row's data"
-                      (click)="editRowData(row)"
-                      >
-                      <mat-icon>list</mat-icon>
-                    </button>
-                  </div>
-                </div>
+          <div cdkDropListGroup>
+            <!-- row -->
+            @for ( row of rows.value; track row; let i = $index; let first =
+            $first; let last = $last) {
+            <div
+              cdkDropList
+              cdkDropListOrientation="horizontal"
+              (cdkDropListDropped)="drop($any($event), row)"
+              style="display: flex; flex-flow: row wrap"
+            >
+              <!-- nr -->
+              <span class="row-nr">{{ i + 1 }}</span>
+              <!-- tile -->
+              @for (tile of row.tiles || []; track tile) {
+              <cadmus-text-tile
+                [tile]="tile"
+                [selected]="tile === selectedTile"
+                cdkDrag
+                style="flex: 0 0 auto"
+                (click)="selectedTile = tile"
+                (editData)="editTileData(tile)"
+                (tileChange)="onTileChange($event)"
+              >
+                <div class="tile-placeholder" *cdkDragPlaceholder></div>
+              </cadmus-text-tile>
               }
+              <!-- row tail buttons -->
+              <div class="unmuted-hovering">
+                <button
+                  type="button"
+                  mat-icon-button
+                  (click)="addTile(row)"
+                  matTooltip="Append new tile"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  (click)="moveRowUp(i)"
+                  [disabled]="first"
+                  matTooltip="Move this row up"
+                >
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  (click)="moveRowDown(i)"
+                  [disabled]="last"
+                  matTooltip="Move this row down"
+                >
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Delete whole row"
+                  color="warn"
+                  (click)="deleteRow(i)"
+                >
+                  <mat-icon class="mat-warn">remove_circle</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Edit row's data"
+                  (click)="editRowData(row)"
+                >
+                  <mat-icon>list</mat-icon>
+                </button>
+              </div>
             </div>
+            }
+          </div>
           }
           <!-- bottom buttons -->
           <button
@@ -110,7 +106,7 @@
             mat-icon-button
             matTooltip="Append new row"
             (click)="addRow()"
-            >
+          >
             <mat-icon>add_circle</mat-icon>
           </button>
           <span>{{ getTileCoords() }}</span>
@@ -120,7 +116,7 @@
             matTooltip="Edit selected tile's data"
             [disabled]="!selectedTile"
             (click)="editTileData(selectedTile!)"
-            >
+          >
             <mat-icon>list</mat-icon>
           </button>
           <button
@@ -130,8 +126,8 @@
             color="warn"
             (click)="deleteSelectedTile()"
             [disabled]="!selectedTile"
-            >
-            <mat-icon>remove_circle</mat-icon>
+          >
+            <mat-icon class="mat-warn">remove_circle</mat-icon>
           </button>
 
           <mat-card-actions>
@@ -144,15 +140,15 @@
         </mat-tab>
 
         @if (editedData) {
-          <mat-tab label="Data">
-            <cadmus-tiled-data
-              [data]="editedData"
-              [title]="editedDataTitle"
-              [hiddenKeys]="['text']"
-              (cancel)="closeDataEditor()"
-              (dataChange)="saveEditedData($event)"
-            ></cadmus-tiled-data>
-          </mat-tab>
+        <mat-tab label="Data">
+          <cadmus-tiled-data
+            [data]="editedData"
+            [title]="editedDataTitle"
+            [hiddenKeys]="['text']"
+            (cancel)="closeDataEditor()"
+            (dataChange)="saveEditedData($event)"
+          ></cadmus-tiled-data>
+        </mat-tab>
         }
       </mat-tab-group>
     </mat-card-content>

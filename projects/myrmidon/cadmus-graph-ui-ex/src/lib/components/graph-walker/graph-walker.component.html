@@ -11,7 +11,7 @@
       [zoomToFit$]="zoomToFit$"
       layout="colaForceDirected"
       (select)="onNodeSelect($event)"
-      >
+    >
       <ng-template #defsTemplate>
         <svg:marker
           id="arrow"
@@ -21,206 +21,202 @@
           markerWidth="4"
           markerHeight="4"
           orient="auto"
-          >
+        >
           <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
-          </svg:marker>
-        </ng-template>
+        </svg:marker>
+      </ng-template>
 
-        <!-- cluster template -->
-        <ng-template #clusterTemplate let-cluster>
-          <svg:g class="node cluster">
-            <svg:rect
-              rx="5"
-              ry="5"
-              [attr.width]="cluster.dimension.width"
-              [attr.height]="cluster.dimension.height"
-              [attr.fill]="cluster.data.color"
-              />
-              </svg:g>
-            </ng-template>
+      <!-- cluster template -->
+      <ng-template #clusterTemplate let-cluster>
+        <svg:g class="node cluster">
+          <svg:rect
+            rx="5"
+            ry="5"
+            [attr.width]="cluster.dimension.width"
+            [attr.height]="cluster.dimension.height"
+            [attr.fill]="cluster.data.color"
+          />
+        </svg:g>
+      </ng-template>
 
-            <!-- node template -->
-            <ng-template #nodeTemplate let-node>
-              <svg:g class="node" (dblclick)="onNodeDblClick(node)">
-                <svg:rect
-                  [class.selected]="node.data?.selected"
-                  [attr.width]="node.dimension.width"
-                  [attr.height]="node.dimension.height"
-                  [attr.fill]="node.data.customColor || node.data.color"
-                  />
-                  <svg:text
-                    alignment-baseline="central"
-                    [attr.x]="10"
-                    [attr.y]="node.dimension.height / 2"
-                    >
-                    {{ node.label }}
-                    </svg:text>
-                    </svg:g>
-                  </ng-template>
+      <!-- node template -->
+      <ng-template #nodeTemplate let-node>
+        <svg:g class="node" (dblclick)="onNodeDblClick(node)">
+          <svg:rect
+            [class.selected]="node.data?.selected"
+            [attr.width]="node.dimension.width"
+            [attr.height]="node.dimension.height"
+            [attr.fill]="node.data.customColor || node.data.color"
+          />
+          <svg:text
+            alignment-baseline="central"
+            [attr.x]="10"
+            [attr.y]="node.dimension.height / 2"
+          >
+            {{ node.label }}
+          </svg:text>
+        </svg:g>
+      </ng-template>
 
-                  <!-- link template -->
-                  <ng-template #linkTemplate let-link>
-                    <svg:g class="edge">
-                      <svg:path
-                        class="line"
-                        stroke-width="2"
-                        marker-end="url(#arrow)"
-                        ></svg:path>
-                        <svg:text class="edge-label" text-anchor="middle">
-                          <textPath
-                            class="text-path"
-                            [attr.href]="'#' + link.id"
-                            [style.dominant-baseline]="link.dominantBaseline"
-                            startOffset="50%"
-                            >
-                            {{ link.label }}
-                          </textPath>
-                          </svg:text>
-                          </svg:g>
-                        </ng-template>
-                      </ngx-graph>
-                    </div>
+      <!-- link template -->
+      <ng-template #linkTemplate let-link>
+        <svg:g class="edge">
+          <svg:path
+            class="line"
+            stroke-width="2"
+            marker-end="url(#arrow)"
+          ></svg:path>
+          <svg:text class="edge-label" text-anchor="middle">
+            <textPath
+              class="text-path"
+              [attr.href]="'#' + link.id"
+              [style.dominant-baseline]="link.dominantBaseline"
+              startOffset="50%"
+            >
+              {{ link.label }}
+            </textPath>
+          </svg:text>
+        </svg:g>
+      </ng-template>
+    </ngx-graph>
+  </div>
 
-                    <!-- tools -->
-                    <div id="tools">
-                      <div id="bar">
-                        <button
-                          type="button"
-                          mat-icon-button
-                          matTooltip="Center"
-                          (click)="center$.next(true)"
-                          >
-                          <mat-icon>filter_center_focus</mat-icon>
-                        </button>
-                        <button
-                          type="button"
-                          mat-icon-button
-                          matTooltip="Zoom to fit"
-                          (click)="zoomToFit$.next({ force: true })"
-                          >
-                          <mat-icon>fit_screen</mat-icon>
-                        </button>
-                        <button
-                          type="button"
-                          color="warn"
-                          mat-icon-button
-                          matTooltip="Reset"
-                          (click)="update$.next(true)"
-                          >
-                          <mat-icon>restart_alt</mat-icon>
-                        </button>
-                        @if (nodes$ | async; as nodes) {
-                          <span class="muted"
-                            >N:{{ nodes.length }} E:{{ (edges$ | async)?.length }}</span
-                            >
-                          }
-                          @if (selectedNode$ | async; as selectedNode) {
-                            <button
-                              type="button"
-                              color="primary"
-                              mat-icon-button
-                              matTooltip="Toggle the selected node"
-                              [disabled]="!selectedNode"
-                              (click)="onNodeDblClick(selectedNode)"
-                              >
-                              <mat-icon>unfold_more</mat-icon>
-                            </button>
-                          }
-                          @if (canPick) {
-                            <button
-                              type="button"
-                              color="primary"
-                              mat-icon-button
+  <!-- tools -->
+  <div id="tools">
+    <div id="bar">
+      <button
+        type="button"
+        mat-icon-button
+        matTooltip="Center"
+        (click)="center$.next(true)"
+      >
+        <mat-icon>filter_center_focus</mat-icon>
+      </button>
+      <button
+        type="button"
+        mat-icon-button
+        matTooltip="Zoom to fit"
+        (click)="zoomToFit$.next({ force: true })"
+      >
+        <mat-icon>fit_screen</mat-icon>
+      </button>
+      <button
+        type="button"
+        color="warn"
+        mat-icon-button
+        matTooltip="Reset"
+        (click)="update$.next(true)"
+      >
+        <mat-icon class="mat-warn">restart_alt</mat-icon>
+      </button>
+      @if (nodes$ | async; as nodes) {
+      <span class="muted"
+        >N:{{ nodes.length }} E:{{ (edges$ | async)?.length }}</span
+      >
+      } @if (selectedNode$ | async; as selectedNode) {
+      <button
+        type="button"
+        color="primary"
+        mat-icon-button
+        matTooltip="Toggle the selected node"
+        [disabled]="!selectedNode"
+        (click)="onNodeDblClick(selectedNode)"
+      >
+        <mat-icon class="mat-primary">unfold_more</mat-icon>
+      </button>
+      } @if (canPick) {
+      <button
+        type="button"
+        color="primary"
+        mat-icon-button
         [matTooltip]="
           canMoveToSource
             ? 'Pick selected node or (shift) its source'
             : 'Pick the selected node'
         "
-                              [disabled]="!(selectedNode$ | async)"
-                              (click)="pickSelectedNode($event)"
-                              >
-                              <mat-icon>check_circle</mat-icon>
-                            </button>
-                          }
-                        </div>
-                        <!-- progress -->
-                        <div id="progress">
-                          @if (loading$ | async) {
-                            <mat-progress-bar
-                              mode="indeterminate"
-                            ></mat-progress-bar>
-                          }
-                        </div>
-                        <div id="filters">
-                          @if (selectedNode$ | async; as node) {
-                            <div id="filter-head">
-                              <span [style.color]="node.data.color || 'black'">&#x2b24;</span>
-                              <span style="margin-left: 6px" matTooltip="{{ node.data.uri }}">{{
-                                node | graphNodeLabel
-                              }}</span>
-                              <span class="muted" style="margin-left: 8px; font-size: 90%">{{
-                                node.id
-                              }}</span>
-                            </div>
-                          }
-                          <mat-tab-group>
-                            <!-- N-outs -->
-                            @if (nOutFilter$ | async; as nOutFilter) {
-                              <mat-tab>
-                                <ng-template mat-tab-label>
-                                  N<mat-icon>logout</mat-icon>
-                                </ng-template>
-                                <cadmus-walker-triple-filter
-                                  [filter]="nOutFilter"
-                                  (filterChange)="onNOutFilterChange($event)"
-                                ></cadmus-walker-triple-filter>
-                              </mat-tab>
-                            }
-                            <!-- N-ins -->
-                            @if (nInFilter$ | async; as nInFilter) {
-                              <mat-tab>
-                                <ng-template mat-tab-label> N<mat-icon>login</mat-icon> </ng-template>
-                                <cadmus-walker-triple-filter
-                                  [filter]="nInFilter"
-                                  (filterChange)="onNInFilterChange($event)"
-                                ></cadmus-walker-triple-filter>
-                              </mat-tab>
-                            }
-                            <!-- P-outs -->
-                            @if (pOutFilter$ | async; as pOutFilter) {
-                              <mat-tab>
-                                <ng-template mat-tab-label>
-                                  P<mat-icon>logout</mat-icon>
-                                </ng-template>
-                                <cadmus-walker-linked-node-filter
-                                  [filter]="pOutFilter"
-                                  (filterChange)="onPOutFilterChange($event)"
-                                ></cadmus-walker-linked-node-filter>
-                              </mat-tab>
-                            }
-                            <!-- P-ins -->
-                            @if (pInFilter$ | async; as pInFilter) {
-                              <mat-tab>
-                                <ng-template mat-tab-label> P<mat-icon>login</mat-icon> </ng-template>
-                                <cadmus-walker-linked-node-filter
-                                  [filter]="pInFilter"
-                                  (filterChange)="onPInFilterChange($event)"
-                                ></cadmus-walker-linked-node-filter>
-                              </mat-tab>
-                            }
-                            <!-- P-lit -->
-                            @if (pLitFilter$ | async; as pLitFilter) {
-                              <mat-tab>
-                                <ng-template mat-tab-label>
-                                  P<mat-icon>exit_to_app</mat-icon>
-                                </ng-template>
-                                <cadmus-walker-linked-literal-filter
-                                  [filter]="pLitFilter"
-                                  (filterChange)="onPLitFilterChange($event)"
-                                ></cadmus-walker-linked-literal-filter>
-                              </mat-tab>
-                            }
-                          </mat-tab-group>
-                        </div>
-                      </div>
-                    </div>
+        [disabled]="!(selectedNode$ | async)"
+        (click)="pickSelectedNode($event)"
+      >
+        <mat-icon class="mat-primary">check_circle</mat-icon>
+      </button>
+      }
+    </div>
+    <!-- progress -->
+    <div id="progress">
+      @if (loading$ | async) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      }
+    </div>
+    <div id="filters">
+      @if (selectedNode$ | async; as node) {
+      <div id="filter-head">
+        <span [style.color]="node.data.color || 'black'">&#x2b24;</span>
+        <span style="margin-left: 6px" matTooltip="{{ node.data.uri }}">{{
+          node | graphNodeLabel
+        }}</span>
+        <span class="muted" style="margin-left: 8px; font-size: 90%">{{
+          node.id
+        }}</span>
+      </div>
+      }
+      <mat-tab-group>
+        <!-- N-outs -->
+        @if (nOutFilter$ | async; as nOutFilter) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            N<mat-icon>logout</mat-icon>
+          </ng-template>
+          <cadmus-walker-triple-filter
+            [filter]="nOutFilter"
+            (filterChange)="onNOutFilterChange($event)"
+          ></cadmus-walker-triple-filter>
+        </mat-tab>
+        }
+        <!-- N-ins -->
+        @if (nInFilter$ | async; as nInFilter) {
+        <mat-tab>
+          <ng-template mat-tab-label> N<mat-icon>login</mat-icon> </ng-template>
+          <cadmus-walker-triple-filter
+            [filter]="nInFilter"
+            (filterChange)="onNInFilterChange($event)"
+          ></cadmus-walker-triple-filter>
+        </mat-tab>
+        }
+        <!-- P-outs -->
+        @if (pOutFilter$ | async; as pOutFilter) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            P<mat-icon>logout</mat-icon>
+          </ng-template>
+          <cadmus-walker-linked-node-filter
+            [filter]="pOutFilter"
+            (filterChange)="onPOutFilterChange($event)"
+          ></cadmus-walker-linked-node-filter>
+        </mat-tab>
+        }
+        <!-- P-ins -->
+        @if (pInFilter$ | async; as pInFilter) {
+        <mat-tab>
+          <ng-template mat-tab-label> P<mat-icon>login</mat-icon> </ng-template>
+          <cadmus-walker-linked-node-filter
+            [filter]="pInFilter"
+            (filterChange)="onPInFilterChange($event)"
+          ></cadmus-walker-linked-node-filter>
+        </mat-tab>
+        }
+        <!-- P-lit -->
+        @if (pLitFilter$ | async; as pLitFilter) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            P<mat-icon>exit_to_app</mat-icon>
+          </ng-template>
+          <cadmus-walker-linked-literal-filter
+            [filter]="pLitFilter"
+            (filterChange)="onPLitFilterChange($event)"
+          ></cadmus-walker-linked-literal-filter>
+        </mat-tab>
+        }
+      </mat-tab-group>
+    </div>
+  </div>
+</div>

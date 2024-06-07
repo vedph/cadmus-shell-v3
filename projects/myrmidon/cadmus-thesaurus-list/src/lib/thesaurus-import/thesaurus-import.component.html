@@ -15,10 +15,11 @@
         type="button"
         mat-flat-button
         color="primary"
+        class="mat-primary"
         (click)="fileInput.click()"
         [disabled]="uploading"
       >
-        Select File
+        select file
       </button>
       <span class="file-name">{{ file.value?.name }}</span>
       @if ($any(file).errors?.required) {
@@ -99,9 +100,10 @@
         type="submit"
         mat-flat-button
         color="warn"
+        class="mat-warn"
         [disabled]="uploading || form.invalid"
       >
-        Upload
+        upload
       </button>
     </div>
   </fieldset>
@@ -111,8 +113,14 @@
 @if (uploading) {
 <div>
   <div>
-    <button type="button" mat-flat-button color="warn" (click)="onCancel()">
-      Cancel
+    <button
+      type="button"
+      mat-flat-button
+      color="warn"
+      class="mat-warn"
+      (click)="onCancel()"
+    >
+      cancel
     </button>
   </div>
   <div style="margin-top: 16px">

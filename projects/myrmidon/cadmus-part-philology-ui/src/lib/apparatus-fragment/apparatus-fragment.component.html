@@ -62,7 +62,7 @@
                     color="primary"
                     (click)="editEntry(entry, i)"
                   >
-                    <mat-icon>edit</mat-icon>
+                    <mat-icon class="mat-primary">edit</mat-icon>
                   </button>
                   <button
                     mat-icon-button
@@ -89,7 +89,7 @@
                     color="warn"
                     (click)="removeEntry(i)"
                   >
-                    <mat-icon>remove_circle</mat-icon>
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
                   </button>
                 </td>
                 <td [matTooltip]="getEntryTypeDsc(entry.type)">
@@ -111,6 +111,7 @@
             <button
               type="button"
               color="primary"
+              class="mat-primary"
               (click)="addEntry()"
               mat-flat-button
             >

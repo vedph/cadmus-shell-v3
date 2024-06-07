@@ -13,8 +13,8 @@
       color="warn"
       style="margin-top: 20px"
       (click)="clearSubjectNode()"
-      >
-      <mat-icon>clear</mat-icon>
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
     </button>
   </div>
   <!-- predicate -->
@@ -32,40 +32,39 @@
       color="warn"
       style="margin-top: 20px"
       (click)="clearPredicateNode()"
-      >
-      <mat-icon>clear</mat-icon>
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
     </button>
   </div>
   <!-- object, objectLit -->
   <div>
     <mat-checkbox [formControl]="literal">literal</mat-checkbox>
   </div>
-  @if (literal?.value) {
-    <div>
-      <mat-label>literal</mat-label>
-      <mat-form-field>
-        <input matInput [formControl]="objectLit" maxlength="500" />
-      </mat-form-field>
-    </div>
-  }
-  @if (!literal?.value) {
-    <div class="form-row">
-      <cadmus-ref-lookup
-        [service]="lookupService"
-        [item]="objectNode$ | async"
-        label="object"
-        (itemChange)="onObjectNodeChange($event)"
-      ></cadmus-ref-lookup>
-      <button
-        type="button"
-        mat-icon-button
-        color="warn"
-        style="margin-top: 20px"
-        (click)="clearObjectNode()"
-        >
-        <mat-icon>clear</mat-icon>
-      </button>
-    </div>
+  @if (literal.value) {
+  <div>
+    <mat-label>literal</mat-label>
+    <mat-form-field>
+      <input matInput [formControl]="objectLit" maxlength="500" />
+    </mat-form-field>
+  </div>
+  } @else {
+  <div class="form-row">
+    <cadmus-ref-lookup
+      [service]="lookupService"
+      [item]="objectNode$ | async"
+      label="object"
+      (itemChange)="onObjectNodeChange($event)"
+    ></cadmus-ref-lookup>
+    <button
+      type="button"
+      mat-icon-button
+      color="warn"
+      style="margin-top: 20px"
+      (click)="clearObjectNode()"
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
+    </button>
+  </div>
   }
   <!-- sid, sidPrefix -->
   <div>
@@ -83,7 +82,7 @@
     role="group"
     aria-label="toolbar"
     style="margin-bottom: 10px"
-    >
+  >
     <button
       mat-icon-button
       type="button"
@@ -91,8 +90,8 @@
       color="warn"
       matTooltip="Reset filters"
       [disabled]="disabled"
-      >
-      <mat-icon>clear</mat-icon>
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
       type="submit"
@@ -100,8 +99,8 @@
       color="primary"
       [disabled]="disabled"
       matTooltip="Apply filters"
-      >
-      <mat-icon>check_circle</mat-icon>
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
 </form>

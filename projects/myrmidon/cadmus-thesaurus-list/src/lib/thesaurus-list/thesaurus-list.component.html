@@ -34,7 +34,7 @@
                   color="primary"
                   (click)="editThesaurus(thesaurus)"
                 >
-                  <mat-icon>mode_edit</mat-icon>
+                  <mat-icon class="mat-primary">mode_edit</mat-icon>
                 </button>
                 @if (userLevel > 2) {
                 <button
@@ -44,7 +44,7 @@
                   color="warn"
                   (click)="deleteThesaurus(thesaurus)"
                 >
-                  <mat-icon>delete</mat-icon>
+                  <mat-icon class="mat-warn">delete</mat-icon>
                 </button>
                 }
                 <button
@@ -98,6 +98,7 @@
     <button
       type="button"
       color="primary"
+      class="mat-primary"
       mat-flat-button
       matTooltip="Add a new thesaurus"
       (click)="addThesaurus()"

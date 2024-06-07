@@ -28,11 +28,12 @@
           matTooltip="Clear query"
           (click)="queryCtl.reset()"
         >
-          <mat-icon>clear</mat-icon>
+          <mat-icon class="mat-warn">clear</mat-icon>
         </button>
         <button
           type="submit"
           color="primary"
+          class="mat-primary"
           mat-button
           matTooltip="Search items"
           [disabled]="disabled || form.invalid"
@@ -111,7 +112,7 @@
                     matTooltip="Copy name"
                     (click)="copyToClipboard(pd.name)"
                   >
-                    <mat-icon>content_copy</mat-icon>
+                    <mat-icon class="mat-primary">content_copy</mat-icon>
                   </button>
                 </td>
                 <td>{{ pd.name }}</td>

@@ -1,14 +1,14 @@
 <form [formGroup]="form" (submit)="apply()" ng-disabled="disabled">
   <!-- paginator -->
   @if (hasPager) {
-    <mat-paginator
-      [length]="total"
-      [pageSize]="pageSize.value || 10"
-      [pageSizeOptions]="[5, 10, 20]"
-      (page)="onPageChange($event)"
-      aria-label="Select page"
-      >
-    </mat-paginator>
+  <mat-paginator
+    [length]="total"
+    [pageSize]="pageSize.value || 10"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPageChange($event)"
+    aria-label="Select page"
+  >
+  </mat-paginator>
   }
 
   <!-- subject ID -->
@@ -57,42 +57,42 @@
         type="number"
         [formControl]="minLitNumber"
         placeholder="min."
-        />
-      </mat-form-field>
-      -
-      <mat-form-field style="width: 5em">
-        <input
-          matInput
-          type="number"
-          [formControl]="maxLitNumber"
-          placeholder="max."
-          />
-        </mat-form-field>
-      </div>
-      <div
-        class="btn-group"
-        role="group"
-        aria-label="toolbar"
-        style="margin-bottom: 10px"
-        >
-        <button
-          mat-icon-button
-          type="button"
-          (click)="reset()"
-          color="warn"
-          matTooltip="Reset filters"
-          [disabled]="disabled"
-          >
-          <mat-icon>clear</mat-icon>
-        </button>
-        <button
-          type="submit"
-          mat-icon-button
-          color="primary"
-          [disabled]="disabled"
-          matTooltip="Apply filters"
-          >
-          <mat-icon>check_circle</mat-icon>
-        </button>
-      </div>
-    </form>
+      />
+    </mat-form-field>
+    -
+    <mat-form-field style="width: 5em">
+      <input
+        matInput
+        type="number"
+        [formControl]="maxLitNumber"
+        placeholder="max."
+      />
+    </mat-form-field>
+  </div>
+  <div
+    class="btn-group"
+    role="group"
+    aria-label="toolbar"
+    style="margin-bottom: 10px"
+  >
+    <button
+      mat-icon-button
+      type="button"
+      (click)="reset()"
+      color="warn"
+      matTooltip="Reset filters"
+      [disabled]="disabled"
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      mat-icon-button
+      color="primary"
+      [disabled]="disabled"
+      matTooltip="Apply filters"
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon>
+    </button>
+  </div>
+</form>

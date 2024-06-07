@@ -13,6 +13,7 @@
             type="button"
             mat-flat-button
             color="primary"
+            class="mat-primary"
             (click)="addMetadatum()"
           >
             <mat-icon>add_circle</mat-icon> metadatum
@@ -33,7 +34,7 @@
                 color="warn"
                 (click)="removeMetadatum(i)"
               >
-                <mat-icon>remove_circle</mat-icon>
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
               <button
                 [disabled]="first"

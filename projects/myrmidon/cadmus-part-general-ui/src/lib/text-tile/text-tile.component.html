@@ -1,92 +1,76 @@
 @if (tile) {
-  <div
-    class="tile"
-    [class.checked]="checked"
-    [class.selected]="selected"
-    [style.background-color]="color || 'transparent'"
-    tabindex="1"
-    (keydown.F2)="edit()"
-    (keydown.F3)="requestEditData()"
-    (keydown.space)="toggleCheckedNonEdit()"
-    >
-    @if (editing) {
-      <form [formGroup]="form" (submit)="save()">
-        <mat-form-field>
-          <mat-label>text [{{ tile.x }}]</mat-label>
-          <input
-            #textInput
-            matInput
-            type="text"
-            spellcheck="false"
-            formControlName="editedText"
-            (keydown.esc)="cancel()"
-            />
-            @if (
-              editedText.hasError('required') &&
-              (editedText.dirty || editedText.touched)
-              ) {
-              <mat-error
-                >enter a text</mat-error
-                >
-            }
-            @if (
-              editedText.hasError('maxLength') &&
-              (editedText.dirty || editedText.touched)
-              ) {
-              <mat-error
-                >text too long</mat-error
-                >
-              }
-              @if (
-                editedText.hasError('pattern') &&
-                (editedText.dirty || editedText.touched)
-                ) {
-                <mat-error
-                  >no whitespaces allowed</mat-error
-                  >
-                }
-              </mat-form-field>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Discard text"
-                color="warn"
-                (click)="cancel()"
-                >
-                <mat-icon>clear</mat-icon>
-              </button>
-              <button
-                type="submit"
-                [disabled]="form.invalid"
-                mat-icon-button
-                matTooltip="Save text"
-                color="primary"
-                >
-                <mat-icon>check_circle</mat-icon>
-              </button>
-            </form>
-          }
-          @if (!editing) {
-            <ng-container style="display: flex; align-items: center">
-              <span class="text">{{ text }}</span>
-              @if (!readonly) {
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Edit text (F2)"
-                  color="primary"
-                  (click)="edit()"
-                  >
-                  <mat-icon>edit</mat-icon>
-                </button>
-              }
-              @if (checkable) {
-                <mat-checkbox
-                  [formControl]="checker"
-                  matTooltip="Toggle check"
-                ></mat-checkbox>
-              }
-            </ng-container>
-          }
-        </div>
+<div
+  class="tile"
+  [class.checked]="checked"
+  [class.selected]="selected"
+  [style.background-color]="color || 'transparent'"
+  tabindex="1"
+  (keydown.F2)="edit()"
+  (keydown.F3)="requestEditData()"
+  (keydown.space)="toggleCheckedNonEdit()"
+>
+  @if (editing) {
+  <form [formGroup]="form" (submit)="save()">
+    <mat-form-field>
+      <mat-label>text [{{ tile.x }}]</mat-label>
+      <input
+        #textInput
+        matInput
+        type="text"
+        spellcheck="false"
+        formControlName="editedText"
+        (keydown.esc)="cancel()"
+      />
+      @if ( editedText.hasError('required') && (editedText.dirty ||
+      editedText.touched) ) {
+      <mat-error>enter a text</mat-error>
+      } @if ( editedText.hasError('maxLength') && (editedText.dirty ||
+      editedText.touched) ) {
+      <mat-error>text too long</mat-error>
+      } @if ( editedText.hasError('pattern') && (editedText.dirty ||
+      editedText.touched) ) {
+      <mat-error>no whitespaces allowed</mat-error>
       }
+    </mat-form-field>
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Discard text"
+      color="warn"
+      (click)="cancel()"
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      [disabled]="form.invalid"
+      mat-icon-button
+      matTooltip="Save text"
+      color="primary"
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon>
+    </button>
+  </form>
+  } @if (!editing) {
+  <ng-container style="display: flex; align-items: center">
+    <span class="text">{{ text }}</span>
+    @if (!readonly) {
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Edit text (F2)"
+      color="primary"
+      (click)="edit()"
+    >
+      <mat-icon class="mat-primary">edit</mat-icon>
+    </button>
+    } @if (checkable) {
+    <mat-checkbox
+      [formControl]="checker"
+      matTooltip="Toggle check"
+    ></mat-checkbox>
+    }
+  </ng-container>
+  }
+</div>
+}

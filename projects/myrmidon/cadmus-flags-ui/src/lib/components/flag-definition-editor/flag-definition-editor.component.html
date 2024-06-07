@@ -5,82 +5,64 @@
       <mat-label>ID</mat-label>
       <mat-select [formControl]="id">
         @for (n of flagNumbers; track n) {
-          <mat-option [value]="n">{{
-            n
-          }}</mat-option>
+        <mat-option [value]="n">{{ n }}</mat-option>
         }
       </mat-select>
       @if ($any(id.errors)?.required && (id.dirty || id.touched)) {
-        <mat-error
-          >ID required</mat-error
-          >
-        }
-      </mat-form-field>
+      <mat-error>ID required</mat-error>
+      }
+    </mat-form-field>
 
-      <!-- label -->
-      <mat-form-field>
-        <mat-label>label</mat-label>
-        <input matInput [formControl]="label" />
-        @if ($any(label.errors)?.required && (label.dirty || label.touched)) {
-          <mat-error
-            >label required</mat-error
-            >
-          }
-          @if ($any(label.errors)?.maxLength && (label.dirty || label.touched)) {
-            <mat-error
-              >label too long</mat-error
-              >
-            }
-          </mat-form-field>
+    <!-- label -->
+    <mat-form-field>
+      <mat-label>label</mat-label>
+      <input matInput [formControl]="label" />
+      @if ($any(label.errors)?.required && (label.dirty || label.touched)) {
+      <mat-error>label required</mat-error>
+      } @if ($any(label.errors)?.maxLength && (label.dirty || label.touched)) {
+      <mat-error>label too long</mat-error>
+      }
+    </mat-form-field>
 
-          <!-- colorKey -->
-          <mat-form-field class="input-color">
-            <mat-label>color</mat-label>
-            <input matInput type="color" [formControl]="colorKey" />
-          </mat-form-field>
-        </div>
-        <div>
-          <!-- description -->
-          <mat-form-field class="dsc">
-            <mat-label>description</mat-label>
-            <textarea matInput rows="2" [formControl]="description"></textarea>
-            @if (
-              $any(description.errors)?.required &&
-              (description.dirty || description.touched)
-              ) {
-              <mat-error
-                >description required</mat-error
-                >
-              }
-              @if (
-                $any(description.errors)?.maxLength &&
-                (description.dirty || description.touched)
-                ) {
-                <mat-error
-                  >description too long</mat-error
-                  >
-                }
-              </mat-form-field>
-            </div>
-            <!-- buttons -->
-            <div>
-              <button
-                type="button"
-                color="warn"
-                mat-icon-button
-                matTooltip="Discard changes"
-                (click)="cancel()"
-                >
-                <mat-icon>clear</mat-icon>
-              </button>
-              <button
-                type="submit"
-                color="primary"
-                mat-icon-button
-                matTooltip="Accept changes"
-                [disabled]="form.invalid || form.pristine"
-                >
-                <mat-icon>check_circle</mat-icon>
-              </button>
-            </div>
-          </form>
+    <!-- colorKey -->
+    <mat-form-field class="input-color">
+      <mat-label>color</mat-label>
+      <input matInput type="color" [formControl]="colorKey" />
+    </mat-form-field>
+  </div>
+  <div>
+    <!-- description -->
+    <mat-form-field class="dsc">
+      <mat-label>description</mat-label>
+      <textarea matInput rows="2" [formControl]="description"></textarea>
+      @if ( $any(description.errors)?.required && (description.dirty ||
+      description.touched) ) {
+      <mat-error>description required</mat-error>
+      } @if ( $any(description.errors)?.maxLength && (description.dirty ||
+      description.touched) ) {
+      <mat-error>description too long</mat-error>
+      }
+    </mat-form-field>
+  </div>
+  <!-- buttons -->
+  <div>
+    <button
+      type="button"
+      color="warn"
+      mat-icon-button
+      matTooltip="Discard changes"
+      (click)="cancel()"
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      color="primary"
+      mat-icon-button
+      matTooltip="Accept changes"
+      [disabled]="form.invalid || form.pristine"
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon>
+    </button>
+  </div>
+</form>

@@ -1,62 +1,53 @@
 <div>
   @if (loading$ | async) {
-    <mat-progress-bar
-      mode="indeterminate"
-    ></mat-progress-bar>
-  }
-  @if (flags$ | async; as flags) {
-    <table>
-      <tbody>
-        @for (f of flags; track f; let i = $index) {
-          <tr
-            [class.selected]="f === (editedFlag$ | async)"
-            >
-            <td class="fit-width">
-              <button
-                type="button"
-                mat-icon-button
-                color="primary"
-                (click)="editFlag(f)"
-                >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                color="warn"
-                (click)="deleteFlag(i)"
-                >
-                <mat-icon>remove_circle</mat-icon>
-              </button>
-            </td>
-            <td class="fit-width">
-              <mat-icon [style.color]="'#' + f.colorKey">flag</mat-icon>
-            </td>
-            <td class="fit-width">{{ f.id | flagBit }}</td>
-            <td [matTooltip]="f.description">
-              {{ f.label }}
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  }
-  @if (editedFlag$ | async; as editedFlag) {
-    <mat-card
-      appearance="outlined"
-      [@inOutAnimation]
-      >
-      <mat-card-header>
-        <mat-card-title>Flag #{{ editedFlag.id }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <cadmus-flag-definition-editor
-          [flag]="editedFlag"
-          (editorClose)="onFlagEditorClose()"
-          (flagChange)="onFlagChange($event)"
-        ></cadmus-flag-definition-editor>
-      </mat-card-content>
-    </mat-card>
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  } @if (flags$ | async; as flags) {
+  <table>
+    <tbody>
+      @for (f of flags; track f; let i = $index) {
+      <tr [class.selected]="f === (editedFlag$ | async)">
+        <td class="fit-width">
+          <button
+            type="button"
+            mat-icon-button
+            color="primary"
+            (click)="editFlag(f)"
+          >
+            <mat-icon class="mat-primary">edit</mat-icon>
+          </button>
+          <button
+            type="button"
+            mat-icon-button
+            color="warn"
+            (click)="deleteFlag(i)"
+          >
+            <mat-icon class="mat-warn">remove_circle</mat-icon>
+          </button>
+        </td>
+        <td class="fit-width">
+          <mat-icon [style.color]="'#' + f.colorKey">flag</mat-icon>
+        </td>
+        <td class="fit-width">{{ f.id | flagBit }}</td>
+        <td [matTooltip]="f.description">
+          {{ f.label }}
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+  } @if (editedFlag$ | async; as editedFlag) {
+  <mat-card appearance="outlined" [@inOutAnimation]>
+    <mat-card-header>
+      <mat-card-title>Flag #{{ editedFlag.id }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <cadmus-flag-definition-editor
+        [flag]="editedFlag"
+        (editorClose)="onFlagEditorClose()"
+        (flagChange)="onFlagChange($event)"
+      ></cadmus-flag-definition-editor>
+    </mat-card-content>
+  </mat-card>
   }
 
   <div class="form-row">
@@ -66,8 +57,8 @@
       color="primary"
       matTooltip="Add a new flag"
       (click)="addFlag()"
-      >
-      <mat-icon>add_circle</mat-icon>
+    >
+      <mat-icon class="mat-primary">add_circle</mat-icon>
     </button>
     <button
       type="button"
@@ -75,8 +66,8 @@
       color="warn"
       matTooltip="Reset flags"
       (click)="reset()"
-      >
-      <mat-icon>refresh</mat-icon>
+    >
+      <mat-icon class="mat-warn">refresh</mat-icon>
     </button>
     <button
       type="button"
@@ -84,8 +75,8 @@
       color="primary"
       matTooltip="Save flags"
       (click)="save()"
-      >
-      <mat-icon>check_circle</mat-icon> save
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon> save
     </button>
   </div>
 </div>

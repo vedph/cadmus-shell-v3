@@ -1,6 +1,6 @@
 @if (item$ | async; as item) {
   <div class="item-bar">
-    <h2>{{ item.title }}</h2>
+    <h3>{{ item.title }}</h3>
     <p class="dsc">{{ item.description }}</p>
     <p class="ver">
       Last saved {{ item.timeModified | date: "yyyy-MM-dd HH:mm:ss" }} by

@@ -3,3 +3,7 @@ th {
   color: silver;
   font-weight: normal;
 }
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}

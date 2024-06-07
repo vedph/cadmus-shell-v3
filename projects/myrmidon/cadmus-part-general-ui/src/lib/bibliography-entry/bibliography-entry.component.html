@@ -322,12 +322,12 @@
             [disabled]="keyForm.invalid"
             matTooltip="Add new keyword"
           >
-            <mat-icon>add_circle</mat-icon> keyword
+            <mat-icon class="mat-primary">add_circle</mat-icon> keyword
           </button>
         </div>
       </form>
       <!-- list -->
-      @if (keywords?.length) {
+      @if (keywords.length) {
       <table>
         <thead>
           <tr>
@@ -348,7 +348,7 @@
                 color="warn"
                 (click)="deleteKeyword(i)"
               >
-                <mat-icon>remove_circle</mat-icon>
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
               <button
                 [disabled]="first"
@@ -388,7 +388,7 @@
       matTooltip="Cancel edit"
       (click)="cancel()"
     >
-      <mat-icon>cancel</mat-icon>
+      <mat-icon class="mat-warn">cancel</mat-icon>
     </button>
     <button
       type="submit"
@@ -397,7 +397,7 @@
       color="primary"
       matTooltip="Save entry"
     >
-      <mat-icon>check_circle</mat-icon>
+      <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
 </form>

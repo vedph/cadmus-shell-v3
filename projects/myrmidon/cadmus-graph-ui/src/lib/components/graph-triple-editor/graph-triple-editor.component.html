@@ -31,85 +31,69 @@
       <mat-checkbox [formControl]="isLiteral">literal</mat-checkbox>
       <!-- object -->
       @if (!isLiteral?.value) {
-        <cadmus-ref-lookup
-          [required]="true"
-          [service]="lookupService"
-          [item]="objectNode.value"
-          label="object"
-          (itemChange)="onObjectChange($event)"
-        ></cadmus-ref-lookup>
+      <cadmus-ref-lookup
+        [required]="true"
+        [service]="lookupService"
+        [item]="objectNode.value"
+        label="object"
+        (itemChange)="onObjectChange($event)"
+      ></cadmus-ref-lookup>
       }
       <!-- literal value -->
       @if (isLiteral?.value) {
-        <mat-form-field style="width: 100%">
-          <mat-label>object</mat-label>
-          <textarea matInput [formControl]="literal"></textarea>
-          @if (
-            $any(literal).errors?.required && (literal.dirty || literal.touched)
-            ) {
-            <mat-error
-              >literal required</mat-error
-              >
-            }
-            @if (
-              $any(literal).errors?.maxLength &&
-              (literal.dirty || literal.touched)
-              ) {
-              <mat-error
-                >literal too long</mat-error
-                >
-              }
-            </mat-form-field>
+      <mat-form-field style="width: 100%">
+        <mat-label>object</mat-label>
+        <textarea matInput [formControl]="literal"></textarea>
+        @if ( $any(literal).errors?.required && (literal.dirty ||
+        literal.touched) ) {
+        <mat-error>literal required</mat-error>
+        } @if ( $any(literal).errors?.maxLength && (literal.dirty ||
+        literal.touched) ) {
+        <mat-error>literal too long</mat-error>
+        }
+      </mat-form-field>
+      }
+      <div class="form-row">
+        <!-- literal language -->
+        @if (isLiteral?.value) {
+        <mat-form-field>
+          <mat-label>language</mat-label>
+          <input matInput [formControl]="literalLang" />
+          <mat-hint>ISO-639 etc.</mat-hint>
+          @if ( $any(literalLang).errors?.maxLength && (literalLang.dirty ||
+          literalLang.touched) ) {
+          <mat-error>language too long</mat-error>
           }
-          <div class="form-row">
-            <!-- literal language -->
-            @if (isLiteral?.value) {
-              <mat-form-field>
-                <mat-label>language</mat-label>
-                <input matInput [formControl]="literalLang" />
-                <mat-hint>ISO-639 etc.</mat-hint>
-                @if (
-                  $any(literalLang).errors?.maxLength &&
-                  (literalLang.dirty || literalLang.touched)
-                  ) {
-                  <mat-error
-                    >language too long</mat-error
-                    >
-                  }
-                </mat-form-field>
-              }
-              <!-- literal type -->
-              @if (isLiteral?.value) {
-                <mat-form-field>
-                  <mat-label>type</mat-label>
-                  <input matInput [formControl]="literalType" />
-                  <mat-hint>XML data type (xs:...)</mat-hint>
-                  @if (
-                    $any(literalType).errors?.maxLength &&
-                    (literalType.dirty || literalType.touched)
-                    ) {
-                    <mat-error
-                      >type too long</mat-error
-                      >
-                    }
-                  </mat-form-field>
-                }
-              </div>
-            </fieldset>
-          </div>
+        </mat-form-field>
+        }
+        <!-- literal type -->
+        @if (isLiteral?.value) {
+        <mat-form-field>
+          <mat-label>type</mat-label>
+          <input matInput [formControl]="literalType" />
+          <mat-hint>XML data type (xs:...)</mat-hint>
+          @if ( $any(literalType).errors?.maxLength && (literalType.dirty ||
+          literalType.touched) ) {
+          <mat-error>type too long</mat-error>
+          }
+        </mat-form-field>
+        }
+      </div>
+    </fieldset>
+  </div>
 
-          <!-- buttons -->
-          <div>
-            <button color="warn" mat-icon-button type="button" (click)="cancel()">
-              <mat-icon>cancel</mat-icon>
-            </button>
-            <button
-              color="primary"
-              mat-icon-button
-              type="submit"
-              [disabled]="form.invalid"
-              >
-              <mat-icon>check_circle</mat-icon>
-            </button>
-          </div>
-        </form>
+  <!-- buttons -->
+  <div>
+    <button color="warn" mat-icon-button type="button" (click)="cancel()">
+      <mat-icon class="mat-warn">cancel</mat-icon>
+    </button>
+    <button
+      color="primary"
+      mat-icon-button
+      type="submit"
+      [disabled]="form.invalid"
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon>
+    </button>
+  </div>
+</form>

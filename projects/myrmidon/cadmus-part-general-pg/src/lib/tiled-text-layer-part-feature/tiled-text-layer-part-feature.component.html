@@ -6,151 +6,138 @@
     </div>
     <mat-card-title>
       Tiles-Based Text Layers
-      <button
-        type="button"
-        mat-icon-button
-        (click)="refreshBreakChance()"
+      <button type="button" mat-icon-button (click)="refreshBreakChance()">
+        @switch (breakChance$ | async) { @case (-1) {
+        <mat-icon matTooltip="Checking...">refresh</mat-icon>
+        } @case (0) {
+        <mat-icon matTooltip="Valid">check_circle</mat-icon>
+        } @case (1) {
+        <mat-icon matTooltip="Potentially broken" color="warn" class="mat-warn"
+          >warning</mat-icon
         >
-        @switch (breakChance$ | async) {
-          @case (-1) {
-            <mat-icon matTooltip="Checking...">refresh</mat-icon>
-          }
-          @case (0) {
-            <mat-icon matTooltip="Valid">check_circle</mat-icon>
-          }
-          @case (1) {
-            <mat-icon matTooltip="Potentially broken" color="warn"
-              >warning</mat-icon
-              >
-            }
-            @case (2) {
-              <mat-icon matTooltip="Broken" color="warn"
-                >error</mat-icon
-                >
-              }
-            }
-          </button>
-        </mat-card-title>
-        <cadmus-current-layer-part-bar></cadmus-current-layer-part-bar>
-      </mat-card-header>
-      @if (!(loading$ | async) && !(saving$ | async)) {
-        <mat-card-actions>
-          <mat-toolbar>
-            <button
-              mat-icon-button
-              type="button"
-              (click)="editFragment()"
-              matTooltip="Edit the selected fragment"
-              >
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              color="warn"
-              (click)="deleteFragment()"
-              matTooltip="Delete the selected fragment"
-              >
-              <mat-icon>delete</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              (click)="pickLocation()"
-              matTooltip="Pick the selection location for a new fragment"
-              >
-              <mat-icon>info</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              color="warn"
-              (click)="clearTileChecks()"
-              matTooltip="Clear any selection"
-              >
-              <mat-icon>clear</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              color="primary"
-              (click)="addFragment()"
-              matTooltip="Add a new fragment at selection"
-              >
-              <mat-icon>add_circle</mat-icon>
-            </button>
-            <span>{{ pickedLocation }}</span>
-          </mat-toolbar>
-        </mat-card-actions>
-      }
+        } @case (2) {
+        <mat-icon matTooltip="Broken" color="warn" class="mat-warn"
+          >error</mat-icon
+        >
+        } }
+      </button>
+    </mat-card-title>
+    <cadmus-current-layer-part-bar></cadmus-current-layer-part-bar>
+  </mat-card-header>
+  @if (!(loading$ | async) && !(saving$ | async)) {
+  <mat-card-actions>
+    <mat-toolbar>
+      <button
+        mat-icon-button
+        type="button"
+        (click)="editFragment()"
+        matTooltip="Edit the selected fragment"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        type="button"
+        color="warn"
+        (click)="deleteFragment()"
+        matTooltip="Delete the selected fragment"
+      >
+        <mat-icon class="mat-warn">delete</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        type="button"
+        (click)="pickLocation()"
+        matTooltip="Pick the selection location for a new fragment"
+      >
+        <mat-icon>info</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        type="button"
+        color="warn"
+        (click)="clearTileChecks()"
+        matTooltip="Clear any selection"
+      >
+        <mat-icon class="mat-warn">clear</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        type="button"
+        color="primary"
+        (click)="addFragment()"
+        matTooltip="Add a new fragment at selection"
+      >
+        <mat-icon class="mat-primary">add_circle</mat-icon>
+      </button>
+      <span>{{ pickedLocation }}</span>
+    </mat-toolbar>
+  </mat-card-actions>
+  }
 
-      <mat-card-content>
-        @if (loading$ | async) {
-          <mat-progress-bar
-            mode="indeterminate"
-          ></mat-progress-bar>
+  <mat-card-content>
+    @if (loading$ | async) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <!-- rows -->
+    @if (view) {
+    <div>
+      @for (row of view.rows; track row; let iy = $index) {
+      <div class="tile-row" style="display: flex; flex-flow: row wrap">
+        <span class="row-nr">{{ iy + 1 }}</span>
+        <!-- tile -->
+        @for (tile of row.tiles || []; track tile; let ix = $index) {
+        <cadmus-text-tile
+          [tile]="tile.model"
+          [readonly]="true"
+          [selected]="tile === selectedTile"
+          [checkable]="true"
+          [checked]="tile.checked"
+          [color]="tile.frIndex > -1 ? 'yellow' : 'transparent'"
+          style="flex: 0 0 auto"
+          (click)="selectedTile = tile"
+          (checkedChange)="onTileChecked(iy + 1, ix + 1, $event.checked)"
+          (keydown.control.arrowleft)="selectPrevTile()"
+          (keydown.control.arrowright)="selectNextTile()"
+        >
+        </cadmus-text-tile>
         }
-
-        <!-- rows -->
-        @if (view) {
-          <div>
-            @for (row of view.rows; track row; let iy = $index) {
-              <div
-                class="tile-row"
-                style="display: flex; flex-flow: row wrap"
-                >
-                <span class="row-nr">{{ iy + 1 }}</span>
-                <!-- tile -->
-                @for (tile of row.tiles || []; track tile; let ix = $index) {
-                  <cadmus-text-tile
-                    [tile]="tile.model"
-                    [readonly]="true"
-                    [selected]="tile === selectedTile"
-                    [checkable]="true"
-                    [checked]="tile.checked"
-                    [color]="tile.frIndex > -1 ? 'yellow' : 'transparent'"
-                    style="flex: 0 0 auto"
-                    (click)="selectedTile = tile"
-                    (checkedChange)="onTileChecked(iy + 1, ix + 1, $event.checked)"
-                    (keydown.control.arrowleft)="selectPrevTile()"
-                    (keydown.control.arrowright)="selectNextTile()"
-                    >
-                  </cadmus-text-tile>
-                }
-              </div>
-            }
-          </div>
-        }
-      </mat-card-content>
-
-      <div>
-        <button
-          type="button"
-          mat-raised-button
-          color="warn"
-          matTooltip="Close this editor"
-          (click)="close()"
-          >
-          <mat-icon>cancel</mat-icon>
-          close
-        </button>
       </div>
-      @if (layerHints$ | async; as layerHints) {
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>Layer hints</mat-panel-title>
-            <mat-panel-description>{{ layerHints.length }}</mat-panel-description>
-          </mat-expansion-panel-header>
-          <cadmus-layer-hints
-            [hints]="layerHints"
-            [disabled]="(loading$ | async) || (saving$ | async) ? true : false"
-            [readonly]="userLevel < 2"
-            [targetLocation]="pickedLocation"
-            (requestEdit)="editFragmentFromHint($event)"
-            (requestDelete)="deleteFragmentFromHint($event)"
-            (requestMove)="moveFragmentFromHint($event)"
-            (requestPatch)="applyLayerPatches($event)"
-          ></cadmus-layer-hints>
-        </mat-expansion-panel>
       }
-    </mat-card>
+    </div>
+    }
+  </mat-card-content>
+
+  <div>
+    <button
+      type="button"
+      mat-raised-button
+      color="warn"
+      class="mat-warn"
+      matTooltip="Close this editor"
+      (click)="close()"
+    >
+      <mat-icon>cancel</mat-icon>
+      close
+    </button>
+  </div>
+  @if (layerHints$ | async; as layerHints) {
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Layer hints</mat-panel-title>
+      <mat-panel-description>{{ layerHints.length }}</mat-panel-description>
+    </mat-expansion-panel-header>
+    <cadmus-layer-hints
+      [hints]="layerHints"
+      [disabled]="(loading$ | async) || (saving$ | async) ? true : false"
+      [readonly]="userLevel < 2"
+      [targetLocation]="pickedLocation"
+      (requestEdit)="editFragmentFromHint($event)"
+      (requestDelete)="deleteFragmentFromHint($event)"
+      (requestMove)="moveFragmentFromHint($event)"
+      (requestPatch)="applyLayerPatches($event)"
+    ></cadmus-layer-hints>
+  </mat-expansion-panel>
+  }
+</mat-card>

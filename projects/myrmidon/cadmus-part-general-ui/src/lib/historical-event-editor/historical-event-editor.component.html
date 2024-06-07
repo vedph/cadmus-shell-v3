@@ -130,6 +130,7 @@
           type="button"
           mat-flat-button
           color="primary"
+          class="mat-primary"
           (click)="addEntity()"
         >
           <mat-icon>add_circle</mat-icon> related
@@ -154,7 +155,7 @@
                 (click)="editEntity(e, i)"
                 matTooltip="Edit this entity"
               >
-                <mat-icon>edit</mat-icon>
+                <mat-icon class="mat-primary">edit</mat-icon>
               </button>
               <button
                 type="button"
@@ -163,7 +164,7 @@
                 (click)="deleteEntity(i)"
                 matTooltip="Delete this entity"
               >
-                <mat-icon>delete</mat-icon>
+                <mat-icon class="mat-warn">delete</mat-icon>
               </button>
             </td>
             <td>
@@ -202,7 +203,7 @@
   <hr />
   <div class="button-row">
     <button type="button" color="warn" mat-icon-button (click)="cancel()">
-      <mat-icon>clear</mat-icon>
+      <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
       type="submit"
@@ -211,7 +212,7 @@
       matTooltip="Save event"
       [disabled]="form.invalid || form.pristine"
     >
-      <mat-icon>check_circle</mat-icon>
+      <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
     <span>event</span>
   </div>

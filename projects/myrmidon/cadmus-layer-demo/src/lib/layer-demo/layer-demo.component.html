@@ -1,6 +1,6 @@
 <mat-card appearance="outlined">
   <mat-card-header>
-    <h2>Layered Text Demo</h2>
+    <h3>Layered Text Demo</h3>
   </mat-card-header>
   <mat-card-content>
     <article>
@@ -54,115 +54,115 @@
             required
             spellcheck="false"
             formControlName="location"
-            />
-            <mat-hint>Y.X&#64;AxR</mat-hint>
-          </mat-form-field>
-        </div>
+          />
+          <mat-hint>Y.X&#64;AxR</mat-hint>
+        </mat-form-field>
+      </div>
 
-        <div>
-          <mat-toolbar>
-            <span>
-              <button
-                mat-icon-button
-                (click)="addLocation()"
-                type="button"
-                matTooltip="Add the specified location"
-                >
-                <mat-icon style="color: #66cc75">add_circle</mat-icon>
-              </button>
+      <div>
+        <mat-toolbar>
+          <span>
+            <button
+              mat-icon-button
+              (click)="addLocation()"
+              type="button"
+              matTooltip="Add the specified location"
+            >
+              <mat-icon style="color: #66cc75">add_circle</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="clearLocations()"
+              type="button"
+              matTooltip="Remove all the locations"
+            >
+              <mat-icon class="mat-warn">delete_sweep</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="primary"
+              type="submit"
+              matTooltip="Render the decorated base text"
+            >
+              <mat-icon class="mat-primary">play_circle_outline</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="getLocationForNew()"
+              type="button"
+              matTooltip="Get location for new item"
+            >
+              <mat-icon>playlist_add</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="getLocationForEdit()"
+              type="button"
+              matTooltip="Get location for selected item"
+            >
+              <mat-icon>playlist_add_check</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Larger text"
+              (click)="makeLarger()"
+              [disabled]="textSize >= 24"
+            >
+              <mat-icon>format_size</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Smaller text"
+              (click)="makeSmaller()"
+              [disabled]="textSize <= 12"
+            >
+              <mat-icon>text_fields</mat-icon>
+            </button>
+          </span>
+          <span class="tb-fill-remaining-space"></span>
+          <span>{{ userLocation }}</span>
+        </mat-toolbar>
+      </div>
+
+      <table>
+        <tbody>
+          @for (loc of locations; track loc) {
+          <tr>
+            <td>
               <button
                 mat-icon-button
                 color="warn"
-                (click)="clearLocations()"
-                type="button"
-                matTooltip="Remove all the locations"
-                >
-                <mat-icon>delete_sweep</mat-icon>
+                (click)="removeLocation(loc)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
-              <button
-                mat-icon-button
-                color="primary"
-                type="submit"
-                matTooltip="Render the decorated base text"
-                >
-                <mat-icon>play_circle_outline</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                (click)="getLocationForNew()"
-                type="button"
-                matTooltip="Get location for new item"
-                >
-                <mat-icon>playlist_add</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                (click)="getLocationForEdit()"
-                type="button"
-                matTooltip="Get location for selected item"
-                >
-                <mat-icon>playlist_add_check</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Larger text"
-                (click)="makeLarger()"
-                [disabled]="textSize >= 24"
-                >
-                <mat-icon>format_size</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Smaller text"
-                (click)="makeSmaller()"
-                [disabled]="textSize <= 12"
-                >
-                <mat-icon>text_fields</mat-icon>
-              </button>
-            </span>
-            <span class="tb-fill-remaining-space"></span>
-            <span>{{ userLocation }}</span>
-          </mat-toolbar>
-        </div>
+            </td>
+            <td>{{ loc.toString() }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-        <table>
-          <tbody>
-            @for (loc of locations; track loc) {
-              <tr>
-                <td>
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    (click)="removeLocation(loc)"
-                    >
-                    <mat-icon>remove_circle</mat-icon>
-                  </button>
-                </td>
-                <td>{{ loc.toString() }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </form>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <h3>Rendition</h3>
-    </mat-card-header>
-    <mat-card-content>
-      <div
-        [style.font-size]="textSize + 'px'"
-        [innerHtml]="result | safeHtml: 'html'"
-        id="result"
-        #resultElem
-      ></div>
-      <hr />
-      <div>
-        <code>{{ result }}</code>
-      </div>
-    </mat-card-content>
-  </mat-card>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <h3>Rendition</h3>
+  </mat-card-header>
+  <mat-card-content>
+    <div
+      [style.font-size]="textSize + 'px'"
+      [innerHtml]="result | safeHtml : 'html'"
+      id="result"
+      #resultElem
+    ></div>
+    <hr />
+    <div>
+      <code>{{ result }}</code>
+    </div>
+  </mat-card-content>
+</mat-card>
