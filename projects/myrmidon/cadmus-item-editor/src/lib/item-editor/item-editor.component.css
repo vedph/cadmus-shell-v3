@@ -1,6 +1,9 @@
 .full-width {
   width: 100%;
 }
+table {
+  border-collapse: collapse;
+}
 th {
   font-weight: normal;
   color: silver;
@@ -8,6 +11,9 @@ th {
 td.fit-width {
   width: 1px;
   white-space: nowrap;
+}
+tbody tr:nth-child(odd) {
+  background-color: #e2e2e2;
 }
 #layers td {
   padding: 0 6px;
@@ -48,6 +54,15 @@ input.id {
 }
 .form-row * {
   flex: 0 0 auto;
+}
+.group-header {
+  border-top: 1px solid #ccc;
+}
+table.parts-table {
+  width: 100%;
+}
+table.parts-table th {
+  text-align: left;
 }
 fieldset {
   border: 1px solid silver;

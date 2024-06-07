@@ -192,7 +192,7 @@
         </div>
         <mat-divider></mat-divider>
         @for (group of partGroups$ | async; track group) {
-        <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel expanded="true" class="group-header">
           <mat-expansion-panel-header>
             <mat-panel-title
               ><strong>{{ group.label }}</strong></mat-panel-title
@@ -201,7 +201,7 @@
               group.parts.length
             }}</mat-panel-description>
           </mat-expansion-panel-header>
-          <table style="width: 100%">
+          <table class="parts-table">
             <thead>
               <tr>
                 <th></th>
@@ -309,7 +309,7 @@
           <tbody>
             @for (part of parts; track part) {
             <tr>
-              <td>
+              <td class="fit-width">
                 @if (!part.isAbsent) {
                 <button
                   type="button"
