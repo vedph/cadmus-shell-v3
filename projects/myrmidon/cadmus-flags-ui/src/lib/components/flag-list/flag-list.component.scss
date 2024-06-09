@@ -2,9 +2,16 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
+th {
+  font-weight: normal;
+  color: silver;
+}
 td.fit-width {
   width: 1px;
   white-space: nowrap;
+}
+tbody tr:nth-child(odd) {
+  background-color: #e2e2e2;
 }
 .selected {
   background-color: #d6e8f1;
@@ -17,4 +24,11 @@ td.fit-width {
 }
 .form-row * {
   flex: 0 0 auto;
+}
+
+/* lt-md */
+@media only screen and (max-width: 959px) {
+  .noif-lt-md {
+    display: none;
+  }
 }

@@ -2,8 +2,8 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-tr:nth-child(odd) {
-  background-color: #eaeaea;
+tbody tr:nth-child(odd) {
+  background-color: #e2e2e2;
 }
 th {
   text-align: left;

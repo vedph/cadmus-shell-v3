@@ -28,8 +28,11 @@
           <mat-icon [style.color]="'#' + f.colorKey">flag</mat-icon>
         </td>
         <td class="fit-width">{{ f.id | flagBit }}</td>
-        <td [matTooltip]="f.description">
+        <td>
           {{ f.label }}
+        </td>
+        <td class="noif-lt-md">
+          {{ f.description }}
         </td>
       </tr>
       }
@@ -76,7 +79,7 @@
       matTooltip="Save flags"
       (click)="save()"
     >
-      <mat-icon class="mat-primary">check_circle</mat-icon> save
+      <mat-icon>check_circle</mat-icon> save
     </button>
   </div>
 </div>

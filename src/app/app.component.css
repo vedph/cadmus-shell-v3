@@ -17,3 +17,7 @@ footer {
 #logo {
   flex: 0 0 60px;
 }
+
+mat-toolbar mat-icon {
+  color: white;
+}

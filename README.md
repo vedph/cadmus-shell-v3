@@ -15,6 +15,10 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-06-09:
+  - applied [M3 theme](https://material.angular.io/guide/theming).
+  - minor aesthetic changes in some libraries.
+
 ### 8.1.2
 
 - 2024-06-07:

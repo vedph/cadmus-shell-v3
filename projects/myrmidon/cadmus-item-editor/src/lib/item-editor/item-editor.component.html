@@ -157,7 +157,7 @@
       @if (id) {
       <mat-tab label="Parts">
         <div class="new-part">
-          <form [formGroup]="newPart">
+          <form [formGroup]="newPart" class="form-row">
             <mat-form-field>
               <mat-label>part</mat-label>
               <mat-select [formControl]="newPartType" required>
@@ -175,7 +175,6 @@
               </mat-select>
               <mat-error>part type required</mat-error>
             </mat-form-field>
-            &nbsp;
             <button
               mat-stroked-button
               color="primary"

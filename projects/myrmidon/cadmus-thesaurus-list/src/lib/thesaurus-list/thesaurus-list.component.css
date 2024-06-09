@@ -1,8 +1,17 @@
 table {
   width: 100%;
+  border-collapse: collapse;
 }
-tr:nth-child(odd) {
-  background-color: #eaeaea;
+th {
+  font-weight: normal;
+  color: silver;
+}
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}
+tbody tr:nth-child(odd) {
+  background-color: #e2e2e2;
 }
 th {
   text-align: left;
@@ -11,10 +20,6 @@ th {
 }
 td.command {
   width: 24px;
-}
-td.fit-width {
-  width: 1px;
-  white-space: nowrap;
 }
 
 div#container {
