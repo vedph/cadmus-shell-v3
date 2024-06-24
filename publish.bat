@@ -40,6 +40,11 @@ call npm publish --access=public
 cd ..\..\..
 pause
 
+cd .\dist\myrmidon\cadmus-graph-ui-ex
+call npm publish --access=public
+cd ..\..\..
+pause
+
 cd .\dist\myrmidon\cadmus-item-editor
 call npm publish --access=public
 cd ..\..\..
