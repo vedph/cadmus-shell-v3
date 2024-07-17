@@ -20,6 +20,7 @@ import {
   PHYSICAL_STATES_PART_TYPEID,
   PIN_LINKS_PART_TYPEID,
   PIN_LINKS_FRAGMENT_TYPEID,
+  DECORATED_COUNTS_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
 import {
   APPARATUS_FRAGMENT_TYPEID,
@@ -48,6 +49,9 @@ export const PART_EDITOR_KEYS: PartEditorKeys = {
     part: GENERAL,
   },
   [COMMENT_PART_TYPEID]: {
+    part: GENERAL,
+  },
+  [DECORATED_COUNTS_PART_TYPEID]: {
     part: GENERAL,
   },
   [DOC_REFERENCES_PART_TYPEID]: {

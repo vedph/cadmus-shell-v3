@@ -83,6 +83,8 @@ import { TiledTextPartComponent } from './tiled-text-part/tiled-text-part.compon
 import { RelatedEntityComponent } from './related-entity/related-entity.component';
 import { PhysicalStatesPartComponent } from './physical-states-part/physical-states-part.component';
 import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/physical-measurements-part.component';
+import { DecoratedCountsPartComponent } from './decorated-counts-part/decorated-counts-part.component';
+import { DecoratedCountsComponent } from '@myrmidon/cadmus-refs-decorated-counts';
 
 @NgModule({
   imports: [
@@ -125,6 +127,7 @@ import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/
     AssertedChronotopeComponent,
     ProperNameComponent,
     CadmusProperNamePipe,
+    DecoratedCountsComponent,
     PhysicalStateComponent,
     PhysicalMeasurementSetComponent
   ],
@@ -136,6 +139,7 @@ import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/
     ChronologyFragmentComponent,
     ChronotopesPartComponent,
     CommentEditorComponent,
+    DecoratedCountsPartComponent,
     DocReferencesPartComponent,
     ExternalIdsPartComponent,
     HistoricalDatePartComponent,
@@ -163,6 +167,7 @@ import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/
     ChronologyFragmentComponent,
     CommentEditorComponent,
     ChronotopesPartComponent,
+    DecoratedCountsPartComponent,
     DocReferencesPartComponent,
     ExternalIdsPartComponent,
     HistoricalDatePartComponent,

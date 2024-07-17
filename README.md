@@ -15,6 +15,9 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-07-17:
+  - updated Angular and packages.
+  - added new general parts: decorated counts, physical measurements, physical states.
 - 2024-06-09:
   - applied [M3 theme](https://material.angular.io/guide/theming).
   - minor aesthetic changes in some libraries.

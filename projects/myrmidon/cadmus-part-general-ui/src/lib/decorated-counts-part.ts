@@ -1,31 +1,30 @@
 import { Part } from '@myrmidon/cadmus-core';
-import { PhysicalMeasurement } from '@myrmidon/cadmus-mat-physical-size';
+import { DecoratedCount } from '@myrmidon/cadmus-refs-decorated-counts';
 
 /**
- * The PhysicalMeasurements part model.
+ * The DecoratedCounts part model.
  */
-export interface PhysicalMeasurementsPart extends Part {
-  measurements: PhysicalMeasurement[];
+export interface DecoratedCountsPart extends Part {
+  counts: DecoratedCount[];
 }
 
 /**
- * The type ID used to identify the PhysicalMeasurementsPart type.
+ * The type ID used to identify the DecoratedCountsPart type.
  */
-export const PHYSICAL_MEASUREMENTS_PART_TYPEID =
-  'it.vedph.physical-measurements';
+export const DECORATED_COUNTS_PART_TYPEID = 'it.vedph.decorated-counts';
 
 /**
- * JSON schema for the PhysicalMeasurements part.
+ * JSON schema for the DecoratedCounts part.
  * You can use the JSON schema tool at https://jsonschema.net/.
  */
-export const PHYSICAL_MEASUREMENTS_PART_SCHEMA = {
+export const DECORATED_COUNTS_PART_SCHEMA = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   $id:
     'www.vedph.it/cadmus/parts/general/' +
-    PHYSICAL_MEASUREMENTS_PART_TYPEID +
+    DECORATED_COUNTS_PART_TYPEID +
     '.json',
   type: 'object',
-  title: 'PhysicalMeasurementsPart',
+  title: 'DecoratedCountsPart',
   required: [
     'id',
     'itemId',
@@ -34,7 +33,7 @@ export const PHYSICAL_MEASUREMENTS_PART_SCHEMA = {
     'creatorId',
     'timeModified',
     'userId',
-    'measurements',
+    'counts',
   ],
   properties: {
     timeCreated: {
@@ -67,24 +66,24 @@ export const PHYSICAL_MEASUREMENTS_PART_SCHEMA = {
       type: ['string', 'null'],
       pattern: '^([a-z][-0-9a-z._]*)?$',
     },
-    measurements: {
+    counts: {
       type: 'array',
       items: {
         anyOf: [
           {
             type: 'object',
-            required: ['name', 'value', 'unit'],
+            required: ['id', 'value'],
             properties: {
-              name: {
+              id: {
                 type: 'string',
               },
               tag: {
                 type: 'string',
               },
               value: {
-                type: 'number',
+                type: 'integer',
               },
-              unit: {
+              note: {
                 type: 'string',
               },
             },

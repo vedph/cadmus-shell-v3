@@ -1,0 +1,25 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card>
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title>Decorated Counts Part</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <cadmus-refs-decorated-counts
+        [idEntries]="idEntries"
+        [tagEntries]="tagEntries"
+        [counts]="counts.value"
+        (countsChange)="onCountsChange($event)"
+      />
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      ></cadmus-close-save-buttons>
+    </mat-card-actions>
+  </mat-card>
+</form>

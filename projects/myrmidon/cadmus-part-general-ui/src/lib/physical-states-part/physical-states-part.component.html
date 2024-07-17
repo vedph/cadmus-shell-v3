@@ -4,11 +4,11 @@
       <div mat-card-avatar>
         <mat-icon>picture_in_picture</mat-icon>
       </div>
-      <mat-card-title>PhysicalStates Part</mat-card-title>
+      <mat-card-title>Physical States Part</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <mat-tab-group [(selectedIndex)]="tabIndex">
-        <mat-tab label="Physical States">
+        <mat-tab label="list">
           <div>
             <button
               type="button"
@@ -25,7 +25,6 @@
               <tr>
                 <th></th>
                 <th>type</th>
-                <th>features</th>
                 <th>date</th>
               </tr>
             </thead>
@@ -71,8 +70,9 @@
                     <mat-icon class="mat-warn">remove_circle</mat-icon>
                   </button>
                 </td>
-                <td>{{ entry.type }}</td>
-                <td>{{ entry.features?.join(", ") }}</td>
+                <td>
+                  {{ entry.type | flatLookup : stateEntries : "id" : "value" }}
+                </td>
                 <td>{{ entry.date }}</td>
               </tr>
               }

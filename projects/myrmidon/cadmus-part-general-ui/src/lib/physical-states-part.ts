@@ -11,7 +11,7 @@ export interface PhysicalStatesPart extends Part {
 /**
  * The type ID used to identify the PhysicalStatesPart type.
  */
-export const PHYSICAL_STATES_PART_TYPEID = 'it.vedph.general.physical-states';
+export const PHYSICAL_STATES_PART_TYPEID = 'it.vedph.physical-states';
 
 /**
  * JSON schema for the PhysicalStates part.
