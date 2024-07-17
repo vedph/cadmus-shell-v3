@@ -14,7 +14,7 @@ export const PIN_LINKS_FRAGMENT_SCHEMA = {
   definitions: {},
   $schema: 'http://json-schema.org/draft-07/schema#',
   $id:
-    'www.vedph.it/cadmus/fragments/<PRJ>/' +
+    'www.vedph.it/cadmus/fragments/general/' +
     PIN_LINKS_FRAGMENT_TYPEID +
     '.json',
   type: 'object',

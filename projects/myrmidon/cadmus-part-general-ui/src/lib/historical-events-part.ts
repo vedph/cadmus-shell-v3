@@ -44,7 +44,7 @@ export const HISTORICAL_EVENTS_PART_TYPEID = 'it.vedph.historical-events';
 export const HISTORICAL_EVENTS_PART_SCHEMA = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   $id:
-    'www.vedph.it/cadmus/parts/events/' +
+    'www.vedph.it/cadmus/parts/general/' +
     HISTORICAL_EVENTS_PART_TYPEID +
     '.json',
   type: 'object',

@@ -28,12 +28,28 @@ import { NgToolsModule } from '@myrmidon/ng-tools';
 import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
 
 // bricks
-import { AssertedCompositeIdComponent, AssertedCompositeIdsComponent, AssertedIdsComponent } from '@myrmidon/cadmus-refs-asserted-ids';
+import {
+  AssertedCompositeIdComponent,
+  AssertedCompositeIdsComponent,
+  AssertedIdsComponent,
+} from '@myrmidon/cadmus-refs-asserted-ids';
 import { DocReferencesComponent } from '@myrmidon/cadmus-refs-doc-references';
-import { HistoricalDateComponent, HistoricalDatePipe } from '@myrmidon/cadmus-refs-historical-date';
-import { AssertedChronotopeComponent, AssertedChronotopeSetComponent, AssertedChronotopesPipe } from '@myrmidon/cadmus-refs-asserted-chronotope';
+import {
+  HistoricalDateComponent,
+  HistoricalDatePipe,
+} from '@myrmidon/cadmus-refs-historical-date';
+import {
+  AssertedChronotopeComponent,
+  AssertedChronotopeSetComponent,
+  AssertedChronotopesPipe,
+} from '@myrmidon/cadmus-refs-asserted-chronotope';
 import { AssertionComponent } from '@myrmidon/cadmus-refs-assertion';
-import { CadmusProperNamePipe, ProperNameComponent } from '@myrmidon/cadmus-refs-proper-name';
+import {
+  CadmusProperNamePipe,
+  ProperNameComponent,
+} from '@myrmidon/cadmus-refs-proper-name';
+import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
+import { PhysicalStateComponent } from '@myrmidon/cadmus-mat-physical-state';
 
 // cadmus
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
@@ -64,7 +80,7 @@ import { TextTileComponent } from './text-tile/text-tile.component';
 import { TiledDataComponent } from './tiled-data/tiled-data.component';
 import { TiledTextPartComponent } from './tiled-text-part/tiled-text-part.component';
 import { RelatedEntityComponent } from './related-entity/related-entity.component';
-import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
+import { PhysicalStatesPartComponent } from '../public-api';
 
 @NgModule({
   imports: [
@@ -107,6 +123,7 @@ import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
     AssertedChronotopeComponent,
     ProperNameComponent,
     CadmusProperNamePipe,
+    PhysicalStateComponent,
   ],
   declarations: [
     BibAuthorsEditorComponent,
@@ -127,6 +144,7 @@ import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
     MetadataPartComponent,
     NamesPartComponent,
     NotePartComponent,
+    PhysicalStatesPartComponent,
     PinLinksFragmentComponent,
     PinLinksPartComponent,
     RelatedEntityComponent,
@@ -152,6 +170,7 @@ import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
     MetadataPartComponent,
     NamesPartComponent,
     NotePartComponent,
+    PhysicalStatesPartComponent,
     PinLinksFragmentComponent,
     PinLinksPartComponent,
     RelatedEntityComponent,
@@ -160,8 +179,6 @@ import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
     TiledTextPartComponent,
     TokenTextPartComponent,
   ],
-  providers: [
-    CadmusTextEdService,
-  ]
+  providers: [CadmusTextEdService],
 })
 export class CadmusPartGeneralUiModule {}

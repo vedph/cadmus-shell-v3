@@ -50,6 +50,9 @@ export * from './lib/names-part/names-part.component';
 export * from './lib/note-part';
 export * from './lib/note-part/note-part.component';
 
+export * from './lib/physical-states-part';
+export * from './lib/physical-states-part/physical-states-part.component';
+
 export * from './lib/pin-links-part';
 export * from './lib/pin-links-part/pin-links-part.component';
 

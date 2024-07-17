@@ -25,26 +25,26 @@ import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
 import {
   CadmusPartGeneralUiModule,
   BIBLIOGRAPHY_PART_TYPEID,
-  COMMENT_FRAGMENT_TYPEID,
+  CATEGORIES_PART_TYPEID,
+  CHRONOTOPES_PART_TYPEID,
   COMMENT_PART_TYPEID,
   DOC_REFERENCES_PART_TYPEID,
+  EXTERNAL_IDS_PART_TYPEID,
+  HISTORICAL_DATE_PART_TYPEID,
+  HISTORICAL_EVENTS_PART_TYPEID,
+  INDEX_KEYWORDS_PART_TYPEID,
   KEYWORDS_PART_TYPEID,
   METADATA_PART_TYPEID,
   NAMES_PART_TYPEID,
   NOTE_PART_TYPEID,
-  HISTORICAL_DATE_PART_TYPEID,
-  HISTORICAL_EVENTS_PART_TYPEID,
-  INDEX_KEYWORDS_PART_TYPEID,
+  PIN_LINKS_PART_TYPEID,
   TILED_TEXT_PART_TYPEID,
   TOKEN_TEXT_PART_TYPEID,
-  CHRONOTOPES_PART_TYPEID,
-  EXTERNAL_IDS_PART_TYPEID,
-  PIN_LINKS_PART_TYPEID,
-  PIN_LINKS_FRAGMENT_TYPEID,
-} from '@myrmidon/cadmus-part-general-ui';
-import {
-  CATEGORIES_PART_TYPEID,
+  PHYSICAL_STATES_PART_TYPEID,
   CHRONOLOGY_FRAGMENT_TYPEID,
+  COMMENT_FRAGMENT_TYPEID,
+  PIN_LINKS_FRAGMENT_TYPEID,
+  PhysicalStatesPartComponent,
 } from '@myrmidon/cadmus-part-general-ui';
 
 import { BibliographyPartFeatureComponent } from './bibliography-part-feature/bibliography-part-feature.component';
@@ -68,6 +68,7 @@ import { TiledTextLayerPartFeatureComponent } from './tiled-text-layer-part-feat
 import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feature/token-text-layer-part-feature.component';
 import { TokenTextPartFeatureComponent } from './token-text-part-feature/token-text-part-feature.component';
 import { PinLinksFragmentFeatureComponent } from './pin-links-fragment-feature/pin-links-fragment-feature.component';
+import { PhysicalStatesPartFeatureComponent } from './physical-states-part-feature/physical-states-part-feature.component';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
@@ -147,6 +148,12 @@ export const RouterModuleForChild = RouterModule.forChild([
     path: `${NOTE_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: NotePartFeatureComponent,
+    canDeactivate: [PendingChangesGuard],
+  },
+  {
+    path: `${PHYSICAL_STATES_PART_TYPEID}/:pid`,
+    pathMatch: 'full',
+    component: PhysicalStatesPartComponent,
     canDeactivate: [PendingChangesGuard],
   },
   {
@@ -243,6 +250,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     MetadataPartFeatureComponent,
     NamesPartFeatureComponent,
     NotePartFeatureComponent,
+    PhysicalStatesPartFeatureComponent,
     PinLinksFragmentFeatureComponent,
     PinLinksPartFeatureComponent,
     TiledTextLayerPartFeatureComponent,
@@ -266,6 +274,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     MetadataPartFeatureComponent,
     NamesPartFeatureComponent,
     NotePartFeatureComponent,
+    PhysicalStatesPartFeatureComponent,
     PinLinksFragmentFeatureComponent,
     PinLinksPartFeatureComponent,
     TiledTextLayerPartFeatureComponent,

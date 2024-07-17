@@ -1,35 +1,30 @@
 import { Part } from '@myrmidon/cadmus-core';
+import { PhysicalState } from '@myrmidon/cadmus-mat-physical-state';
 
 /**
- * The metadata part model.
+ * The PhysicalStates part model.
  */
-export interface MetadataPart extends Part {
-  metadata: Metadatum[];
+export interface PhysicalStatesPart extends Part {
+  states: PhysicalState[];
 }
 
 /**
- * A metadata entry in MetadataPart.
+ * The type ID used to identify the PhysicalStatesPart type.
  */
-export interface Metadatum {
-  type?: string;
-  name: string;
-  value: string;
-}
+export const PHYSICAL_STATES_PART_TYPEID = 'it.vedph.general.physical-states';
 
 /**
- * The type ID used to identify the MetadataPart type.
- */
-export const METADATA_PART_TYPEID = 'it.vedph.metadata';
-
-/**
- * JSON schema for the metadata part.
+ * JSON schema for the PhysicalStates part.
  * You can use the JSON schema tool at https://jsonschema.net/.
  */
-export const METADATA_PART_SCHEMA = {
+export const PHYSICAL_STATES_PART_SCHEMA = {
   $schema: 'http://json-schema.org/draft-07/schema#',
-  $id: 'www.vedph.it/cadmus/parts/general/' + METADATA_PART_TYPEID + '.json',
+  $id:
+    'www.vedph.it/cadmus/parts/general/' +
+    PHYSICAL_STATES_PART_TYPEID +
+    '.json',
   type: 'object',
-  title: 'MetadataPart',
+  title: 'PhysicalStatesPart',
   required: [
     'id',
     'itemId',
@@ -38,7 +33,7 @@ export const METADATA_PART_SCHEMA = {
     'creatorId',
     'timeModified',
     'userId',
-    'metadata',
+    'states',
   ],
   properties: {
     timeCreated: {
@@ -71,21 +66,30 @@ export const METADATA_PART_SCHEMA = {
       type: ['string', 'null'],
       pattern: '^([a-z][-0-9a-z._]*)?$',
     },
-    metadata: {
+    states: {
       type: 'array',
       items: {
         anyOf: [
           {
             type: 'object',
-            required: ['name', 'value'],
+            required: ['type'],
             properties: {
               type: {
                 type: 'string',
               },
-              name: {
+              features: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+              },
+              date: {
                 type: 'string',
               },
-              value: {
+              reporter: {
+                type: 'string',
+              },
+              note: {
                 type: 'string',
               },
             },
