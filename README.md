@@ -15,9 +15,12 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+### 8.1.3
+
 - 2024-07-17:
   - updated Angular and packages.
-  - added new general parts: decorated counts, physical measurements, physical states.
+  - added new general parts: decorated counts, physical measurements, physical states (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`).
+  - [refactored Gravatar](https://myrmex.github.io/overview/cadmus/dev/history/f-gravatar)
 - 2024-06-09:
   - applied [M3 theme](https://material.angular.io/guide/theming).
   - minor aesthetic changes in some libraries.
