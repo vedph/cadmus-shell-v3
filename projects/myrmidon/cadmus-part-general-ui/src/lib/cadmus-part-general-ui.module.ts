@@ -50,6 +50,7 @@ import {
 } from '@myrmidon/cadmus-refs-proper-name';
 import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
 import { PhysicalStateComponent } from '@myrmidon/cadmus-mat-physical-state';
+import { PhysicalMeasurementSetComponent } from '@myrmidon/cadmus-mat-physical-size';
 
 // cadmus
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
@@ -80,7 +81,8 @@ import { TextTileComponent } from './text-tile/text-tile.component';
 import { TiledDataComponent } from './tiled-data/tiled-data.component';
 import { TiledTextPartComponent } from './tiled-text-part/tiled-text-part.component';
 import { RelatedEntityComponent } from './related-entity/related-entity.component';
-import { PhysicalStatesPartComponent } from '../public-api';
+import { PhysicalStatesPartComponent } from './physical-states-part/physical-states-part.component';
+import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/physical-measurements-part.component';
 
 @NgModule({
   imports: [
@@ -124,6 +126,7 @@ import { PhysicalStatesPartComponent } from '../public-api';
     ProperNameComponent,
     CadmusProperNamePipe,
     PhysicalStateComponent,
+    PhysicalMeasurementSetComponent
   ],
   declarations: [
     BibAuthorsEditorComponent,
@@ -144,6 +147,7 @@ import { PhysicalStatesPartComponent } from '../public-api';
     MetadataPartComponent,
     NamesPartComponent,
     NotePartComponent,
+    PhysicalMeasurementsPartComponent,
     PhysicalStatesPartComponent,
     PinLinksFragmentComponent,
     PinLinksPartComponent,
@@ -170,6 +174,7 @@ import { PhysicalStatesPartComponent } from '../public-api';
     MetadataPartComponent,
     NamesPartComponent,
     NotePartComponent,
+    PhysicalMeasurementsPartComponent,
     PhysicalStatesPartComponent,
     PinLinksFragmentComponent,
     PinLinksPartComponent,

@@ -45,6 +45,7 @@ import {
   COMMENT_FRAGMENT_TYPEID,
   PIN_LINKS_FRAGMENT_TYPEID,
   PhysicalStatesPartComponent,
+  PHYSICAL_MEASUREMENTS_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
 
 import { BibliographyPartFeatureComponent } from './bibliography-part-feature/bibliography-part-feature.component';
@@ -69,6 +70,7 @@ import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feat
 import { TokenTextPartFeatureComponent } from './token-text-part-feature/token-text-part-feature.component';
 import { PinLinksFragmentFeatureComponent } from './pin-links-fragment-feature/pin-links-fragment-feature.component';
 import { PhysicalStatesPartFeatureComponent } from './physical-states-part-feature/physical-states-part-feature.component';
+import { PhysicalMeasurementsPartFeatureComponent } from '../public-api';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
@@ -148,6 +150,12 @@ export const RouterModuleForChild = RouterModule.forChild([
     path: `${NOTE_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: NotePartFeatureComponent,
+    canDeactivate: [PendingChangesGuard],
+  },
+  {
+    path: `${PHYSICAL_MEASUREMENTS_PART_TYPEID}/:pid`,
+    pathMatch: 'full',
+    component: PhysicalMeasurementsPartFeatureComponent,
     canDeactivate: [PendingChangesGuard],
   },
   {
@@ -250,6 +258,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     MetadataPartFeatureComponent,
     NamesPartFeatureComponent,
     NotePartFeatureComponent,
+    PhysicalMeasurementsPartFeatureComponent,
     PhysicalStatesPartFeatureComponent,
     PinLinksFragmentFeatureComponent,
     PinLinksPartFeatureComponent,
@@ -274,6 +283,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     MetadataPartFeatureComponent,
     NamesPartFeatureComponent,
     NotePartFeatureComponent,
+    PhysicalMeasurementsPartFeatureComponent,
     PhysicalStatesPartFeatureComponent,
     PinLinksFragmentFeatureComponent,
     PinLinksPartFeatureComponent,
