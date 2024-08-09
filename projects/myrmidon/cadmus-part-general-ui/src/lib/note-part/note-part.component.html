@@ -37,21 +37,30 @@
           }
         </div>
 
-        <!-- text -->
-        <div id="txt">
-          <nge-monaco-editor
-            style="--editor-height: 800px"
-            (ready)="onCreateEditor($event)"
-          />
+        <div id="content-wrapper">
+          <!-- text -->
+          <div id="txt">
+            <nge-monaco-editor id="editor" (ready)="onCreateEditor($event)" />
+            @if (text.hasError('required') && (text.touched || text.dirty)) {
+            <mat-error>please enter some text</mat-error>
+            }
+          </div>
+          <!-- preview -->
+          <div id="pvw">
+            <nge-markdown [data]="text.value || undefined" />
+          </div>
+        </div>
+
+        <!-- <div id="txt">
+          <nge-monaco-editor id="editor" (ready)="onCreateEditor($event)" />
           @if (text.hasError('required') && (text.touched || text.dirty)) {
           <mat-error>please enter some text</mat-error>
           }
         </div>
 
-        <!-- preview -->
         <div id="pvw">
           <nge-markdown [data]="text.value || undefined" />
-        </div>
+        </div> -->
       </div>
     </mat-card-content>
 

@@ -15,6 +15,8 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-08-09: note layout: preview side by side.
+
 ### 8.1.3
 
 - 2024-07-17:
