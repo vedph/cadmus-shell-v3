@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { Observable, of } from 'rxjs';
-import { retry, catchError } from 'rxjs/operators';
+import { retry, catchError, map } from 'rxjs/operators';
 
 import {
   ItemFilter,
@@ -254,6 +254,36 @@ export class ItemService {
           }
           return this._error.handleError(error);
         })
+      );
+  }
+
+  /**
+   * Check if the item with the specified ID has a part of the specified type
+   * and role.
+   * @param id The item ID.
+   * @param type The part type of "any".
+   * @param role The part role or "default".
+   * @returns Observable with result.
+   */
+  public partWithTypeAndRoleExists(
+    id: string,
+    type: string,
+    role = 'default'
+  ): Observable<boolean> {
+    if (!type) {
+      type = 'any';
+    }
+    if (!role) {
+      role = 'default';
+    }
+    return this._http
+      .get<{ exists: boolean }>(
+        `${this._env.get('apiUrl')}items/${id}/parts/${type}/${role}/exists`
+      )
+      .pipe(
+        retry(3),
+        catchError(this._error.handleError),
+        map((r) => r.exists)
       );
   }
 

@@ -7,6 +7,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,11 +26,13 @@ import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { CadmusStateModule } from '@myrmidon/cadmus-state';
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
 
 import { ItemEditorComponent } from './item-editor/item-editor.component';
 import { PartsScopeEditorComponent } from './parts-scope-editor/parts-scope-editor.component';
 import { MissingPartsComponent } from './missing-parts/missing-parts.component';
 import { HasPreviewPipe } from './has-preview.pipe';
+import { ItemLookupDialogComponent } from './item-lookup-dialog/item-lookup-dialog.component';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
@@ -48,6 +51,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatCheckboxModule,
     MatCardModule,
     MatDividerModule,
+    MatDialogModule,
     MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,
@@ -64,13 +68,15 @@ export const RouterModuleForChild = RouterModule.forChild([
     CadmusApiModule,
     CadmusUiModule,
     CadmusStateModule,
+    RefLookupComponent,
   ],
   declarations: [
     ItemEditorComponent,
+    ItemLookupDialogComponent,
     MissingPartsComponent,
     PartsScopeEditorComponent,
     HasPreviewPipe,
   ],
-  exports: [ItemEditorComponent],
+  exports: [ItemEditorComponent, ItemLookupDialogComponent],
 })
 export class CadmusItemEditorModule {}

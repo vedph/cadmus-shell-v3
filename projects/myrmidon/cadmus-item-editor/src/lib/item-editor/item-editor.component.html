@@ -248,6 +248,15 @@
                   >
                     <mat-icon>assignment</mat-icon>
                   </button>
+                  <!-- copy into item -->
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Copy part into another item"
+                    (click)="onCopyPart(part)"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
                   <!-- preview -->
                   @if ( part | hasPreview : (previewJKeys$ | async) :
                   (previewFKeys$ | async) ) {

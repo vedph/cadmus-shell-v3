@@ -15,6 +15,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-09-28: added copy to item feature in item editor. This allows copying any part of the edited item into another item, provided that the target item does not already have such a part with that role. Items must belong to the same facet.
 - 2024-08-09: note layout: preview side by side.
 
 ### 8.1.3

@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -22,16 +23,17 @@ import {
   LayerPartInfo,
   Thesaurus,
   ComponentCanDeactivate,
-  ItemInfo,
 } from '@myrmidon/cadmus-core';
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { DialogService } from '@myrmidon/ng-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import { ItemService, UserLevelService } from '@myrmidon/cadmus-api';
 import { ItemListRepository } from '@myrmidon/cadmus-item-list';
+import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
 
 import { PartScopeSetRequest } from '../parts-scope-editor/parts-scope-editor.component';
 import { EditedItemRepository } from '../state/edited-item.repository';
+import { ItemLookupDialogComponent } from '../item-lookup-dialog/item-lookup-dialog.component';
 
 /**
  * Item editor. This can edit a new or existing item's metadata and parts.
@@ -79,6 +81,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   public metadata: FormGroup;
 
   constructor(
+    public itemLookupService: ItemRefLookupService,
+    public dialog: MatDialog,
     private _router: Router,
     private _route: ActivatedRoute,
     private _snackbar: MatSnackBar,
@@ -439,5 +443,56 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
 
   public setPartsScope(request: PartScopeSetRequest): void {
     this._repository.setPartThesaurusScope(request.ids, request.scope);
+  }
+
+  public onCopyPart(part: Part): void {
+    const dialogRef = this.dialog.open(ItemLookupDialogComponent, {
+      height: '180px',
+      width: '250px',
+      data: {},
+    });
+    dialogRef.afterClosed().subscribe((targetItem: Item) => {
+      // nope if no target item or same item
+      if (!targetItem || part.itemId === targetItem.id) {
+        return;
+      }
+      // nope if target item has a different facet
+      if (this.facet.value !== targetItem.facetId) {
+        this._snackbar.open(
+          'Cannot copy part to an item with a different facet',
+          'OK'
+        );
+        return;
+      }
+      // check if the part already exists in the target item
+      this.busy = true;
+      this._itemService
+        .partWithTypeAndRoleExists(targetItem.id, part.typeId, part.roleId)
+        .subscribe((exists: boolean) => {
+          // part already exists, nope
+          if (exists) {
+            this._snackbar.open('Part already exists in target item', 'OK');
+            this.busy = false;
+            return;
+          }
+          // else add part as a new part to the target item
+          part.id = '';
+          part.itemId = targetItem.id;
+          this._itemService.addPart(part).subscribe({
+            next: (_) => {
+              this._snackbar.open('Part copied', 'OK', {
+                duration: 3000,
+              });
+            },
+            error: (error) => {
+              console.error(error);
+              this._snackbar.open('Error copying part', 'OK');
+            },
+            complete: () => {
+              this.busy = false;
+            },
+          });
+        });
+    });
   }
 }
