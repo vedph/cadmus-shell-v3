@@ -134,22 +134,29 @@
           </fieldset>
           <br />
 
-          <div>
-            @if ( user?.roles?.length && (user?.roles?.includes('admin') ||
-            user?.roles?.includes('editor') ||
-            user?.roles?.includes('operator')) ) {
+          <!-- action buttons -->
+          @if (userLevel > 1) {
+          <div class="form-row">
+            <button
+              type="button"
+              mat-flat-button
+              class="mat-warn"
+              (click)="onGenerateItems()"
+            >
+              <mat-icon>copy_all</mat-icon> generate
+            </button>
             <button
               type="submit"
-              mat-raised-button
-              color="primary"
+              mat-flat-button
               class="mat-primary"
-              [disabled]="userLevel < 2 || busy"
+              [disabled]="busy"
               matTooltip="Save metadata"
+              (click)="save()"
             >
               <mat-icon>save</mat-icon> save
             </button>
-            }
           </div>
+          }
         </form>
       </mat-tab>
 

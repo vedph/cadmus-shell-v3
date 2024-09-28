@@ -8,7 +8,12 @@ import {
 } from '@myrmidon/paged-data-browsers';
 
 import { ItemFilter, ItemInfo } from '@myrmidon/cadmus-core';
-import { ItemService } from '@myrmidon/cadmus-api';
+import { ItemService, MessagingService } from '@myrmidon/cadmus-api';
+
+/**
+ * The ID of the message received by the item list repository to reset its list.
+ */
+export const MESSAGE_ITEM_LIST_REPOSITORY_RESET = 'item-list-repository.reset';
 
 /**
  * Item list repository.
@@ -30,10 +35,16 @@ export class ItemListRepository
     return this._store.page$;
   }
 
-  constructor(private _itemService: ItemService) {
+  constructor(private _itemService: ItemService, messaging: MessagingService) {
     this._store = new PagedListStore<ItemFilter, ItemInfo>(this);
     this._loading$ = new BehaviorSubject<boolean | undefined>(undefined);
     this._store.reset();
+
+    messaging.messages$.subscribe((msg) => {
+      if (msg.id === MESSAGE_ITEM_LIST_REPOSITORY_RESET) {
+        this.reset();
+      }
+    });
   }
 
   public loadPage(

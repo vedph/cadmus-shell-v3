@@ -33,6 +33,7 @@ import { PartsScopeEditorComponent } from './parts-scope-editor/parts-scope-edit
 import { MissingPartsComponent } from './missing-parts/missing-parts.component';
 import { HasPreviewPipe } from './has-preview.pipe';
 import { ItemLookupDialogComponent } from './item-lookup-dialog/item-lookup-dialog.component';
+import { ItemGenerateDialogComponent } from './item-generate-dialog/item-generate-dialog.component';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
@@ -72,11 +73,16 @@ export const RouterModuleForChild = RouterModule.forChild([
   ],
   declarations: [
     ItemEditorComponent,
+    ItemGenerateDialogComponent,
     ItemLookupDialogComponent,
     MissingPartsComponent,
     PartsScopeEditorComponent,
     HasPreviewPipe,
   ],
-  exports: [ItemEditorComponent, ItemLookupDialogComponent],
+  exports: [
+    ItemEditorComponent,
+    ItemLookupDialogComponent,
+    ItemGenerateDialogComponent,
+  ],
 })
 export class CadmusItemEditorModule {}

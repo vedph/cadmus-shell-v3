@@ -1,0 +1,72 @@
+<div id="container">
+  <h3>Generate Items</h3>
+  <form [formGroup]="form" (submit)="apply()">
+    <!-- count -->
+    <div>
+      <mat-form-field class="input-nr">
+        <mat-label>count</mat-label>
+        <input matInput type="number" min="1" [formControl]="itemCount" />
+        <mat-hint>number of items to generate</mat-hint>
+
+        @if ($any(itemCount).errors?.required && (itemCount.dirty ||
+        itemCount.touched)) {
+        <mat-error>count required</mat-error>
+        } @if ($any(itemCount).errors?.min && (itemCount.dirty ||
+        itemCount.touched)) {
+        <mat-error>count too low</mat-error>
+        } @if ($any(itemCount).errors?.max && (itemCount.dirty ||
+        itemCount.touched)) {
+        <mat-error>count too high</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- title -->
+    <div>
+      <mat-form-field>
+        <mat-label>title</mat-label>
+        <input matInput [formControl]="itemTitle" />
+        <mat-hint>title template ({{ 0 }}=N)</mat-hint>
+
+        @if ($any(itemTitle).errors?.required && (itemTitle.dirty ||
+        itemTitle.touched)) {
+        <mat-error>title required</mat-error>
+        } @if ($any(itemTitle).errors?.maxLength && (itemTitle.dirty ||
+        itemTitle.touched)) {
+        <mat-error>title too long</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- flags -->
+    @if (flags.length) {
+    <div>
+      <mat-form-field>
+        <mat-label>flags</mat-label>
+        <mat-select [formControl]="itemFlags" multiple>
+          @for (flag of flags; track flag.id) {
+          <mat-option [value]="flag">
+            <span class="flag-bullet" [style.color]="'#' + flag.colorKey"
+              >&#x2b24;</span
+            >
+            {{ flag.label }}</mat-option
+          >
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    }
+
+    <!-- apply button -->
+    <div>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="form.invalid"
+      >
+        generate
+      </button>
+    </div>
+  </form>
+</div>

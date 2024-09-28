@@ -27,13 +27,18 @@ import {
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { DialogService } from '@myrmidon/ng-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
-import { ItemService, UserLevelService } from '@myrmidon/cadmus-api';
-import { ItemListRepository } from '@myrmidon/cadmus-item-list';
+import {
+  ItemService,
+  MessagingService,
+  UserLevelService,
+} from '@myrmidon/cadmus-api';
+import { MESSAGE_ITEM_LIST_REPOSITORY_RESET } from '@myrmidon/cadmus-item-list';
 import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
 
 import { PartScopeSetRequest } from '../parts-scope-editor/parts-scope-editor.component';
 import { EditedItemRepository } from '../state/edited-item.repository';
 import { ItemLookupDialogComponent } from '../item-lookup-dialog/item-lookup-dialog.component';
+import { ItemGenerateDialogComponent } from '../item-generate-dialog/item-generate-dialog.component';
 
 /**
  * Item editor. This can edit a new or existing item's metadata and parts.
@@ -89,11 +94,12 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     private _appRepository: AppRepository,
     private _repository: EditedItemRepository,
     private _itemService: ItemService,
-    private _itemListRepository: ItemListRepository,
+    // private _itemListRepository: ItemListRepository,
     private _libraryRouteService: LibraryRouteService,
     private _dialogService: DialogService,
     private _authService: AuthJwtService,
     private _userLevelService: UserLevelService,
+    private _messaging: MessagingService,
     private _formBuilder: FormBuilder
   ) {
     this.id = this._route.snapshot.params['id'];
@@ -292,7 +298,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     this._repository
       .save(item as Item)
       .then((saved) => {
-        this._itemListRepository.reset();
+        this._messaging.sendMessage(MESSAGE_ITEM_LIST_REPOSITORY_RESET);
+        // this._itemListRepository.reset();
 
         // reload to force change in page URL
         if (!item.id) {
@@ -446,6 +453,9 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public onCopyPart(part: Part): void {
+    if (this.busy) {
+      return;
+    }
     const dialogRef = this.dialog.open(ItemLookupDialogComponent, {
       height: '180px',
       width: '250px',
@@ -494,5 +504,44 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
           });
         });
     });
+  }
+
+  public onGenerateItems(): void {
+    if (this.busy) {
+      return;
+    }
+    const dialogRef = this.dialog.open(ItemGenerateDialogComponent, {
+      height: '350px',
+      width: '300px',
+      data: {
+        flags: this.flagDefinitions,
+      },
+    });
+    dialogRef
+      .afterClosed()
+      .subscribe((data: { count: number; title: string; flags: number }) => {
+        if (!data) {
+          return;
+        }
+        this.busy = true;
+        this._itemService
+          .generateItems(data.count, this.id!, data.title, data.flags)
+          .subscribe({
+            next: (_) => {
+              // reset the items list
+              this._messaging.sendMessage(MESSAGE_ITEM_LIST_REPOSITORY_RESET);
+              this._snackbar.open('Items generated', 'OK', {
+                duration: 3000,
+              });
+            },
+            error: (error) => {
+              console.error(error);
+              this._snackbar.open('Error generating items', 'OK');
+            },
+            complete: () => {
+              this.busy = false;
+            },
+          });
+      });
   }
 }

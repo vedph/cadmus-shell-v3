@@ -9,7 +9,7 @@ import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
 
 /**
  * Simple item lookup dialog. This allows the user to select an item from
- * its title, and returns the selected item or null if cancelled.
+ * its title, and returns the selected item if not cancelled.
  */
 @Component({
   selector: 'cadmus-item-lookup-dialog',

@@ -8,6 +8,7 @@ export * from './lib/services/flag.service';
 export * from './lib/services/graph.service';
 export * from './lib/services/item-browser.service';
 export * from './lib/services/item.service';
+export * from './lib/services/messaging.service';
 export * from './lib/services/operator-guard.service';
 export * from './lib/services/preview.service';
 export * from './lib/services/thesaurus.service';

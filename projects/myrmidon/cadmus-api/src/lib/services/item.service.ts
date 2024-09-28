@@ -208,6 +208,32 @@ export class ItemService {
   }
 
   /**
+   * Generate the specified count of items using the specified item as a template.
+   *
+   * @param count The count of items to generate.
+   * @param itemId The ID of the item to be used as a template.
+   * @param title The title template for the new item. It can contain
+   * a placeholder like {0} for the item number. This can use any
+   * formatting supported by the backend (C# `string.Format`).
+   * @param flags The flag(s) to be set for each new item.
+   */
+  public generateItems(
+    count: number,
+    itemId: string,
+    title: string,
+    flags = 0
+  ): Observable<any> {
+    return this._http
+      .post<any>(`${this._env.get('apiUrl')}items/generate`, {
+        count,
+        itemId,
+        title,
+        flags,
+      })
+      .pipe(catchError(this._error.handleError));
+  }
+
+  /**
    * Get the item's part with the specified ID.
    * @param id The part ID.
    * @returns Observable with result. If the part ID is null,
