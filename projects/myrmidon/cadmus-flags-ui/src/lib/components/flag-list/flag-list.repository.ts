@@ -1,4 +1,4 @@
-import { Injectable, OnInit, Optional } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { FlagDefinition } from '@myrmidon/cadmus-core';

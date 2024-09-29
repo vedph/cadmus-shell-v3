@@ -46,12 +46,12 @@ export class FlagListComponent {
     this._repository.addNewFlag();
   }
 
-  public deleteFlag(index: number): void {
+  public deleteFlag(flag: FlagDefinition): void {
     this._dialogService
       .confirm('Confirmation', 'Delete this flag?')
       .subscribe((yes) => {
         if (yes) {
-          this._repository.deleteFlag(index);
+          this._repository.deleteFlag(flag.id);
         }
       });
   }
