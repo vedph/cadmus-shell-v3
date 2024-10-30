@@ -9,6 +9,7 @@ export * from './lib/chronotopes-part-feature/chronotopes-part-feature.component
 export * from './lib/comment-fragment-feature/comment-fragment-feature.component';
 export * from './lib/comment-part-feature/comment-part-feature.component';
 export * from './lib/decorated-counts-part-feature/decorated-counts-part-feature.component';
+export * from './lib/district-location-part-feature/district-location-part-feature.component';
 export * from './lib/doc-references-part-feature/doc-references-part-feature.component';
 export * from './lib/external-ids-part-feature/external-ids-part-feature.component';
 export * from './lib/historical-date-part-feature/historical-date-part-feature.component';

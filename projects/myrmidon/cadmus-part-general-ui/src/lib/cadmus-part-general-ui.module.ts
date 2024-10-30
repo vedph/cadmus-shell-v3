@@ -55,6 +55,7 @@ import { PhysicalMeasurementSetComponent } from '@myrmidon/cadmus-mat-physical-s
 // cadmus
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
+import { DecoratedCountsComponent } from '@myrmidon/cadmus-refs-decorated-counts';
 
 import { TokenTextPartComponent } from './token-text-part/token-text-part.component';
 import { BibAuthorsEditorComponent } from './bib-authors-editor/bib-authors-editor.component';
@@ -64,6 +65,8 @@ import { CategoriesPartComponent } from './categories-part/categories-part.compo
 import { ChronologyFragmentComponent } from './chronology-fragment/chronology-fragment.component';
 import { ChronotopesPartComponent } from './chronotopes-part/chronotopes-part.component';
 import { CommentEditorComponent } from './comment-editor/comment-editor.component';
+import { DecoratedCountsPartComponent } from './decorated-counts-part/decorated-counts-part.component';
+import { DistrictLocationPartComponent } from './district-location-part/district-location-part.component';
 import { DocReferencesPartComponent } from './doc-references-part/doc-references-part.component';
 import { ExternalIdsPartComponent } from './external-ids-part/external-ids-part.component';
 import { HistoricalDatePartComponent } from './historical-date-part/historical-date-part.component';
@@ -83,8 +86,6 @@ import { TiledTextPartComponent } from './tiled-text-part/tiled-text-part.compon
 import { RelatedEntityComponent } from './related-entity/related-entity.component';
 import { PhysicalStatesPartComponent } from './physical-states-part/physical-states-part.component';
 import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/physical-measurements-part.component';
-import { DecoratedCountsPartComponent } from './decorated-counts-part/decorated-counts-part.component';
-import { DecoratedCountsComponent } from '@myrmidon/cadmus-refs-decorated-counts';
 
 @NgModule({
   imports: [
@@ -140,6 +141,7 @@ import { DecoratedCountsComponent } from '@myrmidon/cadmus-refs-decorated-counts
     ChronotopesPartComponent,
     CommentEditorComponent,
     DecoratedCountsPartComponent,
+    DistrictLocationPartComponent,
     DocReferencesPartComponent,
     ExternalIdsPartComponent,
     HistoricalDatePartComponent,
@@ -168,6 +170,7 @@ import { DecoratedCountsComponent } from '@myrmidon/cadmus-refs-decorated-counts
     CommentEditorComponent,
     ChronotopesPartComponent,
     DecoratedCountsPartComponent,
+    DistrictLocationPartComponent,
     DocReferencesPartComponent,
     ExternalIdsPartComponent,
     HistoricalDatePartComponent,

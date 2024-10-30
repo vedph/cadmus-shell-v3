@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-general-ui",
-  "version": "8.1.4",
+  "version": "8.1.5",
   "description": "Cadmus - generic parts.",
   "keywords": [
     "Cadmus"
@@ -14,9 +14,9 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^18.0.0",
-    "@angular/core": "^18.0.0",
-    "@cisstech/nge": "^17.7.1",
+    "@angular/common": "^18.2.9",
+    "@angular/core": "^18.2.9",
+    "@cisstech/nge": "^18.0.4",
     "@myrmidon/ng-tools": "^3.1.1",
     "@myrmidon/ng-mat-tools": "^3.1.0",
     "@myrmidon/cadmus-refs-asserted-ids": "^5.1.7",
@@ -29,6 +29,6 @@
     "@myrmidon/cadmus-ui": "^8.1.2"
   },
   "dependencies": {
-    "tslib": "^2.5.0"
+    "tslib": "^2.8.0"
   }
 }

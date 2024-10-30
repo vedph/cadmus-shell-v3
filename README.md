@@ -15,6 +15,9 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-10-30:
+  - updated Angular and packages.
+  - added district location part.
 - 2024-09-29: fix to flags editor.
 - 2024-09-28: affected libraries: `@myrmidon/cadmus-api`, `@myrmidon/cadmus-item-editor`, `@myrmidon/cadmus-item-list`:
   - added generate items feature in item editor. This allows using the edited item as a template to generate a specific number of new items. When using this feature, it may be a good idea having a flag marking items used as pure templates, and another one marking generated items, so you can be sure to edit them after their generation.

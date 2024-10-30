@@ -6,40 +6,40 @@
         style="display: block; margin: auto"
         src="./assets/img/cadmus-300.png"
         alt="Cadmus"
-        />
-      </div>
-      <div
+      />
+    </div>
+    <div
       style="
         text-align: center;
         max-width: 800px;
         display: block;
         margin: 32px auto 32px auto;
       "
+    >
+      <p>Welcome to the Cadmus editor.</p>
+      <p>
+        You can find the full source code of Cadmus infrastructure and projects
+        at
+        <a rel="noopener" href="https://github.com/vedph" target="_blank"
+          >github.com/vedph</a
+        >. Conceptual and technical documentation and links to other learning or
+        demonstrative materials can be found at the
+        <a
+          rel="noopener"
+          href="https://myrmex.github.io/overview/cadmus"
+          target="_blank"
+          >documentation site.</a
         >
-        <p>Welcome to the Cadmus editor.</p>
-        <p>
-          You can find the full source code of Cadmus infrastructure and projects
-          at
-          <a rel="noopener" href="https://github.com/vedph" target="_blank"
-            >github.com/vedph</a
-            >. Conceptual and technical documentation and links to other learning or
-            demonstrative materials can be found at the
-            <a
-              rel="noopener"
-              href="https://myrmex.github.io/overview/cadmus"
-              target="_blank"
-              >documentation site.</a
-              >
-            </p>
-            <p>
-              Also, you can have a look at the shorter, more interactive
-              <a rel="noopener" href="https://cadmus.fusi-soft.com" target="_blank"
-                >presentation site</a
-                >.
-              </p>
-              @if (!logged) {
-                <p>Please <a routerLink="/login">login</a> to start.</p>
-              }
-            </div>
-          </div>
-        </div>
+      </p>
+      <p>
+        Also, you can have a look at the shorter, more interactive
+        <a rel="noopener" href="https://cadmus.fusi-soft.com" target="_blank"
+          >presentation site</a
+        >.
+      </p>
+      @if (!logged) {
+      <p>Please <a routerLink="/login">login</a> to start.</p>
+      }
+    </div>
+  </div>
+</div>

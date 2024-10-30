@@ -28,6 +28,7 @@ import {
   CATEGORIES_PART_TYPEID,
   CHRONOTOPES_PART_TYPEID,
   COMMENT_PART_TYPEID,
+  DISTRICT_LOCATION_PART_TYPEID,
   DOC_REFERENCES_PART_TYPEID,
   EXTERNAL_IDS_PART_TYPEID,
   HISTORICAL_DATE_PART_TYPEID,
@@ -44,9 +45,9 @@ import {
   CHRONOLOGY_FRAGMENT_TYPEID,
   COMMENT_FRAGMENT_TYPEID,
   PIN_LINKS_FRAGMENT_TYPEID,
-  PhysicalStatesPartComponent,
   PHYSICAL_MEASUREMENTS_PART_TYPEID,
   DECORATED_COUNTS_PART_TYPEID,
+  DistrictLocationPartComponent,
 } from '@myrmidon/cadmus-part-general-ui';
 
 import { BibliographyPartFeatureComponent } from './bibliography-part-feature/bibliography-part-feature.component';
@@ -55,6 +56,8 @@ import { ChronologyFragmentFeatureComponent } from './chronology-fragment-featur
 import { ChronotopesPartFeatureComponent } from './chronotopes-part-feature/chronotopes-part-feature.component';
 import { CommentFragmentFeatureComponent } from './comment-fragment-feature/comment-fragment-feature.component';
 import { CommentPartFeatureComponent } from './comment-part-feature/comment-part-feature.component';
+import { DecoratedCountsPartFeatureComponent } from './decorated-counts-part-feature/decorated-counts-part-feature.component';
+import { DistrictLocationPartFeatureComponent } from './district-location-part-feature/district-location-part-feature.component';
 import { DocReferencesPartFeatureComponent } from './doc-references-part-feature/doc-references-part-feature.component';
 import { ExternalIdsPartFeatureComponent } from './external-ids-part-feature/external-ids-part-feature.component';
 import { HistoricalDatePartFeatureComponent } from './historical-date-part-feature/historical-date-part-feature.component';
@@ -65,16 +68,13 @@ import { MetadataPartFeatureComponent } from './metadata-part-feature/metadata-p
 import { NamesPartFeatureComponent } from './names-part-feature/names-part-feature.component';
 import { NotePartFeatureComponent } from './note-part-feature/note-part-feature.component';
 import { PinLinksPartFeatureComponent } from './pin-links-part-feature/pin-links-part-feature.component';
+import { PinLinksFragmentFeatureComponent } from './pin-links-fragment-feature/pin-links-fragment-feature.component';
+import { PhysicalStatesPartFeatureComponent } from './physical-states-part-feature/physical-states-part-feature.component';
+import { PhysicalMeasurementsPartFeatureComponent } from './physical-measurements-part-feature/physical-measurements-part-feature.component';
 import { TiledTextPartFeatureComponent } from './tiled-text-part-feature/tiled-text-part-feature.component';
 import { TiledTextLayerPartFeatureComponent } from './tiled-text-layer-part-feature/tiled-text-layer-part-feature.component';
 import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feature/token-text-layer-part-feature.component';
 import { TokenTextPartFeatureComponent } from './token-text-part-feature/token-text-part-feature.component';
-import { PinLinksFragmentFeatureComponent } from './pin-links-fragment-feature/pin-links-fragment-feature.component';
-import { PhysicalStatesPartFeatureComponent } from './physical-states-part-feature/physical-states-part-feature.component';
-import {
-  DecoratedCountsPartFeatureComponent,
-  PhysicalMeasurementsPartFeatureComponent,
-} from '../public-api';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
@@ -106,6 +106,12 @@ export const RouterModuleForChild = RouterModule.forChild([
     path: `${DECORATED_COUNTS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: DecoratedCountsPartFeatureComponent,
+    canDeactivate: [PendingChangesGuard],
+  },
+  {
+    path: `${DISTRICT_LOCATION_PART_TYPEID}/:pid`,
+    pathMatch: 'full',
+    component: DistrictLocationPartFeatureComponent,
     canDeactivate: [PendingChangesGuard],
   },
   {
@@ -260,6 +266,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     CommentFragmentFeatureComponent,
     CommentPartFeatureComponent,
     DecoratedCountsPartFeatureComponent,
+    DistrictLocationPartFeatureComponent,
     DocReferencesPartFeatureComponent,
     ExternalIdsPartFeatureComponent,
     HistoricalDatePartFeatureComponent,
@@ -286,6 +293,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     CommentFragmentFeatureComponent,
     CommentPartFeatureComponent,
     DecoratedCountsPartFeatureComponent,
+    DistrictLocationPartFeatureComponent,
     DocReferencesPartFeatureComponent,
     ExternalIdsPartFeatureComponent,
     HistoricalDatePartFeatureComponent,

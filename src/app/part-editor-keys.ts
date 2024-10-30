@@ -29,6 +29,7 @@ import {
   QUOTATIONS_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-philology-ui';
 import { PartEditorKeys } from '@myrmidon/cadmus-core';
+import { DISTRICT_LOCATION_PART_TYPEID } from 'projects/myrmidon/cadmus-part-general-ui/src/public-api';
 
 const GENERAL = 'general';
 const PHILOLOGY = 'philology';
@@ -52,6 +53,9 @@ export const PART_EDITOR_KEYS: PartEditorKeys = {
     part: GENERAL,
   },
   [DECORATED_COUNTS_PART_TYPEID]: {
+    part: GENERAL,
+  },
+  [DISTRICT_LOCATION_PART_TYPEID]: {
     part: GENERAL,
   },
   [DOC_REFERENCES_PART_TYPEID]: {

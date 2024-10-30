@@ -23,6 +23,9 @@ export * from './lib/comment-editor/comment-editor.component';
 export * from './lib/decorated-counts-part';
 export * from './lib/decorated-counts-part/decorated-counts-part.component';
 
+export * from './lib/district-location-part';
+export * from './lib/district-location-part/district-location-part.component';
+
 export * from './lib/doc-references-part';
 export * from './lib/doc-references-part/doc-references-part.component';
 
