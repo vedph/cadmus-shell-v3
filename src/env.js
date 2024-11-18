@@ -3,7 +3,7 @@
   window.__env = window.__env || {};
 
   // environment-dependent settings
-  window.__env.apiUrl = "http://localhost:60380/api/";
+  window.__env.apiUrl = "http://localhost:5050/api/";
   window.__env.version = '8.1.4';
   // enable thesaurus import in thesaurus list for admins
   window.__env.thesImportEnabled = true;
