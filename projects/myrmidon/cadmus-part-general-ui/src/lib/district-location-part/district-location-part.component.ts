@@ -32,6 +32,7 @@ export class DistrictLocationPartComponent
 {
   public place: FormControl<ProperName | null>;
   public note: FormControl<string | null>;
+  public initialName?: ProperName | null;
 
   // district-name-piece-types
   public typeEntries?: ThesaurusEntry[];
@@ -67,9 +68,11 @@ export class DistrictLocationPartComponent
 
   private updateForm(part?: DistrictLocationPart | null): void {
     if (!part) {
+      this.initialName = undefined;
       this.form.reset();
       return;
     }
+    this.initialName = part.place;
     this.place.setValue(part.place || null);
     this.note.setValue(part.note || null);
 

@@ -49,7 +49,7 @@
     "@myrmidon/cadmus-refs-geonames-lookup": "^5.1.1",
     "@myrmidon/cadmus-refs-historical-date": "5.1.2",
     "@myrmidon/cadmus-refs-lookup": "^5.1.2",
-    "@myrmidon/cadmus-refs-proper-name": "5.1.3",
+    "@myrmidon/cadmus-refs-proper-name": "5.1.4",
     "@myrmidon/cadmus-refs-viaf-lookup": "^5.1.0",
     "@myrmidon/cadmus-text-block-view": "^5.1.0",
     "@myrmidon/cadmus-text-ed": "^5.1.0",

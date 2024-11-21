@@ -15,6 +15,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-11-21: fix to district location part.
 - 2024-11-18:
   - updated Angular.
   - changed port number in `env.js` so that it fits the API http development port.

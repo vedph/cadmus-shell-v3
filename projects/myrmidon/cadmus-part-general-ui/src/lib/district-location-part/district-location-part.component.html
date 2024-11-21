@@ -14,7 +14,7 @@
           <cadmus-refs-proper-name
             [langEntries]="langEntries"
             [typeEntries]="typeEntries"
-            [name]="place.value"
+            [name]="initialName"
             [noAssertion]="true"
             (nameChange)="onNameChange($event)"
           ></cadmus-refs-proper-name>
@@ -24,7 +24,7 @@
       <!-- note -->
       <div>
         <mat-form-field class="long-text">
-          <mat-label i18n>original function</mat-label>
+          <mat-label i18n>note</mat-label>
           <textarea matInput [formControl]="note"></textarea>
           @if ($any(note).errors?.maxLength && (note.dirty || note.touched)) {
           <mat-error i18n>note too long</mat-error>
