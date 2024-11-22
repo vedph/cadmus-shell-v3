@@ -15,6 +15,10 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+### 9.0.1
+
+- 2024-11-22: updated some peer dependencies.
+
 ### 9.0.0
 
 - 2024-11-22: ⚠️ upgraded to Angular 19 and updated packages except for `@swimlane/ngx-graph` whose version 9 has [issues](https://github.com/swimlane/ngx-graph/issues/548) when loading a zero nodes graph. Until the fix is merged, we will stick to version 8.4.0.

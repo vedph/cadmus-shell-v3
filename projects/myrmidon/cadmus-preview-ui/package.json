@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-preview-ui",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "Cadmus - preview components.",
   "keywords": [
     "Cadmus"
@@ -19,7 +19,7 @@
     "@myrmidon/ng-tools": "4.0.0",
     "@myrmidon/ng-mat-tools": "4.0.0",
     "@myrmidon/cadmus-api": "^9.0.0",
-    "@myrmidon/cadmus-text-block-view": "^9.0.0"
+    "@myrmidon/cadmus-text-block-view": "^6.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
