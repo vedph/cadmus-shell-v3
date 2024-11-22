@@ -22,6 +22,7 @@ import { NgToolsValidators } from '@myrmidon/ng-tools';
   selector: 'cadmus-keywords-part',
   templateUrl: './keywords-part.component.html',
   styleUrls: ['./keywords-part.component.css'],
+  standalone: false,
 })
 export class KeywordsPartComponent
   extends ModelEditorComponentBase<KeywordsPart>

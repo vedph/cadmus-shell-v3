@@ -25,6 +25,7 @@ import {
   selector: 'cadmus-doc-references-part',
   templateUrl: './doc-references-part.component.html',
   styleUrls: ['./doc-references-part.component.css'],
+  standalone: false,
 })
 export class DocReferencesPartComponent
   extends ModelEditorComponentBase<DocReferencesPart>

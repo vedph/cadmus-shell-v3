@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-pin-links-part-feature',
   templateUrl: './pin-links-part-feature.component.html',
   styleUrls: ['./pin-links-part-feature.component.css'],
+  standalone: false,
 })
 export class PinLinksPartFeatureComponent
   extends EditPartFeatureBase

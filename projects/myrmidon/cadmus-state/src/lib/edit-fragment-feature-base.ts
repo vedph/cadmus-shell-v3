@@ -20,6 +20,7 @@ import { FragmentEditorService } from './fragment-editor.service';
  */
 @Component({
   template: '',
+  standalone: false,
 })
 export abstract class EditFragmentFeatureBase
   implements OnInit, OnDestroy, ComponentCanDeactivate

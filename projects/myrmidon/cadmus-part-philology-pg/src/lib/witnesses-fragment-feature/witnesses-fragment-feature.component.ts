@@ -11,6 +11,7 @@ import { LibraryRouteService } from '@myrmidon/cadmus-core';
   selector: 'cadmus-witnesses-fragment-feature',
   templateUrl: './witnesses-fragment-feature.component.html',
   styleUrls: ['./witnesses-fragment-feature.component.css'],
+  standalone: false,
 })
 export class WitnessesFragmentFeatureComponent
   extends EditFragmentFeatureBase

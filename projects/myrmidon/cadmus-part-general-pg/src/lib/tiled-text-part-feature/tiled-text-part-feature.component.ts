@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-tiled-text-part-feature',
   templateUrl: './tiled-text-part-feature.component.html',
   styleUrls: ['./tiled-text-part-feature.component.css'],
+  standalone: false,
 })
 export class TiledTextPartFeatureComponent
   extends EditPartFeatureBase

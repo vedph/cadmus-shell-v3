@@ -7,6 +7,7 @@ import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
   selector: 'cadmus-current-item-bar',
   templateUrl: './current-item-bar.component.html',
   styleUrls: ['./current-item-bar.component.css'],
+  standalone: false,
 })
 export class CurrentItemBarComponent implements OnInit {
   public item$: Observable<Item | undefined>;

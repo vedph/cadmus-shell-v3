@@ -25,6 +25,7 @@ import { PartPreviewSource } from '../part-preview/part-preview.component';
   selector: 'cadmus-text-preview',
   templateUrl: './text-preview.component.html',
   styleUrls: ['./text-preview.component.css'],
+  standalone: false,
 })
 export class TextPreviewComponent implements OnInit {
   private _source: PartPreviewSource | undefined | null;

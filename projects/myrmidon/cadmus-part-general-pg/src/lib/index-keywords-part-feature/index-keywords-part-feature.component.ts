@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-index-keywords-part-feature',
   templateUrl: './index-keywords-part-feature.component.html',
   styleUrls: ['./index-keywords-part-feature.component.css'],
+  standalone: false,
 })
 export class IndexKeywordsPartFeatureComponent
   extends EditPartFeatureBase

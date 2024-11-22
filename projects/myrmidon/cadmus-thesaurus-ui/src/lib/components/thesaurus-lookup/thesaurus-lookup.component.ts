@@ -20,6 +20,7 @@ import {
   selector: 'cadmus-thesaurus-lookup',
   templateUrl: './thesaurus-lookup.component.html',
   styleUrls: ['./thesaurus-lookup.component.css'],
+  standalone: false,
 })
 export class ThesaurusLookupComponent implements OnInit {
   private _initialValue: string | undefined;

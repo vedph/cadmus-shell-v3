@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-api",
-  "version": "8.1.2",
+  "version": "9.0.0",
   "description": "Cadmus - API services.",
   "keywords": [
     "Cadmus"
@@ -14,12 +14,12 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^18.0.0",
-    "@angular/core": "^18.0.0",
-    "@myrmidon/ng-tools": "^3.1.1",
-    "@myrmidon/auth-jwt-login": "^4.0.1"
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@myrmidon/ng-tools": "^4.0.0",
+    "@myrmidon/auth-jwt-login": "^6.0.0"
   },
   "dependencies": {
-    "tslib": "^2.5.0"
+    "tslib": "^2.3.0"
   }
 }

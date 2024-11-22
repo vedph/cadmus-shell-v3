@@ -15,6 +15,7 @@ import { ThesaurusEntry } from '@myrmidon/cadmus-core';
   selector: 'cadmus-graph-node-editor',
   templateUrl: './graph-node-editor.component.html',
   styleUrls: ['./graph-node-editor.component.css'],
+  standalone: false,
 })
 export class GraphNodeEditorComponent implements OnInit {
   private _node?: UriNode;

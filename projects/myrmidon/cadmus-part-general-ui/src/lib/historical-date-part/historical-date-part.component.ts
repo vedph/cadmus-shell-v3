@@ -24,6 +24,7 @@ import {
   selector: 'cadmus-historical-date-part',
   templateUrl: './historical-date-part.component.html',
   styleUrls: ['./historical-date-part.component.css'],
+  standalone: false,
 })
 export class HistoricalDatePartComponent
   extends ModelEditorComponentBase<HistoricalDatePart>

@@ -37,6 +37,7 @@ import { CommentFragment } from '../comment-fragment';
   selector: 'cadmus-comment-editor',
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.css'],
+  standalone: false,
 })
 export class CommentEditorComponent
   extends ModelEditorComponentBase<CommentPart | CommentFragment>
@@ -167,7 +168,9 @@ export class CommentEditorComponent
     if (this._editorBindings) {
       Object.keys(this._editorBindings).forEach((key) => {
         const n = parseInt(key, 10);
-        console.log('Binding ' + n + ' to ' + this._editorBindings![key as any]);
+        console.log(
+          'Binding ' + n + ' to ' + this._editorBindings![key as any]
+        );
         this._editor!.addCommand(n, () => {
           this.applyEdit(this._editorBindings![key as any]);
         });

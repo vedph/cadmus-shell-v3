@@ -28,6 +28,7 @@ import {
   selector: 'cadmus-bibliography-part',
   templateUrl: './bibliography-part.component.html',
   styleUrls: ['./bibliography-part.component.css'],
+  standalone: false,
 })
 export class BibliographyPartComponent
   extends ModelEditorComponentBase<BibliographyPart>

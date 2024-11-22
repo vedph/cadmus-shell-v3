@@ -46,6 +46,7 @@ export const renderLabelFromLastColon = (label: string): string => {
   selector: 'cadmus-thesaurus-tree',
   templateUrl: './thesaurus-tree.component.html',
   styleUrls: ['./thesaurus-tree.component.css'],
+  standalone: false,
 })
 export class ThesaurusTreeComponent implements OnInit {
   private _entries?: ThesaurusEntry[];

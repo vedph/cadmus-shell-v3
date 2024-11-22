@@ -15,6 +15,7 @@ import { ItemListRepository } from '../state/item-list.repository';
   selector: 'cadmus-item-filter',
   templateUrl: './item-filter.component.html',
   styleUrls: ['./item-filter.component.css'],
+  standalone: false,
 })
 export class ItemFilterComponent implements OnInit {
   public filter$: Observable<ItemFilter>;

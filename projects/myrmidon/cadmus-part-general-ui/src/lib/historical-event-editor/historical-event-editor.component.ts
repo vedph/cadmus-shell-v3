@@ -23,6 +23,7 @@ const RELATION_SEP = ':';
   selector: 'cadmus-historical-event-editor',
   templateUrl: './historical-event-editor.component.html',
   styleUrls: ['./historical-event-editor.component.css'],
+  standalone: false,
 })
 export class HistoricalEventEditorComponent {
   private _model: HistoricalEvent | undefined;

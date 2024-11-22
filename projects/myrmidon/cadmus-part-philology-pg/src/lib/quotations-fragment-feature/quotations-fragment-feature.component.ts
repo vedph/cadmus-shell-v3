@@ -11,6 +11,7 @@ import { LibraryRouteService } from '@myrmidon/cadmus-core';
   selector: 'cadmus-quotations-fragment-feature',
   templateUrl: './quotations-fragment-feature.component.html',
   styleUrls: ['./quotations-fragment-feature.component.css'],
+  standalone: false,
 })
 export class QuotationsFragmentFeatureComponent
   extends EditFragmentFeatureBase

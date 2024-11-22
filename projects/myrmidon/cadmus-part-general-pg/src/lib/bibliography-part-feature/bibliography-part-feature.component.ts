@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-bibliography-part-feature',
   templateUrl: './bibliography-part-feature.component.html',
   styleUrls: ['./bibliography-part-feature.component.css'],
+  standalone: false,
 })
 export class BibliographyPartFeatureComponent
   extends EditPartFeatureBase

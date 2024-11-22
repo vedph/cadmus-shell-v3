@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-chronotopes-part-feature',
   templateUrl: './chronotopes-part-feature.component.html',
   styleUrls: ['./chronotopes-part-feature.component.css'],
+  standalone: false,
 })
 export class ChronotopesPartFeatureComponent
   extends EditPartFeatureBase

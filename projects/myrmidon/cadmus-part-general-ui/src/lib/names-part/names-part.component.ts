@@ -25,6 +25,7 @@ import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
   selector: 'cadmus-names-part',
   templateUrl: './names-part.component.html',
   styleUrls: ['./names-part.component.css'],
+  standalone: false,
 })
 export class NamesPartComponent
   extends ModelEditorComponentBase<NamesPart>

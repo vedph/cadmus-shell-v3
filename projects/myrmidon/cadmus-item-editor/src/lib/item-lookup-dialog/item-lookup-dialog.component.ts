@@ -15,12 +15,13 @@ import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
   selector: 'cadmus-item-lookup-dialog',
   templateUrl: './item-lookup-dialog.component.html',
   styleUrl: './item-lookup-dialog.component.scss',
+  standalone: false,
 })
 export class ItemLookupDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<ItemLookupDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public config: MatDialogConfig,
-    public itemLookupService: ItemRefLookupService,
+    public itemLookupService: ItemRefLookupService
   ) {}
 
   public onCancel(): void {

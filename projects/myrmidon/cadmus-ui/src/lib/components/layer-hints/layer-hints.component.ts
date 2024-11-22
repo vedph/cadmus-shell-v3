@@ -3,8 +3,6 @@ import {
   FormGroup,
   FormArray,
   FormBuilder,
-  FormControl,
-  Validators,
 } from '@angular/forms';
 
 import { LayerHint } from '@myrmidon/cadmus-core';
@@ -14,6 +12,7 @@ import { DialogService } from '@myrmidon/ng-mat-tools';
   selector: 'cadmus-layer-hints',
   templateUrl: './layer-hints.component.html',
   styleUrls: ['./layer-hints.component.css'],
+  standalone: false,
 })
 export class LayerHintsComponent implements OnInit {
   private _hints: LayerHint[];

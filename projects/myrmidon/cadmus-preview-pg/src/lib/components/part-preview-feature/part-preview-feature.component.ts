@@ -6,6 +6,7 @@ import { PartPreviewSource } from '@myrmidon/cadmus-preview-ui';
   selector: 'cadmus-part-preview-feature',
   templateUrl: './part-preview-feature.component.html',
   styleUrls: ['./part-preview-feature.component.css'],
+  standalone: false,
 })
 export class PartPreviewFeatureComponent implements OnInit {
   public source?: PartPreviewSource;

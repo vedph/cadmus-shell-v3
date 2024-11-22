@@ -29,6 +29,7 @@ import {
   selector: 'cadmus-historical-events-part',
   templateUrl: './historical-events-part.component.html',
   styleUrls: ['./historical-events-part.component.css'],
+  standalone: false,
 })
 export class HistoricalEventsPartComponent
   extends ModelEditorComponentBase<HistoricalEventsPart>

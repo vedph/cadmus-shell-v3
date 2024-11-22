@@ -10,6 +10,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   selector: 'cadmus-refs-external-ids-part-feature',
   templateUrl: './external-ids-part-feature.component.html',
   styleUrls: ['./external-ids-part-feature.component.css'],
+  standalone: false,
 })
 export class ExternalIdsPartFeatureComponent
   extends EditPartFeatureBase

@@ -49,6 +49,7 @@ import { ItemGenerateDialogComponent } from '../item-generate-dialog/item-genera
   selector: 'cadmus-item-editor',
   templateUrl: './item-editor.component.html',
   styleUrls: ['./item-editor.component.css'],
+  standalone: false,
 })
 export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   private _flagsFrozen?: boolean;

@@ -6,6 +6,7 @@ import { UserListRepository } from '@myrmidon/auth-jwt-admin';
   selector: 'app-register-user-page',
   templateUrl: './register-user-page.component.html',
   styleUrls: ['./register-user-page.component.css'],
+  standalone: false,
 })
 export class RegisterUserPageComponent implements OnInit {
   constructor(

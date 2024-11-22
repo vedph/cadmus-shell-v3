@@ -20,6 +20,7 @@ import { NodeListRepository } from '../../state/graph-node-list.repository';
   selector: 'cadmus-graph-node-list',
   templateUrl: './graph-node-list.component.html',
   styleUrls: ['./graph-node-list.component.css'],
+  standalone: false,
 })
 export class GraphNodeListComponent implements OnInit {
   private _editedNode?: UriNode;

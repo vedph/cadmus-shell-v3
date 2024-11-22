@@ -6,6 +6,7 @@ import { PartDefinition, Part, Thesaurus } from '@myrmidon/cadmus-core';
   selector: 'cadmus-missing-parts',
   templateUrl: './missing-parts.component.html',
   styleUrls: ['./missing-parts.component.css'],
+  standalone: false,
 })
 export class MissingPartsComponent implements OnInit {
   private _partDefinitions?: PartDefinition[];

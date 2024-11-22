@@ -16,6 +16,7 @@ import { PartEditorService } from './part-editor.service';
  */
 @Component({
   template: '',
+  standalone: false,
 })
 export abstract class EditPartFeatureBase
   implements OnInit, OnDestroy, ComponentCanDeactivate

@@ -8,10 +8,10 @@ import { Node as GraphNode } from '@swimlane/ngx-graph';
  * got from the property node's data uri.
  */
 @Pipe({
-  name: 'graphNodeLabel'
+  name: 'graphNodeLabel',
+  standalone: false,
 })
 export class GraphNodeLabelPipe implements PipeTransform {
-
   transform(value: unknown, ...args: unknown[]): unknown {
     const node = value as GraphNode;
     if (!node?.id || !node?.label) {

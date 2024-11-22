@@ -61,7 +61,8 @@ export interface EditedObject<T extends Part | Fragment> {
  * from the derived editor's ngOnInit handler.
  */
 @Component({
-  template: '',
+    template: '',
+    standalone: false
 })
 export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   implements OnInit, OnDestroy

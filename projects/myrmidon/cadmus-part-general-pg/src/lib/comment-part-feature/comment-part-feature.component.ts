@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-comment-part-feature',
   templateUrl: './comment-part-feature.component.html',
   styleUrls: ['./comment-part-feature.component.css'],
+  standalone: false,
 })
 export class CommentPartFeatureComponent
   extends EditPartFeatureBase
@@ -45,7 +46,7 @@ export class CommentPartFeatureComponent
       'comment-id-scopes',
       'comment-id-tags',
       'assertion-tags',
-      'pin-link-settings'
+      'pin-link-settings',
     ];
   }
 }

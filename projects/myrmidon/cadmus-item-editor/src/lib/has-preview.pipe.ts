@@ -12,7 +12,8 @@ import { Part } from '@myrmidon/cadmus-core';
  * to the renderer if any.
  */
 @Pipe({
-  name: 'hasPreview',
+    name: 'hasPreview',
+    standalone: false
 })
 export class HasPreviewPipe implements PipeTransform {
   /**

@@ -28,6 +28,7 @@ export interface PartScopeSetRequest {
   selector: 'cadmus-parts-scope-editor',
   templateUrl: './parts-scope-editor.component.html',
   styleUrls: ['./parts-scope-editor.component.css'],
+  standalone: false,
 })
 export class PartsScopeEditorComponent implements OnInit {
   private _parts: Part[] | undefined;

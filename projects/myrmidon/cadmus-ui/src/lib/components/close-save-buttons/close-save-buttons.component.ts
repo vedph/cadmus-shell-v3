@@ -4,7 +4,8 @@ import { FormGroup, UntypedFormGroup } from '@angular/forms';
 @Component({
   selector: 'cadmus-close-save-buttons',
   templateUrl: './close-save-buttons.component.html',
-  styleUrls: ['./close-save-buttons.component.css']
+  styleUrls: ['./close-save-buttons.component.css'],
+  standalone: false,
 })
 export class CloseSaveButtonsComponent {
   @Input()

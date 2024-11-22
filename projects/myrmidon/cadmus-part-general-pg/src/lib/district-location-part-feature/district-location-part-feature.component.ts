@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-district-location-part-feature',
   templateUrl: './district-location-part-feature.component.html',
   styleUrl: './district-location-part-feature.component.scss',
+  standalone: false,
 })
 export class DistrictLocationPartFeatureComponent
   extends EditPartFeatureBase

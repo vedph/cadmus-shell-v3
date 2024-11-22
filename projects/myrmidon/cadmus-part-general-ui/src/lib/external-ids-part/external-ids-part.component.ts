@@ -27,6 +27,7 @@ import { NgToolsValidators } from '@myrmidon/ng-tools';
   selector: 'cadmus-refs-external-ids-part',
   templateUrl: './external-ids-part.component.html',
   styleUrls: ['./external-ids-part.component.css'],
+  standalone: false,
 })
 export class ExternalIdsPartComponent
   extends ModelEditorComponentBase<ExternalIdsPart>

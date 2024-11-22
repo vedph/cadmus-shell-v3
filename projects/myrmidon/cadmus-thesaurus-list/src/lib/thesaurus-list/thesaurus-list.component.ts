@@ -17,6 +17,7 @@ import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
   selector: 'cadmus-thesaurus-list',
   templateUrl: './thesaurus-list.component.html',
   styleUrls: ['./thesaurus-list.component.css'],
+  standalone: false,
 })
 export class ThesaurusListComponent implements OnInit {
   public loading$: Observable<boolean | undefined>;

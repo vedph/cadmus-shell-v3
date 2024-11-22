@@ -9,6 +9,7 @@ import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
   selector: 'cadmus-physical-states-part-feature',
   templateUrl: './physical-states-part-feature.component.html',
   styleUrl: './physical-states-part-feature.component.scss',
+  standalone: false,
 })
 export class PhysicalStatesPartFeatureComponent
   extends EditPartFeatureBase

@@ -16,6 +16,7 @@ import { PagedLinkedLiteralFilter } from '../../graph-walker';
   selector: 'cadmus-walker-linked-literal-filter',
   templateUrl: './linked-literal-filter.component.html',
   styleUrls: ['./linked-literal-filter.component.css'],
+  standalone: false,
 })
 export class LinkedLiteralFilterComponent implements OnInit {
   private _filter: PagedLinkedLiteralFilter;

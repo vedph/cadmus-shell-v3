@@ -20,6 +20,7 @@ import { Keyword } from '../keywords-part';
   selector: 'cadmus-bibliography-entry',
   templateUrl: './bibliography-entry.component.html',
   styleUrls: ['./bibliography-entry.component.css'],
+  standalone: false,
 })
 export class BibliographyEntryComponent implements OnInit {
   private _entry?: BibEntry;

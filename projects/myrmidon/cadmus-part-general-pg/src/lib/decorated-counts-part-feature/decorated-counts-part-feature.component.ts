@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-decorated-counts-part-feature',
   templateUrl: './decorated-counts-part-feature.component.html',
   styleUrl: './decorated-counts-part-feature.component.scss',
+  standalone: false,
 })
 export class DecoratedCountsPartFeatureComponent
   extends EditPartFeatureBase

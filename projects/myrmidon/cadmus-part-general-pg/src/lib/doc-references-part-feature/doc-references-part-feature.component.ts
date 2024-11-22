@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-doc-references-part-feature',
   templateUrl: './doc-references-part-feature.component.html',
   styleUrls: ['./doc-references-part-feature.component.css'],
+  standalone: false,
 })
 export class DocReferencesPartFeatureComponent
   extends EditPartFeatureBase

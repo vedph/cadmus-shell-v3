@@ -24,6 +24,7 @@ import { PinLinksPart, PIN_LINKS_PART_TYPEID } from '../pin-links-part';
   selector: 'cadmus-pin-links-part',
   templateUrl: './pin-links-part.component.html',
   styleUrls: ['./pin-links-part.component.css'],
+  standalone: false,
 })
 export class PinLinksPartComponent
   extends ModelEditorComponentBase<PinLinksPart>

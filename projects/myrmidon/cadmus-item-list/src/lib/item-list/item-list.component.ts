@@ -21,6 +21,7 @@ import { ItemListRepository } from '../state/item-list.repository';
   selector: 'cadmus-item-list',
   templateUrl: './item-list.component.html',
   styleUrls: ['./item-list.component.css'],
+  standalone: false,
 })
 export class ItemListComponent implements OnInit {
   public loading$: Observable<boolean | undefined>;

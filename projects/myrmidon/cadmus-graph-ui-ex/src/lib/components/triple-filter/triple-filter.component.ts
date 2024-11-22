@@ -16,6 +16,7 @@ import { PagedTripleFilter } from '../../graph-walker';
   selector: 'cadmus-walker-triple-filter',
   templateUrl: './triple-filter.component.html',
   styleUrls: ['./triple-filter.component.css'],
+  standalone: false,
 })
 export class TripleFilterComponent implements OnInit {
   private _filter: PagedTripleFilter;

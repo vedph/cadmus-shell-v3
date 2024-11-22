@@ -12,6 +12,7 @@ import {
   selector: 'cadmus-pin-links-fragment-feature',
   templateUrl: './pin-links-fragment-feature.component.html',
   styleUrls: ['./pin-links-fragment-feature.component.css'],
+  standalone: false,
 })
 export class PinLinksFragmentFeatureComponent
   extends EditFragmentFeatureBase

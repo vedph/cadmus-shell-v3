@@ -21,6 +21,7 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   selector: 'cadmus-graph-triple-filter',
   templateUrl: './graph-triple-filter.component.html',
   styleUrls: ['./graph-triple-filter.component.css'],
+  standalone: false,
 })
 export class GraphTripleFilterComponent implements OnInit {
   public filter$: Observable<TripleFilter>;

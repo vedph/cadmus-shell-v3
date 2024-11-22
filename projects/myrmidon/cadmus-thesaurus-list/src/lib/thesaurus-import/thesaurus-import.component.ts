@@ -37,6 +37,7 @@ interface UploadResult {
   selector: 'cadmus-thesaurus-import',
   templateUrl: './thesaurus-import.component.html',
   styleUrls: ['./thesaurus-import.component.css'],
+  standalone: false,
 })
 export class ThesaurusImportComponent {
   private _sub?: Subscription;

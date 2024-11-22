@@ -18,6 +18,7 @@ import { RelatedEntity } from '../historical-events-part';
   selector: 'cadmus-related-entity',
   templateUrl: './related-entity.component.html',
   styleUrls: ['./related-entity.component.css'],
+  standalone: false,
 })
 export class RelatedEntityComponent {
   private _entity: RelatedEntity | undefined;

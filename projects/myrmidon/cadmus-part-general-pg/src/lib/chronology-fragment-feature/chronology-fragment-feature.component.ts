@@ -12,6 +12,7 @@ import { LibraryRouteService } from '@myrmidon/cadmus-core';
   selector: 'cadmus-chronology-fragment-feature',
   templateUrl: './chronology-fragment-feature.component.html',
   styleUrls: ['./chronology-fragment-feature.component.css'],
+  standalone: false,
 })
 export class ChronologyFragmentFeatureComponent
   extends EditFragmentFeatureBase

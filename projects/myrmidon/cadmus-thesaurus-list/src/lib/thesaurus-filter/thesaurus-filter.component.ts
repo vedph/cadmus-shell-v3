@@ -15,6 +15,7 @@ import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
   selector: 'cadmus-thesaurus-filter',
   templateUrl: './thesaurus-filter.component.html',
   styleUrls: ['./thesaurus-filter.component.css'],
+  standalone: false,
 })
 export class ThesaurusFilterComponent implements OnInit {
   public filter$: Observable<ThesaurusFilter>;

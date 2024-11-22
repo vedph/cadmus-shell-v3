@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-token-text-part-feature',
   templateUrl: './token-text-part-feature.component.html',
   styleUrls: ['./token-text-part-feature.component.css'],
+  standalone: false,
 })
 export class TokenTextPartFeatureComponent
   extends EditPartFeatureBase

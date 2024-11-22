@@ -6,18 +6,12 @@ import {
   UntypedFormGroup,
 } from '@angular/forms';
 
-
 import { NgToolsValidators } from '@myrmidon/ng-tools';
 import { DialogService } from '@myrmidon/ng-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import {
-  EditedObject,
-  ModelEditorComponentBase,
-} from '@myrmidon/cadmus-ui';
+import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import {
-  PhysicalState,
-} from '@myrmidon/cadmus-mat-physical-state';
+import { PhysicalState } from '@myrmidon/cadmus-mat-physical-state';
 
 import {
   PHYSICAL_STATES_PART_TYPEID,
@@ -33,6 +27,7 @@ import {
   selector: 'cadmus-physical-states-part',
   templateUrl: './physical-states-part.component.html',
   styleUrl: './physical-states-part.component.scss',
+  standalone: false,
 })
 export class PhysicalStatesPartComponent
   extends ModelEditorComponentBase<PhysicalStatesPart>

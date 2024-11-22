@@ -25,6 +25,7 @@ import {
   selector: 'cadmus-physical-measurements-part',
   templateUrl: './physical-measurements-part.component.html',
   styleUrl: './physical-measurements-part.component.scss',
+  standalone: false,
 })
 export class PhysicalMeasurementsPartComponent
   extends ModelEditorComponentBase<PhysicalMeasurementsPart>

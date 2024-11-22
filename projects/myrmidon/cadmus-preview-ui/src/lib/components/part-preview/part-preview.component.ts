@@ -23,6 +23,7 @@ export interface PartPreviewSource {
   selector: 'cadmus-part-preview',
   templateUrl: './part-preview.component.html',
   styleUrls: ['./part-preview.component.css'],
+  standalone: false,
 })
 export class PartPreviewComponent implements OnInit {
   private _source: PartPreviewSource | undefined | null;

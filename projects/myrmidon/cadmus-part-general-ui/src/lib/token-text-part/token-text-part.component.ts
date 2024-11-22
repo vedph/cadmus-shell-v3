@@ -26,6 +26,7 @@ import {
   selector: 'cadmus-token-text-part',
   templateUrl: './token-text-part.component.html',
   styleUrls: ['./token-text-part.component.css'],
+  standalone: false,
 })
 export class TokenTextPartComponent
   extends ModelEditorComponentBase<TokenTextPart>

@@ -2,7 +2,8 @@
 
 @import "preview-styles.css";
 
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 $light-theme: mat.define-theme(
   (

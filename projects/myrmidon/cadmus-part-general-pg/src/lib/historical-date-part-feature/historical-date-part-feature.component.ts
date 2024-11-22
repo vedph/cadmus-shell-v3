@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-historical-date-part-feature',
   templateUrl: './historical-date-part-feature.component.html',
   styleUrls: ['./historical-date-part-feature.component.css'],
+  standalone: false,
 })
 export class HistoricalDatePartFeatureComponent
   extends EditPartFeatureBase

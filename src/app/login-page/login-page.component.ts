@@ -7,6 +7,7 @@ import { take } from 'rxjs/operators';
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.css'],
+  standalone: false,
 })
 export class LoginPageComponent implements OnInit {
   constructor(private _authService: AuthJwtService, private _router: Router) {}

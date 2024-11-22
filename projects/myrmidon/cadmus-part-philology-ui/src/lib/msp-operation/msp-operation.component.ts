@@ -19,6 +19,7 @@ import { MspOperation, MspOperator } from '../msp-operation';
   selector: 'cadmus-msp-operation',
   templateUrl: './msp-operation.component.html',
   styleUrls: ['./msp-operation.component.css'],
+  standalone: false,
 })
 export class MspOperationComponent implements OnInit {
   private _operation?: MspOperation;

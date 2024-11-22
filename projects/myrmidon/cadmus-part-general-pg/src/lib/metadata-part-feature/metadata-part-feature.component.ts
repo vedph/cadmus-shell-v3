@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-metadata-part-feature',
   templateUrl: './metadata-part-feature.component.html',
   styleUrls: ['./metadata-part-feature.component.css'],
+  standalone: false,
 })
 export class MetadataPartFeatureComponent
   extends EditPartFeatureBase

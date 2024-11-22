@@ -10,6 +10,7 @@ import { AppRepository } from '@myrmidon/cadmus-state';
   selector: 'cadmus-text-preview-feature',
   templateUrl: './text-preview-feature.component.html',
   styleUrls: ['./text-preview-feature.component.css'],
+  standalone: false,
 })
 export class TextPreviewFeatureComponent implements OnInit {
   public source?: PartPreviewSource;

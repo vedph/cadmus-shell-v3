@@ -20,6 +20,7 @@ import { GraphTripleListRepository } from '../../state/graph-triple-list.reposit
   selector: 'cadmus-graph-triple-list',
   templateUrl: './graph-triple-list.component.html',
   styleUrls: ['./graph-triple-list.component.css'],
+  standalone: false,
 })
 export class GraphTripleListComponent implements OnInit {
   public page$: Observable<DataPage<UriTriple>>;

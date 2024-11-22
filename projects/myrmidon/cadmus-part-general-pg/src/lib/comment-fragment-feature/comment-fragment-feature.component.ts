@@ -12,6 +12,7 @@ import { LibraryRouteService } from '@myrmidon/cadmus-core';
   selector: 'cadmus-comment-fragment-feature',
   templateUrl: './comment-fragment-feature.component.html',
   styleUrls: ['./comment-fragment-feature.component.css'],
+  standalone: false,
 })
 export class CommentFragmentFeatureComponent
   extends EditFragmentFeatureBase

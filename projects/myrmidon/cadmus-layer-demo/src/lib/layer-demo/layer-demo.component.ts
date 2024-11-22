@@ -6,6 +6,7 @@ import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
   selector: 'cadmus-layer-demo',
   templateUrl: './layer-demo.component.html',
   styleUrls: ['./layer-demo.component.css'],
+  standalone: false,
 })
 export class LayerDemoComponent {
   @ViewChild('resultElem') _resultElement?: ElementRef;

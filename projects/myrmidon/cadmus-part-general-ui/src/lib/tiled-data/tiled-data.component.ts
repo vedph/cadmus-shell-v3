@@ -27,6 +27,7 @@ const VALUE_MAX_LEN = 100;
   selector: 'cadmus-tiled-data',
   templateUrl: './tiled-data.component.html',
   styleUrls: ['./tiled-data.component.css'],
+  standalone: false,
 })
 export class TiledDataComponent implements OnInit {
   private _data: Data;

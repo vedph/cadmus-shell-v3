@@ -15,6 +15,7 @@ import { IndexKeyword } from '../index-keywords-part';
   selector: 'cadmus-index-keyword',
   templateUrl: './index-keyword.component.html',
   styleUrls: ['./index-keyword.component.css'],
+  standalone: false,
 })
 export class IndexKeywordComponent implements OnInit {
   private _keyword?: IndexKeyword;

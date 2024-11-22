@@ -16,6 +16,7 @@ import { PagedLinkedNodeFilter } from '../../graph-walker';
   selector: 'cadmus-walker-linked-node-filter',
   templateUrl: './linked-node-filter.component.html',
   styleUrls: ['./linked-node-filter.component.css'],
+  standalone: false,
 })
 export class LinkedNodeFilterComponent implements OnInit {
   private _filter: PagedLinkedNodeFilter;

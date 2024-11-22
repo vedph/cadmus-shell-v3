@@ -25,6 +25,7 @@ import {
   selector: 'cadmus-district-location-part',
   templateUrl: './district-location-part.component.html',
   styleUrl: './district-location-part.component.scss',
+  standalone: false,
 })
 export class DistrictLocationPartComponent
   extends ModelEditorComponentBase<DistrictLocationPart>

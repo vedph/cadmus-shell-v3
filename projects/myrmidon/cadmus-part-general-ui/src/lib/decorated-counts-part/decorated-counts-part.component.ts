@@ -25,6 +25,7 @@ import { NgToolsValidators } from '@myrmidon/ng-tools';
   selector: 'cadmus-decorated-counts-part',
   templateUrl: './decorated-counts-part.component.html',
   styleUrl: './decorated-counts-part.component.scss',
+  standalone: false,
 })
 export class DecoratedCountsPartComponent
   extends ModelEditorComponentBase<DecoratedCountsPart>

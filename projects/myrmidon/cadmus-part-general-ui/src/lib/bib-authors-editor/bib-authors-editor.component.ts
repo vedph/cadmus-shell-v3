@@ -8,6 +8,7 @@ import { BibAuthor } from '../bibliography-part';
   selector: 'cadmus-bib-authors-editor',
   templateUrl: './bib-authors-editor.component.html',
   styleUrls: ['./bib-authors-editor.component.css'],
+  standalone: false,
 })
 export class BibAuthorsEditorComponent implements OnInit {
   @Input()

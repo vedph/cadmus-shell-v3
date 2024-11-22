@@ -31,6 +31,7 @@ import { NgToolsValidators } from '@myrmidon/ng-tools';
   selector: 'cadmus-apparatus-fragment',
   templateUrl: './apparatus-fragment.component.html',
   styleUrls: ['./apparatus-fragment.component.css'],
+  standalone: false,
 })
 export class ApparatusFragmentComponent
   extends ModelEditorComponentBase<ApparatusFragment>

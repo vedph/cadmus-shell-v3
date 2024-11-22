@@ -11,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   selector: 'cadmus-orthography-fragment-feature',
   templateUrl: './orthography-fragment-feature.component.html',
   styleUrls: ['./orthography-fragment-feature.component.css'],
+  standalone: false,
 })
 export class OrthographyFragmentFeatureComponent
   extends EditFragmentFeatureBase
@@ -27,8 +28,6 @@ export class OrthographyFragmentFeatureComponent
   }
 
   protected override getReqThesauriIds(): string[] {
-    return [
-      'orthography-tags',
-    ];
+    return ['orthography-tags'];
   }
 }

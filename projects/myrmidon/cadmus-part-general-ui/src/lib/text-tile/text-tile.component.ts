@@ -21,6 +21,7 @@ import { TextTile, TEXT_TILE_TEXT_DATA_NAME } from '../tiled-text-part';
   selector: 'cadmus-text-tile',
   templateUrl: './text-tile.component.html',
   styleUrls: ['./text-tile.component.css'],
+  standalone: false,
 })
 export class TextTileComponent implements OnInit {
   private _tile?: TextTile;

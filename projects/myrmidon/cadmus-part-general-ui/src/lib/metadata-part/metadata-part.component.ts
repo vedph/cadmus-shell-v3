@@ -27,6 +27,7 @@ import {
   selector: 'cadmus-metadata-part',
   templateUrl: './metadata-part.component.html',
   styleUrls: ['./metadata-part.component.css'],
+  standalone: false,
 })
 export class MetadataPartComponent
   extends ModelEditorComponentBase<MetadataPart>

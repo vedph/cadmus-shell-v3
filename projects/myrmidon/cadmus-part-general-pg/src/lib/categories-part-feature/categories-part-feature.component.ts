@@ -8,6 +8,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-categories-part-feature',
   templateUrl: './categories-part-feature.component.html',
   styleUrls: ['./categories-part-feature.component.css'],
+  standalone: false,
 })
 export class CategoriesPartFeatureComponent
   extends EditPartFeatureBase

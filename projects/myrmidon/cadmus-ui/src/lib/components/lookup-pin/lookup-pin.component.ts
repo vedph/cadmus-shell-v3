@@ -6,7 +6,11 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormBuilder,
+  UntypedFormControl,
+  UntypedFormGroup,
+} from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import {
   debounceTime,
@@ -36,6 +40,7 @@ import { DataPage, ErrorWrapper } from '@myrmidon/ng-tools';
   selector: 'cadmus-lookup-pin',
   templateUrl: './lookup-pin.component.html',
   styleUrls: ['./lookup-pin.component.css'],
+  standalone: false,
 })
 export class LookupPinComponent implements OnInit {
   private _initialValue: string | undefined;

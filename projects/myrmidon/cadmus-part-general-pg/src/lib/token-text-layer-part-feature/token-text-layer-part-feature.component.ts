@@ -27,6 +27,7 @@ import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
   selector: 'cadmus-token-text-layer-part-feature',
   templateUrl: './token-text-layer-part-feature.component.html',
   styleUrls: ['./token-text-layer-part-feature.component.css'],
+  standalone: false,
 })
 export class TokenTextLayerPartFeatureComponent
   implements OnInit, ComponentCanDeactivate

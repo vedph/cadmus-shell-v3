@@ -25,6 +25,7 @@ import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
   selector: 'cadmus-categories-part',
   templateUrl: './categories-part.component.html',
   styleUrls: ['./categories-part.component.css'],
+  standalone: false,
 })
 export class CategoriesPartComponent
   extends ModelEditorComponentBase<CategoriesPart>

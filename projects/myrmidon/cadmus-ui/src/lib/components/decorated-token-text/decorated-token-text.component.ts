@@ -9,6 +9,7 @@ import { TokenLocation, TextLayerService } from '@myrmidon/cadmus-core';
   selector: 'cadmus-decorated-token-text',
   templateUrl: './decorated-token-text.component.html',
   styleUrls: ['./decorated-token-text.component.css'],
+  standalone: false,
 })
 export class DecoratedTokenTextComponent implements OnInit {
   @ViewChild('textElem') _textElement?: ElementRef;

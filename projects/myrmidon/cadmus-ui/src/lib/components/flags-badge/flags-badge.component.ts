@@ -17,6 +17,7 @@ export interface FlagsBadgeData {
   selector: 'cadmus-flags-badge',
   templateUrl: './flags-badge.component.html',
   styleUrls: ['./flags-badge.component.css'],
+  standalone: false,
 })
 export class FlagsBadgeComponent {
   private _data?: FlagsBadgeData | null;

@@ -24,6 +24,7 @@ import {
   selector: 'cadmus-apparatus-entry',
   templateUrl: './apparatus-entry.component.html',
   styleUrls: ['./apparatus-entry.component.css'],
+  standalone: false,
 })
 export class ApparatusEntryComponent implements OnInit {
   private _entry?: ApparatusEntry;

@@ -64,6 +64,7 @@ import { OrthographyFragment } from '../orthography-fragment';
       transition('open <=> closed', [animate('300ms ease-in')]),
     ]),
   ],
+  standalone: false,
 })
 export class OrthographyFragmentComponent
   extends ModelEditorComponentBase<OrthographyFragment>
@@ -270,10 +271,7 @@ export class OrthographyFragmentComponent
     }
 
     // set operations
-    const result = this._differ.diff_main(
-      this.frText,
-      this.standard.value
-    );
+    const result = this._differ.diff_main(this.frText, this.standard.value);
     const ops = this._adapter!.adapt(result);
 
     this.operations.markAsDirty();

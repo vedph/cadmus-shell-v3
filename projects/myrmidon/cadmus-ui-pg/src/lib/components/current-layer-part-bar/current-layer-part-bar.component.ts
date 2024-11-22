@@ -8,6 +8,7 @@ import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
   selector: 'cadmus-current-layer-part-bar',
   templateUrl: './current-layer-part-bar.component.html',
   styleUrls: ['./current-layer-part-bar.component.css'],
+  standalone: false,
 })
 export class CurrentLayerPartBarComponent implements OnInit {
   constructor(

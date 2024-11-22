@@ -25,6 +25,7 @@ import { Observable } from 'rxjs';
       ]),
     ]),
   ],
+  standalone: false,
 })
 export class FlagListComponent {
   public flags$: Observable<FlagDefinition[]>;

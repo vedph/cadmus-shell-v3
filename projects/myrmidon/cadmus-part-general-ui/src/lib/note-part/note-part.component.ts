@@ -26,6 +26,7 @@ import { NotePart, NOTE_PART_TYPEID } from '../note-part';
   selector: 'cadmus-note-part',
   templateUrl: './note-part.component.html',
   styleUrls: ['./note-part.component.css'],
+  standalone: false,
 })
 export class NotePartComponent
   extends ModelEditorComponentBase<NotePart>

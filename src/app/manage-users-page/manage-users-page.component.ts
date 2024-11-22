@@ -3,13 +3,11 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-manage-users-page',
   templateUrl: './manage-users-page.component.html',
-  styleUrls: ['./manage-users-page.component.css']
+  styleUrls: ['./manage-users-page.component.css'],
+  standalone: false,
 })
 export class ManageUsersPageComponent implements OnInit {
+  constructor() {}
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
+  ngOnInit(): void {}
 }

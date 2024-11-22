@@ -12,6 +12,7 @@ import { AuthJwtAccountService } from '@myrmidon/auth-jwt-admin';
   selector: 'cadmus-reset-password',
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css'],
+  standalone: false,
 })
 export class ResetPasswordComponent {
   public busy: boolean | undefined;

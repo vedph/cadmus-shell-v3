@@ -12,6 +12,7 @@ export interface FacetBadgeData {
   selector: 'cadmus-facet-badge',
   templateUrl: './facet-badge.component.html',
   styleUrls: ['./facet-badge.component.css'],
+  standalone: false,
 })
 export class FacetBadgeComponent {
   private _facetColors: { [key: string]: string };

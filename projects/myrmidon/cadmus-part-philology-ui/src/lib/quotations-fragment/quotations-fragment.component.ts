@@ -8,7 +8,12 @@ import {
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
-import { TextLayerService, ThesauriSet, ThesaurusEntry, TokenLocation } from '@myrmidon/cadmus-core';
+import {
+  TextLayerService,
+  ThesauriSet,
+  ThesaurusEntry,
+  TokenLocation,
+} from '@myrmidon/cadmus-core';
 import { DialogService } from '@myrmidon/ng-mat-tools';
 
 import { QuotationWorksService } from './quotation-works.service';
@@ -23,6 +28,7 @@ import { NgToolsValidators } from '@myrmidon/ng-tools';
   selector: 'cadmus-quotations-fragment',
   templateUrl: './quotations-fragment.component.html',
   styleUrls: ['./quotations-fragment.component.css'],
+  standalone: false,
 })
 export class QuotationsFragmentComponent
   extends ModelEditorComponentBase<QuotationsFragment>

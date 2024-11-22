@@ -8,6 +8,7 @@ import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
   selector: 'cadmus-graph-editor-feature',
   templateUrl: './graph-editor-feature.component.html',
   styleUrls: ['./graph-editor-feature.component.css'],
+  standalone: false,
 })
 export class GraphEditorFeatureComponent implements OnInit {
   public nodeTagEntries?: ThesaurusEntry[];

@@ -23,6 +23,7 @@ import { ThesaurusNode } from '../../services/thesaurus-nodes.service';
   selector: 'cadmus-thesaurus-node',
   templateUrl: './thesaurus-node.component.html',
   styleUrls: ['./thesaurus-node.component.css'],
+  standalone: false,
 })
 export class ThesaurusNodeComponent {
   private _node: ThesaurusNode | undefined;

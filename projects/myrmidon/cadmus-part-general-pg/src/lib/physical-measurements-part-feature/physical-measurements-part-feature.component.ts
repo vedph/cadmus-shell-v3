@@ -9,6 +9,7 @@ import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
   selector: 'cadmus-physical-measurements-part-feature',
   templateUrl: './physical-measurements-part-feature.component.html',
   styleUrl: './physical-measurements-part-feature.component.scss',
+  standalone: false,
 })
 export class PhysicalMeasurementsPartFeatureComponent
   extends EditPartFeatureBase

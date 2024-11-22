@@ -23,6 +23,7 @@ import { PinLinksFragment } from '../pin-links-fragment';
   selector: 'cadmus-pin-links-fragment',
   templateUrl: './pin-links-fragment.component.html',
   styleUrls: ['./pin-links-fragment.component.css'],
+  standalone: false,
 })
 export class PinLinksFragmentComponent
   extends ModelEditorComponentBase<PinLinksFragment>

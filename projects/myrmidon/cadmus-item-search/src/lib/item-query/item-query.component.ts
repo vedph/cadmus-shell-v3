@@ -38,6 +38,7 @@ interface PartDefViewModel {
   selector: 'cadmus-item-query',
   templateUrl: './item-query.component.html',
   styleUrls: ['./item-query.component.css'],
+  standalone: false,
 })
 export class ItemQueryComponent implements OnInit, AfterViewInit {
   public form: FormGroup;

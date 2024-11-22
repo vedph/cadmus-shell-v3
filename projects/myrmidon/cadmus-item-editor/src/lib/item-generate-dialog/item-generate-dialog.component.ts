@@ -20,6 +20,7 @@ import { FlagDefinition } from '@myrmidon/cadmus-core';
   selector: 'cadmus-item-generate-dialog',
   templateUrl: './item-generate-dialog.component.html',
   styleUrl: './item-generate-dialog.component.scss',
+  standalone: false,
 })
 export class ItemGenerateDialogComponent {
   public flags: FlagDefinition[] = [];

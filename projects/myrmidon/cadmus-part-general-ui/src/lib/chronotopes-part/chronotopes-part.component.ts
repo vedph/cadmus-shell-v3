@@ -25,6 +25,7 @@ import { ChronotopesPart, CHRONOTOPES_PART_TYPEID } from '../chronotopes-part';
   selector: 'cadmus-chronotopes-part',
   templateUrl: './chronotopes-part.component.html',
   styleUrls: ['./chronotopes-part.component.css'],
+  standalone: false,
 })
 export class ChronotopesPartComponent
   extends ModelEditorComponentBase<ChronotopesPart>

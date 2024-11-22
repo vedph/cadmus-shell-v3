@@ -16,6 +16,7 @@ import { ColorService } from '@myrmidon/cadmus-ui';
   selector: 'cadmus-flag-definition-editor',
   templateUrl: './flag-definition-editor.component.html',
   styleUrls: ['./flag-definition-editor.component.scss'],
+  standalone: false,
 })
 export class FlagDefinitionEditorComponent implements OnInit {
   private _definition: FlagDefinition | undefined;

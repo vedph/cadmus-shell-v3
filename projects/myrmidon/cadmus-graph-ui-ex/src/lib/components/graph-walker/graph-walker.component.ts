@@ -1,7 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Observable, Subject, take } from 'rxjs';
 
-import { Edge, Node as GraphNode, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
+import {
+  Edge,
+  Node as GraphNode,
+  NgxGraphZoomOptions,
+} from '@swimlane/ngx-graph';
 import { DialogService } from '@myrmidon/ng-mat-tools';
 
 import { GraphService } from '@myrmidon/cadmus-api';
@@ -22,6 +26,7 @@ import {
   selector: 'cadmus-graph-walker',
   templateUrl: './graph-walker.component.html',
   styleUrls: ['./graph-walker.component.css'],
+  standalone: false,
 })
 export class GraphWalkerComponent implements OnInit {
   private readonly _walker: GraphWalker;

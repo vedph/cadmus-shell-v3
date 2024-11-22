@@ -22,6 +22,7 @@ import { ChronologyFragment } from '../chronology-fragment';
   selector: 'cadmus-chronology-fragment',
   templateUrl: './chronology-fragment.component.html',
   styleUrls: ['./chronology-fragment.component.css'],
+  standalone: false,
 })
 export class ChronologyFragmentComponent
   extends ModelEditorComponentBase<ChronologyFragment>

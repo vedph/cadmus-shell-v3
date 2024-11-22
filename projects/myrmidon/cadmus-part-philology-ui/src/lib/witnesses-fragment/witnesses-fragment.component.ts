@@ -41,6 +41,7 @@ import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
       transition('open <=> closed', [animate('300ms ease-in')]),
     ]),
   ],
+  standalone: false,
 })
 export class WitnessesFragmentComponent
   extends ModelEditorComponentBase<WitnessesFragment>

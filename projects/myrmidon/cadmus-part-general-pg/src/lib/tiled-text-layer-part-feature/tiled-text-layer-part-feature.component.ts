@@ -33,6 +33,7 @@ import { EditedLayerRepository } from '@myrmidon/cadmus-state';
   selector: 'cadmus-tiled-text-layer-part-feature',
   templateUrl: './tiled-text-layer-part-feature.component.html',
   styleUrls: ['./tiled-text-layer-part-feature.component.css'],
+  standalone: false,
 })
 export class TiledTextLayerPartFeatureComponent
   implements OnInit, ComponentCanDeactivate

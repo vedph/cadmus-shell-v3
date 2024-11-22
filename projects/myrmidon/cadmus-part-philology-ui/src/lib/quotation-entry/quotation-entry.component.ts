@@ -17,6 +17,7 @@ import { DialogService } from '@myrmidon/ng-mat-tools';
   selector: 'cadmus-quotation-entry',
   templateUrl: './quotation-entry.component.html',
   styleUrls: ['./quotation-entry.component.css'],
+  standalone: false,
 })
 export class QuotationEntryComponent implements OnInit {
   private _entry?: QuotationEntry;

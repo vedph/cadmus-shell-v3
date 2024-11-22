@@ -1,7 +1,6 @@
 import {
   Component,
   EventEmitter,
-  Inject,
   Input,
   OnInit,
   Output,
@@ -44,6 +43,7 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
   selector: 'cadmus-thesaurus-editor',
   templateUrl: './thesaurus-editor.component.html',
   styleUrls: ['./thesaurus-editor.component.css'],
+  standalone: false,
 })
 export class ThesaurusEditorComponent implements OnInit {
   private _thesaurus: Thesaurus | undefined;

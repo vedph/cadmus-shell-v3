@@ -20,6 +20,7 @@ const TAB_WALKER = 2;
   selector: 'cadmus-graph-editor-ex-feature',
   templateUrl: './graph-editor-ex-feature.component.html',
   styleUrls: ['./graph-editor-ex-feature.component.css'],
+  standalone: false,
 })
 export class GraphEditorExFeatureComponent implements OnInit {
   public nodeTagEntries?: ThesaurusEntry[];

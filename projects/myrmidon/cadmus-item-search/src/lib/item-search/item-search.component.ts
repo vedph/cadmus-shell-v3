@@ -7,7 +7,11 @@ import { take } from 'rxjs/operators';
 import { DataPage } from '@myrmidon/ng-tools';
 import { DialogService } from '@myrmidon/ng-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
-import { FacetDefinition, FlagDefinition, ItemInfo } from '@myrmidon/cadmus-core';
+import {
+  FacetDefinition,
+  FlagDefinition,
+  ItemInfo,
+} from '@myrmidon/cadmus-core';
 import { UserLevelService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 
@@ -17,6 +21,7 @@ import { ItemSearchRepository } from '../state/item-search.repository';
   selector: 'cadmus-item-search',
   templateUrl: './item-search.component.html',
   styleUrls: ['./item-search.component.css'],
+  standalone: false,
 })
 export class ItemSearchComponent implements OnInit {
   public user?: User;

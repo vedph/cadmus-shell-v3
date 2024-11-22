@@ -11,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   selector: 'cadmus-apparatus-fragment-feature',
   templateUrl: './apparatus-fragment-feature.component.html',
   styleUrls: ['./apparatus-fragment-feature.component.css'],
+  standalone: false,
 })
 export class ApparatusFragmentFeatureComponent
   extends EditFragmentFeatureBase

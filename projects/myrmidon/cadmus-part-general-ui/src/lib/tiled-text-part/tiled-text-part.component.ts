@@ -27,6 +27,7 @@ interface Data {
   selector: 'cadmus-tiled-text-part',
   templateUrl: './tiled-text-part.component.html',
   styleUrls: ['./tiled-text-part.component.css'],
+  standalone: false,
 })
 export class TiledTextPartComponent
   extends ModelEditorComponentBase<TiledTextPart>

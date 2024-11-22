@@ -17,6 +17,7 @@ import {
   selector: 'lib-thesaurus-editor-feature',
   templateUrl: './thesaurus-editor-feature.component.html',
   styleUrls: ['./thesaurus-editor-feature.component.css'],
+  standalone: false,
 })
 export class ThesaurusEditorFeatureComponent implements OnInit {
   public id?: string;

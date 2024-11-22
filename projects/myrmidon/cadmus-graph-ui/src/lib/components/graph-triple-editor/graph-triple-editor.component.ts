@@ -26,6 +26,7 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   selector: 'cadmus-graph-triple-editor',
   templateUrl: './graph-triple-editor.component.html',
   styleUrls: ['./graph-triple-editor.component.css'],
+  standalone: false,
 })
 export class GraphTripleEditorComponent implements OnInit, OnDestroy {
   private _triple: UriTriple | undefined;
