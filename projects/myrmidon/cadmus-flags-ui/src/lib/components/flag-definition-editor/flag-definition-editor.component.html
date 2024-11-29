@@ -29,6 +29,9 @@
       <mat-label>color</mat-label>
       <input matInput type="color" [formControl]="colorKey" />
     </mat-form-field>
+
+    <!-- isAdmin -->
+    <mat-checkbox [formControl]="isAdmin">admin</mat-checkbox>
   </div>
   <div>
     <!-- description -->
@@ -48,7 +51,6 @@
   <div>
     <button
       type="button"
-      color="warn"
       mat-icon-button
       matTooltip="Discard changes"
       (click)="cancel()"
@@ -57,7 +59,6 @@
     </button>
     <button
       type="submit"
-      color="primary"
       mat-icon-button
       matTooltip="Accept changes"
       [disabled]="form.invalid || form.pristine"

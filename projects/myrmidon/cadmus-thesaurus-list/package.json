@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-thesaurus-list",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "Cadmus - thesauri list.",
   "keywords": [
     "Cadmus"
@@ -19,7 +19,7 @@
     "@myrmidon/ng-tools": "^4.0.0",
     "@myrmidon/ng-mat-tools": "^4.0.0",
     "@myrmidon/cadmus-api": "^9.0.0",
-    "@myrmidon/cadmus-ui": "^9.0.0"
+    "@myrmidon/cadmus-ui": "^9.0.1"
   },
   "dependencies": {
     "tslib": "^2.3.0"

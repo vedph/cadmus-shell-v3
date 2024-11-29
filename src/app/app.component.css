@@ -18,6 +18,9 @@ footer {
   flex: 0 0 60px;
 }
 
+mat-toolbar {
+  background-color: #1976d2;
+}
 mat-toolbar mat-icon {
   color: white;
 }

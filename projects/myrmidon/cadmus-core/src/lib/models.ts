@@ -246,6 +246,7 @@ export interface FlagDefinition {
   label: string;
   description: string;
   colorKey: string;
+  isAdmin?: boolean;
 }
 
 /**

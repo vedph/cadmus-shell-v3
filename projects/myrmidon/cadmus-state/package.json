@@ -1,7 +1,7 @@
 {
   "name": "@myrmidon/cadmus-state",
   "description": "Cadmus - state management.",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "keywords": [
     "Cadmus"
   ],
@@ -17,7 +17,7 @@
     "@angular/common": "^19.0.0",
     "@angular/core": "^19.0.0",
     "@myrmidon/ng-tools": "^4.0.0",
-    "@myrmidon/cadmus-core": "^9.0.0",
+    "@myrmidon/cadmus-core": "^9.0.1",
     "@myrmidon/cadmus-api": "^9.0.0"
   },
   "dependencies": {

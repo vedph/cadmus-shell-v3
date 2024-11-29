@@ -1,11 +1,5 @@
 @if (form) {
-<button
-  type="button"
-  mat-raised-button
-  color="warn"
-  class="mat-warn"
-  (click)="close()"
->
+<button type="button" mat-raised-button class="mat-warn" (click)="close()">
   <mat-icon>cancel</mat-icon>
   close
 </button>
@@ -14,7 +8,6 @@
   type="submit"
   [disabled]="form.invalid"
   mat-raised-button
-  color="primary"
   class="mat-primary"
   style="margin-left: 8px"
 >

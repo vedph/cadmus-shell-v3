@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-general-pg",
-  "version": "9.0.0",
+  "version": "9.0.2",
   "description": "Cadmus - general parts wrappers.",
   "keywords": [
     "Cadmus"
@@ -18,11 +18,11 @@
     "@angular/core": "^19.0.0",
     "@myrmidon/ng-tools": "^4.0.0",
     "@myrmidon/ng-mat-tools": "^4.0.0",
-    "@myrmidon/cadmus-core": "^9.0.0",
-    "@myrmidon/cadmus-state": "^9.0.0",
-    "@myrmidon/cadmus-ui": "^9.0.0",
-    "@myrmidon/cadmus-ui-pg": "^9.0.0",
-    "@myrmidon/cadmus-part-general-ui": "^9.0.0"
+    "@myrmidon/cadmus-core": "^9.0.1",
+    "@myrmidon/cadmus-state": "^9.0.1",
+    "@myrmidon/cadmus-ui": "^9.0.1",
+    "@myrmidon/cadmus-ui-pg": "^9.0.1",
+    "@myrmidon/cadmus-part-general-ui": "^9.0.2"
   },
   "dependencies": {
     "tslib": "^2.3.0"

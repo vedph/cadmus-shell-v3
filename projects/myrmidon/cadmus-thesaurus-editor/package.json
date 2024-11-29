@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-thesaurus-editor",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "Cadmus - thesaurus editor.",
   "keywords": [
     "Cadmus"
@@ -19,9 +19,9 @@
     "@myrmidon/ng-tools": "^4.0.0",
     "@myrmidon/ng-mat-tools": "^4.0.0",
     "@myrmidon/cadmus-api": "^9.0.0",
-    "@myrmidon/cadmus-state": "^9.0.0",
-    "@myrmidon/cadmus-ui": "^9.0.0",
-    "@myrmidon/cadmus-thesaurus-ui": "^9.0.0"
+    "@myrmidon/cadmus-state": "^9.0.1",
+    "@myrmidon/cadmus-ui": "^9.0.1",
+    "@myrmidon/cadmus-thesaurus-ui": "^9.0.1"
   },
   "dependencies": {
     "tslib": "^2.3.0"

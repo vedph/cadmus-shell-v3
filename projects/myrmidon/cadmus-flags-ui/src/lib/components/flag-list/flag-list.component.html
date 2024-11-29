@@ -4,28 +4,23 @@
   } @if (flags$ | async; as flags) {
   <table>
     <tbody>
-      @for (f of flags; track f; let i = $index) {
+      @for (f of flags; track f.id; let i = $index) {
       <tr [class.selected]="f === (editedFlag$ | async)">
         <td class="fit-width">
-          <button
-            type="button"
-            mat-icon-button
-            color="primary"
-            (click)="editFlag(f)"
-          >
+          <button type="button" mat-icon-button (click)="editFlag(f)">
             <mat-icon class="mat-primary">edit</mat-icon>
           </button>
-          <button
-            type="button"
-            mat-icon-button
-            color="warn"
-            (click)="deleteFlag(f)"
-          >
+          <button type="button" mat-icon-button (click)="deleteFlag(f)">
             <mat-icon class="mat-warn">remove_circle</mat-icon>
           </button>
         </td>
         <td class="fit-width">
           <mat-icon [style.color]="'#' + f.colorKey">flag</mat-icon>
+        </td>
+        <td class="fit-width">
+          <mat-icon>{{
+            f.isAdmin ? "admin_panel_settings" : "people"
+          }}</mat-icon>
         </td>
         <td class="fit-width">{{ f.id | flagBit }}</td>
         <td>
@@ -57,7 +52,6 @@
     <button
       type="button"
       mat-icon-button
-      color="primary"
       matTooltip="Add a new flag"
       (click)="addFlag()"
     >
@@ -66,7 +60,6 @@
     <button
       type="button"
       mat-icon-button
-      color="warn"
       matTooltip="Reset flags"
       (click)="reset()"
     >
@@ -75,7 +68,6 @@
     <button
       type="button"
       mat-flat-button
-      color="primary"
       matTooltip="Save flags"
       (click)="save()"
     >

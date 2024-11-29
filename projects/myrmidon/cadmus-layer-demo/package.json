@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-layer-demo",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "Cadmus - text layer demo page.",
   "keywords": [
     "Cadmus"
@@ -17,8 +17,8 @@
     "@angular/common": "^19.0.0",
     "@angular/core": "^19.0.0",
     "@myrmidon/ng-tools": "^4.0.0",
-    "@myrmidon/cadmus-core": "^9.0.0",
-    "@myrmidon/cadmus-ui": "^9.0.0"
+    "@myrmidon/cadmus-core": "^9.0.1",
+    "@myrmidon/cadmus-ui": "^9.0.1"
   },
   "dependencies": {
     "tslib": "^2.3.0"

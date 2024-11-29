@@ -120,7 +120,14 @@
             <legend>flags</legend>
             @if (flagDefinitions) {
             <div formArrayName="flagChecks">
-              @for (c of flagChecks.controls; track c; let i = $index) {
+              @for (c of flagChecks.controls; track c; let i = $index) { @if
+              (userLevel < 4 && flagDefinitions[i].isAdmin === true) {
+              <span [style.color]="'#' + flagDefinitions[i].colorKey" style="margin-left: 12px;"
+                >&#x25c6;</span
+              >
+              &nbsp;
+              {{ flagDefinitions[i].label }}
+              } @else {
               <mat-checkbox class="flag" [formControlName]="i">
                 <span [style.color]="'#' + flagDefinitions[i].colorKey"
                   >&#x2b24;</span
@@ -128,7 +135,7 @@
                 &nbsp;
                 {{ flagDefinitions[i].label }}
               </mat-checkbox>
-              }
+              } }
             </div>
             }
           </fieldset>
@@ -184,7 +191,6 @@
             </mat-form-field>
             <button
               mat-stroked-button
-              color="primary"
               class="mat-primary"
               type="button"
               [disabled]="userLevel < 2 || busy || !newPart.valid"
@@ -225,7 +231,6 @@
                   <button
                     mat-icon-button
                     type="button"
-                    color="primary"
                     [disabled]="busy"
                     (click)="editPart(part)"
                     matTooltip="Edit this part"
@@ -243,7 +248,7 @@
                     (click)="deletePart(part)"
                     matTooltip="Delete this part"
                   >
-                    <mat-icon color="warn" class="mat-warn">delete</mat-icon>
+                    <mat-icon class="mat-warn">delete</mat-icon>
                   </button>
                   }
                   <!-- copy -->
@@ -328,7 +333,6 @@
                 @if (!part.isAbsent) {
                 <button
                   type="button"
-                  color="primary"
                   mat-icon-button
                   matTooltip="Edit this layer part"
                   (click)="editPart(part)"
@@ -339,7 +343,6 @@
                 <button
                   type="button"
                   mat-icon-button
-                  color="primary"
                   matTooltip="Add this layer part"
                   [disabled]="userLevel < 2"
                   (click)="addLayerPart(part)"
@@ -350,7 +353,6 @@
                 <button
                   type="button"
                   mat-icon-button
-                  color="warn"
                   matTooltip="Delete this layer part"
                   [disabled]="userLevel < 2"
                   (click)="deletePart(part)"

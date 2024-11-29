@@ -26,6 +26,9 @@ export class FlagDefinitionEditorComponent implements OnInit {
     return this._definition;
   }
   public set flag(value: FlagDefinition | undefined) {
+    if (this._definition === value) {
+      return;
+    }
     this._definition = value;
     this.updateForm(value);
   }
@@ -39,6 +42,7 @@ export class FlagDefinitionEditorComponent implements OnInit {
   public label: FormControl<string | null>;
   public colorKey: FormControl<string | null>;
   public description: FormControl<string | null>;
+  public isAdmin: FormControl<boolean>;
   public form: FormGroup;
   public flagNumbers: number[];
 
@@ -61,15 +65,17 @@ export class FlagDefinitionEditorComponent implements OnInit {
       Validators.required,
       Validators.maxLength(100),
     ]);
+    this.isAdmin = formBuilder.control(false, { nonNullable: true });
     this.form = formBuilder.group({
       id: this.id,
       label: this.label,
       colorKey: this.colorKey,
       description: this.description,
+      isAdmin: this.isAdmin,
     });
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.updateForm(this.flag);
   }
 
@@ -94,6 +100,7 @@ export class FlagDefinitionEditorComponent implements OnInit {
     this.label.setValue(definition.label);
     this.colorKey.setValue('#' + definition.colorKey || null);
     this.description.setValue(definition.description);
+    this.isAdmin.setValue(definition.isAdmin === true);
 
     this.form.markAsPristine();
   }
@@ -104,6 +111,7 @@ export class FlagDefinitionEditorComponent implements OnInit {
       label: this.label.value?.trim() || '',
       colorKey: this.colorKey.value?.substring(1) || '',
       description: this.description.value?.trim() || '',
+      isAdmin: this.isAdmin.value === true,
     };
   }
 
