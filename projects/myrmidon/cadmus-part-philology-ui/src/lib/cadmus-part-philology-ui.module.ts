@@ -20,9 +20,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-
+import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
@@ -56,11 +54,11 @@ import { WitnessesFragmentComponent } from './witnesses-fragment/witnesses-fragm
     MatToolbarModule,
     MatTooltipModule,
     ClipboardModule,
+    // myrmidon
+    SafeHtmlPipe,
     // cadmus
     CadmusCoreModule,
     CadmusUiModule,
-    NgToolsModule,
-    NgMatToolsModule,
   ],
   declarations: [
     ApparatusEntryComponent,

@@ -11,8 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-
+import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
@@ -37,8 +36,9 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatInputModule,
     MatToolbarModule,
     MatTooltipModule,
+    // myrmidon
+    SafeHtmlPipe,
     // cadmus
-    NgToolsModule,
     CadmusCoreModule,
     CadmusUiModule,
   ],

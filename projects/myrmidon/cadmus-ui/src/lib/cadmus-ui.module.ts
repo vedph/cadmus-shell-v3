@@ -12,10 +12,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTreeModule } from '@angular/material/tree';
+import { MatNestedTreeNode, MatTreeModule } from '@angular/material/tree';
 
-// myrmidon
-import { NgToolsModule } from '@myrmidon/ng-tools';
+import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
 
 // cadmus
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
@@ -44,13 +43,14 @@ import { ThesaurusTreeComponent } from './components/thesaurus-tree/thesaurus-tr
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatNestedTreeNode,
     MatSelectModule,
     MatTreeModule,
     MatTooltipModule,
     // Cadmus
-    NgToolsModule,
     CadmusCoreModule,
     RefLookupComponent,
+    SafeHtmlPipe,
   ],
   declarations: [
     CloseSaveButtonsComponent,
@@ -73,6 +73,6 @@ import { ThesaurusTreeComponent } from './components/thesaurus-tree/thesaurus-tr
     LookupPinComponent,
     PartBadgeComponent,
     ThesaurusTreeComponent,
-  ]
+  ],
 })
 export class CadmusUiModule {}

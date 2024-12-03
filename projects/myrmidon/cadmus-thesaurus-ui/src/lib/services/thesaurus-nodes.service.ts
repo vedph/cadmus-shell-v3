@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { DataPage } from '@myrmidon/ng-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
 
 /**
  * A thesaurus entry edited in a set of thesauri nodes.

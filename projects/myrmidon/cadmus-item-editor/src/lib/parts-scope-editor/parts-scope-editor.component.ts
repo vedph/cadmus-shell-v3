@@ -11,7 +11,7 @@ import { Part } from '@myrmidon/cadmus-core';
 import { ColorService, CustomValidators } from '@myrmidon/cadmus-ui';
 import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { EditedItemRepository } from '../state/edited-item.repository';
 
 export interface PartScopeSetRequest {

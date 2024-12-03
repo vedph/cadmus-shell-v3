@@ -14,7 +14,7 @@ import {
 } from '@angular/forms';
 import { BehaviorSubject, Subscription } from 'rxjs';
 
-import { deepCopy } from '@myrmidon/ng-tools';
+import { deepCopy } from '@myrmidon/ngx-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 
 import {
@@ -61,8 +61,8 @@ export interface EditedObject<T extends Part | Fragment> {
  * from the derived editor's ngOnInit handler.
  */
 @Component({
-    template: '',
-    standalone: false
+  template: '',
+  standalone: false,
 })
 export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   implements OnInit, OnDestroy

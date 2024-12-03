@@ -46,14 +46,18 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 
 // myrmidon
-import { EnvServiceProvider, NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
 import {
-  AuthJwtLoginModule,
+  EllipsisPipe,
+  EnvServiceProvider,
+  FlatLookupPipe,
+  SafeHtmlPipe,
+} from '@myrmidon/ngx-tools';
+import {
   authJwtInterceptor,
+  AuthJwtLoginComponent,
+  GravatarPipe,
 } from '@myrmidon/auth-jwt-login';
-import { AuthJwtAdminModule } from '@myrmidon/auth-jwt-admin';
-import { PagedDataBrowsersModule } from '@myrmidon/paged-data-browsers';
+import { AuthJwtRegistrationComponent, UserListComponent } from '@myrmidon/auth-jwt-admin';
 
 import {
   CADMUS_TEXT_ED_BINDINGS_TOKEN,
@@ -65,6 +69,7 @@ import {
   MdLinkCtePlugin,
 } from '@myrmidon/cadmus-text-ed-md';
 import { TxtEmojiCtePlugin } from '@myrmidon/cadmus-text-ed-txt';
+import { GEONAMES_USERNAME_TOKEN } from '@myrmidon/cadmus-refs-geonames-lookup';
 
 // libraries in this workspace
 // notice that when you import the libraries into another workspace, you must change
@@ -87,7 +92,6 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
 import { PART_EDITOR_KEYS } from './part-editor-keys';
 import { INDEX_LOOKUP_DEFINITIONS } from './index-lookup-definitions';
 import { ITEM_BROWSER_KEYS } from './item-browser-keys';
-import { GEONAMES_USERNAME_TOKEN } from '@myrmidon/cadmus-refs-geonames-lookup';
 import { environment } from 'src/environments/environment';
 
 @NgModule({
@@ -143,11 +147,13 @@ import { environment } from 'src/environments/environment';
     // vendor
     NgeMonacoModule.forRoot({}),
     // myrmidon
-    NgToolsModule,
-    NgMatToolsModule,
-    AuthJwtLoginModule,
-    AuthJwtAdminModule,
-    PagedDataBrowsersModule,
+    EllipsisPipe,
+    FlatLookupPipe,
+    SafeHtmlPipe,
+    AuthJwtLoginComponent,
+    AuthJwtRegistrationComponent,
+    UserListComponent,
+    GravatarPipe,
     // cadmus
     CadmusApiModule,
     CadmusCoreModule,

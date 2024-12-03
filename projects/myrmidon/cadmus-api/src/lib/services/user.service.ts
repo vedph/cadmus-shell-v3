@@ -4,7 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
 
-import { DataPage, EnvService, ErrorService } from '@myrmidon/ng-tools';
+import { DataPage, EnvService, ErrorService } from '@myrmidon/ngx-tools';
 import { UserInfo } from '@myrmidon/cadmus-core';
 import { UserFilter } from '@myrmidon/auth-jwt-admin';
 

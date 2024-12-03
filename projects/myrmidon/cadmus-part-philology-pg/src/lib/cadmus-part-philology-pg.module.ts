@@ -14,9 +14,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-
 import { CadmusCoreModule, PendingChangesGuard } from '@myrmidon/cadmus-core';
 import { CadmusStateModule } from '@myrmidon/cadmus-state';
 import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
@@ -85,8 +82,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     CadmusPartPhilologyUiModule,
     CadmusStateModule,
     CadmusUiPgModule,
-    NgToolsModule,
-    NgMatToolsModule,
   ],
   declarations: [
     ApparatusFragmentFeatureComponent,

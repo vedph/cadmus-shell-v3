@@ -6,7 +6,7 @@ import {
   Node as GraphNode,
   NgxGraphZoomOptions,
 } from '@swimlane/ngx-graph';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { GraphService } from '@myrmidon/cadmus-api';
 

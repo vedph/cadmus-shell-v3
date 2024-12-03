@@ -23,10 +23,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
-// myrmidon
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-
 // bricks
 import {
   AssertedCompositeIdComponent,
@@ -52,6 +48,7 @@ import { CadmusTextEdService } from '@myrmidon/cadmus-text-ed';
 import { PhysicalStateComponent } from '@myrmidon/cadmus-mat-physical-state';
 import { PhysicalMeasurementSetComponent } from '@myrmidon/cadmus-mat-physical-size';
 
+import { FlatLookupPipe } from '@myrmidon/ngx-tools';
 // cadmus
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
@@ -112,8 +109,6 @@ import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/
     MatTabsModule,
     MatTooltipModule,
     // cadmus
-    NgToolsModule,
-    NgMatToolsModule,
     CadmusCoreModule,
     CadmusUiModule,
     AssertedChronotopeSetComponent,
@@ -130,7 +125,8 @@ import { PhysicalMeasurementsPartComponent } from './physical-measurements-part/
     CadmusProperNamePipe,
     DecoratedCountsComponent,
     PhysicalStateComponent,
-    PhysicalMeasurementSetComponent
+    PhysicalMeasurementSetComponent,
+    FlatLookupPipe
   ],
   declarations: [
     BibAuthorsEditorComponent,

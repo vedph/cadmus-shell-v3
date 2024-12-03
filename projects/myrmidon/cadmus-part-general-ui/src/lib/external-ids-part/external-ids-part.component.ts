@@ -15,7 +15,7 @@ import {
   EXTERNAL_IDS_PART_TYPEID,
 } from '../external-ids-part';
 import { AssertedId } from '@myrmidon/cadmus-refs-asserted-ids';
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * External IDs part editor component. This is just a collection of asserted
@@ -52,7 +52,7 @@ export class ExternalIdsPartComponent
     super(authService, formBuilder);
     // form
     this.ids = formBuilder.control([], {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
   }

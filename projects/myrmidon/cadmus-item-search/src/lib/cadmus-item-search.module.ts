@@ -16,10 +16,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-import { PagedDataBrowsersModule } from '@myrmidon/paged-data-browsers';
-
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { CadmusStateModule } from '@myrmidon/cadmus-state';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
@@ -55,9 +51,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     CadmusApiModule,
     CadmusUiModule,
     CadmusStateModule,
-    NgToolsModule,
-    NgMatToolsModule,
-    PagedDataBrowsersModule
   ],
   declarations: [ItemQueryComponent, ItemSearchComponent],
   exports: [ItemQueryComponent, ItemSearchComponent],

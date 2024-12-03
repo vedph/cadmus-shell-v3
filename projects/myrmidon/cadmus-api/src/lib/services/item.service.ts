@@ -22,7 +22,7 @@ import {
   EnvService,
   ErrorService,
   ErrorWrapper,
-} from '@myrmidon/ng-tools';
+} from '@myrmidon/ngx-tools';
 
 export interface RolePartId {
   roleId: string;

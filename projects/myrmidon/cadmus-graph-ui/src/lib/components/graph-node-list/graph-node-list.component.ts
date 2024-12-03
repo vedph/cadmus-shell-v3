@@ -6,8 +6,8 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { GraphService, UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
-import { DialogService } from '@myrmidon/ng-mat-tools';
-import { DataPage } from '@myrmidon/ng-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { NodeListRepository } from '../../state/graph-node-list.repository';

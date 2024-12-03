@@ -7,7 +7,7 @@ import {
   UntypedFormGroup,
 } from '@angular/forms';
 
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
 import {
@@ -20,7 +20,7 @@ import {
 import { ApparatusEntryType, ApparatusEntry } from '../apparatus-fragment';
 import { ApparatusEntrySummaryService } from './apparatus-entry-summary.service';
 import { ApparatusFragment } from '../apparatus-fragment';
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * Critical apparatus fragment.
@@ -70,7 +70,7 @@ export class ApparatusFragmentComponent
     this._editedEntryIndex = -1;
     // form
     this.entries = formBuilder.control([], {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
     this.tag = formBuilder.control(null, Validators.maxLength(50));

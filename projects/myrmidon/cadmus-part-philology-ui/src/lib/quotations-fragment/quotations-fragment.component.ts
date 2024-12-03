@@ -14,11 +14,11 @@ import {
   ThesaurusEntry,
   TokenLocation,
 } from '@myrmidon/cadmus-core';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { QuotationWorksService } from './quotation-works.service';
 import { QuotationsFragment, QuotationEntry } from '../quotations-fragment';
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * Quotations fragment editor.
@@ -58,7 +58,7 @@ export class QuotationsFragmentComponent
     this._editedEntryIndex = -1;
     // form
     this.entries = formBuilder.control([], {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
   }

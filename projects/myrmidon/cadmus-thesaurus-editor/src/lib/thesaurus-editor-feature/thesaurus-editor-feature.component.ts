@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { User } from '@myrmidon/auth-jwt-login';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { ThesaurusService, UserLevelService } from '@myrmidon/cadmus-api';
 import { Thesaurus, ThesaurusFilter } from '@myrmidon/cadmus-core';

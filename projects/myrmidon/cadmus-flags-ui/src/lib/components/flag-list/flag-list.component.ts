@@ -2,7 +2,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component } from '@angular/core';
 
 import { FlagDefinition } from '@myrmidon/cadmus-core';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppRepository } from '@myrmidon/cadmus-state';
 

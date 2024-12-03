@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
 
 import { FacetDefinition, PartDefinition } from '@myrmidon/cadmus-core';
-import { EnvService, ErrorService } from '@myrmidon/ng-tools';
+import { EnvService, ErrorService } from '@myrmidon/ngx-tools';
 
 @Injectable({ providedIn: 'root' })
 export class FacetService {

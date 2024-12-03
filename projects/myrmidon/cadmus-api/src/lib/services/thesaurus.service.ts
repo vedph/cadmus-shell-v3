@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { retry, catchError, take } from 'rxjs/operators';
 
 import { Thesaurus, ThesauriSet, ThesaurusFilter } from '@myrmidon/cadmus-core';
-import { DataPage, EnvService, ErrorService } from '@myrmidon/ng-tools';
+import { DataPage, EnvService, ErrorService } from '@myrmidon/ngx-tools';
 
 @Injectable({ providedIn: 'root' })
 export class ThesaurusService {

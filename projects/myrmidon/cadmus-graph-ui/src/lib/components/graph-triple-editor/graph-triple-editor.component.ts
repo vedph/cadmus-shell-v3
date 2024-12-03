@@ -18,7 +18,7 @@ import { take } from 'rxjs/operators';
 
 import { GraphService, UriNode, UriTriple } from '@myrmidon/cadmus-api';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import { GraphNodeLookupService } from '../../services/graph-node-lookup.service';
 
@@ -87,7 +87,7 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
     this.subjectNode = formBuilder.control(null, Validators.required);
     this.predicateNode = formBuilder.control(null, Validators.required);
     this.objectNode = formBuilder.control(null, {
-      validators: NgToolsValidators.conditionalValidator(
+      validators: NgxToolsValidators.conditionalValidator(
         () => !this.isLiteral.value,
         Validators.required
       ),

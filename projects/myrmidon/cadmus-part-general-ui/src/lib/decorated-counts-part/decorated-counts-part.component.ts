@@ -15,7 +15,7 @@ import {
   DecoratedCountsPart,
 } from '../decorated-counts-part';
 import { DecoratedCount } from '@myrmidon/cadmus-refs-decorated-counts';
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * Decorated counts part editor component.
@@ -43,7 +43,7 @@ export class DecoratedCountsPartComponent
     super(authService, formBuilder);
     // form
     this.counts = formBuilder.control([], {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
   }

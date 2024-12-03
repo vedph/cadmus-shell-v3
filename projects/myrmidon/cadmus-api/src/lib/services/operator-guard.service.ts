@@ -1,12 +1,16 @@
 // https://angular.io/docs/ts/latest/guide/router.html
 import { Injectable } from '@angular/core';
-import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {
+  Router,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 @Injectable({
   providedIn: 'root',
 })
-export class OperatorGuardService  {
+export class OperatorGuardService {
   constructor(private _router: Router, private _authService: AuthJwtService) {}
 
   private redirectToLogin(url: string): void {

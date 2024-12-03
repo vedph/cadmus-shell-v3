@@ -15,6 +15,22 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+### 10.0.0
+
+- 2024-12-02: ⚠️ updated dependencies:
+  - ngx-tools and ngx-mat-tools; the old libraries are ng-tools and ng-mat-tools. The new one has the correct name according to Angular conventions.
+  - ngx-data-browser;
+  - authjwt;
+  - bricks.
+
+All these dependencies have been refactored and their major version has been increased, in order to lay the foundation for a more general modernization of the codebase. These being the lowest layers of the frontend, they have been refactored as a first stage. Next stages will involve a progressive refactoring of the libraries in bricks, then in this shell, and finally of all the single Cadmus projects. The modernization refers to:
+
+1. migrate to standalone: `ng generate @angular/core:standalone`. This usually requires to manually define the imports of each component. Also, most of the work is then spent in changing the consumer code, which needs to import components at a more granular level.
+2. migrate dependency injection to function-based paradigm: `ng generate @angular/core:inject`. This usually is trivial.
+3. migrate properties from decorators to signal-based: `ng generate @angular/core:signals --insert-todos`. This is the step requiring most work, because the schematics are applied only to a minor subset of trivial cases. All the others must be manually refactored into signals: `input` or `model` for properties, `output` for events; the corresponding code and template must be updated so that whenever it reads a signal it calls a function, and whenever it writes it either sets it via output if it's an input, or uses a `model`.
+
+Currently the libraries listed above except bricks were fully migrated (points 1-3); bricks instead were just updated for their dependencies for the listed libraries; and finally, here all the libraries have been updated for their dependencies on these libraries and on bricks.
+
 ### 9.0.2
 
 - 2024-11-29: updated `@myrmidon/cadmus-core` to add `isAdmin` to flag definitions.
@@ -355,7 +371,7 @@ RouterModule.forRoot(routes, {
 - 2022-11-24:
   - minor fixes to `@myrmidon/cadmus-item-list` and `@myrmidon/cadmus-ui`.
   - `@myrmidon/cadmus-item-editor`: wider buttons space.
-  - removed `CadmusValidators` (they are now under `@myrmidon/ng-tools` as `NgToolsValidators`)
+  - removed `CadmusValidators` (they are now under `@myrmidon/ng-tools` as `NgxToolsValidators`)
 - 2022-11-08:
   - updated Angular.
   - changed prefix building in historical event editor.

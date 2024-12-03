@@ -16,7 +16,7 @@ export class GraphEditorFeatureComponent implements OnInit {
 
   constructor(private _thesService: ThesaurusService) {}
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this._thesService
       .getThesauriSet(['graph-node-tags', 'graph-triple-tags'])
       .pipe(take(1))

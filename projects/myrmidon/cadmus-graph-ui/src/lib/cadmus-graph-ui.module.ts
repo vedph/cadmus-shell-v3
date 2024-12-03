@@ -18,10 +18,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
+import { EllipsisPipe } from '@myrmidon/ngx-tools';
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
-import { PagedDataBrowsersModule } from '@myrmidon/paged-data-browsers';
 import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
 
 import { GraphNodeFilterComponent } from './components/graph-node-filter/graph-node-filter.component';
@@ -38,7 +36,7 @@ import { GraphTripleEditorComponent } from './components/graph-triple-editor/gra
     GraphNodeEditorComponent,
     GraphTripleFilterComponent,
     GraphTripleListComponent,
-    GraphTripleEditorComponent
+    GraphTripleEditorComponent,
   ],
   imports: [
     CommonModule,
@@ -59,12 +57,11 @@ import { GraphTripleEditorComponent } from './components/graph-triple-editor/gra
     MatSelectModule,
     MatProgressBarModule,
     MatTooltipModule,
+    // myrmidon
+    EllipsisPipe,
     // Cadmus
     CadmusApiModule,
     RefLookupComponent,
-    NgToolsModule,
-    NgMatToolsModule,
-    PagedDataBrowsersModule
   ],
   exports: [
     // GraphNodeFilterComponent,

@@ -5,7 +5,7 @@ import {
   PagedListStore,
   PagedListStoreService,
 } from '@myrmidon/paged-data-browsers';
-import { DataPage } from '@myrmidon/ng-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
 
 import {
   ThesaurusNode,

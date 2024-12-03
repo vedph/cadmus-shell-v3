@@ -16,9 +16,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
@@ -53,8 +50,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     // cadmus
     CadmusApiModule,
     CadmusUiModule,
-    NgToolsModule,
-    NgMatToolsModule,
   ],
   declarations: [
     ThesaurusListComponent,

@@ -5,7 +5,7 @@ import { take } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
-import { EnvService, RamStorageService } from '@myrmidon/ng-tools';
+import { EnvService, RamStorageService } from '@myrmidon/ngx-tools';
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { ViafRefLookupService } from '@myrmidon/cadmus-refs-viaf-lookup';
 import { GeoNamesRefLookupService } from '@myrmidon/cadmus-refs-geonames-lookup';

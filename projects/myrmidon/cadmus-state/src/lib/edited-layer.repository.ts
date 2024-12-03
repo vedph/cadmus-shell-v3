@@ -14,7 +14,7 @@ import {
   ItemService,
   ThesaurusService,
 } from '@myrmidon/cadmus-api';
-import { deepCopy } from '@myrmidon/ng-tools';
+import { deepCopy } from '@myrmidon/ngx-tools';
 
 /**
  * Edited layer part repository.

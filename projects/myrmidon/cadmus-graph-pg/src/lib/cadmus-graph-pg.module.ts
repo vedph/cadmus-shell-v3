@@ -6,8 +6,6 @@ import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-import { NgToolsModule } from '@myrmidon/ng-tools';
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { CadmusGraphUiModule } from '@myrmidon/cadmus-graph-ui';
 
@@ -34,8 +32,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatCardModule,
     MatTabsModule,
     // cadmus
-    NgToolsModule,
-    NgMatToolsModule,
     CadmusApiModule,
     CadmusGraphUiModule,
   ],

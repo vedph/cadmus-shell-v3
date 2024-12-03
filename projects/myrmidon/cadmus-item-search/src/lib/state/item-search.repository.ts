@@ -5,7 +5,7 @@ export interface ItemSearchFilter {
   query?: string;
 }
 
-import { DataPage } from '@myrmidon/ng-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
 
 import { ItemService } from '@myrmidon/cadmus-api';
 import { ItemInfo } from '@myrmidon/cadmus-core';

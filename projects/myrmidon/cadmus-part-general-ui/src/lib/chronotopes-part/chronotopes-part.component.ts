@@ -7,8 +7,8 @@ import {
 } from '@angular/forms';
 import { take } from 'rxjs/operators';
 
-import { NgToolsValidators } from '@myrmidon/ng-tools';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { AssertedChronotope } from '@myrmidon/cadmus-refs-asserted-chronotope';
 import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
@@ -57,7 +57,7 @@ export class ChronotopesPartComponent
     this.tabIndex = 0;
     // form
     this.chronotopes = formBuilder.control([], {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
   }

@@ -28,9 +28,7 @@ export class TextRange {
     if (!m) {
       return null;
     }
-    return new TextRange(
-      parseInt(m[1], 10),
-      m[2]? parseInt(m[2], 10) : 1);
+    return new TextRange(parseInt(m[1], 10), m[2] ? parseInt(m[2], 10) : 1);
   }
 
   constructor(start: number, length: number) {
@@ -46,7 +44,7 @@ export class TextRange {
    */
   public end(): number {
     const n = this.start + this.length;
-    return n > 0? n - 1 : 0;
+    return n > 0 ? n - 1 : 0;
   }
 
   /**

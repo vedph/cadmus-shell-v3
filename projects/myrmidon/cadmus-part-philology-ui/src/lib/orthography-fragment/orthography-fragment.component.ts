@@ -25,7 +25,7 @@ import {
   animate,
   state,
 } from '@angular/animations';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   TextLayerService,

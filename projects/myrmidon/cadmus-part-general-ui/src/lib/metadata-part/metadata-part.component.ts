@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
@@ -47,7 +47,7 @@ export class MetadataPartComponent
     // form
     this.metadata = formBuilder.array(
       [],
-      NgToolsValidators.strictMinLengthValidator(1)
+      NgxToolsValidators.strictMinLengthValidator(1)
     );
   }
 

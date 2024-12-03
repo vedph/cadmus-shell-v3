@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 interface Data {
   [key: string]: any;

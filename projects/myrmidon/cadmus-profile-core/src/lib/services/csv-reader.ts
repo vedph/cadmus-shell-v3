@@ -12,7 +12,7 @@ const DEFAULT_OPTIONS = {
   fieldSeparator: ',',
   lineSeparator: '\n',
   quote: '"',
-  trimming: true
+  trimming: true,
 };
 
 interface State {
@@ -180,7 +180,7 @@ export class CsvReader {
     row: T,
     state: State
   ) {
-    row.push(this._options.trimming? field.trim() : field);
+    row.push(this._options.trimming ? field.trim() : field);
     state.field++;
     state.fieldOffset = -1;
     state.appendField = false;

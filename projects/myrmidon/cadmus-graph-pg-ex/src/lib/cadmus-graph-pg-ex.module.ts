@@ -10,8 +10,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 // vendor
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { CadmusGraphUiModule } from '@myrmidon/cadmus-graph-ui';
 import { CadmusGraphUiExModule } from '@myrmidon/cadmus-graph-ui-ex';
@@ -43,8 +41,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     // vendor
     NgxGraphModule,
     // cadmus
-    NgToolsModule,
-    NgMatToolsModule,
     RefLookupComponent,
     CadmusApiModule,
     CadmusGraphUiModule,

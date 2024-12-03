@@ -17,9 +17,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-
+import { FlatLookupPipe, SafeHtmlPipe } from '@myrmidon/ngx-tools';
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { TextBlockViewComponent } from '@myrmidon/cadmus-text-block-view';
 
@@ -47,11 +45,12 @@ import { TextPreviewComponent } from './components/text-preview/text-preview.com
     MatSnackBarModule,
     MatTabsModule,
     MatTooltipModule,
+    // myrmidon
+    FlatLookupPipe,
+    SafeHtmlPipe,
     // Cadmus
     TextBlockViewComponent,
     CadmusApiModule,
-    NgToolsModule,
-    NgMatToolsModule,
   ],
   exports: [PartPreviewComponent, TextPreviewComponent],
 })

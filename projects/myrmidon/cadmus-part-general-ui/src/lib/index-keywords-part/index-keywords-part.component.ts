@@ -15,7 +15,7 @@ import {
   IndexKeyword,
   INDEX_KEYWORDS_PART_TYPEID,
 } from '../index-keywords-part';
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * Index keywords part editor.
@@ -43,7 +43,7 @@ export class IndexKeywordsPartComponent
     super(authService, formBuilder);
     // form
     this.keywords = formBuilder.control([], {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
   }

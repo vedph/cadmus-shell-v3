@@ -9,7 +9,7 @@ import {
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { EnvService } from '@myrmidon/ng-tools';
+import { EnvService } from '@myrmidon/ngx-tools';
 import { UploadService } from '@myrmidon/cadmus-api';
 
 class FileExtensionValidator {

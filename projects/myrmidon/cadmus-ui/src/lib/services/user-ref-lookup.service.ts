@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
 import { User } from '@myrmidon/auth-jwt-login';
-import { DataPage } from '@myrmidon/ng-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
 
 import { UserService } from '@myrmidon/cadmus-api';
 import { UserInfo } from '@myrmidon/cadmus-core';

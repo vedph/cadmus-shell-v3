@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
-import { EnvServiceProvider } from '@myrmidon/ng-tools';
+import { EnvServiceProvider } from '@myrmidon/ngx-tools';
 
 import { ItemBrowserService } from './item-browser.service';
 

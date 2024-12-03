@@ -1,7 +1,7 @@
-
 import { Injectable } from '@angular/core';
 import { map, Observable, take } from 'rxjs';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 // https://stackoverflow.com/questions/35922071/warn-user-of-unsaved-changes-before-leaving-page
 
@@ -17,11 +17,8 @@ export interface ComponentCanDeactivate {
 @Injectable({
   providedIn: 'root',
 })
-export class PendingChangesGuard
-  
-{
-  constructor(private _dialogService: DialogService) {
-  }
+export class PendingChangesGuard {
+  constructor(private _dialogService: DialogService) {}
 
   canDeactivate(
     component: ComponentCanDeactivate
@@ -30,13 +27,13 @@ export class PendingChangesGuard
     return !component || component.canDeactivate()
       ? true
       : this._dialogService
-      .confirm(
-        'Warning',
-        'There are unsaved changes. Do you want to leave?'
-      )
-      .pipe(
-        take(1),
-        map((yes) => (yes ? true : false))
-      );
+          .confirm(
+            'Warning',
+            'There are unsaved changes. Do you want to leave?'
+          )
+          .pipe(
+            take(1),
+            map((yes) => (yes ? true : false))
+          );
   }
 }

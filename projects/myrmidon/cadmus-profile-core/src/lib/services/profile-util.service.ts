@@ -26,7 +26,10 @@ export class ProfileUtilService {
    * @returns An object where each property is a key with value equal
    * to an array of items.
    */
-  public groupIntoObject<T>(arr: T[], keys: (keyof T)[]): { [key: string]: T[] } {
+  public groupIntoObject<T>(
+    arr: T[],
+    keys: (keyof T)[]
+  ): { [key: string]: T[] } {
     // https://gist.github.com/robmathers/1830ce09695f759bf2c4df15c29dd22d
     return arr.reduce((storage, item) => {
       const compositeKey = keys.map((key) => `${item[key]}`).join(':');

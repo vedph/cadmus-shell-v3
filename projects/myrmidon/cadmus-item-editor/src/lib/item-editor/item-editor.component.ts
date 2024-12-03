@@ -25,7 +25,7 @@ import {
   ComponentCanDeactivate,
 } from '@myrmidon/cadmus-core';
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import {
   ItemService,

@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,7 +8,7 @@ import {
 import { PageEvent } from '@angular/material/paginator';
 import { Observable } from 'rxjs';
 
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import {
   Thesaurus,
@@ -22,7 +16,7 @@ import {
   ThesaurusFilter,
 } from '@myrmidon/cadmus-core';
 import { ComponentSignal } from '@myrmidon/cadmus-profile-core';
-import { DataPage, NgToolsValidators } from '@myrmidon/ng-tools';
+import { DataPage, NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import {
   ThesaurusNode,
@@ -123,7 +117,7 @@ export class ThesaurusEditorComponent implements OnInit {
     this.alias = formBuilder.control(false, { nonNullable: true });
     this.targetId = formBuilder.control(null);
     this.entryCount = formBuilder.control(0, {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
     this.form = formBuilder.group({
@@ -161,7 +155,7 @@ export class ThesaurusEditorComponent implements OnInit {
     } else {
       // not an alias: entries required, no target ID
       this.entryCount.setValidators(
-        NgToolsValidators.strictMinLengthValidator(1)
+        NgxToolsValidators.strictMinLengthValidator(1)
       );
       this.targetId.setValidators(null);
     }

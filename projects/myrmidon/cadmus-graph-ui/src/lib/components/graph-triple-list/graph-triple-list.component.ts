@@ -10,9 +10,9 @@ import {
   ThesaurusService,
   UriTriple,
 } from '@myrmidon/cadmus-api';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { DataPage } from '@myrmidon/ng-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
 
 import { GraphTripleListRepository } from '../../state/graph-triple-list.repository';
 

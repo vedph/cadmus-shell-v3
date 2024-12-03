@@ -6,9 +6,6 @@ import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { CadmusPreviewUiModule } from '@myrmidon/cadmus-preview-ui';
 
@@ -25,8 +22,8 @@ export const RouterModuleForChild = RouterModule.forChild([
   {
     path: ':iid/:pid/text',
     pathMatch: 'full',
-    component: TextPreviewFeatureComponent
-  }
+    component: TextPreviewFeatureComponent,
+  },
 ]);
 
 @NgModule({
@@ -41,8 +38,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatCardModule,
     MatTabsModule,
     // cadmus
-    NgToolsModule,
-    NgMatToolsModule,
     CadmusApiModule,
     CadmusPreviewUiModule,
   ],

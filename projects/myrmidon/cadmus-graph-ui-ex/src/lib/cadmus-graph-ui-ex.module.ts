@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -19,8 +22,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
 import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
 
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
@@ -33,45 +34,49 @@ import { LinkedLiteralFilterComponent } from './components/linked-literal-filter
 import { LinkedNodeFilterComponent } from './components/linked-node-filter/linked-node-filter.component';
 import { GraphNodeLabelPipe } from './pipes/graph-node-label.pipe';
 
-@NgModule({ declarations: [
-        GraphNodeLabelPipe,
-        GraphWalkerComponent,
-        LinkedLiteralFilterComponent,
-        LinkedNodeFilterComponent,
-        TripleFilterComponent,
-    ],
-    exports: [
-        GraphNodeLabelPipe,
-        GraphWalkerComponent,
-        CadmusApiModule,
-        LinkedLiteralFilterComponent,
-        LinkedNodeFilterComponent,
-        TripleFilterComponent,
-    ], imports: [CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        // material
-        MatAutocompleteModule,
-        MatButtonModule,
-        MatCheckboxModule,
-        MatChipsModule,
-        MatFormFieldModule,
-        MatIconModule,
-        MatInputModule,
-        MatListModule,
-        MatPaginatorModule,
-        MatProgressBarModule,
-        MatSelectModule,
-        MatTabsModule,
-        MatTooltipModule,
-        // vendor
-        NgxGraphModule,
-        // Cadmus
-        NgToolsModule,
-        NgMatToolsModule,
-        CadmusCoreModule,
-        CadmusApiModule,
-        // CadmusRefsLookupModule,
-        RefLookupComponent,
-        CadmusGraphUiModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+@NgModule({
+  declarations: [
+    GraphNodeLabelPipe,
+    GraphWalkerComponent,
+    LinkedLiteralFilterComponent,
+    LinkedNodeFilterComponent,
+    TripleFilterComponent,
+  ],
+  exports: [
+    GraphNodeLabelPipe,
+    GraphWalkerComponent,
+    CadmusApiModule,
+    LinkedLiteralFilterComponent,
+    LinkedNodeFilterComponent,
+    TripleFilterComponent,
+  ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    // material
+    MatAutocompleteModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatTooltipModule,
+    // vendor
+    NgxGraphModule,
+    // Cadmus
+    CadmusCoreModule,
+    CadmusApiModule,
+    // CadmusRefsLookupModule,
+    RefLookupComponent,
+    CadmusGraphUiModule,
+  ],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
+})
 export class CadmusGraphUiExModule {}

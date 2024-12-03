@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-flags-ui",
-  "version": "9.0.1",
+  "version": "10.0.0",
   "description": "Cadmus - item flags UI.",
   "keywords": [
     "Cadmus"
@@ -19,8 +19,8 @@
   "peerDependencies": {
     "@angular/common": "^19.0.0",
     "@angular/core": "^19.0.0",
-    "@myrmidon/ng-tools": "^4.0.0",
-    "@myrmidon/ng-mat-tools": "^4.0.0"
+    "@myrmidon/ngx-tools": "^0.0.1",
+    "@myrmidon/ngx-mat-tools": "^0.0.1"
   },
   "sideEffects": false
 }

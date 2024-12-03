@@ -12,7 +12,7 @@ import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';
-import { NgToolsValidators } from '@myrmidon/ng-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * Keywords editor component.
@@ -40,7 +40,7 @@ export class KeywordsPartComponent
     super(authService, formBuilder);
     // form
     this.keywords = formBuilder.control([], {
-      validators: NgToolsValidators.strictMinLengthValidator(1),
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
     // new keyword form

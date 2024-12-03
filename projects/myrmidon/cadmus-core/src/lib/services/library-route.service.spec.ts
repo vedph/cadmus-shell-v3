@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { EnvServiceProvider } from '@myrmidon/ng-tools';
+import { EnvServiceProvider } from '@myrmidon/ngx-tools';
 
 import { LibraryRouteService } from './library-route.service';
 

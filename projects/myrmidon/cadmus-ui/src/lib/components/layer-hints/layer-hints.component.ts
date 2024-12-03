@@ -1,12 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import {
-  FormGroup,
-  FormArray,
-  FormBuilder,
-} from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
 
 import { LayerHint } from '@myrmidon/cadmus-core';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 @Component({
   selector: 'cadmus-layer-hints',

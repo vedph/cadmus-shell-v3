@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-api",
-  "version": "9.0.0",
+  "version": "10.0.0",
   "description": "Cadmus - API services.",
   "keywords": [
     "Cadmus"
@@ -16,8 +16,8 @@
   "peerDependencies": {
     "@angular/common": "^19.0.0",
     "@angular/core": "^19.0.0",
-    "@myrmidon/ng-tools": "^4.0.0",
-    "@myrmidon/auth-jwt-login": "^6.0.0"
+    "@myrmidon/ngx-tools": "^0.0.1",
+    "@myrmidon/auth-jwt-login": "^7.0.1"
   },
   "dependencies": {
     "tslib": "^2.3.0"

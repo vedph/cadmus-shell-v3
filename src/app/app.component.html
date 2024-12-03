@@ -102,7 +102,12 @@
 
     <!-- login -->
     @if (!logged) {
-    <button type="button" mat-icon-button routerLink="/login">
+    <button
+      type="button"
+      mat-icon-button
+      [routerLink]="['/login']"
+      [queryParams]="{ returnUrl: 'items' }"
+    >
       <mat-icon>login</mat-icon>
     </button>
     }

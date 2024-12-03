@@ -22,7 +22,7 @@ import {
 
 import { DataPinInfo, IndexLookupDefinitions } from '@myrmidon/cadmus-core';
 import { ItemService } from '@myrmidon/cadmus-api';
-import { DataPage, ErrorWrapper } from '@myrmidon/ng-tools';
+import { DataPage, ErrorWrapper } from '@myrmidon/ngx-tools';
 
 /**
  * Generic data pin lookup component. This allows users typing a part

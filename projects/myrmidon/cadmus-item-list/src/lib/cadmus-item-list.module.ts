@@ -15,9 +15,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { NgToolsModule } from '@myrmidon/ng-tools';
-import { NgMatToolsModule } from '@myrmidon/ng-mat-tools';
-import { PagedDataBrowsersModule } from '@myrmidon/paged-data-browsers';
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { CadmusApiModule } from '@myrmidon/cadmus-api';
 import { CadmusUiModule } from '@myrmidon/cadmus-ui';
@@ -51,9 +48,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatSelectModule,
     MatTooltipModule,
     // cadmus
-    NgToolsModule,
-    NgMatToolsModule,
-    PagedDataBrowsersModule,
     CadmusCoreModule,
     CadmusApiModule,
     RefLookupComponent,

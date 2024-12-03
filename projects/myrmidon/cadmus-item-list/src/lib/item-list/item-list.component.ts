@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
 import { Observable } from 'rxjs';
 
-import { DataPage } from '@myrmidon/ng-tools';
-import { DialogService } from '@myrmidon/ng-mat-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 
 import {

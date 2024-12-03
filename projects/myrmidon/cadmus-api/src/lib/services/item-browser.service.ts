@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
 
 import { ItemInfo } from '@myrmidon/cadmus-core';
-import { DataPage, EnvService, ErrorService } from '@myrmidon/ng-tools';
+import { DataPage, EnvService, ErrorService } from '@myrmidon/ngx-tools';
 
 @Injectable({
   providedIn: 'root',

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-preview-pg",
-  "version": "9.0.0",
+  "version": "10.0.0",
   "description": "Cadmus - preview wrapper components.",
   "keywords": [
     "Cadmus"
@@ -16,10 +16,10 @@
   "peerDependencies": {
     "@angular/common": "^19.0.0",
     "@angular/core": "^19.0.0",
-    "@myrmidon/ng-tools": "^4.0.0",
-    "@myrmidon/ng-mat-tools": "^4.0.0",
-    "@myrmidon/cadmus-api": "^9.0.0",
-    "@myrmidon/cadmus-preview-ui": "^9.0.0"
+    "@myrmidon/ngx-tools": "^0.0.1",
+    "@myrmidon/ngx-mat-tools": "^0.0.1",
+    "@myrmidon/cadmus-api": "^10.0.0",
+    "@myrmidon/cadmus-preview-ui": "^10.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
