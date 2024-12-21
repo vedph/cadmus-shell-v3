@@ -5,7 +5,6 @@ import {
 } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 
-import { EnvServiceProvider } from '@myrmidon/ngx-tools';
 import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 
 @NgModule({
@@ -14,6 +13,6 @@ import { CadmusCoreModule } from '@myrmidon/cadmus-core';
     // cadmus
     CadmusCoreModule,
   ],
-  providers: [EnvServiceProvider, provideHttpClient(withInterceptorsFromDi())],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
 })
 export class CadmusApiModule {}

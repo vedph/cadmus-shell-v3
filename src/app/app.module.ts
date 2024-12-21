@@ -48,7 +48,6 @@ import { NgeMonacoModule } from '@cisstech/nge/monaco';
 // myrmidon
 import {
   EllipsisPipe,
-  EnvServiceProvider,
   FlatLookupPipe,
   SafeHtmlPipe,
 } from '@myrmidon/ngx-tools';
@@ -57,7 +56,10 @@ import {
   AuthJwtLoginComponent,
   GravatarPipe,
 } from '@myrmidon/auth-jwt-login';
-import { AuthJwtRegistrationComponent, UserListComponent } from '@myrmidon/auth-jwt-admin';
+import {
+  AuthJwtRegistrationComponent,
+  UserListComponent,
+} from '@myrmidon/auth-jwt-admin';
 
 import {
   CADMUS_TEXT_ED_BINDINGS_TOKEN,
@@ -167,8 +169,6 @@ import { environment } from 'src/environments/environment';
       withInterceptors([authJwtInterceptor]),
       withJsonpSupport()
     ),
-    // environment service
-    EnvServiceProvider,
     // parts and fragments type IDs to editor group keys mappings
     // https://github.com/nrwl/nx/issues/208#issuecomment-384102058
     // inject like: @Inject('partEditorKeys') partEditorKeys: PartEditorKeys

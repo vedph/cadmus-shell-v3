@@ -15,6 +15,10 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+### 10.1.0
+
+- 2024-12-21: ⚠️ updated dependencies removing `EnvServiceProvider`. This is no longer required because the new `EnvService` now auto-configures itself from object `window.__env`.
+
 ### 10.0.0
 
 - 2024-12-02: ⚠️ updated dependencies:

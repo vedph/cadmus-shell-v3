@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-thesaurus-list",
-  "version": "10.0.0",
+  "version": "10.1.0",
   "description": "Cadmus - thesauri list.",
   "keywords": [
     "Cadmus"
@@ -16,10 +16,10 @@
   "peerDependencies": {
     "@angular/common": "^19.0.0",
     "@angular/core": "^19.0.0",
-    "@myrmidon/ngx-tools": "^0.0.1",
+    "@myrmidon/ngx-tools": "^1.0.0",
     "@myrmidon/ngx-mat-tools": "^0.0.1",
-    "@myrmidon/cadmus-api": "^10.0.0",
-    "@myrmidon/cadmus-ui": "^10.0.0"
+    "@myrmidon/cadmus-api": "^10.1.0",
+    "@myrmidon/cadmus-ui": "^10.1.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

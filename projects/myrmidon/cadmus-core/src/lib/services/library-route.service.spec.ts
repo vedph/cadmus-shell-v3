@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { EnvServiceProvider } from '@myrmidon/ngx-tools';
 
 import { LibraryRouteService } from './library-route.service';
 
@@ -7,7 +6,6 @@ describe('LibraryRouteServiceService', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
-        EnvServiceProvider,
         {
           provide: 'partEditorKeys',
           useValue: {},
