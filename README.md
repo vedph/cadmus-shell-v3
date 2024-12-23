@@ -15,6 +15,13 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+### 10.2.0
+
+- 2024-12-23:
+  - ⚠️ updated to [bricks V3](https://github.com/vedph/cadmus-bricks-shell-v3).
+  - removed legacy `color` directive, which was already replaced by classes.
+  - fixed user service (new model from API).
+
 ### 10.1.0
 
 - 2024-12-21: ⚠️ updated dependencies removing `EnvServiceProvider`. This is no longer required because the new `EnvService` now auto-configures itself from object `window.__env`.
@@ -42,7 +49,7 @@ Currently the libraries listed above except bricks were fully migrated (points 1
 
 ### 9.0.0
 
-- 2024-11-22: ⚠️ upgraded to Angular 19 and updated packages except for `@swimlane/ngx-graph` whose version 9 has [issues](https://github.com/swimlane/ngx-graph/issues/548) when loading a zero nodes graph. Until the fix is merged, we will stick to version 8.4.0.
+- 2024-11-22: ⚠️ upgraded to Angular 19 and updated packages except for `@swimlane/ngx-graph` whose version 9 has [issues](https://github.com/swimlane/ngx-graph/issues/559) when loading a zero nodes graph. Until the fix is merged, we will stick to version 8.4.0.
 - 2024-11-21: fix to district location part.
 - 2024-11-18:
   - updated Angular.

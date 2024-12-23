@@ -15,7 +15,6 @@
       <button
         type="button"
         mat-icon-button
-        color="primary"
         matTooltip="Edit this entry"
         (click)="toggleEdit(true)"
       >
@@ -76,7 +75,6 @@
       <button
         type="button"
         mat-icon-button
-        color="warn"
         matTooltip="Delete this entry"
         (click)="emitSignal('delete')"
       >
@@ -86,7 +84,6 @@
       <button
         type="button"
         mat-icon-button
-        color="primary"
         matTooltip="Add a sibling after this node"
         (click)="emitSignal('add-sibling')"
       >
@@ -139,7 +136,6 @@
       <button
         type="button"
         mat-icon-button
-        color="warn"
         matTooltip="Discard changes"
         (click)="toggleEdit(false)"
       >
@@ -149,7 +145,6 @@
         type="submit"
         mat-icon-button
         [disabled]="form.pristine || form.invalid"
-        color="primary"
         matTooltip="Save changes"
       >
         <mat-icon class="mat-primary">check_circle</mat-icon>

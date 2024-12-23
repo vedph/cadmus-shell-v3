@@ -1,15 +1,24 @@
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
-import { User } from '@myrmidon/auth-jwt-login';
 import { DataPage } from '@myrmidon/ngx-tools';
 
 import { UserService } from '@myrmidon/cadmus-api';
-import { UserInfo } from '@myrmidon/cadmus-core';
 import {
   RefLookupFilter,
   RefLookupService,
 } from '@myrmidon/cadmus-refs-lookup';
+
+export interface UserWithRoles {
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    userName: string;
+    email: string;
+  };
+  roles: string[];
+}
 
 /**
  * Service for users lookup.
@@ -20,7 +29,10 @@ import {
 export class UserRefLookupService implements RefLookupService {
   constructor(private _userService: UserService) {}
 
-  lookup(filter: RefLookupFilter, options?: any): Observable<UserInfo[]> {
+  public lookup(
+    filter: RefLookupFilter,
+    options?: any
+  ): Observable<UserWithRoles[]> {
     return this._userService
       .getUsers(
         {
@@ -30,13 +42,13 @@ export class UserRefLookupService implements RefLookupService {
         filter.limit
       )
       .pipe(
-        map((page: DataPage<UserInfo>) => {
+        map((page: DataPage<UserWithRoles>) => {
           return page.items;
         })
       );
   }
 
-  getName(item: User): string {
-    return item?.userName;
+  public getName(item: UserWithRoles): string {
+    return item?.user?.userName;
   }
 }

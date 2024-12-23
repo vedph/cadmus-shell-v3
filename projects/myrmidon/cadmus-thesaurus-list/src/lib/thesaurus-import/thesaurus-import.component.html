@@ -14,7 +14,6 @@
       <button
         type="button"
         mat-flat-button
-        color="primary"
         class="mat-primary"
         (click)="fileInput.click()"
         [disabled]="uploading"
@@ -99,7 +98,6 @@
       <button
         type="submit"
         mat-flat-button
-        color="warn"
         class="mat-warn"
         [disabled]="uploading || form.invalid"
       >
@@ -113,13 +111,7 @@
 @if (uploading) {
 <div>
   <div>
-    <button
-      type="button"
-      mat-flat-button
-      color="warn"
-      class="mat-warn"
-      (click)="onCancel()"
-    >
+    <button type="button" mat-flat-button class="mat-warn" (click)="onCancel()">
       cancel
     </button>
   </div>

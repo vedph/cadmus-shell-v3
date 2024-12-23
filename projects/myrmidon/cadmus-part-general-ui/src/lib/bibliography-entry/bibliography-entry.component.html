@@ -318,7 +318,6 @@
           <button
             mat-flat-button
             type="submit"
-            color="primary"
             [disabled]="keyForm.invalid"
             matTooltip="Add new keyword"
           >
@@ -345,7 +344,6 @@
                 mat-icon-button
                 type="button"
                 matTooltip="Remove this keyword"
-                color="warn"
                 (click)="deleteKeyword(i)"
               >
                 <mat-icon class="mat-warn">remove_circle</mat-icon>
@@ -384,7 +382,6 @@
     <button
       type="button"
       mat-icon-button
-      color="warn"
       matTooltip="Cancel edit"
       (click)="cancel()"
     >
@@ -394,7 +391,6 @@
       type="submit"
       [disabled]="form.invalid"
       mat-icon-button
-      color="primary"
       matTooltip="Save entry"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>

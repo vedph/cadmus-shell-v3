@@ -13,7 +13,6 @@
             <button
               type="button"
               mat-flat-button
-              color="primary"
               class="mat-primary"
               (click)="addChronotope()"
             >
@@ -37,7 +36,6 @@
                   <button
                     type="button"
                     mat-icon-button
-                    color="primary"
                     matTooltip="Edit this chronotope"
                     (click)="editChronotope(entry, i)"
                   >
@@ -64,7 +62,6 @@
                   <button
                     type="button"
                     mat-icon-button
-                    color="warn"
                     matTooltip="Delete this chronotope"
                     (click)="deleteChronotope(i)"
                   >
@@ -89,22 +86,12 @@
             [refTypeEntries]="refTypeEntries"
             [chronotope]="editedChronotope"
             (chronotopeChange)="onChronotopeChange($event)"
-          ></cadmus-refs-asserted-chronotope>
+          />
           <div>
-            <button
-              type="button"
-              (click)="closeChronotope()"
-              mat-icon-button
-              color="warn"
-            >
+            <button type="button" (click)="closeChronotope()" mat-icon-button>
               <mat-icon class="mat-warn">cancel</mat-icon>
             </button>
-            <button
-              type="button"
-              (click)="saveChronotope()"
-              mat-icon-button
-              color="primary"
-            >
+            <button type="button" (click)="saveChronotope()" mat-icon-button>
               <mat-icon class="mat-primary">check_circle</mat-icon>
             </button>
           </div>

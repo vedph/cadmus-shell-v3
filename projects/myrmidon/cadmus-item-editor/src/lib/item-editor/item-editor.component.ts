@@ -512,8 +512,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       return;
     }
     const dialogRef = this.dialog.open(ItemGenerateDialogComponent, {
-      height: '350px',
-      width: '300px',
+      height: '400px',
+      width: '350px',
       data: {
         flags: this.flagDefinitions,
       },

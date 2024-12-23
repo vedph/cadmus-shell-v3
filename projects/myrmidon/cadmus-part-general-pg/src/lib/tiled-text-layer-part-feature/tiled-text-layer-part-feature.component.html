@@ -12,13 +12,11 @@
         } @case (0) {
         <mat-icon matTooltip="Valid">check_circle</mat-icon>
         } @case (1) {
-        <mat-icon matTooltip="Potentially broken" color="warn" class="mat-warn"
+        <mat-icon matTooltip="Potentially broken" class="mat-warn"
           >warning</mat-icon
         >
         } @case (2) {
-        <mat-icon matTooltip="Broken" color="warn" class="mat-warn"
-          >error</mat-icon
-        >
+        <mat-icon matTooltip="Broken" class="mat-warn">error</mat-icon>
         } }
       </button>
     </mat-card-title>
@@ -38,7 +36,6 @@
       <button
         mat-icon-button
         type="button"
-        color="warn"
         (click)="deleteFragment()"
         matTooltip="Delete the selected fragment"
       >
@@ -55,7 +52,6 @@
       <button
         mat-icon-button
         type="button"
-        color="warn"
         (click)="clearTileChecks()"
         matTooltip="Clear any selection"
       >
@@ -64,7 +60,6 @@
       <button
         mat-icon-button
         type="button"
-        color="primary"
         (click)="addFragment()"
         matTooltip="Add a new fragment at selection"
       >
@@ -113,7 +108,6 @@
     <button
       type="button"
       mat-raised-button
-      color="warn"
       class="mat-warn"
       matTooltip="Close this editor"
       (click)="close()"

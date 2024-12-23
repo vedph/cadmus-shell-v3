@@ -72,7 +72,6 @@
             </button>
             <button
               mat-icon-button
-              color="warn"
               (click)="clearLocations()"
               type="button"
               matTooltip="Remove all the locations"
@@ -81,7 +80,6 @@
             </button>
             <button
               mat-icon-button
-              color="primary"
               type="submit"
               matTooltip="Render the decorated base text"
             >
@@ -132,11 +130,7 @@
           @for (loc of locations; track loc) {
           <tr>
             <td>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="removeLocation(loc)"
-              >
+              <button mat-icon-button (click)="removeLocation(loc)">
                 <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
             </td>

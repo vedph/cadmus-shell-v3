@@ -55,7 +55,7 @@
       }
       <div class="form-row">
         <!-- literal language -->
-        @if (isLiteral?.value) {
+        @if (isLiteral.value) {
         <mat-form-field>
           <mat-label>language</mat-label>
           <input matInput [formControl]="literalLang" />
@@ -65,9 +65,8 @@
           <mat-error>language too long</mat-error>
           }
         </mat-form-field>
-        }
+
         <!-- literal type -->
-        @if (isLiteral?.value) {
         <mat-form-field>
           <mat-label>type</mat-label>
           <input matInput [formControl]="literalType" />
@@ -84,15 +83,10 @@
 
   <!-- buttons -->
   <div>
-    <button color="warn" mat-icon-button type="button" (click)="cancel()">
+    <button mat-icon-button type="button" (click)="cancel()">
       <mat-icon class="mat-warn">cancel</mat-icon>
     </button>
-    <button
-      color="primary"
-      mat-icon-button
-      type="submit"
-      [disabled]="form.invalid"
-    >
+    <button mat-icon-button type="submit" [disabled]="form.invalid">
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>

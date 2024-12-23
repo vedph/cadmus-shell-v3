@@ -5,9 +5,25 @@ import { Observable } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
 
 import { DataPage, EnvService, ErrorService } from '@myrmidon/ngx-tools';
-import { UserInfo } from '@myrmidon/cadmus-core';
 import { UserFilter } from '@myrmidon/auth-jwt-admin';
 
+/**
+ * A Cadmus user with his roles.
+ */
+export interface UserWithRoles {
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    userName: string;
+    email: string;
+  };
+  roles: string[];
+}
+
+/**
+ * Cadmus users service.
+ */
 @Injectable({ providedIn: 'root' })
 export class UserService {
   constructor(
@@ -16,9 +32,9 @@ export class UserService {
     private _env: EnvService
   ) {}
 
-  public getAllUsers(): Observable<DataPage<UserInfo>> {
+  public getAllUsers(): Observable<DataPage<UserWithRoles>> {
     return this._http
-      .get<DataPage<UserInfo>>(this._env.get('apiUrl') + 'users', {
+      .get<DataPage<UserWithRoles>>(this._env.get('apiUrl') + 'users', {
         params: new HttpParams().set('pageNumber', '1'),
       })
       .pipe(retry(3), catchError(this._error.handleError));
@@ -28,7 +44,7 @@ export class UserService {
     filter: UserFilter,
     pageNumber = 1,
     pageSize = 20
-  ): Observable<DataPage<UserInfo>> {
+  ): Observable<DataPage<UserWithRoles>> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
     httpParams = httpParams.set('pageSize', pageSize.toString());
@@ -37,7 +53,7 @@ export class UserService {
     }
 
     return this._http
-      .get<DataPage<UserInfo>>(this._env.get('apiUrl') + 'users', {
+      .get<DataPage<UserWithRoles>>(this._env.get('apiUrl') + 'users', {
         params: httpParams,
       })
       .pipe(retry(3), catchError(this._error.handleError));

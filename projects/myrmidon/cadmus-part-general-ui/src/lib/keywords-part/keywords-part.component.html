@@ -43,7 +43,6 @@
         <button
           mat-flat-button
           type="submit"
-          color="primary"
           class="mat-primary"
           [disabled]="newForm.invalid"
         >
@@ -70,7 +69,7 @@
                 matTooltip="Delete this keyword"
                 (click)="deleteKeyword(k)"
               >
-                <mat-icon color="warn" class="mat-warn">remove_circle</mat-icon>
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
             </td>
             <td>{{ k.language }}</td>

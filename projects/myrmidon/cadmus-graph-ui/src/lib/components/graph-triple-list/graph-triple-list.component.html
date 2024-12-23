@@ -37,7 +37,6 @@
               <button
                 mat-icon-button
                 type="button"
-                color="primary"
                 matTooltip="Edit triple"
                 (click)="editTriple(d)"
               >
@@ -46,7 +45,6 @@
               <button
                 mat-icon-button
                 type="button"
-                color="warn"
                 matTooltip="Delete triple"
                 (click)="deleteTriple(d)"
               >
@@ -65,7 +63,6 @@
       </table>
       <div>
         <button
-          color="primary"
           class="mat-primary"
           type="button"
           mat-flat-button
@@ -78,12 +75,10 @@
       <!-- pagination -->
       <div id="paginator" class="form-row">
         <button
-          color="primary"
           type="button"
           mat-icon-button
           matTooltip="Reset list"
           (click)="reset()"
-          color="warn"
         >
           <mat-icon class="mat-warn">autorenew</mat-icon>
         </button>

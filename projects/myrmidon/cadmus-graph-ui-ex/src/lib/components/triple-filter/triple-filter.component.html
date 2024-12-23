@@ -37,12 +37,7 @@
             @for (n of notPreds.value; track n.id) {
             <mat-list-item>
               <span>{{ n.label }}</span>
-              <button
-                type="button"
-                mat-icon-button
-                color="warn"
-                (click)="deleteNotPred(n)"
-              >
+              <button type="button" mat-icon-button (click)="deleteNotPred(n)">
                 <mat-icon class="mat-warn">clear</mat-icon>
               </button>
             </mat-list-item>
@@ -57,12 +52,7 @@
             @for (n of preds.value; track n.id) {
             <mat-list-item>
               <span>{{ n.label }}</span>
-              <button
-                type="button"
-                mat-icon-button
-                color="warn"
-                (click)="deletePred(n)"
-              >
+              <button type="button" mat-icon-button (click)="deletePred(n)">
                 <mat-icon class="mat-warn">clear</mat-icon>
               </button>
             </mat-list-item>
@@ -156,7 +146,6 @@
       mat-icon-button
       type="button"
       (click)="reset()"
-      color="warn"
       matTooltip="Reset filters"
       [disabled]="disabled"
     >
@@ -165,7 +154,6 @@
     <button
       type="submit"
       mat-icon-button
-      color="primary"
       [disabled]="disabled"
       matTooltip="Apply filters"
     >

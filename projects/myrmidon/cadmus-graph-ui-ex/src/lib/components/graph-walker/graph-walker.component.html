@@ -102,7 +102,6 @@
       </button>
       <button
         type="button"
-        color="warn"
         mat-icon-button
         matTooltip="Reset"
         (click)="update$.next(true)"
@@ -116,7 +115,6 @@
       } @if (selectedNode$ | async; as selectedNode) {
       <button
         type="button"
-        color="primary"
         mat-icon-button
         matTooltip="Toggle the selected node"
         [disabled]="!selectedNode"
@@ -127,7 +125,6 @@
       } @if (canPick) {
       <button
         type="button"
-        color="primary"
         mat-icon-button
         [matTooltip]="
           canMoveToSource

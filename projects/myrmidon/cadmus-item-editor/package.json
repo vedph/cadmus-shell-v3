@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-item-editor",
-  "version": "10.1.0",
+  "version": "10.2.0",
   "description": "Cadmus - item editor.",
   "keywords": [
     "Cadmus"
@@ -21,7 +21,7 @@
     "@myrmidon/paged-data-browsers": "^4.0.1",
     "@myrmidon/cadmus-core": "^10.1.0",
     "@myrmidon/cadmus-api": "^10.1.0",
-    "@myrmidon/cadmus-ui": "^10.1.0",
+    "@myrmidon/cadmus-ui": "^10.2.0",
     "@myrmidon/cadmus-state": "^10.1.0"
   },
   "dependencies": {

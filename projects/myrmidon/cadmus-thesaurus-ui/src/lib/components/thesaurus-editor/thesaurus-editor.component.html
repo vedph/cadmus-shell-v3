@@ -54,12 +54,7 @@
               </mat-select>
             </mat-form-field>
             }
-            <button
-              type="submit"
-              mat-icon-button
-              color="primary"
-              matTooltip="Apply filters"
-            >
+            <button type="submit" mat-icon-button matTooltip="Apply filters">
               <mat-icon class="mat-primary">check_circle</mat-icon>
             </button>
             <button
@@ -93,7 +88,6 @@
           <button
             type="button"
             mat-flat-button
-            color="primary"
             class="mat-primary"
             (click)="appendNode()"
             style="margin: 8px 0"
@@ -116,7 +110,6 @@
       }
       <button
         type="button"
-        color="warn"
         class="mat-warn"
         mat-stroked-button
         (click)="close()"
@@ -127,7 +120,6 @@
       &nbsp;
       <button
         type="submit"
-        color="primary"
         class="mat-primary"
         mat-stroked-button
         [disabled]="form.invalid"

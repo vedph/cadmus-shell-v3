@@ -16,7 +16,6 @@
       <button
         type="button"
         mat-flat-button
-        color="primary"
         class="mat-primary"
         matTooltip="Add a new witness"
         (click)="openCurrentWitness()"
@@ -46,7 +45,7 @@
                 matTooltip="Edit this witness"
                 (click)="openCurrentWitness(w)"
               >
-                <mat-icon color="primary" class="mat-primary">edit</mat-icon>
+                <mat-icon class="mat-primary">edit</mat-icon>
               </button>
             </td>
             <td>
@@ -78,7 +77,7 @@
                 matTooltip="Remove this witness"
                 (click)="deleteWitness(i)"
               >
-                <mat-icon color="warn" class="mat-warn">remove_circle</mat-icon>
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
             </td>
             <td>
@@ -146,8 +145,8 @@
             <mat-error>please enter some text</mat-error>
             }
             <hr />
-            @if (text?.value) {
-            <nge-markdown [data]="text?.value || undefined" />
+            @if (text.value) {
+            <nge-markdown [data]="text.value || undefined" />
             }
           </div>
           <!-- note -->
@@ -158,25 +157,19 @@
               (ready)="onCreateNoteEditor($event)"
             />
             <hr />
-            @if (note?.value) {
-            <nge-markdown [data]="note?.value || undefined" />
+            @if (note.value) {
+            <nge-markdown [data]="note.value || undefined" />
             }
           </div>
           <button
             type="button"
             mat-icon-button
-            color="warn"
             matTooltip="Close this witness"
             (click)="closeCurrentWitness()"
           >
             <mat-icon class="mat-warn">clear</mat-icon>
           </button>
-          <button
-            type="submit"
-            color="primary"
-            mat-icon-button
-            matTooltip="Save this witness"
-          >
+          <button type="submit" mat-icon-button matTooltip="Save this witness">
             <mat-icon class="mat-primary">check_circle</mat-icon>
           </button>
         </form>

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-thesaurus-ui",
-  "version": "10.1.0",
+  "version": "10.2.0",
   "description": "Cadmus - thesauri UI components.",
   "keywords": [
     "Cadmus"
@@ -18,7 +18,7 @@
     "@angular/core": "^19.0.0",
     "@myrmidon/ngx-tools": "^1.0.0",
     "@myrmidon/paged-data-browsers": "^4.0.1",
-    "@myrmidon/cadmus-ui": "^10.1.0"
+    "@myrmidon/cadmus-ui": "^10.2.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

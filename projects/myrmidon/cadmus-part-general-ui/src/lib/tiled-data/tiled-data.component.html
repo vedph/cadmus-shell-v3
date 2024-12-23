@@ -34,7 +34,6 @@
           <td>
             <button
               type="button"
-              color="warn"
               (click)="deleteDatum(key)"
               mat-icon-button
               matTooltip="Remove this datum"
@@ -90,7 +89,6 @@
       <button
         type="button"
         mat-icon-button
-        color="warn"
         (click)="close()"
         matTooltip="Close without saving"
       >
@@ -99,7 +97,6 @@
       <button
         type="submit"
         mat-button
-        color="primary"
         class="mat-primary"
         [disabled]="form.invalid"
         matTooltip="Save data"

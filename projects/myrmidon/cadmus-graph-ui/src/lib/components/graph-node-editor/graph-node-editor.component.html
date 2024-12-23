@@ -53,16 +53,11 @@
 
   <!-- buttons -->
   <div>
-    <button color="warn" mat-icon-button type="button" (click)="cancel()">
+    <button mat-icon-button type="button" (click)="cancel()">
       <mat-icon class="mat-warn">cancel</mat-icon>
     </button>
     &nbsp;
-    <button
-      color="primary"
-      mat-icon-button
-      type="submit"
-      [disabled]="form.invalid"
-    >
+    <button mat-icon-button type="submit" [disabled]="form.invalid">
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>

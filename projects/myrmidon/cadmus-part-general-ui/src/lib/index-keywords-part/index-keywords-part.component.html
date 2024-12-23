@@ -13,7 +13,6 @@
         <button
           type="button"
           mat-flat-button
-          color="primary"
           class="mat-primary"
           (click)="addNewKeyword()"
         >
@@ -55,7 +54,7 @@
                 matTooltip="Edit this keyword"
                 (click)="editKeyword(k)"
               >
-                <mat-icon color="primary" class="mat-primary">edit</mat-icon>
+                <mat-icon class="mat-primary">edit</mat-icon>
               </button>
               <button
                 mat-icon-button
@@ -63,7 +62,7 @@
                 matTooltip="Delete this keyword"
                 (click)="deleteKeyword(k)"
               >
-                <mat-icon color="warn" class="mat-warn">remove_circle</mat-icon>
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
             </td>
             <td>{{ k.indexId }}</td>

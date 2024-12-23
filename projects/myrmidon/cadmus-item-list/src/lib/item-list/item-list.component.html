@@ -36,7 +36,6 @@
                 <button
                   mat-icon-button
                   type="button"
-                  color="primary"
                   (click)="editItem(item)"
                   matTooltip="Edit this item"
                 >
@@ -46,7 +45,6 @@
                 <button
                   mat-icon-button
                   type="button"
-                  color="warn"
                   (click)="deleteItem(item)"
                   matTooltip="Delete this item"
                 >
@@ -81,7 +79,6 @@
           <button
             type="button"
             mat-icon-button
-            color="warn"
             matTooltip="Reset list"
             (click)="reset()"
           >
@@ -104,7 +101,6 @@
     @if (userLevel > 1) {
     <button
       type="button"
-      color="primary"
       class="mat-primary"
       mat-raised-button
       (click)="addItem()"

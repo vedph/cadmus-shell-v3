@@ -82,7 +82,6 @@
                   type="button"
                   mat-icon-button
                   matTooltip="Delete whole row"
-                  color="warn"
                   (click)="deleteRow(i)"
                 >
                   <mat-icon class="mat-warn">remove_circle</mat-icon>
@@ -123,7 +122,6 @@
             type="button"
             mat-icon-button
             matTooltip="Delete the selected tile"
-            color="warn"
             (click)="deleteSelectedTile()"
             [disabled]="!selectedTile"
           >

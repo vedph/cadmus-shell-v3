@@ -13,7 +13,7 @@
             <button
               type="button"
               mat-flat-button
-              color="primary"
+              class="mat-primary"
               (click)="addState()"
             >
               <mat-icon>add_circle</mat-icon> state
@@ -36,7 +36,6 @@
                   <button
                     type="button"
                     mat-icon-button
-                    color="primary"
                     matTooltip="Edit this state"
                     (click)="editState(entry, i)"
                   >
@@ -63,7 +62,6 @@
                   <button
                     type="button"
                     mat-icon-button
-                    color="warn"
                     matTooltip="Delete this state"
                     (click)="deleteState(i)"
                   >
