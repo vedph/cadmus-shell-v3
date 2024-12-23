@@ -7,3 +7,12 @@ td.fit-width {
   width: 1px;
   white-space: nowrap;
 }
+#list {
+  margin-top: 8px;
+}
+fieldset {
+  margin-top: 8px;
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 4px;
+}

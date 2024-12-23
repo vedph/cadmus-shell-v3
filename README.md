@@ -15,6 +15,8 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+- 2024-12-23: better layout in index keywords part.
+
 ### 10.2.0
 
 - 2024-12-23:
