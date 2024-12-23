@@ -21,7 +21,7 @@
     "@myrmidon/ngx-mat-tools": "^0.0.1",
     "@myrmidon/paged-data-browsers": "^4.0.1",
     "@myrmidon/cadmus-refs-lookup": "^8.0.0",
-    "@myrmidon/cadmus-api": "^10.1.0"
+    "@myrmidon/cadmus-api": "^10.2.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

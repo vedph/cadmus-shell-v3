@@ -22,7 +22,7 @@
     "@myrmidon/ngx-tools": "^1.0.0",
     "@myrmidon/ngx-mat-tools": "^0.0.1",
     "@myrmidon/cadmus-refs-lookup": "^8.0.0",
-    "@myrmidon/cadmus-api": "^10.1.0",
+    "@myrmidon/cadmus-api": "^10.2.0",
     "@myrmidon/cadmus-graph-ui": "^10.2.0",
     "@myrmidon/cadmus-graph-ui-ex": "^10.2.0"
   },

@@ -17,8 +17,8 @@
     "@angular/common": "^19.0.0",
     "@angular/core": "^19.0.0",
     "@myrmidon/cadmus-core": "^10.1.0",
-    "@myrmidon/cadmus-api": "^10.1.0",
-    "@myrmidon/cadmus-state": "^10.1.0",
+    "@myrmidon/cadmus-api": "^10.2.0",
+    "@myrmidon/cadmus-state": "^10.2.0",
     "@myrmidon/cadmus-ui": "^10.2.0"
   },
   "dependencies": {
