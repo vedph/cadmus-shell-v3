@@ -15,14 +15,14 @@
         [refTagEntries]="refTagEntries"
         [ids]="ids.value"
         (idsChange)="onIdsChange($event)"
-      ></cadmus-refs-asserted-ids>
+      />
     </mat-card-content>
     <mat-card-actions>
       <cadmus-close-save-buttons
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

@@ -14,10 +14,10 @@
           <cadmus-refs-proper-name
             [langEntries]="langEntries"
             [typeEntries]="typeEntries"
-            [name]="initialName"
-            [noAssertion]="true"
+            [name]="initialName || undefined"
+            [hideAssertion]="true"
             (nameChange)="onNameChange($event)"
-          ></cadmus-refs-proper-name>
+          />
         </fieldset>
       </div>
 
@@ -37,7 +37,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

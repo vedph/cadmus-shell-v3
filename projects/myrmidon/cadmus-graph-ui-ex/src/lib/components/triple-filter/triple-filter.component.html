@@ -19,7 +19,7 @@
           label="subject"
           [service]="lookupService"
           (itemChange)="onSubjectNodeChange($event)"
-        ></cadmus-ref-lookup>
+        />
       </div>
       <!-- predicate IDs -->
       <div>
@@ -28,7 +28,7 @@
           [service]="lookupService"
           [baseFilter]="{ tag: 'property' }"
           (itemChange)="onPredicateNodeChange($event)"
-        ></cadmus-ref-lookup>
+        />
         <mat-checkbox [formControl]="isNotPred">not</mat-checkbox>
         <!-- notPreds -->
         @if (isNotPred.value) {
@@ -67,7 +67,7 @@
           label="object"
           [service]="lookupService"
           (itemChange)="onObjectNodeChange($event)"
-        ></cadmus-ref-lookup>
+        />
       </div>
       <!-- sid -->
       <div>

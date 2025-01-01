@@ -10,7 +10,7 @@
       <cadmus-refs-historical-date
         [date]="date.value"
         (dateChange)="onDateChange($event)"
-      ></cadmus-refs-historical-date>
+      />
       <!-- references -->
       <mat-expansion-panel>
         <mat-expansion-panel-header>
@@ -21,7 +21,7 @@
           [typeEntries]="typeEntries"
           [tagEntries]="tagEntries"
           (referencesChange)="onReferencesChange($event)"
-        ></cadmus-refs-doc-references>
+        />
       </mat-expansion-panel>
     </mat-card-content>
     <mat-card-actions>
@@ -29,7 +29,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

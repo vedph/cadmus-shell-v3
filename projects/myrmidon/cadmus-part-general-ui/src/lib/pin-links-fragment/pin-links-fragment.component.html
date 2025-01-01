@@ -20,7 +20,7 @@
         [canEditTarget]="canEditTarget"
         [internalDefault]="true"
         (idsChange)="onIdsChange($event)"
-      ></cadmus-refs-asserted-composite-ids>
+      />
     </mat-card-content>
 
     <mat-card-actions>
@@ -28,7 +28,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

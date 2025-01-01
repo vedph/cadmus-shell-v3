@@ -88,7 +88,7 @@
             [roleEntries]="roleEntries"
             (editorClose)="closeEntry()"
             (entryChange)="saveEntry($event)"
-          ></cadmus-bibliography-entry>
+          />
         </mat-tab>
         }
       </mat-tab-group>
@@ -98,7 +98,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

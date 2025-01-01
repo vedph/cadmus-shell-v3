@@ -132,20 +132,20 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
     this._sub?.unsubscribe();
   }
 
-  public onSubjectChange(node?: UriNode | null): void {
-    this.subjectNode.setValue(node || null);
+  public onSubjectChange(node?: unknown): void {
+    this.subjectNode.setValue((node as UriNode) || null);
     this.subjectNode.updateValueAndValidity();
     this.subjectNode.markAsDirty();
   }
 
-  public onPredicateChange(node?: UriNode | null): void {
-    this.predicateNode.setValue(node || null);
+  public onPredicateChange(node?: unknown): void {
+    this.predicateNode.setValue((node as UriNode) || null);
     this.predicateNode.updateValueAndValidity();
     this.predicateNode.markAsDirty();
   }
 
-  public onObjectChange(node?: UriNode | null): void {
-    this.objectNode.setValue(node || null);
+  public onObjectChange(node?: unknown): void {
+    this.objectNode.setValue(node as UriNode || null);
     this.objectNode.updateValueAndValidity();
     this.objectNode.markAsDirty();
 

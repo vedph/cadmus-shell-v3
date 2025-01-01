@@ -204,33 +204,34 @@ export class TripleFilterComponent implements OnInit {
     this.emitFilterChange();
   }
 
-  public onSubjectNodeChange(node: UriNode | null): void {
-    this.subj.setValue(node);
+  public onSubjectNodeChange(node: unknown): void {
+    this.subj.setValue(node as UriNode);
   }
 
-  public onObjectNodeChange(node: UriNode | null): void {
-    this.obj.setValue(node);
+  public onObjectNodeChange(node: unknown): void {
+    this.obj.setValue(node as UriNode);
   }
 
-  public onPredicateNodeChange(node: UriNode | null): void {
+  public onPredicateNodeChange(node: unknown): void {
     if (!node) {
       return;
     }
+    const un = node as UriNode;
     if (this.isNotPred.value) {
       const nodes = [...this.notPreds.value];
-      if (nodes.some((n) => n.id === node.id)) {
+      if (nodes.some((n) => n.id === un.id)) {
         return;
       }
-      nodes.push(node);
+      nodes.push(un);
       this.notPreds.setValue(nodes);
       this.notPreds.updateValueAndValidity();
       this.notPreds.markAsDirty();
     } else {
       const nodes = [...this.preds.value];
-      if (nodes.some((n) => n.id === node.id)) {
+      if (nodes.some((n) => n.id === un.id)) {
         return;
       }
-      nodes.push(node);
+      nodes.push(un);
       this.preds.setValue(nodes);
       this.preds.updateValueAndValidity();
       this.preds.markAsDirty();

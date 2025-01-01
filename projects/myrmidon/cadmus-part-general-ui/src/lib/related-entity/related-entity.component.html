@@ -39,11 +39,10 @@
     [pinByTypeMode]="pinByTypeMode"
     [canSwitchMode]="canSwitchMode"
     [canEditTarget]="canEditTarget"
-    [id]="id.value"
+    [id]="id.value || undefined"
     [internalDefault]="true"
-    (idChange)="onIdChange($event)"
-  >
-  </cadmus-refs-asserted-composite-id>
+    (idChange)="onIdChange($event!)"
+  />
 
   <button mat-icon-button type="button" (click)="cancel()">
     <mat-icon class="mat-warn">close</mat-icon>

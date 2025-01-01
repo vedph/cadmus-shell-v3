@@ -28,7 +28,7 @@ export class ItemLookupDialogComponent {
     this.dialogRef.close(null);
   }
 
-  public onItemLookupChange(value: Item): void {
-    this.dialogRef.close(value);
+  public onItemLookupChange(value: unknown): void {
+    this.dialogRef.close(value as Item);
   }
 }

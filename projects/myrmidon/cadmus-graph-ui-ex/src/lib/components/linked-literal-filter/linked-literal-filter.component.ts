@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { PageEvent } from '@angular/material/paginator';
 import { forkJoin, from } from 'rxjs';
@@ -18,7 +18,7 @@ import { PagedLinkedLiteralFilter } from '../../graph-walker';
   styleUrls: ['./linked-literal-filter.component.css'],
   standalone: false,
 })
-export class LinkedLiteralFilterComponent implements OnInit {
+export class LinkedLiteralFilterComponent {
   private _filter: PagedLinkedLiteralFilter;
 
   /**
@@ -110,8 +110,6 @@ export class LinkedLiteralFilterComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
-
   private updateForm(filter: PagedLinkedLiteralFilter): void {
     this.pageNumber.setValue(filter.pageNumber);
     this.pageSize.setValue(filter.pageSize);
@@ -155,12 +153,12 @@ export class LinkedLiteralFilterComponent implements OnInit {
     this.filterChange.emit(this.getFilter());
   }
 
-  public onSubjectNodeChange(node: UriNode | null): void {
-    this.subj.setValue(node);
+  public onSubjectNodeChange(node: unknown): void {
+    this.subj.setValue(node as UriNode);
   }
 
-  public onPredicateNodeChange(node: UriNode | null): void {
-    this.pred.setValue(node);
+  public onPredicateNodeChange(node: unknown): void {
+    this.pred.setValue(node as UriNode);
   }
 
   public onPageChange(page: PageEvent): void {

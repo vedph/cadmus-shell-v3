@@ -181,12 +181,12 @@ export class LinkedNodeFilterComponent implements OnInit {
     this.emitFilterChange();
   }
 
-  public onClassAdd(node: UriNode | null): void {
+  public onClassAdd(node: unknown): void {
     if (!node) {
       return;
     }
     const nodes = [...this.classes.value];
-    nodes.push(node);
+    nodes.push(node as UriNode);
     this.classes.setValue(nodes);
     this.classes.updateValueAndValidity();
     this.classes.markAsDirty();

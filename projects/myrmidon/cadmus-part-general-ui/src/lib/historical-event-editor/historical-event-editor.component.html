@@ -98,8 +98,8 @@
             [refTagEntries]="refTagEntries"
             [refTypeEntries]="refTypeEntries"
             [chronotopes]="chronotopes.value || undefined"
-            (chronotopesChange)="onChronotopesChange($event)"
-          ></cadmus-asserted-chronotope-set>
+            (chronotopesChange)="onChronotopesChange($event!)"
+          />
         </fieldset>
       </mat-expansion-panel>
 
@@ -115,10 +115,9 @@
             [assTagEntries]="assTagEntries"
             [refTagEntries]="refTagEntries"
             [refTypeEntries]="refTypeEntries"
-            [assertion]="assertion.value"
+            [assertion]="assertion.value || undefined"
             (assertionChange)="onAssertionChange($event)"
-          >
-          </cadmus-refs-assertion>
+          />
         </fieldset>
       </mat-expansion-panel>
     </mat-tab>
@@ -190,7 +189,7 @@
             [entity]="editedEntity"
             (entityChange)="onEntityChange($event)"
             (editorClose)="closeEntity()"
-          ></cadmus-related-entity>
+          />
         </fieldset>
       </mat-expansion-panel>
     </mat-tab>

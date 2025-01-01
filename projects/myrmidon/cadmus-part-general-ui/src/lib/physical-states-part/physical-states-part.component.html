@@ -85,7 +85,7 @@
             [stateEntries]="stateEntries"
             [reporterEntries]="reporterEntries"
             [state]="edited"
-            (stateChange)="saveState($event)"
+            (stateChange)="saveState($event!)"
             (stateCancel)="closeState()"
           />
         </mat-tab>
@@ -96,7 +96,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

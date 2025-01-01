@@ -6,7 +6,7 @@
       [item]="subjectNode$ | async"
       label="subject"
       (itemChange)="onSubjectNodeChange($event)"
-    ></cadmus-ref-lookup>
+    />
     <button
       type="button"
       mat-icon-button
@@ -24,7 +24,7 @@
       [item]="predicateNode$ | async"
       [baseFilter]="{ tag: 'property' }"
       (itemChange)="onPredicateNodeChange($event)"
-    ></cadmus-ref-lookup>
+    />
     <button
       type="button"
       mat-icon-button
@@ -52,7 +52,7 @@
       [item]="objectNode$ | async"
       label="object"
       (itemChange)="onObjectNodeChange($event)"
-    ></cadmus-ref-lookup>
+    />
     <button
       type="button"
       mat-icon-button

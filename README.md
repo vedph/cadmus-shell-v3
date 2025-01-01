@@ -15,6 +15,15 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## History
 
+### 10.2.2
+
+- 2025-01-01: adjusted some typings after updates for library `@myrmidon/cadmus-part-general-ui`.
+
+### 10.2.1
+
+- 2025-01-01:
+  - updated packages.
+  - adjusted some typings after updates for libraries `@myrmidon/cadmus-graph-ui`, `@myrmidon/cadmus-graph-ui-ex`, `@myrmidon/cadmus-item-editor`, `@myrmidon/cadmus-item-list`.
 - 2024-12-23: better layout in index keywords part.
 
 ### 10.2.0

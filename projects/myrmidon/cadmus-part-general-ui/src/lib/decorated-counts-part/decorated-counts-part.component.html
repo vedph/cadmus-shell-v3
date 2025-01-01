@@ -11,7 +11,7 @@
         [idEntries]="idEntries"
         [tagEntries]="tagEntries"
         [counts]="counts.value"
-        (countsChange)="onCountsChange($event)"
+        (countsChange)="onCountsChange($event!)"
       />
     </mat-card-content>
     <mat-card-actions>
@@ -19,7 +19,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

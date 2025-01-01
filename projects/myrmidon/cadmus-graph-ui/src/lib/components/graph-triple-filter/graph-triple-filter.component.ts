@@ -99,24 +99,24 @@ export class GraphTripleFilterComponent implements OnInit {
     };
   }
 
-  public onSubjectNodeChange(node?: UriNode | null): void {
-    this._repository.setTerm(node, 'S');
+  public onSubjectNodeChange(node?: unknown): void {
+    this._repository.setTerm(node as UriNode, 'S');
   }
 
   public clearSubjectNode(): void {
     this._repository.setTerm(null, 'S');
   }
 
-  public onPredicateNodeChange(node?: UriNode | null): void {
-    this._repository.setTerm(node, 'P');
+  public onPredicateNodeChange(node?: unknown): void {
+    this._repository.setTerm(node as UriNode, 'P');
   }
 
   public clearPredicateNode(): void {
     this._repository.setTerm(null, 'P');
   }
 
-  public onObjectNodeChange(node?: UriNode | null): void {
-    this._repository.setTerm(node, 'O');
+  public onObjectNodeChange(node?: unknown): void {
+    this._repository.setTerm(node as UriNode, 'O');
   }
 
   public clearObjectNode(): void {

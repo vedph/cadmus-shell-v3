@@ -114,19 +114,18 @@ export class GraphNodeFilterComponent implements OnInit {
     this._repository.setLinkedNode();
   }
 
-  public onLinkedNodeSet(node: UriNode | null): void {
-    this._repository.setLinkedNode(node || undefined);
+  public onLinkedNodeSet(node: unknown): void {
+    this._repository.setLinkedNode(node as UriNode || undefined);
   }
 
   public clearLinkedNode(): void {
     this._repository.setLinkedNode();
   }
 
-  public onClassAdd(node: UriNode | null): void {
-    if (!node) {
-      return;
+  public onClassAdd(node: unknown): void {
+    if (node) {
+      this._repository.addClassNode(node as UriNode);
     }
-    this._repository.addClassNode(node);
   }
 
   public onClassRemove(id: number): void {

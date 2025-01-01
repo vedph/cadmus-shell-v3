@@ -17,7 +17,7 @@
       label="subject"
       [service]="lookupService"
       (itemChange)="onSubjectNodeChange($event)"
-    ></cadmus-ref-lookup>
+    />
   </div>
 
   <!-- predicate ID -->
@@ -27,7 +27,7 @@
       [service]="lookupService"
       [baseFilter]="{ tag: 'property' }"
       (itemChange)="onPredicateNodeChange($event)"
-    ></cadmus-ref-lookup>
+    />
   </div>
 
   <!-- LITERAL -->

@@ -85,7 +85,7 @@
             [refTagEntries]="refTagEntries"
             [refTypeEntries]="refTypeEntries"
             [chronotope]="editedChronotope"
-            (chronotopeChange)="onChronotopeChange($event)"
+            (chronotopeChange)="onChronotopeChange($event!)"
           />
           <div>
             <button type="button" (click)="closeChronotope()" mat-icon-button>
@@ -104,7 +104,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

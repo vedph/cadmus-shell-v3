@@ -70,7 +70,7 @@
           [item]="linkedNode$ | async"
           [service]="lookupService"
           (itemChange)="onLinkedNodeSet($event)"
-        ></cadmus-ref-lookup>
+        />
         @if (linkedNode$ | async) {
         <div>
           <mat-form-field>
@@ -102,7 +102,7 @@
           [service]="lookupService"
           [baseFilter]="{ isClass: true }"
           (itemChange)="onClassAdd($event)"
-        ></cadmus-ref-lookup>
+        />
         @if (classNodes$ | async; as classNodes) {
         <mat-chip-listbox>
           @for (node of classNodes; track node.id) {

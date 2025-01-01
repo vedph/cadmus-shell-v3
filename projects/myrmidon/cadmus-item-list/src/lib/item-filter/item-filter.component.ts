@@ -123,9 +123,15 @@ export class ItemFilterComponent implements OnInit {
     };
   }
 
-  public onUserChange(user?: UserInfo): void {
-    this.user.setValue(user?.userName || null);
-    this.currentUser = user;
+  public onUserChange(user?: unknown): void {
+    const u = user as UserInfo | undefined;
+    if (u) {
+      this.user.setValue(u.userName);
+      this.currentUser = u;
+    } else {
+      this.user.setValue(null);
+      this.currentUser = undefined;
+    }
   }
 
   public reset() {
