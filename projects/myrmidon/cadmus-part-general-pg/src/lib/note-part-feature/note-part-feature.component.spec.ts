@@ -2,7 +2,6 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HAMMER_LOADER } from '@angular/platform-browser';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 
@@ -15,7 +14,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 
 import { NotePartFeatureComponent } from './note-part-feature.component';
 
@@ -33,8 +31,7 @@ describe('NotePartFeatureComponent', () => {
         RouterTestingModule,
         NgeMonacoModule,
         NgeMarkdownModule,
-        CadmusCoreModule,
-        CadmusUiModule,
+        NotePartFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
@@ -51,11 +48,7 @@ describe('NotePartFeatureComponent', () => {
           },
         },
       ],
-      declarations: [
-        CurrentItemBarComponent,
-        NotePartComponent,
-        NotePartFeatureComponent,
-      ],
+      declarations: [CurrentItemBarComponent, NotePartComponent],
     }).compileComponents();
   }));
 

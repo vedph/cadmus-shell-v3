@@ -33,7 +33,7 @@
           </thead>
           <tbody>
             @for (k of keywords.value; track k) {
-            <tr>
+            <tr [class.selected]="editedKeyword === k">
               <td class="fit-width">
                 <button
                   mat-icon-button
@@ -60,7 +60,7 @@
           </tbody>
         </table>
       </div>
-      } @if (editedKeyword) {
+      }
       <fieldset>
         <mat-expansion-panel
           [disabled]="!editedKeyword"
@@ -79,7 +79,6 @@
           />
         </mat-expansion-panel>
       </fieldset>
-      }
     </mat-card-content>
     <mat-card-actions>
       <cadmus-close-save-buttons

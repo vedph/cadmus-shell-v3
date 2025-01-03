@@ -8,8 +8,8 @@ describe('CurrentLayerPartBarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ CurrentLayerPartBarComponent ]
-    })
+    imports: [CurrentLayerPartBarComponent]
+})
     .compileComponents();
   }));
 

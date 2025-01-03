@@ -3,9 +3,7 @@
   <div id="filters">
     <mat-card appearance="outlined">
       <mat-card-content>
-        <cadmus-graph-triple-filter
-          [disabled]="(loading$ | async) === true"
-        ></cadmus-graph-triple-filter>
+        <cadmus-graph-triple-filter [disabled]="(loading$ | async) === true" />
       </mat-card-content>
     </mat-card>
   </div>
@@ -89,7 +87,7 @@
           [pageSizeOptions]="[5, 10, 20, 50, 100]"
           (page)="onPageChange($event)"
           [showFirstLastButtons]="true"
-        ></mat-paginator>
+        />
       </div>
     </div>
     <!-- editor -->
@@ -104,7 +102,7 @@
         [tagEntries]="tagEntries"
         (tripleChange)="onTripleChange($event)"
         (editorClose)="onEditorClose()"
-      ></cadmus-graph-triple-editor>
+      />
     </mat-expansion-panel>
   </div>
   }

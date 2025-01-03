@@ -8,8 +8,8 @@ describe('GraphNodeEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GraphNodeEditorComponent ]
-    })
+    imports: [GraphNodeEditorComponent]
+})
     .compileComponents();
   });
 

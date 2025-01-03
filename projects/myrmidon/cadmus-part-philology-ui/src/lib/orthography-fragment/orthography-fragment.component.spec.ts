@@ -1,12 +1,10 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
 import { HAMMER_LOADER } from '@angular/platform-browser';
 
 import { OrthographyFragmentComponent } from './orthography-fragment.component';
 import { MspOperationComponent } from '../msp-operation/msp-operation.component';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('OrthographyFragmentComponent', () => {
@@ -20,8 +18,8 @@ describe('OrthographyFragmentComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        MspOperationComponent,
+        OrthographyFragmentComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
@@ -38,7 +36,6 @@ describe('OrthographyFragmentComponent', () => {
           useValue: 'cadmus',
         },
       ],
-      declarations: [MspOperationComponent, OrthographyFragmentComponent],
     }).compileComponents();
   }));
 

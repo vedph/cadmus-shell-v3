@@ -4,10 +4,6 @@ import { TiledTextPartFeatureComponent } from './tiled-text-part-feature.compone
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
-import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import {
   TILED_TEXT_PART_TYPEID,
   TiledDataComponent,
@@ -26,10 +22,7 @@ describe('TiledTextPartFeatureComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        RouterTestingModule,
-        CadmusCoreModule,
-        CadmusUiModule,
-        CadmusUiPgModule,
+        TiledTextPartFeatureComponent,
       ],
       providers: [
         {
@@ -45,7 +38,6 @@ describe('TiledTextPartFeatureComponent', () => {
         TiledDataComponent,
         TextTileComponent,
         TiledTextPartComponent,
-        TiledTextPartFeatureComponent,
       ],
     }).compileComponents();
   }));

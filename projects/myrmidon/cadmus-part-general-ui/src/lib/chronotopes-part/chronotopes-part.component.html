@@ -7,78 +7,83 @@
       <mat-card-title>Chronotopes Part</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <mat-tab-group [(selectedIndex)]="tabIndex">
-        <mat-tab label="chronotopes">
-          <div>
-            <button
-              type="button"
-              mat-flat-button
-              class="mat-primary"
-              (click)="addChronotope()"
-            >
-              <mat-icon>add_circle</mat-icon> chronotope
-            </button>
-          </div>
-          @if (chronotopes.value.length) {
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>place</th>
-                <th>date</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for ( entry of chronotopes.value; track entry; let i = $index;
-              let first = $first; let last = $last) {
-              <tr>
-                <td>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Edit this chronotope"
-                    (click)="editChronotope(entry, i)"
-                  >
-                    <mat-icon class="mat-primary">edit</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this chronotope up"
-                    [disabled]="first"
-                    (click)="moveChronotopeUp(i)"
-                  >
-                    <mat-icon>arrow_upward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this chronotope down"
-                    [disabled]="last"
-                    (click)="moveChronotopeDown(i)"
-                  >
-                    <mat-icon>arrow_downward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Delete this chronotope"
-                    (click)="deleteChronotope(i)"
-                  >
-                    <mat-icon class="mat-warn">remove_circle</mat-icon>
-                  </button>
-                </td>
-                <td>{{ entry.place?.value }}</td>
-                <td>{{ entry.date | historicalDate }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
+      <div>
+        <button
+          type="button"
+          mat-flat-button
+          class="mat-primary"
+          (click)="addChronotope()"
+        >
+          <mat-icon>add_circle</mat-icon> chronotope
+        </button>
+      </div>
+      @if (chronotopes.value.length) {
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>place</th>
+            <th>date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for ( entry of chronotopes.value; track entry; let i = $index; let
+          first = $first; let last = $last) {
+          <tr [class.selected]="entry === editedChronotope">
+            <td class="fit-width">
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Edit this chronotope"
+                (click)="editChronotope(entry, i)"
+              >
+                <mat-icon class="mat-primary">edit</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this chronotope up"
+                [disabled]="first"
+                (click)="moveChronotopeUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this chronotope down"
+                [disabled]="last"
+                (click)="moveChronotopeDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Delete this chronotope"
+                (click)="deleteChronotope(i)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
+              </button>
+            </td>
+            <td>{{ entry.place?.value }}</td>
+            <td>{{ entry.date | historicalDate }}</td>
+          </tr>
           }
-        </mat-tab>
+        </tbody>
+      </table>
+      }
 
-        @if (editedChronotope) {
-        <mat-tab label="chronotope">
+      <mat-expansion-panel
+        [expanded]="editedChronotope"
+        [disabled]="!editedChronotope"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ (editedChronotope | assertedChronotopes) || "chronotope" }}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <fieldset>
           <cadmus-refs-asserted-chronotope
             [tagEntries]="tagEntries"
             [assTagEntries]="assTagEntries"
@@ -87,17 +92,17 @@
             [chronotope]="editedChronotope"
             (chronotopeChange)="onChronotopeChange($event!)"
           />
-          <div>
+          <div class="form-row">
             <button type="button" (click)="closeChronotope()" mat-icon-button>
               <mat-icon class="mat-warn">cancel</mat-icon>
             </button>
             <button type="button" (click)="saveChronotope()" mat-icon-button>
               <mat-icon class="mat-primary">check_circle</mat-icon>
             </button>
+            <span>chronotope</span>
           </div>
-        </mat-tab>
-        }
-      </mat-tab-group>
+        </fieldset>
+      </mat-expansion-panel>
     </mat-card-content>
     <mat-card-actions>
       <cadmus-close-save-buttons

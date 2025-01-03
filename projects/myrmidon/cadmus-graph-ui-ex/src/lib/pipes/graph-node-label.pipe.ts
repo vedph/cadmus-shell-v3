@@ -7,10 +7,7 @@ import { Node as GraphNode } from '@swimlane/ngx-graph';
  * nodes label is just the count of the triples group, so the predicate ID is
  * got from the property node's data uri.
  */
-@Pipe({
-  name: 'graphNodeLabel',
-  standalone: false,
-})
+@Pipe({ name: 'graphNodeLabel' })
 export class GraphNodeLabelPipe implements PipeTransform {
   transform(value: unknown, ...args: unknown[]): unknown {
     const node = value as GraphNode;

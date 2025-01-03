@@ -1,4 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+
+import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
+
 import { TokenLocation, TextLayerService } from '@myrmidon/cadmus-core';
 
 /**
@@ -9,7 +12,7 @@ import { TokenLocation, TextLayerService } from '@myrmidon/cadmus-core';
   selector: 'cadmus-decorated-token-text',
   templateUrl: './decorated-token-text.component.html',
   styleUrls: ['./decorated-token-text.component.css'],
-  standalone: false,
+  imports: [SafeHtmlPipe],
 })
 export class DecoratedTokenTextComponent implements OnInit {
   @ViewChild('textElem') _textElement?: ElementRef;

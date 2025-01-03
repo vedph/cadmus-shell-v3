@@ -11,7 +11,16 @@ import {
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
+
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+
 import { ComponentSignal } from '@myrmidon/cadmus-profile-core';
 
 import { ThesaurusNode } from '../../services/thesaurus-nodes.service';
@@ -23,7 +32,17 @@ import { ThesaurusNode } from '../../services/thesaurus-nodes.service';
   selector: 'cadmus-thesaurus-node',
   templateUrl: './thesaurus-node.component.html',
   styleUrls: ['./thesaurus-node.component.css'],
-  standalone: false,
+  imports: [
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+  ],
 })
 export class ThesaurusNodeComponent {
   private _node: ThesaurusNode | undefined;

@@ -6,18 +6,9 @@ import {
   FormBuilder,
   Validators,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { take } from 'rxjs/operators';
-import { Clipboard } from '@angular/cdk/clipboard';
-import { MatSnackBar } from '@angular/material/snack-bar';
-
-import { diff_match_patch } from 'diff-match-patch';
-
-import {
-  EditedObject,
-  ModelEditorComponentBase,
-  renderLabelFromLastColon,
-} from '@myrmidon/cadmus-ui';
 import {
   trigger,
   transition,
@@ -25,6 +16,35 @@ import {
   animate,
   state,
 } from '@angular/animations';
+import { take } from 'rxjs/operators';
+
+import { Clipboard } from '@angular/cdk/clipboard';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardSubtitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { diff_match_patch } from 'diff-match-patch';
+
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+  renderLabelFromLastColon,
+  ThesaurusTreeComponent,
+} from '@myrmidon/cadmus-ui';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -38,6 +58,7 @@ import { DifferResultToMspAdapter } from '../differ-result-to-msp-adapter';
 import { MspOperation } from '../msp-operation';
 import { MspValidators } from '../msp-validators';
 import { OrthographyFragment } from '../orthography-fragment';
+import { MspOperationComponent } from '../msp-operation/msp-operation.component';
 
 /**
  * Orthography fragment.
@@ -64,7 +85,29 @@ import { OrthographyFragment } from '../orthography-fragment';
       transition('open <=> closed', [animate('300ms ease-in')]),
     ]),
   ],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatToolbar,
+    MatButton,
+    MatTooltip,
+    MatIconButton,
+    MspOperationComponent,
+    MatCardActions,
+    ThesaurusTreeComponent,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class OrthographyFragmentComponent
   extends ModelEditorComponentBase<OrthographyFragment>

@@ -1,4 +1,11 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  OnDestroy,
+} from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   FormGroup,
@@ -6,11 +13,34 @@ import {
   FormControl,
   Validators,
   FormArray,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { distinctUntilChanged } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
-import { BibEntry, BibAuthor } from '../bibliography-part';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import {
+  MatFormField,
+  MatLabel,
+  MatError,
+  MatSuffix,
+} from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import {
+  MatDatepickerInput,
+  MatDatepickerToggle,
+  MatDatepicker,
+} from '@angular/material/datepicker';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
 import { Keyword } from '../keywords-part';
+import { BibEntry, BibAuthor } from '../bibliography-part';
+import { BibAuthorsEditorComponent } from '../bib-authors-editor/bib-authors-editor.component';
 
 /**
  * Bibliography entry editor used by BibliographyPartComponent to edit a single
@@ -20,9 +50,30 @@ import { Keyword } from '../keywords-part';
   selector: 'cadmus-bibliography-entry',
   templateUrl: './bibliography-entry.component.html',
   styleUrls: ['./bibliography-entry.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatTabGroup,
+    MatTab,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatInput,
+    MatError,
+    BibAuthorsEditorComponent,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatSuffix,
+    MatDatepicker,
+    MatButton,
+    MatTooltip,
+    MatIcon,
+    MatIconButton,
+  ],
 })
-export class BibliographyEntryComponent implements OnInit {
+export class BibliographyEntryComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
   private _entry?: BibEntry;
 
   @Input()
@@ -165,18 +216,24 @@ export class BibliographyEntryComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // automatically set last page when first is set to something > 0
     // and last is not set
-    this.firstPage.valueChanges.pipe(distinctUntilChanged()).subscribe((_) => {
-      if (
-        this.firstPage.value &&
-        this.lastPage.value &&
-        this.lastPage.value < this.firstPage.value
-      ) {
-        this.lastPage.setValue(this.firstPage.value);
-      }
-    });
+    this._sub = this.firstPage.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe((_) => {
+        if (
+          this.firstPage.value &&
+          this.lastPage.value &&
+          this.lastPage.value < this.firstPage.value
+        ) {
+          this.lastPage.setValue(this.firstPage.value);
+        }
+      });
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   private getAuthorGroup(author?: BibAuthor): FormGroup {

@@ -8,8 +8,8 @@ describe('DocReferencesPartFeatureComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DocReferencesPartFeatureComponent ]
-    })
+    imports: [DocReferencesPartFeatureComponent]
+})
     .compileComponents();
   });
 

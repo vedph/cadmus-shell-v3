@@ -8,8 +8,8 @@ describe('LookupPinComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LookupPinComponent ]
-    })
+    imports: [LookupPinComponent]
+})
     .compileComponents();
   });
 

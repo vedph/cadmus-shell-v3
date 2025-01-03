@@ -15,7 +15,6 @@ export enum PartBadgeType {
   selector: 'cadmus-part-badge',
   templateUrl: './part-badge.component.html',
   styleUrls: ['./part-badge.component.css'],
-  standalone: false,
 })
 export class PartBadgeComponent {
   private _typeThesaurus?: Thesaurus;

@@ -1,14 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { Router, ActivatedRoute } from '@angular/router';
+
 import { MatSnackBar } from '@angular/material/snack-bar';
+
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CategoriesPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-categories-part-feature',
+  imports: [CurrentItemBarComponent, CategoriesPartComponent],
   templateUrl: './categories-part-feature.component.html',
   styleUrls: ['./categories-part-feature.component.css'],
-  standalone: false,
 })
 export class CategoriesPartFeatureComponent
   extends EditPartFeatureBase

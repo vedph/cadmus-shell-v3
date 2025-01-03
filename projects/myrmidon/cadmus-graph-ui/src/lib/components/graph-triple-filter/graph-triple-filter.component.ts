@@ -1,11 +1,23 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatLabel, MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
 
 import { UriNode, TripleFilter } from '@myrmidon/cadmus-api';
 
@@ -21,9 +33,22 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   selector: 'cadmus-graph-triple-filter',
   templateUrl: './graph-triple-filter.component.html',
   styleUrls: ['./graph-triple-filter.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    RefLookupComponent,
+    MatIconButton,
+    MatIcon,
+    MatCheckbox,
+    MatLabel,
+    MatFormField,
+    MatInput,
+    MatTooltip,
+    AsyncPipe,
+  ],
 })
-export class GraphTripleFilterComponent implements OnInit {
+export class GraphTripleFilterComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
   public filter$: Observable<TripleFilter>;
   public literal: FormControl<boolean>;
   public objectLit: FormControl<string | null>;
@@ -63,10 +88,14 @@ export class GraphTripleFilterComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.filter$.subscribe((f) => {
+  public ngOnInit(): void {
+    this._sub = this.filter$.subscribe((f) => {
       this.updateForm(f);
     });
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   private updateForm(filter: TripleFilter): void {

@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { PhysicalMeasurementsPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-physical-measurements-part-feature',
   templateUrl: './physical-measurements-part-feature.component.html',
   styleUrl: './physical-measurements-part-feature.component.scss',
-  standalone: false,
+  imports: [CurrentItemBarComponent, PhysicalMeasurementsPartComponent],
 })
 export class PhysicalMeasurementsPartFeatureComponent
   extends EditPartFeatureBase

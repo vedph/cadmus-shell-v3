@@ -8,8 +8,8 @@ describe('ExternalIdsPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ExternalIdsPartComponent ]
-    })
+    imports: [ExternalIdsPartComponent]
+})
     .compileComponents();
   });
 

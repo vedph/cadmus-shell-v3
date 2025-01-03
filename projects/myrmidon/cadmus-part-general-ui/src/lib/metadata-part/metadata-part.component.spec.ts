@@ -8,8 +8,8 @@ describe('MetadataPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ MetadataPartComponent ]
-    })
+    imports: [MetadataPartComponent]
+})
     .compileComponents();
   });
 

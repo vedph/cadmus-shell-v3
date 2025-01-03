@@ -1,132 +1,99 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "@myrmidon/cadmus-admin": [
-        "dist/myrmidon/cadmus-admin/myrmidon-cadmus-admin",
-        "dist/myrmidon/cadmus-admin"
-      ],
       "@myrmidon/cadmus-api": [
-        "dist/myrmidon/cadmus-api/myrmidon-cadmus-api",
-        "dist/myrmidon/cadmus-api"
+        "./dist/myrmidon/cadmus-api"
       ],
       "@myrmidon/cadmus-core": [
-        "dist/myrmidon/cadmus-core/myrmidon-cadmus-core",
-        "dist/myrmidon/cadmus-core"
+        "./dist/myrmidon/cadmus-core"
       ],
       "@myrmidon/cadmus-flags-pg": [
-        "dist/myrmidon/cadmus-flags-pg"
+        "./dist/myrmidon/cadmus-flags-pg"
       ],
       "@myrmidon/cadmus-flags-ui": [
-        "dist/myrmidon/cadmus-flags-ui"
+        "./dist/myrmidon/cadmus-flags-ui"
       ],
       "@myrmidon/cadmus-graph-pg": [
-        "dist/myrmidon/cadmus-graph-pg/myrmidon-cadmus-graph-pg",
-        "dist/myrmidon/cadmus-graph-pg"
+        "./dist/myrmidon/cadmus-graph-pg"
       ],
       "@myrmidon/cadmus-graph-pg-ex": [
-        "dist/myrmidon/cadmus-graph-pg-ex"
+        "./dist/myrmidon/cadmus-graph-pg-ex"
       ],
       "@myrmidon/cadmus-graph-ui": [
-        "dist/myrmidon/cadmus-graph-ui/myrmidon-cadmus-graph-ui",
-        "dist/myrmidon/cadmus-graph-ui"
+        "./dist/myrmidon/cadmus-graph-ui"
       ],
       "@myrmidon/cadmus-graph-ui-ex": [
         "./dist/myrmidon/cadmus-graph-ui-ex"
       ],
       "@myrmidon/cadmus-item-editor": [
-        "dist/myrmidon/cadmus-item-editor/myrmidon-cadmus-item-editor",
-        "dist/myrmidon/cadmus-item-editor"
+        "./dist/myrmidon/cadmus-item-editor"
       ],
       "@myrmidon/cadmus-item-list": [
-        "dist/myrmidon/cadmus-item-list/myrmidon-cadmus-item-list",
-        "dist/myrmidon/cadmus-item-list"
+        "./dist/myrmidon/cadmus-item-list"
       ],
       "@myrmidon/cadmus-item-search": [
-        "dist/myrmidon/cadmus-item-search/myrmidon-cadmus-item-search",
-        "dist/myrmidon/cadmus-item-search"
+        "./dist/myrmidon/cadmus-item-search"
       ],
       "@myrmidon/cadmus-layer-demo": [
-        "dist/myrmidon/cadmus-layer-demo/myrmidon-cadmus-layer-demo",
-        "dist/myrmidon/cadmus-layer-demo"
+        "./dist/myrmidon/cadmus-layer-demo"
       ],
       "@myrmidon/cadmus-part-general-pg": [
-        "dist/myrmidon/cadmus-part-general-pg/myrmidon-cadmus-part-general-pg",
-        "dist/myrmidon/cadmus-part-general-pg"
+        "./dist/myrmidon/cadmus-part-general-pg"
       ],
       "@myrmidon/cadmus-part-general-ui": [
-        "dist/myrmidon/cadmus-part-general-ui/myrmidon-cadmus-part-general-ui",
-        "dist/myrmidon/cadmus-part-general-ui"
+        "./dist/myrmidon/cadmus-part-general-ui"
       ],
       "@myrmidon/cadmus-part-philology-pg": [
-        "dist/myrmidon/cadmus-part-philology-pg/myrmidon-cadmus-part-philology-pg",
-        "dist/myrmidon/cadmus-part-philology-pg"
+        "./dist/myrmidon/cadmus-part-philology-pg"
       ],
       "@myrmidon/cadmus-part-philology-ui": [
-        "dist/myrmidon/cadmus-part-philology-ui/myrmidon-cadmus-part-philology-ui",
-        "dist/myrmidon/cadmus-part-philology-ui"
+        "./dist/myrmidon/cadmus-part-philology-ui"
       ],
       "@myrmidon/cadmus-preview-pg": [
-        "dist/myrmidon/cadmus-preview-pg"
+        "./dist/myrmidon/cadmus-preview-pg"
       ],
       "@myrmidon/cadmus-preview-ui": [
-        "dist/myrmidon/cadmus-preview-ui"
+        "./dist/myrmidon/cadmus-preview-ui"
       ],
       "@myrmidon/cadmus-profile-core": [
-        "dist/myrmidon/cadmus-profile-core/myrmidon-cadmus-profile-core",
-        "dist/myrmidon/cadmus-profile-core"
+        "./dist/myrmidon/cadmus-profile-core"
       ],
       "@myrmidon/cadmus-state": [
-        "dist/myrmidon/cadmus-state/myrmidon-cadmus-state",
-        "dist/myrmidon/cadmus-state"
+        "./dist/myrmidon/cadmus-state"
       ],
       "@myrmidon/cadmus-thesaurus-editor": [
-        "dist/myrmidon/cadmus-thesaurus-editor/myrmidon-cadmus-thesaurus-editor",
-        "dist/myrmidon/cadmus-thesaurus-editor"
+        "./dist/myrmidon/cadmus-thesaurus-editor"
       ],
       "@myrmidon/cadmus-thesaurus-list": [
-        "dist/myrmidon/cadmus-thesaurus-list/myrmidon-cadmus-thesaurus-list",
-        "dist/myrmidon/cadmus-thesaurus-list"
+        "./dist/myrmidon/cadmus-thesaurus-list"
       ],
       "@myrmidon/cadmus-thesaurus-ui": [
-        "dist/myrmidon/cadmus-thesaurus-ui/myrmidon-cadmus-thesaurus-ui",
-        "dist/myrmidon/cadmus-thesaurus-ui"
+        "./dist/myrmidon/cadmus-thesaurus-ui"
       ],
       "@myrmidon/cadmus-ui": [
-        "dist/myrmidon/cadmus-ui/myrmidon-cadmus-ui",
-        "dist/myrmidon/cadmus-ui"
+        "./dist/myrmidon/cadmus-ui"
       ],
       "@myrmidon/cadmus-ui-pg": [
-        "dist/myrmidon/cadmus-ui-pg/myrmidon-cadmus-ui-pg",
-        "dist/myrmidon/cadmus-ui-pg"
-      ],
-      "@myrmidon/cadmus-user": [
-        "dist/myrmidon/cadmus-user/myrmidon-cadmus-user",
-        "dist/myrmidon/cadmus-user"
+        "./dist/myrmidon/cadmus-ui-pg"
       ]
     },
-    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
-    "declaration": false,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "es2020",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
-    "useDefineForClassFields": false
+    "module": "ES2022"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

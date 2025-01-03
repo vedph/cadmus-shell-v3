@@ -1,13 +1,27 @@
+import { AsyncPipe } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { FlagDefinition } from '@myrmidon/cadmus-core';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardContent,
+} from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+
 import { AppRepository } from '@myrmidon/cadmus-state';
 
+import { FlagDefinitionEditorComponent } from '../flag-definition-editor/flag-definition-editor.component';
+import { FlagBitPipe } from '../../pipes/flag-bit.pipe';
 import { FlagListRepository } from './flag-list.repository';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'cadmus-flag-list',
@@ -25,7 +39,20 @@ import { Observable } from 'rxjs';
       ]),
     ]),
   ],
-  standalone: false,
+  imports: [
+    MatProgressBar,
+    MatIconButton,
+    MatIcon,
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    FlagDefinitionEditorComponent,
+    MatTooltip,
+    MatButton,
+    AsyncPipe,
+    FlagBitPipe,
+  ],
 })
 export class FlagListComponent {
   public flags$: Observable<FlagDefinition[]>;
@@ -41,6 +68,8 @@ export class FlagListComponent {
     this.flags$ = _repository.flags$;
     this.editedFlag$ = _repository.activeFlag$;
     this.loading$ = _repository.loading$;
+    // ensure flags are loaded
+    this._appRepository.load();
   }
 
   public addFlag(): void {

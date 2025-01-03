@@ -1,10 +1,9 @@
 @if ((loading$ | async) || (saving$ | async)) {
-  <mat-progress-bar
-  ></mat-progress-bar>
+<mat-progress-bar />
 }
 <cadmus-thesaurus-editor
   [thesaurus]="thesaurus"
   [lookupFn]="wrapLookup(thesService)"
   (thesaurusChange)="onThesaurusChange($event)"
   (editorClose)="cancel()"
-></cadmus-thesaurus-editor>
+/>

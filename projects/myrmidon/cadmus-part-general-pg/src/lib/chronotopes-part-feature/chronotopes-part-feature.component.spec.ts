@@ -8,8 +8,8 @@ describe('ChronotopesPartFeatureComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ChronotopesPartFeatureComponent ]
-    })
+    imports: [ChronotopesPartFeatureComponent]
+})
     .compileComponents();
   });
 

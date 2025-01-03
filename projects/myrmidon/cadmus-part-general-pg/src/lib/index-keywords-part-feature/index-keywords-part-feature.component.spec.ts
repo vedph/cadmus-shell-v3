@@ -3,15 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IndexKeywordsPartFeatureComponent } from './index-keywords-part-feature.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
-import {
-  CadmusPartGeneralUiModule,
-  INDEX_KEYWORDS_PART_TYPEID,
-} from '@myrmidon/cadmus-part-general-ui';
-import { CadmusStateModule } from '@myrmidon/cadmus-state';
-import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
-import { RouterTestingModule } from '@angular/router/testing';
+import { INDEX_KEYWORDS_PART_TYPEID } from '@myrmidon/cadmus-part-general-ui';
 
 describe('IndexKeywordsPartFeatureComponent', () => {
   let component: IndexKeywordsPartFeatureComponent;
@@ -22,13 +14,8 @@ describe('IndexKeywordsPartFeatureComponent', () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        RouterTestingModule,
         NoopAnimationsModule,
-        CadmusCoreModule,
-        CadmusUiModule,
-        CadmusPartGeneralUiModule,
-        CadmusStateModule,
-        CadmusUiPgModule,
+        IndexKeywordsPartFeatureComponent,
       ],
       providers: [
         {
@@ -40,7 +27,6 @@ describe('IndexKeywordsPartFeatureComponent', () => {
           },
         },
       ],
-      declarations: [IndexKeywordsPartFeatureComponent],
     }).compileComponents();
   }));
 

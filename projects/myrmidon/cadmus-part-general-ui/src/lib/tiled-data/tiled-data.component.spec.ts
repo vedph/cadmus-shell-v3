@@ -1,10 +1,7 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TiledDataComponent } from './tiled-data.component';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('TiledDataComponent', () => {
@@ -17,11 +14,8 @@ describe('TiledDataComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
-        CadmusCoreModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        TiledDataComponent,
       ],
-      declarations: [TiledDataComponent],
     }).compileComponents();
   }));
 

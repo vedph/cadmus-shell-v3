@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   # MongoDB
   cadmus-mongo:
@@ -42,9 +41,11 @@ services:
     environment:
       # for Windows use : as separator, for non Windows use __
       # (see https://github.com/aspnet/Configuration/issues/469)
+      - ASPNETCORE_URLS=http://+:8080
       - CONNECTIONSTRINGS__DEFAULT=mongodb://cadmus-mongo:27017/{0}
+      - CONNECTIONSTRINGS__AUTH=Server=cadmus-pgsql;port=5432;Database={0};User Id=postgres;Password=postgres;Include Error Detail=True
       - CONNECTIONSTRINGS__INDEX=Server=cadmus-pgsql;port=5432;Database={0};User Id=postgres;Password=postgres;Include Error Detail=True
-      - SEED__INDEXDELAY=35
+      - SEED__DELAY=20
       - MESSAGING__APIROOTURL=http://cadmusapi.azurewebsites.net
       - MESSAGING__APPROOTURL=http://cadmusapi.com/
       - MESSAGING__SUPPORTEMAIL=support@cadmus.com

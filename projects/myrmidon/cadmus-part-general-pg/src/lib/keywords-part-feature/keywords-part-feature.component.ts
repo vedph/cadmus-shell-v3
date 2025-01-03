@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { KeywordsPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-keywords-part-feature',
   templateUrl: './keywords-part-feature.component.html',
   styleUrls: ['./keywords-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, KeywordsPartComponent],
 })
 export class KeywordsPartFeatureComponent
   extends EditPartFeatureBase

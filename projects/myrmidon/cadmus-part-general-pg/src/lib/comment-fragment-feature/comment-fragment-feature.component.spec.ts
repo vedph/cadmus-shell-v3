@@ -1,12 +1,6 @@
-import {
-  async,
-  ComponentFixture,
-  TestBed,
-  waitForAsync,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
 import { CommentFragmentFeatureComponent } from './comment-fragment-feature.component';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
@@ -14,9 +8,7 @@ import {
   CommentFragmentComponent,
   CHRONOLOGY_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { ActivatedRoute } from '@angular/router';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
@@ -32,11 +24,10 @@ describe('CommentFragmentFeatureComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        RouterTestingModule,
         NgeMonacoModule,
         NgeMarkdownModule,
-        CadmusCoreModule,
-        CadmusUiModule,
+        CommentFragmentComponent,
+        CommentFragmentFeatureComponent,
       ],
       providers: [
         {
@@ -62,11 +53,7 @@ describe('CommentFragmentFeatureComponent', () => {
           },
         },
       ],
-      declarations: [
-        CurrentItemBarComponent,
-        CommentFragmentComponent,
-        CommentFragmentFeatureComponent,
-      ],
+      declarations: [CurrentItemBarComponent],
     }).compileComponents();
   }));
 

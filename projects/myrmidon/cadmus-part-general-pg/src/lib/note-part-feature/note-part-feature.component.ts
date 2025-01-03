@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { NotePartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-note-part-feature',
   templateUrl: './note-part-feature.component.html',
   styleUrls: ['./note-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, NotePartComponent],
 })
 export class NotePartFeatureComponent
   extends EditPartFeatureBase

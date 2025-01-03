@@ -6,12 +6,19 @@ import {
   FragmentEditorService,
 } from '@myrmidon/cadmus-state';
 import { LibraryRouteService } from '@myrmidon/cadmus-core';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { QuotationsFragmentComponent } from '@myrmidon/cadmus-part-philology-ui';
+import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
 
 @Component({
   selector: 'cadmus-quotations-fragment-feature',
   templateUrl: './quotations-fragment-feature.component.html',
   styleUrls: ['./quotations-fragment-feature.component.css'],
-  standalone: false,
+  imports: [
+    CurrentItemBarComponent,
+    DecoratedTokenTextComponent,
+    QuotationsFragmentComponent,
+  ],
 })
 export class QuotationsFragmentFeatureComponent
   extends EditFragmentFeatureBase

@@ -10,9 +10,8 @@ describe('LayerHintsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule],
-      declarations: [LayerHintsComponent],
-    }).compileComponents();
+    imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule, LayerHintsComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {

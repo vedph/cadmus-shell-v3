@@ -10,7 +10,7 @@
         [item]="subjectNode.value"
         label="subject"
         (itemChange)="onSubjectChange($event)"
-      ></cadmus-ref-lookup>
+      />
     </fieldset>
     <!-- P -->
     <fieldset id="p">
@@ -23,7 +23,7 @@
         label="predicate"
         [baseFilter]="{ tag: 'property' }"
         (itemChange)="onPredicateChange($event)"
-      ></cadmus-ref-lookup>
+      />
     </fieldset>
     <!-- O -->
     <fieldset id="o">
@@ -37,7 +37,7 @@
         [item]="objectNode.value"
         label="object"
         (itemChange)="onObjectChange($event)"
-      ></cadmus-ref-lookup>
+      />
       }
       <!-- literal value -->
       @if (isLiteral?.value) {

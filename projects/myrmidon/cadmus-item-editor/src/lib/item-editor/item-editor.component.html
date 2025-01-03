@@ -29,7 +29,7 @@
       {{ item.creatorId }}.
     </p>
     } @if (busy) {
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <mat-progress-bar mode="indeterminate"/>
     }
 
     <!-- item content -->
@@ -122,7 +122,9 @@
             <div formArrayName="flagChecks">
               @for (c of flagChecks.controls; track c; let i = $index) { @if
               (userLevel < 4 && flagDefinitions[i].isAdmin === true) {
-              <span [style.color]="'#' + flagDefinitions[i].colorKey" style="margin-left: 12px;"
+              <span
+                [style.color]="'#' + flagDefinitions[i].colorKey"
+                style="margin-left: 12px"
                 >&#x25c6;</span
               >
               &nbsp;
@@ -190,7 +192,7 @@
               <mat-error>part type required</mat-error>
             </mat-form-field>
             <button
-              mat-stroked-button
+              mat-flat-button
               class="mat-primary"
               type="button"
               [disabled]="userLevel < 2 || busy || !newPart.valid"
@@ -288,7 +290,7 @@
                     [facetDefinition]="(facet$ | async) || undefined"
                     [badgeType]="1"
                     [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                  ></cadmus-part-badge>
+                  />
                 </td>
                 <td>
                   <cadmus-part-badge
@@ -296,7 +298,7 @@
                     [facetDefinition]="(facet$ | async) || undefined"
                     [badgeType]="2"
                     [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                  ></cadmus-part-badge>
+                  />
                 </td>
                 <td class="noif-lt-xs">
                   {{ part.timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
@@ -313,7 +315,7 @@
           [parts]="(parts$ | async) || undefined"
           [typeThesaurus]="(typeThesaurus$ | async) || undefined"
           (addRequest)="addPart($event)"
-        ></cadmus-missing-parts>
+        />
       </mat-tab>
       } @if (id) {
       <mat-tab label="Layers">
@@ -376,7 +378,7 @@
                   [facetDefinition]="(facet$ | async) || undefined"
                   [badgeType]="1"
                   [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                ></cadmus-part-badge>
+                />
               </td>
               <td>
                 <cadmus-part-badge
@@ -384,7 +386,7 @@
                   [facetDefinition]="(facet$ | async) || undefined"
                   [badgeType]="2"
                   [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                ></cadmus-part-badge>
+                />
               </td>
               <td
                 [ngClass]="{
@@ -414,7 +416,7 @@
           [parts]="parts"
           [readonly]="userLevel < 2 || busy ? true : false"
           (setScopeRequest)="setPartsScope($event)"
-        ></cadmus-parts-scope-editor>
+        />
       </mat-tab>
       }
     </mat-tab-group>

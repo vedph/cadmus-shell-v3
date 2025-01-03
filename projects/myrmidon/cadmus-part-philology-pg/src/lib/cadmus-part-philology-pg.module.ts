@@ -14,12 +14,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
-import { CadmusCoreModule, PendingChangesGuard } from '@myrmidon/cadmus-core';
-import { CadmusStateModule } from '@myrmidon/cadmus-state';
-import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
+import { PendingChangesGuard } from '@myrmidon/cadmus-core';
 import {
-  CadmusPartPhilologyUiModule,
   APPARATUS_FRAGMENT_TYPEID,
   ORTHOGRAPHY_FRAGMENT_TYPEID,
   WITNESSES_FRAGMENT_TYPEID,
@@ -77,13 +73,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatTooltipModule,
     MatToolbarModule,
     // cadmus
-    CadmusCoreModule,
-    CadmusUiModule,
-    CadmusPartPhilologyUiModule,
-    CadmusStateModule,
-    CadmusUiPgModule,
-  ],
-  declarations: [
     ApparatusFragmentFeatureComponent,
     OrthographyFragmentFeatureComponent,
     QuotationsFragmentFeatureComponent,

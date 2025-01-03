@@ -33,3 +33,26 @@ div#pvw {
   padding: 6px;
   margin: 16px 0;
 }
+div#picker {
+  grid-area: picker;
+}
+div#list {
+  grid-area: list;
+}
+div#container {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: auto auto;
+  grid-template-areas: "picker list";
+  gap: 8px;
+}
+/* lt-md */
+@media only screen and (max-width: 959px) {
+  div#container {
+    grid-template-rows: 1fr auto;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "picker"
+      "list";
+  }
+}

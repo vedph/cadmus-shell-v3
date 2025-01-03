@@ -5,6 +5,8 @@ import {
   Validators,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import {
   trigger,
@@ -14,11 +16,34 @@ import {
   animate,
 } from '@angular/animations';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardSubtitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+
+import { NgeMonacoModule } from '@cisstech/nge/monaco';
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+
+import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import { WitnessesFragment, Witness } from '../witnesses-fragment';
-import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
 
 @Component({
   selector: 'cadmus-witnesses-fragment',
@@ -41,7 +66,28 @@ import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
       transition('open <=> closed', [animate('300ms ease-in')]),
     ]),
   ],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatButton,
+    MatTooltip,
+    MatIconButton,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    NgeMonacoModule,
+    NgeMarkdownModule,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class WitnessesFragmentComponent
   extends ModelEditorComponentBase<WitnessesFragment>

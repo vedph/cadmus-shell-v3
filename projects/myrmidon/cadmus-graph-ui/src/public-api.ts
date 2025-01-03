@@ -13,5 +13,3 @@ export * from './lib/services/graph-node-lookup.service';
 
 export * from './lib/state/graph-node-list.repository';
 export * from './lib/state/graph-triple-list.repository';
-
-export * from './lib/cadmus-graph-ui.module';

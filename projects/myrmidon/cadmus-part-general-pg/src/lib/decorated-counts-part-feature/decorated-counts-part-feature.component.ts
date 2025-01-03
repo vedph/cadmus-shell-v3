@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { DecoratedCountsPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-decorated-counts-part-feature',
   templateUrl: './decorated-counts-part-feature.component.html',
   styleUrl: './decorated-counts-part-feature.component.scss',
-  standalone: false,
+  imports: [CurrentItemBarComponent, DecoratedCountsPartComponent],
 })
 export class DecoratedCountsPartFeatureComponent
   extends EditPartFeatureBase

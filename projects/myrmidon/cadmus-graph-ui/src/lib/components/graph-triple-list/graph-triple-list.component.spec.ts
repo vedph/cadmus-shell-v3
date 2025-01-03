@@ -8,8 +8,8 @@ describe('GraphTripleListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GraphTripleListComponent ]
-    })
+    imports: [GraphTripleListComponent]
+})
     .compileComponents();
   });
 

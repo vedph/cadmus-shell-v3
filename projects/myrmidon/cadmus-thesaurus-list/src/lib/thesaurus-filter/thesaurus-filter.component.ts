@@ -1,11 +1,20 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   FormControl,
-  Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { Observable } from 'rxjs';
+
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 import { ThesaurusFilter } from '@myrmidon/cadmus-core';
 
@@ -15,7 +24,18 @@ import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
   selector: 'cadmus-thesaurus-filter',
   templateUrl: './thesaurus-filter.component.html',
   styleUrls: ['./thesaurus-filter.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+  ],
 })
 export class ThesaurusFilterComponent implements OnInit {
   public filter$: Observable<ThesaurusFilter>;

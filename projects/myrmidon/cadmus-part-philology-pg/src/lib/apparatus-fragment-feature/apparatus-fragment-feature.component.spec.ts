@@ -1,8 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ApparatusFragmentFeatureComponent } from './apparatus-fragment-feature.component';
@@ -12,8 +10,6 @@ import {
   ApparatusEntryComponent,
 } from '@myrmidon/cadmus-part-philology-ui';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
-import { MomentModule } from 'ngx-moment';
-import { RouterTestingModule } from '@angular/router/testing';
 
 describe('ApparatusFragmentFeatureComponent', () => {
   let component: ApparatusFragmentFeatureComponent;
@@ -25,11 +21,8 @@ describe('ApparatusFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        RouterTestingModule,
         BrowserAnimationsModule,
-        MomentModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        ApparatusFragmentFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
@@ -46,7 +39,6 @@ describe('ApparatusFragmentFeatureComponent', () => {
         CurrentItemBarComponent,
         ApparatusEntryComponent,
         ApparatusFragmentComponent,
-        ApparatusFragmentFeatureComponent,
       ],
     }).compileComponents();
   }));

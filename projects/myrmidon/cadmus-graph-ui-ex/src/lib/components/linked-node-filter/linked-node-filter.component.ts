@@ -1,10 +1,31 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { PageEvent } from '@angular/material/paginator';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { take } from 'rxjs/operators';
 
-import { GraphNodeLookupService } from '@myrmidon/cadmus-graph-ui';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatCheckbox } from '@angular/material/checkbox';
+import {
+  MatChipListbox,
+  MatChipOption,
+  MatChipRemove,
+} from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
 
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
+
+import { GraphNodeLookupService } from '@myrmidon/cadmus-graph-ui';
 import { GraphService, UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
 
 import { PagedLinkedNodeFilter } from '../../graph-walker';
@@ -16,7 +37,23 @@ import { PagedLinkedNodeFilter } from '../../graph-walker';
   selector: 'cadmus-walker-linked-node-filter',
   templateUrl: './linked-node-filter.component.html',
   styleUrls: ['./linked-node-filter.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatPaginator,
+    MatFormField,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatCheckbox,
+    RefLookupComponent,
+    MatChipListbox,
+    MatChipOption,
+    MatTooltip,
+    MatChipRemove,
+    MatIcon,
+    MatIconButton,
+  ],
 })
 export class LinkedNodeFilterComponent implements OnInit {
   private _filter: PagedLinkedNodeFilter;

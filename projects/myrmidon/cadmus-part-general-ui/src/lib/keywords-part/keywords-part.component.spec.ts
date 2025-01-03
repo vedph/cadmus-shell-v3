@@ -1,13 +1,12 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
 import { HAMMER_LOADER } from '@angular/platform-browser';
 
-import { KeywordsPartComponent } from './keywords-part.component';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+
+import { KeywordsPartComponent } from './keywords-part.component';
 
 describe('KeywordsPartComponent', () => {
   let component: KeywordsPartComponent;
@@ -20,8 +19,7 @@ describe('KeywordsPartComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        MaterialModule,
-        UiModule,
+        KeywordsPartComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
@@ -44,7 +42,6 @@ describe('KeywordsPartComponent', () => {
           },
         },
       ],
-      declarations: [KeywordsPartComponent],
     }).compileComponents();
   }));
 

@@ -4,15 +4,43 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { take } from 'rxjs/operators';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import {
+  MatExpansionModule,
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+} from '@angular/material/expansion';
 
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  AssertedProperName,
+  ProperNameComponent,
+  CadmusProperNamePipe,
+} from '@myrmidon/cadmus-refs-proper-name';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { AssertedProperName } from '@myrmidon/cadmus-refs-proper-name';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
 
@@ -25,7 +53,24 @@ import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
   selector: 'cadmus-names-part',
   templateUrl: './names-part.component.html',
   styleUrls: ['./names-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatExpansionModule,
+    ProperNameComponent,
+    MatCardActions,
+    CadmusProperNamePipe,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class NamesPartComponent
   extends ModelEditorComponentBase<NamesPart>

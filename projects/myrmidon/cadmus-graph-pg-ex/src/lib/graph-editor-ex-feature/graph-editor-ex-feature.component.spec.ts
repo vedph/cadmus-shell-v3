@@ -8,8 +8,8 @@ describe('GraphEditorFeatureComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GraphEditorExFeatureComponent ]
-    })
+    imports: [GraphEditorExFeatureComponent]
+})
     .compileComponents();
   });
 

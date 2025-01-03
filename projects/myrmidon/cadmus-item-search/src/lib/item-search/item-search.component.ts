@@ -1,12 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { PageEvent } from '@angular/material/paginator';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { Observable, Subscription } from 'rxjs';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardContent,
+} from '@angular/material/card';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 import { DataPage } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
+
 import {
   FacetDefinition,
   FlagDefinition,
@@ -14,20 +26,38 @@ import {
 } from '@myrmidon/cadmus-core';
 import { UserLevelService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
+import { FacetBadgeComponent, FlagsBadgeComponent } from '@myrmidon/cadmus-ui';
 
+import { ItemQueryComponent } from '../item-query/item-query.component';
 import { ItemSearchRepository } from '../state/item-search.repository';
 
 @Component({
   selector: 'cadmus-item-search',
   templateUrl: './item-search.component.html',
   styleUrls: ['./item-search.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    ItemQueryComponent,
+    MatProgressBar,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatPaginator,
+    AsyncPipe,
+    DatePipe,
+    FacetBadgeComponent,
+    FlagsBadgeComponent,
+  ],
 })
-export class ItemSearchComponent implements OnInit {
+export class ItemSearchComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
   public user?: User;
   public userLevel: number;
-  public facets: FacetDefinition[];
-  public flags: FlagDefinition[];
+  public facets: FacetDefinition[] = [];
+  public flags: FlagDefinition[] = [];
   public loading$: Observable<boolean | undefined>;
   public query$: Observable<string | undefined>;
   public page$: Observable<DataPage<ItemInfo>>;
@@ -40,7 +70,7 @@ export class ItemSearchComponent implements OnInit {
     private _router: Router,
     private _authService: AuthJwtService,
     private _userLevelService: UserLevelService,
-    appRepository: AppRepository
+    private _appRepository: AppRepository
   ) {
     this.userLevel = 0;
     this.page$ = this._repository.page$;
@@ -48,15 +78,23 @@ export class ItemSearchComponent implements OnInit {
     this.lastQueries$ = this._repository.lastQueries$;
     this.error$ = this._repository.error$;
     this.loading$ = this._repository.loading$;
-    this.facets = appRepository.getFacets();
-    this.flags = appRepository.getFlags();
   }
 
-  ngOnInit(): void {
-    this._authService.currentUser$.subscribe((user: User | null) => {
-      this.user = user ?? undefined;
-      this.userLevel = this._userLevelService.getCurrentUserLevel();
-    });
+  public async ngOnInit() {
+    this._sub = this._authService.currentUser$.subscribe(
+      (user: User | null) => {
+        this.user = user ?? undefined;
+        this.userLevel = this._userLevelService.getCurrentUserLevel();
+      }
+    );
+
+    await this._appRepository.load();
+    this.facets = this._appRepository.getFacets();
+    this.flags = this._appRepository.getFlags();
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   public onPageChange(event: PageEvent): void {

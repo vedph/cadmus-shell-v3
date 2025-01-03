@@ -8,8 +8,8 @@ describe('ThesaurusImportComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ThesaurusImportComponent]
-    });
+    imports: [ThesaurusImportComponent]
+});
     fixture = TestBed.createComponent(ThesaurusImportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -11,10 +11,7 @@ import { Part } from '@myrmidon/cadmus-core';
  * should have a renderer. When there is no flattener, we fallback
  * to the renderer if any.
  */
-@Pipe({
-    name: 'hasPreview',
-    standalone: false
-})
+@Pipe({ name: 'hasPreview' })
 export class HasPreviewPipe implements PipeTransform {
   /**
    * Transform the received part into a boolean value telling whether

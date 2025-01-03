@@ -129,9 +129,7 @@ export class NodeListRepository
           this._linkedNode$.next(node);
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(`Node ID ${id} not found`, error);
           console.warn('Node ID not found: ' + id);
         },
       });
@@ -173,9 +171,7 @@ export class NodeListRepository
         this._classNodes$.next(nodes);
       },
       error: (error) => {
-        if (error) {
-          console.error(JSON.stringify(error));
-        }
+        console.error('Error getting nodes', error);
       },
     });
   }

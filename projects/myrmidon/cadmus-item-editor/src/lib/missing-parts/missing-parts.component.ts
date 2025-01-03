@@ -1,14 +1,19 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 
 import { PartDefinition, Part, Thesaurus } from '@myrmidon/cadmus-core';
+import { PartBadgeComponent } from '@myrmidon/cadmus-ui';
 
 @Component({
   selector: 'cadmus-missing-parts',
   templateUrl: './missing-parts.component.html',
   styleUrls: ['./missing-parts.component.css'],
-  standalone: false,
+  imports: [MatIcon, MatIconButton, MatTooltip, PartBadgeComponent],
 })
-export class MissingPartsComponent implements OnInit {
+export class MissingPartsComponent {
   private _partDefinitions?: PartDefinition[];
   private _parts?: Part[];
   private _typeThesaurus?: Thesaurus;
@@ -52,8 +57,6 @@ export class MissingPartsComponent implements OnInit {
     this.missingDefinitions = [];
     this.addRequest = new EventEmitter<PartDefinition>();
   }
-
-  ngOnInit(): void {}
 
   private isPartPresent(typeId: string, roleId?: string): boolean {
     if (!this._partDefinitions) {

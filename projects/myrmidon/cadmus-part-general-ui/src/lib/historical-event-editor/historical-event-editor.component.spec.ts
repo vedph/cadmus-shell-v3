@@ -8,8 +8,8 @@ describe('HistoricalEventEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ HistoricalEventEditorComponent ]
-    })
+    imports: [HistoricalEventEditorComponent]
+})
     .compileComponents();
   });
 

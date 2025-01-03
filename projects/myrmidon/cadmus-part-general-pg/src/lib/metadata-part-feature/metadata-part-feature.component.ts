@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { MetadataPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-metadata-part-feature',
   templateUrl: './metadata-part-feature.component.html',
   styleUrls: ['./metadata-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, MetadataPartComponent],
 })
 export class MetadataPartFeatureComponent
   extends EditPartFeatureBase
@@ -34,6 +36,6 @@ export class MetadataPartFeatureComponent
   }
 
   protected override getReqThesauriIds(): string[] {
-    return ['metadata-types'];
+    return ['metadata-types', 'metadata-names'];
   }
 }

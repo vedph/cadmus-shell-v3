@@ -8,8 +8,8 @@ describe('FlagsEditorFeatureComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [FlagsEditorFeatureComponent]
-    });
+    imports: [FlagsEditorFeatureComponent]
+});
     fixture = TestBed.createComponent(FlagsEditorFeatureComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

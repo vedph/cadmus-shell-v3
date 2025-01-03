@@ -13,15 +13,15 @@
     <mat-card-content>
       <div id="container">
         <!-- available categories (from thesaurus) -->
-        <div id="picker">
-          <h3>Available Categories</h3>
+        <fieldset id="picker">
+          <legend>Available Categories</legend>
           <cadmus-thesaurus-tree
             [entries]="entries"
             rootLabel="categories"
             [renderLabel]="renderLabel"
             (entryChange)="onEntryChange($event)"
           />
-        </div>
+        </fieldset>
 
         <!-- categories -->
         @if (categories.value.length) {

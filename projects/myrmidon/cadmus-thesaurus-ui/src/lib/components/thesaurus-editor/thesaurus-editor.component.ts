@@ -4,10 +4,29 @@ import {
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { PageEvent } from '@angular/material/paginator';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
+import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardContent,
+} from '@angular/material/card';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
+import { DataPage, NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import {
@@ -16,8 +35,9 @@ import {
   ThesaurusFilter,
 } from '@myrmidon/cadmus-core';
 import { ComponentSignal } from '@myrmidon/cadmus-profile-core';
-import { DataPage, NgxToolsValidators } from '@myrmidon/ngx-tools';
 
+import { ThesaurusNodeComponent } from '../thesaurus-node/thesaurus-node.component';
+import { ThesaurusLookupComponent } from '../thesaurus-lookup/thesaurus-lookup.component';
 import {
   ThesaurusNode,
   ThesaurusNodeFilter,
@@ -37,7 +57,29 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
   selector: 'cadmus-thesaurus-editor',
   templateUrl: './thesaurus-editor.component.html',
   styleUrls: ['./thesaurus-editor.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatCheckbox,
+    ThesaurusLookupComponent,
+    MatSelect,
+    MatOption,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    ThesaurusNodeComponent,
+    MatButton,
+    MatPaginator,
+    AsyncPipe,
+  ],
 })
 export class ThesaurusEditorComponent implements OnInit {
   private _thesaurus: Thesaurus | undefined;

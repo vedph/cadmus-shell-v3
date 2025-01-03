@@ -4,7 +4,18 @@ import {
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
+
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 import { FlagDefinition } from '@myrmidon/cadmus-core';
 import { ColorService } from '@myrmidon/cadmus-ui';
@@ -16,7 +27,20 @@ import { ColorService } from '@myrmidon/cadmus-ui';
   selector: 'cadmus-flag-definition-editor',
   templateUrl: './flag-definition-editor.component.html',
   styleUrls: ['./flag-definition-editor.component.scss'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatError,
+    MatInput,
+    MatCheckbox,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+  ],
 })
 export class FlagDefinitionEditorComponent implements OnInit {
   private _definition: FlagDefinition | undefined;

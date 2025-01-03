@@ -4,17 +4,42 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { take } from 'rxjs/operators';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { AssertedChronotope } from '@myrmidon/cadmus-refs-asserted-chronotope';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  AssertedChronotope,
+  AssertedChronotopeComponent,
+  AssertedChronotopesPipe,
+} from '@myrmidon/cadmus-refs-asserted-chronotope';
+import { HistoricalDatePipe } from '@myrmidon/cadmus-refs-historical-date';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import { ChronotopesPart, CHRONOTOPES_PART_TYPEID } from '../chronotopes-part';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 /**
  * Chronotopes part editor component.
@@ -25,7 +50,25 @@ import { ChronotopesPart, CHRONOTOPES_PART_TYPEID } from '../chronotopes-part';
   selector: 'cadmus-chronotopes-part',
   templateUrl: './chronotopes-part.component.html',
   styleUrls: ['./chronotopes-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatExpansionModule,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    AssertedChronotopeComponent,
+    MatCardActions,
+    HistoricalDatePipe,
+    AssertedChronotopesPipe,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class ChronotopesPartComponent
   extends ModelEditorComponentBase<ChronotopesPart>
@@ -33,7 +76,6 @@ export class ChronotopesPartComponent
 {
   private _editedChronotopeIndex: number;
 
-  public tabIndex: number;
   public editedChronotope: AssertedChronotope | undefined;
 
   // chronotope-place-tags
@@ -54,7 +96,6 @@ export class ChronotopesPartComponent
   ) {
     super(authService, formBuilder);
     this._editedChronotopeIndex = -1;
-    this.tabIndex = 0;
     // form
     this.chronotopes = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -134,9 +175,6 @@ export class ChronotopesPartComponent
   public editChronotope(chronotope: AssertedChronotope, index: number): void {
     this._editedChronotopeIndex = index;
     this.editedChronotope = chronotope;
-    setTimeout(() => {
-      this.tabIndex = 1;
-    }, 200);
   }
 
   public onChronotopeChange(chronotope: AssertedChronotope): void {
@@ -163,7 +201,6 @@ export class ChronotopesPartComponent
   public closeChronotope(): void {
     this.editedChronotope = undefined;
     this._editedChronotopeIndex = -1;
-    this.tabIndex = 0;
   }
 
   public deleteChronotope(index: number): void {

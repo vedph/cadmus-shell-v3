@@ -1,6 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, FormBuilder } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
+import { Observable, Subscription } from 'rxjs';
+
+import {
+  MatFormField,
+  MatLabel,
+  MatSuffix,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
+import {
+  MatDatepickerInput,
+  MatDatepickerToggle,
+  MatDatepicker,
+} from '@angular/material/datepicker';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 import { FlagMatching, ItemFilter, UserInfo } from '@myrmidon/cadmus-core';
 import { UserRefLookupService } from '@myrmidon/cadmus-ui';
@@ -15,9 +40,27 @@ import { ItemListRepository } from '../state/item-list.repository';
   selector: 'cadmus-item-filter',
   templateUrl: './item-filter.component.html',
   styleUrls: ['./item-filter.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    RefLookupComponent,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatSuffix,
+    MatDatepicker,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    AsyncPipe,
+  ],
 })
-export class ItemFilterComponent implements OnInit {
+export class ItemFilterComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
   public filter$: Observable<ItemFilter>;
 
   public title: FormControl<string | null>;
@@ -63,12 +106,18 @@ export class ItemFilterComponent implements OnInit {
       maxModified: this.maxModified,
       user: this.user,
     });
+    // ensure app data is loaded
+    this.app.load();
   }
 
-  ngOnInit() {
-    this.filter$.subscribe((f) => {
+  public ngOnInit() {
+    this._sub = this.filter$.subscribe((f) => {
       this.updateForm(f);
     });
+  }
+
+  public ngOnDestroy() {
+    this._sub?.unsubscribe();
   }
 
   private flagsToArray(flags: number | undefined): number[] {

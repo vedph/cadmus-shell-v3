@@ -45,9 +45,7 @@ export class EditedThesaurusRepository {
         },
         error: (error) => {
           this._loading$.next(false);
-          console.error(
-            'Error loding thesaurus: ' + JSON.stringify(error || {})
-          );
+          console.error('Error loding thesaurus', error);
         },
       });
     } else {
@@ -77,9 +75,7 @@ export class EditedThesaurusRepository {
         },
         error: (error) => {
           this._saving$.next(false);
-          console.error(
-            'Error loding thesaurus: ' + JSON.stringify(error || {})
-          );
+          console.error('Error loding thesaurus', error);
           reject(error);
         },
       });

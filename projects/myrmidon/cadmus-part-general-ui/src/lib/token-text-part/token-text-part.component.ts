@@ -5,12 +5,37 @@ import {
   Validators,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { take } from 'rxjs/operators';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { NgeMonacoModule } from '@cisstech/nge/monaco';
+
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   TokenTextPart,
@@ -26,7 +51,27 @@ import {
   selector: 'cadmus-token-text-part',
   templateUrl: './token-text-part.component.html',
   styleUrls: ['./token-text-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatIconButton,
+    MatTooltip,
+    NgeMonacoModule,
+    MatError,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class TokenTextPartComponent
   extends ModelEditorComponentBase<TokenTextPart>

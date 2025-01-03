@@ -13,4 +13,3 @@ export * from './lib/quotations-fragment';
 export * from './lib/quotations-fragment/quotations-fragment.component';
 export * from './lib/witnesses-fragment';
 export * from './lib/witnesses-fragment/witnesses-fragment.component';
-export * from './lib/cadmus-part-philology-ui.module';

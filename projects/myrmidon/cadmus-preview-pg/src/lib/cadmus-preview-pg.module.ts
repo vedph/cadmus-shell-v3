@@ -6,9 +6,6 @@ import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 
-import { CadmusApiModule } from '@myrmidon/cadmus-api';
-import { CadmusPreviewUiModule } from '@myrmidon/cadmus-preview-ui';
-
 import { PartPreviewFeatureComponent } from './components/part-preview-feature/part-preview-feature.component';
 import { TextPreviewFeatureComponent } from './components/text-preview-feature/text-preview-feature.component';
 
@@ -27,7 +24,6 @@ export const RouterModuleForChild = RouterModule.forChild([
 ]);
 
 @NgModule({
-  declarations: [PartPreviewFeatureComponent, TextPreviewFeatureComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -38,8 +34,8 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatCardModule,
     MatTabsModule,
     // cadmus
-    CadmusApiModule,
-    CadmusPreviewUiModule,
+    PartPreviewFeatureComponent,
+    TextPreviewFeatureComponent,
   ],
   exports: [PartPreviewFeatureComponent, TextPreviewFeatureComponent],
 })

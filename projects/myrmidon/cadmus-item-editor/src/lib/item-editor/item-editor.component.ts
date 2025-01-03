@@ -1,16 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
   FormBuilder,
   Validators,
   FormArray,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
 import { take } from 'rxjs/operators';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardSubtitle,
+  MatCardContent,
+} from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/divider';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+  MatExpansionPanelDescription,
+} from '@angular/material/expansion';
+
+import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
+import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
 
 import {
   Item,
@@ -25,20 +57,23 @@ import {
   ComponentCanDeactivate,
 } from '@myrmidon/cadmus-core';
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import {
   ItemService,
   MessagingService,
   UserLevelService,
 } from '@myrmidon/cadmus-api';
 import { MESSAGE_ITEM_LIST_REPOSITORY_RESET } from '@myrmidon/cadmus-item-list';
-import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
+import { PartBadgeComponent } from '@myrmidon/cadmus-ui';
 
-import { PartScopeSetRequest } from '../parts-scope-editor/parts-scope-editor.component';
+import {
+  PartScopeSetRequest,
+  PartsScopeEditorComponent,
+} from '../parts-scope-editor/parts-scope-editor.component';
 import { EditedItemRepository } from '../state/edited-item.repository';
 import { ItemLookupDialogComponent } from '../item-lookup-dialog/item-lookup-dialog.component';
 import { ItemGenerateDialogComponent } from '../item-generate-dialog/item-generate-dialog.component';
+import { MissingPartsComponent } from '../missing-parts/missing-parts.component';
+import { HasPreviewPipe } from '../has-preview.pipe';
 
 /**
  * Item editor. This can edit a new or existing item's metadata and parts.
@@ -49,9 +84,46 @@ import { ItemGenerateDialogComponent } from '../item-generate-dialog/item-genera
   selector: 'cadmus-item-editor',
   templateUrl: './item-editor.component.html',
   styleUrls: ['./item-editor.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatTooltip,
+    CdkCopyToClipboard,
+    MatProgressBar,
+    MatTabGroup,
+    MatTab,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatSelect,
+    MatOption,
+    MatCheckbox,
+    MatButton,
+    MatIcon,
+    MatDivider,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    MatIconButton,
+    MissingPartsComponent,
+    NgClass,
+    AsyncPipe,
+    DatePipe,
+    HasPreviewPipe,
+    PartsScopeEditorComponent,
+    PartBadgeComponent,
+  ],
 })
-export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
+export class ItemEditorComponent
+  implements OnInit, OnDestroy, ComponentCanDeactivate
+{
+  private _subs: Subscription[] = [];
   private _flagsFrozen?: boolean;
 
   public flagDefinitions: FlagDefinition[];
@@ -155,32 +227,49 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     this.previewFKeys$ = this._appRepository.previewFKeys$;
   }
 
-  ngOnInit(): void {
-    this._authService.currentUser$.subscribe((user: User | null) => {
-      this.user = user || undefined;
-      this.userLevel = this._userLevelService.getCurrentUserLevel();
-    });
+  public async ngOnInit() {
+    // ensure data is loaded
+    // await this._appRepository.load();
+
+    this._subs.push(
+      this._authService.currentUser$.subscribe((user: User | null) => {
+        this.user = user || undefined;
+        this.userLevel = this._userLevelService.getCurrentUserLevel();
+      })
+    );
 
     // rebuild the flags controls array when flags definitions change
-    this._appRepository.flags$.subscribe((defs) => {
-      this.flagDefinitions = defs;
-      this.buildFlagsControls();
-    });
+    this._subs.push(
+      this._appRepository.flags$.subscribe((defs) => {
+        this.flagDefinitions = defs;
+        this.buildFlagsControls();
+      })
+    );
 
     // when flags controls values change, update the flags value
-    this.flagChecks.valueChanges.subscribe((_) => {
-      if (!this._flagsFrozen) {
-        this.flags.setValue(this.getFlagsValue());
-      }
-    });
+    this._subs.push(
+      this.flagChecks.valueChanges.subscribe((_) => {
+        if (!this._flagsFrozen) {
+          this.flags.setValue(this.getFlagsValue());
+        }
+      })
+    );
 
     // update the metadata form when item changes (e.g. saved)
-    this.item$.subscribe((item) => {
-      this.updateMetadataForm(item);
-    });
+    this._subs.push(
+      this.item$.subscribe((item) => {
+        this.updateMetadataForm(item);
+      })
+    );
 
     // load the item (if any) and its lookup
     this._repository.load(this.id);
+  }
+
+  public ngOnDestroy(): void {
+    for (const sub of this._subs) {
+      sub.unsubscribe();
+    }
   }
 
   public canDeactivate(): boolean | Observable<boolean> {

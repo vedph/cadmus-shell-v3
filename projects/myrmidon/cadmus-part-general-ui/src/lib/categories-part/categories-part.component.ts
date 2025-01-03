@@ -4,16 +4,34 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
+  CloseSaveButtonsComponent,
   EditedObject,
   ModelEditorComponentBase,
   renderLabelFromLastColon,
+  ThesaurusTreeComponent,
 } from '@myrmidon/cadmus-ui';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
 
@@ -25,7 +43,22 @@ import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
   selector: 'cadmus-categories-part',
   templateUrl: './categories-part.component.html',
   styleUrls: ['./categories-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatBadge,
+    MatCardContent,
+    MatIconButton,
+    MatTooltip,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+    ThesaurusTreeComponent,
+  ],
 })
 export class CategoriesPartComponent
   extends ModelEditorComponentBase<CategoriesPart>

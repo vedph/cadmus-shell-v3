@@ -7,12 +7,19 @@ import {
   FragmentEditorService,
 } from '@myrmidon/cadmus-state';
 import { LibraryRouteService } from '@myrmidon/cadmus-core';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
+import { CommentEditorComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-comment-fragment-feature',
   templateUrl: './comment-fragment-feature.component.html',
   styleUrls: ['./comment-fragment-feature.component.css'],
-  standalone: false,
+  imports: [
+    CurrentItemBarComponent,
+    DecoratedTokenTextComponent,
+    CommentEditorComponent,
+  ],
 })
 export class CommentFragmentFeatureComponent
   extends EditFragmentFeatureBase

@@ -4,10 +4,24 @@ import {
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import {
+  AssertedCompositeId,
+  AssertedCompositeIdComponent,
+} from '@myrmidon/cadmus-refs-asserted-ids';
+
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { AssertedCompositeId } from '@myrmidon/cadmus-refs-asserted-ids';
 
 import { RelatedEntity } from '../historical-events-part';
 
@@ -18,7 +32,20 @@ import { RelatedEntity } from '../historical-events-part';
   selector: 'cadmus-related-entity',
   templateUrl: './related-entity.component.html',
   styleUrls: ['./related-entity.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatError,
+    MatInput,
+    AssertedCompositeIdComponent,
+    MatIconButton,
+    MatIcon,
+    MatTooltip,
+  ],
 })
 export class RelatedEntityComponent {
   private _entity: RelatedEntity | undefined;

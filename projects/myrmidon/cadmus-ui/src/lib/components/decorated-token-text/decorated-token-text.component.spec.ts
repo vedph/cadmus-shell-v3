@@ -14,22 +14,22 @@ describe('DecoratedTokenTextComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
+    imports: [
         CommonModule,
         FormsModule,
         RouterModule,
         ReactiveFormsModule,
         CadmusMaterialModule,
-      ],
-      // https://github.com/angular/components/issues/14668
-      providers: [
+        DecoratedTokenTextComponent, SafeHtmlPipe,
+    ],
+    // https://github.com/angular/components/issues/14668
+    providers: [
         {
-          provide: HAMMER_LOADER,
-          useValue: () => new Promise(() => {}),
+            provide: HAMMER_LOADER,
+            useValue: () => new Promise(() => { }),
         },
-      ],
-      declarations: [DecoratedTokenTextComponent, SafeHtmlPipe],
-    }).compileComponents();
+    ],
+}).compileComponents();
   }));
 
   beforeEach(() => {

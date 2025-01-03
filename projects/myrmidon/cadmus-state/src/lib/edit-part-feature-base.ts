@@ -194,7 +194,7 @@ export abstract class EditPartFeatureBase
         console.log('Saved part ID: ' + saved.id);
         if (!this.identity.partId) {
           this.identity = { ...this.identity, partId: saved.id };
-          console.log('Updated identity: ' + JSON.stringify(this.identity));
+          console.log('Updated identity: ', this.identity);
         }
         console.log('Part saved: ' + saved.id);
         this.snackbar.open('Part saved', 'OK', {

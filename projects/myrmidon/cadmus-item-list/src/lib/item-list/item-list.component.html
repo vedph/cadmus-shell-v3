@@ -6,7 +6,7 @@
     <div id="container">
       <!-- filters -->
       <div id="filters">
-        <cadmus-item-filter></cadmus-item-filter>
+        <cadmus-item-filter />
       </div>
 
       <!-- list -->
@@ -55,12 +55,12 @@
               <td class="fit-width">
                 <cadmus-facet-badge
                   [data]="{ definitions: facets, facetId: item.facetId }"
-                ></cadmus-facet-badge>
+                />
               </td>
               <td class="fit-width">
                 <cadmus-flags-badge
                   [data]="{ definitions: flags, flags: item.flags }"
-                ></cadmus-flags-badge>
+                />
               </td>
               <td>{{ item.title }}</td>
               <td>{{ item.description }}</td>
@@ -91,7 +91,7 @@
             [pageSizeOptions]="[5, 10, 20, 50, 100]"
             (page)="onPageChange($event)"
             [showFirstLastButtons]="true"
-          ></mat-paginator>
+          />
         </div>
       </div>
       }
@@ -102,7 +102,7 @@
     <button
       type="button"
       class="mat-primary"
-      mat-raised-button
+      mat-flat-button
       (click)="addItem()"
     >
       <mat-icon>add_circle</mat-icon>

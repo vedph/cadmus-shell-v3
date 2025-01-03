@@ -1,14 +1,34 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
+import {
+  FormGroup,
+  FormArray,
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { LayerHint } from '@myrmidon/cadmus-core';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 @Component({
   selector: 'cadmus-layer-hints',
   templateUrl: './layer-hints.component.html',
   styleUrls: ['./layer-hints.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatCheckbox,
+    MatButton,
+  ],
 })
 export class LayerHintsComponent implements OnInit {
   private _hints: LayerHint[];

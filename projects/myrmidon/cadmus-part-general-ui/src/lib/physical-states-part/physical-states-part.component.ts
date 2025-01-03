@@ -4,14 +4,37 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatExpansionModule } from '@angular/material/expansion';
+
+import { NgxToolsValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  PhysicalState,
+  PhysicalStateComponent,
+} from '@myrmidon/cadmus-mat-physical-state';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { PhysicalState } from '@myrmidon/cadmus-mat-physical-state';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   PHYSICAL_STATES_PART_TYPEID,
@@ -27,15 +50,30 @@ import {
   selector: 'cadmus-physical-states-part',
   templateUrl: './physical-states-part.component.html',
   styleUrl: './physical-states-part.component.scss',
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatExpansionModule,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    PhysicalStateComponent,
+    MatCardActions,
+    FlatLookupPipe,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class PhysicalStatesPartComponent
   extends ModelEditorComponentBase<PhysicalStatesPart>
   implements OnInit
 {
-  private _editedIndex: number;
-
-  public tabIndex: number;
+  public editedIndex: number;
   public edited: PhysicalState | undefined;
 
   // physical-states
@@ -53,8 +91,7 @@ export class PhysicalStatesPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this._editedIndex = -1;
-    this.tabIndex = 0;
+    this.editedIndex = -1;
     // form
     this.entries = formBuilder.control([], {
       // at least 1 entry
@@ -129,27 +166,21 @@ export class PhysicalStatesPartComponent
   }
 
   public editState(entry: PhysicalState, index: number): void {
-    this._editedIndex = index;
+    this.editedIndex = index;
     this.edited = entry;
-    setTimeout(() => {
-      this.tabIndex = 1;
-    });
   }
 
   public closeState(): void {
-    this._editedIndex = -1;
+    this.editedIndex = -1;
     this.edited = undefined;
-    setTimeout(() => {
-      this.tabIndex = 0;
-    });
   }
 
   public saveState(entry: PhysicalState): void {
     const entries = [...this.entries.value];
-    if (this._editedIndex === -1) {
+    if (this.editedIndex === -1) {
       entries.push(entry);
     } else {
-      entries.splice(this._editedIndex, 1, entry);
+      entries.splice(this.editedIndex, 1, entry);
     }
     this.entries.setValue(entries);
     this.entries.markAsDirty();
@@ -162,7 +193,7 @@ export class PhysicalStatesPartComponent
       .confirm('Confirmation', 'Delete state?')
       .subscribe((yes: boolean | undefined) => {
         if (yes) {
-          if (this._editedIndex === index) {
+          if (this.editedIndex === index) {
             this.closeState();
           }
           const entries = [...this.entries.value];

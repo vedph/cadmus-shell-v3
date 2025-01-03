@@ -4,15 +4,39 @@ import {
   FormControl,
   Validators,
   FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
   UntypedFormGroup,
 } from '@angular/forms';
 
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * Keywords editor component.
@@ -22,7 +46,28 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
   selector: 'cadmus-keywords-part',
   templateUrl: './keywords-part.component.html',
   styleUrls: ['./keywords-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatBadge,
+    MatCardContent,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatError,
+    MatInput,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class KeywordsPartComponent
   extends ModelEditorComponentBase<KeywordsPart>

@@ -1,7 +1,6 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
 import { HistoricalDatePartFeatureComponent } from './historical-date-part-feature.component';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
@@ -9,9 +8,7 @@ import {
   HistoricalDatePartComponent,
   HISTORICAL_DATE_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 
 describe('HistoricalDatePartFeatureComponent', () => {
   let component: HistoricalDatePartFeatureComponent;
@@ -24,9 +21,7 @@ describe('HistoricalDatePartFeatureComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        RouterTestingModule,
-        CadmusCoreModule,
-        CadmusUiModule,
+        HistoricalDatePartFeatureComponent,
       ],
       providers: [
         {
@@ -38,11 +33,7 @@ describe('HistoricalDatePartFeatureComponent', () => {
           },
         },
       ],
-      declarations: [
-        CurrentItemBarComponent,
-        HistoricalDatePartComponent,
-        HistoricalDatePartFeatureComponent,
-      ],
+      declarations: [CurrentItemBarComponent, HistoricalDatePartComponent],
     }).compileComponents();
   }));
 

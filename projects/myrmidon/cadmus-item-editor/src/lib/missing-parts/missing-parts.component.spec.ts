@@ -8,8 +8,8 @@ describe('MissingPartsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ MissingPartsComponent ]
-    })
+    imports: [MissingPartsComponent]
+})
     .compileComponents();
   }));
 

@@ -10,9 +10,8 @@ describe('CloseSaveButtonsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule],
-      declarations: [CloseSaveButtonsComponent],
-    }).compileComponents();
+    imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule, CloseSaveButtonsComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {

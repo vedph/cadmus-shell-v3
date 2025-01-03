@@ -29,8 +29,8 @@
         <tbody>
           @for ( name of names.value; track name; let i = $index; let first =
           $first; let last = $last) {
-          <tr>
-            <td>
+          <tr [class.selected]="name === editedName">
+            <td class="fit-width">
               <button
                 type="button"
                 mat-icon-button
@@ -76,22 +76,25 @@
 
       <!-- name editor -->
       @if (editedName) {
-      <mat-expansion-panel [expanded]="editedName">
-        <mat-expansion-panel-header>{{
-          editedName | cadmusProperName
-        }}</mat-expansion-panel-header>
-        <cadmus-refs-proper-name
-          [langEntries]="langEntries"
-          [tagEntries]="tagEntries"
-          [typeEntries]="typeEntries"
-          [assTagEntries]="assTagEntries"
-          [refTagEntries]="refTagEntries"
-          [refTypeEntries]="refTypeEntries"
-          [name]="editedName"
-          (nameChange)="onNameChange($event)"
-        >
-        </cadmus-refs-proper-name>
-      </mat-expansion-panel>
+      <fieldset>
+        <mat-expansion-panel [expanded]="editedName">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{ editedName | cadmusProperName }}</mat-panel-title
+            ></mat-expansion-panel-header
+          >
+          <cadmus-refs-proper-name
+            [langEntries]="langEntries"
+            [tagEntries]="tagEntries"
+            [typeEntries]="typeEntries"
+            [assTagEntries]="assTagEntries"
+            [refTagEntries]="refTagEntries"
+            [refTypeEntries]="refTypeEntries"
+            [name]="editedName"
+            (nameChange)="onNameChange($event)"
+          />
+        </mat-expansion-panel>
+      </fieldset>
       }
     </mat-card-content>
     <mat-card-actions>

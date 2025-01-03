@@ -2,10 +2,7 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ApparatusEntryComponent } from './apparatus-entry.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
 describe('ApparatusEntryComponent', () => {
   let component: ApparatusEntryComponent;
@@ -16,12 +13,9 @@ describe('ApparatusEntryComponent', () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        CadmusCoreModule,
         NoopAnimationsModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        ApparatusEntryComponent,
       ],
-      declarations: [ApparatusEntryComponent],
     }).compileComponents();
   }));
 

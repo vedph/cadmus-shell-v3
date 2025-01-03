@@ -22,5 +22,3 @@ export * from './lib/validators/json-validators';
 export * from './lib/services/user-ref-lookup.service';
 
 export * from './lib/utils';
-
-export * from './lib/cadmus-ui.module';

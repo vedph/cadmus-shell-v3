@@ -65,6 +65,8 @@ export class EditedItemRepository {
     this._layersPartInfo$ = new BehaviorSubject<LayerPartInfo[]>([]);
     this._facet$ = new BehaviorSubject<FacetDefinition | undefined>(undefined);
     this._newPartDefinitions$ = new BehaviorSubject<PartDefinition[]>([]);
+    // ensure app data is loaded
+    this._appRepository.load();
   }
 
   public getItem(): Item | undefined {
@@ -244,9 +246,7 @@ export class EditedItemRepository {
           resolve(saved);
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(`Error saving item ${item.id}`, error);
           reject({ message: 'Error saving item ' + item.id, error: error });
         },
       });
@@ -273,9 +273,7 @@ export class EditedItemRepository {
           resolve(id);
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(`Error deleting item's part ${id}`, error);
           reject({
             message: "Error deleting item's part " + id,
             error: error,
@@ -316,9 +314,10 @@ export class EditedItemRepository {
           resolve(part);
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(
+            `Error adding new layer part for item ${itemId}`,
+            error
+          );
           reject({
             message: 'Error adding new layer part for item ' + itemId,
             error: error,
@@ -349,9 +348,7 @@ export class EditedItemRepository {
           resolve(true);
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error("Error setting item's part scope", error);
           reject({
             message: "Error setting item's part scope",
             error: error,

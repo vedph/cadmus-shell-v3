@@ -91,7 +91,17 @@ export class AppRepository {
     return this._flags$.value;
   }
 
-  public load(): void {
+  /**
+   * Load app data from the API. If the data is already loaded, this
+   * does nothing unless refresh is true.
+   *
+   * @param refresh True to force a refresh.
+   * @returns Promise.
+   */
+  public load(refresh = false): Promise<void> {
+    if (this._facets$.value.length && !refresh) {
+      return Promise.resolve();
+    }
     const facets$ = this._facetService.getFacets();
     const flags$ = this._flagService.getFlags();
     const thesauri$ = this._thesaurusService.getThesauriSet([
@@ -102,48 +112,82 @@ export class AppRepository {
     const fKeys$ = this._previewService.getKeys('F');
     const cKeys$ = this._previewService.getKeys('C');
 
-    forkJoin({
-      facets: facets$,
-      flags: flags$,
-      thesauri: thesauri$,
-      jKeys: jKeys$,
-      fKeys: fKeys$,
-      cKeys: cKeys$,
-    }).subscribe({
-      next: (result) => {
-        this._facets$.next(result.facets);
-        this._flags$.next(result.flags);
-        this._typeThesaurus$.next(result.thesauri['model-types']);
-        this._itemBrowserThesaurus$.next(result.thesauri['item-browsers']);
-        this._previewJKeys$.next(result.jKeys);
-        this._previewFKeys$.next(result.fKeys);
-        this._previewCKeys$.next(result.cKeys);
-      },
+    return new Promise((resolve, reject) => {
+      forkJoin({
+        facets: facets$,
+        flags: flags$,
+        thesauri: thesauri$,
+        jKeys: jKeys$,
+        fKeys: fKeys$,
+        cKeys: cKeys$,
+      }).subscribe({
+        next: (result) => {
+          this._facets$.next(result.facets);
+          this._flags$.next(result.flags);
+          this._typeThesaurus$.next(result.thesauri['model-types']);
+          this._itemBrowserThesaurus$.next(result.thesauri['item-browsers']);
+          this._previewJKeys$.next(result.jKeys);
+          this._previewFKeys$.next(result.fKeys);
+          this._previewCKeys$.next(result.cKeys);
+          console.log(
+            `AppRepository loaded (facets: ${result.facets.length}, flags: ${result.flags.length})`
+          );
+          resolve();
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
     });
+  }
+
+  /**
+   * Clear the repository.
+   */
+  public clear(): void {
+    this._facets$.next([]);
+    this._flags$.next([]);
+    this._typeThesaurus$.next(undefined);
+    this._itemBrowserThesaurus$.next(undefined);
+    this._previewJKeys$.next([]);
+    this._previewFKeys$.next([]);
+    this._previewCKeys$.next([]);
   }
 
   /**
    * Load the model types and item browsers thesauri.
    */
-  public loadThesauri(): void {
-    this._thesaurusService
-      .getThesauriSet(['model-types@en', 'item-browsers@en'])
-      .subscribe({
-        next: (thesauri) => {
-          this._typeThesaurus$.next(thesauri['model-types']);
-          this._itemBrowserThesaurus$.next(thesauri['item-browsers']);
-        },
-      });
+  public loadThesauri(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._thesaurusService
+        .getThesauriSet(['model-types@en', 'item-browsers@en'])
+        .subscribe({
+          next: (thesauri) => {
+            this._typeThesaurus$.next(thesauri['model-types']);
+            this._itemBrowserThesaurus$.next(thesauri['item-browsers']);
+            resolve();
+          },
+          error: (err) => {
+            reject(err);
+          },
+        });
+    });
   }
 
   /**
    * Load the flags definitions.
    */
-  public loadFlags(): void {
-    this._flagService.getFlags().subscribe({
-      next: (flags) => {
-        this._flags$.next(flags);
-      },
+  public loadFlags(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._flagService.getFlags().subscribe({
+        next: (flags) => {
+          this._flags$.next(flags);
+          resolve();
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
     });
   }
 }

@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 
+import { MatTooltip } from '@angular/material/tooltip';
+
 import { ColorService } from '../../services/color.service';
 
 export interface FacetBadgeData {
@@ -12,7 +14,7 @@ export interface FacetBadgeData {
   selector: 'cadmus-facet-badge',
   templateUrl: './facet-badge.component.html',
   styleUrls: ['./facet-badge.component.css'],
-  standalone: false,
+  imports: [MatTooltip],
 })
 export class FacetBadgeComponent {
   private _facetColors: { [key: string]: string };

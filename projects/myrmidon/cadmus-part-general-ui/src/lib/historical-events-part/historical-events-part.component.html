@@ -33,8 +33,9 @@
         <tbody>
           @for ( entry of events.value; track entry; let i = $index; let first =
           $first; let last = $last) {
-          <tr>
-            <td>
+          <tr [class.selected]="editedEvent === entry">
+            <td class="fit-width">
+              <span class="nr">{{ i + 1 }}.</span>
               <button
                 type="button"
                 mat-icon-button
@@ -85,7 +86,12 @@
 
       <!-- event editor -->
       <mat-expansion-panel [expanded]="editedEvent" [disabled]="!editedEvent">
-        <mat-expansion-panel-header>event</mat-expansion-panel-header>
+        @if (editedEvent) {
+        <mat-expansion-panel-header>
+          <span class="edited-title">event</span>
+          <span class="nr">{{ editedEventIndex + 1 }}</span>
+        </mat-expansion-panel-header>
+        }
         <fieldset>
           <cadmus-historical-event-editor
             [eventTagEntries]="eventTagEntries"

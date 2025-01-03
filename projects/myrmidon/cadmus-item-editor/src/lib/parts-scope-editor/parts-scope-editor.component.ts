@@ -1,17 +1,27 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import {
   FormGroup,
   FormArray,
   FormBuilder,
   FormControl,
   Validators,
+  ReactiveFormsModule,
 } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { Part } from '@myrmidon/cadmus-core';
 import { ColorService, CustomValidators } from '@myrmidon/cadmus-ui';
 import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
+
 import { EditedItemRepository } from '../state/edited-item.repository';
 
 export interface PartScopeSetRequest {
@@ -28,9 +38,19 @@ export interface PartScopeSetRequest {
   selector: 'cadmus-parts-scope-editor',
   templateUrl: './parts-scope-editor.component.html',
   styleUrls: ['./parts-scope-editor.component.css'],
-  standalone: false,
+  imports: [
+    ReactiveFormsModule,
+    MatCheckbox,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatButton,
+    MatTooltip,
+    DatePipe,
+  ],
 })
-export class PartsScopeEditorComponent implements OnInit {
+export class PartsScopeEditorComponent {
   private _parts: Part[] | undefined;
 
   @Input()
@@ -72,9 +92,9 @@ export class PartsScopeEditorComponent implements OnInit {
       checks: this.checks,
       scope: this.scope,
     });
+    // ensure app data is loaded
+    this._appRepository.load();
   }
-
-  ngOnInit(): void {}
 
   private updateForm(): void {
     this.checks.clear();

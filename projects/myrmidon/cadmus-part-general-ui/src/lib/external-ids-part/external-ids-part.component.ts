@@ -4,18 +4,38 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
-import { ThesaurusEntry, ThesauriSet } from '@myrmidon/cadmus-core';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
 
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import {
+  AssertedId,
+  AssertedIdsComponent,
+} from '@myrmidon/cadmus-refs-asserted-ids';
+
+import { ThesaurusEntry, ThesauriSet } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
+
 import {
   ExternalIdsPart,
   EXTERNAL_IDS_PART_TYPEID,
 } from '../external-ids-part';
-import { AssertedId } from '@myrmidon/cadmus-refs-asserted-ids';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * External IDs part editor component. This is just a collection of asserted
@@ -27,7 +47,19 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
   selector: 'cadmus-refs-external-ids-part',
   templateUrl: './external-ids-part.component.html',
   styleUrls: ['./external-ids-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    AssertedIdsComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class ExternalIdsPartComponent
   extends ModelEditorComponentBase<ExternalIdsPart>

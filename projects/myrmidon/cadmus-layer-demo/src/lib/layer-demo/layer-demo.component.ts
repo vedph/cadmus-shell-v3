@@ -1,12 +1,44 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
+import {
+  FormGroup,
+  FormControl,
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
+import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
+
 import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
 
 @Component({
   selector: 'cadmus-layer-demo',
   templateUrl: './layer-demo.component.html',
   styleUrls: ['./layer-demo.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatHint,
+    MatToolbar,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    SafeHtmlPipe,
+  ],
 })
 export class LayerDemoComponent {
   @ViewChild('resultElem') _resultElement?: ElementRef;

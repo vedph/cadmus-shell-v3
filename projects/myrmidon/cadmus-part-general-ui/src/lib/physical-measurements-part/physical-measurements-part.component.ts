@@ -4,13 +4,33 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
 
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import {
+  PhysicalMeasurement,
+  PhysicalMeasurementSetComponent,
+} from '@myrmidon/cadmus-mat-physical-size';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
-import { PhysicalMeasurement } from '@myrmidon/cadmus-mat-physical-size';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   PHYSICAL_MEASUREMENTS_PART_TYPEID,
@@ -25,7 +45,19 @@ import {
   selector: 'cadmus-physical-measurements-part',
   templateUrl: './physical-measurements-part.component.html',
   styleUrl: './physical-measurements-part.component.scss',
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    PhysicalMeasurementSetComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class PhysicalMeasurementsPartComponent
   extends ModelEditorComponentBase<PhysicalMeasurementsPart>

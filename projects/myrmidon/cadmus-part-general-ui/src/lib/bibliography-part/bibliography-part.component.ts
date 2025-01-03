@@ -4,13 +4,33 @@ import {
   FormControl,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
-import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+
+import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import {
   BibliographyPart,
@@ -18,6 +38,7 @@ import {
   BIBLIOGRAPHY_PART_TYPEID,
   BibAuthor,
 } from '../bibliography-part';
+import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-entry.component';
 
 /**
  * Bibliography part editor.
@@ -28,7 +49,23 @@ import {
   selector: 'cadmus-bibliography-part',
   templateUrl: './bibliography-part.component.html',
   styleUrls: ['./bibliography-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatExpansionModule,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatCardActions,
+    BibliographyEntryComponent,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class BibliographyPartComponent
   extends ModelEditorComponentBase<BibliographyPart>
@@ -37,7 +74,6 @@ export class BibliographyPartComponent
   private _editedEntryIndex: number;
 
   public editedEntry?: BibEntry;
-  public currentTabIndex: number;
 
   // thesauri
   // bibliography-languages
@@ -59,7 +95,6 @@ export class BibliographyPartComponent
   ) {
     super(authService, formBuilder);
     this._editedEntryIndex = -1;
-    this.currentTabIndex = 0;
     // form
     this.entries = formBuilder.control<BibEntry[]>([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -152,11 +187,9 @@ export class BibliographyPartComponent
   public editEntry(entry: BibEntry, index: number): void {
     this._editedEntryIndex = index;
     this.editedEntry = entry;
-    this.currentTabIndex = 1;
   }
 
   public closeEntry(): void {
-    this.currentTabIndex = 0;
     this._editedEntryIndex = -1;
     this.editedEntry = undefined;
   }

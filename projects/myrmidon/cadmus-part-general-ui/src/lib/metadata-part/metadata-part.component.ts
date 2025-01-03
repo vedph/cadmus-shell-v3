@@ -5,13 +5,41 @@ import {
   FormArray,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import {
+  MatFormField,
+  MatLabel,
+  MatError,
+  MatHint,
+} from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   MetadataPart,
@@ -27,7 +55,28 @@ import {
   selector: 'cadmus-metadata-part',
   templateUrl: './metadata-part.component.html',
   styleUrls: ['./metadata-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatError,
+    MatInput,
+    MatHint,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class MetadataPartComponent
   extends ModelEditorComponentBase<MetadataPart>
@@ -40,6 +89,11 @@ export class MetadataPartComponent
    * metadata-types thesaurus entries.
    */
   public typeEntries: ThesaurusEntry[] | undefined;
+
+  /**
+   * metadata-names thesaurus entries.
+   */
+  public nameEntries: ThesaurusEntry[] | undefined;
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -74,11 +128,17 @@ export class MetadataPartComponent
   }
 
   private updateThesauri(thesauri: ThesauriSet): void {
-    const key = 'metadata-types';
+    let key = 'metadata-types';
     if (this.hasThesaurus(key)) {
       this.typeEntries = thesauri[key].entries;
     } else {
       this.typeEntries = undefined;
+    }
+    key = 'metadata-names';
+    if (this.hasThesaurus(key)) {
+      this.nameEntries = thesauri[key].entries;
+    } else {
+      this.nameEntries = undefined;
     }
   }
 

@@ -5,11 +5,36 @@ import {
   Validators,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardSubtitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { NgxToolsValidators, SafeHtmlPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 import {
   TextLayerService,
   ThesauriSet,
@@ -17,10 +42,11 @@ import {
   TokenLocation,
 } from '@myrmidon/cadmus-core';
 
+import { ApparatusEntryComponent } from '../apparatus-entry/apparatus-entry.component';
 import { ApparatusEntryType, ApparatusEntry } from '../apparatus-fragment';
-import { ApparatusEntrySummaryService } from './apparatus-entry-summary.service';
 import { ApparatusFragment } from '../apparatus-fragment';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { ApparatusEntrySummaryService } from './apparatus-entry-summary.service';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 /**
  * Critical apparatus fragment.
@@ -31,17 +57,39 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
   selector: 'cadmus-apparatus-fragment',
   templateUrl: './apparatus-fragment.component.html',
   styleUrls: ['./apparatus-fragment.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatFormField,
+    MatExpansionModule,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatInput,
+    MatError,
+    MatIconButton,
+    MatTooltip,
+    MatButton,
+    ApparatusEntryComponent,
+    MatCardActions,
+    SafeHtmlPipe,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class ApparatusFragmentComponent
   extends ModelEditorComponentBase<ApparatusFragment>
   implements OnInit
 {
-  private _editedEntryIndex: number;
-
+  public editedEntryIndex: number;
   public frText?: string;
   public editedEntry?: ApparatusEntry;
-  public currentTabIndex: number;
 
   public tag: FormControl<string | null>;
   public entries: FormControl<ApparatusEntry[]>;
@@ -67,14 +115,13 @@ export class ApparatusFragmentComponent
     private _summaryService: ApparatusEntrySummaryService
   ) {
     super(authService, formBuilder);
-    this._editedEntryIndex = -1;
+    this.editedEntryIndex = -1;
     // form
     this.entries = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
     this.tag = formBuilder.control(null, Validators.maxLength(50));
-    this.currentTabIndex = 0;
   }
 
   public override ngOnInit(): void {
@@ -194,8 +241,7 @@ export class ApparatusFragmentComponent
 
   public editEntry(entry: ApparatusEntry, index: number): void {
     this.editedEntry = entry;
-    this._editedEntryIndex = index;
-    this.currentTabIndex = 1;
+    this.editedEntryIndex = index;
   }
 
   public saveEntry(entry: ApparatusEntry): void {
@@ -203,10 +249,10 @@ export class ApparatusFragmentComponent
       return;
     }
     const entries = [...this.entries.value];
-    if (this._editedEntryIndex === -1) {
+    if (this.editedEntryIndex === -1) {
       entries.push(entry);
     } else {
-      entries.splice(this._editedEntryIndex, 1, entry);
+      entries.splice(this.editedEntryIndex, 1, entry);
     }
     this.entries.setValue(entries);
     this.entries.markAsDirty();
@@ -220,8 +266,7 @@ export class ApparatusFragmentComponent
     if (!this.editedEntry) {
       return;
     }
-    this.currentTabIndex = 0;
-    this._editedEntryIndex = -1;
+    this.editedEntryIndex = -1;
     this.editedEntry = undefined;
   }
 

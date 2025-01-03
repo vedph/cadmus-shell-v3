@@ -4,14 +4,40 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { take } from 'rxjs/operators';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+} from '@angular/material/expansion';
+
+import { NgxToolsValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import { AssertedChronotopesPipe } from '@myrmidon/cadmus-refs-asserted-chronotope';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
+
+import { HistoricalEventEditorComponent } from '../historical-event-editor/historical-event-editor.component';
 
 import {
   HistoricalEvent,
@@ -29,14 +55,32 @@ import {
   selector: 'cadmus-historical-events-part',
   templateUrl: './historical-events-part.component.html',
   styleUrls: ['./historical-events-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    HistoricalEventEditorComponent,
+    MatCardActions,
+    AssertedChronotopesPipe,
+    FlatLookupPipe,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class HistoricalEventsPartComponent
   extends ModelEditorComponentBase<HistoricalEventsPart>
   implements OnInit
 {
-  private _editedIndex: number;
-
+  public editedEventIndex: number;
   public editedEvent: HistoricalEvent | undefined;
   // settings
   // by-type: true/false
@@ -87,7 +131,7 @@ export class HistoricalEventsPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this._editedIndex = -1;
+    this.editedEventIndex = -1;
     // form
     this.events = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -215,7 +259,7 @@ export class HistoricalEventsPartComponent
   }
 
   public closeEvent(): void {
-    this._editedIndex = -1;
+    this.editedEventIndex = -1;
     this.editedEvent = undefined;
   }
 
@@ -230,16 +274,16 @@ export class HistoricalEventsPartComponent
   }
 
   public editEvent(event: HistoricalEvent, index: number): void {
-    this._editedIndex = index;
+    this.editedEventIndex = index;
     this.editedEvent = event;
   }
 
   public onEventSave(event: HistoricalEvent): void {
     const events = [...this.events.value];
-    if (this._editedIndex === -1) {
+    if (this.editedEventIndex === -1) {
       events.push(event);
     } else {
-      events[this._editedIndex] = event;
+      events[this.editedEventIndex] = event;
     }
     this.events.setValue(events);
     this.events.updateValueAndValidity();
@@ -253,7 +297,7 @@ export class HistoricalEventsPartComponent
       .pipe(take(1))
       .subscribe((yes) => {
         if (yes) {
-          if (this._editedIndex === index) {
+          if (this.editedEventIndex === index) {
             this.closeEvent();
           }
           const entries = [...this.events.value];

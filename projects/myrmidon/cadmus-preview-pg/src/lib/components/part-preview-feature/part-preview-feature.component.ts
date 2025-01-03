@@ -1,14 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { PartPreviewSource } from '@myrmidon/cadmus-preview-ui';
+
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+
+import {
+  PartPreviewComponent,
+  PartPreviewSource,
+} from '@myrmidon/cadmus-preview-ui';
 
 @Component({
   selector: 'cadmus-part-preview-feature',
   templateUrl: './part-preview-feature.component.html',
   styleUrls: ['./part-preview-feature.component.css'],
-  standalone: false,
+  imports: [MatCard, MatCardHeader, MatCardContent, PartPreviewComponent],
 })
-export class PartPreviewFeatureComponent implements OnInit {
+export class PartPreviewFeatureComponent {
   public source?: PartPreviewSource;
 
   constructor(route: ActivatedRoute) {
@@ -17,6 +23,4 @@ export class PartPreviewFeatureComponent implements OnInit {
       partId: route.snapshot.params['pid'],
     };
   }
-
-  ngOnInit(): void {}
 }

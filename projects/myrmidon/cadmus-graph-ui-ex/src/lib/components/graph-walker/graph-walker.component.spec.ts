@@ -8,8 +8,8 @@ describe('GraphWalkerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GraphWalkerComponent ]
-    })
+    imports: [GraphWalkerComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(GraphWalkerComponent);

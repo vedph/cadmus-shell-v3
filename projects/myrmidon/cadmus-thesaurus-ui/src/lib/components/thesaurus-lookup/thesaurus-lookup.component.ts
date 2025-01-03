@@ -1,8 +1,11 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import {
   UntypedFormBuilder,
   UntypedFormControl,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { ThesaurusFilter } from '@myrmidon/cadmus-core';
 import { Observable, of } from 'rxjs';
@@ -13,6 +16,17 @@ import {
   take,
 } from 'rxjs/operators';
 
+import {
+  MatAutocomplete,
+  MatAutocompleteTrigger,
+} from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
 /**
  * Thesaurus ID lookup component.
  */
@@ -20,7 +34,19 @@ import {
   selector: 'cadmus-thesaurus-lookup',
   templateUrl: './thesaurus-lookup.component.html',
   styleUrls: ['./thesaurus-lookup.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatAutocomplete,
+    MatOption,
+    MatFormField,
+    MatInput,
+    MatAutocompleteTrigger,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    AsyncPipe,
+  ],
 })
 export class ThesaurusLookupComponent implements OnInit {
   private _initialValue: string | undefined;

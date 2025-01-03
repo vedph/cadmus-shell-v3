@@ -12,21 +12,21 @@ describe('MspOperationComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
+    imports: [
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-      ],
-      // https://github.com/angular/components/issues/14668
-      providers: [
+        MspOperationComponent,
+    ],
+    // https://github.com/angular/components/issues/14668
+    providers: [
         {
-          provide: HAMMER_LOADER,
-          useValue: () => new Promise(() => {}),
+            provide: HAMMER_LOADER,
+            useValue: () => new Promise(() => { }),
         },
-      ],
-      declarations: [MspOperationComponent],
-    }).compileComponents();
+    ],
+}).compileComponents();
   }));
 
   beforeEach(() => {

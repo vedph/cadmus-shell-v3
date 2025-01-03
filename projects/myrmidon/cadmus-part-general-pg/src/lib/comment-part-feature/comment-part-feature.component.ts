@@ -4,12 +4,14 @@ import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CommentEditorComponent } from '@myrmidon/cadmus-part-general-ui';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
 
 @Component({
   selector: 'cadmus-comment-part-feature',
   templateUrl: './comment-part-feature.component.html',
   styleUrls: ['./comment-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, CommentEditorComponent],
 })
 export class CommentPartFeatureComponent
   extends EditPartFeatureBase

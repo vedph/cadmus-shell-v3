@@ -6,12 +6,19 @@ import {
   FragmentEditorService,
 } from '@myrmidon/cadmus-state';
 import { LibraryRouteService } from '@myrmidon/cadmus-core';
+import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { WitnessesFragmentComponent } from '@myrmidon/cadmus-part-philology-ui';
 
 @Component({
   selector: 'cadmus-witnesses-fragment-feature',
   templateUrl: './witnesses-fragment-feature.component.html',
   styleUrls: ['./witnesses-fragment-feature.component.css'],
-  standalone: false,
+  imports: [
+    CurrentItemBarComponent,
+    DecoratedTokenTextComponent,
+    WitnessesFragmentComponent,
+  ],
 })
 export class WitnessesFragmentFeatureComponent
   extends EditFragmentFeatureBase

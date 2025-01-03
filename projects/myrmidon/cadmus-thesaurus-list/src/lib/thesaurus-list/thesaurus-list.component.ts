@@ -1,8 +1,26 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageEvent } from '@angular/material/paginator';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
 
 import { DataPage, EnvService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
@@ -11,13 +29,33 @@ import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import { Thesaurus } from '@myrmidon/cadmus-core';
 import { ThesaurusService, UserLevelService } from '@myrmidon/cadmus-api';
 
+import { ThesaurusFilterComponent } from '../thesaurus-filter/thesaurus-filter.component';
 import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
+import { ThesaurusImportComponent } from '../thesaurus-import/thesaurus-import.component';
 
 @Component({
   selector: 'cadmus-thesaurus-list',
   templateUrl: './thesaurus-list.component.html',
   styleUrls: ['./thesaurus-list.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    ThesaurusFilterComponent,
+    MatProgressBar,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatPaginator,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    ThesaurusImportComponent,
+    MatCardActions,
+    MatButton,
+    AsyncPipe,
+  ],
 })
 export class ThesaurusListComponent implements OnInit {
   public loading$: Observable<boolean | undefined>;

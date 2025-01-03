@@ -1,9 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-  name: 'flagBit',
-  standalone: false,
-})
+@Pipe({ name: 'flagBit' })
 export class FlagBitPipe implements PipeTransform {
   transform(value: unknown, ...args: unknown[]): string {
     const n = value ? (value as number) : 0;

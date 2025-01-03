@@ -8,8 +8,8 @@ describe('PartsScopeEditorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PartsScopeEditorComponent ]
-    })
+    imports: [PartsScopeEditorComponent]
+})
     .compileComponents();
   }));
 

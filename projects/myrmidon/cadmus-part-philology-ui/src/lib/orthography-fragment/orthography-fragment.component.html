@@ -117,7 +117,7 @@
               [operation]="currentOperation"
               (operationChange)="currentOperationSaved($event)"
               (operationClose)="currentOperationClosed()"
-            ></cadmus-msp-operation>
+            />
           </div>
           }
         </div>
@@ -128,7 +128,7 @@
             rootLabel="tags"
             [renderLabel]="renderLabel"
             (entryChange)="onTagChange($event)"
-          ></cadmus-thesaurus-tree>
+          />
         </div>
         }
       </div>
@@ -138,7 +138,7 @@
         [form]="form"
         [noSave]="userLevel < 2"
         (closeRequest)="close()"
-      ></cadmus-close-save-buttons>
+      />
     </mat-card-actions>
   </mat-card>
 </form>

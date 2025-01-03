@@ -75,5 +75,3 @@ export * from './lib/tiled-text-part/tiled-text-part.component';
 
 export * from './lib/token-text-part';
 export * from './lib/token-text-part/token-text-part.component';
-
-export * from './lib/cadmus-part-general-ui.module';

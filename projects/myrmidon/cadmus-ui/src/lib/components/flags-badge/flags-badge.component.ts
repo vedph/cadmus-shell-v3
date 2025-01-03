@@ -1,4 +1,7 @@
 import { Component, Input } from '@angular/core';
+
+import { MatTooltip } from '@angular/material/tooltip';
+
 import { FlagDefinition } from '@myrmidon/cadmus-core';
 
 /**
@@ -17,7 +20,7 @@ export interface FlagsBadgeData {
   selector: 'cadmus-flags-badge',
   templateUrl: './flags-badge.component.html',
   styleUrls: ['./flags-badge.component.css'],
-  standalone: false,
+  imports: [MatTooltip],
 })
 export class FlagsBadgeComponent {
   private _data?: FlagsBadgeData | null;

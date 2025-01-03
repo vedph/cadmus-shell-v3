@@ -4,8 +4,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ChronologyFragmentComponent } from './chronology-fragment.component';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
 describe('ChronologyFragmentComponent', () => {
   let component: ChronologyFragmentComponent;
@@ -18,14 +16,9 @@ describe('ChronologyFragmentComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        CadmusMaterialModule,
-        CadmusUiModule
+        ChronologyFragmentComponent,
       ],
-      declarations: [
-        ChronologyFragmentComponent
-      ]
-    })
-    .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {

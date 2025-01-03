@@ -21,15 +21,15 @@ import {
   PIN_LINKS_PART_TYPEID,
   PIN_LINKS_FRAGMENT_TYPEID,
   DECORATED_COUNTS_PART_TYPEID,
-} from '@myrmidon/cadmus-part-general-ui';
+} from '../../projects/myrmidon/cadmus-part-general-ui/src/public-api';
 import {
   APPARATUS_FRAGMENT_TYPEID,
   ORTHOGRAPHY_FRAGMENT_TYPEID,
   WITNESSES_FRAGMENT_TYPEID,
   QUOTATIONS_FRAGMENT_TYPEID,
-} from '@myrmidon/cadmus-part-philology-ui';
-import { PartEditorKeys } from '@myrmidon/cadmus-core';
-import { DISTRICT_LOCATION_PART_TYPEID } from 'projects/myrmidon/cadmus-part-general-ui/src/public-api';
+} from '../../projects/myrmidon/cadmus-part-philology-ui/src/public-api';
+import { PartEditorKeys } from '../../projects/myrmidon/cadmus-core/src/public-api';
+import { DISTRICT_LOCATION_PART_TYPEID } from '../../projects/myrmidon/cadmus-part-general-ui/src/public-api';
 
 const GENERAL = 'general';
 const PHILOLOGY = 'philology';
@@ -43,6 +43,7 @@ const TILED_TEXT_LAYER_PART_TYPEID = 'it.vedph.tiled-text-layer';
  * with the mappings between fragment type IDs and their editor keys.
  */
 export const PART_EDITOR_KEYS: PartEditorKeys = {
+  // general parts
   [BIBLIOGRAPHY_PART_TYPEID]: {
     part: GENERAL,
   },

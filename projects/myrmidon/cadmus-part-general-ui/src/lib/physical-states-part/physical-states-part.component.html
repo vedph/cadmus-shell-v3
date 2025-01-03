@@ -7,79 +7,84 @@
       <mat-card-title>Physical States Part</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <mat-tab-group [(selectedIndex)]="tabIndex">
-        <mat-tab label="list">
-          <div>
-            <button
-              type="button"
-              mat-flat-button
-              class="mat-primary"
-              (click)="addState()"
-            >
-              <mat-icon>add_circle</mat-icon> state
-            </button>
-          </div>
-          @if (entries.value.length) {
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>type</th>
-                <th>date</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (entry of entries.value; track entry; let i = $index; let
-              first = $first; let last = $last) {
-              <tr>
-                <td class="fit-width">
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Edit this state"
-                    (click)="editState(entry, i)"
-                  >
-                    <mat-icon class="mat-primary">edit</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this state up"
-                    [disabled]="first"
-                    (click)="moveStateUp(i)"
-                  >
-                    <mat-icon>arrow_upward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this state down"
-                    [disabled]="last"
-                    (click)="moveStateDown(i)"
-                  >
-                    <mat-icon>arrow_downward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Delete this state"
-                    (click)="deleteState(i)"
-                  >
-                    <mat-icon class="mat-warn">remove_circle</mat-icon>
-                  </button>
-                </td>
-                <td>
-                  {{ entry.type | flatLookup : stateEntries : "id" : "value" }}
-                </td>
-                <td>{{ entry.date }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
+      <div>
+        <button
+          type="button"
+          mat-flat-button
+          class="mat-primary"
+          (click)="addState()"
+        >
+          <mat-icon>add_circle</mat-icon> state
+        </button>
+      </div>
+      @if (entries.value.length) {
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>type</th>
+            <th>date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of entries.value; track entry; let i = $index; let first =
+          $first; let last = $last) {
+          <tr [class.selected]="edited === entry">
+            <td class="fit-width">
+              <span class="nr">{{ i + 1 }}.</span>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Edit this state"
+                (click)="editState(entry, i)"
+              >
+                <mat-icon class="mat-primary">edit</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this state up"
+                [disabled]="first"
+                (click)="moveStateUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this state down"
+                [disabled]="last"
+                (click)="moveStateDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Delete this state"
+                (click)="deleteState(i)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
+              </button>
+            </td>
+            <td>
+              {{ entry.type | flatLookup : stateEntries : "id" : "value" }}
+            </td>
+            <td>{{ entry.date }}</td>
+          </tr>
           }
-        </mat-tab>
-
-        <mat-tab label="state" *ngIf="edited">
+        </tbody>
+      </table>
+      }
+      <mat-expansion-panel [expanded]="edited" [disabled]="!edited">
+        @if (edited) {
+        <fieldset>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="state-title">state</span>
+              <span class="nr">{{ editedIndex + 1 }}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
           <cadmus-mat-physical-state
             [featEntries]="featEntries"
             [stateEntries]="stateEntries"
@@ -88,8 +93,9 @@
             (stateChange)="saveState($event!)"
             (stateCancel)="closeState()"
           />
-        </mat-tab>
-      </mat-tab-group>
+        </fieldset>
+        }
+      </mat-expansion-panel>
     </mat-card-content>
     <mat-card-actions>
       <cadmus-close-save-buttons

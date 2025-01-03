@@ -6,5 +6,3 @@ export * from './lib/thesaurus-filter/thesaurus-filter.component';
 export * from './lib/thesaurus-list/thesaurus-list.component';
 export * from './lib/thesaurus-import/thesaurus-import.component';
 export * from './lib/state/thesaurus-list.repository';
-
-export * from './lib/cadmus-thesaurus-list.module';

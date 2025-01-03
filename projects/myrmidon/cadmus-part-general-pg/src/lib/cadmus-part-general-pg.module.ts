@@ -15,12 +15,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
-import { CadmusCoreModule, PendingChangesGuard } from '@myrmidon/cadmus-core';
-import { CadmusStateModule } from '@myrmidon/cadmus-state';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
-import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
+import { PendingChangesGuard } from '@myrmidon/cadmus-core';
 import {
-  CadmusPartGeneralUiModule,
   BIBLIOGRAPHY_PART_TYPEID,
   CATEGORIES_PART_TYPEID,
   CHRONOTOPES_PART_TYPEID,
@@ -44,7 +40,6 @@ import {
   PIN_LINKS_FRAGMENT_TYPEID,
   PHYSICAL_MEASUREMENTS_PART_TYPEID,
   DECORATED_COUNTS_PART_TYPEID,
-  DistrictLocationPartComponent,
 } from '@myrmidon/cadmus-part-general-ui';
 
 import { BibliographyPartFeatureComponent } from './bibliography-part-feature/bibliography-part-feature.component';
@@ -246,13 +241,6 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatTooltipModule,
     MatToolbarModule,
     // cadmus
-    CadmusCoreModule,
-    CadmusUiModule,
-    CadmusPartGeneralUiModule,
-    CadmusStateModule,
-    CadmusUiPgModule,
-  ],
-  declarations: [
     BibliographyPartFeatureComponent,
     CategoriesPartFeatureComponent,
     ChronologyFragmentFeatureComponent,

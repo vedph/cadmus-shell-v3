@@ -1,8 +1,8 @@
-<cadmus-current-item-bar></cadmus-current-item-bar>
+<cadmus-current-item-bar/>
 <cadmus-comment-editor
   [identity]="identity"
   [data]="$any(data)"
   (dataChange)="save($any($event))"
   (editorClose)="close()"
   (dirtyChange)="onDirtyChange($event)"
-></cadmus-comment-editor>
+/>

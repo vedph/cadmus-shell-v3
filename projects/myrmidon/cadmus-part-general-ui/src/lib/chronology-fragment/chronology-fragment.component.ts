@@ -1,16 +1,40 @@
 import { Component, OnInit } from '@angular/core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 import {
   FormControl,
   FormBuilder,
   Validators,
   UntypedFormGroup,
   FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardSubtitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { HistoricalDateModel } from '@myrmidon/cadmus-refs-historical-date';
+import {
+  HistoricalDateModel,
+  HistoricalDateComponent,
+} from '@myrmidon/cadmus-refs-historical-date';
 
 import { ChronologyFragment } from '../chronology-fragment';
 
@@ -22,7 +46,26 @@ import { ChronologyFragment } from '../chronology-fragment';
   selector: 'cadmus-chronology-fragment',
   templateUrl: './chronology-fragment.component.html',
   styleUrls: ['./chronology-fragment.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatSelect,
+    MatOption,
+    HistoricalDateComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class ChronologyFragmentComponent
   extends ModelEditorComponentBase<ChronologyFragment>

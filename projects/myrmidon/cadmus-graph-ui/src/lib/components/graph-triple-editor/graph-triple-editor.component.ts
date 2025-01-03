@@ -11,14 +11,29 @@ import {
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatCheckbox } from '@angular/material/checkbox';
+import {
+  MatFormField,
+  MatLabel,
+  MatError,
+  MatHint,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
+
 import { GraphService, UriNode, UriTriple } from '@myrmidon/cadmus-api';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import { GraphNodeLookupService } from '../../services/graph-node-lookup.service';
 
@@ -26,7 +41,19 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   selector: 'cadmus-graph-triple-editor',
   templateUrl: './graph-triple-editor.component.html',
   styleUrls: ['./graph-triple-editor.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    RefLookupComponent,
+    MatCheckbox,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatHint,
+    MatIconButton,
+    MatIcon,
+  ],
 })
 export class GraphTripleEditorComponent implements OnInit, OnDestroy {
   private _triple: UriTriple | undefined;
@@ -145,7 +172,7 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
   }
 
   public onObjectChange(node?: unknown): void {
-    this.objectNode.setValue(node as UriNode || null);
+    this.objectNode.setValue((node as UriNode) || null);
     this.objectNode.updateValueAndValidity();
     this.objectNode.markAsDirty();
 
@@ -166,9 +193,7 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
             resolve(node);
           },
           error: (error) => {
-            if (error) {
-              console.error(JSON.stringify(error));
-            }
+            console.error('Error loading node', error);
             this._snackbar.open('Error loading node ' + id, 'OK');
             reject();
           },

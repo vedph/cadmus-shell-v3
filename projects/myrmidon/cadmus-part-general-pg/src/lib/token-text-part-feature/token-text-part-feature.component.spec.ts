@@ -1,7 +1,6 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 
@@ -12,9 +11,7 @@ import {
   TILED_TEXT_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
 
-import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 
 describe('TokenTextPartFeatureComponent', () => {
   let component: TokenTextPartFeatureComponent;
@@ -27,10 +24,8 @@ describe('TokenTextPartFeatureComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        RouterTestingModule,
         NgeMonacoModule,
-        CadmusCoreModule,
-        CadmusUiModule,
+        TokenTextPartFeatureComponent,
       ],
       providers: [
         {
@@ -42,11 +37,7 @@ describe('TokenTextPartFeatureComponent', () => {
           },
         },
       ],
-      declarations: [
-        CurrentItemBarComponent,
-        TokenTextPartComponent,
-        TokenTextPartFeatureComponent,
-      ],
+      declarations: [CurrentItemBarComponent, TokenTextPartComponent],
     }).compileComponents();
   }));
 

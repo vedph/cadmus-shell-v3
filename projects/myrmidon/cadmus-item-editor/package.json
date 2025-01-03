@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-item-editor",
-  "version": "10.2.1",
+  "version": "11.0.0",
   "description": "Cadmus - item editor.",
   "keywords": [
     "Cadmus"
@@ -19,10 +19,10 @@
     "@myrmidon/ngx-tools": "^1.0.0",
     "@myrmidon/ngx-mat-tools": "^0.0.1",
     "@myrmidon/paged-data-browsers": "^4.0.2",
-    "@myrmidon/cadmus-core": "^10.1.0",
-    "@myrmidon/cadmus-api": "^10.2.0",
-    "@myrmidon/cadmus-ui": "^10.2.0",
-    "@myrmidon/cadmus-state": "^10.2.0"
+    "@myrmidon/cadmus-core": "^11.0.0",
+    "@myrmidon/cadmus-api": "^11.0.0",
+    "@myrmidon/cadmus-ui": "^11.0.0",
+    "@myrmidon/cadmus-state": "^11.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

@@ -5,7 +5,7 @@
       <mat-card-content>
         <cadmus-graph-node-filter
           [disabled]="(loading$ | async) ? true : false"
-        ></cadmus-graph-node-filter>
+        />
       </mat-card-content>
     </mat-card>
   </div>
@@ -102,7 +102,7 @@
           [pageSizeOptions]="[5, 10, 20, 50, 100]"
           (page)="onPageChange($event)"
           [showFirstLastButtons]="true"
-        ></mat-paginator>
+        />
       </div>
     </div>
     }
@@ -118,7 +118,7 @@
         [tagEntries]="tagEntries"
         (nodeChange)="onNodeChange($event)"
         (editorClose)="onEditorClose()"
-      ></cadmus-graph-node-editor>
+      />
     </mat-expansion-panel>
   </div>
   }

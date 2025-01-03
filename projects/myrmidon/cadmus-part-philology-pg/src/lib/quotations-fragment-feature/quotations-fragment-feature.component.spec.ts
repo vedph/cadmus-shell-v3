@@ -8,11 +8,7 @@ import {
 } from '@myrmidon/cadmus-part-philology-ui';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MomentModule } from 'ngx-moment';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
 
 describe('QuotationsFragmentFeatureComponent', () => {
@@ -25,11 +21,8 @@ describe('QuotationsFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        RouterTestingModule,
         BrowserAnimationsModule,
-        MomentModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        QuotationsFragmentFeatureComponent,
       ],
       providers: [
         {
@@ -45,7 +38,6 @@ describe('QuotationsFragmentFeatureComponent', () => {
         CurrentItemBarComponent,
         QuotationEntryComponent,
         QuotationsFragmentComponent,
-        QuotationsFragmentFeatureComponent,
       ],
     }).compileComponents();
   }));

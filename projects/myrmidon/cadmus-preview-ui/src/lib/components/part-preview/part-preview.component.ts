@@ -5,6 +5,10 @@ import { take } from 'rxjs/operators';
 import { ItemService, PreviewService } from '@myrmidon/cadmus-api';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Item } from '@myrmidon/cadmus-core';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
 
 /**
  * Source IDs for a part preview.
@@ -23,7 +27,7 @@ export interface PartPreviewSource {
   selector: 'cadmus-part-preview',
   templateUrl: './part-preview.component.html',
   styleUrls: ['./part-preview.component.css'],
-  standalone: false,
+  imports: [MatProgressBar, MatButton, MatIcon, SafeHtmlPipe],
 })
 export class PartPreviewComponent implements OnInit {
   private _source: PartPreviewSource | undefined | null;
@@ -79,9 +83,7 @@ export class PartPreviewComponent implements OnInit {
         },
         error: (error) => {
           this.busy = false;
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(`Error previewing part ${this._source!.partId}`, error);
           this._snackbar.open('Error previewing part ' + this._source!.partId);
         },
       });

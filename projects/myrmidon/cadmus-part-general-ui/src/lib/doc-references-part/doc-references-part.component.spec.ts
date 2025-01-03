@@ -8,8 +8,8 @@ describe('DocReferencesPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DocReferencesPartComponent ]
-    })
+    imports: [DocReferencesPartComponent]
+})
     .compileComponents();
   });
 

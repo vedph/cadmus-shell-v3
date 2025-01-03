@@ -14,8 +14,30 @@ import {
   FormGroup,
   FormControl,
   Validators,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import {
+  MatFormField,
+  MatLabel,
+  MatError,
+  MatSuffix,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 import { ItemService } from '@myrmidon/cadmus-api';
 import {
@@ -24,6 +46,7 @@ import {
   PartDefinition,
 } from '@myrmidon/cadmus-core';
 import { AppRepository } from '@myrmidon/cadmus-state';
+import { Subscription } from 'rxjs';
 
 interface PartDefViewModel {
   typeId: string;
@@ -38,9 +61,30 @@ interface PartDefViewModel {
   selector: 'cadmus-item-query',
   templateUrl: './item-query.component.html',
   styleUrls: ['./item-query.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardContent,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    CdkTextareaAutosize,
+    MatError,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatButton,
+    MatSelect,
+    MatOption,
+    MatSuffix,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatProgressBar,
+  ],
 })
 export class ItemQueryComponent implements OnInit, AfterViewInit {
+  private _sub?: Subscription;
   public form: FormGroup;
 
   @Input()
@@ -129,9 +173,9 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     this.partDefs = partDefs;
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // part definitions
-    this._appRepository.facets$.subscribe((facets) => {
+    this._sub = this._appRepository.facets$.subscribe((facets) => {
       this.updatePartDefs(facets);
     });
     // when selected part def changes, load its pins defs
@@ -150,6 +194,12 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
           },
         });
       });
+      // ensure app data is loaded
+      this._appRepository.load();
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   private focusQuery(): void {
@@ -160,7 +210,7 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     this.focusQuery();
   }
 

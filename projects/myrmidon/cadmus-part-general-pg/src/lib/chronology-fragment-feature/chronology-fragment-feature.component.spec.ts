@@ -1,7 +1,6 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 
 import { ChronologyFragmentFeatureComponent } from './chronology-fragment-feature.component';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
@@ -9,9 +8,7 @@ import {
   ChronologyFragmentComponent,
   CHRONOLOGY_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { ActivatedRoute } from '@angular/router';
 
 describe('ChronologyFragmentFeatureComponent', () => {
@@ -25,9 +22,7 @@ describe('ChronologyFragmentFeatureComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        RouterTestingModule,
-        CadmusCoreModule,
-        CadmusUiModule,
+        ChronologyFragmentFeatureComponent,
       ],
       providers: [
         {
@@ -53,11 +48,7 @@ describe('ChronologyFragmentFeatureComponent', () => {
           },
         },
       ],
-      declarations: [
-        CurrentItemBarComponent,
-        ChronologyFragmentComponent,
-        ChronologyFragmentFeatureComponent,
-      ],
+      declarations: [CurrentItemBarComponent, ChronologyFragmentComponent],
     }).compileComponents();
   }));
 

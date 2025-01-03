@@ -4,18 +4,44 @@ import {
   FormControl,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
+
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   IndexKeywordsPart,
   IndexKeyword,
   INDEX_KEYWORDS_PART_TYPEID,
 } from '../index-keywords-part';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { IndexKeywordComponent } from '../index-keyword/index-keyword.component';
 
 /**
  * Index keywords part editor.
@@ -25,7 +51,26 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
   selector: 'cadmus-index-keywords-part',
   templateUrl: './index-keywords-part.component.html',
   styleUrls: ['./index-keywords-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatBadge,
+    MatCardContent,
+    MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    IndexKeywordComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class IndexKeywordsPartComponent
   extends ModelEditorComponentBase<IndexKeywordsPart>

@@ -4,13 +4,33 @@ import {
   FormControl,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
 
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import {
+  AssertedCompositeId,
+  AssertedCompositeIdsComponent,
+} from '@myrmidon/cadmus-refs-asserted-ids';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
-import { AssertedCompositeId } from '@myrmidon/cadmus-refs-asserted-ids';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import { PinLinksFragment } from '../pin-links-fragment';
 
@@ -23,7 +43,19 @@ import { PinLinksFragment } from '../pin-links-fragment';
   selector: 'cadmus-pin-links-fragment',
   templateUrl: './pin-links-fragment.component.html',
   styleUrls: ['./pin-links-fragment.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    AssertedCompositeIdsComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class PinLinksFragmentComponent
   extends ModelEditorComponentBase<PinLinksFragment>

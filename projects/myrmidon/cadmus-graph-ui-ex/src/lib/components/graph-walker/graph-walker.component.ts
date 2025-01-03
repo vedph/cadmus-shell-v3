@@ -1,15 +1,35 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Observable, Subject, take } from 'rxjs';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Observable, Subject, Subscription, take } from 'rxjs';
+
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
 
 import {
   Edge,
   Node as GraphNode,
   NgxGraphZoomOptions,
+  GraphModule,
 } from '@swimlane/ngx-graph';
+
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { GraphService } from '@myrmidon/cadmus-api';
 
+import { TripleFilterComponent } from '../triple-filter/triple-filter.component';
+import { LinkedNodeFilterComponent } from '../linked-node-filter/linked-node-filter.component';
+import { LinkedLiteralFilterComponent } from '../linked-literal-filter/linked-literal-filter.component';
+import { GraphNodeLabelPipe } from '../../pipes/graph-node-label.pipe';
 import {
   GraphWalker,
   NodeChildTotals,
@@ -26,9 +46,24 @@ import {
   selector: 'cadmus-graph-walker',
   templateUrl: './graph-walker.component.html',
   styleUrls: ['./graph-walker.component.css'],
-  standalone: false,
+  imports: [
+    GraphModule,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatProgressBar,
+    MatTabGroup,
+    MatTab,
+    MatTabLabel,
+    TripleFilterComponent,
+    LinkedNodeFilterComponent,
+    LinkedLiteralFilterComponent,
+    AsyncPipe,
+    GraphNodeLabelPipe,
+  ],
 })
-export class GraphWalkerComponent implements OnInit {
+export class GraphWalkerComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
   private readonly _walker: GraphWalker;
   private _nodeId: number;
 
@@ -111,10 +146,14 @@ export class GraphWalkerComponent implements OnInit {
     this.childTotals$ = this._walker.childTotals$;
   }
 
-  ngOnInit(): void {
-    this.update$.subscribe((_) => {
+  public ngOnInit(): void {
+    this._sub = this.update$.subscribe((_) => {
       this.onReset();
     });
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   public onNodeSelect(node: GraphNode): void {

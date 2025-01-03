@@ -8,8 +8,8 @@ describe('FlagDefinitionEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FlagDefinitionEditorComponent ]
-    })
+    imports: [FlagDefinitionEditorComponent]
+})
     .compileComponents();
   });
 

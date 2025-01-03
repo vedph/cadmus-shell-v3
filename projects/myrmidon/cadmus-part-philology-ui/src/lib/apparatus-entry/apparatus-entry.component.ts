@@ -5,11 +5,31 @@ import {
   FormArray,
   FormBuilder,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { Clipboard } from '@angular/cdk/clipboard';
 
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+  MatExpansionPanelDescription,
+} from '@angular/material/expansion';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { renderLabelFromLastColon } from '@myrmidon/cadmus-ui';
+import {
+  renderLabelFromLastColon,
+  ThesaurusTreeComponent,
+} from '@myrmidon/cadmus-ui';
 
 import {
   ApparatusEntry,
@@ -24,7 +44,26 @@ import {
   selector: 'cadmus-apparatus-entry',
   templateUrl: './apparatus-entry.component.html',
   styleUrls: ['./apparatus-entry.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatError,
+    MatInput,
+    MatCheckbox,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatButton,
+    ThesaurusTreeComponent,
+  ],
 })
 export class ApparatusEntryComponent implements OnInit {
   private _entry?: ApparatusEntry;

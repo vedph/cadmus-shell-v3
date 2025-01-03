@@ -15,5 +15,3 @@ export * from './lib/services/thesaurus.service';
 export * from './lib/services/upload.service';
 export * from './lib/services/user-level.service';
 export * from './lib/services/user.service';
-
-export * from './lib/cadmus-api.module';

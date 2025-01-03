@@ -6,12 +6,19 @@ import {
 } from '@myrmidon/cadmus-state';
 import { LibraryRouteService } from '@myrmidon/cadmus-core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
+import { ApparatusFragmentComponent } from '@myrmidon/cadmus-part-philology-ui';
 
 @Component({
   selector: 'cadmus-apparatus-fragment-feature',
+  imports: [
+    CurrentItemBarComponent,
+    DecoratedTokenTextComponent,
+    ApparatusFragmentComponent,
+  ],
   templateUrl: './apparatus-fragment-feature.component.html',
   styleUrls: ['./apparatus-fragment-feature.component.css'],
-  standalone: false,
 })
 export class ApparatusFragmentFeatureComponent
   extends EditFragmentFeatureBase

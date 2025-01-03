@@ -1,13 +1,13 @@
-<cadmus-current-item-bar></cadmus-current-item-bar>
+<cadmus-current-item-bar/>
 <div class="base-text">
   <cadmus-decorated-token-text
     [baseText]="data?.baseText || ''"
     [locations]="frLoc ? [frLoc] : []"
-  ></cadmus-decorated-token-text>
+  />
 </div>
 <cadmus-apparatus-fragment
   [data]="$any(data)"
   (dataChange)="save($event)"
   (editorClose)="close()"
   (dirtyChange)="onDirtyChange($event)"
-></cadmus-apparatus-fragment>
+/>

@@ -4,13 +4,33 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
-import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { DocReference } from '@myrmidon/cadmus-refs-doc-references';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import {
+  DocReference,
+  DocReferencesComponent,
+} from '@myrmidon/cadmus-refs-doc-references';
+
+import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   DocReferencesPart,
@@ -25,7 +45,19 @@ import {
   selector: 'cadmus-doc-references-part',
   templateUrl: './doc-references-part.component.html',
   styleUrls: ['./doc-references-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    DocReferencesComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class DocReferencesPartComponent
   extends ModelEditorComponentBase<DocReferencesPart>

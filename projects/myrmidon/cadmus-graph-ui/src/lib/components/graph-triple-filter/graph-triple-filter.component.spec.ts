@@ -8,8 +8,8 @@ describe('GraphTripleFilterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GraphTripleFilterComponent ]
-    })
+    imports: [GraphTripleFilterComponent]
+})
     .compileComponents();
   });
 

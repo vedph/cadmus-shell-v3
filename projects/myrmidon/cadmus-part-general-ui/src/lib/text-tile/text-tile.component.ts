@@ -6,24 +6,49 @@ import {
   Output,
   ElementRef,
   ViewChild,
+  OnDestroy,
 } from '@angular/core';
+import { distinctUntilChanged } from 'rxjs/operators';
+
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+
 import {
   FormControl,
   FormGroup,
   FormBuilder,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { distinctUntilChanged } from 'rxjs/operators';
 
 import { TextTile, TEXT_TILE_TEXT_DATA_NAME } from '../tiled-text-part';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'cadmus-text-tile',
   templateUrl: './text-tile.component.html',
   styleUrls: ['./text-tile.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatCheckbox,
+  ],
 })
-export class TextTileComponent implements OnInit {
+export class TextTileComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
+
   private _tile?: TextTile;
   private _checkedChangeFrozen?: boolean;
 
@@ -102,18 +127,24 @@ export class TextTileComponent implements OnInit {
     }>();
   }
 
-  ngOnInit(): void {
-    this.checker.valueChanges.pipe(distinctUntilChanged()).subscribe((_) => {
-      if (this._checkedChangeFrozen || !this.checkable) {
-        return;
-      }
-      if (this.tile) {
-        this.checkedChange.emit({
-          checked: this.checker.value,
-          tile: this.tile,
-        });
-      }
-    });
+  public ngOnInit(): void {
+    this._sub = this.checker.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe((_) => {
+        if (this._checkedChangeFrozen || !this.checkable) {
+          return;
+        }
+        if (this.tile) {
+          this.checkedChange.emit({
+            checked: this.checker.value,
+            tile: this.tile,
+          });
+        }
+      });
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   private updateForm(): void {

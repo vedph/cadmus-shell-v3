@@ -1,13 +1,13 @@
 @if (badgeType !== 2) {
-  <span class="part-badge"
-    [style.background-color]="color"
-    [style.color]="contrastColor"
-    >
-    {{ typeName }}
-  </span>
-}
-@if (badgeType !== 1 && roleName) {
-  <span class="role-badge">
-    {{ roleName }}
-  </span>
+<span
+  class="part-badge"
+  [style.background-color]="color"
+  [style.color]="contrastColor"
+>
+  {{ typeName }}
+</span>
+} @if (badgeType !== 1 && roleName) {
+<span class="role-badge">
+  {{ roleName }}
+</span>
 }

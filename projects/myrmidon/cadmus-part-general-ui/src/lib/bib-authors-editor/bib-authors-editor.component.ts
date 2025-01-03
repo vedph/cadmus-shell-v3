@@ -1,6 +1,21 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
+import {
+  FormGroup,
+  FormArray,
+  FormBuilder,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
 
 import { BibAuthor } from '../bibliography-part';
 
@@ -8,7 +23,20 @@ import { BibAuthor } from '../bibliography-part';
   selector: 'cadmus-bib-authors-editor',
   templateUrl: './bib-authors-editor.component.html',
   styleUrls: ['./bib-authors-editor.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatButton,
+    MatIcon,
+    MatIconButton,
+    MatTooltip,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatSelect,
+    MatOption,
+  ],
 })
 export class BibAuthorsEditorComponent implements OnInit {
   @Input()

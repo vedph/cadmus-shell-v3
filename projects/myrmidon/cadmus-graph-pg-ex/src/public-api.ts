@@ -3,4 +3,3 @@
  */
 
 export * from './lib/graph-editor-ex-feature/graph-editor-ex-feature.component';
-export * from './lib/cadmus-graph-pg-ex.module';

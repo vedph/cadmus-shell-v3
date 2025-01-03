@@ -1,14 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { take } from 'rxjs/operators';
 
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+
 import { ThesaurusService } from '@myrmidon/cadmus-api';
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  GraphNodeListComponent,
+  GraphTripleListComponent,
+} from '@myrmidon/cadmus-graph-ui';
 
 @Component({
   selector: 'cadmus-graph-editor-feature',
   templateUrl: './graph-editor-feature.component.html',
   styleUrls: ['./graph-editor-feature.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    MatTabGroup,
+    MatTab,
+    GraphNodeListComponent,
+    GraphTripleListComponent,
+  ],
 })
 export class GraphEditorFeatureComponent implements OnInit {
   public nodeTagEntries?: ThesaurusEntry[];
@@ -26,9 +41,7 @@ export class GraphEditorFeatureComponent implements OnInit {
           this.tripleTagEntries = set['graph-triple-tags']?.entries;
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error('Error getting thesauri set', error);
         },
       });
   }

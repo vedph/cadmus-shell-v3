@@ -143,10 +143,7 @@ export class GraphTripleListRepository
         this.setTerm(node, type);
       },
       error: (error) => {
-        if (error) {
-          console.error(JSON.stringify(error));
-        }
-        console.warn('Node ID not found: ' + id);
+        console.error(`Node ID ${id} not found`, error);
       },
     });
   }

@@ -162,9 +162,7 @@ export class EditedLayerRepository {
             },
             error: (error) => {
               this._loading$.next(false);
-              console.error(
-                'Error loading thesauri: ' + JSON.stringify(error || {})
-              );
+              console.error('Error loading thesauri', error);
             },
           });
         } else {
@@ -182,9 +180,7 @@ export class EditedLayerRepository {
       },
       error: (error) => {
         this._loading$.next(false);
-        console.error(
-          'Error loading text layer part: ' + JSON.stringify(error || {})
-        );
+        console.error('Error loading text layer part', error);
       },
     });
   }
@@ -212,9 +208,7 @@ export class EditedLayerRepository {
       },
       error: (error) => {
         this._loading$.next(false);
-        console.error(
-          'Error loading text layer part: ' + JSON.stringify(error || {})
-        );
+        console.error('Error loading text layer part', error);
       },
     });
   }
@@ -247,9 +241,7 @@ export class EditedLayerRepository {
         this._breakChance$.next(result.chance);
       },
       error: (error) => {
-        console.error(
-          'Error calculating break chance: ' + JSON.stringify(error || {})
-        );
+        console.error('Error calculating break chance', error);
         this._breakChance$.next(-1);
       },
     });
@@ -264,9 +256,7 @@ export class EditedLayerRepository {
       },
       error: (error) => {
         this._saving$.next(false);
-        console.error(
-          'Error patching text layer part: ' + JSON.stringify(error || {})
-        );
+        console.error('Error patching text layer part', error);
       },
     });
   }
@@ -305,8 +295,8 @@ export class EditedLayerRepository {
         this._saving$.next(false);
         console.error(error);
         console.error(
-          `Error deleting fragment at ${loc} in part ${part!.id}: ` +
-            JSON.stringify(error || {})
+          `Error deleting fragment at ${loc} in part ${part!.id}`,
+          error
         );
       },
     });
@@ -357,9 +347,8 @@ export class EditedLayerRepository {
       error: (error) => {
         this._saving$.next(false);
         console.error(
-          `Error saving fragment at ${fragment.location} in part ${
-            part!.id
-          }: ` + JSON.stringify(error || {})
+          `Error saving fragment at ${fragment.location} in part ${part!.id}`,
+          error
         );
       },
     });

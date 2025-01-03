@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { TokenTextPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-token-text-part-feature',
   templateUrl: './token-text-part-feature.component.html',
   styleUrls: ['./token-text-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, TokenTextPartComponent],
 })
 export class TokenTextPartFeatureComponent
   extends EditPartFeatureBase

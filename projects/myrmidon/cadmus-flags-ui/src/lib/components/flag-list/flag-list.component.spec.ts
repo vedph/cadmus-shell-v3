@@ -8,8 +8,8 @@ describe('FlagDefinitionListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FlagListComponent ]
-    })
+    imports: [FlagListComponent]
+})
     .compileComponents();
   });
 

@@ -7,3 +7,10 @@
 .form-row * {
   flex: 1 0 auto;
 }
+.nr {
+  color: white;
+  background-color: #c0c0c0;
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  padding: 0 2px;
+}

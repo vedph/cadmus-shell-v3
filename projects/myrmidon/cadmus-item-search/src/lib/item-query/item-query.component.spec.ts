@@ -9,8 +9,8 @@ describe('ItemQueryComponent', () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [ItemQueryComponent],
-      }).compileComponents();
+    imports: [ItemQueryComponent],
+}).compileComponents();
     })
   );
 

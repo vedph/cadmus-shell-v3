@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { HistoricalEventsPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-historical-events-part-feature',
   templateUrl: './historical-events-part-feature.component.html',
   styleUrls: ['./historical-events-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, HistoricalEventsPartComponent],
 })
 export class HistoricalEventsPartFeatureComponent
   extends EditPartFeatureBase

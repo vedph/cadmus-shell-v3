@@ -8,8 +8,8 @@ describe('PartPreviewFeatureComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PartPreviewFeatureComponent ]
-    })
+    imports: [PartPreviewFeatureComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(PartPreviewFeatureComponent);

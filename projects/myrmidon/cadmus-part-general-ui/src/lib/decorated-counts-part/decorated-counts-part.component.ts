@@ -4,18 +4,38 @@ import {
   FormBuilder,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import {
+  DecoratedCount,
+  DecoratedCountsComponent,
+} from '@myrmidon/cadmus-refs-decorated-counts';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   DECORATED_COUNTS_PART_TYPEID,
   DecoratedCountsPart,
 } from '../decorated-counts-part';
-import { DecoratedCount } from '@myrmidon/cadmus-refs-decorated-counts';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 /**
  * Decorated counts part editor component.
@@ -25,7 +45,19 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
   selector: 'cadmus-decorated-counts-part',
   templateUrl: './decorated-counts-part.component.html',
   styleUrl: './decorated-counts-part.component.scss',
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    DecoratedCountsComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class DecoratedCountsPartComponent
   extends ModelEditorComponentBase<DecoratedCountsPart>

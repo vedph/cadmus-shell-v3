@@ -1,16 +1,29 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { take } from 'rxjs/operators';
 
-import { PageEvent } from '@angular/material/paginator';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+} from '@angular/material/expansion';
 
-import { GraphService, UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { DataPage } from '@myrmidon/ngx-tools';
+
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
+import { GraphService, UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
 
 import { NodeListRepository } from '../../state/graph-node-list.repository';
+import { GraphNodeFilterComponent } from '../graph-node-filter/graph-node-filter.component';
+import { GraphNodeEditorComponent } from '../graph-node-editor/graph-node-editor.component';
 
 /**
  * List of graph nodes. This includes a graph node filter, a list, and a graph
@@ -20,7 +33,21 @@ import { NodeListRepository } from '../../state/graph-node-list.repository';
   selector: 'cadmus-graph-node-list',
   templateUrl: './graph-node-list.component.html',
   styleUrls: ['./graph-node-list.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardContent,
+    GraphNodeFilterComponent,
+    MatProgressBar,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatButton,
+    MatPaginator,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    GraphNodeEditorComponent,
+    AsyncPipe,
+  ],
 })
 export class GraphNodeListComponent implements OnInit {
   private _editedNode?: UriNode;
@@ -100,9 +127,7 @@ export class GraphNodeListComponent implements OnInit {
         });
       },
       error: (error) => {
-        if (error) {
-          console.error(JSON.stringify(error));
-        }
+        console.error('Error saving node', error);
         this._snackbar.open('Error saving node', 'OK');
       },
     });
@@ -126,9 +151,7 @@ export class GraphNodeListComponent implements OnInit {
                 this._repository.reset();
               },
               error: (error) => {
-                if (error) {
-                  console.error(JSON.stringify(error));
-                }
+                console.error('Error deleting node', error);
                 this._snackbar.open('Error deleting node', 'OK');
               },
             });

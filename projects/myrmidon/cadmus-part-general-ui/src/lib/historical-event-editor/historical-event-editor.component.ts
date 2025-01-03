@@ -4,15 +4,39 @@ import {
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+} from '@angular/material/expansion';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { FlatLookupPipe } from '@myrmidon/ngx-tools';
+import {
+  AssertedChronotope,
+  AssertedChronotopeSetComponent,
+} from '@myrmidon/cadmus-refs-asserted-chronotope';
+import { Assertion, AssertionComponent } from '@myrmidon/cadmus-refs-assertion';
+
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { AssertedChronotope } from '@myrmidon/cadmus-refs-asserted-chronotope';
-import { Assertion } from '@myrmidon/cadmus-refs-assertion';
-import { renderLabelFromLastColon } from '@myrmidon/cadmus-ui';
-import { AssertedCompositeId } from '@myrmidon/cadmus-refs-asserted-ids';
+import {
+  renderLabelFromLastColon,
+  ThesaurusTreeComponent,
+} from '@myrmidon/cadmus-ui';
 
 import { HistoricalEvent, RelatedEntity } from '../historical-events-part';
+import { RelatedEntityComponent } from '../related-entity/related-entity.component';
 
 const RELATION_SEP = ':';
 
@@ -23,7 +47,30 @@ const RELATION_SEP = ':';
   selector: 'cadmus-historical-event-editor',
   templateUrl: './historical-event-editor.component.html',
   styleUrls: ['./historical-event-editor.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatTabGroup,
+    MatTab,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatSelect,
+    MatOption,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    AssertedChronotopeSetComponent,
+    MatCheckbox,
+    AssertionComponent,
+    MatButton,
+    MatIcon,
+    MatIconButton,
+    MatTooltip,
+    RelatedEntityComponent,
+    FlatLookupPipe,
+    ThesaurusTreeComponent,
+  ],
 })
 export class HistoricalEventEditorComponent {
   private _model: HistoricalEvent | undefined;

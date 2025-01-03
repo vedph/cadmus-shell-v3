@@ -5,11 +5,35 @@ import {
   Validators,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+
+import { NgeMonacoModule } from '@cisstech/nge/monaco';
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 import {
   CadmusTextEdService,
   CADMUS_TEXT_ED_BINDINGS_TOKEN,
@@ -26,7 +50,27 @@ import { NotePart, NOTE_PART_TYPEID } from '../note-part';
   selector: 'cadmus-note-part',
   templateUrl: './note-part.component.html',
   styleUrls: ['./note-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatSelect,
+    MatOption,
+    NgeMonacoModule,
+    NgeMarkdownModule,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
+  providers: [CadmusTextEdService],
 })
 export class NotePartComponent
   extends ModelEditorComponentBase<NotePart>

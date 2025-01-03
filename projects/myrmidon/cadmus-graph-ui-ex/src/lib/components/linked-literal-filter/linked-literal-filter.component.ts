@@ -1,10 +1,23 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { PageEvent } from '@angular/material/paginator';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { forkJoin, from } from 'rxjs';
 
-import { GraphNodeLookupService } from '@myrmidon/cadmus-graph-ui';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
+
+import { GraphNodeLookupService } from '@myrmidon/cadmus-graph-ui';
 import { GraphService, UriNode } from '@myrmidon/cadmus-api';
 
 import { PagedLinkedLiteralFilter } from '../../graph-walker';
@@ -16,7 +29,17 @@ import { PagedLinkedLiteralFilter } from '../../graph-walker';
   selector: 'cadmus-walker-linked-literal-filter',
   templateUrl: './linked-literal-filter.component.html',
   styleUrls: ['./linked-literal-filter.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatPaginator,
+    RefLookupComponent,
+    MatFormField,
+    MatInput,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+  ],
 })
 export class LinkedLiteralFilterComponent {
   private _filter: PagedLinkedLiteralFilter;

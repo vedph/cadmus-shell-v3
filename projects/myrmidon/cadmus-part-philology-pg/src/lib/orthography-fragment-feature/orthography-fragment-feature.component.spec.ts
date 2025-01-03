@@ -2,9 +2,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
-import { RouterTestingModule } from '@angular/router/testing';
 import { OrthographyFragmentFeatureComponent } from './orthography-fragment-feature.component';
 import {
   OrthographyFragmentComponent,
@@ -12,7 +9,6 @@ import {
   ORTHOGRAPHY_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-philology-ui';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
-import { MomentModule } from 'ngx-moment';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 describe('OrthographyFragmentFeatureComponent', () => {
@@ -25,11 +21,8 @@ describe('OrthographyFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        RouterTestingModule,
         BrowserAnimationsModule,
-        MomentModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        OrthographyFragmentFeatureComponent,
       ],
       providers: [
         {
@@ -59,7 +52,6 @@ describe('OrthographyFragmentFeatureComponent', () => {
         CurrentItemBarComponent,
         MspOperationComponent,
         OrthographyFragmentComponent,
-        OrthographyFragmentFeatureComponent,
       ],
     }).compileComponents();
   }));

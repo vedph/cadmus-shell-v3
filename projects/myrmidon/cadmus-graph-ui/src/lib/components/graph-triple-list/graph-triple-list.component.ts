@@ -1,26 +1,54 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { take } from 'rxjs/operators';
 
-import { PageEvent } from '@angular/material/paginator';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+} from '@angular/material/expansion';
 
+import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { DataPage, EllipsisPipe } from '@myrmidon/ngx-tools';
+
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   GraphService,
   ThesaurusService,
   UriTriple,
 } from '@myrmidon/cadmus-api';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { DataPage } from '@myrmidon/ngx-tools';
 
+import { GraphTripleFilterComponent } from '../graph-triple-filter/graph-triple-filter.component';
+import { GraphTripleEditorComponent } from '../graph-triple-editor/graph-triple-editor.component';
 import { GraphTripleListRepository } from '../../state/graph-triple-list.repository';
 
 @Component({
   selector: 'cadmus-graph-triple-list',
   templateUrl: './graph-triple-list.component.html',
   styleUrls: ['./graph-triple-list.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardContent,
+    GraphTripleFilterComponent,
+    MatProgressBar,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatButton,
+    MatPaginator,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    GraphTripleEditorComponent,
+    AsyncPipe,
+    EllipsisPipe,
+  ],
 })
 export class GraphTripleListComponent implements OnInit {
   public page$: Observable<DataPage<UriTriple>>;
@@ -84,9 +112,7 @@ export class GraphTripleListComponent implements OnInit {
           });
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error('Error saving triple', error);
           this._snackbar.open('Error saving triple', 'OK');
         },
       });
@@ -110,9 +136,7 @@ export class GraphTripleListComponent implements OnInit {
                 this._repository.reset();
               },
               error: (error) => {
-                if (error) {
-                  console.error(JSON.stringify(error));
-                }
+                console.error('Error deleting triple', error);
                 this._snackbar.open('Error deleting triple', 'OK');
               },
             });

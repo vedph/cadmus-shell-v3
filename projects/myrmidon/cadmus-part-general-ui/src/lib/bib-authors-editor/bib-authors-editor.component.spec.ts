@@ -2,9 +2,6 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BibAuthorsEditorComponent } from './bib-authors-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('BibAuthorsEditorComponent', () => {
@@ -17,11 +14,8 @@ describe('BibAuthorsEditorComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
-        CadmusCoreModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        BibAuthorsEditorComponent,
       ],
-      declarations: [BibAuthorsEditorComponent],
     }).compileComponents();
   }));
 

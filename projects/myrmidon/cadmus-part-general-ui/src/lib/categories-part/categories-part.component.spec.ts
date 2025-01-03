@@ -3,9 +3,6 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CategoriesPartComponent } from './categories-part.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
-import { NGX_MONACO_EDITOR_CONFIG } from 'ngx-monaco-editor';
 
 describe('CategoriesPartComponent', () => {
   let component: CategoriesPartComponent;
@@ -17,15 +14,7 @@ describe('CategoriesPartComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
-      ],
-      declarations: [CategoriesPartComponent],
-      providers: [
-        {
-          provide: NGX_MONACO_EDITOR_CONFIG,
-          useValue: {},
-        },
+        CategoriesPartComponent,
       ],
     }).compileComponents();
   }));

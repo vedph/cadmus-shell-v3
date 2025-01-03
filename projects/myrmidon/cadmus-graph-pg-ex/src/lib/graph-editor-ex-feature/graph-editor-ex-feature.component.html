@@ -11,13 +11,13 @@
           [tagEntries]="nodeTagEntries"
           [hasWalker]="true"
           (nodeWalk)="onNodeWalk($event)"
-        ></cadmus-graph-node-list>
+        />
       </mat-tab>
       <!-- triples -->
       <mat-tab label="&#9650; triples">
         <cadmus-graph-triple-list
           [tagEntries]="tripleTagEntries"
-        ></cadmus-graph-triple-list>
+        />
       </mat-tab>
       <!-- walker -->
       <mat-tab label="&#x25c6; walker">
@@ -27,7 +27,7 @@
           [canMoveToSource]="true"
           (nodePick)="onWalkerNodePick($event)"
           (moveToSource)="onWalkerMoveToSource($event)"
-        ></cadmus-graph-walker>
+        />
       </mat-tab>
     </mat-tab-group>
   </mat-card-content>

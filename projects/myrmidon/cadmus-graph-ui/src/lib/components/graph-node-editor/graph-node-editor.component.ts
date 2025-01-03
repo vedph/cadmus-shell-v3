@@ -4,9 +4,20 @@ import {
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
+
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
+import { UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
 
 /**
  * Graph node editor.
@@ -15,7 +26,19 @@ import { ThesaurusEntry } from '@myrmidon/cadmus-core';
   selector: 'cadmus-graph-node-editor',
   templateUrl: './graph-node-editor.component.html',
   styleUrls: ['./graph-node-editor.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatCheckbox,
+    MatSelect,
+    MatOption,
+    MatIconButton,
+    MatIcon,
+  ],
 })
 export class GraphNodeEditorComponent implements OnInit {
   private _node?: UriNode;

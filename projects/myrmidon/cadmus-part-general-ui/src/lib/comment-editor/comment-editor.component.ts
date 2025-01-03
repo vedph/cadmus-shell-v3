@@ -6,24 +6,61 @@ import {
   FormArray,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
 import {
-  EditedObject,
-  ModelEditorComponentBase,
-  renderLabelFromLastColon,
-} from '@myrmidon/cadmus-ui';
-import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+} from '@angular/material/expansion';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { NgeMonacoModule } from '@cisstech/nge/monaco';
+
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { DocReference } from '@myrmidon/cadmus-refs-doc-references';
-import { AssertedCompositeId } from '@myrmidon/cadmus-refs-asserted-ids';
+import {
+  DocReference,
+  DocReferencesComponent,
+} from '@myrmidon/cadmus-refs-doc-references';
+import {
+  AssertedCompositeId,
+  AssertedCompositeIdsComponent,
+} from '@myrmidon/cadmus-refs-asserted-ids';
 import {
   CADMUS_TEXT_ED_BINDINGS_TOKEN,
   CadmusTextEdBindings,
   CadmusTextEdService,
 } from '@myrmidon/cadmus-text-ed';
 
+import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+  renderLabelFromLastColon,
+  ThesaurusTreeComponent,
+} from '@myrmidon/cadmus-ui';
+
 import { Comment, CommentPart, COMMENT_PART_TYPEID } from '../comment-part';
+
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+
 import { IndexKeyword } from '../index-keywords-part';
 import { CommentFragment } from '../comment-fragment';
 
@@ -37,7 +74,39 @@ import { CommentFragment } from '../comment-fragment';
   selector: 'cadmus-comment-editor',
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatTabGroup,
+    MatTab,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatInput,
+    MatError,
+    NgeMonacoModule,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    NgeMarkdownModule,
+    DocReferencesComponent,
+    AssertedCompositeIdsComponent,
+    MatIconButton,
+    MatTooltip,
+    MatButton,
+    MatCardActions,
+    ThesaurusTreeComponent,
+    CloseSaveButtonsComponent,
+  ],
+  providers: [
+    CadmusTextEdService
+  ]
 })
 export class CommentEditorComponent
   extends ModelEditorComponentBase<CommentPart | CommentFragment>

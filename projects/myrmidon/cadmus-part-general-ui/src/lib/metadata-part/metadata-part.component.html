@@ -25,7 +25,7 @@
           <div [formGroupName]="i" class="form-row">
             <!-- child actions -->
             <span style="flex: 0 0 auto">
-              {{ i + 1 }}.
+              <span class="nr">{{ i + 1 }}.</span>
               <button
                 mat-icon-button
                 type="button"
@@ -71,7 +71,7 @@
             </mat-form-field>
             }
             <!-- type (free) -->
-            @if (!typeEntries?.length) {
+            @else {
             <mat-form-field>
               <mat-label>type</mat-label>
               <input matInput formControlName="type" />
@@ -85,8 +85,23 @@
               <mat-error>type too long</mat-error>
               }
             </mat-form-field>
-            }
-            <!-- name -->
+            } @if (nameEntries?.length) {
+            <!-- name (bound) -->
+            <mat-form-field>
+              <mat-label>name</mat-label>
+              <mat-select formControlName="name">
+                @for (e of nameEntries; track e.id) {
+                <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                }
+              </mat-select>
+              @if ( $any(g)['controls'].name.errors?.required &&
+              ($any(g)['controls'].name.dirty ||
+              $any(g)['controls'].name.touched) ) {
+              <mat-error>name required</mat-error>
+              }
+            </mat-form-field>
+            } @else {
+            <!-- name (free) -->
             <mat-form-field>
               <mat-label>name</mat-label>
               <input matInput formControlName="name" />
@@ -101,6 +116,7 @@
               <mat-error>name too long</mat-error>
               }
             </mat-form-field>
+            }
             <!-- value -->
             <mat-form-field>
               <mat-label>value</mat-label>

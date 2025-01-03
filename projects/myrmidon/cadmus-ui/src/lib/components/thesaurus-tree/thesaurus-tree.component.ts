@@ -1,7 +1,33 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { NgClass } from '@angular/common';
+
+import {
+  MatTreeNestedDataSource,
+  MatTree,
+  MatTreeNodeDef,
+  MatTreeNode,
+  MatTreeNodeToggle,
+  MatNestedTreeNode,
+  MatTreeNodeOutlet,
+} from '@angular/material/tree';
+import { MatIconButton, MatAnchor } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatFormField,
+  MatLabel,
+  MatSuffix,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 interface TreeNode {
@@ -46,7 +72,25 @@ export const renderLabelFromLastColon = (label: string): string => {
   selector: 'cadmus-thesaurus-tree',
   templateUrl: './thesaurus-tree.component.html',
   styleUrls: ['./thesaurus-tree.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSuffix,
+    NgClass,
+    MatTree,
+    MatTreeNodeDef,
+    MatTreeNode,
+    MatTreeNodeToggle,
+    MatAnchor,
+    MatNestedTreeNode,
+    MatTreeNodeOutlet,
+  ],
 })
 export class ThesaurusTreeComponent implements OnInit {
   private _entries?: ThesaurusEntry[];

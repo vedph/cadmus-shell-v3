@@ -10,9 +10,8 @@ describe('FlagsBadgeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule],
-      declarations: [FlagsBadgeComponent],
-    }).compileComponents();
+    imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule, FlagsBadgeComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,23 +1,47 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-
 import {
   FormBuilder,
   FormGroup,
   FormControl,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
+import { DialogService } from '@myrmidon/ngx-mat-tools';
+
 import { QuotationWorksService } from '../quotations-fragment/quotation-works.service';
 import { QuotationEntry } from '../quotations-fragment';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 @Component({
   selector: 'cadmus-quotation-entry',
   templateUrl: './quotation-entry.component.html',
   styleUrls: ['./quotation-entry.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatInput,
+    MatError,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    AsyncPipe,
+  ],
 })
 export class QuotationEntryComponent implements OnInit {
   private _entry?: QuotationEntry;

@@ -1,10 +1,7 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { IndexKeywordComponent } from './index-keyword.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('IndexKeywordComponent', () => {
@@ -17,11 +14,8 @@ describe('IndexKeywordComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
-        CadmusCoreModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        IndexKeywordComponent,
       ],
-      declarations: [IndexKeywordComponent],
     }).compileComponents();
   }));
 

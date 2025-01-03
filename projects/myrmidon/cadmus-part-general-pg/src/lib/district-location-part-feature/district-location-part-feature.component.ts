@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { DistrictLocationPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-district-location-part-feature',
   templateUrl: './district-location-part-feature.component.html',
   styleUrl: './district-location-part-feature.component.scss',
-  standalone: false,
+  imports: [CurrentItemBarComponent, DistrictLocationPartComponent],
 })
 export class DistrictLocationPartFeatureComponent
   extends EditPartFeatureBase

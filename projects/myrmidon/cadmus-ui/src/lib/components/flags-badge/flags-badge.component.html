@@ -1,15 +1,11 @@
 <div>
   @for (def of badgeFlags; track def.id) {
-    <span
-      class="badge-flag"
-      [style.color]="'#' + def.colorKey"
-      [matTooltip]="def.label"
-      >
-      @if (def.isAdmin) {
-        &#x25c6;
-      } @else {
-        &#x2b24;
-      }
-    </span>
+  <span
+    class="badge-flag"
+    [style.color]="'#' + def.colorKey"
+    [matTooltip]="def.label"
+  >
+    @if (def.isAdmin) { &#x25c6; } @else { &#x2b24; }
+  </span>
   }
 </div>

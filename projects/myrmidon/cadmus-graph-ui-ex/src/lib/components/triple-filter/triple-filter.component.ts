@@ -1,10 +1,26 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { PageEvent } from '@angular/material/paginator';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { forkJoin, from } from 'rxjs';
 
-import { GraphNodeLookupService } from '@myrmidon/cadmus-graph-ui';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatList, MatListItem } from '@angular/material/list';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
 
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
+
+import { GraphNodeLookupService } from '@myrmidon/cadmus-graph-ui';
 import { GraphService, UriNode } from '@myrmidon/cadmus-api';
 
 import { PagedTripleFilter } from '../../graph-walker';
@@ -16,7 +32,22 @@ import { PagedTripleFilter } from '../../graph-walker';
   selector: 'cadmus-walker-triple-filter',
   templateUrl: './triple-filter.component.html',
   styleUrls: ['./triple-filter.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatPaginator,
+    MatTabGroup,
+    MatTab,
+    RefLookupComponent,
+    MatCheckbox,
+    MatList,
+    MatListItem,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatInput,
+    MatTooltip,
+  ],
 })
 export class TripleFilterComponent implements OnInit {
   private _filter: PagedTripleFilter;

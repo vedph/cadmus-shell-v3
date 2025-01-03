@@ -1,14 +1,10 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TiledTextLayerPartFeatureComponent } from './tiled-text-layer-part-feature.component';
-import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import {
   TILED_TEXT_PART_TYPEID,
   TextTileComponent,
@@ -25,10 +21,7 @@ describe('TiledTextLayerPartFeatureComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        RouterTestingModule,
-        CadmusCoreModule,
-        CadmusUiModule,
-        CadmusUiPgModule,
+        TiledTextLayerPartFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
@@ -55,7 +48,7 @@ describe('TiledTextLayerPartFeatureComponent', () => {
           },
         },
       ],
-      declarations: [TextTileComponent, TiledTextLayerPartFeatureComponent],
+      declarations: [TextTileComponent],
     }).compileComponents();
   }));
 

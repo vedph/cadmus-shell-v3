@@ -1,6 +1,29 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
+import { Observable, Subscription } from 'rxjs';
+
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatChipListbox,
+  MatChipOption,
+  MatChipRemove,
+} from '@angular/material/chips';
+
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
 
 import { NodeFilter, UriNode } from '@myrmidon/cadmus-api';
 
@@ -16,9 +39,27 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   selector: 'cadmus-graph-node-filter',
   templateUrl: './graph-node-filter.component.html',
   styleUrls: ['./graph-node-filter.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatCheckbox,
+    RefLookupComponent,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatChipListbox,
+    MatChipOption,
+    MatChipRemove,
+    AsyncPipe,
+  ],
 })
-export class GraphNodeFilterComponent implements OnInit {
+export class GraphNodeFilterComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
   public filter$: Observable<NodeFilter>;
   public linkedNode$: Observable<UriNode | undefined>;
   public classNodes$: Observable<UriNode[] | undefined>;
@@ -65,10 +106,14 @@ export class GraphNodeFilterComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.filter$.subscribe((f) => {
+  public ngOnInit(): void {
+    this._sub = this.filter$.subscribe((f) => {
       this.updateForm(f);
     });
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   private updateForm(filter: NodeFilter): void {
@@ -115,7 +160,7 @@ export class GraphNodeFilterComponent implements OnInit {
   }
 
   public onLinkedNodeSet(node: unknown): void {
-    this._repository.setLinkedNode(node as UriNode || undefined);
+    this._repository.setLinkedNode((node as UriNode) || undefined);
   }
 
   public clearLinkedNode(): void {

@@ -1,15 +1,47 @@
 import { Component, OnInit } from '@angular/core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 import {
   FormControl,
   FormBuilder,
   Validators,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+
+import {
+  CdkDragDrop,
+  moveItemInArray,
+  CdkDropListGroup,
+  CdkDropList,
+  CdkDrag,
+  CdkDragPlaceholder,
+} from '@angular/cdk/drag-drop';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+
+import { TextTileComponent } from '../text-tile/text-tile.component';
+import { TiledDataComponent } from '../tiled-data/tiled-data.component';
 import {
   TiledTextPart,
   TextTileRow,
@@ -17,7 +49,6 @@ import {
   TEXT_TILE_TEXT_DATA_NAME,
   TextTile,
 } from '../tiled-text-part';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 interface Data {
   [key: string]: any;
@@ -27,7 +58,32 @@ interface Data {
   selector: 'cadmus-tiled-text-part',
   templateUrl: './tiled-text-part.component.html',
   styleUrls: ['./tiled-text-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    MatTabGroup,
+    MatTab,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    CdkDropListGroup,
+    CdkDropList,
+    TextTileComponent,
+    CdkDrag,
+    CdkDragPlaceholder,
+    MatIconButton,
+    MatTooltip,
+    MatCardActions,
+    TiledDataComponent,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class TiledTextPartComponent
   extends ModelEditorComponentBase<TiledTextPart>

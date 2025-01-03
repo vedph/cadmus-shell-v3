@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
@@ -22,9 +21,8 @@ describe('WitnessesFragmentComponent', () => {
         NoopAnimationsModule,
         NgeMonacoModule,
         NgeMarkdownModule,
-        CadmusUiModule,
+        WitnessesFragmentComponent,
       ],
-      declarations: [WitnessesFragmentComponent],
     }).compileComponents();
   }));
 

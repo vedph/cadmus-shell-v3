@@ -3,7 +3,7 @@
   <!-- progress -->
   @if (busy) {
   <div>
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <mat-progress-bar mode="indeterminate"/>
   </div>
   }
   <!-- toolbar -->
@@ -45,7 +45,7 @@
       <cadmus-text-block-view
         [blocks]="row.blocks"
         (blockClick)="onBlockClick($event)"
-      ></cadmus-text-block-view>
+      />
     </div>
     }
   </div>

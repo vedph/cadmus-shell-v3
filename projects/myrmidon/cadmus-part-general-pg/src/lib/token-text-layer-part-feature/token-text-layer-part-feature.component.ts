@@ -1,6 +1,29 @@
 import { Component, OnInit } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardActions,
+  MatCardContent,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+  MatExpansionPanelDescription,
+} from '@angular/material/expansion';
+
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import {
   TokenLocation,
@@ -9,12 +32,14 @@ import {
   ComponentCanDeactivate,
   LayerHint,
 } from '@myrmidon/cadmus-core';
-
-import { DialogService } from '@myrmidon/ngx-mat-tools';
-
 import { EditedLayerRepository } from '@myrmidon/cadmus-state';
 import { UserLevelService } from '@myrmidon/cadmus-api';
 import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
+import {
+  DecoratedTokenTextComponent,
+  LayerHintsComponent,
+} from '@myrmidon/cadmus-ui';
+import { CurrentItemBarComponent, CurrentLayerPartBarComponent } from '@myrmidon/cadmus-ui-pg';
 
 /**
  * Token-based text layer part feature editor. This is a special type of editor,
@@ -27,7 +52,29 @@ import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
   selector: 'cadmus-token-text-layer-part-feature',
   templateUrl: './token-text-layer-part-feature.component.html',
   styleUrls: ['./token-text-layer-part-feature.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatIconButton,
+    MatTooltip,
+    MatCardActions,
+    MatToolbar,
+    MatCardContent,
+    MatProgressBar,
+    MatButton,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    AsyncPipe,
+    LayerHintsComponent,
+    CurrentItemBarComponent,
+    CurrentLayerPartBarComponent,
+    DecoratedTokenTextComponent,
+  ],
 })
 export class TokenTextLayerPartFeatureComponent
   implements OnInit, ComponentCanDeactivate

@@ -1,11 +1,20 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
+
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
@@ -15,7 +24,19 @@ import { IndexKeyword } from '../index-keywords-part';
   selector: 'cadmus-index-keyword',
   templateUrl: './index-keyword.component.html',
   styleUrls: ['./index-keyword.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatInput,
+    MatError,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+  ],
 })
 export class IndexKeywordComponent implements OnInit {
   private _keyword?: IndexKeyword;

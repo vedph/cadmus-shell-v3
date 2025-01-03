@@ -1,13 +1,6 @@
-import {
-  async,
-  ComponentFixture,
-  TestBed,
-  waitForAsync,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
-import { RouterTestingModule } from '@angular/router/testing';
 import { WitnessesFragmentFeatureComponent } from './witnesses-fragment-feature.component';
 import {
   WitnessesFragmentComponent,
@@ -27,10 +20,9 @@ describe('WitnessesFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        RouterTestingModule,
         NgeMonacoModule,
         NgeMarkdownModule,
-        CadmusUiModule,
+        WitnessesFragmentFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
@@ -43,11 +35,7 @@ describe('WitnessesFragmentFeatureComponent', () => {
           },
         },
       ],
-      declarations: [
-        CurrentItemBarComponent,
-        WitnessesFragmentComponent,
-        WitnessesFragmentFeatureComponent,
-      ],
+      declarations: [CurrentItemBarComponent, WitnessesFragmentComponent],
     }).compileComponents();
   }));
 

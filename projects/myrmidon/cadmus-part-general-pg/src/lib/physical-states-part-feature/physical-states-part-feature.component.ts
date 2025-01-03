@@ -3,13 +3,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { PhysicalStatesPartComponent } from '@myrmidon/cadmus-part-general-ui';
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
 
 @Component({
   selector: 'cadmus-physical-states-part-feature',
   templateUrl: './physical-states-part-feature.component.html',
   styleUrl: './physical-states-part-feature.component.scss',
-  standalone: false,
+  imports: [CurrentItemBarComponent, PhysicalStatesPartComponent],
 })
 export class PhysicalStatesPartFeatureComponent
   extends EditPartFeatureBase

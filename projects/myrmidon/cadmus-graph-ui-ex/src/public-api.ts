@@ -10,5 +10,3 @@ export * from './lib/components/triple-filter/triple-filter.component';
 export * from './lib/pipes/graph-node-label.pipe';
 
 export * from './lib/graph-walker';
-
-export * from './lib/cadmus-graph-ui-ex.module';

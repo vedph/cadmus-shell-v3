@@ -13,5 +13,3 @@ export * from './lib/pipes/sort.pipe';
 
 export * from './lib/services/library-route.service';
 export * from './lib/services/text-layer.service';
-
-export * from './lib/cadmus-core.module';

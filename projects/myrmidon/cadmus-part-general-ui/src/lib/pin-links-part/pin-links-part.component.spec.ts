@@ -8,8 +8,8 @@ describe('PinLinksPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PinLinksPartComponent ]
-    })
+    imports: [PinLinksPartComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(PinLinksPartComponent);

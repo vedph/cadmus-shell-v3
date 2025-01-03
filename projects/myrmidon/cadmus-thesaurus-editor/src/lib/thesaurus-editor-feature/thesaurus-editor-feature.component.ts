@@ -1,23 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 
-import { User } from '@myrmidon/auth-jwt-login';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
-import { ThesaurusService, UserLevelService } from '@myrmidon/cadmus-api';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { User } from '@myrmidon/auth-jwt-login';
+
 import { Thesaurus, ThesaurusFilter } from '@myrmidon/cadmus-core';
+import { ThesaurusService, UserLevelService } from '@myrmidon/cadmus-api';
 import {
   EditedThesaurusRepository,
   AppRepository,
 } from '@myrmidon/cadmus-state';
+import { ThesaurusEditorComponent } from '@myrmidon/cadmus-thesaurus-ui';
 
 @Component({
   selector: 'lib-thesaurus-editor-feature',
   templateUrl: './thesaurus-editor-feature.component.html',
   styleUrls: ['./thesaurus-editor-feature.component.css'],
-  standalone: false,
+  imports: [MatProgressBar, AsyncPipe, ThesaurusEditorComponent],
 })
 export class ThesaurusEditorFeatureComponent implements OnInit {
   public id?: string;
@@ -46,11 +50,10 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     this.saving$ = this._repository.saving$;
   }
 
-  ngOnInit(): void {
-    // this._authService.currentUser$.subscribe((user: User | null) => {
-    //   this.user = user ?? undefined;
-    //   this.userLevel = this._userLevelService.getCurrentUserLevel();
-    // });
+  public async ngOnInit() {
+    // ensure app data is loaded
+    this._appRepository.load();
+
     // update form whenever we get new data
     this._repository.thesaurus$.subscribe(
       (thesaurus: Thesaurus | undefined) => {

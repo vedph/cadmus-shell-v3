@@ -254,7 +254,7 @@ export class GraphWalker {
         console.error(error);
       } else {
         this._error$.next('Walker error');
-        console.error(JSON.stringify(error));
+        console.error('Walker error', error);
       }
     } else {
       this._error$.next('Walker error');

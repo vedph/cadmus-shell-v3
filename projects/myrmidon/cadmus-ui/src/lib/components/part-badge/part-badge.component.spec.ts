@@ -9,9 +9,8 @@ describe('PartBadgeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [CadmusApiModule],
-      declarations: [PartBadgeComponent],
-    }).compileComponents();
+    imports: [CadmusApiModule, PartBadgeComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {

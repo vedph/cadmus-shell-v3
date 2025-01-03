@@ -1,8 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, Observable } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
+import { map, Observable, Subscription } from 'rxjs';
+
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardActions,
+  MatCardContent,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+  MatExpansionPanelDescription,
+} from '@angular/material/expansion';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
+
+import { LayerHintsComponent } from '@myrmidon/cadmus-ui';
 import {
   TokenLocation,
   LibraryRouteService,
@@ -10,11 +33,19 @@ import {
   LayerHint,
 } from '@myrmidon/cadmus-core';
 import { UserLevelService } from '@myrmidon/cadmus-api';
-import { TextTileRow, TiledTextPart } from '@myrmidon/cadmus-part-general-ui';
-
-import { TiledTextLayerView, TextTileLayerView } from './tiled-text-layer-view';
+import {
+  TextTileComponent,
+  TextTileRow,
+  TiledTextPart,
+} from '@myrmidon/cadmus-part-general-ui';
 import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
 import { EditedLayerRepository } from '@myrmidon/cadmus-state';
+
+import { TiledTextLayerView, TextTileLayerView } from './tiled-text-layer-view';
+import {
+  CurrentItemBarComponent,
+  CurrentLayerPartBarComponent,
+} from '@myrmidon/cadmus-ui-pg';
 
 /**
  * Tiled text layer part editor.
@@ -33,11 +64,34 @@ import { EditedLayerRepository } from '@myrmidon/cadmus-state';
   selector: 'cadmus-tiled-text-layer-part-feature',
   templateUrl: './tiled-text-layer-part-feature.component.html',
   styleUrls: ['./tiled-text-layer-part-feature.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatIconButton,
+    MatTooltip,
+    MatCardActions,
+    MatToolbar,
+    MatCardContent,
+    MatProgressBar,
+    MatButton,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    AsyncPipe,
+    CurrentItemBarComponent,
+    CurrentLayerPartBarComponent,
+    LayerHintsComponent,
+    TextTileComponent,
+  ],
 })
 export class TiledTextLayerPartFeatureComponent
-  implements OnInit, ComponentCanDeactivate
+  implements OnInit, OnDestroy, ComponentCanDeactivate
 {
+  private _sub?: Subscription;
   public view?: TiledTextLayerView;
   public selectedTile?: TextTileLayerView;
 
@@ -96,10 +150,10 @@ export class TiledTextLayerPartFeatureComponent
     return true;
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // when the base text changes, load all the fragments locations
     // and setup their UI state
-    this.rows$.subscribe((rows) => {
+    this._sub = this.rows$.subscribe((rows) => {
       this.view = rows ? new TiledTextLayerView(rows) : undefined;
       this.view?.setFragmentLocations(this._repository.getLocations());
     });
@@ -112,6 +166,10 @@ export class TiledTextLayerPartFeatureComponent
     if (this.partId) {
       this._repository.load(this.itemId, this.partId);
     }
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   public refreshBreakChance(): void {

@@ -1,20 +1,34 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FormBuilder, FormControl } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+
+import { FlatLookupPipe, SafeHtmlPipe } from '@myrmidon/ngx-tools';
+import {
+  TextBlock,
+  TextBlockEventArgs,
+  TextBlockViewComponent,
+} from '@myrmidon/cadmus-text-block-view';
+
+import { Item, LayerPartInfo, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   PreviewService,
   ItemService,
   TextBlockRow,
   RenditionResult,
 } from '@myrmidon/cadmus-api';
-import { Item, LayerPartInfo, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import {
-  TextBlock,
-  TextBlockEventArgs,
-} from '@myrmidon/cadmus-text-block-view';
 
 import { PartPreviewSource } from '../part-preview/part-preview.component';
 
@@ -25,7 +39,20 @@ import { PartPreviewSource } from '../part-preview/part-preview.component';
   selector: 'cadmus-text-preview',
   templateUrl: './text-preview.component.html',
   styleUrls: ['./text-preview.component.css'],
-  standalone: false,
+  imports: [
+    MatProgressBar,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    FormsModule,
+    ReactiveFormsModule,
+    MatOption,
+    TextBlockViewComponent,
+    MatTabGroup,
+    MatTab,
+    FlatLookupPipe,
+    SafeHtmlPipe,
+  ],
 })
 export class TextPreviewComponent implements OnInit {
   private _source: PartPreviewSource | undefined | null;
@@ -121,9 +148,10 @@ export class TextPreviewComponent implements OnInit {
         },
         error: (error) => {
           this.busy = false;
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(
+            `Error previewing text part ${this._source!.partId}`,
+            error
+          );
           this._snackbar.open(
             'Error previewing text part ' + this._source!.partId
           );
@@ -164,9 +192,10 @@ export class TextPreviewComponent implements OnInit {
         },
         error: (error) => {
           this.busy = false;
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(
+            `Error previewing text part ${this._source!.partId}`,
+            error
+          );
           this._snackbar.open(
             'Error previewing text part ' + this._source!.partId
           );
@@ -209,9 +238,10 @@ export class TextPreviewComponent implements OnInit {
         },
         error: (error) => {
           this.busy = false;
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error(
+            `Error previewing text part ${this._source!.partId}`,
+            error
+          );
           this._snackbar.open(
             'Error previewing text part ' + this._source!.partId
           );

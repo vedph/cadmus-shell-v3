@@ -3,10 +3,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 /**
  * Sort pipe. Use like *ngFor="let i of items | sort:'propname'".
  */
-@Pipe({
-  name: 'sort',
-  standalone: false,
-})
+@Pipe({ name: 'sort' })
 export class SortPipe implements PipeTransform {
   transform(value: any[], propName: string): unknown {
     if (!value || !Array.isArray(value)) {

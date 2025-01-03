@@ -8,8 +8,8 @@ describe('ThesaurusListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ThesaurusListComponent],
-    }).compileComponents();
+    imports: [ThesaurusListComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {

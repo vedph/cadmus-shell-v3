@@ -17,53 +17,50 @@
     $first; let last = $last) {
     <div>
       <!-- child form -->
-      <div [formGroupName]="i">
+      <div [formGroupName]="i" class="form-row">
         <!-- child actions -->
-        {{ i + 1 }}.
-        <button
-          mat-icon-button
-          type="button"
-          matTooltip="Remove this author"
-          (click)="removeAuthor(i)"
-        >
-          <mat-icon class="mat-warn">remove_circle</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          type="button"
-          matTooltip="Add author below"
-          (click)="addAuthorBelow(i)"
-        >
-          <mat-icon class="mat-primary">add_circle</mat-icon>
-        </button>
-        <button
-          [disabled]="first"
-          mat-icon-button
-          type="button"
-          matTooltip="Move author up"
-          (click)="moveAuthorUp(i)"
-        >
-          <mat-icon>arrow_upward</mat-icon>
-        </button>
-        <button
-          [disabled]="last"
-          mat-icon-button
-          type="button"
-          matTooltip="Move author down"
-          (click)="moveAuthorDown(i)"
-        >
-          <mat-icon>arrow_downward</mat-icon>
-        </button>
+        <div>
+          {{ i + 1 }}.
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Remove this author"
+            (click)="removeAuthor(i)"
+          >
+            <mat-icon class="mat-warn">remove_circle</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Add author below"
+            (click)="addAuthorBelow(i)"
+          >
+            <mat-icon class="mat-primary">add_circle</mat-icon>
+          </button>
+          <button
+            [disabled]="first"
+            mat-icon-button
+            type="button"
+            matTooltip="Move author up"
+            (click)="moveAuthorUp(i)"
+          >
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button
+            [disabled]="last"
+            mat-icon-button
+            type="button"
+            matTooltip="Move author down"
+            (click)="moveAuthorDown(i)"
+          >
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+        </div>
         <!-- child controls -->
         <!-- last -->
         <mat-form-field>
           <mat-label>last name</mat-label>
-          <input
-            matInput
-            formControlName="lastName"
-            spellcheck="false"
-            autofocus
-          />
+          <input matInput formControlName="lastName" spellcheck="false" />
           @if ( item.get('lastName')?.hasError('required') &&
           (item.get('lastName')?.dirty || item.get('lastName')?.touched) ) {
           <mat-error>last name required</mat-error>
@@ -89,7 +86,7 @@
             }
           </mat-select>
         </mat-form-field>
-        } @if (!roleEntries?.length) {
+        } @else {
         <mat-form-field>
           <mat-label>role</mat-label>
           <input matInput formControlName="roleId" spellcheck="false" />

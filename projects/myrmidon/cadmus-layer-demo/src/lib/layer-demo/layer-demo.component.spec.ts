@@ -8,8 +8,8 @@ describe('LayerDemoComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ LayerDemoComponent ]
-    })
+    imports: [LayerDemoComponent]
+})
     .compileComponents();
   }));
 

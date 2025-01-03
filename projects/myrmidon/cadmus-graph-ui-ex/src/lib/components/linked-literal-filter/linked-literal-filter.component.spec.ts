@@ -8,8 +8,8 @@ describe('LinkedLiteralFilterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LinkedLiteralFilterComponent ]
-    })
+    imports: [LinkedLiteralFilterComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(LinkedLiteralFilterComponent);

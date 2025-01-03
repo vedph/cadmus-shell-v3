@@ -8,8 +8,8 @@ describe('ItemEditorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ItemEditorComponent ]
-    })
+    imports: [ItemEditorComponent]
+})
     .compileComponents();
   }));
 

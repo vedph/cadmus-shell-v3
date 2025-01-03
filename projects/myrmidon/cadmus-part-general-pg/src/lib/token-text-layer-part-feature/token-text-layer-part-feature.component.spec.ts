@@ -4,14 +4,11 @@ import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feat
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import {
   CurrentItemBarComponent,
   CurrentLayerPartBarComponent,
 } from '@myrmidon/cadmus-ui-pg';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 import { TILED_TEXT_PART_TYPEID } from '@myrmidon/cadmus-part-general-ui';
 
 describe('TokenTextLayerPartFeatureComponent', () => {
@@ -25,9 +22,7 @@ describe('TokenTextLayerPartFeatureComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        RouterTestingModule,
-        CadmusCoreModule,
-        CadmusUiModule,
+        TokenTextLayerPartFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
@@ -54,11 +49,7 @@ describe('TokenTextLayerPartFeatureComponent', () => {
           },
         },
       ],
-      declarations: [
-        CurrentItemBarComponent,
-        CurrentLayerPartBarComponent,
-        TokenTextLayerPartFeatureComponent,
-      ],
+      declarations: [CurrentItemBarComponent, CurrentLayerPartBarComponent],
     }).compileComponents();
   }));
 

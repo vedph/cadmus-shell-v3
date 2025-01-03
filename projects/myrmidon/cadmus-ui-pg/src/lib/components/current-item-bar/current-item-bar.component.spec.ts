@@ -8,8 +8,8 @@ describe('CurrentItemBarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [CurrentItemBarComponent],
-    }).compileComponents();
+    imports: [CurrentItemBarComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {

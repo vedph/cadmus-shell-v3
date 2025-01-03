@@ -4,12 +4,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { PinLinksPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-pin-links-part-feature',
   templateUrl: './pin-links-part-feature.component.html',
   styleUrls: ['./pin-links-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, PinLinksPartComponent],
 })
 export class PinLinksPartFeatureComponent
   extends EditPartFeatureBase

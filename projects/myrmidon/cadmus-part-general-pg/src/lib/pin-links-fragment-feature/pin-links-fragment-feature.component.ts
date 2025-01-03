@@ -7,12 +7,19 @@ import {
   EditFragmentFeatureBase,
   FragmentEditorService,
 } from '@myrmidon/cadmus-state';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { PinLinksFragmentComponent } from '@myrmidon/cadmus-part-general-ui';
+import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
 
 @Component({
   selector: 'cadmus-pin-links-fragment-feature',
   templateUrl: './pin-links-fragment-feature.component.html',
   styleUrls: ['./pin-links-fragment-feature.component.css'],
-  standalone: false,
+  imports: [
+    CurrentItemBarComponent,
+    DecoratedTokenTextComponent,
+    PinLinksFragmentComponent,
+  ],
 })
 export class PinLinksFragmentFeatureComponent
   extends EditFragmentFeatureBase

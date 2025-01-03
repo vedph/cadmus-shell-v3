@@ -4,13 +4,39 @@ import {
   FormGroup,
   FormControl,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+
+import { MspOperation, MspOperator } from '../msp-operation';
+import {
+  MatCard,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import {
+  MatFormField,
+  MatLabel,
+  MatHint,
+  MatSuffix,
+  MatError,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
 
 import { TextRange } from '@myrmidon/cadmus-core';
 
 import { MspValidators } from '../msp-validators';
-import { MspOperation, MspOperator } from '../msp-operation';
 
 /**
  * Single misspelling operation editor.
@@ -19,7 +45,27 @@ import { MspOperation, MspOperator } from '../msp-operation';
   selector: 'cadmus-msp-operation',
   templateUrl: './msp-operation.component.html',
   styleUrls: ['./msp-operation.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardContent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatHint,
+    MatIconButton,
+    MatSuffix,
+    MatIcon,
+    MatError,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatSelect,
+    MatOption,
+    MatCardActions,
+    MatTooltip,
+  ],
 })
 export class MspOperationComponent implements OnInit {
   private _operation?: MspOperation;

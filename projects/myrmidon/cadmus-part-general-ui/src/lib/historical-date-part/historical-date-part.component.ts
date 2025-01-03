@@ -4,16 +4,42 @@ import {
   FormControl,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
 import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
+
+import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import {
   HistoricalDate,
   HistoricalDateModel,
+  HistoricalDateComponent,
 } from '@myrmidon/cadmus-refs-historical-date';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import {
+  DocReference,
+  DocReferencesComponent,
+} from '@myrmidon/cadmus-refs-doc-references';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
-import { DocReference } from '@myrmidon/cadmus-refs-doc-references';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   HistoricalDatePart,
@@ -24,7 +50,23 @@ import {
   selector: 'cadmus-historical-date-part',
   templateUrl: './historical-date-part.component.html',
   styleUrls: ['./historical-date-part.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    HistoricalDateComponent,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    DocReferencesComponent,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class HistoricalDatePartComponent
   extends ModelEditorComponentBase<HistoricalDatePart>
@@ -101,12 +143,10 @@ export class HistoricalDatePartComponent
     return part;
   }
 
-  public onDateChange(date?: HistoricalDateModel): void {
-    if (date) {
-      this.date.setValue(date);
-      this.date.markAsDirty();
-      this.date.updateValueAndValidity();
-    }
+  public onDateChange(date: HistoricalDateModel): void {
+    this.date.setValue(date);
+    this.date.markAsDirty();
+    this.date.updateValueAndValidity();
   }
 
   public onReferencesChange(references: DocReference[]): void {

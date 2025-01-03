@@ -1,6 +1,11 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  AbstractControl,
+  ValidationErrors,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import {
   FormBuilder,
   FormControl,
@@ -9,7 +14,27 @@ import {
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
+import { MatButton } from '@angular/material/button';
+import {
+  MatFormField,
+  MatLabel,
+  MatHint,
+  MatError,
+} from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatInput } from '@angular/material/input';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardTitle,
+  MatCardContent,
+} from '@angular/material/card';
+
 import { EnvService } from '@myrmidon/ngx-tools';
+
 import { UploadService } from '@myrmidon/cadmus-api';
 
 class FileExtensionValidator {
@@ -37,7 +62,24 @@ interface UploadResult {
   selector: 'cadmus-thesaurus-import',
   templateUrl: './thesaurus-import.component.html',
   styleUrls: ['./thesaurus-import.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatButton,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatHint,
+    MatError,
+    MatCheckbox,
+    MatInput,
+    MatProgressBar,
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+  ],
 })
 export class ThesaurusImportComponent {
   private _sub?: Subscription;

@@ -4,21 +4,39 @@ import {
   FormControl,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardSubtitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+
+import { CloseSaveButtonsComponent, EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
 import {
   TextLayerService,
   ThesauriSet,
   ThesaurusEntry,
   TokenLocation,
 } from '@myrmidon/cadmus-core';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
 
-import { QuotationWorksService } from './quotation-works.service';
+import { QuotationEntryComponent } from '../quotation-entry/quotation-entry.component';
 import { QuotationsFragment, QuotationEntry } from '../quotations-fragment';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { QuotationWorksService } from './quotation-works.service';
 
 /**
  * Quotations fragment editor.
@@ -28,7 +46,25 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
   selector: 'cadmus-quotations-fragment',
   templateUrl: './quotations-fragment.component.html',
   styleUrls: ['./quotations-fragment.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardSubtitle,
+    MatCardContent,
+    MatTabGroup,
+    MatTab,
+    MatIconButton,
+    MatTooltip,
+    MatButton,
+    MatCardActions,
+    QuotationEntryComponent,
+    CloseSaveButtonsComponent
+  ],
 })
 export class QuotationsFragmentComponent
   extends ModelEditorComponentBase<QuotationsFragment>

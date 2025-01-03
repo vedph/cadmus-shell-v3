@@ -1,16 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { AppRepository, EditedLayerRepository } from '@myrmidon/cadmus-state';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+
 import { TextLayerPart } from '@myrmidon/cadmus-core';
 import { FacetService } from '@myrmidon/cadmus-api';
+import { AppRepository, EditedLayerRepository } from '@myrmidon/cadmus-state';
 import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'cadmus-current-layer-part-bar',
   templateUrl: './current-layer-part-bar.component.html',
   styleUrls: ['./current-layer-part-bar.component.css'],
-  standalone: false,
 })
-export class CurrentLayerPartBarComponent implements OnInit {
+export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
+  private _subs: Subscription[] = [];
+
   constructor(
     private _appRepository: AppRepository,
     private _editedItemRepository: EditedItemRepository,
@@ -63,12 +66,22 @@ export class CurrentLayerPartBarComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-    this._editedItemRepository.facet$.subscribe((_) => {
-      this.updateLabels();
-    });
-    this._editedLayerRepository.part$.subscribe((_) => {
-      this.updateLabels();
-    });
+  public ngOnInit(): void {
+    this._subs.push(
+      this._editedItemRepository.facet$.subscribe((_) => {
+        this.updateLabels();
+      })
+    );
+    this._subs.push(
+      this._editedLayerRepository.part$.subscribe((_) => {
+        this.updateLabels();
+      })
+    );
+    // ensure app data is loaded
+    this._appRepository.load();
+  }
+
+  public ngOnDestroy(): void {
+    this._subs.forEach((s) => s.unsubscribe());
   }
 }

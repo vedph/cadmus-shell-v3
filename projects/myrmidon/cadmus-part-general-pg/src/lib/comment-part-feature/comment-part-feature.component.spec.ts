@@ -8,8 +8,8 @@ describe('CommentPartFeatureComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CommentPartFeatureComponent ]
-    })
+    imports: [CommentPartFeatureComponent]
+})
     .compileComponents();
   });
 

@@ -2,10 +2,8 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
 
 import { ApparatusFragmentComponent } from './apparatus-fragment.component';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { ApparatusEntryComponent } from '../apparatus-entry/apparatus-entry.component';
 
 describe('ApparatusFragmentComponent', () => {
@@ -19,10 +17,9 @@ describe('ApparatusFragmentComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        ApparatusEntryComponent,
+        ApparatusFragmentComponent,
       ],
-      declarations: [ApparatusEntryComponent, ApparatusFragmentComponent],
     }).compileComponents();
   }));
 

@@ -1,17 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
 import { take } from 'rxjs/operators';
 
-import { UriNode, ThesaurusService, ItemService } from '@myrmidon/cadmus-api';
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+import { Node as GraphNode } from '@swimlane/ngx-graph';
+
 import {
   LibraryRouteService,
   ThesauriSet,
   ThesaurusEntry,
 } from '@myrmidon/cadmus-core';
-import { Node as GraphNode } from '@swimlane/ngx-graph';
-import { WalkerNodeData } from '@myrmidon/cadmus-graph-ui-ex';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { UriNode, ThesaurusService, ItemService } from '@myrmidon/cadmus-api';
+import {
+  GraphWalkerComponent,
+  WalkerNodeData,
+} from '@myrmidon/cadmus-graph-ui-ex';
+import {
+  GraphNodeListComponent,
+  GraphTripleListComponent,
+} from '@myrmidon/cadmus-graph-ui';
 
 const TAB_NODES = 0;
 const TAB_WALKER = 2;
@@ -20,7 +30,16 @@ const TAB_WALKER = 2;
   selector: 'cadmus-graph-editor-ex-feature',
   templateUrl: './graph-editor-ex-feature.component.html',
   styleUrls: ['./graph-editor-ex-feature.component.css'],
-  standalone: false,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    MatTabGroup,
+    MatTab,
+    GraphNodeListComponent,
+    GraphTripleListComponent,
+    GraphWalkerComponent,
+  ],
 })
 export class GraphEditorExFeatureComponent implements OnInit {
   public nodeTagEntries?: ThesaurusEntry[];
@@ -41,7 +60,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
     this.walkerNodeId = 0;
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this._thesService
       .getThesauriSet(['graph-node-tags', 'graph-triple-tags'])
       .pipe(take(1))
@@ -51,9 +70,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
           this.tripleTagEntries = set['graph-triple-tags']?.entries;
         },
         error: (error) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-          }
+          console.error('Error getting thesauri set', error);
         },
       });
   }
@@ -121,9 +138,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
             }
           },
           error: (error) => {
-            if (error) {
-              console.error(JSON.stringify(error));
-            }
+            console.error('Error loading part', error);
             this._snackbar.open('Error loading part', 'OK');
           },
         });

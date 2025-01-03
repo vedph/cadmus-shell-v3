@@ -2,10 +2,9 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
 
 import { HistoricalDatePartComponent } from './historical-date-part.component';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
+import { CloseSaveButtonsComponent } from '@myrmidon/cadmus-ui';
 
 describe('HistoricalDatePartComponent', () => {
   let component: HistoricalDatePartComponent;
@@ -18,10 +17,9 @@ describe('HistoricalDatePartComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        CadmusMaterialModule,
-        CadmusUiModule,
+        CloseSaveButtonsComponent,
+        HistoricalDatePartComponent,
       ],
-      declarations: [HistoricalDatePartComponent],
     }).compileComponents();
   }));
 

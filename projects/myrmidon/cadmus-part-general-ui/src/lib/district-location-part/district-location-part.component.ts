@@ -5,12 +5,34 @@ import {
   Validators,
   FormGroup,
   UntypedFormGroup,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import {
+  ProperName,
+  ProperNameComponent,
+} from '@myrmidon/cadmus-refs-proper-name';
+
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
-import { ProperName } from '@myrmidon/cadmus-refs-proper-name';
+import {
+  CloseSaveButtonsComponent,
+  EditedObject,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   DistrictLocationPart,
@@ -25,7 +47,23 @@ import {
   selector: 'cadmus-district-location-part',
   templateUrl: './district-location-part.component.html',
   styleUrl: './district-location-part.component.scss',
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardAvatar,
+    MatIcon,
+    MatCardTitle,
+    MatCardContent,
+    ProperNameComponent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatError,
+    MatCardActions,
+    CloseSaveButtonsComponent,
+  ],
 })
 export class DistrictLocationPartComponent
   extends ModelEditorComponentBase<DistrictLocationPart>

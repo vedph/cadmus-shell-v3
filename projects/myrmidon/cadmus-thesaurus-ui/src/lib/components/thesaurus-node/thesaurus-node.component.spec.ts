@@ -8,8 +8,8 @@ describe('ThesaurusNodeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ThesaurusNodeComponent ]
-    })
+    imports: [ThesaurusNodeComponent]
+})
     .compileComponents();
   });
 

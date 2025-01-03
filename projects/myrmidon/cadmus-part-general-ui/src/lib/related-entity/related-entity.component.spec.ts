@@ -8,8 +8,8 @@ describe('RelatedEntityComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [RelatedEntityComponent]
-    });
+    imports: [RelatedEntityComponent]
+});
     fixture = TestBed.createComponent(RelatedEntityComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

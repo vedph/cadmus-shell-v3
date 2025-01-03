@@ -5,12 +5,14 @@ import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { ExternalIdsPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({
   selector: 'cadmus-refs-external-ids-part-feature',
   templateUrl: './external-ids-part-feature.component.html',
   styleUrls: ['./external-ids-part-feature.component.css'],
-  standalone: false,
+  imports: [CurrentItemBarComponent, ExternalIdsPartComponent],
 })
 export class ExternalIdsPartFeatureComponent
   extends EditPartFeatureBase

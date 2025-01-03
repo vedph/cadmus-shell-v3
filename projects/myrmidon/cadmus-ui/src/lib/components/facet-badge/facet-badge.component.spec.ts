@@ -10,9 +10,8 @@ describe('FacetBadgeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule],
-      declarations: [FacetBadgeComponent],
-    }).compileComponents();
+    imports: [FormsModule, ReactiveFormsModule, CadmusMaterialModule, FacetBadgeComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {

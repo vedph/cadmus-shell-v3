@@ -21,9 +21,8 @@
               </mat-select>
             </mat-form-field>
             }
-
             <!-- tag (free) -->
-            @if (!comTagEntries?.length) {
+            @else {
             <mat-form-field>
               <mat-label>tag</mat-label>
               <input matInput [formControl]="tag" />
@@ -84,37 +83,47 @@
         <!-- categories -->
         @if (catEntries?.length) {
         <mat-tab label="categories">
-          <cadmus-thesaurus-tree
-            [entries]="catEntries"
-            rootLabel="categories"
-            [renderLabel]="renderLabel"
-            (entryChange)="onCategoryChange($event)"
-          />
-          <hr />
-          @if (categories.value.length) {
-          <div>
-            <table>
-              <tbody>
-                @for (entry of categories.value; track entry; let i = $index) {
-                <tr>
-                  <td>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      type="button"
-                      matTooltip="Remove this category"
-                      (click)="removeCategory(i)"
-                    >
-                      <mat-icon class="mat-warn">remove_circle</mat-icon>
-                    </button>
-                  </td>
-                  <td [matTooltip]="entry.id">{{ entry.value }}</td>
-                </tr>
-                }
-              </tbody>
-            </table>
+          <div id="container">
+            <div id="picker">
+              <fieldset>
+                <legend>Available Categories</legend>
+                <cadmus-thesaurus-tree
+                  [entries]="catEntries"
+                  rootLabel="categories"
+                  [renderLabel]="renderLabel"
+                  (entryChange)="onCategoryChange($event)"
+                />
+              </fieldset>
+            </div>
+            @if (categories.value.length) {
+            <div id="list">
+              <fieldset>
+                <legend>Assigned Categories</legend>
+                <table>
+                  <tbody>
+                    @for (entry of categories.value; track entry; let i =
+                    $index) {
+                    <tr>
+                      <td>
+                        <button
+                          type="button"
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Remove this category"
+                          (click)="removeCategory(i)"
+                        >
+                          <mat-icon class="mat-warn">remove_circle</mat-icon>
+                        </button>
+                      </td>
+                      <td [matTooltip]="entry.id">{{ entry.value }}</td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </fieldset>
+            </div>
+            }
           </div>
-          }
         </mat-tab>
         }
 

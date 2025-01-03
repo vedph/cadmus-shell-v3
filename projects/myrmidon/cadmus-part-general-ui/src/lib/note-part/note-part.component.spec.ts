@@ -1,9 +1,8 @@
-import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
-import { CadmusUiModule } from '@myrmidon/cadmus-ui';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 
 import { NotePartComponent } from './note-part.component';
@@ -21,9 +20,8 @@ describe('NotePartComponent', () => {
         BrowserAnimationsModule,
         NgeMonacoModule,
         NgeMarkdownModule,
-        CadmusUiModule,
+        NotePartComponent,
       ],
-      declarations: [NotePartComponent],
     }).compileComponents();
   }));
 

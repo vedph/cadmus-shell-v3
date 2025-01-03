@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { map, Observable, of } from 'rxjs';
 
-import { RefLookupService } from '@myrmidon/cadmus-refs-lookup';
-import { RefLookupFilter } from '@myrmidon/cadmus-refs-lookup/public-api';
+import {
+  RefLookupFilter,
+  RefLookupService,
+} from '@myrmidon/cadmus-refs-lookup';
 import { GraphService, UriNode } from '@myrmidon/cadmus-api';
 
 export interface GraphNodeLookupFilter extends RefLookupFilter {

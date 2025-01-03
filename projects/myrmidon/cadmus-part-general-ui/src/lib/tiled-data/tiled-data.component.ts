@@ -1,13 +1,34 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  EventEmitter,
+  Output,
+  OnDestroy,
+} from '@angular/core';
 import {
   FormControl,
   FormBuilder,
   FormGroup,
   Validators,
+  FormsModule,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 
+import {
+  MatFormField,
+  MatLabel,
+  MatSuffix,
+  MatError,
+} from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+
 import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { Subscription } from 'rxjs';
 
 interface Data {
   [key: string]: any;
@@ -27,9 +48,22 @@ const VALUE_MAX_LEN = 100;
   selector: 'cadmus-tiled-data',
   templateUrl: './tiled-data.component.html',
   styleUrls: ['./tiled-data.component.css'],
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatButton,
+    MatIconButton,
+    MatSuffix,
+    MatIcon,
+    MatTooltip,
+    MatError,
+  ],
 })
-export class TiledDataComponent implements OnInit {
+export class TiledDataComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
   private _data: Data;
   private _hiddenData: Data;
   private _hiddenKeys: string[];
@@ -106,12 +140,16 @@ export class TiledDataComponent implements OnInit {
     this.cancel = new EventEmitter<any>();
   }
 
-  ngOnInit(): void {
-    this.keyFilter.valueChanges
+  public ngOnInit(): void {
+    this._sub = this.keyFilter.valueChanges
       .pipe(distinctUntilChanged(), debounceTime(300))
       .subscribe((_) => {
         this.updateDataVisibility();
       });
+  }
+
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
   private matchesFilter(key: string): boolean {
