@@ -8,7 +8,7 @@
 <cadmus-pin-links-fragment
   [identity]="identity"
   [data]="$any(data)"
-  (dataChange)="save($any($event))"
+  (dataChange)="save($event!.value!)"
   (editorClose)="close()"
   (dirtyChange)="onDirtyChange($event)"
 />

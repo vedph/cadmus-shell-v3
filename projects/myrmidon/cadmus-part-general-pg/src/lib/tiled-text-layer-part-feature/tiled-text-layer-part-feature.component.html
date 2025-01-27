@@ -92,7 +92,7 @@
           [color]="tile.frIndex > -1 ? 'yellow' : 'transparent'"
           style="flex: 0 0 auto"
           (click)="selectedTile = tile"
-          (checkedChange)="onTileChecked(iy + 1, ix + 1, $event.checked)"
+          (checkedChange)="onTileChecked(iy + 1, ix + 1, $event)"
           (keydown.control.arrowleft)="selectPrevTile()"
           (keydown.control.arrowright)="selectNextTile()"
         />

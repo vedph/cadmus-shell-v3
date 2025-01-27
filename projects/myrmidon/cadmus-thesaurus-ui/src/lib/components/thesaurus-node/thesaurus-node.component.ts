@@ -1,9 +1,9 @@
 import {
   Component,
+  effect,
   ElementRef,
-  EventEmitter,
-  Input,
-  Output,
+  model,
+  output,
   ViewChild,
 } from '@angular/core';
 import {
@@ -45,7 +45,6 @@ import { ThesaurusNode } from '../../services/thesaurus-nodes.service';
   ],
 })
 export class ThesaurusNodeComponent {
-  private _node: ThesaurusNode | undefined;
   public editing: boolean;
 
   public id: FormControl<string | null>;
@@ -56,26 +55,13 @@ export class ThesaurusNodeComponent {
 
   @ViewChild('nodeVal') nodeValRef: ElementRef | undefined;
 
-  @Input()
-  public get node(): ThesaurusNode | undefined {
-    return this._node;
-  }
-  public set node(value: ThesaurusNode | undefined) {
-    this._node = value;
-    this.updateForm(value);
-  }
+  public readonly node = model<ThesaurusNode>();
 
-  @Output()
-  public nodeChange: EventEmitter<ThesaurusNode>;
-
-  @Output()
-  public signal: EventEmitter<ComponentSignal<ThesaurusNode>>;
+  public readonly signal = output<ComponentSignal<ThesaurusNode>>();
 
   constructor(formBuilder: FormBuilder) {
     this.editing = false;
     this.indent = '';
-    this.nodeChange = new EventEmitter<ThesaurusNode>();
-    this.signal = new EventEmitter<ComponentSignal<ThesaurusNode>>();
     // form
     this.id = formBuilder.control(null, [
       Validators.required,
@@ -88,6 +74,10 @@ export class ThesaurusNodeComponent {
     this.form = formBuilder.group({
       id: this.id,
       value: this.value,
+    });
+
+    effect(() => {
+      this.updateForm(this.node());
     });
   }
 
@@ -113,12 +103,13 @@ export class ThesaurusNodeComponent {
   }
 
   private getNode(): ThesaurusNode {
+    const node = this.node();
     return {
-      ...this._node,
+      ...node,
       id: this.id.value?.trim() || '',
       value: this.value.value?.trim() || '',
-      level: this._node?.level || 0,
-      ordinal: this._node?.ordinal || 0,
+      level: node?.level || 0,
+      ordinal: node?.ordinal || 0,
     };
   }
 
@@ -128,7 +119,7 @@ export class ThesaurusNodeComponent {
     }
     this.form.markAsPristine();
     this.editing = false;
-    this.nodeChange.emit(this.getNode());
+    this.node.set(this.getNode());
   }
 
   public emitSignal(id: string) {

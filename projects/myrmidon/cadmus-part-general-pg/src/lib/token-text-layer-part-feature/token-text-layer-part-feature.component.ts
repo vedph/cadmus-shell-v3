@@ -145,12 +145,7 @@ export class TokenTextLayerPartFeatureComponent
     this.textSize = size;
   }
 
-  ngOnInit(): void {
-    // when the base text changes, load all the fragments locations
-    // this.baseText$.subscribe(_ => {
-    //   this.loadAllFragmentLocations();
-    // });
-
+  public ngOnInit(): void {
     // ensure the container item is loaded
     this._editedItemRepository.ensureItemLoaded(this.itemId);
 

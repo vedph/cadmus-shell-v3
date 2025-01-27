@@ -1,5 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * Pipe to convert a flags bit to its 1-based index.
+ */
 @Pipe({ name: 'flagBit' })
 export class FlagBitPipe implements PipeTransform {
   transform(value: unknown, ...args: unknown[]): string {

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'cadmus-error-list',
@@ -6,6 +6,5 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./error-list.component.css'],
 })
 export class ErrorListComponent {
-  @Input()
-  public errors?: string[];
+  public readonly errors = input<string[]>();
 }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, input, model } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -55,48 +55,32 @@ import { PagedLinkedNodeFilter } from '../../graph-walker';
     MatIconButton,
   ],
 })
-export class LinkedNodeFilterComponent implements OnInit {
-  private _filter: PagedLinkedNodeFilter;
-
+export class LinkedNodeFilterComponent {
   /**
    * True if this component is disabled.
    */
-  @Input()
-  public disabled: boolean | undefined | null;
+  public readonly disabled = input<boolean>();
 
   /**
    * True if this component should show a pager.
    */
-  @Input()
-  public hasPager: boolean | undefined | null;
+  public readonly hasPager = input<boolean>(false);
 
   /**
    * The total number of nodes returned from the last
    * page fetch operation. Used when hasPager is true.
    */
-  @Input()
-  public total: number;
+  public readonly total = input<number>(0);
 
   /**
    * The filter.
    */
-  @Input()
-  public get filter(): PagedLinkedNodeFilter {
-    return this._filter;
-  }
-  public set filter(value: PagedLinkedNodeFilter) {
-    if (this._filter === value) {
-      return;
-    }
-    this._filter = value;
-    this.updateForm(value);
-  }
-
-  /**
-   * Emitted when filter changes.
-   */
-  @Output()
-  public filterChange: EventEmitter<PagedLinkedNodeFilter>;
+  public readonly filter = model<PagedLinkedNodeFilter>({
+    pageNumber: 1,
+    pageSize: 10,
+    otherNodeId: 0,
+    predicateId: 0,
+  });
 
   public otherNodeId: number;
   public predicateId: number;
@@ -123,14 +107,6 @@ export class LinkedNodeFilterComponent implements OnInit {
     this.otherNodeId = 0;
     this.predicateId = 0;
     this.isObject = false;
-    this._filter = {
-      pageNumber: 1,
-      pageSize: 10,
-      otherNodeId: 0,
-      predicateId: 0,
-    };
-    this.total = 0;
-    this.filterChange = new EventEmitter<PagedLinkedNodeFilter>();
     // form
     this.pageNumber = formBuilder.control(1, { nonNullable: true });
     this.pageSize = formBuilder.control(10, { nonNullable: true });
@@ -155,9 +131,11 @@ export class LinkedNodeFilterComponent implements OnInit {
       isSidPrefix: this.isSidPrefix,
       classes: this.classes,
     });
-  }
 
-  ngOnInit(): void {}
+    effect(() => {
+      this.updateForm(this.filter());
+    });
+  }
 
   private updateForm(filter: PagedLinkedNodeFilter): void {
     this.otherNodeId = filter.otherNodeId;
@@ -209,13 +187,9 @@ export class LinkedNodeFilterComponent implements OnInit {
     };
   }
 
-  private emitFilterChange(): void {
-    this.filterChange.emit(this.getFilter());
-  }
-
   public onPageChange(page: PageEvent): void {
     this.pageNumber.setValue(page.pageIndex + 1);
-    this.emitFilterChange();
+    this.filter.set(this.getFilter());
   }
 
   public onClassAdd(node: unknown): void {
@@ -242,15 +216,14 @@ export class LinkedNodeFilterComponent implements OnInit {
 
   public reset(): void {
     this.form.reset();
-    this._filter = this.getFilter();
-    this.filterChange.emit(this._filter);
+    this.filter.set(this.getFilter());
   }
 
   public apply(): void {
     if (this.form.invalid) {
       return;
     }
-    this.emitFilterChange();
+    this.filter.set(this.getFilter());
     this.form.markAsPristine();
   }
 }

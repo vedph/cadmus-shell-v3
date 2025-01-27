@@ -27,10 +27,10 @@
         <cadmus-thesaurus-lookup
           style="display: inline-block"
           [initialValue]="targetId.value || undefined"
-          [lookupFn]="lookupFn"
+          [lookupFn]="lookupFn()"
           label="target ID"
           (entryChange)="onTargetIdChange($event)"
-        ></cadmus-thesaurus-lookup>
+        />
         }
       </div>
       @if (!alias.value) {
@@ -81,9 +81,9 @@
           @for (node of page.items; track node.id) {
           <cadmus-thesaurus-node
             [node]="node"
-            (nodeChange)="addNode($event)"
+            (nodeChange)="addNode($event!)"
             (signal)="onSignal($event)"
-          ></cadmus-thesaurus-node>
+          />
           } @if (page.total === 0) {
           <button
             type="button"
@@ -103,7 +103,7 @@
             [pageSizeOptions]="[5, 10, 20, 50, 100]"
             (page)="onPageChange($event)"
             [showFirstLastButtons]="true"
-          ></mat-paginator>
+          />
         </div>
         }
       </div>

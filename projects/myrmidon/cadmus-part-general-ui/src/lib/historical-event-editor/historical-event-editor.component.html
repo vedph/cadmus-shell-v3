@@ -1,7 +1,7 @@
 <form [formGroup]="form" (submit)="save()">
   <mat-tab-group>
     <mat-tab label="general">
-      @if (eventTypeEntries?.length) {
+      @if (eventTypeEntries()?.length) {
       <!-- bound type -->
       <div id="container">
         <div id="ids" class="form-row">
@@ -16,11 +16,11 @@
             }
           </mat-form-field>
           <!-- tag (bound) -->
-          @if (eventTagEntries?.length) {
+          @if (eventTagEntries()?.length) {
           <mat-form-field>
             <mat-label>tag</mat-label>
             <mat-select [formControl]="tag">
-              @for (e of eventTagEntries; track e.id) {
+              @for (e of eventTagEntries(); track e.id) {
               <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
             </mat-select>
@@ -43,13 +43,15 @@
             <legend>type</legend>
             @if (type.value) {
             <div class="sel-type">
-              {{ type.value | flatLookup : eventTypeEntries : "id" : "value" }}
+              {{
+                type.value | flatLookup : eventTypeEntries() : "id" : "value"
+              }}
             </div>
             } @else {
             <mat-error>no type</mat-error>
             }
             <cadmus-thesaurus-tree
-              [entries]="eventTypeEntries"
+              [entries]="eventTypeEntries()"
               rootLabel="types"
               [renderLabel]="renderLabel"
               (entryChange)="onTypeEntryChange($event)"
@@ -84,11 +86,11 @@
           }
         </mat-form-field>
         <!-- tag (bound) -->
-        @if (eventTagEntries?.length) {
+        @if (eventTagEntries()?.length) {
         <mat-form-field>
           <mat-label>tag</mat-label>
           <mat-select [formControl]="tag">
-            @for (e of eventTagEntries; track e.id) {
+            @for (e of eventTagEntries(); track e.id) {
             <mat-option [value]="e.id">{{ e.value }}</mat-option>
             }
           </mat-select>
@@ -133,10 +135,10 @@
         <fieldset>
           <legend>chronotopes</legend>
           <cadmus-asserted-chronotope-set
-            [tagEntries]="ctTagEntries"
-            [assTagEntries]="assTagEntries"
-            [refTagEntries]="refTagEntries"
-            [refTypeEntries]="refTypeEntries"
+            [tagEntries]="ctTagEntries()"
+            [assTagEntries]="assTagEntries()"
+            [refTagEntries]="refTagEntries()"
+            [refTypeEntries]="refTypeEntries()"
             [chronotopes]="chronotopes.value || undefined"
             (chronotopesChange)="onChronotopesChange($event!)"
           />
@@ -152,9 +154,9 @@
         <fieldset>
           <legend>assertion</legend>
           <cadmus-refs-assertion
-            [assTagEntries]="assTagEntries"
-            [refTagEntries]="refTagEntries"
-            [refTypeEntries]="refTypeEntries"
+            [assTagEntries]="assTagEntries()"
+            [refTagEntries]="refTagEntries()"
+            [refTypeEntries]="refTypeEntries()"
             [assertion]="assertion.value || undefined"
             (assertionChange)="onAssertionChange($event)"
           />
@@ -204,7 +206,7 @@
               </button>
             </td>
             <td>
-              {{ e.relation | flatLookup : relationEntries : "id" : "value" }}
+              {{ e.relation | flatLookup : relationEntries() : "id" : "value" }}
             </td>
             <td>{{ e.id.target.label }}</td>
           </tr>
@@ -218,16 +220,16 @@
         <fieldset>
           <cadmus-related-entity
             [relationEntries]="currentRelEntries"
-            [idScopeEntries]="idScopeEntries"
-            [idTagEntries]="idTagEntries"
-            [assTagEntries]="assTagEntries"
-            [refTagEntries]="refTagEntries"
-            [refTypeEntries]="refTypeEntries"
-            [pinByTypeMode]="pinByTypeMode"
-            [canSwitchMode]="canSwitchMode"
-            [canEditTarget]="canEditTarget"
+            [idScopeEntries]="idScopeEntries()"
+            [idTagEntries]="idTagEntries()"
+            [assTagEntries]="assTagEntries()"
+            [refTagEntries]="refTagEntries()"
+            [refTypeEntries]="refTypeEntries()"
+            [pinByTypeMode]="pinByTypeMode()"
+            [canSwitchMode]="canSwitchMode()"
+            [canEditTarget]="canEditTarget()"
             [entity]="editedEntity"
-            (entityChange)="onEntityChange($event)"
+            (entityChange)="onEntityChange($event!)"
             (editorClose)="closeEntity()"
           />
         </fieldset>

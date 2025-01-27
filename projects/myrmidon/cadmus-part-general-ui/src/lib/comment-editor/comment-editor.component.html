@@ -86,7 +86,7 @@
           <div id="container">
             <div id="picker">
               <fieldset>
-                <legend>Available Categories</legend>
+                <legend>available categories</legend>
                 <cadmus-thesaurus-tree
                   [entries]="catEntries"
                   rootLabel="categories"
@@ -98,7 +98,7 @@
             @if (categories.value.length) {
             <div id="list">
               <fieldset>
-                <legend>Assigned Categories</legend>
+                <legend>assigned categories</legend>
                 <table>
                   <tbody>
                     @for (entry of categories.value; track entry; let i =
@@ -188,7 +188,7 @@
                 </mat-form-field>
                 }
                 <!-- indexId (free) -->
-                @if (!idxEntries?.length) {
+                @else {
                 <mat-form-field>
                   <mat-label>index</mat-label>
                   <input matInput formControlName="indexId" />
@@ -211,7 +211,7 @@
                 </mat-form-field>
                 }
                 <!-- tag (free) -->
-                @if (!keyTagEntries?.length) {
+                @else {
                 <mat-form-field>
                   <mat-label>tag</mat-label>
                   <input matInput formControlName="tag" />
@@ -239,7 +239,7 @@
                 </mat-form-field>
                 }
                 <!-- language (free) -->
-                @if (!langEntries?.length) {
+                @else {
                 <mat-form-field>
                   <mat-label>language</mat-label>
                   <input matInput formControlName="language" />

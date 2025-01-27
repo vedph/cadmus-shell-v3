@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -29,20 +29,11 @@ export interface PartPreviewSource {
   styleUrls: ['./part-preview.component.css'],
   imports: [MatProgressBar, MatButton, MatIcon, SafeHtmlPipe],
 })
-export class PartPreviewComponent implements OnInit {
-  private _source: PartPreviewSource | undefined | null;
-
+export class PartPreviewComponent {
   /**
    * The source of the part to be previewed.
    */
-  @Input()
-  public get source(): PartPreviewSource | undefined | null {
-    return this._source;
-  }
-  public set source(value: PartPreviewSource | undefined | null) {
-    this._source = value;
-    this.refresh();
-  }
+  public readonly source = input<PartPreviewSource>();
 
   public busy?: boolean;
   public item?: Item;
@@ -52,15 +43,15 @@ export class PartPreviewComponent implements OnInit {
     private _previewService: PreviewService,
     private _itemService: ItemService,
     private _snackbar: MatSnackBar
-  ) {}
+  ) {
+    effect(() => this.refresh(this.source()));
+  }
 
-  ngOnInit(): void {}
-
-  public refresh(): void {
+  public refresh(source?: PartPreviewSource): void {
     if (this.busy) {
       return;
     }
-    if (!this._source?.partId) {
+    if (!source?.partId) {
       this.item = undefined;
       this.html = undefined;
       return;
@@ -68,11 +59,8 @@ export class PartPreviewComponent implements OnInit {
 
     this.busy = true;
     forkJoin({
-      item: this._itemService.getItem(this._source.itemId, false),
-      preview: this._previewService.renderPart(
-        this._source.itemId,
-        this._source.partId
-      ),
+      item: this._itemService.getItem(source.itemId, false),
+      preview: this._previewService.renderPart(source.itemId, source.partId),
     })
       .pipe(take(1))
       .subscribe({
@@ -83,8 +71,8 @@ export class PartPreviewComponent implements OnInit {
         },
         error: (error) => {
           this.busy = false;
-          console.error(`Error previewing part ${this._source!.partId}`, error);
-          this._snackbar.open('Error previewing part ' + this._source!.partId);
+          console.error(`Error previewing part ${source!.partId}`, error);
+          this._snackbar.open('Error previewing part ' + source!.partId);
         },
       });
   }

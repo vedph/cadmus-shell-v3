@@ -311,6 +311,7 @@
         </mat-expansion-panel>
         }
         <cadmus-missing-parts
+          [facetDefinition]="(facet$ | async) || undefined"
           [partDefinitions]="(facet$ | async)?.partDefinitions"
           [parts]="(parts$ | async) || undefined"
           [typeThesaurus]="(typeThesaurus$ | async) || undefined"

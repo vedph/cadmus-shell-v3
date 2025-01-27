@@ -42,7 +42,7 @@
       <cadmus-flag-definition-editor
         [flag]="editedFlag"
         (editorClose)="onFlagEditorClose()"
-        (flagChange)="onFlagChange($event)"
+        (flagChange)="onFlagChange($event!)"
       />
     </mat-card-content>
   </mat-card>

@@ -1,4 +1,13 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  output,
+  input,
+  effect,
+} from '@angular/core';
 import {
   FormGroup,
   FormArray,
@@ -30,36 +39,17 @@ import { LayerHint } from '@myrmidon/cadmus-core';
     MatButton,
   ],
 })
-export class LayerHintsComponent implements OnInit {
-  private _hints: LayerHint[];
+export class LayerHintsComponent {
+  public readonly hints = input<LayerHint[]>([]);
 
-  @Input()
-  public get hints(): LayerHint[] {
-    return this._hints;
-  }
-  public set hints(value: LayerHint[]) {
-    this._hints = value || [];
-    this.checks.controls = [];
-    for (let i = 0; i < this._hints.length; i++) {
-      this.checks.push(this._formBuilder.control(false));
-    }
-  }
+  public readonly targetLocation = input<string>();
+  public readonly disabled = input<boolean>();
+  public readonly readonly = input<boolean>();
 
-  @Input()
-  public targetLocation?: string;
-  @Input()
-  public disabled?: boolean;
-  @Input()
-  public readonly?: boolean;
-
-  @Output()
-  public requestEdit: EventEmitter<LayerHint>;
-  @Output()
-  public requestDelete: EventEmitter<LayerHint>;
-  @Output()
-  public requestMove: EventEmitter<LayerHint>;
-  @Output()
-  public requestPatch: EventEmitter<string[]>;
+  public readonly requestEdit = output<LayerHint>();
+  public readonly requestDelete = output<LayerHint>();
+  public readonly requestMove = output<LayerHint>();
+  public readonly requestPatch = output<string[]>();
 
   public form: FormGroup;
   public checks: FormArray;
@@ -68,19 +58,22 @@ export class LayerHintsComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _dialogService: DialogService
   ) {
-    this.requestEdit = new EventEmitter<LayerHint>();
-    this.requestDelete = new EventEmitter<LayerHint>();
-    this.requestMove = new EventEmitter<LayerHint>();
-    this.requestPatch = new EventEmitter<string[]>();
-    this._hints = [];
-
     this.checks = _formBuilder.array([]);
     this.form = _formBuilder.group({
       checks: this.checks,
     });
+
+    effect(() => {
+      this.updateChecks(this.hints());
+    });
   }
 
-  ngOnInit(): void {}
+  private updateChecks(hints: LayerHint[]) {
+    this.checks.controls = [];
+    for (let i = 0; i < hints.length; i++) {
+      this.checks.push(this._formBuilder.control(false));
+    }
+  }
 
   public emitRequestEdit(hint: LayerHint) {
     this.requestEdit.emit(hint);
@@ -124,7 +117,7 @@ export class LayerHintsComponent implements OnInit {
           for (let i = 0; i < this.checks.controls.length; i++) {
             const n = this.checks.controls[i].value;
             if (n) {
-              patches.push(this._hints[n - 1].patchOperation!);
+              patches.push(this.hints()[n - 1].patchOperation!);
             }
           }
           this.requestPatch.emit(patches);

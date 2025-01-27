@@ -7,7 +7,7 @@
 </div>
 <cadmus-quotations-fragment
   [data]="$any(data)"
-  (dataChange)="save($event)"
+  (dataChange)="save($event!.value!)"
   (editorClose)="close()"
   (dirtyChange)="onDirtyChange($event)"
 />

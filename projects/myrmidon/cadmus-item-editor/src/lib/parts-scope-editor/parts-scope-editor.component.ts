@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output, effect } from '@angular/core';
 import {
   FormGroup,
   FormArray,
@@ -51,22 +51,11 @@ export interface PartScopeSetRequest {
   ],
 })
 export class PartsScopeEditorComponent {
-  private _parts: Part[] | undefined;
+  public readonly parts = input<Part[]>();
 
-  @Input()
-  public get parts(): Part[] | undefined {
-    return this._parts;
-  }
-  public set parts(value: Part[] | undefined) {
-    this._parts = value;
-    this.updateForm();
-  }
+  public readonly readonly = input<boolean>();
 
-  @Input()
-  public readonly?: boolean;
-
-  @Output()
-  public setScopeRequest: EventEmitter<PartScopeSetRequest>;
+  public readonly setScopeRequest = output<PartScopeSetRequest>();
 
   public checks: FormArray;
   public scope: FormControl<string | null>;
@@ -80,9 +69,6 @@ export class PartsScopeEditorComponent {
     private _colorService: ColorService,
     private _editedItemRepository: EditedItemRepository
   ) {
-    // events
-    this.setScopeRequest = new EventEmitter<PartScopeSetRequest>();
-    // form
     this.checks = _formBuilder.array([], CustomValidators.minChecked(1));
     this.scope = _formBuilder.control(null, [
       Validators.maxLength(50),
@@ -94,15 +80,19 @@ export class PartsScopeEditorComponent {
     });
     // ensure app data is loaded
     this._appRepository.load();
+
+    effect(() => {
+      this.updateForm(this.parts());
+    });
   }
 
-  private updateForm(): void {
+  private updateForm(parts?: Part[]): void {
     this.checks.clear();
-    if (!this._parts || this._parts.length === 0) {
+    if (!parts?.length) {
       return;
     }
 
-    for (let i = 0; i < this._parts.length; i++) {
+    for (let i = 0; i < parts.length; i++) {
       this.checks.push(this._formBuilder.control(false));
     }
   }
@@ -139,13 +129,14 @@ export class PartsScopeEditorComponent {
   }
 
   public submit(): void {
-    if (this.form.invalid || !this._parts) {
+    if (this.form.invalid || !this.parts()?.length) {
       return;
     }
     const ids: string[] = [];
+    const parts = this.parts()!;
     for (let i = 0; i < this.checks.length; i++) {
       if (this.checks.controls[i].value === true) {
-        ids.push(this._parts[i].id);
+        ids.push(parts[i].id);
       }
     }
 

@@ -1,10 +1,10 @@
 import {
   Component,
-  EventEmitter,
-  Input,
+  effect,
+  input,
   OnDestroy,
   OnInit,
-  Output,
+  output,
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { Observable, Subject, Subscription, take } from 'rxjs';
@@ -65,47 +65,32 @@ import {
 export class GraphWalkerComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
   private readonly _walker: GraphWalker;
-  private _nodeId: number;
 
   /**
    * The root origin node ID.
    */
-  @Input()
-  public get nodeId(): number {
-    return this._nodeId;
-  }
-  public set nodeId(value: number) {
-    if (this._nodeId === value) {
-      return;
-    }
-    this._nodeId = value;
-    this.reset(value);
-  }
+  public readonly nodeId = input<number>(0);
 
   /**
    * True if user can pick a node from the graph.
    */
-  @Input()
-  public canPick?: boolean;
+  public readonly canPick = input<boolean>();
 
   /**
    * True if user can move to the source of a picked node when
    * shift-clicking it.
    */
-  @Input()
-  public canMoveToSource?: boolean;
+  public readonly canMoveToSource = input<boolean>();
 
   /**
    * Emitted when a graph node is picked by user.
    */
-  @Output()
-  public nodePick: EventEmitter<GraphNode>;
+  public readonly nodePick = output<GraphNode>();
 
   /**
    * Emitted when the user requests to move to the source of a picked node.
    */
-  @Output()
-  public moveToSource: EventEmitter<GraphNode>;
+  public readonly moveToSource = output<GraphNode>();
 
   // graph
   public nodes$: Observable<GraphNode[]>;
@@ -128,9 +113,6 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
 
   constructor(graphService: GraphService, private _dialog: DialogService) {
     this._walker = new GraphWalker(graphService);
-    this._nodeId = 0;
-    this.nodePick = new EventEmitter<GraphNode>();
-    this.moveToSource = new EventEmitter<GraphNode>();
 
     this.nodes$ = this._walker.nodes$;
     this.edges$ = this._walker.edges$;
@@ -144,6 +126,13 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
     this.nOutFilter$ = this._walker.nOutFilter$;
     this.nInFilter$ = this._walker.nInFilter$;
     this.childTotals$ = this._walker.childTotals$;
+
+    effect(() => {
+      const id = this.nodeId();
+      if (id) {
+        this.reset(id);
+      }
+    });
   }
 
   public ngOnInit(): void {
@@ -165,7 +154,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   }
 
   public onReset(): void {
-    if (!this._nodeId) {
+    if (!this.nodeId()) {
       return;
     }
     this._dialog
@@ -173,7 +162,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe((yes) => {
         if (yes) {
-          this.reset(this._nodeId);
+          this.reset(this.nodeId());
         }
       });
   }
@@ -207,7 +196,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
     if (!node) {
       return;
     }
-    if (this.canMoveToSource && event.shiftKey) {
+    if (this.canMoveToSource() && event.shiftKey) {
       if (node.data.sid) {
         this.moveToSource.emit(node);
       }

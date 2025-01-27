@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, model, effect, output, input } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   FormBuilder,
@@ -43,8 +43,7 @@ import { QuotationEntry } from '../quotations-fragment';
     AsyncPipe,
   ],
 })
-export class QuotationEntryComponent implements OnInit {
-  private _entry?: QuotationEntry;
+export class QuotationEntryComponent {
   private _workDct: Record<string, ThesaurusEntry[]> | undefined;
 
   // list of authors, collected from _workDct
@@ -52,39 +51,10 @@ export class QuotationEntryComponent implements OnInit {
   // list of selected author's works
   public authorWorks$: BehaviorSubject<ThesaurusEntry[]>;
 
-  @Input()
-  public get entry(): QuotationEntry | undefined {
-    return this._entry;
-  }
-  public set entry(value: QuotationEntry | undefined) {
-    if (this._entry === value) {
-      return;
-    }
-    this._entry = value;
-    this.updateForm(value);
-  }
-
-  @Input()
-  public get workDictionary(): Record<string, ThesaurusEntry[]> | undefined {
-    return this._workDct;
-  }
-  public set workDictionary(
-    value: Record<string, ThesaurusEntry[]> | undefined
-  ) {
-    this._workDct = value;
-    this.authors$.next(this._worksService.collectAuthors(value) || []);
-    setTimeout(() => {
-      this.loadAuthorWorks(this.author.value!);
-    }, 700);
-  }
-
-  @Input()
-  public tagEntries?: ThesaurusEntry[];
-
-  @Output()
-  public editorClose: EventEmitter<any>;
-  @Output()
-  public entryChange: EventEmitter<QuotationEntry>;
+  public readonly entry = model<QuotationEntry>();
+  public readonly workDictionary = input<Record<string, ThesaurusEntry[]>>();
+  public readonly tagEntries = input<ThesaurusEntry[]>();
+  public readonly editorClose = output();
 
   public author: FormControl<string | null>;
   public work: FormControl<string | null>;
@@ -100,10 +70,6 @@ export class QuotationEntryComponent implements OnInit {
     private _dialogService: DialogService,
     private _worksService: QuotationWorksService
   ) {
-    // events
-    this.editorClose = new EventEmitter<any>();
-    this.entryChange = new EventEmitter<QuotationEntry>();
-
     this.authors$ = new BehaviorSubject<ThesaurusEntry[]>([]);
     this.authorWorks$ = new BehaviorSubject<ThesaurusEntry[]>([]);
 
@@ -139,9 +105,22 @@ export class QuotationEntryComponent implements OnInit {
         this.loadAuthorWorks(id);
       }
     });
+
+    effect(() => {
+      this.updateForm(this.entry());
+    });
+
+    effect(() => {
+      this.updateAuthorWorks(this.workDictionary());
+    });
   }
 
-  ngOnInit(): void {}
+  private updateAuthorWorks(dct?: Record<string, ThesaurusEntry[]>): void {
+    this.authors$.next(this._worksService.collectAuthors(dct) || []);
+    setTimeout(() => {
+      this.loadAuthorWorks(this.author.value!);
+    }, 700);
+  }
 
   private loadAuthorWorks(authorId: string): void {
     if (!this._workDct) {
@@ -208,7 +187,6 @@ export class QuotationEntryComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this._entry = this.getEntry();
-    this.entryChange.emit(this._entry);
+    this.entry.set(this.getEntry());
   }
 }

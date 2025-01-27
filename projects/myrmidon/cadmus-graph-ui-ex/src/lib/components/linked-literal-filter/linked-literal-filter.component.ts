@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, effect, input, model } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -42,47 +42,29 @@ import { PagedLinkedLiteralFilter } from '../../graph-walker';
   ],
 })
 export class LinkedLiteralFilterComponent {
-  private _filter: PagedLinkedLiteralFilter;
-
   /**
    * True if this component is disabled.
    */
-  @Input()
-  public disabled: boolean | undefined | null;
+  public readonly disabled = input<boolean>();
 
   /**
    * True if this component should show a pager.
    */
-  @Input()
-  public hasPager: boolean | undefined | null;
+  public readonly hasPager = input<boolean>();
 
   /**
    * The total number of triples returned from the last
    * page fetch operation. Used when hasPager is true.
    */
-  @Input()
-  public total: number;
+  public readonly total = input<number>(0);
 
   /**
    * The filter.
    */
-  @Input()
-  public get filter(): PagedLinkedLiteralFilter {
-    return this._filter;
-  }
-  public set filter(value: PagedLinkedLiteralFilter) {
-    if (this._filter === value) {
-      return;
-    }
-    this._filter = value;
-    this.updateForm(value);
-  }
-
-  /**
-   * Emitted when filter changes.
-   */
-  @Output()
-  public filterChange: EventEmitter<PagedLinkedLiteralFilter>;
+  public readonly filter = model<PagedLinkedLiteralFilter>({
+    pageNumber: 1,
+    pageSize: 10,
+  });
 
   public pageNumber: FormControl<number>;
   public pageSize: FormControl<number>;
@@ -102,13 +84,6 @@ export class LinkedLiteralFilterComponent {
     public lookupService: GraphNodeLookupService,
     private _graphService: GraphService
   ) {
-    this._filter = {
-      pageNumber: 1,
-      pageSize: 10,
-    };
-    this.total = 0;
-    this.filterChange = new EventEmitter<PagedLinkedLiteralFilter>();
-    // form
     this.pageNumber = formBuilder.control(1, { nonNullable: true });
     this.pageSize = formBuilder.control(10, { nonNullable: true });
     this.litPattern = formBuilder.control(null);
@@ -130,6 +105,10 @@ export class LinkedLiteralFilterComponent {
       maxLitNumber: this.maxLitNumber,
       subj: this.subj,
       pred: this.pred,
+    });
+
+    effect(() => {
+      this.updateForm(this.filter());
     });
   }
 
@@ -172,10 +151,6 @@ export class LinkedLiteralFilterComponent {
     };
   }
 
-  private emitFilterChange(): void {
-    this.filterChange.emit(this.getFilter());
-  }
-
   public onSubjectNodeChange(node: unknown): void {
     this.subj.setValue(node as UriNode);
   }
@@ -186,20 +161,19 @@ export class LinkedLiteralFilterComponent {
 
   public onPageChange(page: PageEvent): void {
     this.pageNumber.setValue(page.pageIndex + 1);
-    this.emitFilterChange();
+    this.filter.set(this.getFilter());
   }
 
   public reset(): void {
     this.form.reset();
-    this._filter = this.getFilter();
-    this.filterChange.emit(this._filter);
+    this.filter.set(this.getFilter());
   }
 
   public apply(): void {
     if (this.form.invalid) {
       return;
     }
-    this.emitFilterChange();
+    this.filter.set(this.getFilter());
     this.form.markAsPristine();
   }
 }

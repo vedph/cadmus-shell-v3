@@ -14,7 +14,7 @@
       <dt>item ID</dt>
       <dd>{{ item.id }}</dd>
       <dt>part ID</dt>
-      <dd>{{ source!.partId }}</dd>
+      <dd>{{ source()!.partId }}</dd>
     </dl>
     <div>
       @if (layers.length) {
@@ -24,7 +24,7 @@
           <mat-option [value]="{ id: 'all' }">all</mat-option>
           @for (l of layers; track l) {
           <mat-option [value]="l">{{
-            l.roleId | flatLookup : typeEntries : "id" : "value"
+            l.roleId | flatLookup : typeEntries() : "id" : "value"
           }}</mat-option>
           }
         </mat-select>
@@ -56,7 +56,7 @@
     <mat-tab-group>
       @for (html of frHtml; track html; let i = $index) {
       <mat-tab
-        [label]="$any(frLabels[i] | flatLookup : typeEntries : 'id' : 'value')"
+        [label]="$any(frLabels[i] | flatLookup : typeEntries() : 'id' : 'value')"
       >
         <div [innerHtml]="html | safeHtml : 'html'"></div>
       </mat-tab>

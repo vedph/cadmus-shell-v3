@@ -1,5 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, input, OnInit, output } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -93,39 +93,26 @@ export const renderLabelFromLastColon = (label: string): string => {
   ],
 })
 export class ThesaurusTreeComponent implements OnInit {
-  private _entries?: ThesaurusEntry[];
-
   /**
    * The thesaurus entries.
    */
-  @Input()
-  public get entries(): ThesaurusEntry[] | undefined {
-    return this._entries;
-  }
-  public set entries(value: ThesaurusEntry[] | undefined) {
-    if (this._entries !== value) {
-      this._entries = value;
-      this.initTree();
-    }
-  }
+  public readonly entries = input<ThesaurusEntry[]>();
 
   /**
    * The label for the root node.
    */
-  @Input()
-  public rootLabel: string;
+  public readonly rootLabel = input<string>('-');
   /**
    * The optional node label rendering function.
    */
-  @Input()
-  public renderLabel: ((label: string) => string) | undefined;
+  public readonly renderLabel = input<(label: string) => string>();
   /**
    * Fired when a thesaurus entry is selected.
    */
-  @Output()
-  public entryChange: EventEmitter<ThesaurusEntry>;
+  public readonly entryChange = output<ThesaurusEntry>();
 
   public root: TreeNode;
+  // TODO: use childrenAccessor: https://material.angular.io/cdk/tree/examples
   public treeControl: NestedTreeControl<TreeNode>;
   public treeDataSource: MatTreeNestedDataSource<TreeNode>;
 
@@ -143,33 +130,36 @@ export class ThesaurusTreeComponent implements OnInit {
 
   constructor(formBuilder: FormBuilder) {
     // tree
-    this.entryChange = new EventEmitter<ThesaurusEntry>();
     this.treeControl = new NestedTreeControl<TreeNode>((node) => node.children);
     this.treeDataSource = new MatTreeNestedDataSource<TreeNode>();
-    this.rootLabel = '-';
     this.root = { id: '@root', label: '-', children: [] };
     // filter
     this.filter = formBuilder.control(null);
     this.form = formBuilder.group({
       filter: this.filter,
     });
+
+    effect(() => {
+      this.initTree(this.entries());
+    });
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.initTree();
   }
 
-  private initTree(): void {
+  private initTree(entries?: ThesaurusEntry[]): void {
     this.foundNodes = undefined;
 
-    this.root = this.buildTreeModel(this._entries || []);
+    this.root = this.buildTreeModel(entries || []);
     this.treeDataSource.data = [this.root];
     // https://github.com/angular/components/issues/12469
     this.treeControl.dataNodes = this.treeDataSource.data;
   }
 
   private getLabel(label: string): string {
-    return this.renderLabel ? this.renderLabel(label) : label;
+    const renderer = this.renderLabel();
+    return renderer ? renderer(label) : label;
   }
 
   private addNode(
@@ -238,7 +228,7 @@ export class ThesaurusTreeComponent implements OnInit {
   public buildTreeModel(entries: ThesaurusEntry[], separator = '.'): TreeNode {
     const root: TreeNode = {
       id: '@root',
-      label: this.rootLabel || '-',
+      label: this.rootLabel() || '-',
     };
     if (!entries) {
       return root;

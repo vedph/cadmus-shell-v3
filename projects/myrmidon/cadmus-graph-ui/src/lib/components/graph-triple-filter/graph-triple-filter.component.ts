@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, input, OnDestroy, OnInit } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import {
   FormBuilder,
@@ -61,8 +61,7 @@ export class GraphTripleFilterComponent implements OnInit, OnDestroy {
   public predicateNode$: Observable<UriNode | undefined>;
   public objectNode$: Observable<UriNode | undefined>;
 
-  @Input()
-  public disabled?: boolean;
+  public readonly disabled = input<boolean>();
 
   constructor(
     formBuilder: FormBuilder,

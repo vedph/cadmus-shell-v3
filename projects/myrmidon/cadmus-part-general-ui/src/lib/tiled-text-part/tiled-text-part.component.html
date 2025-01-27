@@ -45,7 +45,7 @@
                 style="flex: 0 0 auto"
                 (click)="selectedTile = tile"
                 (editData)="editTileData(tile)"
-                (tileChange)="onTileChange($event)"
+                (tileChange)="onTileChange($event!)"
               >
                 <div class="tile-placeholder" *cdkDragPlaceholder></div>
               </cadmus-text-tile>

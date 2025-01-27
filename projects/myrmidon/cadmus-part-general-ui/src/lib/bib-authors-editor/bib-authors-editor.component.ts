@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   FormGroup,
@@ -39,23 +39,17 @@ import { BibAuthor } from '../bibliography-part';
   ],
 })
 export class BibAuthorsEditorComponent implements OnInit {
-  @Input()
-  public parentForm?: FormGroup;
-  @Input()
-  public controlName: string;
+  public readonly parentForm = input.required<FormGroup>();
+  public readonly controlName = input<string>('authors');
   // bibliography-author-roles
-  @Input()
-  public roleEntries: ThesaurusEntry[] | undefined;
+  public readonly roleEntries = input<ThesaurusEntry[]>();
 
   public authors?: FormArray;
 
-  constructor(private _formBuilder: FormBuilder) {
-    // defaults
-    this.controlName = 'authors';
-  }
+  constructor(private _formBuilder: FormBuilder) {}
 
-  ngOnInit(): void {
-    this.authors = this.parentForm?.controls[this.controlName] as FormArray;
+  public ngOnInit(): void {
+    this.authors = this.parentForm()?.controls[this.controlName()] as FormArray;
   }
 
   private getAuthorGroup(author?: BibAuthor): FormGroup {

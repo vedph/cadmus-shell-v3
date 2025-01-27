@@ -1,4 +1,4 @@
-@if (node) {
+@if (node()) {
 <div>
   <!-- display -->
   @if (!editing) {
@@ -6,9 +6,9 @@
     <!-- indent -->
     <span class="node-ind">{{ indent }}</span>
     <!-- node -->
-    <span class="node-ord">{{ node.ordinal }}</span>
-    <span class="node-id">{{ node.id }}</span>
-    <span class="node-value">{{ node.value }}</span>
+    <span class="node-ord">{{ node()?.ordinal }}</span>
+    <span class="node-id">{{ node()?.id }}</span>
+    <span class="node-value">{{ node()?.value }}</span>
     <!-- buttons -->
     <span class="node-btn">
       <!-- edit -->
@@ -21,7 +21,7 @@
         <mat-icon class="mat-primary">edit</mat-icon>
       </button>
       <!-- expand -->
-      @if (node.collapsed && node.hasChildren) {
+      @if (node()?.collapsed && node()?.hasChildren) {
       <button
         type="button"
         mat-icon-button
@@ -32,7 +32,7 @@
       </button>
       }
       <!-- collapse -->
-      @if (!node.collapsed && node.hasChildren) {
+      @if (!node()?.collapsed && node()?.hasChildren) {
       <button
         type="button"
         mat-icon-button
@@ -50,7 +50,7 @@
           <mat-icon>subdirectory_arrow_right</mat-icon>
         </button> -->
       <!-- move up -->
-      @if ((node.ordinal || 0) > 1) {
+      @if ((node()?.ordinal || 0) > 1) {
       <button
         type="button"
         mat-icon-button
@@ -61,7 +61,7 @@
       </button>
       }
       <!-- move down -->
-      @if (!node.lastSibling) {
+      @if (!node()?.lastSibling) {
       <button
         type="button"
         mat-icon-button
@@ -108,6 +108,7 @@
       [formGroup]="form"
       (submit)="save()"
       (keydown.esc)="toggleEdit(false)"
+      class="form-row"
     >
       <!-- id -->
       <mat-form-field>
@@ -122,7 +123,6 @@
         }
       </mat-form-field>
       <!-- value -->
-      &nbsp;
       <mat-form-field style="min-width: 300px">
         <mat-label>value</mat-label>
         <input matInput [formControl]="value" #nodeVal />
@@ -132,7 +132,6 @@
         <mat-error>value too long</mat-error>
         }
       </mat-form-field>
-      &nbsp;
       <button
         type="button"
         mat-icon-button

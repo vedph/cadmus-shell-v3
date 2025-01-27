@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, input, model, output } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { take } from 'rxjs/operators';
@@ -49,43 +49,29 @@ import { GraphNodeEditorComponent } from '../graph-node-editor/graph-node-editor
     AsyncPipe,
   ],
 })
-export class GraphNodeListComponent implements OnInit {
-  private _editedNode?: UriNode;
-
+export class GraphNodeListComponent {
   public loading$: Observable<boolean | undefined>;
   public page$: Observable<DataPage<UriNode>>;
 
   /**
    * The currently edited node if any.
    */
-  @Input()
-  public get editedNode(): UriNode | undefined | null {
-    return this._editedNode;
-  }
-  public set editedNode(value: UriNode | undefined | null) {
-    if (this._editedNode === value) {
-      return;
-    }
-    this._editedNode = value || undefined;
-  }
+  public readonly editedNode = model<UriNode>();
 
   /**
    * The optional set of thesaurus entries for node's tags.
    */
-  @Input()
-  public tagEntries?: ThesaurusEntry[];
+  public readonly tagEntries = input<ThesaurusEntry[]>();
 
   /**
    * True if this node list should have a walker button for each node.
    */
-  @Input()
-  public hasWalker?: boolean;
+  public readonly hasWalker = input<boolean>();
 
   /**
    * Emitted when walking a specific node is requested.
    */
-  @Output()
-  public nodeWalk: EventEmitter<UriNode>;
+  public readonly nodeWalk = output<UriNode>();
 
   constructor(
     private _repository: NodeListRepository,
@@ -95,32 +81,29 @@ export class GraphNodeListComponent implements OnInit {
   ) {
     this.loading$ = _repository.loading$;
     this.page$ = _repository.page$;
-    this.nodeWalk = new EventEmitter<UriNode>();
   }
-
-  ngOnInit(): void {}
 
   public onPageChange(event: PageEvent): void {
     this._repository.setPage(event.pageIndex + 1, event.pageSize);
   }
 
   public addNode(): void {
-    this.editedNode = {
+    this.editedNode.set({
       uri: '',
       id: 0,
       sourceType: NodeSourceType.User,
       label: '',
-    };
+    });
   }
 
   public editNode(node: UriNode): void {
-    this.editedNode = node;
+    this.editedNode.set(node);
   }
 
   public onNodeChange(node: UriNode): void {
     this._graphService.addNode(node).subscribe({
       next: (n) => {
-        this.editedNode = undefined;
+        this.editedNode.set(undefined);
         this._repository.reset();
         this._snackbar.open('Node saved', 'OK', {
           duration: 1500,
@@ -134,7 +117,7 @@ export class GraphNodeListComponent implements OnInit {
   }
 
   public onEditorClose(): void {
-    this.editedNode = undefined;
+    this.editedNode.set(undefined);
   }
 
   public deleteNode(node: UriNode): void {

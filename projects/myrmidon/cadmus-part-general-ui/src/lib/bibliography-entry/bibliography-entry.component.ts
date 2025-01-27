@@ -1,10 +1,11 @@
 import {
   Component,
   OnInit,
-  Input,
-  Output,
-  EventEmitter,
   OnDestroy,
+  model,
+  effect,
+  input,
+  output,
 } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
@@ -74,37 +75,19 @@ import { BibAuthorsEditorComponent } from '../bib-authors-editor/bib-authors-edi
 })
 export class BibliographyEntryComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
-  private _entry?: BibEntry;
 
-  @Input()
-  public get entry(): BibEntry | undefined {
-    return this._entry;
-  }
-  public set entry(value: BibEntry | undefined) {
-    if (this._entry === value) {
-      return;
-    }
-    this._entry = value;
-    this.updateForm(value);
-  }
+  public readonly entry = model<BibEntry>();
 
   // bibliography-languages
-  @Input()
-  public langEntries: ThesaurusEntry[] | undefined;
+  public readonly langEntries = input<ThesaurusEntry[]>();
   // bibliography-types
-  @Input()
-  public typeEntries: ThesaurusEntry[] | undefined;
+  public readonly typeEntries = input<ThesaurusEntry[]>();
   // bibliography-tags
-  @Input()
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly tagEntries = input<ThesaurusEntry[]>();
   // bibliography-author-roles
-  @Input()
-  public roleEntries: ThesaurusEntry[] | undefined;
+  public readonly roleEntries = input<ThesaurusEntry[]>();
 
-  @Output()
-  public editorClose: EventEmitter<any>;
-  @Output()
-  public entryChange: EventEmitter<BibEntry>;
+  public readonly editorClose = output();
 
   // form - general
   public key: FormControl<string | null>;
@@ -135,9 +118,6 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
   public form: FormGroup;
 
   constructor(private _formBuilder: FormBuilder) {
-    // events
-    this.editorClose = new EventEmitter<any>();
-    this.entryChange = new EventEmitter<BibEntry>();
     // form - general
     this.key = _formBuilder.control(null, Validators.maxLength(300));
     this.type = _formBuilder.control(null, [
@@ -213,6 +193,10 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       accessDate: this.accessDate,
       firstPage: this.firstPage,
       lastPage: this.lastPage,
+    });
+
+    effect(() => {
+      this.updateForm(this.entry());
     });
   }
 
@@ -384,7 +368,6 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     if (this.form.invalid) {
       return;
     }
-    this._entry = this.getEntry();
-    this.entryChange.emit(this._entry);
+    this.entry.set(this.getEntry());
   }
 }

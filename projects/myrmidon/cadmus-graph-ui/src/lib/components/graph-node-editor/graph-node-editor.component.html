@@ -30,17 +30,17 @@
     <mat-checkbox [formControl]="isClass">is class</mat-checkbox>
 
     <!-- tag -->
-    @if (tagEntries?.length) {
-    <mat-form-field style="width: 8em">
+    @if (tagEntries()?.length) {
+    <mat-form-field>
       <mat-label>tag</mat-label>
       <mat-select [formControl]="tag">
         <mat-option [value]="null">(no tag)</mat-option>
-        @for (e of tagEntries; track e.id) {
+        @for (e of tagEntries(); track e.id) {
         <mat-option [value]="e.id">{{ e.value }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
-    } @if (!tagEntries?.length) {
+    } @else {
     <mat-form-field>
       <mat-label>tag</mat-label>
       <input matInput [formControl]="tag" />

@@ -8,7 +8,7 @@ import {
   withInterceptors,
   withJsonpSupport,
 } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withViewTransitions } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 // material
@@ -41,7 +41,7 @@ import { ITEM_BROWSER_KEYS } from './item-browser-keys';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(routes, withViewTransitions()),
     provideAnimationsAsync(),
     provideNativeDateAdapter(),
     provideHttpClient(

@@ -175,6 +175,18 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+### 12.0.0
+
+- 2025-01-26: ⚠️ migrated to signals with a few BREAKING CHANGES:
+  - in `ModelEditorComponentBase` the following properties are now signals, which implies having to read them with `()`: `identity`, `data`, `disabled`. Correspondingly, the ⚠️ `dataChange` event signature has changed; before migrating, the object was `T`; now it is `EditedObject<T>` to align with the corresponding property. This implies a breaking change: whenever you handle `dataChange` you must pass `event$!.value!` rather than just `event$`.
+  - while refactoring, the missing parts component was fixed so that now it should correctly report all the missing properties in an item editor, providing a button to add them.
+  - fixes to physical measurements part.
+  - fixes to physical states part.
+  - minor aesthetic improvements.
+  - note that the following libraries were not affected by this migration and so their version number did not bump to 12; yet, all the latest versions are meant to work together: `cadmus-core`, `cadmus-api`, `cadmus-profile-core`, `cadmus-state`.
+
+Migration to signals here does not carry a huge impact as all the part/fragment editors do not use input/output properties as they behave like top-level components, being miniature editors for their data model. The migration mostly affected sub-components used by these editors. Yet, it also affected generic libraries, and above all the base component for editors as illustrated above.
+
 ### 11.0.0
 
 - 2025-01-02: BREAKING CHANGES:

@@ -75,7 +75,7 @@
             [langEntries]="langEntries"
             [tagEntries]="tagEntries"
             (editorClose)="onKeywordClose()"
-            (save)="onKeywordSave($event)"
+            (keywordChange)="onKeywordChange($event!)"
           />
         </mat-expansion-panel>
       </fieldset>

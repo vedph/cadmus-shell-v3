@@ -1,10 +1,11 @@
 import {
   Component,
   OnInit,
-  Input,
-  EventEmitter,
-  Output,
   OnDestroy,
+  input,
+  model,
+  output,
+  effect,
 } from '@angular/core';
 import {
   FormControl,
@@ -64,40 +65,16 @@ const VALUE_MAX_LEN = 100;
 })
 export class TiledDataComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
-  private _data: Data;
   private _hiddenData: Data;
-  private _hiddenKeys: string[];
   public keys: DataKey[];
 
-  @Input()
-  public title?: string;
+  public readonly title = input<string>();
 
-  @Input()
-  public get data(): Data {
-    return this._data;
-  }
-  public set data(value: Data) {
-    if (this._data === value) {
-      return;
-    }
-    this._data = value;
-    this.updateForm();
-  }
+  public readonly data = model<Data>({});
 
-  @Input()
-  public get hiddenKeys(): string[] {
-    return this._hiddenKeys;
-  }
-  public set hiddenKeys(value: string[]) {
-    this._hiddenKeys = value;
-    this.updateForm();
-  }
+  public readonly hiddenKeys = input<string[]>([]);
 
-  @Output()
-  public dataChange: EventEmitter<Data>;
-
-  @Output()
-  public cancel: EventEmitter<any>;
+  public readonly cancel = output();
 
   public keyFilter: FormControl<string | null>;
   public filterForm: FormGroup;
@@ -112,9 +89,7 @@ export class TiledDataComponent implements OnInit, OnDestroy {
     private _formBuilder: FormBuilder,
     private _dialogService: DialogService
   ) {
-    this._data = {};
     this._hiddenData = {};
-    this._hiddenKeys = [];
     this.keys = [];
     // filter form
     this.keyFilter = _formBuilder.control(null);
@@ -135,9 +110,10 @@ export class TiledDataComponent implements OnInit, OnDestroy {
     });
     // editing form (controls are dynamically populated)
     this.form = _formBuilder.group({});
-    // events
-    this.dataChange = new EventEmitter<Data>();
-    this.cancel = new EventEmitter<any>();
+
+    effect(() => {
+      this.updateForm(this.data(), this.hiddenKeys());
+    });
   }
 
   public ngOnInit(): void {
@@ -167,23 +143,23 @@ export class TiledDataComponent implements OnInit, OnDestroy {
     return dataKey ? dataKey.visible : false;
   }
 
-  private updateForm(): void {
+  private updateForm(data?: Data, hiddenKeys?: string[]): void {
     // reset
     this.keys = [];
     this._hiddenData = {};
     this.form = this._formBuilder.group({});
 
-    if (!this._data) {
+    if (!data) {
       return;
     }
 
     // collect keys from data's own properties and sort the result
     const cache: DataKey[] = [];
-    Object.getOwnPropertyNames(this._data).forEach((key: string) => {
-      if (!this.hiddenKeys || this.hiddenKeys.indexOf(key) === -1) {
+    Object.getOwnPropertyNames(data).forEach((key: string) => {
+      if (!hiddenKeys || hiddenKeys.indexOf(key) === -1) {
         cache.push({ value: key, visible: this.matchesFilter(key) });
       } else {
-        this._hiddenData[key] = this._data[key];
+        this._hiddenData[key] = data[key];
       }
     });
     cache.sort();
@@ -194,7 +170,7 @@ export class TiledDataComponent implements OnInit, OnDestroy {
       this.form.addControl(
         key.value,
         this._formBuilder.control(
-          this._data[key.value],
+          data[key.value],
           Validators.maxLength(VALUE_MAX_LEN)
         )
       );
@@ -229,7 +205,7 @@ export class TiledDataComponent implements OnInit, OnDestroy {
         if (!ok) {
           return;
         }
-        delete this._data[key.value];
+        delete this.data()![key.value];
         this.updateForm();
       });
   }
@@ -238,9 +214,9 @@ export class TiledDataComponent implements OnInit, OnDestroy {
     if (this.newForm.invalid) {
       return;
     }
-    this._data[this.newKey.value!] = this.newValue.value;
+    this.data()![this.newKey.value!] = this.newValue.value;
     this.newForm.reset();
-    this.updateForm();
+    this.updateForm(this.data());
   }
 
   public close(): void {
@@ -251,7 +227,6 @@ export class TiledDataComponent implements OnInit, OnDestroy {
     if (this.form.invalid) {
       return;
     }
-    this._data = this.getData();
-    this.dataChange.emit(this._data);
+    this.data.set(this.getData());
   }
 }

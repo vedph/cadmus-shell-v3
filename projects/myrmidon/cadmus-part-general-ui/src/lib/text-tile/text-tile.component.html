@@ -1,9 +1,9 @@
-@if (tile) {
+@if (tile()) {
 <div
   class="tile"
   [class.checked]="checked"
-  [class.selected]="selected"
-  [style.background-color]="color || 'transparent'"
+  [class.selected]="selected()"
+  [style.background-color]="color() || 'transparent'"
   tabindex="1"
   (keydown.F2)="edit()"
   (keydown.F3)="requestEditData()"
@@ -12,7 +12,7 @@
   @if (editing) {
   <form [formGroup]="form" (submit)="save()">
     <mat-form-field>
-      <mat-label>text [{{ tile.x }}]</mat-label>
+      <mat-label>text [{{ tile()!.x }}]</mat-label>
       <input
         #textInput
         matInput
@@ -52,7 +52,7 @@
   } @if (!editing) {
   <ng-container style="display: flex; align-items: center">
     <span class="text">{{ text }}</span>
-    @if (!readonly) {
+    @if (!readonly()) {
     <button
       type="button"
       mat-icon-button
@@ -61,7 +61,7 @@
     >
       <mat-icon class="mat-primary">edit</mat-icon>
     </button>
-    } @if (checkable) {
+    } @if (checkable()) {
     <mat-checkbox
       [formControl]="checker"
       matTooltip="Toggle check"

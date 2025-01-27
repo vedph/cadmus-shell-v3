@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-ui-pg",
-  "version": "11.0.0",
+  "version": "12.0.0",
   "description": "Cadmus - general smart UI components.",
   "keywords": [
     "Cadmus"
@@ -19,8 +19,8 @@
     "@myrmidon/cadmus-core": "^11.0.0",
     "@myrmidon/cadmus-api": "^11.0.0",
     "@myrmidon/cadmus-state": "^11.0.0",
-    "@myrmidon/cadmus-ui": "^11.0.0",
-    "@myrmidon/cadmus-item-editor": "^11.0.0"
+    "@myrmidon/cadmus-ui": "^12.0.0",
+    "@myrmidon/cadmus-item-editor": "^12.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

@@ -1,12 +1,23 @@
 import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
   MatDialogConfig,
 } from '@angular/material/dialog';
 import { FlagDefinition } from '@myrmidon/cadmus-core';
-import { MatFormField, MatLabel, MatHint, MatError } from '@angular/material/form-field';
+import {
+  MatFormField,
+  MatLabel,
+  MatHint,
+  MatError,
+} from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
@@ -17,20 +28,20 @@ import { MatButton } from '@angular/material/button';
  * and flags, and returns the entered values if not cancelled.
  */
 @Component({
-    selector: 'cadmus-item-generate-dialog',
-    templateUrl: './item-generate-dialog.component.html',
-    styleUrl: './item-generate-dialog.component.scss',
-    imports: [
-        ReactiveFormsModule,
-        MatFormField,
-        MatLabel,
-        MatInput,
-        MatHint,
-        MatError,
-        MatSelect,
-        MatOption,
-        MatButton,
-    ],
+  selector: 'cadmus-item-generate-dialog',
+  templateUrl: './item-generate-dialog.component.html',
+  styleUrl: './item-generate-dialog.component.scss',
+  imports: [
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatHint,
+    MatError,
+    MatSelect,
+    MatOption,
+    MatButton,
+  ],
 })
 export class ItemGenerateDialogComponent {
   public flags: FlagDefinition[] = [];

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, effect, EventEmitter, input, Input, model, output, Output } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -73,75 +73,56 @@ const RELATION_SEP = ':';
   ],
 })
 export class HistoricalEventEditorComponent {
-  private _model: HistoricalEvent | undefined;
   private _editedEntityIndex: number;
 
-  @Input()
-  public get model(): HistoricalEvent | undefined {
-    return this._model;
-  }
-  public set model(value: HistoricalEvent | undefined) {
-    if (this._model === value) {
-      return;
-    }
-    this._model = value;
-    this.updateForm(value);
-  }
-
+  /**
+   * The event being edited.
+   */
+  public readonly event = model<HistoricalEvent>();
   /**
    * Thesaurus event-types (hierarchical).
    */
-  @Input()
-  public eventTypeEntries?: ThesaurusEntry[];
+  public readonly eventTypeEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus event-tags.
    */
-  @Input()
-  public eventTagEntries?: ThesaurusEntry[];
+  public readonly eventTagEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus event-relations (pseudo-hierarchical; the
    * separator used is : rather than .).
    */
-  @Input()
-  public relationEntries?: ThesaurusEntry[];
+  public readonly relationEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus chronotope-tags.
    */
-  @Input()
-  public ctTagEntries?: ThesaurusEntry[];
+  public readonly ctTagEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus asserted-id-scopes.
    */
-  @Input()
-  public idScopeEntries?: ThesaurusEntry[];
+  public readonly idScopeEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus asserted-id-tags.
    */
-  @Input()
-  public idTagEntries?: ThesaurusEntry[];
+  public readonly idTagEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus assertion-tags.
    */
-  @Input()
-  public assTagEntries?: ThesaurusEntry[];
+  public readonly assTagEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus doc-reference-tags.
    */
-  @Input()
-  public refTagEntries?: ThesaurusEntry[];
+  public readonly refTagEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus doc-reference-types.
    */
-  @Input()
-  public refTypeEntries?: ThesaurusEntry[];
+  public readonly refTypeEntries = input<ThesaurusEntry[]>();
   /*
    * Thesaurus pin-link-settings; these include:
    * - by-type: true/false
    * - switch-mode: true/false
    * - edit-target: true/false
    */
-  @Input()
-  public setTagEntries?: ThesaurusEntry[];
+  public readonly setTagEntries = input<ThesaurusEntry[]>();
 
   /**
    * The number of event type portions to cut from the event type ID when
@@ -153,30 +134,22 @@ export class HistoricalEventEditorComponent {
    * "person" and "birth", remove the last 1 tail(s), thus getting "person",
    * join back the portions and append a final colon, generating "person:".
    */
-  @Input()
-  public eventTypeTailCut: number;
+  public readonly eventTypeTailCut = input<number>(0);
 
   // settings for lookup
   // by-type: true/false
-  @Input()
-  public pinByTypeMode?: boolean;
+  public readonly pinByTypeMode = input<boolean>();
   // switch-mode: true/false
-  @Input()
-  public canSwitchMode?: boolean;
+  public readonly canSwitchMode = input<boolean>();
   // edit-target: true/false
-  @Input()
-  public canEditTarget?: boolean;
+  public readonly canEditTarget = input<boolean>();
 
   /**
    * True to disable ID lookup via scoped pin lookup.
    */
-  @Input()
-  public noLookup?: boolean;
+  public readonly noLookup = input<boolean>();
 
-  @Output()
-  public modelChange: EventEmitter<HistoricalEvent>;
-  @Output()
-  public editorClose: EventEmitter<any>;
+  public readonly editorClose = output();
 
   // event
   public eid: FormControl<string | null>;
@@ -195,10 +168,7 @@ export class HistoricalEventEditorComponent {
   public editedEntity?: RelatedEntity;
 
   constructor(formBuilder: FormBuilder) {
-    this.modelChange = new EventEmitter<HistoricalEvent>();
-    this.editorClose = new EventEmitter<any>();
     this._editedEntityIndex = -1;
-    this.eventTypeTailCut = 0;
     // form
     this.eid = formBuilder.control(null, [
       Validators.required,
@@ -227,6 +197,10 @@ export class HistoricalEventEditorComponent {
       assertion: this.assertion,
     });
     this.currentRelEntries = [];
+
+    effect(() => {
+      this.updateForm(this.event());
+    });
   }
 
   public renderLabel(label: string): string {
@@ -234,13 +208,13 @@ export class HistoricalEventEditorComponent {
   }
 
   private updateRelEntries(prefix: string): void {
-    if (!this.relationEntries?.length) {
+    if (!this.relationEntries()?.length) {
       return;
     }
     if (!prefix) {
-      this.currentRelEntries = this.relationEntries;
+      this.currentRelEntries = this.relationEntries()!;
     } else {
-      this.currentRelEntries = this.relationEntries.filter((e) =>
+      this.currentRelEntries = this.relationEntries()!.filter((e) =>
         e.id.startsWith(prefix)
       );
     }
@@ -254,8 +228,8 @@ export class HistoricalEventEditorComponent {
     // This is because that's the convention for representing parent entries
     // like "person.job.-" with children like "person.job.bishop".
     const tailSize = p.endsWith('.-')
-      ? 1 + this.eventTypeTailCut
-      : this.eventTypeTailCut;
+      ? 1 + this.eventTypeTailCut()
+      : this.eventTypeTailCut();
 
     if (tailSize > 0) {
       // split the event type ID (truly hierarchical, e.g. "person.birth")
@@ -398,7 +372,6 @@ export class HistoricalEventEditorComponent {
     if (this.form.invalid) {
       return;
     }
-    this._model = this.getModel();
-    this.modelChange.emit(this._model);
+    this.event.set(this.getModel());
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, input, OnDestroy, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -64,8 +64,7 @@ export class GraphNodeFilterComponent implements OnInit, OnDestroy {
   public linkedNode$: Observable<UriNode | undefined>;
   public classNodes$: Observable<UriNode[] | undefined>;
 
-  @Input()
-  public disabled?: boolean;
+  public readonly disabled = input<boolean>();
 
   public label: FormControl<string | null>;
   public isClass: FormControl<number>;

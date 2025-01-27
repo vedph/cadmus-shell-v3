@@ -136,7 +136,6 @@ export class ItemEditorComponent
   public user?: User;
   public userLevel: number;
   public busy?: boolean;
-  // public status$: Observable<StatusState>;
   // lookup data
   public facet$: Observable<FacetDefinition | undefined>;
   public newPartDefinitions$: Observable<PartDefinition[]>;
@@ -167,7 +166,6 @@ export class ItemEditorComponent
     private _appRepository: AppRepository,
     private _repository: EditedItemRepository,
     private _itemService: ItemService,
-    // private _itemListRepository: ItemListRepository,
     private _libraryRouteService: LibraryRouteService,
     private _dialogService: DialogService,
     private _authService: AuthJwtService,
@@ -228,9 +226,6 @@ export class ItemEditorComponent
   }
 
   public async ngOnInit() {
-    // ensure data is loaded
-    // await this._appRepository.load();
-
     this._subs.push(
       this._authService.currentUser$.subscribe((user: User | null) => {
         this.user = user || undefined;

@@ -18,7 +18,7 @@ import {
   MatCardActions,
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
@@ -56,8 +56,7 @@ import { QuotationWorksService } from './quotation-works.service';
     MatCardTitle,
     MatCardSubtitle,
     MatCardContent,
-    MatTabGroup,
-    MatTab,
+    MatExpansionModule,
     MatIconButton,
     MatTooltip,
     MatButton,
@@ -70,10 +69,8 @@ export class QuotationsFragmentComponent
   extends ModelEditorComponentBase<QuotationsFragment>
   implements OnInit
 {
-  private _editedEntryIndex: number;
-
+  public editedEntryIndex: number;
   public editedEntry?: QuotationEntry;
-  public currentTabIndex: number;
   public frText?: string;
 
   public workEntries: ThesaurusEntry[] | undefined;
@@ -90,8 +87,7 @@ export class QuotationsFragmentComponent
     private _worksService: QuotationWorksService
   ) {
     super(authService, formBuilder);
-    this.currentTabIndex = 0;
-    this._editedEntryIndex = -1;
+    this.editedEntryIndex = -1;
     // form
     this.entries = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -179,8 +175,7 @@ export class QuotationsFragmentComponent
 
   public editEntry(entry: QuotationEntry, index: number): void {
     this.editedEntry = entry;
-    this._editedEntryIndex = index;
-    this.currentTabIndex = 1;
+    this.editedEntryIndex = index;
   }
 
   public saveEntry(entry: QuotationEntry): void {
@@ -188,10 +183,10 @@ export class QuotationsFragmentComponent
       return;
     }
     const entries = [...this.entries.value];
-    if (this._editedEntryIndex === -1) {
+    if (this.editedEntryIndex === -1) {
       entries.push(entry);
     } else {
-      entries.splice(this._editedEntryIndex, 1, entry);
+      entries.splice(this.editedEntryIndex, 1, entry);
     }
     this.entries.setValue(entries);
     this.entries.updateValueAndValidity();
@@ -204,8 +199,7 @@ export class QuotationsFragmentComponent
     if (!this.editedEntry) {
       return;
     }
-    this._editedEntryIndex = -1;
-    this.currentTabIndex = 0;
+    this.editedEntryIndex = -1;
     this.editedEntry = undefined;
   }
 

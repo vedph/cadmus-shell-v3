@@ -1,12 +1,13 @@
 import {
   Component,
   OnInit,
-  Input,
-  EventEmitter,
-  Output,
   ElementRef,
   ViewChild,
   OnDestroy,
+  model,
+  effect,
+  input,
+  output,
 } from '@angular/core';
 import { distinctUntilChanged } from 'rxjs/operators';
 
@@ -49,54 +50,20 @@ import { Subscription } from 'rxjs';
 export class TextTileComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
 
-  private _tile?: TextTile;
   private _checkedChangeFrozen?: boolean;
 
   @ViewChild('textInput')
   public textElement?: ElementRef;
 
-  @Input()
-  public selected?: boolean;
+  public readonly selected = input<boolean>();
+  public readonly checkable = input<boolean>();
+  public readonly readonly = input<boolean>();
+  public readonly color = input<string>();
 
-  @Input()
-  public checkable?: boolean;
+  public readonly checked = model<boolean>(false);
+  public readonly tile = model<TextTile>();
 
-  @Input()
-  public readonly?: boolean;
-
-  @Input()
-  public color?: string;
-
-  @Input()
-  public get checked(): boolean {
-    return this.checker.value;
-  }
-  public set checked(value: boolean) {
-    if (this.checker.value === value) {
-      return;
-    }
-    this._checkedChangeFrozen = true;
-    this.checker.setValue(value);
-    this._checkedChangeFrozen = false;
-  }
-
-  @Input()
-  public get tile(): TextTile | undefined {
-    return this._tile;
-  }
-  public set tile(value: TextTile | undefined) {
-    if (this._tile === value) {
-      return;
-    }
-    this._tile = value;
-    this.updateForm();
-  }
-  @Output()
-  public tileChange: EventEmitter<TextTile>;
-  @Output()
-  public editData: EventEmitter<TextTile>;
-  @Output()
-  public checkedChange: EventEmitter<{ checked: boolean; tile: TextTile }>;
+  public readonly editData = output<TextTile>();
 
   public editedText: FormControl<string | null>;
   public checker: FormControl<boolean>;
@@ -118,13 +85,15 @@ export class TextTileComponent implements OnInit, OnDestroy {
 
     this.checker = formBuilder.control(false, { nonNullable: true });
 
-    // events
-    this.tileChange = new EventEmitter<TextTile>();
-    this.editData = new EventEmitter<TextTile>();
-    this.checkedChange = new EventEmitter<{
-      checked: boolean;
-      tile: TextTile;
-    }>();
+    effect(() => {
+      this.updateForm(this.tile());
+    });
+
+    effect(() => {
+      this._checkedChangeFrozen = true;
+      this.checker.setValue(this.checked());
+      this._checkedChangeFrozen = false;
+    });
   }
 
   public ngOnInit(): void {
@@ -134,11 +103,12 @@ export class TextTileComponent implements OnInit, OnDestroy {
         if (this._checkedChangeFrozen || !this.checkable) {
           return;
         }
-        if (this.tile) {
-          this.checkedChange.emit({
-            checked: this.checker.value,
-            tile: this.tile,
-          });
+        if (this.tile()) {
+          this.checked.set(this.checker.value);
+          // this.checkedChange.emit({
+          //   checked: this.checker.value,
+          //   tile: this.tile()!,
+          // });
         }
       });
   }
@@ -147,14 +117,12 @@ export class TextTileComponent implements OnInit, OnDestroy {
     this._sub?.unsubscribe();
   }
 
-  private updateForm(): void {
-    if (!this._tile) {
+  private updateForm(tile?: TextTile): void {
+    if (!tile) {
       this.form.reset();
       this.text = undefined;
     } else {
-      this.text = this._tile.data
-        ? this._tile.data[TEXT_TILE_TEXT_DATA_NAME]
-        : undefined;
+      this.text = tile.data ? tile.data[TEXT_TILE_TEXT_DATA_NAME] : undefined;
       this.editedText.setValue(this.text || null);
       this.form.markAsPristine();
     }
@@ -162,18 +130,18 @@ export class TextTileComponent implements OnInit, OnDestroy {
 
   public requestDataEdit(): void {
     if (!this.readonly) {
-      this.editData.emit(this.tile);
+      this.editData.emit(this.tile()!);
     }
   }
 
   public toggleCheckedNonEdit(): void {
-    if (!this.editing && this.checkable) {
-      this.checked = !this.checked;
+    if (!this.editing && this.checkable()) {
+      this.checked.set(!this.checked());
     }
   }
 
   public edit(): void {
-    if (this.editing || this.readonly) {
+    if (this.editing || this.readonly()) {
       return;
     }
     this.editing = true;
@@ -184,26 +152,28 @@ export class TextTileComponent implements OnInit, OnDestroy {
   }
 
   public requestEditData(): void {
-    if (this.editing || this.readonly) {
+    if (this.editing || this.readonly()) {
       return;
     }
-    this.editData.emit(this._tile);
+    this.editData.emit(this.tile()!);
   }
 
   public cancel(): void {
     this.editing = false;
   }
 
+  private getTile(): TextTile {
+    const tile: TextTile = { ...this.tile()!, data: {} };
+    this.text = this.editedText.value?.trim() || undefined;
+    tile.data![TEXT_TILE_TEXT_DATA_NAME] = this.text;
+    return tile;
+  }
+
   public save(): void {
-    if (this.form.invalid || this.readonly || !this._tile) {
+    if (this.form.invalid || this.readonly() || !this.tile()) {
       return;
     }
-    this.text = this.editedText.value?.trim() || undefined;
-    if (!this._tile.data) {
-      this._tile.data = {};
-    }
-    this._tile.data[TEXT_TILE_TEXT_DATA_NAME] = this.text;
-    this.tileChange.emit(this._tile);
+    this.tile.set(this.getTile());
     this.editing = false;
   }
 }

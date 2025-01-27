@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { take } from 'rxjs/operators';
@@ -18,7 +18,6 @@ import {
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { DataPage, EllipsisPipe } from '@myrmidon/ngx-tools';
 
-import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   GraphService,
   ThesaurusService,
@@ -50,7 +49,7 @@ import { GraphTripleListRepository } from '../../state/graph-triple-list.reposit
     EllipsisPipe,
   ],
 })
-export class GraphTripleListComponent implements OnInit {
+export class GraphTripleListComponent {
   public page$: Observable<DataPage<UriTriple>>;
   public loading$: Observable<boolean | undefined>;
   public editedTriple?: UriTriple;
@@ -58,27 +57,25 @@ export class GraphTripleListComponent implements OnInit {
   /**
    * The optional set of thesaurus entries for triple's tags.
    */
-  @Input()
-  public tagEntries: ThesaurusEntry[] | undefined;
+  // public readonly tagEntries = input<ThesaurusEntry[]>();
 
   constructor(
     private _graphService: GraphService,
     private _dialogService: DialogService,
     private _snackbar: MatSnackBar,
-    private _thesService: ThesaurusService,
     private _repository: GraphTripleListRepository
   ) {
     this.page$ = _repository.page$;
     this.loading$ = _repository.loading$;
   }
 
-  ngOnInit(): void {
-    this._thesService
-      .getThesaurus('graph-triple-tags@en', true)
-      .subscribe((thesaurus) => {
-        this.tagEntries = thesaurus?.entries || [];
-      });
-  }
+  // ngOnInit(): void {
+  //   this._thesService
+  //     .getThesaurus('graph-triple-tags@en', true)
+  //     .subscribe((thesaurus) => {
+  //       this.tagEntries = thesaurus?.entries || [];
+  //     });
+  // }
 
   public onPageChange(event: PageEvent): void {
     this._repository.setPage(event.pageIndex + 1, event.pageSize);

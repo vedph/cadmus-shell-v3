@@ -14,7 +14,7 @@
       <dt>item ID</dt>
       <dd>{{ item.id }}</dd>
       <dt>part ID</dt>
-      <dd>{{ source!.partId }}</dd>
+      <dd>{{ source()!.partId }}</dd>
     </dl>
     <button type="button" mat-flat-button (click)="refresh()" [disabled]="busy">
       <mat-icon>refresh</mat-icon> refresh

@@ -1,4 +1,11 @@
-import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  input,
+  effect,
+} from '@angular/core';
 
 import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
 
@@ -16,62 +23,43 @@ import { TokenLocation, TextLayerService } from '@myrmidon/cadmus-core';
 })
 export class DecoratedTokenTextComponent implements OnInit {
   @ViewChild('textElem') _textElement?: ElementRef;
-  private _baseText: string;
-  private _locations: TokenLocation[];
-  private _selectedLoc?: TokenLocation;
 
   /**
    * The base text.
    */
-  @Input()
-  public get baseText(): string {
-    return this._baseText;
-  }
-  public set baseText(value: string) {
-    this._baseText = value || '';
-    this.decorate();
-  }
+  public readonly baseText = input<string>('');
 
   /**
    * The token-based locations of all the fragments in the layer.
    */
-  @Input()
-  public get locations(): TokenLocation[] {
-    return this._locations;
-  }
-  public set locations(value: TokenLocation[]) {
-    this._locations = value || [];
-    this.decorate();
-  }
+  public readonly locations = input<TokenLocation[]>([]);
 
   /**
    * A selected token-based location.
    */
-  @Input()
-  public get selectedLocation(): TokenLocation | undefined {
-    return this._selectedLoc;
-  }
-  public set selectedLocation(value: TokenLocation | undefined) {
-    this._selectedLoc = value;
-    this.decorate();
-  }
+  public readonly selectedLocation = input<TokenLocation>();
 
   public text?: string; // rendered HTML text
 
   constructor(private _textLayerService: TextLayerService) {
-    this._baseText = '';
-    this._locations = [];
+    effect(() => {
+      this.decorate(this.baseText(), this.locations(), this.selectedLocation());
+    });
   }
 
   public ngOnInit(): void {
-    this.decorate();
+    this.decorate(this.baseText(), this.locations(), this.selectedLocation());
   }
 
-  private decorate(): void {
+  private decorate(
+    text: string,
+    locations: TokenLocation[],
+    selectedLocation?: TokenLocation
+  ): void {
     this.text = this._textLayerService.render(
-      this._baseText,
-      this._locations,
-      this._selectedLoc
+      text,
+      locations,
+      selectedLocation
     );
   }
 }

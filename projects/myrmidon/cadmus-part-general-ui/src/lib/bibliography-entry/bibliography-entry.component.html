@@ -4,11 +4,11 @@
     <mat-tab label="General">
       <!-- typeId -->
       <div class="form-row">
-        @if (typeEntries?.length) {
+        @if (typeEntries()?.length) {
         <mat-form-field>
           <mat-label>type</mat-label>
           <mat-select formControlName="type">
-            @for (e of typeEntries || []; track e) {
+            @for (e of typeEntries() || []; track e) {
             <mat-option [value]="e.id">{{ e.value }}</mat-option>
             }
           </mat-select>
@@ -31,11 +31,11 @@
         }
 
         <!-- tag (bound) -->
-        @if (tagEntries?.length) {
+        @if (tagEntries()?.length) {
         <mat-form-field>
           <mat-label>tag</mat-label>
           <mat-select [formControl]="tag">
-            @for (e of tagEntries; track e.id) {
+            @for (e of tagEntries(); track e.id) {
             <mat-option [value]="e.id">{{ e.value }}</mat-option>
             }
           </mat-select>
@@ -53,11 +53,11 @@
         }
 
         <!-- language (bound) -->
-        @if (langEntries?.length) {
+        @if (langEntries()?.length) {
         <mat-form-field>
           <mat-label>language</mat-label>
           <mat-select formControlName="language">
-            @for (e of langEntries || []; track e.id) {
+            @for (e of langEntries() || []; track e.id) {
             <mat-option [value]="e.id">{{ e.value }}</mat-option>
             }
           </mat-select>
@@ -94,7 +94,7 @@
         <cadmus-bib-authors-editor
           [parentForm]="form"
           [controlName]="'authors'"
-          [roleEntries]="roleEntries"
+          [roleEntries]="roleEntries()"
         />
       </fieldset>
 
@@ -130,7 +130,7 @@
       <cadmus-bib-authors-editor
         [parentForm]="form"
         [controlName]="'contributors'"
-        [roleEntries]="roleEntries"
+        [roleEntries]="roleEntries()"
       />
 
       <!-- container -->
@@ -211,7 +211,7 @@
         </mat-form-field>
 
         <!-- yearPub -->
-        <mat-form-field [style.width.em]="5">
+        <mat-form-field class="nr">
           <mat-label>year</mat-label>
           <input matInput type="number" formControlName="yearPub" />
           @if ( yearPub.hasError('min') && (yearPub.dirty || yearPub.touched) )
@@ -224,7 +224,7 @@
         </mat-form-field>
 
         <!-- edition -->
-        <mat-form-field [style.width.em]="5">
+        <mat-form-field class="nr">
           <mat-label>ed.</mat-label>
           <input matInput type="number" formControlName="edition" />
           @if ( edition.hasError('min') && (edition.dirty || edition.touched) )
@@ -275,11 +275,11 @@
       <form [formGroup]="keyForm" (submit)="addKeyword()">
         <div class="form-row">
           <!-- language (bound) -->
-          @if (langEntries?.length) {
+          @if (langEntries()?.length) {
           <mat-form-field>
             <mat-label>language</mat-label>
             <mat-select formControlName="keyLanguage">
-              @for (e of langEntries || []; track e.id) {
+              @for (e of langEntries() || []; track e.id) {
               <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
             </mat-select>

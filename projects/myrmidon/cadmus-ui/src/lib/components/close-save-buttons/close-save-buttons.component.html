@@ -1,17 +1,19 @@
-@if (form) {
-<button type="button" mat-flat-button class="mat-warn" (click)="close()">
-  <mat-icon>cancel</mat-icon>
-  close
-</button>
-@if (!noSave) {
-<button
-  type="submit"
-  [disabled]="form.invalid"
-  mat-flat-button
-  class="mat-primary"
-  style="margin-left: 8px"
->
-  <mat-icon>check_circle</mat-icon>
-  save
-</button>
-} }
+@if (form()) {
+<div class="form-row">
+  <button type="button" mat-flat-button class="mat-warn" (click)="close()">
+    <mat-icon>cancel</mat-icon>
+    close
+  </button>
+  @if (!noSave()) {
+  <button
+    type="submit"
+    [disabled]="form()?.invalid"
+    mat-flat-button
+    class="mat-primary"
+  >
+    <mat-icon>check_circle</mat-icon>
+    save
+  </button>
+  }
+</div>
+}

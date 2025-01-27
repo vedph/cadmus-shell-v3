@@ -7,7 +7,7 @@
       <!-- query -->
       <div id="query">
         <cadmus-item-query
-          [query]="query$ | async"
+          [query]="(query$ | async) || undefined"
           [lastQueries]="(lastQueries$ | async) || []"
           (querySubmit)="submitQuery($event)"
         />

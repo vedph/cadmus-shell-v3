@@ -92,7 +92,7 @@
             [tagEntries]="tagEntries"
             [roleEntries]="roleEntries"
             (editorClose)="closeEntry()"
-            (entryChange)="saveEntry($event)"
+            (entryChange)="saveEntry($event!)"
           />
         </fieldset>
       </mat-expansion-panel>

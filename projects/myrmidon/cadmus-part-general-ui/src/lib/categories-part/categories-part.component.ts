@@ -126,7 +126,7 @@ export class CategoriesPartComponent
     // thesauri
     const key = 'categories';
     if (this.hasThesaurus(key)) {
-      this.entries = this.data!.thesauri[key].entries || [];
+      this.entries = data?.thesauri[key].entries || [];
     }
     // tree
     this.updateForm(data?.value);

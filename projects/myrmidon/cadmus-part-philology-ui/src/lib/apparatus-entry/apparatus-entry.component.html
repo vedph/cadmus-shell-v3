@@ -56,13 +56,13 @@
   </div>
 
   <!-- tag -->
-  @if (tagEntries?.length) {
+  @if (tagEntries()?.length) {
   <div>
     <mat-form-field>
       <mat-label>tag</mat-label>
       <mat-select formControlName="tag">
         <mat-option [value]="null">(none)</mat-option>
-        @for (e of tagEntries; track e.id) {
+        @for (e of tagEntries(); track e.id) {
         <mat-option [value]="e.id">
           {{ e.value }}
         </mat-option>
@@ -70,7 +70,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  } @if (!tagEntries?.length) {
+  } @else {
   <div>
     <mat-form-field>
       <mat-label>tag</mat-label>
@@ -108,7 +108,7 @@
     <mat-expansion-panel-header>
       <mat-panel-title>witnesses</mat-panel-title>
       <mat-panel-description>{{
-        entry?.witnesses?.length || 0
+        entry()?.witnesses?.length || 0
       }}</mat-panel-description>
     </mat-expansion-panel-header>
 
@@ -147,11 +147,11 @@
             </button>
           </div>
           <!-- witness: value (bound) -->
-          @if (witEntries?.length) {
+          @if (witEntries()?.length) {
           <mat-form-field>
             <mat-label>value</mat-label>
             <mat-select formControlName="value">
-              @for (e of witEntries; track e.id) {
+              @for (e of witEntries(); track e.id) {
               <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
             </mat-select>
@@ -207,7 +207,7 @@
     <mat-expansion-panel-header>
       <mat-panel-title>authors</mat-panel-title>
       <mat-panel-description>{{
-        entry?.authors?.length || 0
+        entry()?.authors?.length || 0
       }}</mat-panel-description>
     </mat-expansion-panel-header>
 
@@ -245,11 +245,11 @@
           </button>
         </div>
         <!-- author: value (bound) -->
-        @if (authEntries?.length) {
+        @if (authEntries()?.length) {
         <mat-form-field>
           <mat-label>value</mat-label>
           <mat-select formControlName="value">
-            @for (e of authEntries; track e.id) {
+            @for (e of authEntries(); track e.id) {
             <mat-option [value]="e.id">{{ e.value }}</mat-option>
             }
           </mat-select>
@@ -287,11 +287,11 @@
           }
         </mat-form-field>
         <!-- author: tag (thesaurus) -->
-        @if (authTagEntries?.length) {
+        @if (authTagEntries()?.length) {
         <mat-form-field>
           <mat-label>tag</mat-label>
           <mat-select formControlName="tag">
-            @for (e of authTagEntries; track e.id) {
+            @for (e of authTagEntries(); track e.id) {
             <mat-option [value]="e.id">{{ e.value }}</mat-option>
             }
           </mat-select>
@@ -330,10 +330,10 @@
     >
       <mat-icon>add_circle</mat-icon> author
     </button>
-    @if (workEntries?.length) {
+    @if (workEntries()?.length) {
     <div>
       <cadmus-thesaurus-tree
-        [entries]="workEntries"
+        [entries]="workEntries()"
         rootLabel="works"
         [renderLabel]="renderLabel"
         (entryChange)="onEntryChange($event)"

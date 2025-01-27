@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, effect, input, Input, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   FormBuilder,
@@ -55,25 +55,15 @@ import { PartPreviewSource } from '../part-preview/part-preview.component';
   ],
 })
 export class TextPreviewComponent implements OnInit {
-  private _source: PartPreviewSource | undefined | null;
-
   /**
    * The source of the part to be previewed.
    */
-  @Input()
-  public get source(): PartPreviewSource | undefined | null {
-    return this._source;
-  }
-  public set source(value: PartPreviewSource | undefined | null) {
-    this._source = value;
-    this.loadItem();
-  }
+  public readonly source = input<PartPreviewSource>();
 
   /**
    * The model types thesaurus entries.
    */
-  @Input()
-  public typeEntries: ThesaurusEntry[] | undefined | null;
+  public readonly typeEntries = input<ThesaurusEntry[]>();
 
   public busy?: boolean;
   public item?: Item;
@@ -95,6 +85,10 @@ export class TextPreviewComponent implements OnInit {
     this.frLabels = [];
     // form
     this.selectedLayer = formBuilder.control(null);
+
+    effect(() => {
+      this.loadItem(this.source());
+    });
   }
 
   ngOnInit(): void {
@@ -132,7 +126,7 @@ export class TextPreviewComponent implements OnInit {
 
     this._previewService
       .getTextBlocks(
-        this._source!.partId,
+        this.source()!.partId,
         layers.map((l) => l.id),
         layers.map((l) => this.getLayerTypeId(l))
       )
@@ -149,29 +143,29 @@ export class TextPreviewComponent implements OnInit {
         error: (error) => {
           this.busy = false;
           console.error(
-            `Error previewing text part ${this._source!.partId}`,
+            `Error previewing text part ${this.source()!.partId}`,
             error
           );
           this._snackbar.open(
-            'Error previewing text part ' + this._source!.partId
+            'Error previewing text part ' + this.source()!.partId
           );
         },
       });
   }
 
-  private loadItem(): void {
+  private loadItem(source?: PartPreviewSource): void {
     if (this.busy) {
       return;
     }
-    if (!this._source?.partId) {
+    if (!source?.partId) {
       this.item = undefined;
       this.layers = [];
       this.rows = [];
       return;
     }
     forkJoin({
-      item: this._itemService.getItem(this._source!.itemId, false),
-      layers: this._itemService.getItemLayerInfo(this._source.itemId, false),
+      item: this._itemService.getItem(source!.itemId, false),
+      layers: this._itemService.getItemLayerInfo(source.itemId, false),
     })
       .pipe(take(1))
       .subscribe({
@@ -180,10 +174,9 @@ export class TextPreviewComponent implements OnInit {
           this.item = result.item || undefined;
           this.layers = result.layers;
           // select layer if requested
-          if (this._source!.layerId) {
+          if (source!.layerId) {
             this.selectedLayer.setValue(
-              this.layers.find((l) => l.roleId === this._source!.layerId) ||
-                null
+              this.layers.find((l) => l.roleId === source!.layerId) || null
             );
             if (this.selectedLayer.value) {
               this.loadLayer();
@@ -192,13 +185,8 @@ export class TextPreviewComponent implements OnInit {
         },
         error: (error) => {
           this.busy = false;
-          console.error(
-            `Error previewing text part ${this._source!.partId}`,
-            error
-          );
-          this._snackbar.open(
-            'Error previewing text part ' + this._source!.partId
-          );
+          console.error(`Error previewing text part ${source!.partId}`, error);
+          this._snackbar.open('Error previewing text part ' + source!.partId);
         },
       });
   }
@@ -223,7 +211,7 @@ export class TextPreviewComponent implements OnInit {
       )!;
       loaders$.push(
         this._previewService
-          .renderFragment(this._source!.itemId, layer.id, +m[3])
+          .renderFragment(this.source()!.itemId, layer.id, +m[3])
           .pipe(take(1))
       );
     }
@@ -239,11 +227,11 @@ export class TextPreviewComponent implements OnInit {
         error: (error) => {
           this.busy = false;
           console.error(
-            `Error previewing text part ${this._source!.partId}`,
+            `Error previewing text part ${this.source()!.partId}`,
             error
           );
           this._snackbar.open(
-            'Error previewing text part ' + this._source!.partId
+            'Error previewing text part ' + this.source()!.partId
           );
         },
       });

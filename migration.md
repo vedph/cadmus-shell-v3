@@ -204,7 +204,7 @@ protected getValue(): OrthographyFragment {
 }
 ```
 
-8. for fragments, in the template replace the location and base text references from `model?.location` and `model?.baseText` to `data?.value?.location` and `data?.baseText`.
+8. for fragments, in the template replace the location and base text references from `model?.location` and `model?.baseText` to `data()?.value?.location` and `data()?.baseText`.
 
 >Note: `CadmusValidators` has been removed from core, as its functionalities are found in `NgxToolsValidators` (from `@myrmidon/ng-tools`). So, if your code was using these validators, just replace the validators class.
 

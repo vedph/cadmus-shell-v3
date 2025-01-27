@@ -1,4 +1,4 @@
-<cadmus-current-item-bar/>
+<cadmus-current-item-bar />
 <div class="base-text">
   <cadmus-decorated-token-text
     [baseText]="data?.baseText || ''"
@@ -7,7 +7,7 @@
 </div>
 <cadmus-comment-editor
   [data]="$any(data)"
-  (dataChange)="save($any($event))"
+  (dataChange)="save($any($event!.value!))"
   (editorClose)="close()"
   (dirtyChange)="onDirtyChange($event)"
 />

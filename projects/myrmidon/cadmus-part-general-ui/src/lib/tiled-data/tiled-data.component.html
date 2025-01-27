@@ -1,6 +1,6 @@
 <div>
-  @if (title) {
-  <h3>{{ title }}</h3>
+  @if (title()) {
+  <h3>{{ title() }}</h3>
   }
   <form [formGroup]="filterForm">
     <mat-form-field>

@@ -10,12 +10,12 @@ th {
   font-weight: normal;
   color: silver;
 }
-td {
-  padding: 4px;
-}
 td.fit-width {
   width: 1px;
   white-space: nowrap;
+}
+tr.selected {
+  background-color: #d0d0d0 !important;
 }
 .form-row {
   display: flex;

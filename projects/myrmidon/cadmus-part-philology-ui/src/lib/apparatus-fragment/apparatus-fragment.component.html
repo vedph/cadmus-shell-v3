@@ -5,7 +5,7 @@
         <mat-icon>textsms</mat-icon>
       </div>
       <mat-card-title
-        >Apparatus Fragment {{ data?.value?.location }}</mat-card-title
+        >Apparatus Fragment {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
         {{ frText }}
@@ -135,7 +135,7 @@
             [authEntries]="authEntries"
             [authTagEntries]="authTagEntries"
             [workEntries]="workEntries"
-            (save)="saveEntry($event)"
+            (entryChange)="saveEntry($event!)"
             (editorClose)="closeEntry()"
           />
         </mat-expansion-panel>

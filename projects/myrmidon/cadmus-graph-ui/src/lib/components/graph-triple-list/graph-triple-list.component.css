@@ -2,20 +2,20 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-tr:nth-child(odd) {
-  background-color: #f8f8f8;
+tbody tr:nth-child(odd) {
+  background-color: #e2e2e2;
 }
 th {
   text-align: left;
   font-weight: normal;
   color: silver;
 }
-td {
-  padding: 4px;
-}
 td.fit-width {
   width: 1px;
   white-space: nowrap;
+}
+tr.selected {
+  background-color: #d0d0d0 !important;
 }
 .form-row {
   display: flex;

@@ -1,10 +1,10 @@
 import {
   Component,
-  EventEmitter,
+  effect,
   Inject,
-  Input,
+  input,
   OnInit,
-  Output,
+  output,
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import {
@@ -70,34 +70,21 @@ import { ItemService } from '@myrmidon/cadmus-api';
   ],
 })
 export class LookupPinComponent implements OnInit {
-  private _initialValue: string | undefined;
-
   /**
    * The entry value initially set when the component loads.
    */
-  @Input()
-  public get initialValue(): string | undefined {
-    return this._initialValue;
-  }
-  public set initialValue(value: string | undefined) {
-    this._initialValue = value;
-    if (this.lookup) {
-      this.resetToInitial();
-    }
-  }
+  public readonly initialValue = input<string>();
 
   /**
    * The label to be displayed for this lookup.
    */
-  @Input()
-  public label: string;
+  public readonly label = input<string>('');
 
   /**
    * The maximum count of lookup entries to retrieve.
    * Default is 10.
    */
-  @Input()
-  public limit: number;
+  public readonly limit = input<number>(10);
 
   /**
    * True to reset the lookup value after it is picked.
@@ -105,15 +92,13 @@ export class LookupPinComponent implements OnInit {
    * as a pure lookup device, storing the picked value
    * elsewhere when handling its entryChange event.
    */
-  @Input()
-  public resetOnPick: boolean | undefined;
+  public readonly resetOnPick = input<boolean>();
 
   /**
    * Fired whenever an entry is picked. Usually you should
    * cast the received argument to a more specific type.
    */
-  @Output()
-  public entryChange: EventEmitter<DataPinInfo | null>;
+  public readonly entryChange = output<DataPinInfo | null>();
 
   public form: UntypedFormGroup;
   public lookup: UntypedFormControl;
@@ -126,39 +111,41 @@ export class LookupPinComponent implements OnInit {
     @Inject('indexLookupDefinitions')
     private _lookupDefs: IndexLookupDefinitions
   ) {
-    this.label = '';
-    // events
-    this.entryChange = new EventEmitter<DataPinInfo | null>();
     // form
     this.lookup = formBuilder.control(null);
     this.form = formBuilder.group({
       lookup: this.lookup,
     });
-    this.limit = 10;
+
+    effect(() => {
+      console.log('lookup pin initial value', this.initialValue());
+      if (this.lookup) {
+        this.resetToInitial();
+      }
+    });
   }
 
   /**
    * The lookup key to be used for this component.
    * This should be a key from the injectable indexLookupDefinitions.
    */
-  @Input()
-  public lookupKey: string | undefined;
+  public readonly lookupKey = input<string>();
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.entries$ = this.lookup.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((value: DataPinInfo | string) => {
         // if it's a string it's a filter; else it's the entry got
         if (typeof value === 'string') {
-          return this.lookupEntries(value, this.limit || 10);
+          return this.lookupEntries(value, this.limit());
         } else {
           return of([value]);
         }
       })
     );
     // setup initial value if its name was specified
-    if (this._initialValue) {
+    if (this.initialValue()) {
       this.resetToInitial();
     }
   }
@@ -168,10 +155,10 @@ export class LookupPinComponent implements OnInit {
     limit: number
   ): Observable<DataPinInfo[]> {
     // get the lookup definition
-    if (!this.lookupKey || !filter) {
+    if (!this.lookupKey() || !filter) {
       return of([]);
     }
-    const ld = this._lookupDefs[this.lookupKey];
+    const ld = this._lookupDefs[this.lookupKey()!];
     if (!ld) {
       return of([]);
     }
@@ -194,7 +181,7 @@ export class LookupPinComponent implements OnInit {
   }
 
   private resetToInitial(): void {
-    this.lookupEntries(this._initialValue || '', 1)
+    this.lookupEntries(this.initialValue() || '', 1)
       .pipe(take(1))
       .subscribe((entries) => {
         this.lookup.setValue(entries.length ? entries[0] : undefined);
@@ -214,7 +201,7 @@ export class LookupPinComponent implements OnInit {
   public pickEntry(entry: DataPinInfo): void {
     this.entry = entry;
     this.entryChange.emit(entry);
-    if (this.resetOnPick) {
+    if (this.resetOnPick()) {
       this.clear();
     }
   }

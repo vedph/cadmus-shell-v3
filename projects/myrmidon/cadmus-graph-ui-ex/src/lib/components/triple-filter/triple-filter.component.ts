@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, input, model } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -49,48 +49,30 @@ import { PagedTripleFilter } from '../../graph-walker';
     MatTooltip,
   ],
 })
-export class TripleFilterComponent implements OnInit {
-  private _filter: PagedTripleFilter;
-
+export class TripleFilterComponent {
   /**
    * True if this component is disabled.
    */
-  @Input()
-  public disabled: boolean | undefined | null;
+  public readonly disabled = input<boolean>(false);
 
   /**
    * True if this component should show a pager.
    */
-  @Input()
-  public hasPager: boolean | undefined | null;
+  public readonly hasPager = input<boolean>(false);
 
   /**
    * The total number of triples returned from the last
    * page fetch operation. Used when hasPager is true.
    */
-  @Input()
-  public total: number;
+  public readonly total = input<number>(0);
 
   /**
    * The filter.
    */
-  @Input()
-  public get filter(): PagedTripleFilter {
-    return this._filter;
-  }
-  public set filter(value: PagedTripleFilter) {
-    if (this._filter === value) {
-      return;
-    }
-    this._filter = value;
-    this.updateForm(value);
-  }
-
-  /**
-   * Emitted when filter changes.
-   */
-  @Output()
-  public filterChange: EventEmitter<PagedTripleFilter>;
+  public readonly filter = model<PagedTripleFilter>({
+    pageNumber: 1,
+    pageSize: 10,
+  });
 
   public pageNumber: FormControl<number>;
   public pageSize: FormControl<number>;
@@ -117,12 +99,6 @@ export class TripleFilterComponent implements OnInit {
     public lookupService: GraphNodeLookupService,
     private _graphService: GraphService
   ) {
-    this._filter = {
-      pageNumber: 1,
-      pageSize: 10,
-    };
-    this.total = 0;
-    this.filterChange = new EventEmitter<PagedTripleFilter>();
     // form
     this.pageNumber = formBuilder.control(1, { nonNullable: true });
     this.pageSize = formBuilder.control(10, { nonNullable: true });
@@ -161,9 +137,11 @@ export class TripleFilterComponent implements OnInit {
       isSidPrefix: this.isSidPrefix,
       tag: this.tag,
     });
-  }
 
-  ngOnInit(): void {}
+    effect(() => {
+      this.updateForm(this.filter());
+    });
+  }
 
   private updateForm(filter: PagedTripleFilter): void {
     this.pageNumber.setValue(filter.pageNumber);
@@ -226,13 +204,9 @@ export class TripleFilterComponent implements OnInit {
     };
   }
 
-  private emitFilterChange(): void {
-    this.filterChange.emit(this.getFilter());
-  }
-
   public onPageChange(page: PageEvent): void {
     this.pageNumber.setValue(page.pageIndex + 1);
-    this.emitFilterChange();
+    this.filter.set(this.getFilter());
   }
 
   public onSubjectNodeChange(node: unknown): void {
@@ -289,15 +263,14 @@ export class TripleFilterComponent implements OnInit {
 
   public reset(): void {
     this.form.reset();
-    this._filter = this.getFilter();
-    this.filterChange.emit(this._filter);
+    this.filter.set(this.getFilter());
   }
 
   public apply(): void {
     if (this.form.invalid) {
       return;
     }
-    this.emitFilterChange();
+    this.filter.set(this.getFilter());
     this.form.markAsPristine();
   }
 }

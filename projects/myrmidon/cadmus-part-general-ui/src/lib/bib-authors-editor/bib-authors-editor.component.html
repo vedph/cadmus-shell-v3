@@ -1,6 +1,6 @@
-@if (parentForm) {
-<form [formGroup]="parentForm">
-  <div [formArrayName]="controlName">
+@if (parentForm()) {
+<form [formGroup]="parentForm()">
+  <div [formArrayName]="controlName()">
     @if (!authors || !authors.length) {
     <div style="margin: 8px 0">
       <button
@@ -76,12 +76,12 @@
           <mat-error>too long</mat-error>
         </mat-form-field>
         <!-- roleId -->
-        @if (roleEntries?.length) {
+        @if (roleEntries()?.length) {
         <mat-form-field>
           <mat-label>role</mat-label>
           <mat-select formControlName="roleId">
             <mat-option [value]="null">(no role)</mat-option>
-            @for (e of roleEntries; track e.id) {
+            @for (e of roleEntries(); track e.id) {
             <mat-option [value]="e.id">{{ e.value }}</mat-option>
             }
           </mat-select>

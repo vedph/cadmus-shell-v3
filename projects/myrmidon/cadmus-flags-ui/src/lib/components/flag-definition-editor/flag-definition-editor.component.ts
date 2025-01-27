@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, model, output } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -18,7 +18,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
 import { FlagDefinition } from '@myrmidon/cadmus-core';
-import { ColorService } from '@myrmidon/cadmus-ui';
 
 /**
  * Flag definition editor.
@@ -42,25 +41,10 @@ import { ColorService } from '@myrmidon/cadmus-ui';
     MatIcon,
   ],
 })
-export class FlagDefinitionEditorComponent implements OnInit {
-  private _definition: FlagDefinition | undefined;
+export class FlagDefinitionEditorComponent {
+  public readonly flag = model<FlagDefinition>();
 
-  @Input()
-  public get flag(): FlagDefinition | undefined {
-    return this._definition;
-  }
-  public set flag(value: FlagDefinition | undefined) {
-    if (this._definition === value) {
-      return;
-    }
-    this._definition = value;
-    this.updateForm(value);
-  }
-
-  @Output()
-  public flagChange: EventEmitter<FlagDefinition>;
-  @Output()
-  public editorClose: EventEmitter<any>;
+  public readonly editorClose = output();
 
   public id: FormControl<number>;
   public label: FormControl<string | null>;
@@ -70,9 +54,7 @@ export class FlagDefinitionEditorComponent implements OnInit {
   public form: FormGroup;
   public flagNumbers: number[];
 
-  constructor(formBuilder: FormBuilder, private _colorService: ColorService) {
-    this.flagChange = new EventEmitter<FlagDefinition>();
-    this.editorClose = new EventEmitter<any>();
+  constructor(formBuilder: FormBuilder) {
     // https://2ality.com/2014/05/es6-array-methods.html
     this.flagNumbers = Array.from({ length: 32 }, (_, i) => i + 1);
     // form
@@ -97,10 +79,10 @@ export class FlagDefinitionEditorComponent implements OnInit {
       description: this.description,
       isAdmin: this.isAdmin,
     });
-  }
 
-  public ngOnInit(): void {
-    this.updateForm(this.flag);
+    effect(() => {
+      this.updateForm(this.flag());
+    });
   }
 
   private getBit(value: number): number {
@@ -147,6 +129,6 @@ export class FlagDefinitionEditorComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.flagChange.emit(this.getFlag());
+    this.flag.set(this.getFlag());
   }
 }

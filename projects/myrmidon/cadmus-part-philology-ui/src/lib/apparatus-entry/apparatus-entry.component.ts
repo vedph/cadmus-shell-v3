@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, model, effect, output, input } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -65,53 +65,33 @@ import {
     ThesaurusTreeComponent,
   ],
 })
-export class ApparatusEntryComponent implements OnInit {
-  private _entry?: ApparatusEntry;
-
-  @Input()
-  public get entry(): ApparatusEntry | undefined {
-    return this._entry;
-  }
-  public set entry(value: ApparatusEntry | undefined) {
-    if (this._entry === value) {
-      return;
-    }
-    this._entry = value;
-    this.updateForm();
-  }
+export class ApparatusEntryComponent {
+  public readonly entry = model<ApparatusEntry>();
 
   /**
    * Tags for apparatus entries.
    */
-  @Input()
-  public tagEntries?: ThesaurusEntry[];
+  public readonly tagEntries = input<ThesaurusEntry[]>();
   /**
    * Witnesses.
    */
-  @Input()
-  public witEntries?: ThesaurusEntry[];
+  public readonly witEntries = input<ThesaurusEntry[]>();
   /**
    * Authors.
    */
-  @Input()
-  public authEntries?: ThesaurusEntry[];
+  public readonly authEntries = input<ThesaurusEntry[]>();
   /**
    * Author's tags.
    */
-  @Input()
-  public authTagEntries?: ThesaurusEntry[];
+  public readonly authTagEntries = input<ThesaurusEntry[]>();
   /**
    * Author/work tags. This can be alternative or additional
    * to authEntries, and allows picking the work from a tree
    * of authors and works.
    */
-  @Input()
-  public workEntries?: ThesaurusEntry[];
+  public readonly workEntries = input<ThesaurusEntry[]>();
 
-  @Output()
-  public editorClose: EventEmitter<any>;
-  @Output()
-  public save: EventEmitter<ApparatusEntry>;
+  public readonly editorClose = output();
 
   public type: FormControl<number>;
   public value: FormControl<string | null>;
@@ -129,10 +109,6 @@ export class ApparatusEntryComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _clipboard: Clipboard
   ) {
-    // events
-    this.editorClose = new EventEmitter<any>();
-    this.save = new EventEmitter<ApparatusEntry>();
-    // form
     this.type = _formBuilder.control(0, {
       validators: Validators.required,
       nonNullable: true,
@@ -162,70 +138,79 @@ export class ApparatusEntryComponent implements OnInit {
       witnesses: this.witnesses,
       authors: this.authors,
     });
+
+    effect(() => {
+      this.updateForm(this.entry());
+    });
   }
 
-  ngOnInit(): void {}
-
-  private updateForm(): void {
-    if (!this._entry) {
+  private updateForm(entry?: ApparatusEntry): void {
+    if (!entry) {
       this.form.reset();
       return;
     }
-    this.type.setValue(this._entry.type);
-    this.value.setValue(this._entry.value || null);
-    this.normValue.setValue(this._entry.normValue || null);
-    this.accepted.setValue(this._entry.isAccepted === true);
-    this.subrange.setValue(this._entry.subrange || null);
-    this.tag.setValue(this._entry.tag || null);
-    this.groupId.setValue(this._entry.groupId || null);
-    this.note.setValue(this._entry.note || null);
+    this.type.setValue(entry.type);
+    this.value.setValue(entry.value || null);
+    this.normValue.setValue(entry.normValue || null);
+    this.accepted.setValue(entry.isAccepted === true);
+    this.subrange.setValue(entry.subrange || null);
+    this.tag.setValue(entry.tag || null);
+    this.groupId.setValue(entry.groupId || null);
+    this.note.setValue(entry.note || null);
 
     this.witnesses.clear();
-    if (this._entry.witnesses) {
-      for (const wit of this._entry.witnesses) {
+    if (entry.witnesses) {
+      for (const wit of entry.witnesses) {
         this.addWitness(wit);
       }
     }
 
     this.authors.clear();
-    if (this._entry.authors) {
-      for (const auth of this._entry.authors) {
+    if (entry.authors) {
+      for (const auth of entry.authors) {
         this.addAuthor(auth);
       }
     }
     this.form.markAsPristine();
   }
 
-  private updateEntry(): void {
-    if (!this._entry) {
-      return;
-    }
-    this._entry.type = this.type.value;
-    this._entry.value = this.value.value?.trim();
-    this._entry.normValue = this.normValue.value?.trim();
-    this._entry.isAccepted = this.accepted.value === true;
-    this._entry.subrange = this.subrange.value?.trim();
-    this._entry.tag = this.tag.value?.trim();
-    this._entry.groupId = this.groupId.value?.trim();
-    this._entry.note = this.note.value?.trim();
+  private getEntry(): ApparatusEntry {
+    const entry: ApparatusEntry = {
+      type: this.type.value,
+      value: this.value.value?.trim(),
+      normValue: this.normValue.value?.trim(),
+      isAccepted: this.accepted.value === true,
+      subrange: this.subrange.value?.trim(),
+      tag: this.tag.value?.trim(),
+      groupId: this.groupId.value?.trim(),
+      note: this.note.value?.trim(),
+    };
 
-    this._entry.witnesses = [];
+    // witnesses
     for (let i = 0; i < this.witnesses.length; i++) {
-      this._entry.witnesses.push({
+      if (!entry.witnesses) {
+        entry.witnesses = [];
+      }
+      entry.witnesses.push({
         value: this.witnesses.value[i].value?.trim(),
         note: this.witnesses.value[i].note?.trim(),
       });
     }
 
-    this._entry.authors = [];
+    // authors
     for (let i = 0; i < this.authors.length; i++) {
-      this._entry.authors.push({
+      if (!entry.authors) {
+        entry.authors = [];
+      }
+      entry.authors.push({
         tag: this.authors.value[i].tag?.trim(),
         value: this.authors.value[i].value?.trim(),
         location: this.authors.value[i].location?.trim(),
         note: this.authors.value[i].note?.trim(),
       });
     }
+
+    return entry;
   }
 
   public addWitness(witness?: AnnotatedValue): void {
@@ -332,7 +317,6 @@ export class ApparatusEntryComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.updateEntry();
-    this.save.emit(this._entry);
+    this.entry.set(this.getEntry());
   }
 }

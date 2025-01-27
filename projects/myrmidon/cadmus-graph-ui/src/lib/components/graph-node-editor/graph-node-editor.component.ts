@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, input, model, output } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -40,41 +40,21 @@ import { UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
     MatIcon,
   ],
 })
-export class GraphNodeEditorComponent implements OnInit {
-  private _node?: UriNode;
-
+export class GraphNodeEditorComponent {
   /**
    * The node being edited. A new node has ID=0 and no uri.
    */
-  @Input()
-  public get node(): UriNode | undefined | null {
-    return this._node;
-  }
-  public set node(value: UriNode | undefined | null) {
-    if (this._node === value) {
-      return;
-    }
-    this._node = value || undefined;
-    this.updateForm(this._node);
-  }
+  public readonly node = model<UriNode>();
 
   /**
    * The optional set of thesaurus entries for node's tags.
    */
-  @Input()
-  public tagEntries?: ThesaurusEntry[];
-
-  /**
-   * Emitted when the node has changed.
-   */
-  @Output()
-  public nodeChange: EventEmitter<UriNode>;
+  public readonly tagEntries = input<ThesaurusEntry[]>();
 
   /**
    * Emitted when the user requested to close the editor.
    */
-  @Output()
-  public editorClose: EventEmitter<any>;
+  public readonly editorClose = output();
 
   public isNew: boolean;
 
@@ -85,8 +65,6 @@ export class GraphNodeEditorComponent implements OnInit {
   public form: FormGroup;
 
   constructor(formBuilder: FormBuilder) {
-    this.nodeChange = new EventEmitter<UriNode>();
-    this.editorClose = new EventEmitter<any>();
     this.isNew = true;
     // form
     this.uri = formBuilder.control(null, [
@@ -105,9 +83,11 @@ export class GraphNodeEditorComponent implements OnInit {
       isClass: this.isClass,
       tag: this.tag,
     });
-  }
 
-  ngOnInit(): void {}
+    effect(() => {
+      this.updateForm(this.node());
+    });
+  }
 
   private updateForm(node?: UriNode): void {
     if (!node) {
@@ -125,8 +105,8 @@ export class GraphNodeEditorComponent implements OnInit {
 
   private getNode(): UriNode {
     return {
-      id: this._node?.id || 0,
-      sourceType: this._node?.sourceType || NodeSourceType.User,
+      id: this.node()?.id || 0,
+      sourceType: this.node()?.sourceType || NodeSourceType.User,
       uri: this.uri.value?.trim() || '',
       label: this.label.value?.trim() || '',
       isClass: this.isClass.value,
@@ -142,7 +122,6 @@ export class GraphNodeEditorComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this._node = this.getNode();
-    this.nodeChange.emit(this._node);
+    this.node.set(this.getNode());
   }
 }

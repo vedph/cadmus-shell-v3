@@ -1,10 +1,15 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, output, input, effect } from '@angular/core';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { PartDefinition, Part, Thesaurus } from '@myrmidon/cadmus-core';
+import {
+  PartDefinition,
+  Part,
+  Thesaurus,
+  FacetDefinition,
+} from '@myrmidon/cadmus-core';
 import { PartBadgeComponent } from '@myrmidon/cadmus-ui';
 
 @Component({
@@ -14,70 +19,55 @@ import { PartBadgeComponent } from '@myrmidon/cadmus-ui';
   imports: [MatIcon, MatIconButton, MatTooltip, PartBadgeComponent],
 })
 export class MissingPartsComponent {
-  private _partDefinitions?: PartDefinition[];
-  private _parts?: Part[];
-  private _typeThesaurus?: Thesaurus;
-
   public missingDefinitions: PartDefinition[];
 
-  @Input()
-  public get partDefinitions(): PartDefinition[] | undefined {
-    return this._partDefinitions;
-  }
-  public set partDefinitions(value: PartDefinition[] | undefined) {
-    this._partDefinitions = value;
-    this.updateMissing();
-  }
-
-  @Input()
-  public get parts(): Part[] | undefined {
-    return this._parts;
-  }
-  public set parts(value: Part[] | undefined) {
-    this._parts = value;
-    this.updateMissing();
-  }
+  public readonly facetDefinition = input<FacetDefinition>();
+  public readonly partDefinitions = input<PartDefinition[]>();
+  public readonly parts = input<Part[]>();
 
   /**
    * The types thesaurus.
    */
-  @Input()
-  public get typeThesaurus(): Thesaurus | undefined {
-    return this._typeThesaurus;
-  }
-  public set typeThesaurus(value: Thesaurus | undefined) {
-    this._typeThesaurus = value;
-    this.updateMissing();
-  }
+  public readonly typeThesaurus = input<Thesaurus>();
 
-  @Output()
-  public addRequest: EventEmitter<PartDefinition>;
+  /**
+   * Emitted when the user requests to add a missing part.
+   */
+  public readonly addRequest = output<PartDefinition>();
 
   constructor() {
     this.missingDefinitions = [];
-    this.addRequest = new EventEmitter<PartDefinition>();
+
+    effect(() => {
+      this.updateMissing(this.partDefinitions(), this.parts());
+    });
   }
 
-  private isPartPresent(typeId: string, roleId?: string): boolean {
-    if (!this._partDefinitions) {
+  private partExists(typeId: string, roleId?: string, parts?: Part[]): boolean {
+    if (!parts) {
       return false;
     }
-    return this._partDefinitions.some(
-      (d) => d.typeId === typeId && d.roleId === roleId
+    return parts.some(
+      (p) =>
+        p.typeId === typeId && ((!p.roleId && !roleId) || p.roleId === roleId)
     );
   }
 
-  private updateMissing(): void {
-    this.missingDefinitions.length = 0;
-    if (!this._partDefinitions) {
+  private updateMissing(definitions?: PartDefinition[], parts?: Part[]): void {
+    this.missingDefinitions = [];
+    if (!definitions) {
       return;
     }
 
-    for (let i = 0; i < this._partDefinitions.length; i++) {
-      const def = this._partDefinitions[i];
-      if (!this.isPartPresent(def.typeId, def.roleId)) {
+    for (let i = 0; i < definitions.length; i++) {
+      const def = definitions[i];
+      if (def.isRequired && !this.partExists(def.typeId, def.roleId, parts)) {
         this.missingDefinitions.push(def);
       }
     }
+  }
+
+  public requestAddPart(definition: PartDefinition): void {
+    this.addRequest.emit(definition);
   }
 }

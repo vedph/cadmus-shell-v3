@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, output, Output } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import {
   AbstractControl,
@@ -58,6 +58,9 @@ interface UploadResult {
   error?: string;
 }
 
+/**
+ * Thesaurus import component.
+ */
 @Component({
   selector: 'cadmus-thesaurus-import',
   templateUrl: './thesaurus-import.component.html',
@@ -96,10 +99,8 @@ export class ThesaurusImportComponent {
   public uploading: boolean = false;
   public result?: UploadResult;
 
-  @Output()
-  public uploadStart: EventEmitter<void>;
-  @Output()
-  public uploadEnd: EventEmitter<boolean>;
+  public readonly uploadStart = output();
+  public readonly uploadEnd = output<boolean>();
 
   constructor(
     formBuilder: FormBuilder,
@@ -144,10 +145,6 @@ export class ThesaurusImportComponent {
       excelColumn: this.excelColumn,
       dryRun: this.dryRun,
     });
-
-    // events
-    this.uploadStart = new EventEmitter();
-    this.uploadEnd = new EventEmitter<boolean>();
   }
 
   public onFileSelected(event: any) {

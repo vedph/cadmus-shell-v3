@@ -30,7 +30,7 @@
       <legend>object</legend>
       <mat-checkbox [formControl]="isLiteral">literal</mat-checkbox>
       <!-- object -->
-      @if (!isLiteral?.value) {
+      @if (!isLiteral.value) {
       <cadmus-ref-lookup
         [required]="true"
         [service]="lookupService"
@@ -40,7 +40,7 @@
       />
       }
       <!-- literal value -->
-      @if (isLiteral?.value) {
+      @if (isLiteral.value) {
       <mat-form-field style="width: 100%">
         <mat-label>object</mat-label>
         <textarea matInput [formControl]="literal"></textarea>

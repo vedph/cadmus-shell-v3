@@ -238,7 +238,7 @@ export class IndexKeywordsPartComponent
     this.editedKeyword = undefined;
   }
 
-  public onKeywordSave(keyword: IndexKeyword): void {
+  public onKeywordChange(keyword: IndexKeyword): void {
     this.addKeyword(keyword);
     this.editedKeyword = undefined;
   }

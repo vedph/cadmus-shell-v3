@@ -34,9 +34,9 @@
         </thead>
         <tbody>
           @for (d of page.items; track d.id) {
-          <tr>
+          <tr [class.selected]="d === editedNode()">
             <td class="fit-width">
-              @if (hasWalker) {
+              @if (hasWalker()) {
               <button
                 mat-icon-button
                 type="button"
@@ -108,15 +108,15 @@
     }
     <!-- editor -->
     <mat-expansion-panel
-      [expanded]="editedNode ? true : false"
-      [disabled]="editedNode ? false : true"
+      [expanded]="editedNode() ? true : false"
+      [disabled]="editedNode() ? false : true"
       id="editor"
     >
       <mat-expansion-panel-header>Node</mat-expansion-panel-header>
       <cadmus-graph-node-editor
-        [node]="editedNode"
-        [tagEntries]="tagEntries"
-        (nodeChange)="onNodeChange($event)"
+        [node]="editedNode()"
+        [tagEntries]="tagEntries()"
+        (nodeChange)="onNodeChange($event!)"
         (editorClose)="onEditorClose()"
       />
     </mat-expansion-panel>

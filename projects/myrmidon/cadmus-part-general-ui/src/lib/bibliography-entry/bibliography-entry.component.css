@@ -2,6 +2,9 @@
   width: 90%;
   max-width: 800px;
 }
+.nr {
+  width: 6em;
+}
 th {
   font-weight: normal;
   color: silver;

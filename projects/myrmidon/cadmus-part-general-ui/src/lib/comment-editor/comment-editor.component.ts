@@ -421,7 +421,7 @@ export class CommentEditorComponent
   }
 
   protected getValue(): CommentPart | CommentFragment {
-    if ((this.data!.value as CommentFragment)?.location) {
+    if ((this.data()!.value as CommentFragment)?.location) {
       let fr = this.getEditedFragment() as CommentFragment;
       this.updateComment(fr);
       return fr;

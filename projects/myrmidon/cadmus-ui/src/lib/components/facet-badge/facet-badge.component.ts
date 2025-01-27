@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, effect, input, Input } from '@angular/core';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 
 import { MatTooltip } from '@angular/material/tooltip';
@@ -19,7 +19,6 @@ export interface FacetBadgeData {
 export class FacetBadgeComponent {
   private _facetColors: { [key: string]: string };
   private _facetTips: { [key: string]: string };
-  private _data?: FacetBadgeData | null;
 
   public color: string;
   public contrastColor: string;
@@ -28,36 +27,30 @@ export class FacetBadgeComponent {
   /**
    * The facet data.
    */
-  @Input()
-  public get data(): FacetBadgeData | undefined | null {
-    return this._data;
-  }
-  public set data(value: FacetBadgeData | undefined | null) {
-    this._data = value;
-    this._facetColors = {};
-    this._facetTips = {};
-    this.updateBadge();
-  }
+  public readonly data = input<FacetBadgeData>({
+    definitions: [],
+  });
 
   constructor(private _colorService: ColorService) {
-    this._data = {
-      definitions: [],
-    };
     this._facetColors = {};
     this._facetTips = {};
     this.color = 'transparent';
     this.contrastColor = 'black';
+
+    effect(() => {
+      this.updateBadge(this.data());
+    });
   }
 
   private getFacetColor(facetId: string): string {
     if (this._facetColors[facetId]) {
       return this._facetColors[facetId];
     }
-    if (!this._data?.definitions?.length) {
+    if (!this.data().definitions?.length) {
       return 'transparent';
     }
 
-    const facet = this._data.definitions.find((f) => {
+    const facet = this.data().definitions.find((f) => {
       return f.id === facetId;
     });
     if (facet?.colorKey) {
@@ -73,11 +66,11 @@ export class FacetBadgeComponent {
       return this._facetTips[facetId];
     }
 
-    if (!this._data?.definitions?.length) {
+    if (!this.data().definitions?.length) {
       return null;
     }
 
-    const facet = this._data.definitions.find((f) => {
+    const facet = this.data().definitions.find((f) => {
       return f.id === facetId;
     });
     if (!facet) {
@@ -98,9 +91,11 @@ export class FacetBadgeComponent {
     return this._facetTips[facetId];
   }
 
-  private updateBadge() {
-    this.color = this.getFacetColor(this._data?.facetId || '');
+  private updateBadge(data?: FacetBadgeData) {
+    this._facetColors = {};
+    this._facetTips = {};
+    this.color = this.getFacetColor(data?.facetId || '');
     this.contrastColor = this._colorService.getContrastColor(this.color);
-    this.tip = this.getFacetTip(this._data?.facetId || '') ?? undefined;
+    this.tip = this.getFacetTip(data?.facetId || '') ?? undefined;
   }
 }

@@ -1,16 +1,14 @@
 table {
+  width: 100%;
   border-collapse: collapse;
 }
 tbody tr:nth-child(odd) {
   background-color: #e2e2e2;
 }
 th {
+  text-align: left;
   font-weight: normal;
   color: silver;
-  text-align: left;
-}
-td {
-  padding: 0 6px;
 }
 td.fit-width {
   width: 1px;

@@ -122,12 +122,12 @@
       >
         <mat-icon class="mat-primary">unfold_more</mat-icon>
       </button>
-      } @if (canPick) {
+      } @if (canPick()) {
       <button
         type="button"
         mat-icon-button
         [matTooltip]="
-          canMoveToSource
+          canMoveToSource()
             ? 'Pick selected node or (shift) its source'
             : 'Pick the selected node'
         "

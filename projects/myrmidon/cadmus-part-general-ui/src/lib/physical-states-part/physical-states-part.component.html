@@ -70,7 +70,7 @@
             <td>
               {{ entry.type | flatLookup : stateEntries : "id" : "value" }}
             </td>
-            <td>{{ entry.date }}</td>
+            <td>{{ entry.date | date:'yyyy-MM-dd' }}</td>
           </tr>
           }
         </tbody>

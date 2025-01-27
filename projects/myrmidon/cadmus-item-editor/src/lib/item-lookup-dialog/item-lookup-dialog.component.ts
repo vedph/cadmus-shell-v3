@@ -13,10 +13,10 @@ import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
  * its title, and returns the selected item if not cancelled.
  */
 @Component({
-    selector: 'cadmus-item-lookup-dialog',
-    templateUrl: './item-lookup-dialog.component.html',
-    styleUrl: './item-lookup-dialog.component.scss',
-    imports: [RefLookupComponent],
+  selector: 'cadmus-item-lookup-dialog',
+  templateUrl: './item-lookup-dialog.component.html',
+  styleUrl: './item-lookup-dialog.component.scss',
+  imports: [RefLookupComponent],
 })
 export class ItemLookupDialogComponent {
   constructor(

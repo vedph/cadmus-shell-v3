@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, input, model, OnInit, output } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -82,40 +82,21 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
   ],
 })
 export class ThesaurusEditorComponent implements OnInit {
-  private _thesaurus: Thesaurus | undefined;
-
   /**
    * The thesaurus being edited.
    */
-  @Input()
-  public get thesaurus(): Thesaurus | undefined {
-    return this._thesaurus;
-  }
-  public set thesaurus(value: Thesaurus | undefined) {
-    this._thesaurus = value;
-    this.updateForm(value);
-  }
+  public readonly thesaurus = model<Thesaurus>();
 
   /**
    * The lookup function used to lookup thesauri when editing aliases.
    */
-  @Input()
-  public lookupFn?: (
-    filter?: ThesaurusFilter,
-    limit?: number
-  ) => Observable<string[]>;
-
-  /**
-   * Emitted when the thesaurus is saved.
-   */
-  @Output()
-  public thesaurusChange: EventEmitter<Thesaurus>;
+  public readonly lookupFn =
+    input<(filter?: ThesaurusFilter, limit?: number) => Observable<string[]>>();
 
   /**
    * Emitted when user requests to close the editor.
    */
-  @Output()
-  public editorClose: EventEmitter<any>;
+  public readonly editorClose = output();
 
   public loading$: Observable<boolean | undefined>;
   public page$: Observable<DataPage<ThesaurusNode>>;
@@ -145,9 +126,6 @@ export class ThesaurusEditorComponent implements OnInit {
     this.filter$ = _repository.filter$;
     this.page$ = _repository.page$;
 
-    this.thesaurusChange = new EventEmitter<Thesaurus>();
-    this.editorClose = new EventEmitter<any>();
-
     // the list of all the parent nodes IDs in the edited thesaurus
     this.parentIds$ = this._nodesService.selectParentIds();
     // thesaurus form
@@ -174,6 +152,10 @@ export class ThesaurusEditorComponent implements OnInit {
     this.filterForm = formBuilder.group({
       idOrValue: this.idOrValue,
       parentId: this.parentId,
+    });
+
+    effect(() => {
+      this.updateForm(this.thesaurus());
     });
   }
 
@@ -213,9 +195,7 @@ export class ThesaurusEditorComponent implements OnInit {
     });
 
     // load
-    if (this._thesaurus) {
-      this.updateForm(this._thesaurus);
-    }
+    this.updateForm(this.thesaurus());
   }
 
   public onTargetIdChange(id: string | null): void {
@@ -376,6 +356,6 @@ export class ThesaurusEditorComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.thesaurusChange.emit(this.getThesaurus());
+    this.thesaurus.set(this.getThesaurus());
   }
 }

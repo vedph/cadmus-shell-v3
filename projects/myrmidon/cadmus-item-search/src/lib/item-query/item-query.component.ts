@@ -2,12 +2,12 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import {
   Component,
   OnInit,
-  EventEmitter,
-  Input,
-  Output,
   ViewChild,
   ElementRef,
   AfterViewInit,
+  output,
+  input,
+  effect,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -87,16 +87,6 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
   private _sub?: Subscription;
   public form: FormGroup;
 
-  @Input()
-  public get query(): string | undefined | null {
-    return this.queryCtl.value;
-  }
-  public set query(value: string | undefined | null) {
-    this.queryCtl.setValue(value || null);
-    this.queryCtl.markAsDirty();
-    this.queryCtl.updateValueAndValidity();
-  }
-
   public queryCtl: FormControl<string | null>;
   public history: FormControl<string | null>;
   public partDef: FormControl<string | null>;
@@ -104,16 +94,16 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
   @ViewChild('queryta', { static: false })
   public queryElement?: ElementRef<HTMLElement>;
 
+  public readonly query = input<string>();
+
+  public readonly lastQueries = input<string[]>([]);
+
+  public readonly disabled = input<boolean>();
+
   /**
    * Emitted when the query is submitted.
    */
-  @Output()
-  public querySubmit: EventEmitter<string>;
-
-  @Input()
-  public lastQueries?: string[];
-
-  @Input() public disabled?: boolean;
+  public readonly querySubmit = output<string>();
 
   public partDefs?: PartDefViewModel[];
   public pinDefs?: DataPinDefinition[];
@@ -125,9 +115,6 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     private _appRepository: AppRepository,
     private _itemService: ItemService
   ) {
-    // events
-    this.querySubmit = new EventEmitter<string>();
-    // form
     this.queryCtl = formBuilder.control(null, Validators.required);
     this.history = formBuilder.control(null);
     this.partDef = formBuilder.control(null);
@@ -136,6 +123,16 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
       history: this.history,
       partDef: this.partDef,
     });
+
+    effect(() => {
+      this.updateForm(this.query());
+    });
+  }
+
+  private updateForm(query?: string) {
+    this.queryCtl.setValue(query || null);
+    this.queryCtl.markAsDirty();
+    this.queryCtl.updateValueAndValidity();
   }
 
   private getTypeId(def: PartDefinition): string {
@@ -194,8 +191,8 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
           },
         });
       });
-      // ensure app data is loaded
-      this._appRepository.load();
+    // ensure app data is loaded
+    this._appRepository.load();
   }
 
   public ngOnDestroy(): void {

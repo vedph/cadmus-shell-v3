@@ -30,7 +30,7 @@
         </thead>
         <tbody>
           @for (d of page.items; track d.id) {
-          <tr>
+          <tr [class.selected]="d === editedTriple">
             <td class="fit-width">
               <button
                 mat-icon-button
@@ -99,8 +99,7 @@
       <mat-expansion-panel-header>Triple</mat-expansion-panel-header>
       <cadmus-graph-triple-editor
         [triple]="editedTriple"
-        [tagEntries]="tagEntries"
-        (tripleChange)="onTripleChange($event)"
+        (tripleChange)="onTripleChange($event!)"
         (editorClose)="onEditorClose()"
       />
     </mat-expansion-panel>

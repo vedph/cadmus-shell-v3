@@ -1,10 +1,11 @@
 import {
   Component,
-  EventEmitter,
-  Input,
+  effect,
+  input,
+  model,
   OnDestroy,
   OnInit,
-  Output,
+  output,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -56,38 +57,19 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   ],
 })
 export class GraphTripleEditorComponent implements OnInit, OnDestroy {
-  private _triple: UriTriple | undefined;
   private _sub?: Subscription;
 
-  @Input()
-  public get triple(): UriTriple | undefined | null {
-    return this._triple;
-  }
-  public set triple(value: UriTriple | undefined | null) {
-    if (this._triple === value) {
-      return;
-    }
-    this._triple = value || undefined;
-    this.updateForm(this._triple);
-  }
+  public readonly triple = model<UriTriple>();
 
   /**
    * The optional set of thesaurus entries for triple's tags.
    */
-  @Input()
-  public tagEntries?: ThesaurusEntry[] | undefined;
-
-  /**
-   * Emitted when triple has changed.
-   */
-  @Output()
-  public tripleChange: EventEmitter<UriTriple>;
+  // public readonly tagEntries = input<ThesaurusEntry[]>();
 
   /**
    * Emitted when the user requested to close the editor.
    */
-  @Output()
-  public editorClose: EventEmitter<any>;
+  public readonly editorClose = output();
 
   public isNew: boolean;
 
@@ -107,8 +89,6 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
     private _snackbar: MatSnackBar,
     private _graphService: GraphService
   ) {
-    this.tripleChange = new EventEmitter<UriTriple>();
-    this.editorClose = new EventEmitter<any>();
     this.isNew = true;
     // form
     this.subjectNode = formBuilder.control(null, Validators.required);
@@ -136,6 +116,10 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
       literalLang: this.literalLang,
       literalType: this.literalType,
       tag: this.tag,
+    });
+
+    effect(() => {
+      this.updateForm(this.triple());
     });
   }
 
@@ -246,7 +230,7 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
 
   private getTriple(): UriTriple {
     return {
-      id: this.triple?.id || 0,
+      id: this.triple()?.id || 0,
       subjectId: this.subjectNode.value?.id || 0,
       predicateId: this.predicateNode.value?.id || 0,
       objectId: this.isLiteral.value
@@ -275,7 +259,6 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
     if (this.form.invalid) {
       return;
     }
-    this._triple = this.getTriple();
-    this.tripleChange.emit(this._triple);
+    this.triple.set(this.getTriple());
   }
 }

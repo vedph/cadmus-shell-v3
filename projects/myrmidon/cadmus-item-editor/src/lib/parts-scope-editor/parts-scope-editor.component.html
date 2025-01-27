@@ -20,20 +20,20 @@
           <span
             class="model-type"
             [style.background-color]="
-              getPartColor($any(parts)[i].typeId, $any(parts)[i].roleId)
+              getPartColor($any(parts())[i].typeId, $any(parts())[i].roleId)
             "
             [style.color]="
-              getContrastColor($any(parts)[i].typeId, $any(parts)[i].roleId)
+              getContrastColor($any(parts())[i].typeId, $any(parts())[i].roleId)
             "
-            >{{ getTypeIdName($any(parts)[i].typeId) }}</span
+            >{{ getTypeIdName($any(parts())[i].typeId) }}</span
           >
         </td>
-        <td>{{ getRoleIdName($any(parts)[i].roleId) }}</td>
-        <td>{{ $any(parts)[i].thesaurusScope }}</td>
+        <td>{{ getRoleIdName($any(parts())[i].roleId) }}</td>
+        <td>{{ $any(parts())[i].thesaurusScope }}</td>
         <td>
-          {{ $any(parts)[i].timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
+          {{ $any(parts())[i].timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
         </td>
-        <td>{{ $any(parts)[i].userId }}</td>
+        <td>{{ $any(parts())[i].userId }}</td>
       </tr>
       }
     </tbody>

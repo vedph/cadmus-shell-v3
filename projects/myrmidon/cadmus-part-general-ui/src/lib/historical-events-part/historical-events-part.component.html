@@ -106,8 +106,8 @@
             [pinByTypeMode]="pinByTypeMode"
             [canSwitchMode]="canSwitchMode"
             [canEditTarget]="canEditTarget"
-            [model]="editedEvent"
-            (modelChange)="onEventSave($event)"
+            [event]="editedEvent"
+            (eventChange)="onEventSave($event!)"
             (editorClose)="closeEvent()"
           />
         </fieldset>

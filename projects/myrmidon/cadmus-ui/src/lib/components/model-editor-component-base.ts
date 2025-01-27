@@ -1,10 +1,11 @@
 import {
-  Input,
-  Output,
-  EventEmitter,
   Component,
   OnDestroy,
   OnInit,
+  output,
+  input,
+  effect,
+  model,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -68,8 +69,6 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   implements OnInit, OnDestroy
 {
   private readonly _mebSubs: Subscription[] = [];
-  private _identity: PartIdentity | FragmentIdentity | undefined;
-  private _data?: EditedObject<T>;
 
   /**
    * The root form of the editor.
@@ -94,64 +93,29 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   /**
    * The identity of the edited model.
    */
-  @Input()
-  public get identity(): PartIdentity | FragmentIdentity | undefined {
-    return this._identity;
-  }
-  public set identity(value: PartIdentity | FragmentIdentity | undefined) {
-    this._identity = value;
-    if (this.identity?.partId) {
-      const part = this._data?.value as Part;
-      if (part && !part.id) {
-        console.log('part identity updated');
-        part.id = this.identity.partId;
-      }
-    }
-  }
+  public readonly identity = input<PartIdentity | FragmentIdentity>();
 
   /**
    * The data being edited.
    */
-  @Input()
-  public get data(): EditedObject<T> | undefined {
-    return this._data;
-  }
-  public set data(value: EditedObject<T> | undefined) {
-    this._data = value;
-    this.onDataSet(value);
-  }
+  public readonly data = model<EditedObject<T>>();
 
   /**
-   * Event emitted when the edited data is saved.
+   * True to disable the editor.
    */
-  @Output()
-  public dataChange: EventEmitter<T>;
+  public readonly disabled = input<boolean>();
 
   /**
    * Event emitted when the dirty state has changed.
    * This event just reflects changes in isDirty$, and is a facility
    * for propagating it to the parent's component.
    */
-  @Output()
-  public dirtyChange: EventEmitter<boolean>;
-
-  /**
-   * True to disable the editor.
-   */
-  @Input()
-  set disabled(value: boolean) {
-    if (value) {
-      this.form.disable();
-    } else {
-      this.form.enable();
-    }
-  }
+  public readonly dirtyChange = output<boolean>();
 
   /**
    * Emitted when the user requests to close the editor.
    */
-  @Output()
-  public editorClose: EventEmitter<any>;
+  public readonly editorClose = output();
 
   /**
    * Create a new instance of the editor.
@@ -163,12 +127,37 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
     protected authService: AuthJwtService,
     protected formBuilder: FormBuilder
   ) {
-    this.dataChange = new EventEmitter<T>();
-    this.editorClose = new EventEmitter<any>();
-    this.dirtyChange = new EventEmitter<boolean>();
     this.form = formBuilder.group({});
     this.userLevel = 0;
     this.isDirty$ = new BehaviorSubject<boolean>(false);
+
+    effect(() => {
+      this.disableForm(this.disabled());
+    });
+    effect(() => {
+      this.onDataSet(this.data());
+    });
+    effect(() => {
+      this.onIdentitySet(this.identity());
+    });
+  }
+
+  private disableForm(disabled?: boolean) {
+    if (disabled) {
+      this.form.disable();
+    } else {
+      this.form.enable();
+    }
+  }
+
+  private onIdentitySet(identity?: PartIdentity | FragmentIdentity) {
+    if (identity?.partId) {
+      const part = this.data()?.value as Part;
+      if (part && !part.id) {
+        console.log('part identity set', identity.partId);
+        part.id = identity.partId;
+      }
+    }
   }
 
   public ngOnInit(): void {
@@ -251,8 +240,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
    * @param value The value.
    */
   protected updateValue(value: T): void {
-    this._data = { ...(this._data || { thesauri: {} }), value: value };
-    this.dataChange.emit(value);
+    this.data.set({ ...(this.data() || { thesauri: {} }), value: value });
   }
 
   /**
@@ -272,13 +260,13 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
    * @returns Part object.
    */
   protected getEditedPart(typeId: string): Part {
-    const part = deepCopy(this.data?.value) as Part | null;
+    const part = deepCopy(this.data()?.value) as Part | null;
     return (
       part || {
-        itemId: this.identity!.itemId || '',
+        itemId: this.identity()!.itemId || '',
         id: '',
         typeId: typeId,
-        roleId: this.identity!.roleId || undefined,
+        roleId: this.identity()!.roleId || undefined,
         timeCreated: new Date(),
         creatorId: '',
         timeModified: new Date(),
@@ -293,10 +281,10 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
    * @returns Fragment object.
    */
   protected getEditedFragment(): Fragment {
-    const fr = deepCopy(this.data?.value) as Fragment | null;
+    const fr = deepCopy(this.data()?.value) as Fragment | null;
     return (
       fr || {
-        location: (this.identity as FragmentIdentity).loc,
+        location: (this.identity() as FragmentIdentity).loc,
       }
     );
   }
@@ -312,7 +300,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
    * loaded thesauri set.
    */
   protected hasThesaurus(key: string): boolean {
-    return this.data?.thesauri && this.data.thesauri[key] ? true : false;
+    return this.data()?.thesauri && this.data()!.thesauri[key] ? true : false;
   }
 
   /**

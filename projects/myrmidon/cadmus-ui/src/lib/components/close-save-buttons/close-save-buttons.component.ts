@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormGroup, UntypedFormGroup } from '@angular/forms';
 
 import { MatButton } from '@angular/material/button';
@@ -11,17 +11,11 @@ import { MatIcon } from '@angular/material/icon';
   imports: [MatButton, MatIcon],
 })
 export class CloseSaveButtonsComponent {
-  @Input()
-  public form?: FormGroup | UntypedFormGroup;
-  @Input()
-  public noSave?: boolean;
+  public readonly form = input<FormGroup | UntypedFormGroup>();
 
-  @Output()
-  public closeRequest: EventEmitter<any>;
+  public readonly noSave = input<boolean>();
 
-  constructor() {
-    this.closeRequest = new EventEmitter();
-  }
+  public readonly closeRequest = output();
 
   public close(): void {
     this.closeRequest.emit();

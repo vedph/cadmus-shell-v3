@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-graph-pg-ex",
-  "version": "11.0.0",
+  "version": "12.0.0",
   "description": "Cadmus - extended semantic graph page.",
   "keywords": [
     "Cadmus"
@@ -23,8 +23,8 @@
     "@myrmidon/ngx-mat-tools": "^0.0.1",
     "@myrmidon/cadmus-refs-lookup": "^8.0.0",
     "@myrmidon/cadmus-api": "^11.0.0",
-    "@myrmidon/cadmus-graph-ui": "^11.0.0",
-    "@myrmidon/cadmus-graph-ui-ex": "^11.0.0"
+    "@myrmidon/cadmus-graph-ui": "^12.0.0",
+    "@myrmidon/cadmus-graph-ui-ex": "^12.0.0"
   },
   "sideEffects": false
 }

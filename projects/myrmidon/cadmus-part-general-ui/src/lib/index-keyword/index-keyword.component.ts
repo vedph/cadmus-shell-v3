@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output, model, effect, output, input } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -38,32 +38,14 @@ import { IndexKeyword } from '../index-keywords-part';
     MatIcon,
   ],
 })
-export class IndexKeywordComponent implements OnInit {
-  private _keyword?: IndexKeyword;
+export class IndexKeywordComponent {
+  public readonly keyword = model<IndexKeyword>();
 
-  @Input()
-  public get keyword(): IndexKeyword | undefined {
-    return this._keyword;
-  }
-  public set keyword(value: IndexKeyword | undefined) {
-    if (this._keyword === value) {
-      return;
-    }
-    this._keyword = value;
-    this.updateForm();
-  }
+  public readonly idxEntries = input<ThesaurusEntry[]>();
+  public readonly tagEntries = input<ThesaurusEntry[]>();
+  public readonly langEntries = input<ThesaurusEntry[]>();
 
-  @Input()
-  public idxEntries: ThesaurusEntry[] | undefined;
-  @Input()
-  public tagEntries: ThesaurusEntry[] | undefined;
-  @Input()
-  public langEntries: ThesaurusEntry[] | undefined;
-
-  @Output()
-  public editorClose: EventEmitter<any>;
-  @Output()
-  public save: EventEmitter<IndexKeyword>;
+  public readonly editorClose = output();
 
   public indexId: FormControl<string | null>;
   public language: FormControl<string | null>;
@@ -73,10 +55,6 @@ export class IndexKeywordComponent implements OnInit {
   public form: FormGroup;
 
   constructor(formBuilder: FormBuilder) {
-    // events
-    this.editorClose = new EventEmitter<any>();
-    this.save = new EventEmitter<IndexKeyword>();
-    // form
     this.indexId = formBuilder.control(null, [
       Validators.maxLength(50),
       Validators.pattern(/^[-.a-zA-Z0-9_]{0,50}$/),
@@ -97,20 +75,22 @@ export class IndexKeywordComponent implements OnInit {
       note: this.note,
       tag: this.tag,
     });
+
+    effect(() => {
+      this.updateForm(this.keyword());
+    });
   }
 
-  ngOnInit(): void {}
-
-  private updateForm(): void {
-    if (!this._keyword) {
+  private updateForm(keyword?: IndexKeyword): void {
+    if (!keyword) {
       this.form.reset();
       return;
     }
-    this.indexId.setValue(this._keyword.indexId || null);
-    this.language.setValue(this._keyword.language);
-    this.value.setValue(this._keyword.value);
-    this.note.setValue(this._keyword.note || null);
-    this.tag.setValue(this._keyword.tag || null);
+    this.indexId.setValue(keyword.indexId || null);
+    this.language.setValue(keyword.language);
+    this.value.setValue(keyword.value);
+    this.note.setValue(keyword.note || null);
+    this.tag.setValue(keyword.tag || null);
     this.form.markAsPristine();
   }
 
@@ -132,7 +112,6 @@ export class IndexKeywordComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this._keyword = this.getKeyword();
-    this.save.emit(this._keyword);
+    this.keyword.set(this.getKeyword());
   }
 }

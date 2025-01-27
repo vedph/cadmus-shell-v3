@@ -5,7 +5,7 @@
         <mat-icon>textsms</mat-icon>
       </div>
       <mat-card-title
-        >Orthography Fragment {{ data?.value?.location }}</mat-card-title
+        >Orthography Fragment {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
         {{ frText }}
@@ -42,7 +42,7 @@
               type="button"
               mat-icon-button
               matTooltip="Automatically set operations from differences"
-              [disabled]="!standard.value || !data?.baseText"
+              [disabled]="!standard.value || !data()?.baseText"
               (click)="autoAddOperations()"
             >
               <mat-icon>queue</mat-icon>
@@ -115,7 +115,7 @@
           <div [@slideInOut]>
             <cadmus-msp-operation
               [operation]="currentOperation"
-              (operationChange)="currentOperationSaved($event)"
+              (operationChange)="currentOperationSaved($event!)"
               (operationClose)="currentOperationClosed()"
             />
           </div>

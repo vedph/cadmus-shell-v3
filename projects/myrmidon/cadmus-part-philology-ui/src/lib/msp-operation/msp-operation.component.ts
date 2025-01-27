@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, output, model, effect } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -68,29 +68,15 @@ import { MspValidators } from '../msp-validators';
   ],
 })
 export class MspOperationComponent implements OnInit {
-  private _operation?: MspOperation;
   private _ignoreTextUpdate?: boolean;
   private _ignoreVisualUpdate?: boolean;
 
   /**
    * The operation being edited.
    */
-  @Input()
-  public get operation(): MspOperation | undefined {
-    return this._operation;
-  }
-  public set operation(value: MspOperation | undefined) {
-    this._operation = value;
-    this.updateFormControls(value, true);
-  }
+  public readonly operation = model<MspOperation>();
 
-  /**
-   * Fired when the operation being edited has changed.
-   */
-  @Output()
-  public operationChange: EventEmitter<MspOperation>;
-  @Output()
-  public operationClose: EventEmitter<any>;
+  public readonly operationClose = output();
 
   public visualExpanded?: boolean;
 
@@ -107,11 +93,6 @@ export class MspOperationComponent implements OnInit {
   public note: FormControl<string | null>;
 
   constructor(formBuilder: FormBuilder) {
-    // events
-    this.operationChange = new EventEmitter<MspOperation>();
-    this.operationClose = new EventEmitter<any>();
-
-    // form
     const rangeRegExp = /^\@?\d+(?:[x×]\d+)?$/;
     this.text = formBuilder.control(null, [
       Validators.required,
@@ -156,9 +137,13 @@ export class MspOperationComponent implements OnInit {
       text: this.text,
       visual: this.visual,
     });
+
+    effect(() => {
+      this.updateFormControls(this.operation(), true);
+    });
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // whenever text changes, parse the operation
     // (unless instructed to ignore the change)
     this.text.valueChanges
@@ -345,7 +330,6 @@ export class MspOperationComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.operation = this.getOperation();
-    this.operationChange.emit({ ...this._operation } as MspOperation);
+    this.operation.set(this.getOperation());
   }
 }
