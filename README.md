@@ -175,6 +175,10 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+### 12.0.1
+
+- 2025-02-05: increased apparatus entry note limit from 1000 to 5000.
+
 ### 12.0.0
 
 - 2025-01-26: ⚠️ migrated to signals with a few BREAKING CHANGES:

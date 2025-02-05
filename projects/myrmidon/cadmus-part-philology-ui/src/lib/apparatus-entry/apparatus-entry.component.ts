@@ -123,7 +123,7 @@ export class ApparatusEntryComponent {
     );
     this.tag = _formBuilder.control(null, Validators.maxLength(50));
     this.groupId = _formBuilder.control(null, Validators.maxLength(50));
-    this.note = _formBuilder.control(null, Validators.maxLength(1000));
+    this.note = _formBuilder.control(null, Validators.maxLength(5000));
     this.witnesses = _formBuilder.array([]);
     this.authors = _formBuilder.array([]);
     this.form = _formBuilder.group({
