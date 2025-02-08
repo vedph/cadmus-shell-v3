@@ -179,11 +179,11 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
   - new editor settings service in `@myrmidon/cadmus-api` (11.0.1).
   - new methods `getSetting` and `getSettingFor` added to `AppRepository` in `@myrmidon/cadmus-state` (11.0.1).
 
-Editor settings are in the root's `settings` property, which is a single object where each property is an object setting: the property name is the setting key, and the property value is the setting value.
+Editor settings are defined in the backend JSON profile under the root's `settings` property, which is a single object where each property is an object setting: the property name is the setting key, and the property value is the setting value.
 
 By convention, each setting refers to an editor and its ID is the editor's type ID optionally followed by its role ID prefixed by an underscore. For instance, categories editor's settings are under `it.vedph.categories`, and the role-specific settings are under `it.vedph.categories_role`. In MongoDB, each setting is stored as a document in the `settings` collection, with an ID equal to this identifier.
 
-This allows adding specific settings for configurable editors in the UI. Until now, this was possible via thesauri used for this purpose, but this forced settings to be structured as flat string entries, which is not very flexible except for simple cases. Now, each editor can have its own settings, and these can be structured as needed in a freely modeled object.
+This allows adding specific settings for configurable editors in the UI. Until now, this was possible via thesauri used for this purpose; but this forced settings to be structured as flat string entries, which is not flexible except for simple cases. Now, each editor type (also distinguishing its roles, if required) can have its own settings, and these can be structured as needed in a freely modeled object.
 
 To use this feature in your part or fragment editor:
 
