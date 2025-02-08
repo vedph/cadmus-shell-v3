@@ -11,6 +11,7 @@ import {
   FlagService,
   ThesaurusService,
   PreviewService,
+  EditorSettingsService,
 } from '@myrmidon/cadmus-api';
 
 /**
@@ -37,6 +38,8 @@ export class AppRepository {
   private readonly _previewFKeys$: BehaviorSubject<string[]>;
   // the preview item composer keys. Empty when preview is disabled.
   private readonly _previewCKeys$: BehaviorSubject<string[]>;
+  // editor settings cache, lazily loaded
+  private readonly _settingsCache: Map<string, any>;
 
   public get facets$(): Observable<FacetDefinition[]> {
     return this._facets$;
@@ -64,7 +67,8 @@ export class AppRepository {
     private _facetService: FacetService,
     private _flagService: FlagService,
     private _thesaurusService: ThesaurusService,
-    private _previewService: PreviewService
+    private _previewService: PreviewService,
+    private _settingService: EditorSettingsService
   ) {
     this._facets$ = new BehaviorSubject<FacetDefinition[]>([]);
     this._flags$ = new BehaviorSubject<FlagDefinition[]>([]);
@@ -77,6 +81,7 @@ export class AppRepository {
     this._previewJKeys$ = new BehaviorSubject<string[]>([]);
     this._previewFKeys$ = new BehaviorSubject<string[]>([]);
     this._previewCKeys$ = new BehaviorSubject<string[]>([]);
+    this._settingsCache = new Map<string, any>();
   }
 
   public getTypeThesaurus(): Thesaurus | undefined {
@@ -152,6 +157,7 @@ export class AppRepository {
     this._previewJKeys$.next([]);
     this._previewFKeys$.next([]);
     this._previewCKeys$.next([]);
+    this._settingsCache.clear();
   }
 
   /**
@@ -189,5 +195,39 @@ export class AppRepository {
         },
       });
     });
+  }
+
+  /**
+   * Get the editor setting with the specified ID.
+   * @returns Promise with the settings object.
+   */
+  public getSetting(id: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (this._settingsCache.has(id)) {
+        resolve(this._settingsCache.get(id));
+        return;
+      }
+      this._settingService.getSetting(id).subscribe({
+        next: (setting) => {
+          this._settingsCache.set(id, setting);
+          resolve(setting);
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
+    });
+  }
+
+  /**
+   * Get the editor setting for the specified part or fragment type ID,
+   * optionally having the specified role ID.
+   * @param typeId The part or fragment type ID.
+   * @param roleId The optional role ID.
+   * @returns Promise with settings object.
+   */
+  public getSettingFor(typeId: string, roleId?: string): Promise<any> {
+    const id = roleId ? `${typeId}_${roleId}` : typeId;
+    return this.getSetting(id);
   }
 }

@@ -175,6 +175,23 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-02-08: 👉 added editor settings:
+  - new editor settings service in `@myrmidon/cadmus-api` (11.0.1).
+  - new methods `getSetting` and `getSettingFor` added to `AppRepository` in `@myrmidon/cadmus-state` (11.0.1).
+
+Editor settings are in the root's `settings` property, which is a single object where each property is an object setting: the property name is the setting key, and the property value is the setting value.
+
+By convention, each setting refers to an editor and its ID is the editor's type ID optionally followed by its role ID prefixed by an underscore. For instance, categories editor's settings are under `it.vedph.categories`, and the role-specific settings are under `it.vedph.categories_role`. In MongoDB, each setting is stored as a document in the `settings` collection, with an ID equal to this identifier.
+
+This allows adding specific settings for configurable editors in the UI. Until now, this was possible via thesauri used for this purpose, but this forced settings to be structured as flat string entries, which is not very flexible except for simple cases. Now, each editor can have its own settings, and these can be structured as needed in a freely modeled object.
+
+To use this feature in your part or fragment editor:
+
+1. inject the `AppRepository` service.
+2. request the setting object for the editor of the part/fragment type ID and role via `getSettingFor(typeId, roleId?)`. This will return an object with any model, representing all the settings for that specific editor. The repository will cache these settings for future requests, thus avoiding further trips to the server.
+
+This being an opt-in feature, no change is required for all the existing editors.
+
 ### 12.0.1
 
 - 2025-02-05: increased apparatus entry note limit from 1000 to 5000.

@@ -3,6 +3,7 @@
  */
 
 export * from './lib/services/editor-guard.service';
+export * from './lib/services/editor-settings.service';
 export * from './lib/services/facet.service';
 export * from './lib/services/flag.service';
 export * from './lib/services/graph.service';
