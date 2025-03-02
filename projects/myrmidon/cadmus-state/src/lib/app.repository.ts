@@ -181,6 +181,25 @@ export class AppRepository {
   }
 
   /**
+   * Get the color defined for the specified part type ID, reading it
+   * from the facets definitions.
+   * @param typeId The part type ID.
+   * @param roleId The optional role type ID.
+   * @returns The color key, or undefined if not found.
+   */
+  public getPartColor(typeId: string, roleId?: string): string | undefined {
+    // for each facet, find typeId and roleId in its part definitions
+    for (let facet of this._facets$.value) {
+      for (let part of facet.partDefinitions) {
+        if (part.typeId === typeId && (!roleId || part.roleId === roleId)) {
+          return facet.colorKey;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Load the flags definitions.
    */
   public loadFlags(): Promise<void> {

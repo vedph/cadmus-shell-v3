@@ -17,6 +17,36 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## Libraries
 
+Latest versions:
+
+- cadmus-api: 12.0.0
+- cadmus-core: 11.0.0
+- cadmus-flags-pg: 13.0.0
+- cadmus-flags-ui: 13.0.0
+- cadmus-graph-pg: 13.0.0
+- cadmus-graph-pg-ex: 13.0.0
+- cadmus-graph-ui: 13.0.0
+- cadmus-graph-ui-ex: 13.0.0
+- cadmus-item-editor: 13.0.0
+- cadmus-item-list: 13.0.0
+- cadmus-item-search: 13.0.0
+- cadmus-layer-demo: 12.0.0
+- cadmus-part-general-pg: 13.0.0
+- cadmus-part-general-ui: 12.0.0
+- cadmus-part-philology-pg: 13.0.0
+- cadmus-part-philology-ui: 12.0.1
+- cadmus-preview-pg: 13.0.0
+- cadmus-preview-ui: 13.0.0
+- cadmus-profile-core: 11.0.0
+- cadmus-state: 12.0.0
+- cadmus-thesaurus-editor: 13.0.0
+- cadmus-thesaurus-list: 13.0.0
+- cadmus-thesaurus-ui: 12.0.0
+- cadmus-ui: 12.0.0
+- cadmus-ui-pg: 13.0.0
+
+Dependencies:
+
 ```mermaid
 graph LR;
   cadmus-core --> ngx-tools
@@ -109,6 +139,7 @@ graph LR;
   cadmus-preview-ui --> ngx-mat-tools
   cadmus-preview-ui --> cadmus-text-block-view
   cadmus-preview-ui --> cadmus-api
+  cadmus-preview-ui --> cadmus-state
   cadmus-profile-core
   cadmus-state --> ngx-tools
   cadmus-state --> cadmus-core
@@ -175,17 +206,23 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-02-08: 👉 added editor settings:
+### 13.0.0
+
+- 2025-03-02:
+  - ⚠️ refactored **preview** (rendering) components for backend preview V2 (and consequently Cadmus API version 11.x.x). The only relevant change in backend for the preview UI refers to a few endpoints, as most of the refactoring in backend affected the export process for more powerful renditions into TEI etc. The essential change here was replacing the block model with the `TextSpan` model for layered text preview. The related UI components have been modified accordingly, and dependencies from the text view brick have been removed. Also, a few API services for preview have changed to use this model, which implied bumping their major version. In turn, this bumped the major versions of all the dependent libraries, even if their only changes refer to the peer dependencies versions. Finally, in the state library a new function was added to `AppService` for getting the layer color to use in preview UI.
+  - updated Angular and packages.
+
+- 2025-02-08: 👉 added editor **settings**:
   - new editor settings service in `@myrmidon/cadmus-api` (11.0.1).
   - new methods `getSetting` and `getSettingFor` added to `AppRepository` in `@myrmidon/cadmus-state` (11.0.1).
 
-Editor settings are defined in the backend JSON profile under the root's `settings` property, which is a single object where each property is an object setting: the property name is the setting key, and the property value is the setting value.
+Editor **settings** are defined in the backend JSON profile under the root's `settings` property, which is a single object where each property is an object setting: the property name is the setting key, and the property value is the setting value.
 
 By convention, each setting refers to an editor and its ID is the editor's type ID optionally followed by its role ID prefixed by an underscore. For instance, categories editor's settings are under `it.vedph.categories`, and the role-specific settings are under `it.vedph.categories_role`. In MongoDB, each setting is stored as a document in the `settings` collection, with an ID equal to this identifier.
 
 This allows adding specific settings for configurable editors in the UI. Until now, this was possible via thesauri used for this purpose; but this forced settings to be structured as flat string entries, which is not flexible except for simple cases. Now, each editor type (also distinguishing its roles, if required) can have its own settings, and these can be structured as needed in a freely modeled object.
 
-To use this feature in your part or fragment editor:
+💡 To use this feature in your part or fragment editor:
 
 1. inject the `AppRepository` service.
 2. request the setting object for the editor of the part/fragment type ID and role via `getSettingFor(typeId, roleId?)`. This will return an object with any model, representing all the settings for that specific editor. The repository will cache these settings for future requests, thus avoiding further trips to the server.

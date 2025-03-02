@@ -13,24 +13,21 @@ export interface RenditionResult {
   result: string;
 }
 
-/**
- * A text block used in bricks. This interface is repeated here
- * to avoid adding a dependency from bricks.
- */
-export interface TextBlock {
-  id: string;
-  text: string;
-  decoration?: string;
-  htmlDecoration?: boolean;
-  tip?: string;
-  layerIds: string[];
+export interface AnnotatedTextRange {
+  start: number;
+  end: number;
+  fragmentIds?: string[];
+  text?: string;
 }
 
 /**
- * A row of text blocks.
+ * A text span used in rendering.
  */
-export interface TextBlockRow {
-  blocks: TextBlock[];
+export interface TextSpan {
+  range?: AnnotatedTextRange;
+  type?: string;
+  isBeforeEol?: boolean;
+  text?: string;
 }
 
 /**
@@ -109,34 +106,28 @@ export class PreviewService {
 
   // preview/text-parts/{id}
   /**
-   * Gets the text blocks built by flattening the text part with the
+   * Gets the text spans built by flattening the text part with the
    * specified ID with all the layers specified.
    *
-   * @param id The base text part's ID.
+   * @param textPartId The base text part's ID.
    * @param layerPartIds The layer parts IDs.
-   * @param layerIds The IDs to assign to each layer.
    */
-  public getTextBlocks(
-    id: string,
-    layerPartIds: string[],
-    layerIds?: (string | null)[]
-  ): Observable<TextBlockRow[]> {
+  public getTextSpans(
+    textPartId: string,
+    layerPartIds: string[]
+  ): Observable<TextSpan[]> {
     let httpParams = new HttpParams();
 
-    // encode the optional layer IDs as suffixes of part IDs
     if (layerPartIds.length) {
       for (let i = 0; i < layerPartIds.length; i++) {
         let id = layerPartIds[i];
-        if (layerIds && i < layerIds.length) {
-          id += '=' + layerIds[i];
-        }
-        httpParams = httpParams.append('layerId', id);
+        httpParams = httpParams.append('layerPartId', id);
       }
     }
 
     return this._http
-      .get<TextBlockRow[]>(
-        this._env.get('apiUrl') + `preview/text-parts/${id}`,
+      .get<TextSpan[]>(
+        this._env.get('apiUrl') + `preview/text-parts/${textPartId}`,
         {
           params: httpParams,
         }

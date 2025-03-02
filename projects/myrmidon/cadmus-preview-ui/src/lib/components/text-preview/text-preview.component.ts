@@ -1,4 +1,4 @@
-import { Component, effect, input, Input, OnInit } from '@angular/core';
+import { Component, effect, input, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   FormBuilder,
@@ -6,7 +6,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -16,21 +16,25 @@ import { MatOption } from '@angular/material/core';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 
 import { FlatLookupPipe, SafeHtmlPipe } from '@myrmidon/ngx-tools';
-import {
-  TextBlock,
-  TextBlockEventArgs,
-  TextBlockViewComponent,
-} from '@myrmidon/cadmus-text-block-view';
 
 import { Item, LayerPartInfo, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   PreviewService,
   ItemService,
-  TextBlockRow,
   RenditionResult,
+  TextSpan,
 } from '@myrmidon/cadmus-api';
+import { AppRepository } from '@myrmidon/cadmus-state';
 
 import { PartPreviewSource } from '../part-preview/part-preview.component';
+import { TextSpansViewComponent } from '../text-spans-view/text-spans-view.component';
+
+/**
+ * Decorated layer part info. This just adds the color to each layer.
+ */
+export interface DecoratedLayerPartInfo extends LayerPartInfo {
+  color?: string;
+}
 
 /**
  * Layered text preview component.
@@ -47,14 +51,16 @@ import { PartPreviewSource } from '../part-preview/part-preview.component';
     FormsModule,
     ReactiveFormsModule,
     MatOption,
-    TextBlockViewComponent,
     MatTabGroup,
     MatTab,
     FlatLookupPipe,
     SafeHtmlPipe,
+    TextSpansViewComponent,
   ],
 })
-export class TextPreviewComponent implements OnInit {
+export class TextPreviewComponent implements OnInit, OnDestroy {
+  private _sub?: Subscription;
+
   /**
    * The source of the part to be previewed.
    */
@@ -65,24 +71,22 @@ export class TextPreviewComponent implements OnInit {
    */
   public readonly typeEntries = input<ThesaurusEntry[]>();
 
+  public layers: DecoratedLayerPartInfo[] = [];
+  public spans: TextSpan[] = [];
+  public frHtml: string[] = [];
+  public frLabels: string[] = [];
   public busy?: boolean;
   public item?: Item;
-  public layers: LayerPartInfo[];
-  public rows: TextBlockRow[];
-  public selectedLayer: FormControl<LayerPartInfo | null>;
-  public frHtml: string[];
-  public frLabels: string[];
+
+  public selectedLayer: FormControl<DecoratedLayerPartInfo | null>;
 
   constructor(
     private _previewService: PreviewService,
     private _itemService: ItemService,
+    private _appRepository: AppRepository,
     private _snackbar: MatSnackBar,
     formBuilder: FormBuilder
   ) {
-    this.layers = [];
-    this.rows = [];
-    this.frHtml = [];
-    this.frLabels = [];
     // form
     this.selectedLayer = formBuilder.control(null);
 
@@ -91,8 +95,8 @@ export class TextPreviewComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.selectedLayer.valueChanges.subscribe((_) => {
+  public ngOnInit(): void {
+    this._sub = this.selectedLayer.valueChanges.subscribe((_) => {
       if (!this.busy) {
         this.loadLayer();
       }
@@ -100,22 +104,27 @@ export class TextPreviewComponent implements OnInit {
     this.loadItem();
   }
 
-  private getLayerTypeId(layer: LayerPartInfo): string | null {
-    if (!layer) {
-      return null;
-    }
-    let id = layer.typeId;
-    if (layer.roleId) {
-      id += '|' + layer.roleId;
-    }
-    return id;
+  public ngOnDestroy(): void {
+    this._sub?.unsubscribe();
   }
 
-  private adjustBlockWS(blocks: TextBlock[]): void {
+  private adjustSpanWS(spans: TextSpan[]): void {
     // we want to use mid dot instead of space because the visualized
     // blocks might include some spacing between them
-    for (let i = 0; i < blocks.length; i++) {
-      blocks[i].text = blocks[i].text.replace(' ', '\xB7');
+    for (let i = 0; i < spans.length; i++) {
+      spans[i].text = spans[i].text?.replace(/ /g, '\xB7');
+    }
+  }
+
+  private assignLayerColors(layers: DecoratedLayerPartInfo[]): void {
+    for (let i = 0; i < layers.length; i++) {
+      let color = this._appRepository.getPartColor(
+        layers[i].typeId,
+        layers[i].roleId
+      );
+      if (color) {
+        layers[i].color = '#' + color;
+      }
     }
   }
 
@@ -125,20 +134,17 @@ export class TextPreviewComponent implements OnInit {
     this.busy = true;
 
     this._previewService
-      .getTextBlocks(
+      .getTextSpans(
         this.source()!.partId,
-        layers.map((l) => l.id),
-        layers.map((l) => this.getLayerTypeId(l))
+        layers.map((l) => l.id)
       )
       .pipe(take(1))
       .subscribe({
-        next: (rows) => {
+        next: (spans) => {
           this.busy = false;
-          // convert initial/final WS into nbsp
-          for (let i = 0; i < rows.length; i++) {
-            this.adjustBlockWS(rows[i].blocks);
-          }
-          this.rows = rows;
+          // convert initial/final WS into mid dot
+          this.adjustSpanWS(spans);
+          this.spans = spans;
         },
         error: (error) => {
           this.busy = false;
@@ -160,7 +166,7 @@ export class TextPreviewComponent implements OnInit {
     if (!source?.partId) {
       this.item = undefined;
       this.layers = [];
-      this.rows = [];
+      this.spans = [];
       return;
     }
     forkJoin({
@@ -172,6 +178,7 @@ export class TextPreviewComponent implements OnInit {
         next: (result) => {
           this.busy = false;
           this.item = result.item || undefined;
+          this.assignLayerColors(result.layers);
           this.layers = result.layers;
           // select layer if requested
           if (source!.layerId) {
@@ -191,20 +198,21 @@ export class TextPreviewComponent implements OnInit {
       });
   }
 
-  private parseLayerId(id: string): string[] {
-    return /^([^|]+)\|(.+)([0-9]+)$/.exec(id)!;
+  private parseFragmentId(id: string): string[] {
+    // fragment ID has form typeId:roleId@frIndex
+    return /^([^:]+):([^@)]+)@([0-9]+)/.exec(id)!;
   }
 
-  private showFragments(layerIds: string[]): void {
-    if (this.busy || !layerIds.length) {
+  private showFragments(fragmentIds: string[]): void {
+    if (this.busy || !fragmentIds.length) {
       return;
     }
     this.busy = true;
     // load all the fragments linked to this block
     const loaders$: Observable<RenditionResult>[] = [];
     const labels: string[] = [];
-    for (let i = 0; i < layerIds.length; i++) {
-      const m = this.parseLayerId(layerIds[i]);
+    for (let i = 0; i < fragmentIds.length; i++) {
+      const m = this.parseFragmentId(fragmentIds[i]);
       labels.push(m[2]);
       const layer = this.layers.find(
         (l) => l.typeId === m[1] && (!l.roleId || l.roleId === m[2])
@@ -237,10 +245,10 @@ export class TextPreviewComponent implements OnInit {
       });
   }
 
-  public onBlockClick(args: TextBlockEventArgs): void {
-    if (!args.block.layerIds?.length) {
+  public onSpanClick(span: TextSpan): void {
+    if (!span.range?.fragmentIds?.length) {
       return;
     }
-    this.showFragments(args.block.layerIds);
+    this.showFragments(span.range.fragmentIds);
   }
 }

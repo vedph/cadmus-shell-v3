@@ -4,3 +4,4 @@
 
 export * from './lib/components/part-preview/part-preview.component';
 export * from './lib/components/text-preview/text-preview.component';
+export * from './lib/components/text-spans-view/text-spans-view.component';

@@ -31,6 +31,8 @@ export class TextPreviewFeatureComponent {
       this.typeEntries = t?.entries;
     });
     // ensure app data is loaded
-    appRepository.load();
+    appRepository.load().then(() => {
+      this.typeEntries = appRepository.getTypeThesaurus()?.entries;
+    });
   }
 }

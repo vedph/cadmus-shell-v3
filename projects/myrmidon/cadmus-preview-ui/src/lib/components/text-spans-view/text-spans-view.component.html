@@ -1,0 +1,20 @@
+<div class="cadmus-text-span-view-row">
+  <!-- rows -->
+  @for (row of rows(); track row) {
+  <div class="row">
+    <!-- spans in row -->
+    @for (span of row; track span) {
+    <div
+      class="col"
+      (click)="onSpanClick(span)"
+      [style.background-color]="getSpanColor(span)"
+      [style.color]="getSpanColor(span) | colorToContrast"
+    >
+      <div class="text">
+        {{ span.text }}
+      </div>
+    </div>
+    }
+  </div>
+  }
+</div>

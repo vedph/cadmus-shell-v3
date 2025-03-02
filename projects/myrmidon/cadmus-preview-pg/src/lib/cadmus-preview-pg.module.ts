@@ -12,14 +12,14 @@ import { TextPreviewFeatureComponent } from './components/text-preview-feature/t
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
   {
-    path: ':iid/:pid',
-    pathMatch: 'full',
-    component: PartPreviewFeatureComponent,
-  },
-  {
     path: ':iid/:pid/text',
     pathMatch: 'full',
     component: TextPreviewFeatureComponent,
+  },
+  {
+    path: ':iid/:pid',
+    pathMatch: 'full',
+    component: PartPreviewFeatureComponent,
   },
 ]);
 
