@@ -2,14 +2,22 @@
   <!-- rows -->
   @for (row of rows(); track row) {
   <div class="row">
-    <!-- spans in row -->
+    <!-- row -->
     @for (span of row; track span) {
+    <!-- col -->
     <div
       class="col"
       (click)="onSpanClick(span)"
       [style.background-color]="getSpanColor(span)"
       [style.color]="getSpanColor(span) | colorToContrast"
     >
+      <div class="bar">
+        <minichart-bar
+          [data]="span.chartItems || []"
+          [options]="chartOptions"
+          (itemClicked)="onChartItemClicked($event)"
+        />
+      </div>
       <div class="text">
         {{ span.text }}
       </div>
