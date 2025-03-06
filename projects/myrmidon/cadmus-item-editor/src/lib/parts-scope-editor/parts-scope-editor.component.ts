@@ -1,4 +1,4 @@
-import { Component, input, output, effect } from '@angular/core';
+import { Component, input, output, effect, OnDestroy } from '@angular/core';
 import {
   FormGroup,
   FormArray,
@@ -23,6 +23,7 @@ import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 
 import { EditedItemRepository } from '../state/edited-item.repository';
+import { Subscription } from 'rxjs';
 
 export interface PartScopeSetRequest {
   ids: string[];
@@ -50,7 +51,9 @@ export interface PartScopeSetRequest {
     DatePipe,
   ],
 })
-export class PartsScopeEditorComponent {
+export class PartsScopeEditorComponent implements OnDestroy {
+  private readonly _sub: Subscription;
+
   public readonly parts = input<Part[]>();
 
   public readonly readonly = input<boolean>();
@@ -70,6 +73,10 @@ export class PartsScopeEditorComponent {
     private _editedItemRepository: EditedItemRepository
   ) {
     this.checks = _formBuilder.array([], CustomValidators.minChecked(1));
+    this._sub = this.checks.valueChanges.subscribe(() => {
+      this.form.updateValueAndValidity();
+    });
+
     this.scope = _formBuilder.control(null, [
       Validators.maxLength(50),
       Validators.pattern(/^[-a-zA-Z0-9_]+$/),
@@ -86,6 +93,10 @@ export class PartsScopeEditorComponent {
     });
   }
 
+  public ngOnDestroy(): void {
+    this._sub.unsubscribe();
+  }
+
   private updateForm(parts?: Part[]): void {
     this.checks.clear();
     if (!parts?.length) {
@@ -95,6 +106,12 @@ export class PartsScopeEditorComponent {
     for (let i = 0; i < parts.length; i++) {
       this.checks.push(this._formBuilder.control(false));
     }
+
+    this.form.updateValueAndValidity();
+  }
+
+  public onCheckChanged(): void {
+    this.form.updateValueAndValidity();
   }
 
   public getPartColor(typeId: string, roleId?: string): string {

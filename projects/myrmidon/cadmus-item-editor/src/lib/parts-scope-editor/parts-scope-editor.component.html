@@ -14,7 +14,7 @@
       @for (ctl of checks.controls; track ctl; let i = $index) {
       <tr formArrayName="checks">
         <td class="fit-width">
-          <mat-checkbox [formControlName]="i"></mat-checkbox>
+          <mat-checkbox [formControlName]="i" (change)="onCheckChanged()" />
         </td>
         <td>
           <span
@@ -52,7 +52,7 @@
       mat-flat-button
       class="mat-primary"
       type="submit"
-      [disabled]="form.invalid || readonly"
+      [disabled]="form.invalid || readonly()"
       matTooltip="Assign the scope to the checked parts"
     >
       assign

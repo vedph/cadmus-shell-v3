@@ -27,7 +27,7 @@ Latest versions:
 - cadmus-graph-pg-ex: 13.0.0
 - cadmus-graph-ui: 13.0.0
 - cadmus-graph-ui-ex: 13.0.0
-- cadmus-item-editor: 13.0.0
+- cadmus-item-editor: 13.0.1
 - cadmus-item-list: 13.0.0
 - cadmus-item-search: 13.0.0
 - cadmus-layer-demo: 12.0.0
@@ -205,6 +205,8 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ```
 
 ## History
+
+- 2025-03-06: fix to item editor thesaurus assignment (`@myrmidon/cadmus-item-editor`).
 
 ### 13.0.0
 
