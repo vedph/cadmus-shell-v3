@@ -206,7 +206,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-03-09: added features to API preview text span model (`@myrmidon/cadmus-api`).
+- 2025-03-09:
+  - added features to API preview text span model (`@myrmidon/cadmus-api`).
+  - updated Angular.
 - 2025-03-06: fix to item editor thesaurus assignment (`@myrmidon/cadmus-item-editor`).
 
 ### 13.0.0
