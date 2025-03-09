@@ -19,7 +19,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 12.0.0
+- cadmus-api: 12.0.1
 - cadmus-core: 11.0.0
 - cadmus-flags-pg: 13.0.0
 - cadmus-flags-ui: 13.0.0
@@ -206,6 +206,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-03-09: added features to API preview text span model (`@myrmidon/cadmus-api`).
 - 2025-03-06: fix to item editor thesaurus assignment (`@myrmidon/cadmus-item-editor`).
 
 ### 13.0.0

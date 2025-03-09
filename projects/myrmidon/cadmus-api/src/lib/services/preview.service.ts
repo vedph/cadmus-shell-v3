@@ -28,6 +28,7 @@ export interface TextSpan {
   type?: string;
   isBeforeEol?: boolean;
   text?: string;
+  features?: { [key: string]: string };
 }
 
 /**
