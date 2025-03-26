@@ -1,6 +1,11 @@
 import { Component, effect, input } from '@angular/core';
 
-import { Thesaurus, FacetDefinition, PartTypeIds } from '@myrmidon/cadmus-core';
+import {
+  Thesaurus,
+  FacetDefinition,
+  PartTypeIds,
+  ThesaurusEntry,
+} from '@myrmidon/cadmus-core';
 import { FacetService } from '@myrmidon/cadmus-api';
 
 import { ColorService } from '../../services/color.service';
@@ -11,6 +16,10 @@ export enum PartBadgeType {
   roleOnly = 2,
 }
 
+/**
+ * Part badge component. This component displays a badge with the
+ * part's type name and role name, if any, and a background color.
+ */
 @Component({
   selector: 'cadmus-part-badge',
   templateUrl: './part-badge.component.html',
@@ -69,27 +78,67 @@ export class PartBadgeComponent {
     return this._facetService.getPartColor(typeId, roleId, facetDefinition);
   }
 
-  private getTypeIdName(typeId: string, typeThesaurus?: Thesaurus): string {
+  /**
+   * Get the part's human-friendly name from its ID and role ID.
+   * This assumes that thesaurus entries with role ID specified
+   * have form partId:roleId.
+   * @param partId The part ID.
+   * @param roleId The optional role ID.
+   * @param typeThesaurus The types thesaurus.
+   * @returns The name.
+   */
+  private getPartIdName(
+    partId: string,
+    roleId?: string,
+    typeThesaurus?: Thesaurus
+  ): string {
     if (!typeThesaurus) {
-      return typeId;
+      return partId;
     }
-    // strip :suffix if any
-    const i = typeId.lastIndexOf(':');
-    if (i > -1) {
-      typeId = typeId.substring(0, i);
+    let entry: ThesaurusEntry | undefined;
+
+    // first find partId:roleId if any
+    if (roleId) {
+      const suffixedId = `${partId}:${roleId}`;
+      entry = typeThesaurus.entries?.find((e) => e.id === suffixedId);
+      if (entry) {
+        return entry.value;
+      }
     }
-    const entry = typeThesaurus.entries?.find((e) => e.id === typeId);
-    return entry ? entry.value : typeId;
+    // else find partId alone
+    entry = typeThesaurus.entries?.find((e) => e.id === partId);
+
+    return entry ? entry.value : partId;
   }
 
+  /**
+   * Get the role's human-friendly name from its ID.
+   * @param roleId The role ID.
+   * @param typeThesaurus The types thesaurus.
+   * @returns The name.?
+   */
   private getRoleIdName(
     roleId?: string,
     typeThesaurus?: Thesaurus
   ): string | undefined {
-    if (!roleId || !roleId.startsWith('fr.')) {
+    if (!roleId || !typeThesaurus) {
       return roleId;
     }
-    return this.getTypeIdName(roleId, typeThesaurus);
+    let entry: ThesaurusEntry | undefined;
+
+    // first find full roleId with optional suffix
+    entry = typeThesaurus.entries?.find((e) => e.id === roleId);
+    if (entry) {
+      return entry.value;
+    }
+
+    // else strip :suffix if any and find
+    const i = roleId.lastIndexOf(':');
+    if (i > -1) {
+      roleId = roleId.substring(0, i);
+    }
+    entry = typeThesaurus.entries?.find((e) => e.id === roleId);
+    return entry ? entry.value : roleId;
   }
 
   private updateBadge(
@@ -103,7 +152,11 @@ export class PartBadgeComponent {
         partTypeIds.roleId,
         facetDefinition
       );
-      this.typeName = this.getTypeIdName(partTypeIds.typeId, typeThesaurus);
+      this.typeName = this.getPartIdName(
+        partTypeIds.typeId,
+        partTypeIds.roleId,
+        typeThesaurus
+      );
       this.roleName = this.getRoleIdName(partTypeIds.roleId, typeThesaurus);
     } else {
       this.color = 'transparent';

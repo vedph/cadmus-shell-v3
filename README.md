@@ -206,6 +206,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-03-26: improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name.
 - 2025-03-09:
   - added features to API preview text span model (`@myrmidon/cadmus-api`).
   - updated Angular.
