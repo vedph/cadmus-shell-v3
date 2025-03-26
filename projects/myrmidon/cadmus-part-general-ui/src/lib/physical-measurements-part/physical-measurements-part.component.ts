@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
@@ -54,6 +55,7 @@ import {
     MatIcon,
     MatCardTitle,
     MatCardContent,
+    TitleCasePipe,
     PhysicalMeasurementSetComponent,
     MatCardActions,
     CloseSaveButtonsComponent,

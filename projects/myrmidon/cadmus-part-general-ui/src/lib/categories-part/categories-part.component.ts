@@ -34,6 +34,7 @@ import {
 } from '@myrmidon/cadmus-ui';
 
 import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
+import { TitleCasePipe } from '@angular/common';
 
 /**
  * Categories component editor.
@@ -56,6 +57,7 @@ import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
     MatIconButton,
     MatTooltip,
     MatCardActions,
+    TitleCasePipe,
     CloseSaveButtonsComponent,
     ThesaurusTreeComponent,
   ],

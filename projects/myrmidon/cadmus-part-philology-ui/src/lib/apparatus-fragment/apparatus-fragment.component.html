@@ -5,7 +5,8 @@
         <mat-icon>textsms</mat-icon>
       </div>
       <mat-card-title
-        >Apparatus Fragment {{ data()?.value?.location }}</mat-card-title
+        >{{ (modelName() | titlecase) || "Apparatus Fragment" }}
+        {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
         {{ frText }}

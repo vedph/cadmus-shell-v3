@@ -7,7 +7,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 
 import {
   MatCard,
@@ -67,6 +67,7 @@ import {
     PhysicalStateComponent,
     MatCardActions,
     DatePipe,
+    TitleCasePipe,
     FlatLookupPipe,
     CloseSaveButtonsComponent,
   ],

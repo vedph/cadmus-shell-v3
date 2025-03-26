@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
@@ -70,6 +71,7 @@ import {
     NgeMonacoModule,
     MatError,
     MatCardActions,
+    TitleCasePipe,
     CloseSaveButtonsComponent,
   ],
 })

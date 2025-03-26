@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
@@ -19,6 +20,7 @@ import {
   MatCardActions,
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
@@ -46,7 +48,6 @@ import { ApparatusEntryComponent } from '../apparatus-entry/apparatus-entry.comp
 import { ApparatusEntryType, ApparatusEntry } from '../apparatus-fragment';
 import { ApparatusFragment } from '../apparatus-fragment';
 import { ApparatusEntrySummaryService } from './apparatus-entry-summary.service';
-import { MatExpansionModule } from '@angular/material/expansion';
 
 /**
  * Critical apparatus fragment.
@@ -79,6 +80,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatButton,
     ApparatusEntryComponent,
     MatCardActions,
+    TitleCasePipe,
     SafeHtmlPipe,
     CloseSaveButtonsComponent,
   ],

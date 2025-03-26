@@ -17,6 +17,45 @@ export enum PartBadgeType {
 }
 
 /**
+ * Function used to get the part's human-friendly name from its ID and role ID.
+ * This assumes that thesaurus entries with role ID specified have form
+ * partId:roleId.
+ * @param typeId The part type ID.
+ * @param roleId The optional role ID.
+ * @param typeThesaurus The types thesaurus.
+ * @param noFallback If true, and no thesaurus is provided, return undefined
+ * rather than the type and role IDs.
+ * @returns The name.
+ */
+export function getPartIdName(
+  typeId: string,
+  roleId?: string | null,
+  typeThesaurus?: Thesaurus,
+  noFallback = false
+): string | undefined {
+  if (!typeThesaurus) {
+    if (noFallback) {
+      return undefined;
+    }
+    return roleId ? `${typeId} ${roleId}` : typeId;
+  }
+  let entry: ThesaurusEntry | undefined;
+
+  // first find partId:roleId if any
+  if (roleId) {
+    const suffixedId = `${typeId}:${roleId}`;
+    entry = typeThesaurus.entries?.find((e) => e.id === suffixedId);
+    if (entry) {
+      return entry.value;
+    }
+  }
+  // else find partId alone
+  entry = typeThesaurus.entries?.find((e) => e.id === typeId);
+
+  return entry ? entry.value : typeId;
+}
+
+/**
  * Part badge component. This component displays a badge with the
  * part's type name and role name, if any, and a background color.
  */
@@ -79,39 +118,6 @@ export class PartBadgeComponent {
   }
 
   /**
-   * Get the part's human-friendly name from its ID and role ID.
-   * This assumes that thesaurus entries with role ID specified
-   * have form partId:roleId.
-   * @param partId The part ID.
-   * @param roleId The optional role ID.
-   * @param typeThesaurus The types thesaurus.
-   * @returns The name.
-   */
-  private getPartIdName(
-    partId: string,
-    roleId?: string,
-    typeThesaurus?: Thesaurus
-  ): string {
-    if (!typeThesaurus) {
-      return partId;
-    }
-    let entry: ThesaurusEntry | undefined;
-
-    // first find partId:roleId if any
-    if (roleId) {
-      const suffixedId = `${partId}:${roleId}`;
-      entry = typeThesaurus.entries?.find((e) => e.id === suffixedId);
-      if (entry) {
-        return entry.value;
-      }
-    }
-    // else find partId alone
-    entry = typeThesaurus.entries?.find((e) => e.id === partId);
-
-    return entry ? entry.value : partId;
-  }
-
-  /**
    * Get the role's human-friendly name from its ID.
    * @param roleId The role ID.
    * @param typeThesaurus The types thesaurus.
@@ -152,7 +158,7 @@ export class PartBadgeComponent {
         partTypeIds.roleId,
         facetDefinition
       );
-      this.typeName = this.getPartIdName(
+      this.typeName = getPartIdName(
         partTypeIds.typeId,
         partTypeIds.roleId,
         typeThesaurus

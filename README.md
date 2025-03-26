@@ -207,8 +207,18 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ## History
 
 - 2025-03-26:
-  - ➕ improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name.
   - updated Angular and packages.
+  - ➕ improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name. The part badge exposes this logic via an exported function named `getPartIdName` which is then used elsewhere (like in item editor and model editor base).
+  - same logic applied also to the item editor for the list of parts to be added in `@myrmidon/cadmus-item-editor`.
+  - improved all the generic and philology parts (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-philology-ui`) to take advantage of the human-friendly model name (see the next point).
+  - ➕ added to `ModelEditorComponentBase` a computed `modelName` property of type `string | undefined` which is automatically populated with the human-friendly model name for the edited model, as per the `getPartIdName` function. To take advantage of this property, you should change your part's template like in this example, taken from the generic categories part (note that this implies you should add `TitleCasePipe` to the corresponding code imports. This way, when a human-friendly model name is available, it will replace the default fixed title "Categories Part"):
+
+```html
+<mat-card-title>
+  {{ (modelName() | titlecase) || "Categories Part" }}
+</mat-card-title>
+```
+
 - 2025-03-09:
   - ➕ added features to API preview text span model (`@myrmidon/cadmus-api`).
   - updated Angular.

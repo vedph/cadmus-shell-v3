@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
@@ -65,6 +66,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatTooltip,
     AssertedChronotopeComponent,
     MatCardActions,
+    TitleCasePipe,
     HistoricalDatePipe,
     AssertedChronotopesPipe,
     CloseSaveButtonsComponent,

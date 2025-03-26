@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   CloseSaveButtonsComponent,
   EditedObject,
@@ -81,6 +82,7 @@ interface Data {
     MatIconButton,
     MatTooltip,
     MatCardActions,
+    TitleCasePipe,
     TiledDataComponent,
     CloseSaveButtonsComponent,
   ],

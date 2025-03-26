@@ -16,8 +16,11 @@ td.fit-width {
 tbody tr:nth-child(odd) {
   background-color: #e2e2e2;
 }
-#layers td {
+table#layers td {
   padding: 0 6px;
+}
+table#layers th {
+  text-align: left;
 }
 div.new-part {
   margin-left: 32px;

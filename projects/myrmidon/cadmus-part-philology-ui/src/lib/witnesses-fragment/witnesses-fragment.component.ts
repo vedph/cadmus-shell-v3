@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
   FormControl,
@@ -86,6 +87,7 @@ import { WitnessesFragment, Witness } from '../witnesses-fragment';
     NgeMonacoModule,
     NgeMarkdownModule,
     MatCardActions,
+    TitleCasePipe,
     CloseSaveButtonsComponent,
   ],
 })

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
   FormControl,
@@ -67,6 +68,7 @@ import { IndexKeywordComponent } from '../index-keyword/index-keyword.component'
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
+    TitleCasePipe,
     IndexKeywordComponent,
     MatCardActions,
     CloseSaveButtonsComponent,

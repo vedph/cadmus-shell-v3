@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   CloseSaveButtonsComponent,
   EditedObject,
@@ -64,6 +65,7 @@ import { ChronologyFragment } from '../chronology-fragment';
     MatOption,
     HistoricalDateComponent,
     MatCardActions,
+    TitleCasePipe,
     CloseSaveButtonsComponent,
   ],
 })

@@ -1,4 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
@@ -65,6 +66,7 @@ import { NotePart, NOTE_PART_TYPEID } from '../note-part';
     MatError,
     MatSelect,
     MatOption,
+    TitleCasePipe,
     NgeMonacoModule,
     NgeMarkdownModule,
     MatCardActions,

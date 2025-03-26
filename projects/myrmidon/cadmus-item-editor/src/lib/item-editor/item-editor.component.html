@@ -29,7 +29,7 @@
       {{ item.creatorId }}.
     </p>
     } @if (busy) {
-    <mat-progress-bar mode="indeterminate"/>
+    <mat-progress-bar mode="indeterminate" />
     }
 
     <!-- item content -->
@@ -182,10 +182,7 @@
                   <span [style.color]="'#' + p.colorKey" class="new-part-icon"
                     >&#x2b24;</span
                   >
-                  {{ p.name }}
-                  @if (p.roleId) {
-                  <span class="new-part-role">{{ p.roleId }}</span>
-                  }
+                  {{ getPartIdName(p.typeId, p.roleId) }}
                 </mat-option>
                 }
               </mat-select>

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
   FormControl,
@@ -61,6 +62,7 @@ import { QuotationWorksService } from './quotation-works.service';
     MatTooltip,
     MatButton,
     MatCardActions,
+    TitleCasePipe,
     QuotationEntryComponent,
     CloseSaveButtonsComponent
   ],

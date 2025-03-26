@@ -6,6 +6,8 @@ import {
   input,
   effect,
   model,
+  computed,
+  inject,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -24,6 +26,8 @@ import {
   TextLayerPart,
   ThesauriSet,
 } from '@myrmidon/cadmus-core';
+import { getPartIdName } from './part-badge/part-badge.component';
+import { AppRepository } from '@myrmidon/cadmus-state';
 
 /**
  * The identifiers for an edited part.
@@ -69,6 +73,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   implements OnInit, OnDestroy
 {
   private readonly _mebSubs: Subscription[] = [];
+  private readonly _appRepository?: AppRepository;
 
   /**
    * The root form of the editor.
@@ -118,6 +123,37 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   public readonly editorClose = output();
 
   /**
+   * The human-friendly model name. This is computed from the model's
+   * type ID and role ID, if any, using the types thesaurus set provided
+   * by the app repository.
+   */
+  public readonly modelName = computed<string | undefined>(() => {
+    const identity = this.identity();
+    // layers have no identity but have a layerPart
+    if (!identity) {
+      const layerPart = this.data()?.layerPart;
+      if (layerPart) {
+        return getPartIdName(
+          layerPart.typeId,
+          layerPart.roleId,
+          this._appRepository?.getTypeThesaurus(),
+          true // no fallback so that the part template can use its default name
+        );
+      }
+      return undefined;
+    }
+    if (!identity) {
+      return undefined;
+    }
+    return getPartIdName(
+      identity.typeId,
+      identity.roleId,
+      this._appRepository?.getTypeThesaurus(),
+      true // no fallback so that the part template can use its default name
+    );
+  });
+
+  /**
    * Create a new instance of the editor.
    *
    * @param authService The authentication service.
@@ -130,6 +166,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
     this.form = formBuilder.group({});
     this.userLevel = 0;
     this.isDirty$ = new BehaviorSubject<boolean>(false);
+    this._appRepository = inject(AppRepository);
 
     effect(() => {
       this.disableForm(this.disabled());

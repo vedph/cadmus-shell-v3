@@ -4,7 +4,9 @@
       <div mat-card-avatar>
         <mat-icon>picture_in_picture</mat-icon>
       </div>
-      <mat-card-title>Document References Part</mat-card-title>
+      <mat-card-title>{{
+        (modelName() | titlecase) || "Document References Part"
+      }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <cadmus-refs-doc-references

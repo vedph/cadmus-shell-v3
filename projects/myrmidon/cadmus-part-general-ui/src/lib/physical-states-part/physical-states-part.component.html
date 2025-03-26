@@ -4,7 +4,9 @@
       <div mat-card-avatar>
         <mat-icon>picture_in_picture</mat-icon>
       </div>
-      <mat-card-title>Physical States Part</mat-card-title>
+      <mat-card-title>{{
+        (modelName() | titlecase) || "Physical States Part"
+      }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div>
@@ -70,7 +72,7 @@
             <td>
               {{ entry.type | flatLookup : stateEntries : "id" : "value" }}
             </td>
-            <td>{{ entry.date | date:'yyyy-MM-dd' }}</td>
+            <td>{{ entry.date | date : "yyyy-MM-dd" }}</td>
           </tr>
           }
         </tbody>

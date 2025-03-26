@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormGroup,
@@ -105,6 +106,7 @@ import { MspOperationComponent } from '../msp-operation/msp-operation.component'
     MatIconButton,
     MspOperationComponent,
     MatCardActions,
+    TitleCasePipe,
     ThesaurusTreeComponent,
     CloseSaveButtonsComponent,
   ],

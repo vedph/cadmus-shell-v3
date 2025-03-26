@@ -4,8 +4,9 @@
       <div mat-card-avatar>
         <mat-icon>picture_in_picture</mat-icon>
       </div>
-      <mat-card-title
-        >Chronology Fragment {{ data()?.value?.location }}</mat-card-title
+      <mat-card-title>
+        {{ (modelName() | titlecase) || "Chronology Fragment" }}
+        {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
         {{ data()?.value?.baseText }}

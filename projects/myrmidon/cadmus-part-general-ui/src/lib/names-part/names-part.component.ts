@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
@@ -22,8 +23,6 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
   MatExpansionModule,
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
 } from '@angular/material/expansion';
 
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
@@ -68,6 +67,7 @@ import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
     MatExpansionModule,
     ProperNameComponent,
     MatCardActions,
+    TitleCasePipe,
     CadmusProperNamePipe,
     CloseSaveButtonsComponent,
   ],

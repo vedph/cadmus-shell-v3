@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
   FormControl,
@@ -63,6 +64,7 @@ import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-e
     MatIconButton,
     MatTooltip,
     MatCardActions,
+    TitleCasePipe,
     BibliographyEntryComponent,
     CloseSaveButtonsComponent,
   ],

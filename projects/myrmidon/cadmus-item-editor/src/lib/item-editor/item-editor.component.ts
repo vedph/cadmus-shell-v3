@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -63,7 +63,7 @@ import {
   UserLevelService,
 } from '@myrmidon/cadmus-api';
 import { MESSAGE_ITEM_LIST_REPOSITORY_RESET } from '@myrmidon/cadmus-item-list';
-import { PartBadgeComponent } from '@myrmidon/cadmus-ui';
+import { getPartIdName, PartBadgeComponent } from '@myrmidon/cadmus-ui';
 
 import {
   PartScopeSetRequest,
@@ -408,6 +408,14 @@ export class ItemEditorComponent
           p.typeId === typeId && ((!p.roleId && !roleId) || p.roleId === roleId)
       );
     });
+  }
+
+  public getPartIdName(typeId: string, roleId?: string): string {
+    return getPartIdName(
+      typeId,
+      roleId,
+      this._appRepository.getTypeThesaurus()
+    )!;
   }
 
   public addPart(def?: PartDefinition): void {

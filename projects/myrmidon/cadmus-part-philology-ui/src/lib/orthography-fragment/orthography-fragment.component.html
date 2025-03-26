@@ -5,7 +5,8 @@
         <mat-icon>textsms</mat-icon>
       </div>
       <mat-card-title
-        >Orthography Fragment {{ data()?.value?.location }}</mat-card-title
+        >{{ (modelName() | titlecase) || "Orthography Fragment" }}
+        {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
         {{ frText }}

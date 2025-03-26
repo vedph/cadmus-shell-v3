@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
@@ -52,6 +53,7 @@ import { PinLinksPart, PIN_LINKS_PART_TYPEID } from '../pin-links-part';
     MatIcon,
     MatCardTitle,
     MatCardContent,
+    TitleCasePipe,
     AssertedCompositeIdsComponent,
     MatCardActions,
     CloseSaveButtonsComponent,
