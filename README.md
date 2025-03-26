@@ -206,9 +206,11 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-03-26: improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name.
+- 2025-03-26:
+  - ➕ improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name.
+  - updated Angular and packages.
 - 2025-03-09:
-  - added features to API preview text span model (`@myrmidon/cadmus-api`).
+  - ➕ added features to API preview text span model (`@myrmidon/cadmus-api`).
   - updated Angular.
 - 2025-03-06: fix to item editor thesaurus assignment (`@myrmidon/cadmus-item-editor`).
 
@@ -218,7 +220,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
   - ⚠️ refactored **preview** (rendering) components for backend preview V2 (and consequently Cadmus API version 11.x.x). The only relevant change in backend for the preview UI refers to a few endpoints, as most of the refactoring in backend affected the export process for more powerful renditions into TEI etc. The essential change here was replacing the block model with the `TextSpan` model for layered text preview. The related UI components have been modified accordingly, and dependencies from the text view brick have been removed. Also, a few API services for preview have changed to use this model, which implied bumping their major version. In turn, this bumped the major versions of all the dependent libraries, even if their only changes refer to the peer dependencies versions. Finally, in the state library a new function was added to `AppService` for getting the layer color to use in preview UI.
   - updated Angular and packages.
 
-- 2025-02-08: 👉 added editor **settings**:
+- 2025-02-08: ➕ added editor **settings**:
   - new editor settings service in `@myrmidon/cadmus-api` (11.0.1).
   - new methods `getSetting` and `getSettingFor` added to `AppRepository` in `@myrmidon/cadmus-state` (11.0.1).
 
