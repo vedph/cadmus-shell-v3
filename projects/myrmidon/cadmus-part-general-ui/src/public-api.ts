@@ -2,6 +2,10 @@
  * Public API Surface of cadmus-part-general-ui
  */
 
+export * from './lib/asserted-historical-dates-part';
+export * from './lib/asserted-historical-date/asserted-historical-date.component';
+export * from './lib/asserted-historical-dates-part/asserted-historical-dates-part.component';
+
 export * from './lib/bib-authors-editor/bib-authors-editor.component';
 export * from './lib/bibliography-entry/bibliography-entry.component';
 export * from './lib/bibliography-part';

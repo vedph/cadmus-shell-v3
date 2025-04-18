@@ -17,6 +17,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { PendingChangesGuard } from '@myrmidon/cadmus-core';
 import {
+  ASSERTED_HISTORICAL_DATES_PART_TYPEID,
   BIBLIOGRAPHY_PART_TYPEID,
   CATEGORIES_PART_TYPEID,
   CHRONOTOPES_PART_TYPEID,
@@ -67,9 +68,16 @@ import { TiledTextPartFeatureComponent } from './tiled-text-part-feature/tiled-t
 import { TiledTextLayerPartFeatureComponent } from './tiled-text-layer-part-feature/tiled-text-layer-part-feature.component';
 import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feature/token-text-layer-part-feature.component';
 import { TokenTextPartFeatureComponent } from './token-text-part-feature/token-text-part-feature.component';
+import { AssertedHistoricalDateFeatureComponent } from './asserted-historical-date-feature/asserted-historical-date-feature.component';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
+  {
+    path: `${ASSERTED_HISTORICAL_DATES_PART_TYPEID}/:pid`,
+    pathMatch: 'full',
+    component: AssertedHistoricalDateFeatureComponent,
+    canDeactivate: [PendingChangesGuard],
+  },
   {
     path: `${BIBLIOGRAPHY_PART_TYPEID}/:pid`,
     pathMatch: 'full',
@@ -241,6 +249,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     MatTooltipModule,
     MatToolbarModule,
     // cadmus
+    AssertedHistoricalDateFeatureComponent,
     BibliographyPartFeatureComponent,
     CategoriesPartFeatureComponent,
     ChronologyFragmentFeatureComponent,
@@ -268,6 +277,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     TokenTextPartFeatureComponent,
   ],
   exports: [
+    AssertedHistoricalDateFeatureComponent,
     BibliographyPartFeatureComponent,
     CategoriesPartFeatureComponent,
     ChronologyFragmentFeatureComponent,

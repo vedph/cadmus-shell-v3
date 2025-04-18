@@ -31,8 +31,8 @@ Latest versions:
 - cadmus-item-list: 13.0.0
 - cadmus-item-search: 13.0.0
 - cadmus-layer-demo: 12.0.0
-- cadmus-part-general-pg: 13.0.0
-- cadmus-part-general-ui: 12.0.0
+- cadmus-part-general-pg: 13.0.1
+- cadmus-part-general-ui: 12.0.2
 - cadmus-part-philology-pg: 13.0.0
 - cadmus-part-philology-ui: 12.0.1
 - cadmus-preview-pg: 13.0.0
@@ -206,6 +206,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-04-18:
+  - updated Angular and packages.
+  - added new general part `AssertedHistoricalDatesPart`.
 - 2025-03-26:
   - updated Angular and packages.
   - ➕ improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name. The part badge exposes this logic via an exported function named `getPartIdName` which is then used elsewhere (like in item editor and model editor base).

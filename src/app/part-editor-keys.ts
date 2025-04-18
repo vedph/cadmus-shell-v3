@@ -21,6 +21,7 @@ import {
   PIN_LINKS_PART_TYPEID,
   PIN_LINKS_FRAGMENT_TYPEID,
   DECORATED_COUNTS_PART_TYPEID,
+  ASSERTED_HISTORICAL_DATES_PART_TYPEID,
 } from '../../projects/myrmidon/cadmus-part-general-ui/src/public-api';
 import {
   APPARATUS_FRAGMENT_TYPEID,
@@ -44,6 +45,9 @@ const TILED_TEXT_LAYER_PART_TYPEID = 'it.vedph.tiled-text-layer';
  */
 export const PART_EDITOR_KEYS: PartEditorKeys = {
   // general parts
+  [ASSERTED_HISTORICAL_DATES_PART_TYPEID]: {
+    part: GENERAL,
+  },
   [BIBLIOGRAPHY_PART_TYPEID]: {
     part: GENERAL,
   },

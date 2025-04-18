@@ -1,0 +1,106 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card>
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title>{{
+        (modelName() | titlecase) || "Historical Dates"
+      }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div>
+        <button
+          type="button"
+          mat-flat-button
+          color="primary"
+          (click)="addDate()"
+        >
+          <mat-icon>add_circle</mat-icon> date
+        </button>
+      </div>
+      @if (dates.value.length) {
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>date</th>
+            <th>tag</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (date of dates.value; track date; let i = $index; let first =
+          $first; let last = $last) {
+          <tr [class.selected]="date === edited">
+            <td class="fit-width">
+              <button
+                type="button"
+                mat-icon-button
+                color="primary"
+                matTooltip="Edit this date"
+                (click)="editDate(date, i)"
+              >
+                <mat-icon class="mat-primary">edit</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this date up"
+                [disabled]="first"
+                (click)="moveDateUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this date down"
+                [disabled]="last"
+                (click)="moveDateDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                color="warn"
+                matTooltip="Delete this date"
+                (click)="deleteDate(i)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
+              </button>
+            </td>
+            <td>{{ date | historicalDate }}</td>
+            <td>{{ date.tag | flatLookup : tagEntries : "id" : "value" }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      } @if (edited) {
+      <fieldset>
+        <mat-expansion-panel [expanded]="edited" [disabled]="!edited">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Date #</mat-panel-title>
+          </mat-expansion-panel-header>
+          <cadmus-asserted-historical-date
+            [date]="edited"
+            (dateChange)="saveDate($event!)"
+            [tagEntries]="tagEntries"
+            [assertionTagEntries]="assertionTagEntries"
+            [docReferenceTagEntries]="docReferenceTagEntries"
+            [docReferenceTypeEntries]="docReferenceTypeEntries"
+            (dateCancel)="closeDate()"
+          />
+        </mat-expansion-panel>
+      </fieldset>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      />
+    </mat-card-actions>
+  </mat-card>
+</form>

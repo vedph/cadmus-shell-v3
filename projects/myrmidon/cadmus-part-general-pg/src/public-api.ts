@@ -2,6 +2,7 @@
  * Public API Surface of cadmus-part-general-pg
  */
 
+export * from './lib/asserted-historical-date-feature/asserted-historical-date-feature.component';
 export * from './lib/bibliography-part-feature/bibliography-part-feature.component';
 export * from './lib/categories-part-feature/categories-part-feature.component';
 export * from './lib/chronology-fragment-feature/chronology-fragment-feature.component';
