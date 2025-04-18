@@ -73,7 +73,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   implements OnInit, OnDestroy
 {
   private readonly _mebSubs: Subscription[] = [];
-  private readonly _appRepository?: AppRepository;
+  protected readonly _appRepository?: AppRepository;
 
   /**
    * The root form of the editor.

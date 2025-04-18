@@ -70,6 +70,7 @@ export class AssertedHistoricalDatesPartComponent
   extends ModelEditorComponentBase<AssertedHistoricalDatesPart>
   implements OnInit
 {
+  public maxDateCount = -1;
   public editedIndex: number;
   public edited: AssertedDate | undefined;
 
@@ -144,6 +145,11 @@ export class AssertedHistoricalDatesPartComponent
       this.form.reset();
       return;
     }
+    this._appRepository
+      ?.getSettingFor(part.typeId, part.roleId)
+      .then((setting) => {
+        this.maxDateCount = setting?.maxDateCount || -1;
+      }) || -1;
     this.dates.setValue(part.dates || []);
     this.form.markAsPristine();
   }
@@ -169,6 +175,11 @@ export class AssertedHistoricalDatesPartComponent
   }
 
   public addDate(): void {
+    // check max count if set
+    if (this.maxDateCount > 0 && this.dates.value.length >= this.maxDateCount) {
+      return;
+    }
+
     const entry: AssertedDate = {
       a: { value: 0 },
     };

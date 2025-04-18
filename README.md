@@ -42,7 +42,7 @@ Latest versions:
 - cadmus-thesaurus-editor: 13.0.0
 - cadmus-thesaurus-list: 13.0.0
 - cadmus-thesaurus-ui: 12.0.0
-- cadmus-ui: 12.0.0
+- cadmus-ui: 12.0.2
 - cadmus-ui-pg: 13.0.0
 
 Dependencies:
@@ -209,6 +209,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 - 2025-04-18:
   - updated Angular and packages.
   - added new general part `AssertedHistoricalDatesPart`.
+  - made _appRepository protected in `ModelEditorComponentBase`.
 - 2025-03-26:
   - updated Angular and packages.
   - ➕ improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name. The part badge exposes this logic via an exported function named `getPartIdName` which is then used elsewhere (like in item editor and model editor base).

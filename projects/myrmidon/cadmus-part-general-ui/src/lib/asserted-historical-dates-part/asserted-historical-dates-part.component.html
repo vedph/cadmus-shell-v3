@@ -14,6 +14,7 @@
           type="button"
           mat-flat-button
           color="primary"
+          [disabled]="maxDateCount > 0 && dates.value.length >= maxDateCount"
           (click)="addDate()"
         >
           <mat-icon>add_circle</mat-icon> date
