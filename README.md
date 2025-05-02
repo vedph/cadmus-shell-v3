@@ -206,6 +206,12 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+### 14.0.0
+
+- 2025-05-02: ⚠️ breaking changes: refactored rendering for [backend migration V3](https://github.com/vedph/cadmus-migration-v3):
+  - in `cadmus-api`, replaced `TextSpan` with `ExportedSegment` and refactored service accordingly.
+  - in `cadmus-preview-ui`, refactored `TextPreviewComponent` and `TextSegmentsView` (formerly `TextSpansView`).
+  - bumped dependent libraries versions also for: `cadmus-preview-pg`.
 - 2025-04-18:
   - updated Angular and packages.
   - added new general part `AssertedHistoricalDatesPart`.
@@ -231,7 +237,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ### 13.0.0
 
 - 2025-03-02:
-  - ⚠️ refactored **preview** (rendering) components for backend preview V2 (and consequently Cadmus API version 11.x.x). The only relevant change in backend for the preview UI refers to a few endpoints, as most of the refactoring in backend affected the export process for more powerful renditions into TEI etc. The essential change here was replacing the block model with the `TextSpan` model for layered text preview. The related UI components have been modified accordingly, and dependencies from the text view brick have been removed. Also, a few API services for preview have changed to use this model, which implied bumping their major version. In turn, this bumped the major versions of all the dependent libraries, even if their only changes refer to the peer dependencies versions. Finally, in the state library a new function was added to `AppService` for getting the layer color to use in preview UI.
+  - ⚠️ refactored **preview** (rendering) components for [backend migration V2](https://github.com/vedph/cadmus-migration-v2) (and consequently Cadmus API version 11.x.x). The only relevant change in backend for the preview UI refers to a few endpoints, as most of the refactoring in backend affected the export process for more powerful renditions into TEI etc. The essential change here was replacing the block model with the `TextSpan` model for layered text preview. The related UI components have been modified accordingly, and dependencies from the text view brick have been removed. Also, a few API services for preview have changed to use this model, which implied bumping their major version. In turn, this bumped the major versions of all the dependent libraries, even if their only changes refer to the peer dependencies versions. Finally, in the state library a new function was added to `AppService` for getting the layer color to use in preview UI.
   - updated Angular and packages.
 
 - 2025-02-08: ➕ added editor **settings**:

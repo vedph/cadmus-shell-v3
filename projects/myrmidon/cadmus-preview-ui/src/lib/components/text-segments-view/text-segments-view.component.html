@@ -3,23 +3,23 @@
   @for (row of rows(); track row) {
   <div class="row">
     <!-- row -->
-    @for (span of row; track span) {
+    @for (segment of row; track segment) {
     <!-- col -->
     <div
       class="col"
-      (click)="onSpanClick(span)"
-      [style.background-color]="getSpanColor(span)"
-      [style.color]="getSpanColor(span) | colorToContrast"
+      (click)="onSegmentClick(segment)"
+      [style.background-color]="getSegmentColor(segment)"
+      [style.color]="getSegmentColor(segment) | colorToContrast"
     >
       <div class="bar">
         <minichart-bar
-          [data]="span.chartItems || []"
+          [data]="segment.chartItems || []"
           [options]="chartOptions"
           (itemClicked)="onChartItemClicked($event)"
         />
       </div>
       <div class="text">
-        {{ span.text }}
+        {{ segment.text }}
       </div>
     </div>
     }

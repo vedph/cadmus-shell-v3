@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ColorToContrastPipe } from '@myrmidon/ngx-tools';
 
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { TextSpan } from '@myrmidon/cadmus-api';
+import { ExportedSegment } from '@myrmidon/cadmus-api';
 
 import { DecoratedLayerPartInfo } from '../text-preview/text-preview.component';
 import {
@@ -14,15 +14,18 @@ import {
   MiniBarChartOptions,
 } from '../mini-bar-chart/mini-bar-chart.component';
 
-interface DecoratedTextSpan extends TextSpan {
+interface DecoratedSegment extends ExportedSegment {
   chartItems?: MiniBarChartItem[];
 }
 
+// the feature name for end of line at segment end
+const F_EOL_TAIL = 'eol-tail';
+
 /**
- * A component to display a list of text spans, possibly grouped in rows.
+ * A component to display a list of text segments, possibly grouped in rows.
  */
 @Component({
-  selector: 'cadmus-text-spans-view',
+  selector: 'cadmus-text-segments-view',
   imports: [
     CommonModule,
     FormsModule,
@@ -30,10 +33,10 @@ interface DecoratedTextSpan extends TextSpan {
     ColorToContrastPipe,
     MiniBarChartComponent,
   ],
-  templateUrl: './text-spans-view.component.html',
-  styleUrl: './text-spans-view.component.css',
+  templateUrl: './text-segments-view.component.html',
+  styleUrl: './text-segments-view.component.css',
 })
-export class TextSpansViewComponent {
+export class TextSegmentsViewComponent {
   private readonly _typeMap: Map<string, string>;
 
   public readonly chartOptions: MiniBarChartOptions = {
@@ -46,21 +49,21 @@ export class TextSpansViewComponent {
   public readonly layers = input<DecoratedLayerPartInfo[]>();
 
   /**
-   * The spans to display.
+   * The segments to display.
    */
-  public readonly spans = input<TextSpan[]>([]);
+  public readonly segments = input<ExportedSegment[]>([]);
 
   /**
-   * The rows of spans, calculated from spans.
+   * The rows of segments, calculated from segments.
    */
-  public readonly rows = computed<DecoratedTextSpan[][]>(() => {
-    return this.buildRows(this.spans());
+  public readonly rows = computed<DecoratedSegment[][]>(() => {
+    return this.buildRows(this.segments());
   });
 
   /**
-   * Emitted when a span is clicked.
+   * Emitted when a segment is clicked.
    */
-  public readonly spanClick = output<TextSpan>();
+  public readonly segmentClick = output<ExportedSegment>();
 
   /**
    * Emitted when a chart item is clicked, picking the
@@ -78,15 +81,16 @@ export class TextSpansViewComponent {
     }
   }
 
-  private addChartItems(span: DecoratedTextSpan): void {
-    if (!span.range?.fragmentIds?.length || !this.layers()) {
+  private addChartItems(segment: DecoratedSegment): void {
+    const range = segment.payloads?.[0];
+    if (!range?.fragmentIds?.length || !this.layers()) {
       return;
     }
     // add a chart item for each fragment ID
     let chartItems: MiniBarChartItem[] = [];
 
-    for (let i = 0; i < span.range.fragmentIds.length; i++) {
-      const id = span.range.fragmentIds[i];
+    for (let i = 0; i < range.fragmentIds.length; i++) {
+      const id = range.fragmentIds[i];
 
       // find the layer targeted by the fragment ID
       const m = /^([^:]+):([^@]+)/.exec(id);
@@ -99,7 +103,7 @@ export class TextSpansViewComponent {
       if (!layer) {
         continue;
       }
-      // return a chart item for this span's fragment ID
+      // return a chart item for this segment's fragment ID
       chartItems.push({
         id: id,
         label: this._typeMap.get(layer.roleId!) || layer.roleId!,
@@ -108,19 +112,19 @@ export class TextSpansViewComponent {
       });
     }
     if (chartItems.length) {
-      span.chartItems = chartItems;
+      segment.chartItems = chartItems;
     }
   }
 
-  private buildRows(spans: TextSpan[]): DecoratedTextSpan[][] {
-    const rows: DecoratedTextSpan[][] = [];
-    let row: DecoratedTextSpan[] = [];
+  private buildRows(segments: ExportedSegment[]): DecoratedSegment[][] {
+    const rows: DecoratedSegment[][] = [];
+    let row: DecoratedSegment[] = [];
 
-    for (let i = 0; i < spans.length; i++) {
-      const span = spans[i];
-      row.push(span);
-      this.addChartItems(span);
-      if (span.isBeforeEol) {
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      row.push(segment);
+      this.addChartItems(segment);
+      if (segment.features?.some(f => f.name === F_EOL_TAIL)) {
         rows.push(row);
         row = [];
       }
@@ -132,22 +136,23 @@ export class TextSpansViewComponent {
   }
 
   /**
-   * Get the span color by matching any of its fragment IDs with
+   * Get the segment color by matching any of its fragment IDs with
    * the IDs of the layers.
-   * @param span The span.
-   * @returns The color for the span.
+   * @param segment The segment.
+   * @returns The color for the segment.
    */
-  public getSpanColor(span: TextSpan): string {
+  public getSegmentColor(segment: ExportedSegment): string {
     const layers = this.layers();
     const defaultColor = 'transparent';
 
-    if (!layers || !span.range?.fragmentIds?.length) {
+    const range = segment.payloads?.[0];
+    if (!layers || !range?.fragmentIds?.length) {
       return defaultColor;
     }
 
-    for (let i = 0; i < span.range.fragmentIds.length; i++) {
+    for (let i = 0; i < range.fragmentIds.length; i++) {
       // each fragment ID has form typeId:roleId@frIndex
-      const m = /^([^:]+):([^@]+)/.exec(span.range.fragmentIds[i]);
+      const m = /^([^:]+):([^@]+)/.exec(range.fragmentIds[i]);
       if (!m) {
         continue;
       }
@@ -160,8 +165,8 @@ export class TextSpansViewComponent {
     return defaultColor;
   }
 
-  public onSpanClick(span: TextSpan): void {
-    this.spanClick.emit(span);
+  public onSegmentClick(segment: ExportedSegment): void {
+    this.segmentClick.emit(segment);
   }
 
   public onChartItemClicked(item: MiniBarChartItem): void {

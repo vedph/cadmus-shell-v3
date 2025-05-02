@@ -22,12 +22,13 @@ import {
   PreviewService,
   ItemService,
   RenditionResult,
-  TextSpan,
+  ExportedSegment,
+  AnnotatedTextRange,
 } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 
 import { PartPreviewSource } from '../part-preview/part-preview.component';
-import { TextSpansViewComponent } from '../text-spans-view/text-spans-view.component';
+import { TextSegmentsViewComponent } from '../text-segments-view/text-segments-view.component';
 
 /**
  * Decorated layer part info. This just adds the color to each layer.
@@ -55,7 +56,7 @@ export interface DecoratedLayerPartInfo extends LayerPartInfo {
     MatTab,
     FlatLookupPipe,
     SafeHtmlPipe,
-    TextSpansViewComponent,
+    TextSegmentsViewComponent,
   ],
 })
 export class TextPreviewComponent implements OnInit, OnDestroy {
@@ -72,7 +73,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   public readonly typeEntries = input<ThesaurusEntry[]>();
 
   public layers: DecoratedLayerPartInfo[] = [];
-  public spans: TextSpan[] = [];
+  public segments: ExportedSegment[] = [];
   public frHtml: string[] = [];
   public frLabels: string[] = [];
   public busy?: boolean;
@@ -108,7 +109,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
     this._sub?.unsubscribe();
   }
 
-  private adjustSpanWS(spans: TextSpan[]): void {
+  private adjustSpanWS(spans: ExportedSegment[]): void {
     // we want to use mid dot instead of space because the visualized
     // blocks might include some spacing between them
     for (let i = 0; i < spans.length; i++) {
@@ -134,7 +135,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
     this.busy = true;
 
     this._previewService
-      .getTextSpans(
+      .getTextSegments(
         this.source()!.partId,
         layers.map((l) => l.id)
       )
@@ -144,7 +145,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
           this.busy = false;
           // convert initial/final WS into mid dot
           this.adjustSpanWS(spans);
-          this.spans = spans;
+          this.segments = spans;
         },
         error: (error) => {
           this.busy = false;
@@ -166,7 +167,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
     if (!source?.partId) {
       this.item = undefined;
       this.layers = [];
-      this.spans = [];
+      this.segments = [];
       return;
     }
     forkJoin({
@@ -245,10 +246,14 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       });
   }
 
-  public onSpanClick(span: TextSpan): void {
-    if (!span.range?.fragmentIds?.length) {
+  public onSegmentClick(segment: ExportedSegment): void {
+    // for item preview, segment payloads contain a single range
+    const range: AnnotatedTextRange | undefined = segment.payloads
+      ? segment.payloads[0]
+      : undefined;
+    if (!range?.fragmentIds?.length) {
       return;
     }
-    this.showFragments(span.range.fragmentIds);
+    this.showFragments(range.fragmentIds);
   }
 }

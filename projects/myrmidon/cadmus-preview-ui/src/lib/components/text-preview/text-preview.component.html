@@ -37,12 +37,12 @@
     </div>
   </div>
   <!-- preview -->
-  @if (spans.length) {
+  @if (segments.length) {
   <div id="preview">
-    <cadmus-text-spans-view
+    <cadmus-text-segments-view
       [layers]="layers"
-      [spans]="spans"
-      (spanClick)="onSpanClick($event)"
+      [segments]="segments"
+      (segmentClick)="onSegmentClick($event)"
     />
   </div>
   }

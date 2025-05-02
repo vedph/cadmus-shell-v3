@@ -23,12 +23,29 @@ export interface AnnotatedTextRange {
 /**
  * A text span used in rendering.
  */
-export interface TextSpan {
-  range?: AnnotatedTextRange;
+// export interface TextSpan {
+//   range?: AnnotatedTextRange;
+//   type?: string;
+//   isBeforeEol?: boolean;
+//   text?: string;
+//   features?: { [key: string]: string };
+// }
+
+export interface StringPair {
+  name: string;
+  value?: string;
+}
+
+/**
+ * A segment of a text used in export/preview.
+ */
+export interface ExportedSegment {
+  sourceId: number;
   type?: string;
-  isBeforeEol?: boolean;
   text?: string;
-  features?: { [key: string]: string };
+  features?: StringPair[];
+  tags?: string[];
+  payloads?: any[];
 }
 
 /**
@@ -107,16 +124,16 @@ export class PreviewService {
 
   // preview/text-parts/{id}
   /**
-   * Gets the text spans built by flattening the text part with the
+   * Gets the text segments built by flattening the text part with the
    * specified ID with all the layers specified.
    *
    * @param textPartId The base text part's ID.
    * @param layerPartIds The layer parts IDs.
    */
-  public getTextSpans(
+  public getTextSegments(
     textPartId: string,
     layerPartIds: string[]
-  ): Observable<TextSpan[]> {
+  ): Observable<ExportedSegment[]> {
     let httpParams = new HttpParams();
 
     if (layerPartIds.length) {
@@ -127,7 +144,7 @@ export class PreviewService {
     }
 
     return this._http
-      .get<TextSpan[]>(
+      .get<ExportedSegment[]>(
         this._env.get('apiUrl') + `preview/text-parts/${textPartId}`,
         {
           params: httpParams,
