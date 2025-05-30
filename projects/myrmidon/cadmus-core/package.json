@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-core",
-  "version": "11.0.0",
+  "version": "12.0.0",
   "description": "Cadmus - core.",
   "keywords": [
     "Cadmus"
@@ -14,9 +14,9 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@myrmidon/ngx-tools": "^1.0.0"
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@myrmidon/ngx-tools": "^2.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

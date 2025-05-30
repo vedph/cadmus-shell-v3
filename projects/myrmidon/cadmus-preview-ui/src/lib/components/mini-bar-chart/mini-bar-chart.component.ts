@@ -10,7 +10,7 @@ import {
   computed,
   AfterViewInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface MiniBarChartItem {
   id?: string;
@@ -32,7 +32,7 @@ export interface MiniBarChartOptions {
 @Component({
   selector: 'minichart-bar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './mini-bar-chart.component.html',
   styleUrl: './mini-bar-chart.component.scss',
 })

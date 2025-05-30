@@ -19,30 +19,30 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 12.0.1
-- cadmus-core: 11.0.0
-- cadmus-flags-pg: 13.0.0
-- cadmus-flags-ui: 13.0.0
-- cadmus-graph-pg: 13.0.0
-- cadmus-graph-pg-ex: 13.0.0
-- cadmus-graph-ui: 13.0.0
-- cadmus-graph-ui-ex: 13.0.0
-- cadmus-item-editor: 13.0.1
-- cadmus-item-list: 13.0.0
-- cadmus-item-search: 13.0.0
-- cadmus-layer-demo: 12.0.0
-- cadmus-part-general-pg: 13.0.1
-- cadmus-part-general-ui: 12.0.2
-- cadmus-part-philology-pg: 13.0.0
-- cadmus-part-philology-ui: 12.0.1
-- cadmus-preview-pg: 13.0.0
-- cadmus-preview-ui: 13.0.0
-- cadmus-profile-core: 11.0.0
-- cadmus-state: 12.0.0
-- cadmus-thesaurus-editor: 13.0.0
-- cadmus-thesaurus-list: 13.0.0
-- cadmus-thesaurus-ui: 12.0.0
-- cadmus-ui: 12.0.2
+- cadmus-api: 14.0.0
+- cadmus-core: 12.0.0
+- cadmus-flags-pg: 14.0.0
+- cadmus-flags-ui: 14.0.0
+- cadmus-graph-pg: 14.0.0
+- cadmus-graph-pg-ex: 14.0.0
+- cadmus-graph-ui: 14.0.0
+- cadmus-graph-ui-ex: 14.0.0
+- cadmus-item-editor: 14.0.0
+- cadmus-item-list: 14.0.0
+- cadmus-item-search: 14.0.0
+- cadmus-layer-demo: 13.0.0
+- cadmus-part-general-pg: 14.0.0
+- cadmus-part-general-ui: 13.0.0
+- cadmus-part-philology-pg: 14.0.0
+- cadmus-part-philology-ui: 13.0.0
+- cadmus-preview-pg: 15.0.0
+- cadmus-preview-ui: 15.0.0
+- cadmus-profile-core: 12.0.0
+- cadmus-state: 13.0.0
+- cadmus-thesaurus-editor: 14.0.0
+- cadmus-thesaurus-list: 14.0.0
+- cadmus-thesaurus-ui: 13.0.0
+- cadmus-ui: 13.0.0
 - cadmus-ui-pg: 13.0.0
 
 Dependencies:
@@ -205,6 +205,10 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ```
 
 ## History
+
+### 15.0.0
+
+- 2025-05-30: ⚠️ upgraded to Angular 20.
 
 ### 14.0.0
 

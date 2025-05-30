@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { Thesaurus, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { Router, RouterModule } from '@angular/router';
@@ -28,7 +27,6 @@ import { AppRepository } from '../../projects/myrmidon/cadmus-state/src/public-a
 @Component({
   selector: 'app-root',
   imports: [
-    CommonModule,
     RouterModule,
     MatButtonModule,
     MatIconModule,

@@ -1,7 +1,7 @@
 {
   "name": "@myrmidon/cadmus-state",
   "description": "Cadmus - state management.",
-  "version": "12.0.0",
+  "version": "13.0.0",
   "keywords": [
     "Cadmus"
   ],
@@ -14,11 +14,11 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@myrmidon/ngx-tools": "^1.0.0",
-    "@myrmidon/cadmus-core": "^11.0.0",
-    "@myrmidon/cadmus-api": "^12.0.0"
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@myrmidon/ngx-tools": "^2.0.0",
+    "@myrmidon/cadmus-core": "^12.0.0",
+    "@myrmidon/cadmus-api": "^14.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

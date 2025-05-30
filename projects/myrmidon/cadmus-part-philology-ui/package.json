@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-philology-ui",
-  "version": "12.0.2",
+  "version": "13.0.0",
   "description": "Cadmus - philologic parts.",
   "keywords": [
     "Cadmus"
@@ -14,13 +14,13 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@cisstech/nge": "^18.0.4",
-    "@myrmidon/ngx-tools": "^1.0.2",
-    "@myrmidon/ngx-mat-tools": "^0.0.1",
-    "@myrmidon/cadmus-core": "^11.0.0",
-    "@myrmidon/cadmus-ui": "^12.0.0"
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@cisstech/nge": "^18.2.1",
+    "@myrmidon/ngx-tools": "^2.0.0",
+    "@myrmidon/ngx-mat-tools": "^1.0.0",
+    "@myrmidon/cadmus-core": "^12.0.0",
+    "@myrmidon/cadmus-ui": "^13.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

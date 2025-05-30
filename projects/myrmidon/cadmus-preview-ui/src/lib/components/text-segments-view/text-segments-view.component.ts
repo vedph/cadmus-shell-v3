@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, computed, input, output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -27,12 +27,11 @@ const F_EOL_TAIL = 'eol-tail';
 @Component({
   selector: 'cadmus-text-segments-view',
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     ColorToContrastPipe,
-    MiniBarChartComponent,
-  ],
+    MiniBarChartComponent
+],
   templateUrl: './text-segments-view.component.html',
   styleUrl: './text-segments-view.component.css',
 })

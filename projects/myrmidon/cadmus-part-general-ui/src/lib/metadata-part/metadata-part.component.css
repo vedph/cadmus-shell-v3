@@ -7,6 +7,10 @@
 .form-row * {
   flex: 1 0 auto;
 }
+.form-row .type-col {
+  width: 8em !important;
+  flex: 0 0 8em !important;
+}
 .nr {
   color: white;
   background-color: #c0c0c0;

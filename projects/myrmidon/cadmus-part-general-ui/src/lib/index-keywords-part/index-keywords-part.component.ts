@@ -28,7 +28,7 @@ import {
 } from '@angular/material/expansion';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
@@ -69,6 +69,7 @@ import { IndexKeywordComponent } from '../index-keyword/index-keyword.component'
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     TitleCasePipe,
+    FlatLookupPipe,
     IndexKeywordComponent,
     MatCardActions,
     CloseSaveButtonsComponent,

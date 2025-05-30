@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, effect, input, model, output } from '@angular/core';
 import {
   FormBuilder,
@@ -28,7 +28,6 @@ import {
 @Component({
   selector: 'cadmus-asserted-historical-date',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatCheckboxModule,
@@ -39,8 +38,8 @@ import {
     MatSelectModule,
     MatTooltipModule,
     HistoricalDateComponent,
-    AssertionComponent,
-  ],
+    AssertionComponent
+],
   templateUrl: './asserted-historical-date.component.html',
   styleUrl: './asserted-historical-date.component.css',
 })

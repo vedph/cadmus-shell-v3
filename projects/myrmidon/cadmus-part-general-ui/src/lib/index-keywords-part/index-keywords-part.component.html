@@ -57,14 +57,16 @@
                 </button>
               </td>
               <td>{{ k.indexId }}</td>
-              <td>{{ k.language }}</td>
+              <td>
+                {{ k.language | flatLookup : langEntries : "id" : "value" }}
+              </td>
               <td>{{ k.value }}</td>
             </tr>
             }
           </tbody>
         </table>
       </div>
-      }
+      } @if (editedKeyword) {
       <fieldset>
         <mat-expansion-panel
           [disabled]="!editedKeyword"
@@ -83,6 +85,7 @@
           />
         </mat-expansion-panel>
       </fieldset>
+      }
     </mat-card-content>
     <mat-card-actions>
       <cadmus-close-save-buttons

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-flags-pg",
-  "version": "13.0.0",
+  "version": "14.0.0",
   "description": "Cadmus - item flags UI wrapper.",
   "keywords": [
     "Cadmus"
@@ -14,10 +14,10 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@myrmidon/auth-jwt-login": "^7.1.1",
-    "@myrmidon/cadmus-flags-ui": "^13.0.0"
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@myrmidon/auth-jwt-login": "^8.0.0",
+    "@myrmidon/cadmus-flags-ui": "^14.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

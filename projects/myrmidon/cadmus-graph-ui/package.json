@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-graph-ui",
-  "version": "13.0.0",
+  "version": "14.0.0",
   "description": "Cadmus - semantic graph components.",
   "keywords": [
     "Cadmus"
@@ -14,14 +14,14 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@angular/material": "^19.0.0",
-    "@myrmidon/ngx-tools": "^1.0.0",
-    "@myrmidon/ngx-mat-tools": "^0.0.1",
-    "@myrmidon/paged-data-browsers": "^4.0.2",
-    "@myrmidon/cadmus-refs-lookup": "^8.0.0",
-    "@myrmidon/cadmus-api": "^12.0.0"
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@angular/material": "^20.0.1",
+    "@myrmidon/ngx-tools": "^2.0.0",
+    "@myrmidon/ngx-mat-tools": "^1.0.0",
+    "@myrmidon/paged-data-browsers": "^5.0.0",
+    "@myrmidon/cadmus-refs-lookup": "^9.0.0",
+    "@myrmidon/cadmus-api": "^14.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

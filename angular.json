@@ -15,7 +15,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/cadmus-shell-v3",
             "index": "src/index.html",
@@ -67,7 +67,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "cadmus-shell-v3:build:production"
@@ -79,10 +79,10 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n"
+          "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
               "zone.js",
@@ -112,7 +112,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-api/ng-package.json"
           },
@@ -127,7 +127,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-api/tsconfig.spec.json",
             "polyfills": [
@@ -145,7 +145,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-core/ng-package.json"
           },
@@ -160,7 +160,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-core/tsconfig.spec.json",
             "polyfills": [
@@ -178,7 +178,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-flags-pg/ng-package.json"
           },
@@ -193,7 +193,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-flags-pg/tsconfig.spec.json",
             "polyfills": [
@@ -211,7 +211,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-flags-ui/ng-package.json"
           },
@@ -226,7 +226,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-flags-ui/tsconfig.spec.json",
             "polyfills": [
@@ -244,7 +244,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-graph-pg/ng-package.json"
           },
@@ -259,7 +259,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-graph-pg/tsconfig.spec.json",
             "polyfills": [
@@ -277,7 +277,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-graph-ui/ng-package.json"
           },
@@ -292,7 +292,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-graph-ui/tsconfig.spec.json",
             "polyfills": [
@@ -310,7 +310,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-graph-ui-ex/ng-package.json"
           },
@@ -325,7 +325,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-graph-ui-ex/tsconfig.spec.json",
             "polyfills": [
@@ -343,7 +343,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-item-editor/ng-package.json"
           },
@@ -358,7 +358,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-item-editor/tsconfig.spec.json",
             "polyfills": [
@@ -376,7 +376,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-item-list/ng-package.json"
           },
@@ -391,7 +391,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-item-list/tsconfig.spec.json",
             "polyfills": [
@@ -409,7 +409,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-item-search/ng-package.json"
           },
@@ -424,7 +424,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-item-search/tsconfig.spec.json",
             "polyfills": [
@@ -442,7 +442,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-layer-demo/ng-package.json"
           },
@@ -457,7 +457,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-layer-demo/tsconfig.spec.json",
             "polyfills": [
@@ -475,7 +475,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-part-general-pg/ng-package.json"
           },
@@ -490,7 +490,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-part-general-pg/tsconfig.spec.json",
             "polyfills": [
@@ -508,7 +508,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-part-general-ui/ng-package.json"
           },
@@ -523,7 +523,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-part-general-ui/tsconfig.spec.json",
             "polyfills": [
@@ -541,7 +541,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-part-philology-pg/ng-package.json"
           },
@@ -556,7 +556,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-part-philology-pg/tsconfig.spec.json",
             "polyfills": [
@@ -574,7 +574,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-part-philology-ui/ng-package.json"
           },
@@ -589,7 +589,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-part-philology-ui/tsconfig.spec.json",
             "polyfills": [
@@ -607,7 +607,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-preview-pg/ng-package.json"
           },
@@ -622,7 +622,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-preview-pg/tsconfig.spec.json",
             "polyfills": [
@@ -640,7 +640,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-preview-ui/ng-package.json"
           },
@@ -655,7 +655,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-preview-ui/tsconfig.spec.json",
             "polyfills": [
@@ -673,7 +673,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-profile-core/ng-package.json"
           },
@@ -688,7 +688,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-profile-core/tsconfig.spec.json",
             "polyfills": [
@@ -706,7 +706,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-state/ng-package.json"
           },
@@ -721,7 +721,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-state/tsconfig.spec.json",
             "polyfills": [
@@ -739,7 +739,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-thesaurus-editor/ng-package.json"
           },
@@ -754,7 +754,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-thesaurus-editor/tsconfig.spec.json",
             "polyfills": [
@@ -772,7 +772,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-thesaurus-list/ng-package.json"
           },
@@ -787,7 +787,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-thesaurus-list/tsconfig.spec.json",
             "polyfills": [
@@ -805,7 +805,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-thesaurus-ui/ng-package.json"
           },
@@ -820,7 +820,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-thesaurus-ui/tsconfig.spec.json",
             "polyfills": [
@@ -838,7 +838,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-ui/ng-package.json"
           },
@@ -853,7 +853,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-ui/tsconfig.spec.json",
             "polyfills": [
@@ -871,7 +871,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-ui-pg/ng-package.json"
           },
@@ -886,7 +886,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-ui-pg/tsconfig.spec.json",
             "polyfills": [
@@ -904,7 +904,7 @@
       "prefix": "cadmus",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/myrmidon/cadmus-graph-pg-ex/ng-package.json"
           },
@@ -919,7 +919,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "projects/myrmidon/cadmus-graph-pg-ex/tsconfig.spec.json",
             "polyfills": [
@@ -930,5 +930,34 @@
         }
       }
     }
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
+    }
+  },
+  "cli": {
+    "analytics": false
   }
 }

@@ -58,7 +58,7 @@
             <!-- child controls -->
             <!-- type (bound) -->
             @if (typeEntries?.length) {
-            <mat-form-field>
+            <mat-form-field class="type-col">
               <mat-label>type</mat-label>
               <mat-select formControlName="type">
                 @for (e of typeEntries; track e.id) {
@@ -74,7 +74,7 @@
             }
             <!-- type (free) -->
             @else {
-            <mat-form-field>
+            <mat-form-field class="type-col">
               <mat-label>type</mat-label>
               <input matInput formControlName="type" />
               @if ( $any(g)['controls'].type.errors?.required &&
