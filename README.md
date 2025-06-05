@@ -206,6 +206,11 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-06-05:
+  - updated packages and renamed constant for lookup as `LOOKUP_CONFIGS_KEY`.
+  - better loading message.
+  - after user registration, navigate to users manager.
+
 ### 15.0.0
 
 - 2025-05-30: ⚠️ upgraded to Angular 20.

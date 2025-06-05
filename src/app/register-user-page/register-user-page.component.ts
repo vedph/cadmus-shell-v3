@@ -34,6 +34,6 @@ export class RegisterUserPageComponent {
   constructor(private _router: Router) {}
 
   public onRegistered(): void {
-    this._router.navigate(['/home']);
+    this._router.navigate(['/manage-users']);
   }
 }
