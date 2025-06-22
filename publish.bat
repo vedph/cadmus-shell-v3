@@ -105,6 +105,11 @@ call npm publish --access=public
 cd ..\..\..
 pause
 
+cd .\dist\myrmidon\cadmus-statistics
+call npm publish --access=public
+cd ..\..\..
+pause
+
 cd .\dist\myrmidon\cadmus-thesaurus-editor
 call npm publish --access=public
 cd ..\..\..

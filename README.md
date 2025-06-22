@@ -19,7 +19,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 14.0.0
+- cadmus-api: 14.0.1
 - cadmus-core: 12.0.0
 - cadmus-flags-pg: 14.0.0
 - cadmus-flags-ui: 14.0.0
@@ -39,6 +39,7 @@ Latest versions:
 - cadmus-preview-ui: 15.0.0
 - cadmus-profile-core: 12.0.0
 - cadmus-state: 13.0.0
+- cadmus-statistics: 0.0.1
 - cadmus-thesaurus-editor: 14.0.0
 - cadmus-thesaurus-list: 14.0.0
 - cadmus-thesaurus-ui: 13.0.0
@@ -144,6 +145,7 @@ graph LR;
   cadmus-state --> ngx-tools
   cadmus-state --> cadmus-core
   cadmus-state --> cadmus-api
+  cadmus-statistics --> cadmus-api
   cadmus-thesaurus-editor --> ngx-tools
   cadmus-thesaurus-editor --> ngx-mat-tools
   cadmus-thesaurus-editor --> cadmus-api
@@ -197,6 +199,7 @@ ng g library @myrmidon/cadmus-preview-pg --prefix cadmus --force
 ng g library @myrmidon/cadmus-preview-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-profile-core --prefix cadmus --force
 ng g library @myrmidon/cadmus-state --prefix cadmus --force
+ng g library @myrmidon/cadmus-statistics --prefix cadmus --force
 ng g library @myrmidon/cadmus-thesaurus-editor --prefix cadmus --force
 ng g library @myrmidon/cadmus-thesaurus-list --prefix cadmus --force
 ng g library @myrmidon/cadmus-thesaurus-ui --prefix cadmus --force
@@ -206,7 +209,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-06-22: added `StatsService` (`@myrmidon/cadmus-api`).
+- 2025-06-22: 🆕 added `StatsService` (`@myrmidon/cadmus-api`), statistics library, and statistics page, updating routes and menus accordingly. Note that this requires `ngx-echarts` and `echarts`.
 - 2025-06-05:
   - updated packages and renamed constant for lookup as `LOOKUP_CONFIGS_KEY`.
   - better loading message.

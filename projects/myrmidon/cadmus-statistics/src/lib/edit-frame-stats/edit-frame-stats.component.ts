@@ -75,6 +75,11 @@ export class EditFrameStatsComponent implements OnDestroy {
     { nonNullable: true }
   );
 
+  // convert form control values to signals for reactive computation
+  public readonly createdSignal = signal<boolean>(true);
+  public readonly updatedSignal = signal<boolean>(true);
+  public readonly deletedSignal = signal<boolean>(true);
+
   public readonly data = signal<ItemEditFrameStats[]>([]);
   public readonly loading = signal<boolean>(false);
   public readonly error = signal<string | null>(null);
@@ -82,9 +87,9 @@ export class EditFrameStatsComponent implements OnDestroy {
   // chart options computed signal
   public readonly chartOptions = computed<EChartsOption>(() => {
     const stats = this.data();
-    const showCreated = this.created.value;
-    const showUpdated = this.updated.value;
-    const showDeleted = this.deleted.value;
+    const showCreated = this.createdSignal();
+    const showUpdated = this.updatedSignal();
+    const showDeleted = this.deletedSignal();
 
     if (!stats || stats.length === 0) {
       return {};
@@ -202,7 +207,7 @@ export class EditFrameStatsComponent implements OnDestroy {
   });
 
   constructor(private _statsService: StatsService) {
-    // Set initial values from input signals
+    // set initial values from input signals
     effect(() => {
       const initialStart = this.initialStart();
       if (initialStart) {
@@ -224,6 +229,19 @@ export class EditFrameStatsComponent implements OnDestroy {
       }
     });
 
+    // sync form control values with signals for checkboxes
+    this.created.valueChanges
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((value) => this.createdSignal.set(value));
+
+    this.updated.valueChanges
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((value) => this.updatedSignal.set(value));
+
+    this.deleted.valueChanges
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((value) => this.deletedSignal.set(value));
+
     // auto-refresh data when start, end, or interval changes
     combineLatest([
       this.start.valueChanges,
@@ -237,17 +255,6 @@ export class EditFrameStatsComponent implements OnDestroy {
       )
       .subscribe(() => {
         this.loadData();
-      });
-
-    // listen to visibility control changes to trigger chart update
-    combineLatest([
-      this.created.valueChanges,
-      this.updated.valueChanges,
-      this.deleted.valueChanges,
-    ])
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(() => {
-        // chart will update automatically via computed signal
       });
 
     // initial load
@@ -268,7 +275,7 @@ export class EditFrameStatsComponent implements OnDestroy {
       return;
     }
 
-    // Ensure we have proper dates
+    // ensure we have proper dates
     let startDate: Date;
     let endDate: Date;
 
