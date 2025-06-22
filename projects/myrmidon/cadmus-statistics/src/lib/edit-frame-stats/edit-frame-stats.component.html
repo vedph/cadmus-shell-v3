@@ -1,0 +1,97 @@
+<div class="edit-frame-stats-container">
+  <!-- controls -->
+  <mat-card class="controls-panel">
+    <mat-card-content>
+      <div class="date-controls">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>start date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="startPicker"
+            [formControl]="start"
+            readonly
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="startPicker"
+          />
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>end date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="endPicker"
+            [formControl]="end"
+            readonly
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="endPicker"
+          />
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>interval</mat-label>
+          <mat-select [formControl]="interval">
+            <mat-option value="1h">1 hour</mat-option>
+            <mat-option value="1d">1 day</mat-option>
+            <mat-option value="1w">1 week</mat-option>
+            <mat-option value="1M">1 month</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button
+          type="button"
+          mat-raised-button
+          color="primary"
+          class="refresh-btn"
+          (click)="refresh()"
+          [disabled]="loading()"
+        >
+          <mat-icon>refresh</mat-icon>
+          {{ loading() ? "Loading..." : "Refresh" }}
+        </button>
+      </div>
+
+      <!-- visibility controls -->
+      <div class="visibility-controls">
+        <div class="checkbox-group">
+          <mat-checkbox [formControl]="created" class="checkbox created">
+            created
+          </mat-checkbox>
+          <mat-checkbox [formControl]="updated" class="checkbox updated">
+            updated
+          </mat-checkbox>
+          <mat-checkbox [formControl]="deleted" class="checkbox deleted">
+            deleted
+          </mat-checkbox>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- error message -->
+  <mat-card *ngIf="error()" class="error-card">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ error() }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- chart container -->
+  <mat-card class="chart-card">
+    <mat-card-content>
+      <div
+        echarts
+        [options]="chartOptions()"
+        [autoResize]="true"
+        class="chart"
+      ></div>
+    </mat-card-content>
+  </mat-card>
+</div>

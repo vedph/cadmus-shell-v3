@@ -206,6 +206,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-06-22: added `StatsService` (`@myrmidon/cadmus-api`).
 - 2025-06-05:
   - updated packages and renamed constant for lookup as `LOOKUP_CONFIGS_KEY`.
   - better loading message.

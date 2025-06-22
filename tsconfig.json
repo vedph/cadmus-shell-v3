@@ -64,6 +64,9 @@
       "@myrmidon/cadmus-state": [
         "./dist/myrmidon/cadmus-state"
       ],
+      "@myrmidon/cadmus-statistics": [
+        "./dist/myrmidon/cadmus-statistics"
+      ],
       "@myrmidon/cadmus-thesaurus-editor": [
         "./dist/myrmidon/cadmus-thesaurus-editor"
       ],
@@ -100,5 +103,13 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "references": [
+    {
+      "path": "./projects/myrmidon/cadmus-statistics/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/myrmidon/cadmus-statistics/tsconfig.spec.json"
+    }
+  ]
 }

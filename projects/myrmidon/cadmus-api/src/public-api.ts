@@ -12,6 +12,7 @@ export * from './lib/services/item.service';
 export * from './lib/services/messaging.service';
 export * from './lib/services/operator-guard.service';
 export * from './lib/services/preview.service';
+export * from './lib/services/stats.service';
 export * from './lib/services/thesaurus.service';
 export * from './lib/services/upload.service';
 export * from './lib/services/user-level.service';
