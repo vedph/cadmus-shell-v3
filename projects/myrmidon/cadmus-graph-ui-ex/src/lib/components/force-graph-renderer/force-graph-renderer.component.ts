@@ -478,10 +478,24 @@ export class ForceGraphRendererComponent
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // Truncate long labels
+    // More generous truncation based on link length
     let displayLabel = label;
-    if (displayLabel.length > 12) {
-      displayLabel = displayLabel.substring(0, 9) + '...';
+    const maxChars = Math.min(Math.max(15, Math.floor(linkLength / 8)), 25); // Dynamic based on link length, min 15, max 25
+
+    if (displayLabel.length > maxChars) {
+      // Try to be smart about truncation - keep the meaningful part
+      if (displayLabel.includes(':')) {
+        // For URIs like "crm:P98_brought_into_existence", try to keep the part after the colon
+        const parts = displayLabel.split(':');
+        if (parts.length > 1 && parts[1].length <= maxChars - 3) {
+          displayLabel = parts[0] + ':' + parts[1];
+        } else if (parts[1].length > maxChars - 3) {
+          displayLabel = parts[0] + ':' + parts[1].substring(0, maxChars - 6) + '...';
+        }
+      } else {
+        // Regular truncation
+        displayLabel = displayLabel.substring(0, maxChars - 3) + '...';
+      }
     }
 
     // Measure text for background
