@@ -23,6 +23,7 @@ import { takeUntil } from 'rxjs/operators';
 import * as ForceGraph from 'force-graph';
 import * as ForceGraph3D from '3d-force-graph';
 import * as d3 from 'd3-force';
+import * as THREE from 'three';
 
 // force graph types
 interface ForceGraphNode {
@@ -237,15 +238,25 @@ export class ForceGraphRendererComponent
         .default()(container)
         .width(width)
         .height(height)
-        .backgroundColor('rgba(0,0,0,0)')
-        .nodeLabel('name')
+        .backgroundColor('rgba(240,240,240,0.1)')
+        .showNavInfo(false)
+        // Node configuration
+        .nodeLabel(this.getNode3DLabel.bind(this))
+        .nodeAutoColorBy('group')
         .nodeColor(this.getNodeColor.bind(this))
         .nodeVal(this.getNodeSize.bind(this))
+        .nodeResolution(8) // Lower resolution for better performance
+        // Link configuration
+        .linkLabel(this.getLink3DLabel.bind(this))
         .linkColor(this.getLinkColor.bind(this))
         .linkWidth(this.getLinkWidth.bind(this))
-        .linkLabel(this.getLinkLabel.bind(this))
-        .linkDirectionalArrowLength(6)
+        .linkDirectionalArrowLength(4)
         .linkDirectionalArrowRelPos(0.8)
+        .linkOpacity(0.6)
+        // Enable labels rendering
+        .nodeThreeObjectExtend(true)
+        .linkThreeObjectExtend(true)
+        // Event handlers
         .onNodeClick(this.onNodeClick.bind(this))
         .onNodeHover(this.onNodeHover.bind(this))
         .onBackgroundClick(this.onBackgroundClick.bind(this))
@@ -268,26 +279,92 @@ export class ForceGraphRendererComponent
   }
 
   private convertToForceGraphData(): ForceGraphData {
-    const forceNodes: ForceGraphNode[] = this.nodes.map((node) => ({
-      id: node.id, // Keep as string/number as received
-      name: node.label || String(node.id),
-      val: this.getNodeSizeValue(node),
-      color: node.data?.customColor || node.data?.color || '#69b3a2',
-      group: node.data?.originId || '1',
-      __nodeData: node,
-    }));
+    const forceNodes: ForceGraphNode[] = this.nodes.map((node) => {
+      const label = node.label || String(node.id);
+      const count = node.data?.count;
+      const displayName = count ? `${label} (${count})` : label;
 
-    const forceLinks: ForceGraphLink[] = this.edges.map((edge) => ({
-      source: edge.source,
-      target: edge.target,
-      color: edge.data?.color || '#999',
-      width: edge.data?.width || 1,
-      label: edge.label || edge.data?.label || '', // Ensure label is set
-      __linkData: edge,
-    }));
+      return {
+        id: node.id,
+        name: displayName, // This will be used by nodeLabel
+        val: this.getNodeSizeValue(node),
+        color: node.data?.customColor || node.data?.color || '#69b3a2',
+        group: node.data?.originId || String(node.id).charAt(0) || '1', // Group by first character for auto-coloring
+        __nodeData: node,
+      };
+    });
 
-    console.log('Force graph links with labels:', forceLinks); // Debug log
+    const forceLinks: ForceGraphLink[] = this.edges.map((edge) => {
+      const label = edge.label || edge.data?.label || '';
+
+      return {
+        source: edge.source,
+        target: edge.target,
+        color: edge.data?.color || '#999',
+        width: edge.data?.width || 1,
+        label: this.truncateLabelFor3D(label), // Pre-truncate for 3D
+        __linkData: edge,
+      };
+    });
+
+    console.log('Force graph data for 3D:', {
+      nodes: forceNodes,
+      links: forceLinks,
+    });
     return { nodes: forceNodes, links: forceLinks };
+  }
+
+  private getNode3DLabel(node: ForceGraphNode): string {
+    const nodeData = node.__nodeData;
+    if (!nodeData) return node.name || String(node.id);
+
+    const label = nodeData.label || String(nodeData.id);
+    // Add node count if available
+    const count = nodeData.data?.count;
+    const displayLabel = count ? `${label} (${count})` : label;
+
+    // Truncate for 3D display
+    return displayLabel.length > 15
+      ? displayLabel.substring(0, 12) + '...'
+      : displayLabel;
+  }
+
+  private getLink3DLabel(link: ForceGraphLink): string {
+    const label = this.getLinkLabel(link);
+    if (!label) return '';
+
+    // More aggressive truncation for 3D to avoid performance issues
+    if (label.length > 15) {
+      if (label.includes(':')) {
+        const parts = label.split(':');
+        if (parts.length > 1) {
+          return parts[0] + ':' + parts[1].substring(0, 10) + '...';
+        }
+      }
+      return label.substring(0, 12) + '...';
+    }
+    return label;
+  }
+
+  private truncateLabelFor3D(label: string): string {
+    if (!label) return '';
+
+    // More aggressive truncation for 3D to ensure performance
+    if (label.length > 20) {
+      if (label.includes(':')) {
+        const parts = label.split(':');
+        if (parts.length > 1) {
+          const prefix = parts[0];
+          const suffix = parts[1];
+          if (suffix.length > 12) {
+            return `${prefix}:${suffix.substring(0, 9)}...`;
+          }
+          return `${prefix}:${suffix}`;
+        }
+      }
+      return label.substring(0, 17) + '...';
+    }
+    return label;
   }
 
   private updateGraphData(): void {
@@ -490,7 +567,8 @@ export class ForceGraphRendererComponent
         if (parts.length > 1 && parts[1].length <= maxChars - 3) {
           displayLabel = parts[0] + ':' + parts[1];
         } else if (parts[1].length > maxChars - 3) {
-          displayLabel = parts[0] + ':' + parts[1].substring(0, maxChars - 6) + '...';
+          displayLabel =
+            parts[0] + ':' + parts[1].substring(0, maxChars - 6) + '...';
         }
       } else {
         // Regular truncation
