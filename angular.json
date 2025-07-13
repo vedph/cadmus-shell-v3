@@ -39,7 +39,9 @@
             "allowedCommonJsDependencies": [
               "dagre",
               "webcola",
-              "diff-match-patch"
+              "diff-match-patch",
+              "ngraph.graph",
+              "ngraph.forcelayout"
             ]
           },
           "configurations": {
@@ -47,7 +49,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "3MB",
+                  "maximumWarning": "4MB",
                   "maximumError": "5MB"
                 },
                 {

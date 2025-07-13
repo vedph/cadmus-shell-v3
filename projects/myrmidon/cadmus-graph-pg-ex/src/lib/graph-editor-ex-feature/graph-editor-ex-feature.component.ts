@@ -6,8 +6,6 @@ import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { Node as GraphNode } from '@swimlane/ngx-graph';
-
 import {
   LibraryRouteService,
   ThesauriSet,
@@ -17,6 +15,7 @@ import { UriNode, ThesaurusService, ItemService } from '@myrmidon/cadmus-api';
 import {
   GraphWalkerComponent,
   WalkerNodeData,
+  GraphNode,
 } from '@myrmidon/cadmus-graph-ui-ex';
 import {
   GraphNodeListComponent,

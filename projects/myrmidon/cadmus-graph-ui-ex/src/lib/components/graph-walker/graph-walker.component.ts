@@ -15,21 +15,18 @@ import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
 
-import {
-  Edge,
-  Node as GraphNode,
-  NgxGraphZoomOptions,
-  GraphModule,
-} from '@swimlane/ngx-graph';
-
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-
 import { GraphService } from '@myrmidon/cadmus-api';
 
 import { TripleFilterComponent } from '../triple-filter/triple-filter.component';
 import { LinkedNodeFilterComponent } from '../linked-node-filter/linked-node-filter.component';
 import { LinkedLiteralFilterComponent } from '../linked-literal-filter/linked-literal-filter.component';
+import {
+  ForceGraphRendererComponent,
+  GraphMode,
+} from '../force-graph-renderer/force-graph-renderer.component';
 import { GraphNodeLabelPipe } from '../../pipes/graph-node-label.pipe';
+import { GraphNode, Edge, ZoomOptions } from '../../graph-interfaces';
 import {
   GraphWalker,
   NodeChildTotals,
@@ -47,7 +44,7 @@ import {
   templateUrl: './graph-walker.component.html',
   styleUrls: ['./graph-walker.component.css'],
   imports: [
-    GraphModule,
+    ForceGraphRendererComponent,
     MatIconButton,
     MatTooltip,
     MatIcon,
@@ -64,12 +61,17 @@ import {
 })
 export class GraphWalkerComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
-  private readonly _walker: GraphWalker;
+  private _walker?: GraphWalker;
 
   /**
    * The root origin node ID.
    */
   public readonly nodeId = input<number>(0);
+
+  /**
+   * The graph service instance to use.
+   */
+  public readonly graphService = input<GraphService>();
 
   /**
    * True if user can pick a node from the graph.
@@ -81,6 +83,11 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
    * shift-clicking it.
    */
   public readonly canMoveToSource = input<boolean>();
+
+  /**
+   * The graph visualization mode (2D or 3D).
+   */
+  public graphMode: GraphMode = '2d';
 
   /**
    * Emitted when a graph node is picked by user.
@@ -109,10 +116,45 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   // ngx-graph actions
   public update$: Subject<boolean> = new Subject();
   public center$: Subject<boolean> = new Subject();
-  public zoomToFit$: Subject<NgxGraphZoomOptions> = new Subject();
+  public zoomToFit$: Subject<ZoomOptions> = new Subject();
 
-  constructor(graphService: GraphService, private _dialog: DialogService) {
-    this._walker = new GraphWalker(graphService);
+  constructor(private _dialog: DialogService) {
+    // Initialize observables with empty observables initially
+    this.nodes$ = new Observable<GraphNode[]>();
+    this.edges$ = new Observable<Edge[]>();
+    this.loading$ = new Observable<boolean>();
+    this.error$ = new Observable<string | null>();
+    this.selectedNode$ = new Observable<GraphNode | null>();
+    this.pOutFilter$ = new Observable<PagedLinkedNodeFilter | null>();
+    this.pInFilter$ = new Observable<PagedLinkedNodeFilter | null>();
+    this.pLitFilter$ = new Observable<PagedLinkedLiteralFilter | null>();
+    this.nOutFilter$ = new Observable<PagedTripleFilter | null>();
+    this.nInFilter$ = new Observable<PagedTripleFilter | null>();
+    this.childTotals$ = new Observable<NodeChildTotals>();
+
+    // initialize walker when graphService is available
+    effect(() => {
+      const service = this.graphService();
+      console.log('GraphService effect triggered:', service);
+      if (service && !this._walker) {
+        console.log('Creating new GraphWalker');
+        this._walker = new GraphWalker(service);
+        this.setupObservables();
+      }
+    });
+
+    effect(() => {
+      const id = this.nodeId();
+      console.log('NodeId effect triggered:', id);
+      if (id && this._walker) {
+        console.log('Calling reset with id:', id);
+        this.reset(id);
+      }
+    });
+  }
+
+  private setupObservables(): void {
+    if (!this._walker) return;
 
     this.nodes$ = this._walker.nodes$;
     this.edges$ = this._walker.edges$;
@@ -127,11 +169,13 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
     this.nInFilter$ = this._walker.nInFilter$;
     this.childTotals$ = this._walker.childTotals$;
 
-    effect(() => {
-      const id = this.nodeId();
-      if (id) {
-        this.reset(id);
-      }
+    // add debugging
+    this.nodes$.subscribe((nodes) => {
+      console.log('GraphWalker nodes updated:', nodes);
+    });
+
+    this.edges$.subscribe((edges) => {
+      console.log('GraphWalker edges updated:', edges);
     });
   }
 
@@ -146,11 +190,16 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   }
 
   public onNodeSelect(node: GraphNode): void {
-    this._walker.selectNode(node.id);
+    this._walker?.selectNode(node.id);
   }
 
   private reset(id: number): void {
-    this._walker.reset(id);
+    console.log('GraphWalker reset called with id:', id);
+    if (this._walker) {
+      this._walker.reset(id);
+    } else {
+      console.log('GraphWalker instance not available');
+    }
   }
 
   public onReset(): void {
@@ -168,31 +217,35 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   }
 
   public onNodeDblClick(node: GraphNode): void {
-    this._walker.toggleNode(node);
+    this._walker?.toggleNode(node);
+  }
+
+  public onGraphModeChange(mode: GraphMode): void {
+    this.graphMode = mode;
   }
 
   public onPOutFilterChange(filter: PagedLinkedNodeFilter): void {
-    this._walker.expandSelectedProperty(filter);
+    this._walker?.expandSelectedProperty(filter);
   }
 
   public onPInFilterChange(filter: PagedLinkedNodeFilter): void {
-    this._walker.expandSelectedProperty(null, filter);
+    this._walker?.expandSelectedProperty(null, filter);
   }
 
   public onPLitFilterChange(filter: PagedLinkedLiteralFilter): void {
-    this._walker.expandSelectedProperty(null, null, filter);
+    this._walker?.expandSelectedProperty(null, null, filter);
   }
 
   public onNOutFilterChange(filter: PagedTripleFilter): void {
-    this._walker.expandSelectedNode(filter);
+    this._walker?.expandSelectedNode(filter);
   }
 
   public onNInFilterChange(filter: PagedTripleFilter): void {
-    this._walker.expandSelectedNode(null, filter);
+    this._walker?.expandSelectedNode(null, filter);
   }
 
   public pickSelectedNode(event: MouseEvent): void {
-    const node = this._walker.getSelectedNode();
+    const node = this._walker?.getSelectedNode();
     if (!node) {
       return;
     }

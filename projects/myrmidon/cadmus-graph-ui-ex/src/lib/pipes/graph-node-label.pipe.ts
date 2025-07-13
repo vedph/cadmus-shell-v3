@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Node as GraphNode } from '@swimlane/ngx-graph';
+import { GraphNode } from '../graph-interfaces';
 
 /**
  * Get the extended label for the specified graph node. This returns the label

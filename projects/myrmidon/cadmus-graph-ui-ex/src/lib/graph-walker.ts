@@ -1,7 +1,7 @@
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import { Edge, Node as GraphNode } from '@swimlane/ngx-graph';
+import { Edge, GraphNode } from './graph-interfaces';
 
 import {
   GraphService,
@@ -112,7 +112,6 @@ export interface NodeChildTotals {
 export class GraphWalker {
   private readonly _nodes$: BehaviorSubject<GraphNode[]>;
   private readonly _edges$: BehaviorSubject<Edge[]>;
-  // TODO: add clusters
   private readonly _loading$: BehaviorSubject<boolean>;
   private readonly _error$: BehaviorSubject<string | null>;
   private _rootNode?: GraphNode;
@@ -293,20 +292,6 @@ export class GraphWalker {
 
   private buildLiteralId(tripleId: number): string {
     return `L${tripleId}`;
-  }
-
-  private scale(
-    n: number,
-    domainMin: number,
-    domainMax: number,
-    rangeMin: number,
-    rangeMax: number
-  ): number {
-    // https://stackoverflow.com/questions/5294955/how-to-scale-down-a-range-of-numbers-with-a-known-min-and-max-value
-    return (
-      ((domainMax - domainMin) * (n - rangeMin)) / (rangeMax - rangeMin) +
-      domainMin
-    );
   }
 
   private addEdgeIfAbsent(edge: Edge, edges: Edge[]): void {

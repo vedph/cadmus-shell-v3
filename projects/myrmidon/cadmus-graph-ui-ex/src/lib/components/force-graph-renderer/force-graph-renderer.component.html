@@ -1,0 +1,29 @@
+<div class="renderer-container">
+  <div class="controls">
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Switch to {{ mode === '2d' ? '3D' : '2D' }} view"
+      (click)="toggleMode()"
+    >
+      <mat-icon>{{ mode === "2d" ? "view_in_ar" : "view_quilt" }}</mat-icon>
+    </button>
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Center view"
+      (click)="centerView()"
+    >
+      <mat-icon>filter_center_focus</mat-icon>
+    </button>
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Zoom to fit"
+      (click)="zoomToFit()"
+    >
+      <mat-icon>fit_screen</mat-icon>
+    </button>
+  </div>
+  <div #graphContainer class="graph-container"></div>
+</div>

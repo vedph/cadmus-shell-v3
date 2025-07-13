@@ -3,13 +3,17 @@ import { take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { Node as GraphNode } from '@swimlane/ngx-graph';
+
 import { EnvService, ErrorService } from '@myrmidon/ngx-tools';
+
 import {
   GraphService,
   GRAPH_API_PATH,
-} from '../../../projects/myrmidon/cadmus-api/src/public-api';
-import { GraphWalkerComponent } from '../../../projects/myrmidon/cadmus-graph-ui-ex/src/public-api';
+} from '@myrmidon/cadmus-api';
+import {
+  GraphWalkerComponent,
+  GraphNode,
+} from '../../../projects/myrmidon/cadmus-graph-ui-ex/src/public-api';
 
 @Component({
   selector: 'app-graph-demo-page',
@@ -39,19 +43,19 @@ import { GraphWalkerComponent } from '../../../projects/myrmidon/cadmus-graph-ui
 export class GraphDemoPageComponent implements OnInit {
   public nodeId: number = 0;
 
-  constructor(private _service: GraphService) {
-    console.log(
-      'Demo page constructor - GraphService instance:',
-      this._service
-    );
+  constructor(public graphService: GraphService) {
+    console.log('GraphDemoPage constructor - graphService:', this.graphService);
   }
 
   public ngOnInit(): void {
-    this._service
+    console.log('GraphDemoPage ngOnInit - getting node by URI');
+    this.graphService
       .getNodeByUri('x:guys/francesco_petrarca')
       .pipe(take(1))
       .subscribe((node) => {
+        console.log('Node fetched:', node);
         this.nodeId = node.id;
+        console.log('NodeId set to:', this.nodeId);
       });
   }
 

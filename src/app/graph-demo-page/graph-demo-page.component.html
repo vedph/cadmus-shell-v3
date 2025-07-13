@@ -1,14 +1,16 @@
-<div id="container">
-  @if (nodeId) {
+<div>
+  <h2>Graph Demo</h2>
+  <mat-progress-bar
+    *ngIf="nodeId === 0"
+    mode="indeterminate"
+  ></mat-progress-bar>
+
   <cadmus-graph-walker
     [nodeId]="nodeId"
+    [graphService]="graphService"
     [canPick]="true"
+    [canMoveToSource]="true"
     (nodePick)="onNodePick($event)"
-  />
-  } @else {
-  <div>
-    <mat-progress-bar mode="indeterminate" color="primary" />
-  </div>
-  <p>Loading...</p>
-  }
+  >
+  </cadmus-graph-walker>
 </div>

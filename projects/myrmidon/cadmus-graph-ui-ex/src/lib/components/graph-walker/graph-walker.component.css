@@ -11,6 +11,13 @@ div#filter-head {
 .muted {
   color: silver;
 }
+.node-uri {
+  margin-left: 6px;
+}
+.node-id {
+  margin-left: 8px;
+  font-size: 90%;
+}
 .selected {
   stroke-width: 2px;
   stroke: #e7d211;

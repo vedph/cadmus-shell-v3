@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Graph Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #graph {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Force Graph Test</h1>
+    <div class="container">
+        <div class="controls">
+            <button onclick="toggleMode()">Toggle 2D/3D</button>
+            <button onclick="centerView()">Center</button>
+            <button onclick="zoomToFit()">Zoom to Fit</button>
+        </div>
+        <div id="graph"></div>
+    </div>
+
+    <script type="module">
+        let graph = null;
+        let currentMode = '2d';
+
+        // Sample data that mimics the walker structure
+        const graphData = {
+            nodes: [
+                { id: 'N1', name: 'Entity Node', val: 8, color: '#69b3a2', group: 'entity' },
+                { id: 'P1N1', name: 'hasProperty (3)', val: 6, color: '#FF5619', group: 'property' },
+                { id: 'N2', name: 'Related Entity', val: 8, color: '#80ff95', group: 'entity' },
+                { id: 'L1', name: 'Literal Value', val: 4, color: '#ebe2e0', group: 'literal' },
+                { id: 'N3', name: 'Another Entity', val: 8, color: '#80ff95', group: 'entity' },
+                { id: 'P2N3', name: 'hasLabel (2)', val: 6, color: '#FF5619', group: 'property' },
+                { id: 'L2', name: 'Label Text', val: 4, color: '#ebe2e0', group: 'literal' }
+            ],
+            links: [
+                { source: 'N1', target: 'P1N1', color: '#999' },
+                { source: 'P1N1', target: 'N2', color: '#999' },
+                { source: 'P1N1', target: 'L1', color: '#999' },
+                { source: 'N3', target: 'P2N3', color: '#999' },
+                { source: 'P2N3', target: 'L2', color: '#999' },
+                { source: 'N1', target: 'N3', color: '#999' }
+            ]
+        };
+
+        async function initGraph() {
+            const container = document.getElementById('graph');
+
+            if (currentMode === '2d') {
+                const { default: ForceGraph } = await import('https://unpkg.com/force-graph/dist/force-graph.js');
+
+                graph = ForceGraph()(container)
+                    .width(container.clientWidth)
+                    .height(container.clientHeight)
+                    .backgroundColor('rgba(0,0,0,0)')
+                    .nodeLabel('name')
+                    .nodeColor(getNodeColor)
+                    .nodeVal(getNodeSize)
+                    .linkColor(getLinkColor)
+                    .linkWidth(2)
+                    .linkDirectionalArrowLength(6)
+                    .linkDirectionalArrowRelPos(0.8)
+                    .onNodeClick(onNodeClick)
+                    .onNodeHover(onNodeHover)
+                    .nodeCanvasObject(drawNode)
+                    .nodeCanvasObjectMode(() => 'replace')
+                    .graphData(graphData);
+            } else {
+                const { default: ForceGraph3D } = await import('https://unpkg.com/3d-force-graph/dist/3d-force-graph.js');
+
+                graph = ForceGraph3D()(container)
+                    .width(container.clientWidth)
+                    .height(container.clientHeight)
+                    .backgroundColor('rgba(0,0,0,0)')
+                    .nodeLabel('name')
+                    .nodeColor(getNodeColor)
+                    .nodeVal(getNodeSize)
+                    .linkColor(getLinkColor)
+                    .linkWidth(2)
+                    .linkDirectionalArrowLength(6)
+                    .linkDirectionalArrowRelPos(0.8)
+                    .onNodeClick(onNodeClick)
+                    .onNodeHover(onNodeHover)
+                    .graphData(graphData);
+            }
+        }
+
+        function getNodeColor(node) {
+            return node.color || '#69b3a2';
+        }
+
+        function getNodeSize(node) {
+            return node.val || 4;
+        }
+
+        function getLinkColor(link) {
+            return link.color || '#999';
+        }
+
+        function drawNode(node, ctx, globalScale) {
+            const label = node.name || node.id;
+            const size = getNodeSize(node) / globalScale;
+            const color = getNodeColor(node);
+
+            ctx.save();
+
+            if (node.id.startsWith('L')) {
+                // Literal nodes - diamond shape
+                ctx.fillStyle = color;
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 1 / globalScale;
+
+                ctx.beginPath();
+                ctx.moveTo(node.x, node.y - size);
+                ctx.lineTo(node.x + size, node.y);
+                ctx.lineTo(node.x, node.y + size);
+                ctx.lineTo(node.x - size, node.y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (node.id.startsWith('P')) {
+                // Property nodes - hexagon shape
+                ctx.fillStyle = color;
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 1 / globalScale;
+
+                const sides = 6;
+                const a = (Math.PI * 2) / sides;
+
+                ctx.beginPath();
+                for (let i = 0; i < sides; i++) {
+                    const x = node.x + Math.cos(a * i) * size;
+                    const y = node.y + Math.sin(a * i) * size;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                // Regular nodes - circle
+                ctx.fillStyle = color;
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 1 / globalScale;
+
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // Draw label
+            if (globalScale > 0.5) {
+                const fontSize = Math.max(10, 12 / globalScale);
+                ctx.font = `${fontSize}px Arial`;
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Truncate long labels
+                let displayLabel = label;
+                if (displayLabel.length > 15) {
+                    displayLabel = displayLabel.substring(0, 12) + '...';
+                }
+
+                ctx.fillText(displayLabel, node.x, node.y + size + fontSize);
+            }
+
+            ctx.restore();
+        }
+
+        function onNodeClick(node, event) {
+            console.log('Node clicked:', node);
+            alert(`Clicked: ${node.name} (${node.id})`);
+        }
+
+        function onNodeHover(node) {
+            if (currentMode === '2d') {
+                const container = document.getElementById('graph');
+                container.style.cursor = node ? 'pointer' : 'default';
+            }
+        }
+
+        window.toggleMode = async function() {
+            currentMode = currentMode === '2d' ? '3d' : '2d';
+            console.log('Switching to', currentMode);
+
+            if (graph) {
+                graph._destructor?.();
+            }
+
+            const container = document.getElementById('graph');
+            container.innerHTML = '';
+
+            await initGraph();
+        };
+
+        window.centerView = function() {
+            if (graph) {
+                if (currentMode === '2d') {
+                    graph.centerAt(0, 0, 1000);
+                } else {
+                    graph.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, 1000);
+                }
+            }
+        };
+
+        window.zoomToFit = function() {
+            if (graph) {
+                graph.zoomToFit(1000, 50);
+            }
+        };
+
+        // Initialize the graph
+        initGraph();
+    </script>
+</body>
+</html>
