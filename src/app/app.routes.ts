@@ -17,6 +17,7 @@ import { RegisterUserPageComponent } from './register-user-page/register-user-pa
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { LoginPageComponent } from './login-page/login-page.component';
 import { EditFrameStatsPageComponent } from './edit-frame-stats-page/edit-frame-stats-page.component';
+import { GraphDemoPageComponent } from './graph-demo-page/graph-demo-page.component';
 
 export const routes: Routes = [
   // auth
@@ -48,6 +49,11 @@ export const routes: Routes = [
       import('@myrmidon/cadmus-layer-demo').then(
         (module) => module.LayerDemoComponent
       ),
+  },
+  {
+    path: 'demo/graph',
+    component: GraphDemoPageComponent,
+    canActivate: [AuthJwtGuardService],
   },
   // cadmus - items
   {

@@ -1,10 +1,18 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, Optional } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 
 import { DataPage, EnvService, ErrorService } from '@myrmidon/ngx-tools';
+
+import { InjectionToken } from '@angular/core';
+
+// the GRAPH_API_PATH token allows overriding the default API path
+// for the graph service, useful for demos or specific configurations.
+// If you don't define this token, the service will just fallback
+// to the default 'graph' path.
+export const GRAPH_API_PATH = new InjectionToken<string>('GRAPH_API_PATH');
 
 //#region Models
 export enum NodeSourceType {
@@ -117,11 +125,18 @@ export interface LinkedLiteralFilter extends LiteralFilter {
   providedIn: 'root',
 })
 export class GraphService {
+  private readonly _apiPath: string;
+
   constructor(
     private _http: HttpClient,
     private _error: ErrorService,
-    private _env: EnvService
-  ) {}
+    private _env: EnvService,
+    @Optional() @Inject(GRAPH_API_PATH) apiPath?: string
+  ) {
+    // use injected path if provided, otherwise fallback to 'graph'
+    this._apiPath = apiPath || 'graph';
+    console.log(`GraphService API path: ${this._apiPath}`);
+  }
 
   /**
    * Get the specified page of graph nodes.
@@ -134,7 +149,7 @@ export class GraphService {
     pageSize: number,
     filter: NodeFilter
   ): Observable<DataPage<UriNode>> {
-    const url = this._env.get('apiUrl') + 'graph/nodes';
+    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes`;
 
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
@@ -190,7 +205,7 @@ export class GraphService {
    * @returns List of nodes/nulls.
    */
   public getNodeSet(ids: number[]): Observable<(UriNode | null)[]> {
-    const url = this._env.get('apiUrl') + 'graph/nodes-set/';
+    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes-set/`;
     let httpParams = new HttpParams();
     for (let i = 0; i < ids.length; i++) {
       httpParams = httpParams.append('id', ids[i].toString());
@@ -210,7 +225,7 @@ export class GraphService {
    * @returns The node.
    */
   public getNode(id: number): Observable<UriNode> {
-    const url = this._env.get('apiUrl') + 'graph/nodes/' + id.toString();
+    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes/` + id.toString();
     return this._http
       .get<UriNode>(url)
       .pipe(retry(3), catchError(this._error.handleError));
@@ -223,7 +238,8 @@ export class GraphService {
    * @returns The node.
    */
   public getNodeByUri(uri: string): Observable<UriNode> {
-    const url = this._env.get('apiUrl') + 'graph/nodes-by-uri';
+    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes-by-uri`;
+    console.log(`Fetching URL: ${url}`);
     let httpParams = new HttpParams();
     httpParams = httpParams.set('uri', uri);
 
@@ -240,7 +256,7 @@ export class GraphService {
    * @returns The added node.
    */
   public addNode(node: UriNode): Observable<UriNode> {
-    const url = this._env.get('apiUrl') + 'graph/nodes/';
+    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes/`;
     return this._http
       .post<UriNode>(url, node)
       .pipe(catchError(this._error.handleError));
@@ -252,7 +268,7 @@ export class GraphService {
    * @param id The node's ID.
    */
   public deleteNode(id: number): Observable<any> {
-    const url = this._env.get('apiUrl') + 'graph/nodes/' + id.toString();
+    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes/` + id.toString();
     return this._http.delete(url).pipe(catchError(this._error.handleError));
   }
 
@@ -314,7 +330,7 @@ export class GraphService {
     pageSize: number,
     filter: TripleFilter
   ): Observable<DataPage<UriTriple>> {
-    const url = this._env.get('apiUrl') + 'graph/triples';
+    const url = this._env.get('apiUrl') + `${this._apiPath}/triples`;
 
     const httpParams = this.applyTripleFilter(
       pageNumber,
@@ -337,7 +353,7 @@ export class GraphService {
    * @returns The triple.
    */
   public getTriple(id: number): Observable<UriTriple> {
-    const url = this._env.get('apiUrl') + 'graph/triples/' + id.toString();
+    const url = this._env.get('apiUrl') + `${this._apiPath}/triples/` + id.toString();
     return this._http
       .get<UriTriple>(url)
       .pipe(retry(3), catchError(this._error.handleError));
@@ -350,7 +366,7 @@ export class GraphService {
    * @returns The added triple.
    */
   public addTriple(triple: Triple): Observable<Triple> {
-    const url = this._env.get('apiUrl') + 'graph/triples';
+    const url = this._env.get('apiUrl') + `${this._apiPath}/triples`;
     return this._http
       .post<Triple>(url, triple)
       .pipe(catchError(this._error.handleError));
@@ -362,7 +378,7 @@ export class GraphService {
    * @param id The triple's ID.
    */
   public deleteTriple(id: number): Observable<any> {
-    const url = this._env.get('apiUrl') + 'graph/triples/' + id.toString();
+    const url = this._env.get('apiUrl') + `${this._apiPath}/triples/` + id.toString();
     return this._http.delete(url).pipe(catchError(this._error.handleError));
   }
 
@@ -405,6 +421,7 @@ export class GraphService {
     pageSize: number,
     filter: TripleFilter
   ): Observable<DataPage<TripleGroup>> {
+    const url = this._env.get('apiUrl') + `${this._apiPath}/walk/triples`;
     const httpParams = this.applyTripleFilter(
       pageNumber,
       pageSize,
@@ -412,7 +429,6 @@ export class GraphService {
       new HttpParams()
     );
 
-    const url = this._env.get('apiUrl') + 'graph/walk/triples';
     return this._http
       .get<DataPage<TripleGroup>>(url, {
         params: httpParams,
@@ -430,6 +446,7 @@ export class GraphService {
     pageSize: number,
     filter: LinkedNodeFilter
   ): Observable<DataPage<UriNode>> {
+    const url = this._env.get('apiUrl') + `${this._apiPath}/walk/nodes`;
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
     httpParams = httpParams.set('pageSize', pageSize.toString());
@@ -473,7 +490,6 @@ export class GraphService {
       httpParams = httpParams.set('isObject', filter.isObject);
     }
 
-    const url = this._env.get('apiUrl') + 'graph/walk/nodes';
     return this._http
       .get<DataPage<UriNode>>(url, {
         params: httpParams,
@@ -491,6 +507,7 @@ export class GraphService {
     pageSize: number,
     filter: LinkedLiteralFilter
   ): Observable<DataPage<UriTriple>> {
+    const url = this._env.get('apiUrl') + `${this._apiPath}/walk/nodes/literal`;
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
     httpParams = httpParams.set('pageSize', pageSize.toString());
@@ -506,7 +523,6 @@ export class GraphService {
       httpParams = httpParams.set('predicateId', filter.predicateId.toString());
     }
 
-    const url = this._env.get('apiUrl') + 'graph/walk/nodes/literal';
     return this._http
       .get<DataPage<UriTriple>>(url, {
         params: httpParams,
