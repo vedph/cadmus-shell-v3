@@ -12,17 +12,17 @@ import {
   AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
 import { GraphNode, Edge } from '../../graph-interfaces';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
+// Import the libraries directly
 import * as ForceGraph from 'force-graph';
 import * as ForceGraph3D from '3d-force-graph';
+import * as d3 from 'd3-force';
 
 // force graph types
 interface ForceGraphNode {
@@ -62,8 +62,70 @@ export type GraphMode = '2d' | '3d';
  */
 @Component({
   selector: 'cadmus-force-graph-renderer',
-  templateUrl: './force-graph-renderer.component.html',
-  styleUrls: ['./force-graph-renderer.component.css'],
+  template: `
+    <div class="renderer-container">
+      <div class="controls">
+        <button
+          type="button"
+          mat-icon-button
+          matTooltip="Switch to {{ mode === '2d' ? '3D' : '2D' }} view"
+          (click)="toggleMode()"
+        >
+          <mat-icon>{{ mode === '2d' ? 'view_in_ar' : 'view_quilt' }}</mat-icon>
+        </button>
+        <button
+          type="button"
+          mat-icon-button
+          matTooltip="Center view"
+          (click)="centerView()"
+        >
+          <mat-icon>filter_center_focus</mat-icon>
+        </button>
+        <button
+          type="button"
+          mat-icon-button
+          matTooltip="Zoom to fit"
+          (click)="zoomToFit()"
+        >
+          <mat-icon>fit_screen</mat-icon>
+        </button>
+      </div>
+      <div #graphContainer class="graph-container"></div>
+    </div>
+  `,
+  styles: [
+    `
+      .renderer-container {
+        width: 100%;
+        height: 100%;
+        min-height: 600px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        display: flex;
+        gap: 4px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 4px;
+        padding: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .graph-container {
+        width: 100%;
+        height: 100%;
+        min-height: 600px;
+        flex: 1;
+        position: relative;
+      }
+    `,
+  ],
   imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule],
 })
 export class ForceGraphRendererComponent
@@ -156,13 +218,20 @@ export class ForceGraphRendererComponent
         .nodeVal(this.getNodeSize.bind(this))
         .linkColor(this.getLinkColor.bind(this))
         .linkWidth(this.getLinkWidth.bind(this))
+        .linkLabel(this.getLinkLabel.bind(this))
         .linkDirectionalArrowLength(6)
         .linkDirectionalArrowRelPos(0.8)
         .onNodeClick(this.onNodeClick.bind(this))
         .onNodeHover(this.onNodeHover.bind(this))
         .onBackgroundClick(this.onBackgroundClick.bind(this))
         .nodeCanvasObject(this.drawNode.bind(this))
-        .nodeCanvasObjectMode(() => 'replace');
+        .nodeCanvasObjectMode(() => 'replace')
+        .linkCanvasObject(this.drawLink.bind(this))
+        .linkCanvasObjectMode(() => 'after')
+        // Configure d3 forces properly
+        .d3Force('link', d3.forceLink().distance(120).strength(0.5))
+        .d3Force('charge', d3.forceManyBody().strength(-300))
+        .d3Force('collision', d3.forceCollide().radius(50));
     } else {
       this.graph = (ForceGraph3D as any)
         .default()(container)
@@ -174,11 +243,15 @@ export class ForceGraphRendererComponent
         .nodeVal(this.getNodeSize.bind(this))
         .linkColor(this.getLinkColor.bind(this))
         .linkWidth(this.getLinkWidth.bind(this))
+        .linkLabel(this.getLinkLabel.bind(this))
         .linkDirectionalArrowLength(6)
         .linkDirectionalArrowRelPos(0.8)
         .onNodeClick(this.onNodeClick.bind(this))
         .onNodeHover(this.onNodeHover.bind(this))
-        .onBackgroundClick(this.onBackgroundClick.bind(this));
+        .onBackgroundClick(this.onBackgroundClick.bind(this))
+        // Configure d3 forces for 3D
+        .d3Force('link', d3.forceLink().distance(120).strength(0.5))
+        .d3Force('charge', d3.forceManyBody().strength(-300));
     }
 
     // Handle window resize
@@ -197,7 +270,7 @@ export class ForceGraphRendererComponent
   private convertToForceGraphData(): ForceGraphData {
     const forceNodes: ForceGraphNode[] = this.nodes.map((node) => ({
       id: node.id, // Keep as string/number as received
-      name: node.label || node.id,
+      name: node.label || String(node.id),
       val: this.getNodeSizeValue(node),
       color: node.data?.customColor || node.data?.color || '#69b3a2',
       group: node.data?.originId || '1',
@@ -209,10 +282,11 @@ export class ForceGraphRendererComponent
       target: edge.target,
       color: edge.data?.color || '#999',
       width: edge.data?.width || 1,
-      label: edge.label || '',
+      label: edge.label || edge.data?.label || '', // Ensure label is set
       __linkData: edge,
     }));
 
+    console.log('Force graph links with labels:', forceLinks); // Debug log
     return { nodes: forceNodes, links: forceLinks };
   }
 
@@ -257,6 +331,10 @@ export class ForceGraphRendererComponent
 
   private getLinkWidth(link: ForceGraphLink): number {
     return link.__linkData?.data?.width || link.width || 1;
+  }
+
+  private getLinkLabel(link: ForceGraphLink): string {
+    return link.__linkData?.label || link.label || '';
   }
 
   private drawNode(
@@ -340,6 +418,99 @@ export class ForceGraphRendererComponent
 
       ctx.fillText(displayLabel, node.x, node.y + size + fontSize);
     }
+
+    ctx.restore();
+  }
+
+  private drawLink(
+    link: ForceGraphLink,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number
+  ): void {
+    if (!link.source || !link.target) return;
+
+    const source = link.source as any;
+    const target = link.target as any;
+
+    if (!source.x || !source.y || !target.x || !target.y) return;
+
+    const label = this.getLinkLabel(link);
+    if (!label || globalScale < 0.3) return; // Show labels at lower zoom levels
+
+    // Calculate link vector and angle
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const linkLength = Math.sqrt(dx * dx + dy * dy);
+
+    if (linkLength === 0) return;
+
+    const angle = Math.atan2(dy, dx);
+
+    // Position label at 40% of the way from source to target
+    const labelX = source.x + dx * 0.4;
+    const labelY = source.y + dy * 0.4;
+
+    // Calculate offset perpendicular to the link to avoid overlap
+    const offsetDistance = 20 / globalScale;
+    const offsetX = -Math.sin(angle) * offsetDistance;
+    const offsetY = Math.cos(angle) * offsetDistance;
+
+    const finalX = labelX + offsetX;
+    const finalY = labelY + offsetY;
+
+    ctx.save();
+
+    // Smaller font size
+    const fontSize = Math.max(6, 7 / globalScale);
+    ctx.font = `${fontSize}px Arial`;
+
+    // Rotate text to be parallel to the link
+    ctx.translate(finalX, finalY);
+
+    // Keep text readable by avoiding upside-down text
+    let textAngle = angle;
+    if (Math.abs(angle) > Math.PI / 2) {
+      textAngle = angle + Math.PI;
+    }
+
+    ctx.rotate(textAngle);
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Truncate long labels
+    let displayLabel = label;
+    if (displayLabel.length > 12) {
+      displayLabel = displayLabel.substring(0, 9) + '...';
+    }
+
+    // Measure text for background
+    const textMetrics = ctx.measureText(displayLabel);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize;
+
+    // Draw background
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillRect(
+      -textWidth / 2 - 1,
+      -textHeight / 2 - 0.5,
+      textWidth + 2,
+      textHeight + 1
+    );
+
+    // Draw border
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.lineWidth = 0.3 / globalScale;
+    ctx.strokeRect(
+      -textWidth / 2 - 1,
+      -textHeight / 2 - 0.5,
+      textWidth + 2,
+      textHeight + 1
+    );
+
+    // Draw text
+    ctx.fillStyle = '#333';
+    ctx.fillText(displayLabel, 0, 0);
 
     ctx.restore();
   }
