@@ -11,19 +11,20 @@ import {
   ViewChild,
   AfterViewInit,
 } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { GraphNode, Edge } from '../../graph-interfaces';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
-// Import the libraries directly
 import * as ForceGraph from 'force-graph';
 import * as ForceGraph3D from '3d-force-graph';
 import * as d3 from 'd3-force';
 import * as THREE from 'three';
+
+import { GraphNode, Edge } from '../../graph-interfaces';
 
 // force graph types
 interface ForceGraphNode {
@@ -693,7 +694,7 @@ export class ForceGraphRendererComponent
     const nodeData = node.__nodeData;
     if (!nodeData) return null;
 
-    console.log('Creating 3D node with label for:', nodeData.label); // Debug log
+    console.log('Creating 3D node with label for:', nodeData.label);
 
     const size = this.getNodeSize(node);
     const color = this.getNodeColor(node);
@@ -721,92 +722,76 @@ export class ForceGraphRendererComponent
     const mesh = new THREE.Mesh(geometry, material);
     group.add(mesh);
 
-    // Create node label with count
+    // Create node label with count and incoming link labels
     const label = nodeData.label || String(nodeData.id);
     const count = nodeData.data?.count;
-    const displayText = count ? `${label} (${count})` : label;
 
-    // Truncate for 3D
+    // Get incoming link labels
+    const incomingLinks = this.edges.filter(
+      (edge) => edge.target === nodeData.id
+    );
+    const linkLabels = incomingLinks
+      .map((edge) => edge.label || edge.data?.label)
+      .filter((label) => label) // Remove empty labels
+      .slice(0, 3); // Limit to first 3 to avoid too long text
+
+    // Build display text
+    let displayText = label;
+
+    if (count || linkLabels.length > 0) {
+      const parts = [];
+
+      if (count) {
+        parts.push(count.toString());
+      }
+
+      if (linkLabels.length > 0) {
+        // Join multiple link labels with commas
+        const linkText = linkLabels.join(', ');
+        parts.push(linkText);
+      }
+
+      if (parts.length > 0) {
+        displayText = `${label} (${parts.join(': ')})`;
+      }
+    }
+
+    // Truncate for 3D - be more generous to keep labels readable
     let truncatedText = displayText;
-    if (truncatedText.length > 12) {
-      truncatedText = truncatedText.substring(0, 9) + '...';
+    if (truncatedText.length > 25) {
+      // Try to keep the meaningful part - prioritize the link labels over the node label
+      if (linkLabels.length > 0 && count) {
+        // Format: "NodeLabel (count: linkLabel1, linkLabel2)"
+        const linkText = linkLabels.join(', ');
+        const maxLinkLength = 15; // Reserve space for link labels
+        const truncatedLinkText =
+          linkText.length > maxLinkLength
+            ? linkText.substring(0, maxLinkLength - 3) + '...'
+            : linkText;
+
+        const nodePartLength = Math.max(
+          5,
+          25 - count.toString().length - truncatedLinkText.length - 5
+        ); // 5 for " (: )"
+        const truncatedLabel =
+          label.length > nodePartLength
+            ? label.substring(0, nodePartLength - 3) + '...'
+            : label;
+
+        truncatedText = `${truncatedLabel} (${count}: ${truncatedLinkText})`;
+      } else {
+        // Fallback to simple truncation
+        truncatedText = truncatedText.substring(0, 22) + '...';
+      }
     }
 
     const nodeSprite = this.createTextSprite(truncatedText);
     nodeSprite.position.set(0, size + 15, 0); // Position above node
     group.add(nodeSprite);
 
-    // Add incoming link labels (links that END at this node)
-    const incomingLinks = this.edges.filter(
-      (edge) => edge.target === nodeData.id
-    );
-    if (incomingLinks.length > 0) {
-      incomingLinks.forEach((edge, index) => {
-        const linkLabel = edge.label || edge.data?.label;
-        if (linkLabel && index < 3) {
-          // Show up to 3 links to avoid clutter
-          let truncatedLinkLabel = linkLabel;
-          if (truncatedLinkLabel.length > 15) {
-            truncatedLinkLabel = truncatedLinkLabel.substring(0, 12) + '...';
-          }
-
-          const linkSprite = this.createLinkLabelSprite(truncatedLinkLabel);
-
-          // Position labels below the node, similar to how counts are positioned
-          const yOffset = -size - 20 - index * 25; // Stack them vertically below the node
-          linkSprite.position.set(0, yOffset, 0);
-          group.add(linkSprite);
-        }
-      });
-    }
-
-    console.log('Created node sprite with text:', truncatedText); // Debug log
+    console.log('Created node sprite with text:', truncatedText);
 
     return group;
-  }
-
-  // Update the createLinkLabelSprite method with smaller, more compact text:
-  private createLinkLabelSprite(text: string): any {
-    const fontFace = 'Arial';
-    const fontSize = 16; // Smaller font
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d')!;
-
-    // Set font for measurement
-    context.font = `Normal ${fontSize}px ${fontFace}`;
-    const metrics = context.measureText(text);
-    const textWidth = metrics.width;
-    const padding = 6; // Less padding
-
-    // Set canvas size
-    canvas.width = textWidth + padding * 2;
-    canvas.height = fontSize + padding * 2;
-
-    // More subtle background color
-    context.fillStyle = 'rgba(255, 255, 200, 0.8)'; // Light yellow background
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw border
-    context.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-    context.lineWidth = 1;
-    context.strokeRect(0, 0, canvas.width, canvas.height);
-
-    // Draw text
-    context.font = `Normal ${fontSize}px ${fontFace}`;
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    context.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    context.fillText(text, canvas.width / 2, canvas.height / 2);
-
-    // Create texture and sprite
-    const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.SpriteMaterial({ map: texture });
-    const sprite = new THREE.Sprite(material);
-
-    // Smaller scale for more compact labels
-    sprite.scale.set(canvas.width / 4, canvas.height / 4, 1);
-
-    return sprite;
   }
 
   private createTextSprite(text: string): any {
