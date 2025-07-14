@@ -209,6 +209,10 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-07-14: ⚠️ refactored graph:
+  - `@myrmidon/cadmus-graph-ui-ex`: replaced `swimlane/ngx-graph` (which had long-standing issues and appears to be no longer maintained) with `force-graph`. The underlying graph service and walker were essentially unchanged, but the walker component using them to display an interactive graph has been totally rewritten for replacing the old library with the new one.
+  - added graph test page.
+  - added optional injection token to graph service to allow for different URI endpoints for real world projects and mock data for the test page.
 - 2025-06-22: 🆕 added `StatsService` (`@myrmidon/cadmus-api`), statistics library, and statistics page, updating routes and menus accordingly. Note that this requires `ngx-echarts` and `echarts`.
 - 2025-06-05:
   - updated packages and renamed constant for lookup as `LOOKUP_CONFIGS_KEY`.
