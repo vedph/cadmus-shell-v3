@@ -242,9 +242,14 @@ export class ForceGraphRendererComponent
         .showNavInfo(false)
         // Node configuration - use nodeThreeObject for static labels
         .nodeThreeObject(this.createNode3DWithLabel.bind(this))
-        // Link configuration - use linkThreeObject for static labels
-        .linkThreeObject(this.createLink3DWithLabel.bind(this))
-        .linkThreeObjectExtend(true) // Add to default link
+        // Remove link labels - they'll be shown on nodes instead
+        // .linkThreeObject(this.createLink3DWithLabel.bind(this))
+        // .linkThreeObjectExtend(true)
+        .linkColor(this.getLinkColor.bind(this))
+        .linkWidth(this.getLinkWidth.bind(this))
+        .linkDirectionalArrowLength(4)
+        .linkDirectionalArrowRelPos(0.8)
+        .linkOpacity(0.6)
         // Keep tooltip labels for additional info on hover
         .nodeLabel(this.getNode3DLabel.bind(this))
         .linkLabel(this.getLink3DLabel.bind(this))
@@ -694,7 +699,7 @@ export class ForceGraphRendererComponent
     const color = this.getNodeColor(node);
     const nodeId = String(nodeData.id);
 
-    // Create a group to hold both the node and the label
+    // Create a group to hold both the node and the labels
     const group = new THREE.Group();
 
     // Create node geometry based on type
@@ -702,7 +707,12 @@ export class ForceGraphRendererComponent
     if (nodeId.startsWith('L')) {
       geometry = new THREE.OctahedronGeometry(size);
     } else if (nodeId.startsWith('P')) {
-      geometry = new THREE.CylinderGeometry(size * 0.8, size * 0.8, size * 0.5, 6);
+      geometry = new THREE.CylinderGeometry(
+        size * 0.8,
+        size * 0.8,
+        size * 0.5,
+        6
+      );
     } else {
       geometry = new THREE.SphereGeometry(size);
     }
@@ -711,7 +721,7 @@ export class ForceGraphRendererComponent
     const mesh = new THREE.Mesh(geometry, material);
     group.add(mesh);
 
-    // Create actual node label with count
+    // Create node label with count
     const label = nodeData.label || String(nodeData.id);
     const count = nodeData.data?.count;
     const displayText = count ? `${label} (${count})` : label;
@@ -722,29 +732,79 @@ export class ForceGraphRendererComponent
       truncatedText = truncatedText.substring(0, 9) + '...';
     }
 
-    const sprite = this.createTextSprite(truncatedText);
-    sprite.position.set(0, size + 15, 0); // Position above node
-    group.add(sprite);
+    const nodeSprite = this.createTextSprite(truncatedText);
+    nodeSprite.position.set(0, size + 15, 0); // Position above node
+    group.add(nodeSprite);
 
-    console.log('Created sprite with text:', truncatedText); // Debug log
+    // Add incoming link labels (links that END at this node)
+    const incomingLinks = this.edges.filter(
+      (edge) => edge.target === nodeData.id
+    );
+    if (incomingLinks.length > 0) {
+      incomingLinks.forEach((edge, index) => {
+        const linkLabel = edge.label || edge.data?.label;
+        if (linkLabel && index < 3) {
+          // Show up to 3 links to avoid clutter
+          let truncatedLinkLabel = linkLabel;
+          if (truncatedLinkLabel.length > 15) {
+            truncatedLinkLabel = truncatedLinkLabel.substring(0, 12) + '...';
+          }
+
+          const linkSprite = this.createLinkLabelSprite(truncatedLinkLabel);
+
+          // Position labels below the node, similar to how counts are positioned
+          const yOffset = -size - 20 - index * 25; // Stack them vertically below the node
+          linkSprite.position.set(0, yOffset, 0);
+          group.add(linkSprite);
+        }
+      });
+    }
+
+    console.log('Created node sprite with text:', truncatedText); // Debug log
 
     return group;
   }
 
-  private createLink3DWithLabel(link: ForceGraphLink): any {
-    const label = this.getLinkLabel(link);
-    if (!label) return null;
+  // Update the createLinkLabelSprite method with smaller, more compact text:
+  private createLinkLabelSprite(text: string): any {
+    const fontFace = 'Arial';
+    const fontSize = 16; // Smaller font
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d')!;
 
-    console.log('Creating 3D link with label:', label); // Debug log
+    // Set font for measurement
+    context.font = `Normal ${fontSize}px ${fontFace}`;
+    const metrics = context.measureText(text);
+    const textWidth = metrics.width;
+    const padding = 6; // Less padding
 
-    // Truncate label for 3D
-    let truncatedLabel = this.truncateLabelFor3D(label);
+    // Set canvas size
+    canvas.width = textWidth + padding * 2;
+    canvas.height = fontSize + padding * 2;
 
-    // Create text sprite for link
-    const sprite = this.createTextSprite(truncatedLabel);
-    sprite.scale.set(0.3, 0.3, 0.3); // Make link labels smaller than node labels
+    // More subtle background color
+    context.fillStyle = 'rgba(255, 255, 200, 0.8)'; // Light yellow background
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-    console.log('Created link sprite with text:', truncatedLabel); // Debug log
+    // Draw border
+    context.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+    context.lineWidth = 1;
+    context.strokeRect(0, 0, canvas.width, canvas.height);
+
+    // Draw text
+    context.font = `Normal ${fontSize}px ${fontFace}`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+    // Create texture and sprite
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture });
+    const sprite = new THREE.Sprite(material);
+
+    // Smaller scale for more compact labels
+    sprite.scale.set(canvas.width / 4, canvas.height / 4, 1);
 
     return sprite;
   }

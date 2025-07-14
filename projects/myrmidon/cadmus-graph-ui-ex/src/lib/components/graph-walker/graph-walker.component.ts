@@ -190,7 +190,9 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   }
 
   public onNodeSelect(node: GraphNode): void {
-    this._walker?.selectNode(node.id);
+    if (node) {
+      this._walker?.selectNode(node.id);
+    }
   }
 
   private reset(id: number): void {
