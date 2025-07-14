@@ -31,10 +31,13 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
-import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  ThesauriSet,
+  ThesaurusEntry,
+  EditedObject,
+} from '@myrmidon/cadmus-core';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';

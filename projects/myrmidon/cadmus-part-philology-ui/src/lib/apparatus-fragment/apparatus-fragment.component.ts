@@ -34,7 +34,6 @@ import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
 import {
@@ -42,6 +41,7 @@ import {
   ThesauriSet,
   ThesaurusEntry,
   TokenLocation,
+  EditedObject
 } from '@myrmidon/cadmus-core';
 
 import { ApparatusEntryComponent } from '../apparatus-entry/apparatus-entry.component';

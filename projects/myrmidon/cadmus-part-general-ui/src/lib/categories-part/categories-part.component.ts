@@ -24,10 +24,9 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
-import { ThesaurusEntry } from '@myrmidon/cadmus-core';
+import { ThesaurusEntry, EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
   renderLabelFromLastColon,
   ThesaurusTreeComponent,

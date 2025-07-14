@@ -26,10 +26,13 @@ import {
   AssertedIdsComponent,
 } from '@myrmidon/cadmus-refs-asserted-ids';
 
-import { ThesaurusEntry, ThesauriSet } from '@myrmidon/cadmus-core';
+import {
+  ThesaurusEntry,
+  ThesauriSet,
+  EditedObject,
+} from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
 

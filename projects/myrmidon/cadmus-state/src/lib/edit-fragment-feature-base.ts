@@ -9,7 +9,7 @@ import {
 } from '@myrmidon/cadmus-core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { EditedObject, FragmentIdentity } from '@myrmidon/cadmus-ui';
+import { EditedObject, FragmentIdentity } from '@myrmidon/cadmus-core';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { FragmentEditorService } from './fragment-editor.service';

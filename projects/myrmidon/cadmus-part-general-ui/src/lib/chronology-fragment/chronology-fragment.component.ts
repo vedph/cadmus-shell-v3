@@ -1,11 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
-  CloseSaveButtonsComponent,
-  EditedObject,
-  ModelEditorComponentBase,
-} from '@myrmidon/cadmus-ui';
-import {
   FormControl,
   FormBuilder,
   Validators,
@@ -14,6 +9,12 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+
+import { EditedObject } from '@myrmidon/cadmus-core';
+import {
+  CloseSaveButtonsComponent,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 
 import {
   MatCard,

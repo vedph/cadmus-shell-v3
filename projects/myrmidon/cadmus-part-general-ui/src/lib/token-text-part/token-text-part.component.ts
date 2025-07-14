@@ -34,7 +34,6 @@ import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
 
@@ -43,6 +42,7 @@ import {
   TOKEN_TEXT_PART_TYPEID,
   TokenTextLine,
 } from '../token-text-part';
+import { EditedObject } from '@myrmidon/cadmus-core';
 
 /**
  * Editor component for base text, as referenced by token-based layers.

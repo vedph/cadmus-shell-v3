@@ -29,10 +29,13 @@ import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
-import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  ThesauriSet,
+  ThesaurusEntry,
+  EditedObject,
+} from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
 import {

@@ -27,12 +27,16 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
-import { CloseSaveButtonsComponent, EditedObject, ModelEditorComponentBase } from '@myrmidon/cadmus-ui';
+import {
+  CloseSaveButtonsComponent,
+  ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
 import {
   TextLayerService,
   ThesauriSet,
   ThesaurusEntry,
   TokenLocation,
+  EditedObject,
 } from '@myrmidon/cadmus-core';
 
 import { QuotationEntryComponent } from '../quotation-entry/quotation-entry.component';
@@ -64,7 +68,7 @@ import { QuotationWorksService } from './quotation-works.service';
     MatCardActions,
     TitleCasePipe,
     QuotationEntryComponent,
-    CloseSaveButtonsComponent
+    CloseSaveButtonsComponent,
   ],
 })
 export class QuotationsFragmentComponent

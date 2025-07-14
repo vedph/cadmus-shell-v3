@@ -9,7 +9,7 @@
     "test": "ng test",
     "build-cor": "ng build @myrmidon/cadmus-core",
     "build-api": "ng build @myrmidon/cadmus-api",
-    "build-ui": "ng build @myrmidon/cadmus-ui && ng build @myrmidon/cadmus-state",
+    "build-ui": "ng build @myrmidon/cadmus-state && ng build @myrmidon/cadmus-ui",
     "build-uip": "ng build @myrmidon/cadmus-ui-pg",
     "build-ths": "ng build @myrmidon/cadmus-profile-core && ng build @myrmidon/cadmus-thesaurus-ui && ng build @myrmidon/cadmus-thesaurus-editor && ng build @myrmidon/cadmus-thesaurus-list",
     "build-gen": "ng build @myrmidon/cadmus-part-general-ui && ng build @myrmidon/cadmus-part-general-pg",

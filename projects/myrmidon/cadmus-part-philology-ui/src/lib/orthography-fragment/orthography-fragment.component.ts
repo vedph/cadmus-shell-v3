@@ -41,7 +41,6 @@ import { diff_match_patch } from 'diff-match-patch';
 
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
   renderLabelFromLastColon,
   ThesaurusTreeComponent,
@@ -52,6 +51,7 @@ import {
   TextLayerService,
   ThesauriSet,
   ThesaurusEntry,
+  EditedObject,
   TokenLocation,
 } from '@myrmidon/cadmus-core';
 

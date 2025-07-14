@@ -37,10 +37,13 @@ import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
-import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
+import {
+  TextLayerService,
+  TokenLocation,
+  EditedObject,
+} from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
 

@@ -9,42 +9,42 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 3. [version 2](https://github.com/vedph/cadmus-shell-2): this is a production version.
 4. version 3 is this version. It has been cloned from V2, with upgrade to [V2 bricks](https://github.com/vedph/cadmus-bricks-shell-v2#migration-from-v1), which affected only a subset of the libraries. Yet, to ensure compatibility I have created a new repository so that existing Cadmus apps can continue to refer to V2 until they upgrade.
 
-🐋 Quick Docker image build:
+🐋 Quick **Docker** image build:
 
 1. `npm run build-lib`;
 2. update version in `env.js` (and Docker files), and then `ng build --configuration=production`;
-3. `docker build . -t vedph2020/cadmus-shell:8.0.2 -t vedph2020/cadmus-shell:latest` (replace with the current version).
+3. `docker build . -t vedph2020/cadmus-shell:16.0.0 -t vedph2020/cadmus-shell:latest` (replace with the current version).
 
 ## Libraries
 
 Latest versions:
 
-- cadmus-api: 14.0.1
-- cadmus-core: 12.0.0
-- cadmus-flags-pg: 14.0.0
-- cadmus-flags-ui: 14.0.0
-- cadmus-graph-pg: 14.0.0
-- cadmus-graph-pg-ex: 14.0.0
-- cadmus-graph-ui: 14.0.0
-- cadmus-graph-ui-ex: 14.0.0
-- cadmus-item-editor: 14.0.0
-- cadmus-item-list: 14.0.0
-- cadmus-item-search: 14.0.0
-- cadmus-layer-demo: 13.0.0
-- cadmus-part-general-pg: 14.0.0
-- cadmus-part-general-ui: 13.0.0
-- cadmus-part-philology-pg: 14.0.0
-- cadmus-part-philology-ui: 13.0.0
-- cadmus-preview-pg: 15.0.0
-- cadmus-preview-ui: 15.0.0
+- cadmus-api: 14.0.2
+- cadmus-core: 12.0.1
+- cadmus-flags-pg: 15.0.0
+- cadmus-flags-ui: 15.0.0
+- cadmus-graph-pg: 14.0.1
+- cadmus-graph-pg-ex: 15.0.0
+- cadmus-graph-ui: 14.0.1
+- cadmus-graph-ui-ex: 15.0.0
+- cadmus-item-editor: 15.0.0
+- cadmus-item-list: 15.0.0
+- cadmus-item-search: 15.0.0
+- cadmus-layer-demo: 14.0.0
+- cadmus-part-general-pg: 15.0.0
+- cadmus-part-general-ui: 14.0.0
+- cadmus-part-philology-pg: 15.0.0
+- cadmus-part-philology-ui: 14.0.0
+- cadmus-preview-pg: 16.0.0
+- cadmus-preview-ui: 16.0.0
 - cadmus-profile-core: 12.0.0
-- cadmus-state: 13.0.0
-- cadmus-statistics: 0.0.1
-- cadmus-thesaurus-editor: 14.0.0
-- cadmus-thesaurus-list: 14.0.0
-- cadmus-thesaurus-ui: 13.0.0
-- cadmus-ui: 13.0.0
-- cadmus-ui-pg: 13.0.0
+- cadmus-state: 14.0.0
+- cadmus-statistics: 0.0.2
+- cadmus-thesaurus-editor: 15.0.1
+- cadmus-thesaurus-list: 15.0.1
+- cadmus-thesaurus-ui: 14.0.0
+- cadmus-ui: 14.0.0
+- cadmus-ui-pg: 15.0.0
 
 Dependencies:
 
@@ -162,6 +162,7 @@ graph LR;
   cadmus-ui --> ngx-tools
   cadmus-ui --> cadmus-refs-lookup
   cadmus-ui --> cadmus-core
+  cadmus-ui --> cadmus-state
   cadmus-ui-pg --> cadmus-core
   cadmus-ui-pg --> cadmus-api
   cadmus-ui-pg --> cadmus-state
@@ -209,10 +210,13 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-07-14: ⚠️ refactored graph:
-  - `@myrmidon/cadmus-graph-ui-ex`: replaced `swimlane/ngx-graph` (which had long-standing issues and appears to be no longer maintained) with `force-graph`. The underlying graph service and walker were essentially unchanged, but the walker component using them to display an interactive graph has been totally rewritten for replacing the old library with the new one.
+### 16.0.0
+
+- 2025-07-14: ⚠️ refactored **graph** visualization to replace obsolete Swimlane `ngx-graph` with [force-graph](https://github.com/vasturiano/force-graph):
   - added graph test page.
-  - added optional injection token to graph service to allow for different URI endpoints for real world projects and mock data for the test page.
+  - `@myrmidon/cadmus-core`: ⚠️ added to core library **interfaces** for `PartIdentity`, `FragmentIdentity`, `EditedObject` removing them from `@myrmidon/cadmus-ui` model editor component base. This avoids a _circular reference_ between `@myrmidon/cadmus-ui` and `@myrmidon/cadmus-state`. So, in your apps just change the import source from `@myrmidon/cadmus-ui` to `@myrmidon/cadmus-core`.
+  - `@myrmidon/cadmus-graph-ui-ex`: ⚠️ replaced `swimlane/ngx-graph` (which had long-standing issues and appears to be no longer maintained) with `force-graph`. The underlying graph service and walker were essentially unchanged, but the walker component using them to display an interactive graph has been totally rewritten for replacing the old library with the new one.
+  - `@myrmidon/cadmus-api`: added optional injection token to `GraphService` to allow for different URI endpoints for real world projects and mock data for the test page.
 - 2025-06-22: 🆕 added `StatsService` (`@myrmidon/cadmus-api`), statistics library, and statistics page, updating routes and menus accordingly. Note that this requires `ngx-echarts` and `echarts`.
 - 2025-06-05:
   - updated packages and renamed constant for lookup as `LOOKUP_CONFIGS_KEY`.

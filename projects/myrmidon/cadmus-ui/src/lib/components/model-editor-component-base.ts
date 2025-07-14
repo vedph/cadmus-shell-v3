@@ -19,44 +19,16 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { deepCopy } from '@myrmidon/ngx-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
-
-import {
-  Fragment,
-  Part,
-  TextLayerPart,
-  ThesauriSet,
-} from '@myrmidon/cadmus-core';
-import { getPartIdName } from './part-badge/part-badge.component';
 import { AppRepository } from '@myrmidon/cadmus-state';
 
-/**
- * The identifiers for an edited part.
- */
-export interface PartIdentity {
-  itemId: string;
-  typeId: string;
-  partId: string | null;
-  roleId: string | null;
-}
-
-/**
- * The identifiers for an edited fragment.
- */
-export interface FragmentIdentity extends PartIdentity {
-  frTypeId: string;
-  frRoleId: string | null;
-  loc: string;
-}
-
-/**
- * An edited part or fragment.
- */
-export interface EditedObject<T extends Part | Fragment> {
-  value: T | null;
-  thesauri: ThesauriSet;
-  layerPart?: TextLayerPart;
-  baseText?: string;
-}
+import {
+  EditedObject,
+  Fragment,
+  FragmentIdentity,
+  Part,
+  PartIdentity,
+} from '@myrmidon/cadmus-core';
+import { getPartIdName } from './part-badge/part-badge.component';
 
 /**
  * Base class for part/fragment editors dumb components.

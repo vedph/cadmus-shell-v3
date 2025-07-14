@@ -2,8 +2,13 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
-import { Fragment, Part, TextLayerPart } from '@myrmidon/cadmus-core';
-import { EditedObject, FragmentIdentity } from '@myrmidon/cadmus-ui';
+import {
+  Fragment,
+  Part,
+  TextLayerPart,
+  EditedObject,
+  FragmentIdentity,
+} from '@myrmidon/cadmus-core';
 
 /**
  * Service used by layer part editor wrappers to load part and thesauri

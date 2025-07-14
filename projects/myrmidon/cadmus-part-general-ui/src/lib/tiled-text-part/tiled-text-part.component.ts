@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
 import {

@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, map, Observable, take } from 'rxjs';
 
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
-import { Part } from '@myrmidon/cadmus-core';
-import { EditedObject, PartIdentity } from '@myrmidon/cadmus-ui';
+import { Part, EditedObject, PartIdentity } from '@myrmidon/cadmus-core';
 
 /**
  * Service used by part editor wrappers to load part and thesauri

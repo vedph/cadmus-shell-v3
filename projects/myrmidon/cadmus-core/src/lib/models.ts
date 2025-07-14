@@ -313,3 +313,33 @@ export interface LoginCredentials {
   name: string;
   password: string;
 }
+
+// (from @myrmidon/cadmus-ui model editor component base)
+/**
+ * The identifiers for an edited part.
+ */
+export interface PartIdentity {
+  itemId: string;
+  typeId: string;
+  partId: string | null;
+  roleId: string | null;
+}
+
+/**
+ * The identifiers for an edited fragment.
+ */
+export interface FragmentIdentity extends PartIdentity {
+  frTypeId: string;
+  frRoleId: string | null;
+  loc: string;
+}
+
+/**
+ * An edited part or fragment.
+ */
+export interface EditedObject<T extends Part | Fragment> {
+  value: T | null;
+  thesauri: ThesauriSet;
+  layerPart?: TextLayerPart;
+  baseText?: string;
+}

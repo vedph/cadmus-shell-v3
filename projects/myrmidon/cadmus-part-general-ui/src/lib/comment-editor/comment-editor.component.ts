@@ -48,10 +48,13 @@ import {
   CadmusTextEdService,
 } from '@myrmidon/cadmus-text-ed';
 
-import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  ThesauriSet,
+  ThesaurusEntry,
+  EditedObject,
+} from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
-  EditedObject,
   ModelEditorComponentBase,
   renderLabelFromLastColon,
   ThesaurusTreeComponent,
@@ -104,9 +107,7 @@ import { CommentFragment } from '../comment-fragment';
     ThesaurusTreeComponent,
     CloseSaveButtonsComponent,
   ],
-  providers: [
-    CadmusTextEdService
-  ]
+  providers: [CadmusTextEdService],
 })
 export class CommentEditorComponent
   extends ModelEditorComponentBase<CommentPart | CommentFragment>

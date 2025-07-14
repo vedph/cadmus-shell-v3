@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-ui-pg",
-  "version": "14.0.0",
+  "version": "15.0.0",
   "description": "Cadmus - general smart UI components.",
   "keywords": [
     "Cadmus"
@@ -16,11 +16,11 @@
   "peerDependencies": {
     "@angular/common": "^20.0.0",
     "@angular/core": "^20.0.0",
-    "@myrmidon/cadmus-core": "^11.0.0",
-    "@myrmidon/cadmus-api": "^13.0.0",
-    "@myrmidon/cadmus-state": "^13.0.0",
-    "@myrmidon/cadmus-ui": "^13.0.0",
-    "@myrmidon/cadmus-item-editor": "^14.0.0"
+    "@myrmidon/cadmus-core": "^12.0.1",
+    "@myrmidon/cadmus-api": "^14.0.2",
+    "@myrmidon/cadmus-state": "^14.0.0",
+    "@myrmidon/cadmus-ui": "^14.0.0",
+    "@myrmidon/cadmus-item-editor": "^15.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

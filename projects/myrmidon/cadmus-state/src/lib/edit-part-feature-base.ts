@@ -3,9 +3,13 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 
-import { ComponentCanDeactivate, Part } from '@myrmidon/cadmus-core';
+import {
+  ComponentCanDeactivate,
+  Part,
+  EditedObject,
+  PartIdentity,
+} from '@myrmidon/cadmus-core';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
-import { EditedObject, PartIdentity } from '@myrmidon/cadmus-ui';
 
 import { PartEditorService } from './part-editor.service';
 
