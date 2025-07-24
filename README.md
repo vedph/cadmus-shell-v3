@@ -31,8 +31,8 @@ Latest versions:
 - cadmus-item-list: 15.0.0
 - cadmus-item-search: 15.0.0
 - cadmus-layer-demo: 14.0.0
-- cadmus-part-general-pg: 15.0.0
-- cadmus-part-general-ui: 14.0.0
+- cadmus-part-general-pg: 15.0.1
+- cadmus-part-general-ui: 14.0.1
 - cadmus-part-philology-pg: 15.0.0
 - cadmus-part-philology-ui: 14.0.0
 - cadmus-preview-pg: 16.0.0
@@ -209,6 +209,10 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ```
 
 ## History
+
+- 2025-07-24:
+  - fix to event editor related entities (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`).
+  - updated Angular and packages.
 
 ### 16.0.0
 

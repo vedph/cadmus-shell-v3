@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-general-pg",
-  "version": "15.0.0",
+  "version": "15.0.1",
   "description": "Cadmus - general parts wrappers.",
   "keywords": [
     "Cadmus"
@@ -21,8 +21,8 @@
     "@myrmidon/cadmus-core": "^12.0.1",
     "@myrmidon/cadmus-state": "^14.0.0",
     "@myrmidon/cadmus-ui": "^14.0.0",
-    "@myrmidon/cadmus-ui-pg": "^14.0.0",
-    "@myrmidon/cadmus-part-general-ui": "^14.0.0"
+    "@myrmidon/cadmus-ui-pg": "^15.0.0",
+    "@myrmidon/cadmus-part-general-ui": "^14.0.1"
   },
   "dependencies": {
     "tslib": "^2.3.0"

@@ -1,4 +1,12 @@
-import { Component, effect, EventEmitter, input, Input, model, output, Output } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  model,
+  output,
+  signal,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -164,7 +172,17 @@ export class HistoricalEventEditorComponent {
   public form: FormGroup;
 
   // related entity
-  public currentRelEntries: ThesaurusEntry[];
+  public readonly typeEntryPrefix = signal<string | undefined>(undefined);
+  public readonly currentRelEntries = computed<ThesaurusEntry[]>(() => {
+    if (!this.relationEntries()?.length) {
+      return [];
+    }
+    const prefix = this.typeEntryPrefix();
+    if (!prefix) {
+      return this.relationEntries()!;
+    }
+    return this.relationEntries()!.filter((e) => e.id.startsWith(prefix));
+  });
   public editedEntity?: RelatedEntity;
 
   constructor(formBuilder: FormBuilder) {
@@ -196,7 +214,6 @@ export class HistoricalEventEditorComponent {
       hasAssertion: this.hasAssertion,
       assertion: this.assertion,
     });
-    this.currentRelEntries = [];
 
     effect(() => {
       this.updateForm(this.event());
@@ -205,19 +222,6 @@ export class HistoricalEventEditorComponent {
 
   public renderLabel(label: string): string {
     return renderLabelFromLastColon(label);
-  }
-
-  private updateRelEntries(prefix: string): void {
-    if (!this.relationEntries()?.length) {
-      return;
-    }
-    if (!prefix) {
-      this.currentRelEntries = this.relationEntries()!;
-    } else {
-      this.currentRelEntries = this.relationEntries()!.filter((e) =>
-        e.id.startsWith(prefix)
-      );
-    }
   }
 
   private getTypeEntryPrefix(id: string): string {
@@ -247,9 +251,11 @@ export class HistoricalEventEditorComponent {
     setTimeout(() => {
       this.type.setValue(entry.id);
       // filter related entries according to type
-      if (this.relationEntries?.length) {
-        this.updateRelEntries(this.getTypeEntryPrefix(entry.id));
-      }
+      this.typeEntryPrefix.set(
+        this.relationEntries?.length
+          ? this.getTypeEntryPrefix(entry.id)
+          : undefined
+      );
     }, 0);
   }
 
@@ -269,7 +275,7 @@ export class HistoricalEventEditorComponent {
     this.relatedEntities.setValue(model.relatedEntities || []);
 
     if (this.relationEntries?.length) {
-      this.updateRelEntries(this.getTypeEntryPrefix(model.type));
+      this.typeEntryPrefix.set(this.getTypeEntryPrefix(model.type));
     }
 
     this.form.markAsPristine();
@@ -310,8 +316,8 @@ export class HistoricalEventEditorComponent {
     this.editEntity(
       {
         id: { target: { gid: '', label: '' } },
-        relation: this.currentRelEntries?.length
-          ? this.currentRelEntries[0].id
+        relation: this.currentRelEntries()?.length
+          ? this.currentRelEntries()[0].id
           : '',
       },
       -1
