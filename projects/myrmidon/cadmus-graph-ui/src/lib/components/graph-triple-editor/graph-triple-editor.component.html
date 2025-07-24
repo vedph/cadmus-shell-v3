@@ -4,7 +4,7 @@
     <fieldset id="s">
       <legend>subject</legend>
       <!-- picker -->
-      <cadmus-ref-lookup
+      <cadmus-refs-lookup
         [service]="lookupService"
         [required]="true"
         [item]="subjectNode.value"
@@ -16,7 +16,7 @@
     <fieldset id="p">
       <legend>predicate</legend>
       <!-- picker -->
-      <cadmus-ref-lookup
+      <cadmus-refs-lookup
         [service]="lookupService"
         [required]="true"
         [item]="predicateNode.value"
@@ -31,7 +31,7 @@
       <mat-checkbox [formControl]="isLiteral">literal</mat-checkbox>
       <!-- object -->
       @if (!isLiteral.value) {
-      <cadmus-ref-lookup
+      <cadmus-refs-lookup
         [required]="true"
         [service]="lookupService"
         [item]="objectNode.value"

@@ -14,7 +14,7 @@
     <mat-tab label="triple">
       <!-- subject ID -->
       <div>
-        <cadmus-ref-lookup
+        <cadmus-refs-lookup
           label="subject"
           [service]="lookupService"
           (itemChange)="onSubjectNodeChange($event)"
@@ -22,7 +22,7 @@
       </div>
       <!-- predicate IDs -->
       <div>
-        <cadmus-ref-lookup
+        <cadmus-refs-lookup
           label="predicate"
           [service]="lookupService"
           [baseFilter]="{ tag: 'property' }"
@@ -62,7 +62,7 @@
       </div>
       <!-- object ID -->
       <div>
-        <cadmus-ref-lookup
+        <cadmus-refs-lookup
           label="object"
           [service]="lookupService"
           (itemChange)="onObjectNodeChange($event)"

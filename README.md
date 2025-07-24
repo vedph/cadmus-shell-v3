@@ -19,16 +19,16 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 14.0.2
+- cadmus-api: 14.0.3
 - cadmus-core: 12.0.1
 - cadmus-flags-pg: 15.0.0
 - cadmus-flags-ui: 15.0.0
 - cadmus-graph-pg: 14.0.1
 - cadmus-graph-pg-ex: 15.0.0
-- cadmus-graph-ui: 14.0.1
-- cadmus-graph-ui-ex: 15.0.0
-- cadmus-item-editor: 15.0.0
-- cadmus-item-list: 15.0.0
+- cadmus-graph-ui: 14.0.2
+- cadmus-graph-ui-ex: 15.0.1
+- cadmus-item-editor: 15.0.1
+- cadmus-item-list: 15.0.1
 - cadmus-item-search: 15.0.0
 - cadmus-layer-demo: 14.0.0
 - cadmus-part-general-pg: 15.0.1
@@ -213,6 +213,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 - 2025-07-24:
   - fix to event editor related entities (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`).
   - updated Angular and packages.
+  - 👉 added functional guards to API library (`@myrmidon/cadmus-api`).
+  - 👉 adjusted for renamed bricks `cadmus-ref-...` components into `cadmus-refs-...` (`@myrmidon/cadmus-graph-ui`, `@myrmidon/cadmus-graph-ui-ex`, `@myrmidon/cadmus-item-editor`, `@myrmidon/cadmus-item-list`).
+  - 👉 replaced interceptors and guards with their functional counterparts (`jwtInterceptor`, `jwtGuard`, `jwtAdminGuard`). Added configuration of JWT exclusions for interceptor via `AUTH_JWT_EXCLUDED_URLS`.
 
 ### 16.0.0
 

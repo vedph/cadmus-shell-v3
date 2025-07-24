@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-api",
-  "version": "14.0.2",
+  "version": "14.0.3",
   "description": "Cadmus - API services.",
   "keywords": [
     "Cadmus"
@@ -17,7 +17,7 @@
     "@angular/common": "^20.0.0",
     "@angular/core": "^20.0.0",
     "@myrmidon/ngx-tools": "^2.0.0",
-    "@myrmidon/auth-jwt-login": "^8.0.0",
+    "@myrmidon/auth-jwt-login": "^8.0.1",
     "@myrmidon/cadmus-core": "^12.0.1"
   },
   "dependencies": {

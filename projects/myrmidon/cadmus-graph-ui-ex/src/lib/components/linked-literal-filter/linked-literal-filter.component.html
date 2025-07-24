@@ -12,7 +12,7 @@
 
   <!-- subject ID -->
   <div>
-    <cadmus-ref-lookup
+    <cadmus-refs-lookup
       label="subject"
       [service]="lookupService"
       (itemChange)="onSubjectNodeChange($event)"
@@ -21,7 +21,7 @@
 
   <!-- predicate ID -->
   <div>
-    <cadmus-ref-lookup
+    <cadmus-refs-lookup
       label="predicate"
       [service]="lookupService"
       [baseFilter]="{ tag: 'property' }"

@@ -1,7 +1,7 @@
 <form [formGroup]="form" (submit)="apply()" [attr.disabled]="disabled()">
   <!-- subject -->
   <div class="form-row">
-    <cadmus-ref-lookup
+    <cadmus-refs-lookup
       [service]="lookupService"
       [item]="subjectNode$ | async"
       label="subject"
@@ -18,7 +18,7 @@
   </div>
   <!-- predicate -->
   <div class="form-row">
-    <cadmus-ref-lookup
+    <cadmus-refs-lookup
       [service]="lookupService"
       label="predicate"
       [item]="predicateNode$ | async"
@@ -47,7 +47,7 @@
   </div>
   } @else {
   <div class="form-row">
-    <cadmus-ref-lookup
+    <cadmus-refs-lookup
       [service]="lookupService"
       [item]="objectNode$ | async"
       label="object"

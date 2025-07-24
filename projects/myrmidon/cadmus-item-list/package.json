@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-item-list",
-  "version": "15.0.0",
+  "version": "15.0.1",
   "description": "Cadmus - items list.",
   "keywords": [
     "Cadmus"
@@ -19,7 +19,7 @@
     "@myrmidon/ngx-tools": "^2.0.0",
     "@myrmidon/ngx-mat-tools": "^1.0.0",
     "@myrmidon/paged-data-browsers": "^5.0.2",
-    "@myrmidon/cadmus-refs-lookup": "^9.0.1",
+    "@myrmidon/cadmus-refs-lookup": "^10.0.1",
     "@myrmidon/cadmus-core": "^12.0.1",
     "@myrmidon/cadmus-api": "^14.0.2",
     "@myrmidon/cadmus-state": "^14.0.0",

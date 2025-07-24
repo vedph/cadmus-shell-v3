@@ -69,7 +69,7 @@
     <div>
       <fieldset>
         <legend>linked node</legend>
-        <cadmus-ref-lookup
+        <cadmus-refs-lookup
           label="node"
           [item]="linkedNode$ | async"
           [service]="lookupService"
@@ -101,7 +101,7 @@
     <div>
       <fieldset>
         <legend>classes</legend>
-        <cadmus-ref-lookup
+        <cadmus-refs-lookup
           label="class"
           [service]="lookupService"
           [baseFilter]="{ isClass: true }"

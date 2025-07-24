@@ -5,8 +5,8 @@ import {
 } from '@angular/core';
 import {
   provideHttpClient,
+  withFetch,
   withInterceptors,
-  withJsonpSupport,
 } from '@angular/common/http';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -19,7 +19,10 @@ import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 // myrmidon
-import { authJwtInterceptor } from '@myrmidon/auth-jwt-login';
+import {
+  AUTH_JWT_EXCLUDED_URLS,
+  jwtInterceptor,
+} from '@myrmidon/auth-jwt-login';
 import { GEONAMES_USERNAME_TOKEN } from '@myrmidon/cadmus-refs-geonames-lookup';
 import {
   MdBoldCtePlugin,
@@ -45,10 +48,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withViewTransitions()),
     provideAnimationsAsync(),
     provideNativeDateAdapter(),
-    provideHttpClient(
-      withInterceptors([authJwtInterceptor]),
-      withJsonpSupport()
-    ),
+    provideHttpClient(withInterceptors([jwtInterceptor]), withFetch()),
     // vendor
     importProvidersFrom(NgeMonacoModule.forRoot({})),
     importProvidersFrom(NgeMarkdownModule),
@@ -80,6 +80,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: GEONAMES_USERNAME_TOKEN,
       useValue: 'myrmex',
+    },
+    // URLs excluded from JWT auth
+    {
+      provide: AUTH_JWT_EXCLUDED_URLS,
+      useValue: ['https://viaf.org/viaf/'],
     },
     // text editor plugins
     // https://github.com/vedph/cadmus-bricks-shell-v2/blob/master/projects/myrmidon/cadmus-text-ed/README.md
