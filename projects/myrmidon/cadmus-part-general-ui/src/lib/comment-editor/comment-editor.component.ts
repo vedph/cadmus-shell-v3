@@ -71,7 +71,7 @@ import { CommentFragment } from '../comment-fragment';
  * Comment part/fragment editor component.
  * Thesauri: comment-tags, doc-reference-tags, doc-reference-types, comment-categories,
  * languages, keyword-indexes, keyword-tags, comment-id-scopes, comment-id-tags,
- * assertion-tags, pin-link-settings.
+ * assertion-tags.
  */
 @Component({
   selector: 'cadmus-comment-editor',
@@ -145,19 +145,6 @@ export class CommentEditorComponent
   public idTagEntries: ThesaurusEntry[] | undefined;
   // assertion-tags
   public assTagEntries: ThesaurusEntry[] | undefined;
-  // pin-link-settings; these include:
-  // - by-type: true/false
-  // - switch-mode: true/false
-  // - edit-target: true/false
-  public setTagEntries?: ThesaurusEntry[];
-
-  // settings
-  // by-type: true/false
-  public pinByTypeMode?: boolean;
-  // switch-mode: true/false
-  public canSwitchMode?: boolean;
-  // edit-target: true/false
-  public canEditTarget?: boolean;
 
   constructor(
     authService: AuthJwtService,
@@ -259,25 +246,6 @@ export class CommentEditorComponent
     });
   }
 
-  /**
-   * Load settings from thesaurus entries.
-   *
-   * @param entries The thesaurus entries if any.
-   */
-  private loadSettings(entries?: ThesaurusEntry[]): void {
-    if (!entries?.length) {
-      this.pinByTypeMode = undefined;
-      this.canSwitchMode = undefined;
-      this.canEditTarget = undefined;
-    }
-    this.pinByTypeMode =
-      entries?.find((e) => e.id === 'by-type')?.value === 'true';
-    this.canSwitchMode =
-      entries?.find((e) => e.id === 'switch-mode')?.value === 'true';
-    this.canEditTarget =
-      entries?.find((e) => e.id === 'edit-target')?.value === 'true';
-  }
-
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'comment-tags';
     if (this.hasThesaurus(key)) {
@@ -347,8 +315,6 @@ export class CommentEditorComponent
     } else {
       this.assTagEntries = undefined;
     }
-    // load settings from thesaurus
-    this.loadSettings(thesauri['pin-link-settings']?.entries);
   }
 
   private updateForm(part?: CommentPart | CommentFragment | null): void {

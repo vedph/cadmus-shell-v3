@@ -47,7 +47,6 @@ export class HistoricalEventsPartFeatureComponent
       'doc-reference-types',
       'pin-link-scopes',
       'pin-link-tags',
-      'pin-link-settings',
     ];
   }
 }

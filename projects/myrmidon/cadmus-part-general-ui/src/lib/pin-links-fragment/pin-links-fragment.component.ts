@@ -41,7 +41,7 @@ import { PinLinksFragment } from '../pin-links-fragment';
 /**
  * Pin-based links fragment editor component.
  * Thesauri: pin-link-scopes, pin-link-tags, pin-link-assertion-tags,
- * pin-link-docref-types, pin-link-docref-tags, pin-link-settings.
+ * pin-link-docref-types, pin-link-docref-tags.
  */
 @Component({
   selector: 'cadmus-pin-links-fragment',
@@ -86,11 +86,6 @@ export class PinLinksFragmentComponent
   public refTypeEntries?: ThesaurusEntry[];
   // pin-link-docref-tags
   public refTagEntries?: ThesaurusEntry[];
-  // pin-link-settings; these include:
-  // - by-type: true/false
-  // - switch-mode: true/false
-  // - edit-target: true/false
-  public setTagEntries?: ThesaurusEntry[];
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -110,25 +105,6 @@ export class PinLinksFragmentComponent
     return formBuilder.group({
       links: this.links,
     });
-  }
-
-  /**
-   * Load settings from thesaurus entries.
-   *
-   * @param entries The thesaurus entries if any.
-   */
-  private loadSettings(entries?: ThesaurusEntry[]): void {
-    if (!entries?.length) {
-      this.pinByTypeMode = undefined;
-      this.canSwitchMode = undefined;
-      this.canEditTarget = undefined;
-    }
-    this.pinByTypeMode =
-      entries?.find((e) => e.id === 'by-type')?.value === 'true';
-    this.canSwitchMode =
-      entries?.find((e) => e.id === 'switch-mode')?.value === 'true';
-    this.canEditTarget =
-      entries?.find((e) => e.id === 'edit-target')?.value === 'true';
   }
 
   private updateThesauri(thesauri: ThesauriSet): void {
@@ -162,8 +138,6 @@ export class PinLinksFragmentComponent
     } else {
       this.refTagEntries = undefined;
     }
-    // load settings from thesaurus
-    this.loadSettings(thesauri['pin-link-settings']?.entries);
   }
 
   private updateForm(fr?: PinLinksFragment | null): void {

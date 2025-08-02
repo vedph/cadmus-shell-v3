@@ -47,7 +47,6 @@ export class CommentFragmentFeatureComponent
       'comment-id-scopes',
       'comment-id-tags',
       'assertion-tags',
-      'pin-link-settings',
     ];
   }
 }

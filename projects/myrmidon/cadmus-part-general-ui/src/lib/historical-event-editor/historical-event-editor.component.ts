@@ -124,13 +124,6 @@ export class HistoricalEventEditorComponent {
    * Thesaurus doc-reference-types.
    */
   public readonly refTypeEntries = input<ThesaurusEntry[]>();
-  /*
-   * Thesaurus pin-link-settings; these include:
-   * - by-type: true/false
-   * - switch-mode: true/false
-   * - edit-target: true/false
-   */
-  public readonly setTagEntries = input<ThesaurusEntry[]>();
 
   /**
    * The number of event type portions to cut from the event type ID when
@@ -143,14 +136,6 @@ export class HistoricalEventEditorComponent {
    * join back the portions and append a final colon, generating "person:".
    */
   public readonly eventTypeTailCut = input<number>(0);
-
-  // settings for lookup
-  // by-type: true/false
-  public readonly pinByTypeMode = input<boolean>();
-  // switch-mode: true/false
-  public readonly canSwitchMode = input<boolean>();
-  // edit-target: true/false
-  public readonly canEditTarget = input<boolean>();
 
   /**
    * True to disable ID lookup via scoped pin lookup.
@@ -172,7 +157,10 @@ export class HistoricalEventEditorComponent {
   public form: FormGroup;
 
   // related entity
+  // the prefix used to filter the relation entries
   public readonly typeEntryPrefix = signal<string | undefined>(undefined);
+
+  // the current relation entries, filtered by the type prefix
   public readonly currentRelEntries = computed<ThesaurusEntry[]>(() => {
     if (!this.relationEntries()?.length) {
       return [];
@@ -181,8 +169,10 @@ export class HistoricalEventEditorComponent {
     if (!prefix) {
       return this.relationEntries()!;
     }
-    return this.relationEntries()!.filter((e) => e.id.startsWith(prefix));
+    const filtered = this.relationEntries()!.filter((e) => e.id.startsWith(prefix));
+    return filtered;
   });
+
   public editedEntity?: RelatedEntity;
 
   constructor(formBuilder: FormBuilder) {
@@ -227,7 +217,7 @@ export class HistoricalEventEditorComponent {
   private getTypeEntryPrefix(id: string): string {
     let p = id;
 
-    // eventually remove tail: by convention, an entry ID ending with ".-"
+    // remove tail if any: by convention, an entry ID ending with ".-"
     // is always treated as a tailed ID where the ending "-" should be removed.
     // This is because that's the convention for representing parent entries
     // like "person.job.-" with children like "person.job.bishop".
@@ -247,15 +237,15 @@ export class HistoricalEventEditorComponent {
     return p.replace('.', RELATION_SEP) + RELATION_SEP;
   }
 
+  private updateTypeEntryPrefix(id: string): void {
+    const prefix = this.getTypeEntryPrefix(id);
+    this.typeEntryPrefix.set(prefix);
+  }
+
   public onTypeEntryChange(entry: ThesaurusEntry): void {
     setTimeout(() => {
       this.type.setValue(entry.id);
-      // filter related entries according to type
-      this.typeEntryPrefix.set(
-        this.relationEntries?.length
-          ? this.getTypeEntryPrefix(entry.id)
-          : undefined
-      );
+      this.updateTypeEntryPrefix(entry.id);
     }, 0);
   }
 
@@ -264,21 +254,21 @@ export class HistoricalEventEditorComponent {
       this.form.reset();
       return;
     }
-    this.eid.setValue(model.eid);
-    this.type.setValue(model.type);
-    this.tag.setValue(model.tag || null);
-    this.description.setValue(model.description || null);
-    this.note.setValue(model.note || null);
-    this.chronotopes.setValue(model.chronotopes || []);
-    this.hasAssertion.setValue(model.assertion ? true : false);
-    this.assertion.setValue(model.assertion || null);
-    this.relatedEntities.setValue(model.relatedEntities || []);
-
-    if (this.relationEntries?.length) {
-      this.typeEntryPrefix.set(this.getTypeEntryPrefix(model.type));
-    }
+    this.eid.setValue(model.eid, { emitEvent: false });
+    this.type.setValue(model.type, { emitEvent: false });
+    this.tag.setValue(model.tag || null, { emitEvent: false });
+    this.description.setValue(model.description || null, { emitEvent: false });
+    this.note.setValue(model.note || null, { emitEvent: false });
+    this.chronotopes.setValue(model.chronotopes || [], { emitEvent: false });
+    this.hasAssertion.setValue(model.assertion ? true : false, { emitEvent: false });
+    this.assertion.setValue(model.assertion || null, { emitEvent: false });
+    this.relatedEntities.setValue(model.relatedEntities || [], { emitEvent: false });
 
     this.form.markAsPristine();
+
+    setTimeout(() => {
+      this.updateTypeEntryPrefix(model.type);
+    }, 0);
   }
 
   private getModel(): HistoricalEvent {

@@ -48,7 +48,6 @@ export class CommentPartFeatureComponent
       'comment-id-scopes',
       'comment-id-tags',
       'assertion-tags',
-      'pin-link-settings',
     ];
   }
 }

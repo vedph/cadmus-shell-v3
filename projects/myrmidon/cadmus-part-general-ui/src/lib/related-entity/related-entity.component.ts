@@ -70,14 +70,6 @@ export class RelatedEntityComponent {
    */
   public readonly refTypeEntries = input<ThesaurusEntry[]>();
 
-  // settings for lookup
-  // by-type: true/false
-  public readonly pinByTypeMode = input<boolean>();
-  // switch-mode: true/false
-  public readonly canSwitchMode = input<boolean>();
-  // edit-target: true/false
-  public readonly canEditTarget = input<boolean>();
-
   public readonly editorClose = output();
 
   // form

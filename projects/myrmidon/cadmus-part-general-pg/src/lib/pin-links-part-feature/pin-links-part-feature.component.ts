@@ -42,7 +42,6 @@ export class PinLinksPartFeatureComponent
       'pin-link-assertion-tags',
       'pin-link-docref-types',
       'pin-link-docref-tags',
-      'pin-link-settings',
     ];
   }
 }

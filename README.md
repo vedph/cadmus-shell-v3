@@ -210,6 +210,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-08-02:
+  - removed legacy pin settings and the corresponding properties (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`).
+  - fixes to historical event editor.
 - 2025-07-24:
   - fix to event editor related entities (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`).
   - updated Angular and packages.
