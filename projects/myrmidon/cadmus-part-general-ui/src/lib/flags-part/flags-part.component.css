@@ -1,0 +1,9 @@
+fieldset {
+  border: 1px solid silver;
+  border-radius: 4px;
+  padding: 4px;
+  margin: 8px 0;
+}
+fieldset legend {
+  color: silver;
+}

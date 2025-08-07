@@ -58,6 +58,7 @@
     "@myrmidon/cadmus-text-ed-md": "^10.0.2",
     "@myrmidon/cadmus-text-ed-txt": "^9.0.0",
     "@myrmidon/cadmus-ui-flag-set": "^9.0.1",
+    "@myrmidon/cadmus-ui-note-set": "^10.0.0",
     "@myrmidon/ngx-mat-tools": "^1.0.0",
     "@myrmidon/ngx-tools": "^2.0.0",
     "@myrmidon/paged-data-browsers": "^5.0.2",

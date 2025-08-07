@@ -210,6 +210,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-08-07:
+  - 🆕 added flags part.
+  - updated packages.
 - 2025-08-02:
   - removed legacy pin settings and the corresponding properties (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`).
   - fixes to historical event editor.

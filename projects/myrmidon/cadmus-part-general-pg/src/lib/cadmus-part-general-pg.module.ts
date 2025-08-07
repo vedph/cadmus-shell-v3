@@ -41,8 +41,10 @@ import {
   PIN_LINKS_FRAGMENT_TYPEID,
   PHYSICAL_MEASUREMENTS_PART_TYPEID,
   DECORATED_COUNTS_PART_TYPEID,
+  FLAGS_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
 
+import { AssertedHistoricalDateFeatureComponent } from './asserted-historical-date-feature/asserted-historical-date-feature.component';
 import { BibliographyPartFeatureComponent } from './bibliography-part-feature/bibliography-part-feature.component';
 import { CategoriesPartFeatureComponent } from './categories-part-feature/categories-part-feature.component';
 import { ChronologyFragmentFeatureComponent } from './chronology-fragment-feature/chronology-fragment-feature.component';
@@ -53,6 +55,7 @@ import { DecoratedCountsPartFeatureComponent } from './decorated-counts-part-fea
 import { DistrictLocationPartFeatureComponent } from './district-location-part-feature/district-location-part-feature.component';
 import { DocReferencesPartFeatureComponent } from './doc-references-part-feature/doc-references-part-feature.component';
 import { ExternalIdsPartFeatureComponent } from './external-ids-part-feature/external-ids-part-feature.component';
+import { FlagsPartFeatureComponent } from './flags-part-feature/flags-part-feature.component';
 import { HistoricalDatePartFeatureComponent } from './historical-date-part-feature/historical-date-part-feature.component';
 import { HistoricalEventsPartFeatureComponent } from './historical-events-part-feature/historical-events-part-feature.component';
 import { IndexKeywordsPartFeatureComponent } from './index-keywords-part-feature/index-keywords-part-feature.component';
@@ -68,7 +71,6 @@ import { TiledTextPartFeatureComponent } from './tiled-text-part-feature/tiled-t
 import { TiledTextLayerPartFeatureComponent } from './tiled-text-layer-part-feature/tiled-text-layer-part-feature.component';
 import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feature/token-text-layer-part-feature.component';
 import { TokenTextPartFeatureComponent } from './token-text-part-feature/token-text-part-feature.component';
-import { AssertedHistoricalDateFeatureComponent } from './asserted-historical-date-feature/asserted-historical-date-feature.component';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
 export const RouterModuleForChild = RouterModule.forChild([
@@ -124,6 +126,12 @@ export const RouterModuleForChild = RouterModule.forChild([
     path: `${EXTERNAL_IDS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: ExternalIdsPartFeatureComponent,
+    canDeactivate: [PendingChangesGuard],
+  },
+  {
+    path: `${FLAGS_PART_TYPEID}/:pid`,
+    pathMatch: 'full',
+    component: FlagsPartFeatureComponent,
     canDeactivate: [PendingChangesGuard],
   },
   {
@@ -260,6 +268,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     DistrictLocationPartFeatureComponent,
     DocReferencesPartFeatureComponent,
     ExternalIdsPartFeatureComponent,
+    FlagsPartFeatureComponent,
     HistoricalDatePartFeatureComponent,
     HistoricalEventsPartFeatureComponent,
     IndexKeywordsPartFeatureComponent,
@@ -288,6 +297,7 @@ export const RouterModuleForChild = RouterModule.forChild([
     DistrictLocationPartFeatureComponent,
     DocReferencesPartFeatureComponent,
     ExternalIdsPartFeatureComponent,
+    FlagsPartFeatureComponent,
     HistoricalDatePartFeatureComponent,
     HistoricalEventsPartFeatureComponent,
     IndexKeywordsPartFeatureComponent,

@@ -13,6 +13,7 @@ export * from './lib/decorated-counts-part-feature/decorated-counts-part-feature
 export * from './lib/district-location-part-feature/district-location-part-feature.component';
 export * from './lib/doc-references-part-feature/doc-references-part-feature.component';
 export * from './lib/external-ids-part-feature/external-ids-part-feature.component';
+export * from './lib/flags-part-feature/flags-part-feature.component';
 export * from './lib/historical-date-part-feature/historical-date-part-feature.component';
 export * from './lib/historical-events-part-feature/historical-events-part-feature.component';
 export * from './lib/index-keywords-part-feature/index-keywords-part-feature.component';

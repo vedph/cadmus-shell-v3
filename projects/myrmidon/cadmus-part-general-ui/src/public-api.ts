@@ -36,6 +36,9 @@ export * from './lib/doc-references-part/doc-references-part.component';
 export * from './lib/external-ids-part';
 export * from './lib/external-ids-part/external-ids-part.component';
 
+export * from './lib/flags-part';
+export * from './lib/flags-part/flags-part.component';
+
 export * from './lib/historical-events-part';
 export * from './lib/historical-event-editor/historical-event-editor.component';
 
