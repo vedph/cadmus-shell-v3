@@ -13,7 +13,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 1. `npm run build-lib`;
 2. update version in `env.js` (and Docker files), and then `ng build --configuration=production`;
-3. `docker build . -t vedph2020/cadmus-shell:16.0.0 -t vedph2020/cadmus-shell:latest` (replace with the current version).
+3. `docker build . -t vedph2020/cadmus-shell:16.0.1 -t vedph2020/cadmus-shell:latest` (replace with the current version).
 
 ## Libraries
 
@@ -209,6 +209,8 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ```
 
 ## History
+
+### 16.0.1
 
 - 2025-08-07:
   - 🆕 added flags part.
