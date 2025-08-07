@@ -31,8 +31,8 @@ Latest versions:
 - cadmus-item-list: 15.0.1
 - cadmus-item-search: 15.0.0
 - cadmus-layer-demo: 14.0.0
-- cadmus-part-general-pg: 15.0.1
-- cadmus-part-general-ui: 14.0.1
+- cadmus-part-general-pg: 15.0.3
+- cadmus-part-general-ui: 14.0.3
 - cadmus-part-philology-pg: 15.0.0
 - cadmus-part-philology-ui: 14.0.0
 - cadmus-preview-pg: 16.0.0
