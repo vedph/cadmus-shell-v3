@@ -20,7 +20,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 Latest versions:
 
 - cadmus-api: 14.0.3
-- cadmus-core: 12.0.1
+- cadmus-core: 12.0.2
 - cadmus-flags-pg: 15.0.0
 - cadmus-flags-ui: 15.0.0
 - cadmus-graph-pg: 14.0.1
@@ -31,8 +31,8 @@ Latest versions:
 - cadmus-item-list: 15.0.1
 - cadmus-item-search: 15.0.0
 - cadmus-layer-demo: 14.0.0
-- cadmus-part-general-pg: 15.0.3
-- cadmus-part-general-ui: 14.0.3
+- cadmus-part-general-pg: 15.0.4
+- cadmus-part-general-ui: 14.0.4
 - cadmus-part-philology-pg: 15.0.0
 - cadmus-part-philology-ui: 14.0.0
 - cadmus-preview-pg: 16.0.0
@@ -210,7 +210,10 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-08-31: updated Angular and packages.
+- 2025-08-31:
+  - updated Angular and packages.
+  - 🆕 added functional pending changes guard counterpart (`@myrmidon/cadmus-core`) and replaced guards with functional guards in app routes.
+  - 🆕 replaced doc references brick in `DocReferencesPart` to use the lookup-based version. This does not change the underlying data model, but allows to leverage the optional lookup functions provided by this brick, so that the part can be used to assist in entering citations, create lists of bibliographic items from an external service, etc.
 
 ### 16.0.1
 

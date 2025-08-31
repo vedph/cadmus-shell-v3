@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -21,10 +21,7 @@ import { MatIcon } from '@angular/material/icon';
 
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import {
-  DocReference,
-  DocReferencesComponent,
-} from '@myrmidon/cadmus-refs-doc-references';
+import { DocReference } from '@myrmidon/cadmus-refs-doc-references';
 
 import {
   ThesauriSet,
@@ -40,10 +37,18 @@ import {
   DocReferencesPart,
   DOC_REFERENCES_PART_TYPEID,
 } from '../doc-references-part';
+import { LookupDocReferencesComponent } from '@myrmidon/cadmus-refs-lookup';
+
+interface DocReferencesPartSettings {
+  noLookup?: boolean;
+  noCitation?: boolean;
+  defaultPicker?: 'citation' | 'lookup';
+}
 
 /**
  * Document references part editor.
  * Thesauri: doc-reference-tags, doc-reference-types (all optional).
+ * You can configure doc references lookup properties via settings.
  */
 @Component({
   selector: 'cadmus-doc-references-part',
@@ -58,7 +63,7 @@ import {
     MatIcon,
     MatCardTitle,
     MatCardContent,
-    DocReferencesComponent,
+    LookupDocReferencesComponent,
     MatCardActions,
     TitleCasePipe,
     CloseSaveButtonsComponent,
@@ -70,8 +75,11 @@ export class DocReferencesPartComponent
 {
   public references: FormControl<DocReference[]>;
 
-  public typeEntries: ThesaurusEntry[] | undefined;
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly settings = signal<DocReferencesPartSettings | undefined>(
+    undefined
+  );
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -80,6 +88,19 @@ export class DocReferencesPartComponent
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
+    this.loadSettings();
+  }
+
+  private async loadSettings() {
+    const settings = (await this._appRepository?.getSettingFor(
+      DOC_REFERENCES_PART_TYPEID,
+      this.identity()?.roleId || undefined
+    )) as DocReferencesPartSettings | undefined;
+
+    if (settings) {
+      console.log('DocReferencesPart settings', settings);
+      this.settings.set(settings);
+    }
   }
 
   public override ngOnInit(): void {
@@ -95,16 +116,16 @@ export class DocReferencesPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'doc-reference-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
 
     key = 'doc-reference-types';
     if (this.hasThesaurus(key)) {
-      this.typeEntries = thesauri[key].entries;
+      this.typeEntries.set(thesauri[key].entries);
     } else {
-      this.typeEntries = undefined;
+      this.typeEntries.set(undefined);
     }
   }
 

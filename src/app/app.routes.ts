@@ -4,8 +4,7 @@ import { Routes } from '@angular/router';
 import { jwtAdminGuard, jwtGuard } from '@myrmidon/auth-jwt-login';
 
 // libraries in this workspace
-import { EditorGuardService } from '../../projects/myrmidon/cadmus-api/src/public-api';
-import { PendingChangesGuard } from '../../projects/myrmidon/cadmus-core/src/public-api';
+import { pendingChangesGuard } from '../../projects/myrmidon/cadmus-core/src/public-api';
 
 // locals
 import { HomeComponent } from './home/home.component';
@@ -15,6 +14,7 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
 import { LoginPageComponent } from './login-page/login-page.component';
 import { EditFrameStatsPageComponent } from './edit-frame-stats-page/edit-frame-stats-page.component';
 import { GraphDemoPageComponent } from './graph-demo-page/graph-demo-page.component';
+import { editorGuard } from '../../projects/myrmidon/cadmus-api/src/public-api';
 
 export const routes: Routes = [
   // auth
@@ -60,7 +60,7 @@ export const routes: Routes = [
         (module) => module.ItemEditorComponent
       ),
     canActivate: [jwtGuard],
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'items',
@@ -85,7 +85,7 @@ export const routes: Routes = [
       import('@myrmidon/cadmus-thesaurus-editor').then(
         (module) => module.ThesaurusEditorFeatureComponent
       ),
-    canActivate: [EditorGuardService],
+    canActivate: [editorGuard],
   },
   {
     path: 'thesauri',
@@ -93,7 +93,7 @@ export const routes: Routes = [
       import('@myrmidon/cadmus-thesaurus-list').then(
         (module) => module.ThesaurusListComponent
       ),
-    canActivate: [EditorGuardService],
+    canActivate: [editorGuard],
   },
   // cadmus - parts
   {

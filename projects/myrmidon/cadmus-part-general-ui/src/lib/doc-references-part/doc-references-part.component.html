@@ -9,10 +9,13 @@
       }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <cadmus-refs-doc-references
+      <cadmus-refs-lookup-doc-references
         [references]="references.value"
-        [typeEntries]="typeEntries"
-        [tagEntries]="tagEntries"
+        [typeEntries]="typeEntries()"
+        [tagEntries]="tagEntries()"
+        [noLookup]="settings()?.noLookup"
+        [noCitation]="settings()?.noCitation"
+        [defaultPicker]="settings()?.defaultPicker || 'lookup'"
         (referencesChange)="onReferencesChange($event)"
       />
     </mat-card-content>
