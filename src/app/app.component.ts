@@ -16,12 +16,22 @@ import { EnvService, RamStorageService } from '@myrmidon/ngx-tools';
 import { AuthJwtService, GravatarPipe, User } from '@myrmidon/auth-jwt-login';
 
 // bricks
-import { LOOKUP_CONFIGS_KEY, RefLookupConfig } from '@myrmidon/cadmus-refs-lookup';
+import {
+  CIT_SCHEME_SERVICE_SETTINGS_KEY,
+  CitMappedValues,
+  CitSchemeSettings,
+  MapFormatter,
+} from '@myrmidon/cadmus-refs-citation';
+import {
+  LOOKUP_CONFIGS_KEY,
+  RefLookupConfig,
+} from '@myrmidon/cadmus-refs-lookup';
 import { ViafRefLookupService } from '@myrmidon/cadmus-refs-viaf-lookup';
 import { GeoNamesRefLookupService } from '@myrmidon/cadmus-refs-geonames-lookup';
 
 // cadmus
 import { AppRepository } from '../../projects/myrmidon/cadmus-state/src/public-api';
+import { DC_SCHEME, OD_SCHEME } from './cit-schemes';
 
 @Component({
   selector: 'app-root',
@@ -58,6 +68,9 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {
     this.version = env.get('version') || '';
 
+    // configure citation schemes
+    this.configureCitationService(storage);
+
     // configure external lookup for asserted composite IDs
     storage.store(LOOKUP_CONFIGS_KEY, [
       {
@@ -79,6 +92,32 @@ export class AppComponent implements OnInit, OnDestroy {
         itemLabelGetter: (item: any) => item?.name,
       },
     ] as RefLookupConfig[]);
+  }
+
+  private configureCitationService(storage: RamStorageService): void {
+    // custom formatters: agl formatter for Odyssey
+    const aglFormatter = new MapFormatter();
+    const aglMap: CitMappedValues = {};
+    for (let n = 0x3b1; n <= 0x3c9; n++) {
+      // skip final sigma
+      if (n === 0x3c2) {
+        continue;
+      }
+      aglMap[String.fromCharCode(n)] = n - 0x3b0;
+    }
+    aglFormatter.configure(aglMap);
+
+    // store settings via service
+    storage.store(CIT_SCHEME_SERVICE_SETTINGS_KEY, {
+      formats: {},
+      schemes: {
+        dc: DC_SCHEME,
+        od: OD_SCHEME,
+      },
+      formatters: {
+        agl: aglFormatter,
+      },
+    } as CitSchemeSettings);
   }
 
   public ngOnInit(): void {
