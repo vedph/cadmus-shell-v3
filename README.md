@@ -210,6 +210,8 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-08-31: updated Angular and packages.
+
 ### 16.0.1
 
 - 2025-08-07:
