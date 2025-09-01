@@ -95,7 +95,7 @@
             <mat-form-field>
               <mat-label>facet</mat-label>
               <mat-select [formControl]="facet" required="true">
-                @for (f of facets$ | async; track f) {
+                @for (f of facets$ | async; track f.id) {
                 <mat-option [value]="f.id">
                   {{ f.label }}
                 </mat-option>
@@ -177,7 +177,8 @@
             <mat-form-field>
               <mat-label>part</mat-label>
               <mat-select [formControl]="newPartType" required>
-                @for (p of newPartDefinitions$ | async; track p) {
+                @for (p of newPartDefinitions$ | async; track p.typeId + ':' +
+                (p.roleId || '')) {
                 <mat-option [value]="p">
                   <span [style.color]="'#' + p.colorKey" class="new-part-icon"
                     >&#x2b24;</span
@@ -202,7 +203,7 @@
           </form>
         </div>
         <mat-divider></mat-divider>
-        @for (group of partGroups$ | async; track group) {
+        @for (group of partGroups$ | async; track group.key) {
         <mat-expansion-panel expanded="true" class="group-header">
           <mat-expansion-panel-header>
             <mat-panel-title
@@ -223,7 +224,8 @@
               </tr>
             </thead>
             <tbody>
-              @for (part of group.parts; track part) {
+              @for (part of group.parts; track part.typeId + ':' + (part.roleId
+              || '')) {
               <tr>
                 <!-- edit -->
                 <td class="fit-width">
@@ -327,7 +329,8 @@
             <th>last modified</th>
           </thead>
           <tbody>
-            @for (part of parts; track part) {
+            @for (part of parts; track part.typeId + ':' + (part.roleId || ''))
+            {
             <tr>
               <td class="fit-width">
                 @if (!part.isAbsent) {

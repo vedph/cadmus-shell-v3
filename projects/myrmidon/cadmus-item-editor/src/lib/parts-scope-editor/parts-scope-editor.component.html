@@ -11,7 +11,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (ctl of checks.controls; track ctl; let i = $index) {
+      @for (ctl of checks.controls; track i; let i = $index) {
       <tr formArrayName="checks">
         <td class="fit-width">
           <mat-checkbox [formControlName]="i" (change)="onCheckChanged()" />

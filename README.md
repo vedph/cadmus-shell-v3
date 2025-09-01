@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-01: fixed performance of tracking expressions in item editor by tracking parts by the combination of their type ID and role ID, groups by their key, and facets by their ID (`@myrmidon/cadmus-item-editor`).
 - 2025-08-31:
   - updated Angular and packages.
   - 🆕 added functional pending changes guard counterpart (`@myrmidon/cadmus-core`) and replaced guards with functional guards in app routes.
