@@ -51,7 +51,7 @@
     "@myrmidon/cadmus-refs-geonames-lookup": "^10.0.0",
     "@myrmidon/cadmus-refs-historical-date": "9.0.2",
     "@myrmidon/cadmus-refs-lookup": "^10.0.3",
-    "@myrmidon/cadmus-refs-proper-name": "10.0.2",
+    "@myrmidon/cadmus-refs-proper-name": "10.0.3",
     "@myrmidon/cadmus-refs-viaf-lookup": "^10.0.2",
     "@myrmidon/cadmus-text-block-view": "^9.0.1",
     "@myrmidon/cadmus-text-ed": "^9.0.1",
@@ -67,10 +67,10 @@
     "diff-match-patch": "^1.0.5",
     "echarts": "^6.0.0",
     "force-graph": "^1.51.0",
-    "marked": "^16.2.1",
+    "marked": "^16.3.0",
     "monaco-editor": "^0.53.0",
-    "ngx-echarts": "^20.0.0",
-    "ngx-markdown": "^20.0.0",
+    "ngx-echarts": "^20.0.2",
+    "ngx-markdown": "^20.1.0",
     "rxjs": "~7.8.0",
     "three.js": "^0.77.1",
     "ts-md5": "^2.0.1",
@@ -92,7 +92,7 @@
     "karma-coverage": "~2.2.1",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "ng-packagr": "^20.1.0",
-    "typescript": "~5.8.3"
+    "ng-packagr": "^20.3.0",
+    "typescript": "~5.9.2"
   }
 }

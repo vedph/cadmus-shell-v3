@@ -13,7 +13,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 1. `npm run build-lib`;
 2. update version in `env.js` (and Docker files), and then `ng build --configuration=production`;
-3. `docker build . -t vedph2020/cadmus-shell:16.0.1 -t vedph2020/cadmus-shell:latest` (replace with the current version).
+3. `docker build . -t vedph2020/cadmus-shell:17.0.0 -t vedph2020/cadmus-shell:latest` (replace with the current version).
 
 ## Libraries
 
@@ -210,7 +210,11 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-09-15: refactored authors/contributors editing in bibliography entry editor.
+### 17.0.0
+
+- 2025-09-15:
+  - refactored authors/contributors editing in bibliography entry editor.
+  - generated Docker image.
 - 2025-09-13:
   - updated bricks to their `OnPush`-based version.
   - ⚠️ refactored components so that their state is fully reactive. This is the first step towards a future Zone-less system.
