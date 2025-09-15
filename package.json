@@ -43,7 +43,7 @@
     "@myrmidon/cadmus-mat-physical-size": "^9.0.10",
     "@myrmidon/cadmus-mat-physical-state": "^9.0.1",
     "@myrmidon/cadmus-refs-asserted-chronotope": "10.0.4",
-    "@myrmidon/cadmus-refs-asserted-ids": "^10.0.9",
+    "@myrmidon/cadmus-refs-asserted-ids": "^10.0.10",
     "@myrmidon/cadmus-refs-assertion": "10.0.4",
     "@myrmidon/cadmus-refs-citation": "^1.0.2",
     "@myrmidon/cadmus-refs-decorated-counts": "^9.0.1",
