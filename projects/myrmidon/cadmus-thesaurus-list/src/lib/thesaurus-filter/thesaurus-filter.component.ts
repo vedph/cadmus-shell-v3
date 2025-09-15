@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -38,7 +38,7 @@ import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
     MatIcon,
   ],
 })
-export class ThesaurusFilterComponent implements OnInit {
+export class ThesaurusFilterComponent {
   public filter$: Observable<ThesaurusFilter>;
 
   public id: FormControl<string>;
@@ -62,9 +62,6 @@ export class ThesaurusFilterComponent implements OnInit {
       alias: this.alias,
       language: this.language,
     });
-  }
-
-  public ngOnInit(): void {
     // update form when filter changes
     this.filter$?.pipe(takeUntilDestroyed()).subscribe((f) => {
       this.updateForm(f);

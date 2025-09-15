@@ -43,7 +43,7 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     private _dialogService: DialogService,
     private _snackbar: MatSnackBar
   ) {
-    this.id = this._route.snapshot.params['id'];
+    this.id.set(this._route.snapshot.params['id']);
     if (this.id() === 'new') {
       this.id.set(undefined);
     }
