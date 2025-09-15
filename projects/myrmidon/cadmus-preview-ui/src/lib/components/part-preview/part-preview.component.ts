@@ -39,25 +39,41 @@ export class PartPreviewComponent {
   public readonly item = signal<Item | undefined>(undefined);
   public readonly html = signal<string | undefined>(undefined);
 
+  private _isRefreshing = false;
+
   constructor(
     private _previewService: PreviewService,
     private _itemService: ItemService,
     private _snackbar: MatSnackBar
   ) {
-    effect(() => this.refresh(this.source()));
+    effect(() => {
+      const source = this.source();
+      console.log('Effect triggered with source:', source);
+
+      // Prevent infinite loops
+      if (this._isRefreshing) {
+        return;
+      }
+
+      this.refresh(source);
+    });
   }
 
   public refresh(source?: PartPreviewSource): void {
-    if (this.busy()) {
+    // prevent re-entry
+    if (this._isRefreshing) {
       return;
     }
+
     if (!source?.partId) {
       this.item.set(undefined);
       this.html.set(undefined);
       return;
     }
 
+    this._isRefreshing = true;
     this.busy.set(true);
+
     forkJoin({
       item: this._itemService.getItem(source.itemId, false),
       preview: this._previewService.renderPart(source.itemId, source.partId),
@@ -68,9 +84,11 @@ export class PartPreviewComponent {
           this.busy.set(false);
           this.item.set(result.item || undefined);
           this.html.set(result.preview.result);
+          this._isRefreshing = false;
         },
         error: (error) => {
           this.busy.set(false);
+          this._isRefreshing = false;
           console.error(`Error previewing part ${source!.partId}`, error);
           this._snackbar.open('Error previewing part ' + source!.partId);
         },

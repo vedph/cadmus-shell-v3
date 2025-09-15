@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
@@ -15,12 +15,18 @@ import {
   imports: [MatCard, MatCardHeader, MatCardContent, PartPreviewComponent],
 })
 export class PartPreviewFeatureComponent {
-  public source?: PartPreviewSource;
+  public readonly source = signal<PartPreviewSource>({
+    itemId: '',
+    partId: '',
+  });
 
   constructor(route: ActivatedRoute) {
-    this.source = {
+    console.log('PartPreviewFeatureComponent constructor called');
+    const sourceValue = {
       itemId: route.snapshot.params['iid'],
       partId: route.snapshot.params['pid'],
     };
+    console.log('Setting source to:', sourceValue);
+    this.source.set(sourceValue);
   }
 }
