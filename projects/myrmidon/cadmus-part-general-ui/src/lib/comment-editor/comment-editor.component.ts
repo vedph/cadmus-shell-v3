@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, Optional, signal } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -126,25 +126,25 @@ export class CommentEditorComponent
   public keywords: FormArray;
 
   // comment-tags
-  public comTagEntries: ThesaurusEntry[] | undefined;
+  public readonly comTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // doc-reference-tags
-  public refTagEntries: ThesaurusEntry[] | undefined;
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // doc-reference-types
-  public refTypeEntries: ThesaurusEntry[] | undefined;
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // comment-categories
-  public catEntries: ThesaurusEntry[] | undefined;
+  public readonly catEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // languages
-  public langEntries: ThesaurusEntry[] | undefined;
+  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // keyword-indexes
-  public idxEntries: ThesaurusEntry[] | undefined;
+  public readonly idxEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // keyword-tags
-  public keyTagEntries: ThesaurusEntry[] | undefined;
+  public readonly keyTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // comment-id-scopes
-  public idScopeEntries: ThesaurusEntry[] | undefined;
+  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // comment-id-tags
-  public idTagEntries: ThesaurusEntry[] | undefined;
+  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // assertion-tags
-  public assTagEntries: ThesaurusEntry[] | undefined;
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(
     authService: AuthJwtService,
@@ -249,71 +249,71 @@ export class CommentEditorComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'comment-tags';
     if (this.hasThesaurus(key)) {
-      this.comTagEntries = thesauri[key].entries;
+      this.comTagEntries.set(thesauri[key].entries);
     } else {
-      this.comTagEntries = undefined;
+      this.comTagEntries.set(undefined);
     }
 
     key = 'doc-reference-tags';
     if (this.hasThesaurus(key)) {
-      this.refTagEntries = thesauri[key].entries;
+      this.refTagEntries.set(thesauri[key].entries);
     } else {
-      this.refTagEntries = undefined;
+      this.refTagEntries.set(undefined);
     }
 
     key = 'doc-reference-types';
     if (this.hasThesaurus(key)) {
-      this.refTypeEntries = thesauri[key].entries;
+      this.refTypeEntries.set(thesauri[key].entries);
     } else {
-      this.refTypeEntries = undefined;
+      this.refTypeEntries.set(undefined);
     }
 
     key = 'comment-categories';
     if (this.hasThesaurus(key)) {
-      this.catEntries = thesauri[key].entries;
+      this.catEntries.set(thesauri[key].entries);
     } else {
-      this.catEntries = undefined;
+      this.catEntries.set(undefined);
     }
 
     key = 'languages';
     if (this.hasThesaurus(key)) {
-      this.langEntries = thesauri[key].entries;
+      this.langEntries.set(thesauri[key].entries);
     } else {
-      this.langEntries = undefined;
+      this.langEntries.set(undefined);
     }
 
     key = 'keyword-indexes';
     if (this.hasThesaurus(key)) {
-      this.idxEntries = thesauri[key].entries;
+      this.idxEntries.set(thesauri[key].entries);
     } else {
-      this.idxEntries = undefined;
+      this.idxEntries.set(undefined);
     }
 
     key = 'keyword-tags';
     if (this.hasThesaurus(key)) {
-      this.keyTagEntries = thesauri[key].entries;
+      this.keyTagEntries.set(thesauri[key].entries);
     } else {
-      this.keyTagEntries = undefined;
+      this.keyTagEntries.set(undefined);
     }
 
     key = 'comment-id-scopes';
     if (this.hasThesaurus(key)) {
-      this.idScopeEntries = thesauri[key].entries;
+      this.idScopeEntries.set(thesauri[key].entries);
     } else {
-      this.idScopeEntries = undefined;
+      this.idScopeEntries.set(undefined);
     }
 
     key = 'comment-id-tags';
     if (this.hasThesaurus(key)) {
-      this.idTagEntries = thesauri[key].entries;
+      this.idTagEntries.set(thesauri[key].entries);
     } else {
-      this.idTagEntries = undefined;
+      this.idTagEntries.set(undefined);
     }
     key = 'assertion-tags';
     if (this.hasThesaurus(key)) {
-      this.assTagEntries = thesauri[key].entries;
+      this.assTagEntries.set(thesauri[key].entries);
     } else {
-      this.assTagEntries = undefined;
+      this.assTagEntries.set(undefined);
     }
   }
 
@@ -339,7 +339,7 @@ export class CommentEditorComponent
       // map the category IDs to the corresponding thesaurus
       // entries, if any -- else just use the IDs
       const entries: ThesaurusEntry[] = part.categories.map((id) => {
-        const entry = this.catEntries?.find((e) => e.id === id);
+        const entry = this.catEntries()?.find((e) => e.id === id);
         return entry
           ? entry
           : {

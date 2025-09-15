@@ -7,7 +7,7 @@
   <mat-card-content>
     <!-- form -->
     <form [formGroup]="form" (submit)="save()">
-      <div>
+      <div class="form-row">
         <mat-form-field style="width: 350px">
           <mat-label>ID</mat-label>
           <input matInput [formControl]="id" />
@@ -19,9 +19,9 @@
           <mat-error>invalid ID</mat-error>
           }
         </mat-form-field>
-        &nbsp;
+
         <mat-checkbox [formControl]="alias">alias</mat-checkbox>
-        &nbsp;
+
         <!-- lookup -->
         @if (alias.value) {
         <cadmus-thesaurus-lookup
@@ -82,7 +82,7 @@
           <cadmus-thesaurus-node
             [node]="node"
             (nodeChange)="addNode($event!)"
-            (signal)="onSignal($event)"
+            (request)="onRequest($event)"
           />
           } @if (page.total === 0) {
           <button

@@ -1,4 +1,4 @@
-import { Component, effect, input, model, output } from '@angular/core';
+import { Component, effect, input, model, output, signal } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -56,7 +56,7 @@ export class GraphNodeEditorComponent {
    */
   public readonly editorClose = output();
 
-  public isNew: boolean;
+  public readonly isNew = signal<boolean>(true);
 
   public uri: FormControl<string | null>;
   public label: FormControl<string | null>;
@@ -65,7 +65,6 @@ export class GraphNodeEditorComponent {
   public form: FormGroup;
 
   constructor(formBuilder: FormBuilder) {
-    this.isNew = true;
     // form
     this.uri = formBuilder.control(null, [
       Validators.required,
@@ -92,14 +91,14 @@ export class GraphNodeEditorComponent {
   private updateForm(node?: UriNode): void {
     if (!node) {
       this.form.reset();
-      this.isNew = true;
+      this.isNew.set(true);
       return;
     }
     this.uri.setValue(node.uri);
     this.label.setValue(node.label);
     this.isClass.setValue(node.isClass ? true : false);
     this.tag.setValue(node.tag || null);
-    this.isNew = node.id ? false : true;
+    this.isNew.set(node.id ? false : true);
     this.form.markAsPristine();
   }
 

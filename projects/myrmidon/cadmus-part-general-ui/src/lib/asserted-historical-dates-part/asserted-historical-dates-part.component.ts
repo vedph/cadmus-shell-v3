@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -17,7 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { deepCopy, FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -73,18 +73,24 @@ export class AssertedHistoricalDatesPartComponent
   extends ModelEditorComponentBase<AssertedHistoricalDatesPart>
   implements OnInit
 {
-  public maxDateCount = -1;
-  public editedIndex: number;
-  public edited: AssertedDate | undefined;
+  public readonly maxDateCount = signal<number>(-1);
+  public readonly editedIndex = signal<number>(-1);
+  public readonly edited = signal<AssertedDate | undefined>(undefined);
 
   // asserted-historical-dates-tags
-  public tagEntries?: ThesaurusEntry[];
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // assertion-tags
-  public assertionTagEntries?: ThesaurusEntry[];
+  public readonly assertionTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   // doc-reference-types
-  public docReferenceTypeEntries?: ThesaurusEntry[];
+  public readonly docReferenceTypeEntries = signal<
+    ThesaurusEntry[] | undefined
+  >(undefined);
   // doc-reference-tags
-  public docReferenceTagEntries?: ThesaurusEntry[];
+  public readonly docReferenceTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
 
   public dates: FormControl<AssertedDate[]>;
 
@@ -94,7 +100,6 @@ export class AssertedHistoricalDatesPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this.editedIndex = -1;
     // form
     this.dates = formBuilder.control([], {
       // at least 1 entry
@@ -116,30 +121,30 @@ export class AssertedHistoricalDatesPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'asserted-historical-dates-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
 
     key = 'assertion-tags';
     if (this.hasThesaurus(key)) {
-      this.assertionTagEntries = thesauri[key].entries;
+      this.assertionTagEntries.set(thesauri[key].entries);
     } else {
-      this.assertionTagEntries = undefined;
+      this.assertionTagEntries.set(undefined);
     }
 
     key = 'doc-reference-types';
     if (this.hasThesaurus(key)) {
-      this.docReferenceTypeEntries = thesauri[key].entries;
+      this.docReferenceTypeEntries.set(thesauri[key].entries);
     } else {
-      this.docReferenceTypeEntries = undefined;
+      this.docReferenceTypeEntries.set(undefined);
     }
 
     key = 'doc-reference-tags';
     if (this.hasThesaurus(key)) {
-      this.docReferenceTagEntries = thesauri[key].entries;
+      this.docReferenceTagEntries.set(thesauri[key].entries);
     } else {
-      this.docReferenceTagEntries = undefined;
+      this.docReferenceTagEntries.set(undefined);
     }
   }
 
@@ -151,7 +156,7 @@ export class AssertedHistoricalDatesPartComponent
     this._appRepository
       ?.getSettingFor(part.typeId, part.roleId)
       .then((setting) => {
-        this.maxDateCount = setting?.maxDateCount || -1;
+        this.maxDateCount.set(setting?.maxDateCount || -1);
       }) || -1;
     this.dates.setValue(part.dates || []);
     this.form.markAsPristine();
@@ -179,7 +184,7 @@ export class AssertedHistoricalDatesPartComponent
 
   public addDate(): void {
     // check max count if set
-    if (this.maxDateCount > 0 && this.dates.value.length >= this.maxDateCount) {
+    if (this.maxDateCount() > 0 && this.dates.value.length >= this.maxDateCount()) {
       return;
     }
 
@@ -190,13 +195,13 @@ export class AssertedHistoricalDatesPartComponent
   }
 
   public editDate(entry: AssertedDate, index: number): void {
-    this.editedIndex = index;
-    this.edited = entry;
+    this.editedIndex.set(index);
+    this.edited.set(deepCopy(entry));
   }
 
   public closeDate(): void {
-    this.editedIndex = -1;
-    this.edited = undefined;
+    this.editedIndex.set(-1);
+    this.edited.set(undefined);
   }
 
   public saveDate(entry: AssertedDate): void {
@@ -211,10 +216,10 @@ export class AssertedHistoricalDatesPartComponent
     }
 
     const entries = [...this.dates.value];
-    if (this.editedIndex === -1) {
+    if (this.editedIndex() === -1) {
       entries.push(entry);
     } else {
-      entries.splice(this.editedIndex, 1, entry);
+      entries.splice(this.editedIndex(), 1, entry);
     }
     this.dates.setValue(entries);
     this.dates.markAsDirty();
@@ -227,7 +232,7 @@ export class AssertedHistoricalDatesPartComponent
       .confirm('Confirmation', 'Delete date?')
       .subscribe((yes: boolean | undefined) => {
         if (yes) {
-          if (this.editedIndex === index) {
+          if (this.editedIndex() === index) {
             this.closeDate();
           }
           const entries = [...this.dates.value];

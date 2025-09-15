@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -126,16 +126,16 @@ export class ItemEditorComponent
   private _subs: Subscription[] = [];
   private _flagsFrozen?: boolean;
 
-  public flagDefinitions: FlagDefinition[];
+  public readonly flagDefinitions = signal<FlagDefinition[]>([]);
 
-  public id?: string;
+  public readonly id = signal<string | undefined>(undefined);
   public item$: Observable<Item | undefined>;
   public parts$: Observable<Part[] | undefined>;
   public partGroups$: Observable<PartGroup[] | undefined>;
   public layerPartInfos$: Observable<LayerPartInfo[] | undefined>;
-  public user?: User;
-  public userLevel: number;
-  public busy?: boolean;
+  public readonly user = signal<User | undefined>(undefined);
+  public readonly userLevel = signal<number>(0);
+  public readonly busy = signal<boolean>(false);
   // lookup data
   public facet$: Observable<FacetDefinition | undefined>;
   public newPartDefinitions$: Observable<PartDefinition[]>;
@@ -173,10 +173,9 @@ export class ItemEditorComponent
     private _messaging: MessagingService,
     private _formBuilder: FormBuilder
   ) {
-    this.id = this._route.snapshot.params['id'];
-    this.flagDefinitions = [];
-    if (this.id === 'new') {
-      this.id = undefined;
+    this.id.set(this._route.snapshot.params['id']);
+    if (this.id() === 'new') {
+      this.id.set(undefined);
     }
     // new part form
     this.newPartType = _formBuilder.control(null, Validators.required);
@@ -210,7 +209,6 @@ export class ItemEditorComponent
       group: this.group,
       flagChecks: this.flagChecks,
     });
-    this.userLevel = 0;
 
     this.item$ = this._repository.item$;
     this.parts$ = this._repository.parts$;
@@ -228,15 +226,15 @@ export class ItemEditorComponent
   public async ngOnInit() {
     this._subs.push(
       this._authService.currentUser$.subscribe((user: User | null) => {
-        this.user = user || undefined;
-        this.userLevel = this._userLevelService.getCurrentUserLevel();
+        this.user.set(user || undefined);
+        this.userLevel.set(this._userLevelService.getCurrentUserLevel());
       })
     );
 
     // rebuild the flags controls array when flags definitions change
     this._subs.push(
       this._appRepository.flags$.subscribe((defs) => {
-        this.flagDefinitions = defs;
+        this.flagDefinitions.set(defs);
         this.buildFlagsControls();
       })
     );
@@ -258,7 +256,7 @@ export class ItemEditorComponent
     );
 
     // load the item (if any) and its lookup
-    this._repository.load(this.id);
+    this._repository.load(this.id());
   }
 
   public ngOnDestroy(): void {
@@ -279,7 +277,7 @@ export class ItemEditorComponent
     this._flagsFrozen = true;
     this.flagChecks.clear();
 
-    for (const def of this.flagDefinitions) {
+    for (const def of this.flagDefinitions()) {
       const flagValue = def.id;
       // tslint:disable-next-line: no-bitwise
       const checked = (this.flags.value & flagValue) !== 0;
@@ -293,13 +291,13 @@ export class ItemEditorComponent
    * Update the flags controls from the current flags value.
    */
   private updateFlagControls(): void {
-    if (!this.flagDefinitions) {
+    if (!this.flagDefinitions()?.length) {
       return;
     }
     this._flagsFrozen = true;
     const value = this.flags.value;
-    for (let i = 0; i < this.flagDefinitions.length; i++) {
-      const flagValue = this.flagDefinitions[i].id;
+    for (let i = 0; i < this.flagDefinitions().length; i++) {
+      const flagValue = this.flagDefinitions()[i].id;
       // tslint:disable-next-line: no-bitwise
       const checked = (value & flagValue) !== 0;
       this.flagChecks.at(i).setValue(checked);
@@ -313,8 +311,8 @@ export class ItemEditorComponent
   private getFlagsValue(): number {
     let flagsValue = 0;
 
-    for (let i = 0; i < this.flagDefinitions.length; i++) {
-      const flagValue = this.flagDefinitions[i].id;
+    for (let i = 0; i < this.flagDefinitions()?.length; i++) {
+      const flagValue = this.flagDefinitions()[i].id;
       if (this.flagChecks.at(i)?.value) {
         // tslint:disable-next-line: no-bitwise
         flagsValue |= flagValue;
@@ -362,7 +360,7 @@ export class ItemEditorComponent
   }
 
   public save(): void {
-    if (this.busy || !this.metadata.valid) {
+    if (this.busy() || !this.metadata.valid) {
       return;
     }
     // build item (its ID will be empty if new)
@@ -379,7 +377,7 @@ export class ItemEditorComponent
 
     // save: this will trigger a change in the store's item, reflected here
     // by updating the metadata form
-    this.busy = true;
+    this.busy.set(true);
     this._repository
       .save(item as Item)
       .then((saved) => {
@@ -388,12 +386,12 @@ export class ItemEditorComponent
 
         // reload to force change in page URL
         if (!item.id) {
-          this.id = saved.id;
+          this.id.set(saved.id);
           this._router.navigate(['/items', saved.id]);
         }
       })
       .finally(() => {
-        this.busy = false;
+        this.busy.set(false);
       });
   }
 
@@ -422,7 +420,7 @@ export class ItemEditorComponent
     if (!def && !this.newPartType.valid) {
       return;
     }
-    if (!this.id) {
+    if (!this.id()) {
       this._snackbar.open('Please save the item before adding parts', 'OK', {
         duration: 3000,
       });
@@ -436,7 +434,7 @@ export class ItemEditorComponent
     }
 
     const route = this._libraryRouteService.buildPartEditorRoute(
-      this.id,
+      this.id()!,
       'new',
       typeId,
       roleId
@@ -496,7 +494,7 @@ export class ItemEditorComponent
   }
 
   public deletePart(part: Part): void {
-    if (this.busy) {
+    if (this.busy()) {
       return;
     }
     this._dialogService
@@ -506,13 +504,13 @@ export class ItemEditorComponent
           return;
         }
         // delete
-        this.busy = true;
+        this.busy.set(true);
         this._repository.deletePart(part.id).then(
           (_) => {
-            this.busy = false;
+            this.busy.set(false);
           },
           (error) => {
-            this.busy = false;
+            this.busy.set(false);
             console.error(error);
             this._snackbar.open('Error deleting part', 'OK');
           }
@@ -521,14 +519,14 @@ export class ItemEditorComponent
   }
 
   public addLayerPart(part: LayerPartInfo): void {
-    if (this.busy) {
+    if (this.busy()) {
       return;
     }
     let name = this.getTypeIdName(part.typeId);
     if (part.roleId) {
       name += ' for ' + this.getRoleIdName(part.roleId);
     }
-    this.busy = true;
+    this.busy.set(true);
     this._dialogService
       .confirm('Confirm Addition', `Add layer "${name}"?`)
       .subscribe((result) => {
@@ -537,7 +535,7 @@ export class ItemEditorComponent
         }
         this._repository
           .addNewLayerPart(part.typeId, part.roleId)
-          .finally(() => (this.busy = false));
+          .finally(() => (this.busy.set(false)));
       });
   }
 
@@ -546,7 +544,7 @@ export class ItemEditorComponent
   }
 
   public onCopyPart(part: Part): void {
-    if (this.busy) {
+    if (this.busy()) {
       return;
     }
     const dialogRef = this.dialog.open(ItemLookupDialogComponent, {
@@ -568,14 +566,14 @@ export class ItemEditorComponent
         return;
       }
       // check if the part already exists in the target item
-      this.busy = true;
+      this.busy.set(true);
       this._itemService
         .partWithTypeAndRoleExists(targetItem.id, part.typeId, part.roleId)
         .subscribe((exists: boolean) => {
           // part already exists, nope
           if (exists) {
             this._snackbar.open('Part already exists in target item', 'OK');
-            this.busy = false;
+            this.busy.set(false);
             return;
           }
           // else add part as a new part to the target item
@@ -592,7 +590,7 @@ export class ItemEditorComponent
               this._snackbar.open('Error copying part', 'OK');
             },
             complete: () => {
-              this.busy = false;
+              this.busy.set(false);
             },
           });
         });
@@ -600,14 +598,14 @@ export class ItemEditorComponent
   }
 
   public onGenerateItems(): void {
-    if (this.busy) {
+    if (this.busy()) {
       return;
     }
     const dialogRef = this.dialog.open(ItemGenerateDialogComponent, {
       height: '400px',
       width: '350px',
       data: {
-        flags: this.flagDefinitions,
+        flags: this.flagDefinitions(),
       },
     });
     dialogRef
@@ -616,9 +614,9 @@ export class ItemEditorComponent
         if (!data) {
           return;
         }
-        this.busy = true;
+        this.busy.set(true);
         this._itemService
-          .generateItems(data.count, this.id!, data.title, data.flags)
+          .generateItems(data.count, this.id()!, data.title, data.flags)
           .subscribe({
             next: (_) => {
               // reset the items list
@@ -632,7 +630,7 @@ export class ItemEditorComponent
               this._snackbar.open('Error generating items', 'OK');
             },
             complete: () => {
-              this.busy = false;
+              this.busy.set(false);
             },
           });
       });

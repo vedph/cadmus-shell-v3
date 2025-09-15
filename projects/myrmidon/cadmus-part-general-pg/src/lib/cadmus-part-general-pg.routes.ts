@@ -1,21 +1,6 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatToolbarModule } from '@angular/material/toolbar';
-
-import { PendingChangesGuard } from '@myrmidon/cadmus-core';
+import { pendingChangesGuard } from '@myrmidon/cadmus-core';
 import {
   ASSERTED_HISTORICAL_DATES_PART_TYPEID,
   BIBLIOGRAPHY_PART_TYPEID,
@@ -73,246 +58,167 @@ import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feat
 import { TokenTextPartFeatureComponent } from './token-text-part-feature/token-text-part-feature.component';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
-export const RouterModuleForChild = RouterModule.forChild([
+export const CADMUS_PART_GENERAL_ROUTES: Routes = [
   {
     path: `${ASSERTED_HISTORICAL_DATES_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: AssertedHistoricalDateFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${BIBLIOGRAPHY_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: BibliographyPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${CATEGORIES_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: CategoriesPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${COMMENT_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: CommentPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${CHRONOTOPES_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: ChronotopesPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${DECORATED_COUNTS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: DecoratedCountsPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${DISTRICT_LOCATION_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: DistrictLocationPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${DOC_REFERENCES_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: DocReferencesPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${EXTERNAL_IDS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: ExternalIdsPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${FLAGS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: FlagsPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${HISTORICAL_DATE_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: HistoricalDatePartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${HISTORICAL_EVENTS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: HistoricalEventsPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${KEYWORDS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: KeywordsPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${INDEX_KEYWORDS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: IndexKeywordsPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${METADATA_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: MetadataPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${NAMES_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: NamesPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${NOTE_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: NotePartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${PHYSICAL_MEASUREMENTS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: PhysicalMeasurementsPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${PHYSICAL_STATES_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: PhysicalStatesPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${PIN_LINKS_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: PinLinksPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${TOKEN_TEXT_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: TokenTextPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `${TILED_TEXT_PART_TYPEID}/:pid`,
     pathMatch: 'full',
     component: TiledTextPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'it.vedph.token-text-layer/:pid',
     pathMatch: 'full',
     component: TokenTextLayerPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'it.vedph.tiled-text-layer/:pid',
     pathMatch: 'full',
     component: TiledTextLayerPartFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `fragment/:pid/${COMMENT_FRAGMENT_TYPEID}/:loc`,
     pathMatch: 'full',
     component: CommentFragmentFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `fragment/:pid/${CHRONOLOGY_FRAGMENT_TYPEID}/:loc`,
     pathMatch: 'full',
     component: ChronologyFragmentFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: `fragment/:pid/${PIN_LINKS_FRAGMENT_TYPEID}/:loc`,
     pathMatch: 'full',
     component: PinLinksFragmentFeatureComponent,
-    canDeactivate: [PendingChangesGuard],
+    canDeactivate: [pendingChangesGuard],
   },
-]);
-
-@NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModuleForChild,
-    // material
-    MatButtonModule,
-    MatCheckboxModule,
-    MatCardModule,
-    MatExpansionModule,
-    MatIconModule,
-    MatInputModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
-    MatTooltipModule,
-    MatToolbarModule,
-    // cadmus
-    AssertedHistoricalDateFeatureComponent,
-    BibliographyPartFeatureComponent,
-    CategoriesPartFeatureComponent,
-    ChronologyFragmentFeatureComponent,
-    ChronotopesPartFeatureComponent,
-    CommentFragmentFeatureComponent,
-    CommentPartFeatureComponent,
-    DecoratedCountsPartFeatureComponent,
-    DistrictLocationPartFeatureComponent,
-    DocReferencesPartFeatureComponent,
-    ExternalIdsPartFeatureComponent,
-    FlagsPartFeatureComponent,
-    HistoricalDatePartFeatureComponent,
-    HistoricalEventsPartFeatureComponent,
-    IndexKeywordsPartFeatureComponent,
-    KeywordsPartFeatureComponent,
-    MetadataPartFeatureComponent,
-    NamesPartFeatureComponent,
-    NotePartFeatureComponent,
-    PhysicalMeasurementsPartFeatureComponent,
-    PhysicalStatesPartFeatureComponent,
-    PinLinksFragmentFeatureComponent,
-    PinLinksPartFeatureComponent,
-    TiledTextLayerPartFeatureComponent,
-    TiledTextPartFeatureComponent,
-    TokenTextLayerPartFeatureComponent,
-    TokenTextPartFeatureComponent,
-  ],
-  exports: [
-    AssertedHistoricalDateFeatureComponent,
-    BibliographyPartFeatureComponent,
-    CategoriesPartFeatureComponent,
-    ChronologyFragmentFeatureComponent,
-    ChronotopesPartFeatureComponent,
-    CommentFragmentFeatureComponent,
-    CommentPartFeatureComponent,
-    DecoratedCountsPartFeatureComponent,
-    DistrictLocationPartFeatureComponent,
-    DocReferencesPartFeatureComponent,
-    ExternalIdsPartFeatureComponent,
-    FlagsPartFeatureComponent,
-    HistoricalDatePartFeatureComponent,
-    HistoricalEventsPartFeatureComponent,
-    IndexKeywordsPartFeatureComponent,
-    KeywordsPartFeatureComponent,
-    MetadataPartFeatureComponent,
-    NamesPartFeatureComponent,
-    NotePartFeatureComponent,
-    PhysicalMeasurementsPartFeatureComponent,
-    PhysicalStatesPartFeatureComponent,
-    PinLinksFragmentFeatureComponent,
-    PinLinksPartFeatureComponent,
-    TiledTextLayerPartFeatureComponent,
-    TiledTextPartFeatureComponent,
-    TokenTextLayerPartFeatureComponent,
-    TokenTextPartFeatureComponent,
-  ],
-})
-export class CadmusPartGeneralPgModule {}
+];

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -83,8 +83,9 @@ export class KeywordsPartComponent
   public newLanguage: FormControl<string | null>;
   public newValue: FormControl<string | null>;
   public newForm: FormGroup;
+
   // thesaurus
-  public langEntries?: ThesaurusEntry[];
+  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -118,9 +119,9 @@ export class KeywordsPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     const key = 'languages';
     if (this.hasThesaurus(key)) {
-      this.langEntries = thesauri[key].entries;
+      this.langEntries.set(thesauri[key].entries);
     } else {
-      this.langEntries = undefined;
+      this.langEntries.set(undefined);
     }
   }
 

@@ -1,11 +1,11 @@
 import {
   Component,
   effect,
-  input,
   model,
   OnDestroy,
   OnInit,
   output,
+  signal,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -34,7 +34,6 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
 
 import { GraphService, UriNode, UriTriple } from '@myrmidon/cadmus-api';
-import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { GraphNodeLookupService } from '../../services/graph-node-lookup.service';
 
@@ -62,16 +61,11 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
   public readonly triple = model<UriTriple>();
 
   /**
-   * The optional set of thesaurus entries for triple's tags.
-   */
-  // public readonly tagEntries = input<ThesaurusEntry[]>();
-
-  /**
    * Emitted when the user requested to close the editor.
    */
   public readonly editorClose = output();
 
-  public isNew: boolean;
+  public readonly isNew = signal<boolean>(true);
 
   public subjectNode: FormControl<UriNode | null>;
   public predicateNode: FormControl<UriNode | null>;
@@ -89,7 +83,6 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
     private _snackbar: MatSnackBar,
     private _graphService: GraphService
   ) {
-    this.isNew = true;
     // form
     this.subjectNode = formBuilder.control(null, Validators.required);
     this.predicateNode = formBuilder.control(null, Validators.required);
@@ -189,7 +182,7 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
     if (!triple) {
       this.form.reset();
       this.isLiteral.setValue(true);
-      this.isNew = true;
+      this.isNew.set(true);
       return;
     }
 
@@ -224,7 +217,7 @@ export class GraphTripleEditorComponent implements OnInit, OnDestroy {
       this.literalLang.setValue(triple.literalLanguage || null);
       this.literalType.setValue(triple.literalType || null);
     }
-    this.isNew = triple.id ? false : true;
+    this.isNew.set(triple.id ? false : true);
     this.form.markAsPristine();
   }
 

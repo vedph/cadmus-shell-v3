@@ -10,8 +10,8 @@
     </mat-card-header>
     <mat-card-content>
       <cadmus-refs-decorated-counts
-        [idEntries]="idEntries"
-        [tagEntries]="tagEntries"
+        [idEntries]="idEntries()"
+        [tagEntries]="tagEntries()"
         [counts]="counts.value"
         (countsChange)="onCountsChange($event!)"
       />

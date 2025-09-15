@@ -205,8 +205,10 @@ export class TiledDataComponent implements OnInit, OnDestroy {
         if (!ok) {
           return;
         }
-        delete this.data()![key.value];
-        this.updateForm();
+        const data = { ...this.data() };
+        delete data[key.value];
+        this.data.set(data);
+        this.updateForm(this.data());
       });
   }
 
@@ -214,7 +216,10 @@ export class TiledDataComponent implements OnInit, OnDestroy {
     if (this.newForm.invalid) {
       return;
     }
-    this.data()![this.newKey.value!] = this.newValue.value;
+
+    const newData = { ...this.data() };
+    newData[this.newKey.value!] = this.newValue.value;
+    this.data.set(newData);
     this.newForm.reset();
     this.updateForm(this.data());
   }

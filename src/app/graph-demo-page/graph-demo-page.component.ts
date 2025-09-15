@@ -13,7 +13,7 @@ import {
 import {
   GraphWalkerComponent,
   GraphNode,
-} from '../../../projects/myrmidon/cadmus-graph-ui-ex/src/public-api';
+} from '@myrmidon/cadmus-graph-ui-ex';
 
 @Component({
   selector: 'app-graph-demo-page',

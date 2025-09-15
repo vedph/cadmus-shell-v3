@@ -8,6 +8,7 @@ import {
   output,
   input,
   effect,
+  signal,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -105,9 +106,9 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
    */
   public readonly querySubmit = output<string>();
 
-  public partDefs?: PartDefViewModel[];
-  public pinDefs?: DataPinDefinition[];
-  public loadingPinDefs?: boolean;
+  public readonly partDefs = signal<PartDefViewModel[]>([]);
+  public readonly pinDefs = signal<DataPinDefinition[]>([]);
+  public readonly loadingPinDefs = signal<boolean>(false);
 
   constructor(
     formBuilder: FormBuilder,
@@ -141,7 +142,7 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
 
   private updatePartDefs(facets: FacetDefinition[]): void {
     // reset any pin definitions
-    this.pinDefs = undefined;
+    this.pinDefs.set([]);
 
     // collect definitions VMs
     const partDefs: PartDefViewModel[] = [];
@@ -167,7 +168,7 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     partDefs.sort((a, b) => {
       return a.sortKey.localeCompare(b.sortKey);
     });
-    this.partDefs = partDefs;
+    this.partDefs.set(partDefs);
   }
 
   public ngOnInit(): void {
@@ -179,15 +180,15 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     this.partDef.valueChanges
       .pipe(debounceTime(200), distinctUntilChanged())
       .subscribe((id) => {
-        this.loadingPinDefs = true;
+        this.loadingPinDefs.set(true);
         this._itemService.getDataPinDefinitions(id!).subscribe({
           next: (defs) => {
-            this.loadingPinDefs = false;
-            this.pinDefs = defs;
+            this.loadingPinDefs.set(false);
+            this.pinDefs.set(defs);
           },
           error: (err) => {
             console.error(err);
-            this.loadingPinDefs = false;
+            this.loadingPinDefs.set(false);
           },
         });
       });

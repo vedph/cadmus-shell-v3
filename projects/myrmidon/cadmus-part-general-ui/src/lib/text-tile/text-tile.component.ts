@@ -8,6 +8,7 @@ import {
   effect,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { distinctUntilChanged } from 'rxjs/operators';
 
@@ -69,8 +70,8 @@ export class TextTileComponent implements OnInit, OnDestroy {
   public checker: FormControl<boolean>;
   public form: FormGroup;
 
-  public text?: string;
-  public editing?: boolean;
+  public readonly text = signal<string | undefined>(undefined);
+  public readonly editing = signal<boolean>(false);
 
   constructor(formBuilder: FormBuilder) {
     // form
@@ -86,7 +87,8 @@ export class TextTileComponent implements OnInit, OnDestroy {
     this.checker = formBuilder.control(false, { nonNullable: true });
 
     effect(() => {
-      this.updateForm(this.tile());
+      const tile = this.tile();
+      this.updateForm(tile);
     });
 
     effect(() => {
@@ -105,10 +107,6 @@ export class TextTileComponent implements OnInit, OnDestroy {
         }
         if (this.tile()) {
           this.checked.set(this.checker.value);
-          // this.checkedChange.emit({
-          //   checked: this.checker.value,
-          //   tile: this.tile()!,
-          // });
         }
       });
   }
@@ -120,10 +118,10 @@ export class TextTileComponent implements OnInit, OnDestroy {
   private updateForm(tile?: TextTile): void {
     if (!tile) {
       this.form.reset();
-      this.text = undefined;
+      this.text.set(undefined);
     } else {
-      this.text = tile.data ? tile.data[TEXT_TILE_TEXT_DATA_NAME] : undefined;
-      this.editedText.setValue(this.text || null);
+      this.text.set(tile.data ? tile.data[TEXT_TILE_TEXT_DATA_NAME] : undefined);
+      this.editedText.setValue(this.text() || null);
       this.form.markAsPristine();
     }
   }
@@ -141,10 +139,10 @@ export class TextTileComponent implements OnInit, OnDestroy {
   }
 
   public edit(): void {
-    if (this.editing || this.readonly()) {
+    if (this.editing() || this.readonly()) {
       return;
     }
-    this.editing = true;
+    this.editing.set(true);
     setTimeout(() => {
       this.textElement?.nativeElement.focus();
       this.textElement?.nativeElement.select();
@@ -152,20 +150,20 @@ export class TextTileComponent implements OnInit, OnDestroy {
   }
 
   public requestEditData(): void {
-    if (this.editing || this.readonly()) {
+    if (this.editing() || this.readonly()) {
       return;
     }
     this.editData.emit(this.tile()!);
   }
 
   public cancel(): void {
-    this.editing = false;
+    this.editing.set(false);
   }
 
   private getTile(): TextTile {
     const tile: TextTile = { ...this.tile()!, data: {} };
-    this.text = this.editedText.value?.trim() || undefined;
-    tile.data![TEXT_TILE_TEXT_DATA_NAME] = this.text;
+    this.text.set(this.editedText.value?.trim() || undefined);
+    tile.data![TEXT_TILE_TEXT_DATA_NAME] = this.text();
     return tile;
   }
 
@@ -174,6 +172,6 @@ export class TextTileComponent implements OnInit, OnDestroy {
       return;
     }
     this.tile.set(this.getTile());
-    this.editing = false;
+    this.editing.set(false);
   }
 }

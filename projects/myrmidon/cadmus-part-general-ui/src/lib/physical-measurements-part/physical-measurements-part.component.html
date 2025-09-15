@@ -10,9 +10,9 @@
     </mat-card-header>
     <mat-card-content>
       <cadmus-mat-physical-measurement-set
-        [nameEntries]="nameEntries"
-        [unitEntries]="unitEntries || []"
-        [dimTagEntries]="dimTagEntries"
+        [nameEntries]="nameEntries()"
+        [unitEntries]="unitEntries() || []"
+        [dimTagEntries]="dimTagEntries()"
         [measurements]="measurements.value"
         (measurementsChange)="onMeasurementsChange($event!)"
       />

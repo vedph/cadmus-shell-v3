@@ -11,11 +11,11 @@
         <mat-tab label="comment">
           <!-- tag (bound) -->
           <div>
-            @if (comTagEntries?.length) {
+            @if (comTagEntries()?.length) {
             <mat-form-field>
               <mat-label>tag</mat-label>
               <mat-select [formControl]="tag">
-                @for (e of comTagEntries; track e.id) {
+                @for (e of comTagEntries(); track e.id) {
                 <mat-option [value]="e.id">{{ e.value }}</mat-option>
                 }
               </mat-select>
@@ -56,8 +56,8 @@
             <legend>references</legend>
             <cadmus-refs-doc-references
               [references]="references.value"
-              [tagEntries]="refTagEntries"
-              [typeEntries]="refTypeEntries"
+              [tagEntries]="refTagEntries()"
+              [typeEntries]="refTypeEntries()"
               (referencesChange)="onReferencesChange($event)"
             />
           </fieldset>
@@ -66,11 +66,11 @@
           <fieldset>
             <legend>links</legend>
             <cadmus-refs-asserted-composite-ids
-              [idScopeEntries]="idScopeEntries"
-              [idTagEntries]="idTagEntries"
-              [assTagEntries]="assTagEntries"
-              [refTypeEntries]="refTypeEntries"
-              [refTagEntries]="refTagEntries"
+              [idScopeEntries]="idScopeEntries()"
+              [idTagEntries]="idTagEntries()"
+              [assTagEntries]="assTagEntries()"
+              [refTypeEntries]="refTypeEntries()"
+              [refTagEntries]="refTagEntries()"
               [pinByTypeMode]="true"
               [canSwitchMode]="true"
               [canEditTarget]="true"
@@ -81,14 +81,14 @@
         </mat-tab>
 
         <!-- categories -->
-        @if (catEntries?.length) {
+        @if (catEntries()?.length) {
         <mat-tab label="categories">
           <div id="container">
             <div id="picker">
               <fieldset>
                 <legend>available categories</legend>
                 <cadmus-thesaurus-tree
-                  [entries]="catEntries"
+                  [entries]="catEntries()"
                   rootLabel="categories"
                   [renderLabel]="renderLabel"
                   (entryChange)="onCategoryChange($event)"
@@ -177,11 +177,11 @@
                 </button>
                 <!-- child controls -->
                 <!-- indexId (bound) -->
-                @if (idxEntries?.length) {
+                @if (idxEntries()?.length) {
                 <mat-form-field>
                   <mat-label>index</mat-label>
                   <mat-select formControlName="indexId">
-                    @for (e of idxEntries; track e.id) {
+                    @for (e of idxEntries(); track e.id) {
                     <mat-option [value]="e.id">{{ e.value }}</mat-option>
                     }
                   </mat-select>
@@ -200,11 +200,11 @@
                 </mat-form-field>
                 }
                 <!-- tag (bound) -->
-                @if (keyTagEntries?.length) {
+                @if (keyTagEntries()?.length) {
                 <mat-form-field>
                   <mat-label>tag</mat-label>
                   <mat-select formControlName="tag">
-                    @for (e of keyTagEntries; track e.id) {
+                    @for (e of keyTagEntries(); track e.id) {
                     <mat-option [value]="e.id">{{ e.value }}</mat-option>
                     }
                   </mat-select>
@@ -223,11 +223,11 @@
                 </mat-form-field>
                 }
                 <!-- language (bound) -->
-                @if (langEntries?.length) {
+                @if (langEntries()?.length) {
                 <mat-form-field>
                   <mat-label>language</mat-label>
                   <mat-select formControlName="language">
-                    @for (e of langEntries; track e.id) {
+                    @for (e of langEntries(); track e.id) {
                     <mat-option [value]="e.id">{{ e.value }}</mat-option>
                     }
                   </mat-select>

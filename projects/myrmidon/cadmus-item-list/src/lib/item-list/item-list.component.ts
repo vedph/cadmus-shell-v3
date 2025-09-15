@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
@@ -62,8 +62,8 @@ export class ItemListComponent implements OnInit, OnDestroy {
   public facets: FacetDefinition[] = [];
   public flags: FlagDefinition[] = [];
 
-  public user?: User;
-  public userLevel: number;
+  public readonly user = signal<User | undefined>(undefined);
+  public readonly userLevel = signal<number>(0);
 
   constructor(
     private _repository: ItemListRepository,
@@ -73,7 +73,6 @@ export class ItemListComponent implements OnInit, OnDestroy {
     private _userLevelService: UserLevelService,
     private _appRepository: AppRepository
   ) {
-    this.userLevel = 0;
     this.loading$ = _repository.loading$;
     this.page$ = _repository.page$;
   }
@@ -86,8 +85,8 @@ export class ItemListComponent implements OnInit, OnDestroy {
 
     this._sub = this._authService.currentUser$.subscribe(
       (user: User | null) => {
-        this.user = user ?? undefined;
-        this.userLevel = this._userLevelService.getCurrentUserLevel();
+        this.user.set(user ?? undefined);
+        this.userLevel.set(this._userLevelService.getCurrentUserLevel());
       }
     );
   }
@@ -109,7 +108,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
   }
 
   public deleteItem(item: ItemInfo): void {
-    if (this.user?.roles.every((r) => r !== 'admin' && r !== 'editor')) {
+    if (this.user()?.roles.every((r) => r !== 'admin' && r !== 'editor')) {
       return;
     }
 

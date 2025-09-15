@@ -1,7 +1,7 @@
 <form [formGroup]="form" (submit)="save()">
   <!-- uri (readonly if not new) -->
   <div class="form-row">
-    @if (isNew) {
+    @if (isNew()) {
     <mat-form-field>
       <mat-label>uri</mat-label>
       <input matInput [formControl]="uri" />
@@ -11,7 +11,7 @@
       <mat-error>uri too long</mat-error>
       }
     </mat-form-field>
-    } @if (!isNew) {
+    } @else {
     <span style="color: silver">{{ uri.value }} </span>
     }
 

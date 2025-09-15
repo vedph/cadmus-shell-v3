@@ -16,7 +16,7 @@
         mat-flat-button
         class="mat-primary"
         (click)="fileInput.click()"
-        [disabled]="uploading"
+        [disabled]="uploading()"
       >
         select file
       </button>
@@ -99,7 +99,7 @@
         type="submit"
         mat-flat-button
         class="mat-warn"
-        [disabled]="uploading || form.invalid"
+        [disabled]="uploading() || form.invalid"
       >
         upload
       </button>
@@ -108,7 +108,7 @@
 </form>
 
 <!-- uploading -->
-@if (uploading) {
+@if (uploading()) {
 <div>
   <div>
     <button type="button" mat-flat-button class="mat-warn" (click)="onCancel()">
@@ -116,17 +116,17 @@
     </button>
   </div>
   <div style="margin-top: 16px">
-    <mat-progress-bar max="100" [value]="uploadProgress"></mat-progress-bar>
+    <mat-progress-bar max="100" [value]="uploadProgress()"></mat-progress-bar>
   </div>
 </div>
 }
 
 <!-- result -->
-@if (result) {
+@if (result()) {
 <div>
-  @if (result.error) {
-  <div class="error">{{ result.error }}</div>
-  } @if (result.importedIds.length) {
+  @if (result()!.error) {
+  <div class="error">{{ result()!.error }}</div>
+  } @if (result()!.importedIds.length) {
   <div>
     <div>
       <mat-card>
@@ -135,7 +135,7 @@
         </mat-card-header>
         <mat-card-content>
           <ol>
-            @for (id of result.importedIds; track id) {
+            @for (id of result()!.importedIds; track id) {
             <li>{{ id }}</li>
             }
           </ol>

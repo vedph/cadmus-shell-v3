@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -44,7 +44,7 @@ import { MatButton } from '@angular/material/button';
   ],
 })
 export class ItemGenerateDialogComponent {
-  public flags: FlagDefinition[] = [];
+  public readonly flags = signal<FlagDefinition[]>([]);
 
   public itemCount: FormControl<number>;
   public itemTitle: FormControl<string>;
@@ -74,7 +74,7 @@ export class ItemGenerateDialogComponent {
       itemFlags: this.itemFlags,
     });
     // flags definitions
-    this.flags = (config as any)?.flags || [];
+    this.flags.set((config as any)?.flags || []);
   }
 
   public apply(): void {

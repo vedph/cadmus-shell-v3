@@ -30,7 +30,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { FlatLookupPipe } from '@myrmidon/ngx-tools';
+import { deepCopy, FlatLookupPipe } from '@myrmidon/ngx-tools';
 import {
   AssertedChronotope,
   AssertedChronotopeSetComponent,
@@ -81,12 +81,11 @@ const RELATION_SEP = ':';
   ],
 })
 export class HistoricalEventEditorComponent {
-  private _editedEntityIndex: number;
-
   /**
    * The event being edited.
    */
   public readonly event = model<HistoricalEvent>();
+
   /**
    * Thesaurus event-types (hierarchical).
    */
@@ -169,14 +168,16 @@ export class HistoricalEventEditorComponent {
     if (!prefix) {
       return this.relationEntries()!;
     }
-    const filtered = this.relationEntries()!.filter((e) => e.id.startsWith(prefix));
+    const filtered = this.relationEntries()!.filter((e) =>
+      e.id.startsWith(prefix)
+    );
     return filtered;
   });
 
-  public editedEntity?: RelatedEntity;
+  public readonly editedEntity = signal<RelatedEntity | undefined>(undefined);
+  public readonly editedEntityIndex = signal<number>(-1);
 
   constructor(formBuilder: FormBuilder) {
-    this._editedEntityIndex = -1;
     // form
     this.eid = formBuilder.control(null, [
       Validators.required,
@@ -206,7 +207,8 @@ export class HistoricalEventEditorComponent {
     });
 
     effect(() => {
-      this.updateForm(this.event());
+      const event = this.event();
+      this.updateForm(event);
     });
   }
 
@@ -260,9 +262,13 @@ export class HistoricalEventEditorComponent {
     this.description.setValue(model.description || null, { emitEvent: false });
     this.note.setValue(model.note || null, { emitEvent: false });
     this.chronotopes.setValue(model.chronotopes || [], { emitEvent: false });
-    this.hasAssertion.setValue(model.assertion ? true : false, { emitEvent: false });
+    this.hasAssertion.setValue(model.assertion ? true : false, {
+      emitEvent: false,
+    });
     this.assertion.setValue(model.assertion || null, { emitEvent: false });
-    this.relatedEntities.setValue(model.relatedEntities || [], { emitEvent: false });
+    this.relatedEntities.setValue(model.relatedEntities || [], {
+      emitEvent: false,
+    });
 
     this.form.markAsPristine();
 
@@ -315,8 +321,8 @@ export class HistoricalEventEditorComponent {
   }
 
   public editEntity(entity: RelatedEntity, index: number): void {
-    this._editedEntityIndex = index;
-    this.editedEntity = entity;
+    this.editedEntityIndex.set(index);
+    this.editedEntity.set(deepCopy(entity));
   }
 
   public onEntityChange(entity: RelatedEntity): void {
@@ -331,10 +337,10 @@ export class HistoricalEventEditorComponent {
     }
     // add or replace
     const entities = [...this.relatedEntities.value];
-    if (this._editedEntityIndex === -1) {
+    if (this.editedEntityIndex() === -1) {
       entities.push(entity);
     } else {
-      entities.splice(this._editedEntityIndex, 1, entity);
+      entities.splice(this.editedEntityIndex(), 1, entity);
     }
     this.relatedEntities.setValue(entities);
     this.relatedEntities.updateValueAndValidity();
@@ -343,12 +349,12 @@ export class HistoricalEventEditorComponent {
   }
 
   public closeEntity(): void {
-    this._editedEntityIndex = -1;
-    this.editedEntity = undefined;
+    this.editedEntityIndex.set(-1);
+    this.editedEntity.set(undefined);
   }
 
   public deleteEntity(index: number): void {
-    if (this._editedEntityIndex === index) {
+    if (this.editedEntityIndex() === index) {
       this.closeEntity();
     }
     if (index > -1) {

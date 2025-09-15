@@ -9,14 +9,13 @@
   (keydown.F3)="requestEditData()"
   (keydown.space)="toggleCheckedNonEdit()"
 >
-  @if (editing) {
+  @if (editing()) {
   <form [formGroup]="form" (submit)="save()">
     <mat-form-field>
       <mat-label>text [{{ tile()!.x }}]</mat-label>
       <input
         #textInput
         matInput
-        type="text"
         spellcheck="false"
         formControlName="editedText"
         (keydown.esc)="cancel()"
@@ -49,9 +48,9 @@
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </form>
-  } @if (!editing) {
+  } @else {
   <ng-container style="display: flex; align-items: center">
-    <span class="text">{{ text }}</span>
+    <span class="text">{{ text() }}</span>
     @if (!readonly()) {
     <button
       type="button"

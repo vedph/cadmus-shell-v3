@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 
 import { TextLayerPart } from '@myrmidon/cadmus-core';
 import { FacetService } from '@myrmidon/cadmus-api';
@@ -21,9 +21,9 @@ export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
     private _facetService: FacetService
   ) {}
 
-  public typeId?: string;
-  public roleId?: string;
-  public color?: string;
+  public readonly typeId = signal<string | undefined>(undefined);
+  public readonly roleId = signal<string | undefined>(undefined);
+  public readonly color = signal<string | undefined>(undefined);
 
   private getTypeIdName(typeId: string): string {
     const typeThesaurus = this._appRepository.getTypeThesaurus();
@@ -55,14 +55,14 @@ export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
     const part: TextLayerPart | undefined =
       this._editedLayerRepository.getPart();
     if (!part) {
-      this.typeId = undefined;
-      this.roleId = undefined;
-      this.color = undefined;
+      this.typeId.set(undefined);
+      this.roleId.set(undefined);
+      this.color.set(undefined);
       return;
     } else {
-      this.typeId = this.getTypeIdName(part.typeId);
-      this.roleId = this.getRoleIdName(part.roleId);
-      this.color = this.getPartColor(part.typeId, part.roleId);
+      this.typeId.set(this.getTypeIdName(part.typeId));
+      this.roleId.set(this.getRoleIdName(part.roleId));
+      this.color.set(this.getPartColor(part.typeId, part.roleId));
     }
   }
 

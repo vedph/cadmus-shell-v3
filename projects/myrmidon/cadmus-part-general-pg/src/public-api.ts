@@ -30,4 +30,4 @@ export * from './lib/tiled-text-part-feature/tiled-text-part-feature.component';
 export * from './lib/token-text-layer-part-feature/token-text-layer-part-feature.component';
 export * from './lib/token-text-part-feature/token-text-part-feature.component';
 
-export * from './lib/cadmus-part-general-pg.module';
+export * from './lib/cadmus-part-general-pg.routes';

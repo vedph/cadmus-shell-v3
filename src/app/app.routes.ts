@@ -3,8 +3,8 @@ import { Routes } from '@angular/router';
 // myrmidon
 import { jwtAdminGuard, jwtGuard } from '@myrmidon/auth-jwt-login';
 
-// libraries in this workspace
-import { pendingChangesGuard } from '../../projects/myrmidon/cadmus-core/src/public-api';
+import { pendingChangesGuard } from '@myrmidon/cadmus-core';
+import { editorGuard } from '@myrmidon/cadmus-api';
 
 // locals
 import { HomeComponent } from './home/home.component';
@@ -14,7 +14,6 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
 import { LoginPageComponent } from './login-page/login-page.component';
 import { EditFrameStatsPageComponent } from './edit-frame-stats-page/edit-frame-stats-page.component';
 import { GraphDemoPageComponent } from './graph-demo-page/graph-demo-page.component';
-import { editorGuard } from '../../projects/myrmidon/cadmus-api/src/public-api';
 
 export const routes: Routes = [
   // auth
@@ -100,7 +99,7 @@ export const routes: Routes = [
     path: 'items/:iid/general',
     loadChildren: () =>
       import('@myrmidon/cadmus-part-general-pg').then(
-        (module) => module.CadmusPartGeneralPgModule
+        (module) => module.CADMUS_PART_GENERAL_ROUTES
       ),
     canActivate: [jwtGuard],
   },
@@ -108,7 +107,7 @@ export const routes: Routes = [
     path: 'items/:iid/philology',
     loadChildren: () =>
       import('@myrmidon/cadmus-part-philology-pg').then(
-        (module) => module.CadmusPartPhilologyPgModule
+        (module) => module.CADMUS_PART_PHILOLOGY_PG_ROUTES
       ),
     canActivate: [jwtGuard],
   },
@@ -126,7 +125,7 @@ export const routes: Routes = [
     path: 'preview',
     loadChildren: () =>
       import('@myrmidon/cadmus-preview-pg').then(
-        (module) => module.CadmusPreviewPgModule
+        (module) => module.CADMUS_PART_PREVIEW_PG_ROUTES
       ),
     canActivate: [jwtGuard],
   },

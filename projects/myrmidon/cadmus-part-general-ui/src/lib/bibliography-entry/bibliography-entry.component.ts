@@ -6,6 +6,7 @@ import {
   effect,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
@@ -110,7 +111,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
   public firstPage: FormControl<number | null>;
   public lastPage: FormControl<number | null>;
   // form - keywords
-  public keywords: Keyword[];
+  public readonly keywords = signal<Keyword[]>([]);
   public keyLanguage: FormControl<string | null>;
   public keyValue: FormControl<string | null>;
   public keyForm: FormGroup;
@@ -160,7 +161,6 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       Validators.max(10000),
     ]);
     // form - keywords
-    this.keywords = [];
     this.keyLanguage = _formBuilder.control(null, [
       Validators.required,
       Validators.pattern(/^[a-z]{3}$/),
@@ -272,7 +272,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     this.accessDate.setValue(entry.accessDate || null);
     this.firstPage.setValue(entry.firstPage || null);
     this.lastPage.setValue(entry.lastPage || null);
-    this.keywords = entry?.keywords || [];
+    this.keywords.set(entry?.keywords || []);
 
     this.form.markAsPristine();
   }
@@ -311,7 +311,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       accessDate: this.accessDate.value || undefined,
       firstPage: this.firstPage.value || undefined,
       lastPage: this.lastPage.value || undefined,
-      keywords: this.keywords.length ? this.keywords : undefined,
+      keywords: this.keywords.length ? this.keywords() : undefined,
     };
   }
 
@@ -320,23 +320,27 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       return;
     }
     if (
-      !this.keywords.some(
+      !this.keywords().some(
         (k) =>
           k.language === this.keyLanguage.value &&
           k.value === this.keyValue.value
       )
     ) {
-      this.keywords.push({
+      const keywords = [...this.keywords()];
+      keywords.push({
         language: this.keyLanguage.value!,
         value: this.keyValue.value!,
       });
+      this.keywords.set(keywords);
       this.keyValue.reset();
       this.form.markAsDirty();
     }
   }
 
   public deleteKeyword(index: number): void {
-    this.keywords.splice(index, 1);
+    const keywords = [...this.keywords()];
+    keywords.splice(index, 1);
+    this.keywords.set(keywords);
     this.form.markAsDirty();
   }
 
@@ -344,20 +348,22 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     if (index < 1) {
       return;
     }
-    const k = this.keywords[index];
-    this.keywords.splice(index, 1);
-    this.keywords.splice(index - 1, 0, k);
-    this.form.markAsDirty();
+    const keywords = [...this.keywords()];
+    const k = keywords[index];
+    keywords.splice(index, 1);
+    keywords.splice(index - 1, 0, k);
+    this.keywords.set(keywords);
   }
 
   public moveKeywordDown(index: number): void {
-    if (index + 1 >= this.keywords.length) {
+    if (index + 1 >= this.keywords().length) {
       return;
     }
-    const k = this.keywords[index];
-    this.keywords.splice(index, 1);
-    this.keywords.splice(index + 1, 0, k);
-    this.form.markAsDirty();
+    const k = this.keywords()[index];
+    const keywords = [...this.keywords()];
+    keywords.splice(index, 1);
+    keywords.splice(index + 1, 0, k);
+    this.keywords.set(keywords);
   }
 
   public cancel(): void {

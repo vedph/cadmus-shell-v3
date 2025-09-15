@@ -1,4 +1,4 @@
-import { Component, effect, input, Input } from '@angular/core';
+import { Component, effect, input, Input, signal } from '@angular/core';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 
 import { MatTooltip } from '@angular/material/tooltip';
@@ -20,9 +20,9 @@ export class FacetBadgeComponent {
   private _facetColors: { [key: string]: string };
   private _facetTips: { [key: string]: string };
 
-  public color: string;
-  public contrastColor: string;
-  public tip?: string;
+  public readonly color = signal<string>('transparent');
+  public readonly contrastColor = signal<string>('black');
+  public readonly tip = signal<string | undefined>(undefined);
 
   /**
    * The facet data.
@@ -34,8 +34,6 @@ export class FacetBadgeComponent {
   constructor(private _colorService: ColorService) {
     this._facetColors = {};
     this._facetTips = {};
-    this.color = 'transparent';
-    this.contrastColor = 'black';
 
     effect(() => {
       this.updateBadge(this.data());
@@ -94,8 +92,8 @@ export class FacetBadgeComponent {
   private updateBadge(data?: FacetBadgeData) {
     this._facetColors = {};
     this._facetTips = {};
-    this.color = this.getFacetColor(data?.facetId || '');
-    this.contrastColor = this._colorService.getContrastColor(this.color);
-    this.tip = this.getFacetTip(data?.facetId || '') ?? undefined;
+    this.color.set(this.getFacetColor(data?.facetId || ''));
+    this.contrastColor.set(this._colorService.getContrastColor(this.color()));
+    this.tip.set(this.getFacetTip(data?.facetId || '') ?? undefined);
   }
 }

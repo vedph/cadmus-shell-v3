@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -22,7 +22,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { deepCopy, NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
@@ -76,19 +76,18 @@ export class BibliographyPartComponent
   extends ModelEditorComponentBase<BibliographyPart>
   implements OnInit
 {
-  private _editedEntryIndex: number;
-
-  public editedEntry?: BibEntry;
+  public readonly editedIndex = signal<number>(-1);
+  public readonly edited = signal<BibEntry | undefined>(undefined);
 
   // thesauri
   // bibliography-languages
-  public langEntries: ThesaurusEntry[] | undefined;
+  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // bibliography-author-roles
-  public roleEntries: ThesaurusEntry[] | undefined;
+  public readonly roleEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // bibliography-tags
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // bibliography-types
-  public typeEntries: ThesaurusEntry[] | undefined;
+  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   // form
   public entries: FormControl<BibEntry[]>;
@@ -99,7 +98,6 @@ export class BibliographyPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this._editedEntryIndex = -1;
     // form
     this.entries = formBuilder.control<BibEntry[]>([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -120,30 +118,30 @@ export class BibliographyPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'bibliography-languages';
     if (this.hasThesaurus(key)) {
-      this.langEntries = thesauri[key].entries;
+      this.langEntries.set(thesauri[key].entries);
     } else {
-      this.langEntries = undefined;
+      this.langEntries.set(undefined);
     }
 
     key = 'bibliography-types';
     if (this.hasThesaurus(key)) {
-      this.typeEntries = thesauri[key].entries;
+      this.typeEntries.set(thesauri[key].entries);
     } else {
-      this.typeEntries = undefined;
+      this.typeEntries.set(undefined);
     }
 
     key = 'bibliography-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
 
     key = 'bibliography-author-roles';
     if (this.hasThesaurus(key)) {
-      this.roleEntries = thesauri[key].entries;
+      this.roleEntries.set(thesauri[key].entries);
     } else {
-      this.roleEntries = undefined;
+      this.roleEntries.set(undefined);
     }
   }
 
@@ -167,10 +165,10 @@ export class BibliographyPartComponent
   }
 
   public entryTypeToString(id?: string): string {
-    if (!id || !this.typeEntries?.entries) {
+    if (!id || !this.typeEntries()?.entries) {
       return '';
     }
-    const entry = this.typeEntries.find((e) => e.id === id);
+    const entry = this.typeEntries()?.find((e) => e.id === id);
     return entry ? entry.value : id;
   }
 
@@ -182,32 +180,32 @@ export class BibliographyPartComponent
 
   public addEntry(): void {
     const entry: BibEntry = {
-      typeId: this.typeEntries ? this.typeEntries[0].id : '',
+      typeId: this.typeEntries()?.length ? this.typeEntries()![0].id : '',
       title: '',
-      language: this.langEntries ? this.langEntries[0].id : '',
+      language: this.langEntries()?.length ? this.langEntries()![0].id : '',
     };
     this.editEntry(entry, -1);
   }
 
   public editEntry(entry: BibEntry, index: number): void {
-    this._editedEntryIndex = index;
-    this.editedEntry = entry;
+    this.editedIndex.set(index);
+    this.edited.set(deepCopy(entry));
   }
 
   public closeEntry(): void {
-    this._editedEntryIndex = -1;
-    this.editedEntry = undefined;
+    this.editedIndex.set(-1);
+    this.edited.set(undefined);
   }
 
   public saveEntry(entry: BibEntry): void {
-    if (!this.editedEntry) {
+    if (!this.edited) {
       return;
     }
-    if (this._editedEntryIndex === -1) {
+    if (this.editedIndex() === -1) {
       this.entries.setValue([...this.entries.value, entry]);
     } else {
       const entries = [...this.entries.value];
-      entries.splice(this._editedEntryIndex, 1, entry);
+      entries.splice(this.editedIndex(), 1, entry);
       this.entries.setValue(entries);
     }
     this.entries.markAsDirty();

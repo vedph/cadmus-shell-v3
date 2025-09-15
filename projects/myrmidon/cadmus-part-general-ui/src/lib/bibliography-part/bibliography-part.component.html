@@ -30,7 +30,7 @@
         <tbody>
           @for ( entry of entries.value; track entry; let i = $index; let first
           = $first; let last = $last) {
-          <tr [class.selected]="editedEntry === entry">
+          <tr [class.selected]="i === editedIndex()">
             <td class="fit-width">
               <button
                 mat-icon-button
@@ -78,21 +78,21 @@
       <!-- entry editor -->
       <mat-expansion-panel
         id="editor"
-        [expanded]="editedEntry"
-        [disabled]="!editedEntry"
+        [expanded]="edited()"
+        [disabled]="!edited()"
       >
         <mat-expansion-panel-header>
           <mat-panel-title>
-            {{ editedEntry?.title || "entry" }}
+            {{ edited()?.title || "entry" }}
           </mat-panel-title>
         </mat-expansion-panel-header>
         <fieldset>
           <cadmus-bibliography-entry
-            [entry]="editedEntry"
-            [langEntries]="langEntries"
-            [typeEntries]="typeEntries"
-            [tagEntries]="tagEntries"
-            [roleEntries]="roleEntries"
+            [entry]="edited()"
+            [langEntries]="langEntries()"
+            [typeEntries]="typeEntries()"
+            [tagEntries]="tagEntries()"
+            [roleEntries]="roleEntries()"
             (editorClose)="closeEntry()"
             (entryChange)="saveEntry($event!)"
           />

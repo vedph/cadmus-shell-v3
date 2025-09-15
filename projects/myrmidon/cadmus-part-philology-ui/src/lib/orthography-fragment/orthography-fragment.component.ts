@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -10,13 +10,6 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import {
-  trigger,
-  transition,
-  style,
-  animate,
-  state,
-} from '@angular/animations';
 import { take } from 'rxjs/operators';
 
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -69,23 +62,6 @@ import { MspOperationComponent } from '../msp-operation/msp-operation.component'
   selector: 'cadmus-orthography-fragment',
   templateUrl: './orthography-fragment.component.html',
   styleUrls: ['./orthography-fragment.component.css'],
-  animations: [
-    trigger('slideInOut', [
-      state(
-        'open',
-        style({
-          height: '100%',
-        })
-      ),
-      state(
-        'close',
-        style({
-          height: 0,
-        })
-      ),
-      transition('open <=> closed', [animate('300ms ease-in')]),
-    ]),
-  ],
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -121,10 +97,11 @@ export class OrthographyFragmentComponent
 
   public standard: FormControl<string>;
   public operations: FormArray;
-  public currentOperation?: MspOperation;
-  public frText?: string;
 
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+
+  public readonly currentOperation = signal<MspOperation | undefined>(undefined);
+  public readonly frText = signal<string | undefined>(undefined);
 
   constructor(
     authService: AuthJwtService,
@@ -159,9 +136,9 @@ export class OrthographyFragmentComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'orthography-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
   }
 
@@ -182,10 +159,10 @@ export class OrthographyFragmentComponent
   protected override onDataSet(data?: EditedObject<OrthographyFragment>): void {
     // fragment's text
     if (data?.baseText && data.value) {
-      this.frText = this._layerService.getTextFragment(
+      this.frText.set(this._layerService.getTextFragment(
         data.baseText,
         TokenLocation.parse(data.value.location)!
-      );
+      ));
     }
 
     // thesauri
@@ -261,8 +238,9 @@ export class OrthographyFragmentComponent
   public editOperation(index: number): void {
     const form = this.operations.at(index) as FormGroup;
     this._currentOperationIndex = index;
-    this.currentOperation =
-      MspOperation.parse(form.controls['text'].value) || undefined;
+    this.currentOperation.set(
+      MspOperation.parse(form.controls['text'].value) || undefined
+    );
   }
 
   public currentOperationSaved(operation: MspOperation): void {
@@ -274,12 +252,12 @@ export class OrthographyFragmentComponent
     form.controls['text'].updateValueAndValidity();
     form.controls['text'].markAsDirty();
     this._currentOperationIndex = -1;
-    this.currentOperation = undefined;
+    this.currentOperation.set(undefined);
   }
 
   public currentOperationClosed(): void {
     this._currentOperationIndex = -1;
-    this.currentOperation = undefined;
+    this.currentOperation.set(undefined);
   }
 
   private getOperations(): string[] {

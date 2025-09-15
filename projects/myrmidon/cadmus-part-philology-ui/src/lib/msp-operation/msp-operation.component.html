@@ -22,7 +22,10 @@
       </mat-form-field>
 
       <!-- visual -->
-      <mat-expansion-panel [(expanded)]="visualExpanded">
+      <mat-expansion-panel
+        [expanded]="visualExpanded()"
+        (expandedChange)="visualExpanded.set($event)"
+      >
         <mat-expansion-panel-header>
           <mat-panel-title> Visual </mat-panel-title>
         </mat-expansion-panel-header>

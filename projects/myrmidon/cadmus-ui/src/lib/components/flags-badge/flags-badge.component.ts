@@ -1,4 +1,4 @@
-import { Component, effect, input, Input } from '@angular/core';
+import { Component, effect, input, Input, signal } from '@angular/core';
 
 import { MatTooltip } from '@angular/material/tooltip';
 
@@ -23,9 +23,9 @@ export interface FlagsBadgeData {
   imports: [MatTooltip],
 })
 export class FlagsBadgeComponent {
-  public badgeFlags: FlagDefinition[] = [];
-
   public readonly data = input<FlagsBadgeData>();
+
+  public readonly badgeFlags = signal<FlagDefinition[]>([]);
 
   constructor() {
     effect(() => {
@@ -37,9 +37,11 @@ export class FlagsBadgeComponent {
     if (!data) {
       return;
     }
-    this.badgeFlags = data.definitions.filter((def) => {
-      // tslint:disable-next-line: no-bitwise
-      return def.id & data!.flags;
-    });
+    this.badgeFlags.set(
+      data.definitions.filter((def) => {
+        // tslint:disable-next-line: no-bitwise
+        return def.id & data!.flags;
+      })
+    );
   }
 }

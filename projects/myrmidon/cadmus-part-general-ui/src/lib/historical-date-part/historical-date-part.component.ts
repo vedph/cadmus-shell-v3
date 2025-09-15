@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -80,8 +80,8 @@ export class HistoricalDatePartComponent
   public references: FormControl<DocReference[]>;
   public date: FormControl<HistoricalDateModel>;
 
-  public typeEntries: ThesaurusEntry[] | undefined;
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -115,16 +115,16 @@ export class HistoricalDatePartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'doc-reference-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
 
     key = 'doc-reference-types';
     if (this.hasThesaurus(key)) {
-      this.typeEntries = thesauri[key].entries;
+      this.typeEntries.set(thesauri[key].entries);
     } else {
-      this.typeEntries = undefined;
+      this.typeEntries.set(undefined);
     }
   }
 

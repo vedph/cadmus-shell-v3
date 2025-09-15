@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import { EditedObject } from '@myrmidon/cadmus-core';
 import {
@@ -50,6 +50,7 @@ import {
   TEXT_TILE_TEXT_DATA_NAME,
   TextTile,
 } from '../tiled-text-part';
+import { deepCopy } from '@myrmidon/ngx-tools';
 
 interface Data {
   [key: string]: any;
@@ -94,12 +95,13 @@ export class TiledTextPartComponent
   private _editedDataTile?: TextTile;
   private _editedDataRow?: TextTileRow;
 
-  public selectedTile?: TextTile;
   public citation: FormControl<string | null>;
   public rows: FormControl<TextTileRow[]>;
-  public editedData?: Data;
-  public editedDataTitle?: string;
-  public currentTabIndex: number;
+
+  public readonly selectedTile = signal<TextTile | undefined>(undefined);
+  public readonly editedData = signal<Data | undefined>(undefined);
+  public readonly editedDataTitle = signal<string | undefined>(undefined);
+  public readonly currentTabIndex = signal<number>(0);
 
   constructor(
     authService: AuthJwtService,
@@ -107,7 +109,6 @@ export class TiledTextPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this.currentTabIndex = 0;
     // form
     this.rows = formBuilder.control([], { nonNullable: true });
     this.citation = formBuilder.control(null, Validators.maxLength(1000));
@@ -198,13 +199,9 @@ export class TiledTextPartComponent
     const x = row.tiles ? row.tiles.length + 1 : 1;
     const data: { [key: string]: any } = {};
     data[TEXT_TILE_TEXT_DATA_NAME] = 'text' + x;
-    if (!row.tiles) {
-      row.tiles = [];
-    }
-    row.tiles.push({
-      x: x,
-      data: data,
-    });
+    // clone tiles array and add new tile
+    const tiles = row.tiles ? [...row.tiles, { x, data }] : [{ x, data }];
+    row.tiles = tiles;
     this.rows.markAsDirty();
     this.rows.updateValueAndValidity();
   }
@@ -213,22 +210,27 @@ export class TiledTextPartComponent
    * Delete the selected tile, if any.
    */
   public deleteSelectedTile(): void {
-    if (!this.selectedTile) {
+    if (!this.selectedTile()) {
       return;
     }
 
     for (let i = 0; i < this.rows.value.length; i++) {
       const row = this.rows.value[i];
-      if (row.tiles) {
-        const index = row.tiles.indexOf(this.selectedTile);
+      if (row.tiles && this.selectedTile()) {
+        const index = row.tiles.indexOf(this.selectedTile()!);
         if (index > -1) {
-          this.selectedTile =
-            index + 1 < row.tiles.length
-              ? row.tiles[index + 1]
-              : row.tiles.length > 1
-              ? row.tiles[index - 1]
-              : undefined;
-          row.tiles.splice(index, 1);
+          // create a new tiles array without the deleted tile
+          const newTiles = row.tiles.slice();
+          newTiles.splice(index, 1);
+          // update selected tile
+          this.selectedTile.set(
+            index + 1 < newTiles.length
+              ? newTiles[index + 1]
+              : newTiles.length > 0
+              ? newTiles[index - 1]
+              : undefined
+          );
+          row.tiles = newTiles;
           this.adjustCoords();
           this.rows.markAsDirty();
           this.rows.updateValueAndValidity();
@@ -266,7 +268,9 @@ export class TiledTextPartComponent
     if (rowIndex < 1) {
       return;
     }
-    moveItemInArray(this.rows.value, rowIndex, rowIndex - 1);
+    const rows = [...this.rows.value];
+    moveItemInArray(rows, rowIndex, rowIndex - 1);
+    this.rows.setValue(rows);
     this.adjustCoords();
     this.form?.markAsDirty();
   }
@@ -279,14 +283,18 @@ export class TiledTextPartComponent
     if (rowIndex + 1 === this.rows.value.length) {
       return;
     }
-    moveItemInArray(this.rows.value, rowIndex, rowIndex + 1);
+    const rows = [...this.rows.value];
+    moveItemInArray(rows, rowIndex, rowIndex + 1);
+    this.rows.setValue(rows);
     this.adjustCoords();
     this.form?.markAsDirty();
   }
 
   public drop(event: CdkDragDrop<TextTile[]>, row: TextTileRow): void {
-    // https://material.angular.io/cdk/drag-drop/overview
-    moveItemInArray(row.tiles, event.previousIndex, event.currentIndex);
+    // clone tiles array before moving
+    const tiles = [...row.tiles];
+    moveItemInArray(tiles, event.previousIndex, event.currentIndex);
+    row.tiles = tiles;
     this.adjustCoords();
     this.form?.markAsDirty();
   }
@@ -296,33 +304,51 @@ export class TiledTextPartComponent
   }
 
   public editRowData(row: TextTileRow): void {
-    this._editedDataRow = row;
+    this._editedDataRow = deepCopy(row);
     this._editedDataTile = undefined;
-    this.editedDataTitle = `Row ${row.y}`;
-    this.editedData = row.data;
-    this.currentTabIndex = 1;
+    this.editedDataTitle.set(`Row ${row.y}`);
+    this.editedData.set(this._editedDataRow?.data);
+    this.currentTabIndex.set(1);
   }
 
   public editTileData(tile: TextTile): void {
-    this._editedDataTile = tile;
+    this._editedDataTile = deepCopy(tile);
     this._editedDataRow = undefined;
-    this.editedDataTitle = `Tile ${this.getTileCoords(tile)}`;
-    this.editedData = tile.data;
-    this.currentTabIndex = 1;
+    this.editedDataTitle.set(`Tile ${this.getTileCoords(tile)}`);
+    this.editedData.set(this._editedDataTile?.data);
+    this.currentTabIndex.set(1);
   }
 
   public closeDataEditor(): void {
-    this.currentTabIndex = 0;
+    this.currentTabIndex.set(0);
     this._editedDataRow = undefined;
-    this.editedDataTitle = undefined;
-    this.editedData = undefined;
+    this.editedDataTitle.set(undefined);
+    this.editedData.set(undefined);
   }
 
   public saveEditedData(data: Data): void {
     if (this._editedDataTile) {
-      this._editedDataTile.data = data;
-    } else {
-      this._editedDataRow!.data = data;
+      // find and replace the tile in the rows array immutably
+      const rows = this.rows.value.map(row => {
+        if (row.tiles && row.tiles.some(t => t.x === this._editedDataTile!.x && t.data === this._editedDataTile!.data)) {
+          const tiles = row.tiles.map(t =>
+            t.x === this._editedDataTile!.x && t.data === this._editedDataTile!.data
+              ? { ...this._editedDataTile!, data }
+              : t
+          );
+          return { ...row, tiles };
+        }
+        return row;
+      });
+      this.rows.setValue(rows);
+    } else if (this._editedDataRow) {
+      // find and replace the row in the rows array immutably
+      const rows = this.rows.value.map(row =>
+        row.y === this._editedDataRow!.y
+          ? { ...this._editedDataRow!, data }
+          : row
+      );
+      this.rows.setValue(rows);
     }
     this.form?.markAsDirty();
     this.closeDataEditor();
@@ -330,7 +356,7 @@ export class TiledTextPartComponent
 
   public getTileCoords(tile?: TextTile): string {
     if (!tile) {
-      tile = this.selectedTile;
+      tile = this.selectedTile();
     }
     if (!tile) {
       return '';

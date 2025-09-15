@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -22,7 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { deepCopy, NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -79,18 +79,17 @@ export class ChronotopesPartComponent
   extends ModelEditorComponentBase<ChronotopesPart>
   implements OnInit
 {
-  private _editedChronotopeIndex: number;
-
-  public editedChronotope: AssertedChronotope | undefined;
+  public readonly editedIndex = signal<number>(-1);
+  public readonly edited = signal<AssertedChronotope | undefined>(undefined);
 
   // chronotope-place-tags
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // chronotope-assertion-tags
-  public assTagEntries?: ThesaurusEntry[];
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // doc-reference-types
-  public refTypeEntries: ThesaurusEntry[] | undefined;
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // doc-reference-tags
-  public refTagEntries: ThesaurusEntry[] | undefined;
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   public chronotopes: FormControl<AssertedChronotope[]>;
 
@@ -100,7 +99,6 @@ export class ChronotopesPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this._editedChronotopeIndex = -1;
     // form
     this.chronotopes = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -121,30 +119,30 @@ export class ChronotopesPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'chronotope-place-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
 
     key = 'chronotope-assertion-tags';
     if (this.hasThesaurus(key)) {
-      this.assTagEntries = thesauri[key].entries;
+      this.assTagEntries.set(thesauri[key].entries);
     } else {
-      this.assTagEntries = undefined;
+      this.assTagEntries.set(undefined);
     }
 
     key = 'doc-reference-types';
     if (this.hasThesaurus(key)) {
-      this.refTypeEntries = thesauri[key].entries;
+      this.refTypeEntries.set(thesauri[key].entries);
     } else {
-      this.refTypeEntries = undefined;
+      this.refTypeEntries.set(undefined);
     }
 
     key = 'doc-reference-tags';
     if (this.hasThesaurus(key)) {
-      this.refTagEntries = thesauri[key].entries;
+      this.refTagEntries.set(thesauri[key].entries);
     } else {
-      this.refTagEntries = undefined;
+      this.refTagEntries.set(undefined);
     }
   }
 
@@ -178,23 +176,23 @@ export class ChronotopesPartComponent
   }
 
   public editChronotope(chronotope: AssertedChronotope, index: number): void {
-    this._editedChronotopeIndex = index;
-    this.editedChronotope = chronotope;
+    this.editedIndex.set(index);
+    this.edited.set(deepCopy(chronotope));
   }
 
   public onChronotopeChange(chronotope: AssertedChronotope): void {
-    this.editedChronotope = chronotope;
+    this.edited.set(chronotope);
   }
 
   public saveChronotope(): void {
     const chronotopes = [...this.chronotopes.value];
-    if (this._editedChronotopeIndex === -1) {
-      chronotopes.push(this.editedChronotope!);
+    if (this.editedIndex() === -1) {
+      chronotopes.push(this.edited()!);
     } else {
       chronotopes.splice(
-        this._editedChronotopeIndex,
+        this.editedIndex(),
         1,
-        this.editedChronotope!
+        this.edited()!
       );
     }
     this.chronotopes.setValue(chronotopes);
@@ -204,8 +202,8 @@ export class ChronotopesPartComponent
   }
 
   public closeChronotope(): void {
-    this.editedChronotope = undefined;
-    this._editedChronotopeIndex = -1;
+    this.edited.set(undefined);
+    this.editedIndex.set(-1);
   }
 
   public deleteChronotope(index: number): void {

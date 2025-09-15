@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { take } from 'rxjs/operators';
@@ -16,13 +16,9 @@ import {
 } from '@angular/material/expansion';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { DataPage, EllipsisPipe } from '@myrmidon/ngx-tools';
+import { DataPage, deepCopy, EllipsisPipe } from '@myrmidon/ngx-tools';
 
-import {
-  GraphService,
-  ThesaurusService,
-  UriTriple,
-} from '@myrmidon/cadmus-api';
+import { GraphService, UriTriple } from '@myrmidon/cadmus-api';
 
 import { GraphTripleFilterComponent } from '../graph-triple-filter/graph-triple-filter.component';
 import { GraphTripleEditorComponent } from '../graph-triple-editor/graph-triple-editor.component';
@@ -52,7 +48,8 @@ import { GraphTripleListRepository } from '../../state/graph-triple-list.reposit
 export class GraphTripleListComponent {
   public page$: Observable<DataPage<UriTriple>>;
   public loading$: Observable<boolean | undefined>;
-  public editedTriple?: UriTriple;
+
+  public readonly editedTriple = signal<UriTriple | undefined>(undefined);
 
   /**
    * The optional set of thesaurus entries for triple's tags.
@@ -69,31 +66,23 @@ export class GraphTripleListComponent {
     this.loading$ = _repository.loading$;
   }
 
-  // ngOnInit(): void {
-  //   this._thesService
-  //     .getThesaurus('graph-triple-tags@en', true)
-  //     .subscribe((thesaurus) => {
-  //       this.tagEntries = thesaurus?.entries || [];
-  //     });
-  // }
-
   public onPageChange(event: PageEvent): void {
     this._repository.setPage(event.pageIndex + 1, event.pageSize);
   }
 
   public addTriple(): void {
-    this.editedTriple = {
+    this.editedTriple.set({
       id: 0,
       subjectId: 0,
       predicateId: 0,
       objectId: 0,
       subjectUri: '',
       predicateUri: '',
-    };
+    });
   }
 
   public editTriple(triple: UriTriple): void {
-    this.editedTriple = triple;
+    this.editedTriple.set(deepCopy(triple));
   }
 
   public onTripleChange(triple: UriTriple): void {
@@ -102,7 +91,7 @@ export class GraphTripleListComponent {
       .pipe(take(1))
       .subscribe({
         next: (n) => {
-          this.editedTriple = undefined;
+          this.editedTriple.set(undefined);
           this._repository.reset();
           this._snackbar.open('Triple saved', 'OK', {
             duration: 1500,
@@ -116,7 +105,7 @@ export class GraphTripleListComponent {
   }
 
   public onEditorClose(): void {
-    this.editedTriple = undefined;
+    this.editedTriple.set(undefined);
   }
 
   public deleteTriple(triple: UriTriple): void {

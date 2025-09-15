@@ -12,14 +12,14 @@
     <mat-card-content>
       <cadmus-refs-asserted-composite-ids
         [ids]="links.value || []"
-        [idScopeEntries]="idScopeEntries"
-        [idTagEntries]="idTagEntries"
-        [assTagEntries]="assTagEntries"
-        [refTypeEntries]="refTypeEntries"
-        [refTagEntries]="refTagEntries"
-        [pinByTypeMode]="true"
-        [canSwitchMode]="true"
-        [canEditTarget]="true"
+        [idScopeEntries]="idScopeEntries()"
+        [idTagEntries]="idTagEntries()"
+        [assTagEntries]="assTagEntries()"
+        [refTypeEntries]="refTypeEntries()"
+        [refTagEntries]="refTagEntries()"
+        [pinByTypeMode]="pinByTypeMode()"
+        [canSwitchMode]="canSwitchMode()"
+        [canEditTarget]="canEditTarget()"
         (idsChange)="onIdsChange($event)"
       />
     </mat-card-content>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -71,11 +71,11 @@ export class PhysicalMeasurementsPartComponent
   public measurements: FormControl<PhysicalMeasurement[]>;
 
   // physical-size-units
-  public unitEntries?: ThesaurusEntry[];
+  public readonly unitEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // physical-size-dim-tags
-  public dimTagEntries?: ThesaurusEntry[];
+  public readonly dimTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // physical-size-set-names
-  public nameEntries?: ThesaurusEntry[];
+  public readonly nameEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -99,21 +99,21 @@ export class PhysicalMeasurementsPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'physical-size-units';
     if (this.hasThesaurus(key)) {
-      this.unitEntries = thesauri[key].entries;
+      this.unitEntries.set(thesauri[key].entries);
     } else {
-      this.unitEntries = undefined;
+      this.unitEntries.set(undefined);
     }
     key = 'physical-size-dim-tags';
     if (this.hasThesaurus(key)) {
-      this.dimTagEntries = thesauri[key].entries;
+      this.dimTagEntries.set(thesauri[key].entries);
     } else {
-      this.dimTagEntries = undefined;
+      this.dimTagEntries.set(undefined);
     }
     key = 'physical-size-set-names';
     if (this.hasThesaurus(key)) {
-      this.nameEntries = thesauri[key].entries;
+      this.nameEntries.set(thesauri[key].entries);
     } else {
-      this.nameEntries = undefined;
+      this.nameEntries.set(undefined);
     }
   }
 

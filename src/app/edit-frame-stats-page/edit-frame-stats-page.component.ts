@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 
-import { EditFrameStatsComponent } from '../../../projects/myrmidon/cadmus-statistics/src/public-api';
+import { EditFrameStatsComponent } from '@myrmidon/cadmus-statistics';
 import { MatIcon } from '@angular/material/icon';
 
 @Component({

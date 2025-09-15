@@ -1,4 +1,4 @@
-import { Component, output, input, effect } from '@angular/core';
+import { Component, output, input, effect, signal } from '@angular/core';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -19,11 +19,11 @@ import { PartBadgeComponent } from '@myrmidon/cadmus-ui';
   imports: [MatIcon, MatIconButton, MatTooltip, PartBadgeComponent],
 })
 export class MissingPartsComponent {
-  public missingDefinitions: PartDefinition[];
-
   public readonly facetDefinition = input<FacetDefinition>();
   public readonly partDefinitions = input<PartDefinition[]>();
   public readonly parts = input<Part[]>();
+
+  public readonly missingDefinitions = signal<PartDefinition[]>([]);
 
   /**
    * The types thesaurus.
@@ -36,8 +36,6 @@ export class MissingPartsComponent {
   public readonly addRequest = output<PartDefinition>();
 
   constructor() {
-    this.missingDefinitions = [];
-
     effect(() => {
       this.updateMissing(this.partDefinitions(), this.parts());
     });
@@ -54,7 +52,7 @@ export class MissingPartsComponent {
   }
 
   private updateMissing(definitions?: PartDefinition[], parts?: Part[]): void {
-    this.missingDefinitions = [];
+    const missingDefinitions = [];
     if (!definitions) {
       return;
     }
@@ -62,9 +60,10 @@ export class MissingPartsComponent {
     for (let i = 0; i < definitions.length; i++) {
       const def = definitions[i];
       if (def.isRequired && !this.partExists(def.typeId, def.roleId, parts)) {
-        this.missingDefinitions.push(def);
+        missingDefinitions.push(def);
       }
     }
+    this.missingDefinitions.set(missingDefinitions);
   }
 
   public requestAddPart(definition: PartDefinition): void {

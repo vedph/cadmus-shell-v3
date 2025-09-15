@@ -17,7 +17,7 @@
         <fieldset id="picker">
           <legend>available categories</legend>
           <cadmus-thesaurus-tree
-            [entries]="entries"
+            [entries]="entries()"
             rootLabel="categories"
             [renderLabel]="renderLabel"
             (entryChange)="onEntryChange($event)"

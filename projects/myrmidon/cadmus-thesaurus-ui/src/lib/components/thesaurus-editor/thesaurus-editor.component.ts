@@ -34,7 +34,7 @@ import {
   ThesaurusEntry,
   ThesaurusFilter,
 } from '@myrmidon/cadmus-core';
-import { ComponentSignal } from '@myrmidon/cadmus-profile-core';
+import { ComponentSignal as ComponentRequest } from '@myrmidon/cadmus-profile-core';
 
 import { ThesaurusNodeComponent } from '../thesaurus-node/thesaurus-node.component';
 import { ThesaurusLookupComponent } from '../thesaurus-lookup/thesaurus-lookup.component';
@@ -228,17 +228,15 @@ export class ThesaurusEditorComponent implements OnInit {
     this.reset();
   }
 
-  public onSignal(signal: ComponentSignal<ThesaurusNode>): void {
-    const node = signal.payload as ThesaurusNode;
-    switch (signal.id) {
+  public onRequest(request: ComponentRequest<ThesaurusNode>): void {
+    const node = request.payload as ThesaurusNode;
+    switch (request.id) {
       case 'expand':
-        node.collapsed = false;
-        this._nodesService.add(node);
+        this._nodesService.add({ ...node, collapsed: false });
         this.reset();
         break;
       case 'collapse':
-        node.collapsed = true;
-        this._nodesService.add(node);
+        this._nodesService.add({ ...node, collapsed: true });
         this.reset();
         break;
       case 'move-up':
@@ -285,8 +283,7 @@ export class ThesaurusEditorComponent implements OnInit {
         this._nodesService.add(child);
         // expand parent if collapsed
         if (node.collapsed) {
-          node.collapsed = false;
-          this._nodesService.add(node);
+          this._nodesService.add({ ...node, collapsed: false });
         }
         this.reset();
         break;

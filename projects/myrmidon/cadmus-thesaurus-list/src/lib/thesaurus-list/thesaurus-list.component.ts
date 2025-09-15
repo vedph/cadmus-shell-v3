@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -60,10 +60,10 @@ import { ThesaurusImportComponent } from '../thesaurus-import/thesaurus-import.c
 export class ThesaurusListComponent implements OnInit {
   public loading$: Observable<boolean | undefined>;
   public page$: Observable<DataPage<Thesaurus>>;
-  public user?: User;
-  public userLevel: number;
-  public downloading?: boolean;
-  public importEnabled?: boolean;
+
+  public readonly userLevel = signal<number>(0);
+  public readonly downloading = signal<boolean>(false);
+  public readonly importEnabled = signal<boolean>(false);
 
   constructor(
     private _repository: ThesaurusListRepository,
@@ -75,19 +75,18 @@ export class ThesaurusListComponent implements OnInit {
     private _snackbar: MatSnackBar,
     env: EnvService
   ) {
-    this.userLevel = 0;
     this.loading$ = _repository.loading$;
     this.page$ = _repository.page$;
-    this.importEnabled =
+    this.importEnabled.set(
       _authService.isCurrentUserInRole('admin') && env.get('thesImportEnabled')
         ? true
-        : false;
+        : false
+    );
   }
 
   ngOnInit(): void {
     this._authService.currentUser$.subscribe((user: User | null) => {
-      this.user = user ?? undefined;
-      this.userLevel = this._userLevelService.getCurrentUserLevel();
+      this.userLevel.set(this._userLevelService.getCurrentUserLevel());
     });
   }
 
@@ -104,7 +103,7 @@ export class ThesaurusListComponent implements OnInit {
   }
 
   public deleteThesaurus(thesaurus: Thesaurus): void {
-    if (this.user?.roles.every((r) => r !== 'admin' && r !== 'editor')) {
+    if (this.userLevel() < 3) {
       return;
     }
 
@@ -118,14 +117,14 @@ export class ThesaurusListComponent implements OnInit {
   }
 
   public downloadThesaurus(id: string): void {
-    if (this.downloading) {
+    if (this.downloading()) {
       return;
     }
-    this.downloading = true;
+    this.downloading.set(true);
 
     this._thesaurusService.getThesaurus(id).subscribe({
       next: (thesaurus) => {
-        this.downloading = false;
+        this.downloading.set(false);
         const json = JSON.stringify(thesaurus, null, 2);
 
         const element = document.createElement('a');
@@ -136,7 +135,7 @@ export class ThesaurusListComponent implements OnInit {
         element.click();
       },
       error: (err) => {
-        this.downloading = false;
+        this.downloading.set(false);
         console.error(err);
         this._snackbar.open('Error downloading thesaurus', 'OK');
       },

@@ -39,12 +39,12 @@
     </div>
 
     <!-- flags -->
-    @if (flags.length) {
+    @if (flags().length) {
     <div>
       <mat-form-field>
         <mat-label>flags</mat-label>
         <mat-select [formControl]="itemFlags" multiple>
-          @for (flag of flags; track flag.id) {
+          @for (flag of flags(); track flag.id) {
           <mat-option [value]="flag">
             <span class="flag-bullet" [style.color]="'#' + flag.colorKey"
               >&#x2b24;</span

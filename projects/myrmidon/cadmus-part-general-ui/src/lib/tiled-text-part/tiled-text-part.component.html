@@ -10,7 +10,10 @@
     </mat-card-header>
 
     <mat-card-content>
-      <mat-tab-group [(selectedIndex)]="currentTabIndex">
+      <mat-tab-group
+        [selectedIndex]="currentTabIndex()"
+        (selectedIndexChange)="currentTabIndex.set($event)"
+      >
         <mat-tab label="Text">
           <!-- citation -->
           <div>
@@ -42,10 +45,10 @@
               @for (tile of row.tiles || []; track tile) {
               <cadmus-text-tile
                 [tile]="tile"
-                [selected]="tile === selectedTile"
+                [selected]="tile === selectedTile()"
                 cdkDrag
                 style="flex: 0 0 auto"
-                (click)="selectedTile = tile"
+                (click)="selectedTile.set(tile)"
                 (editData)="editTileData(tile)"
                 (tileChange)="onTileChange($event!)"
               >
@@ -115,8 +118,8 @@
             type="button"
             mat-icon-button
             matTooltip="Edit selected tile's data"
-            [disabled]="!selectedTile"
-            (click)="editTileData(selectedTile!)"
+            [disabled]="!selectedTile()"
+            (click)="editTileData(selectedTile()!)"
           >
             <mat-icon>list</mat-icon>
           </button>
@@ -125,7 +128,7 @@
             mat-icon-button
             matTooltip="Delete the selected tile"
             (click)="deleteSelectedTile()"
-            [disabled]="!selectedTile"
+            [disabled]="!selectedTile()"
           >
             <mat-icon class="mat-warn">remove_circle</mat-icon>
           </button>
@@ -139,11 +142,11 @@
           </mat-card-actions>
         </mat-tab>
 
-        @if (editedData) {
+        @if (editedData()) {
         <mat-tab label="Data">
           <cadmus-tiled-data
-            [data]="editedData"
-            [title]="editedDataTitle"
+            [data]="editedData()!"
+            [title]="editedDataTitle()"
             [hiddenKeys]="['text']"
             (cancel)="closeDataEditor()"
             (dataChange)="saveEditedData($event)"

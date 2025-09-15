@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -23,7 +23,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { deepCopy, NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -75,13 +75,15 @@ export class QuotationsFragmentComponent
   extends ModelEditorComponentBase<QuotationsFragment>
   implements OnInit
 {
-  public editedEntryIndex: number;
-  public editedEntry?: QuotationEntry;
-  public frText?: string;
+  public readonly editedEntryIndex = signal<number>(-1);
+  public readonly editedEntry = signal<QuotationEntry | undefined>(undefined);
+  public readonly frText = signal<string | undefined>(undefined);
 
-  public workEntries: ThesaurusEntry[] | undefined;
-  public tagEntries: ThesaurusEntry[] | undefined;
-  public workDictionary?: Record<string, ThesaurusEntry[]>;
+  public readonly workEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly workDictionary = computed(() =>
+    this._worksService.buildDictionary(this.workEntries() || [])
+  );
 
   public entries: FormControl<QuotationEntry[]>;
 
@@ -93,7 +95,6 @@ export class QuotationsFragmentComponent
     private _worksService: QuotationWorksService
   ) {
     super(authService, formBuilder);
-    this.editedEntryIndex = -1;
     // form
     this.entries = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -114,20 +115,16 @@ export class QuotationsFragmentComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'quotation-works';
     if (this.hasThesaurus(key)) {
-      this.workEntries = thesauri[key].entries;
-      this.workDictionary = this._worksService.buildDictionary(
-        this.workEntries || []
-      );
+      this.workEntries.set(thesauri[key].entries);
     } else {
-      this.workEntries = undefined;
-      this.workDictionary = undefined;
+      this.workEntries.set(undefined);
     }
 
     key = 'quotation-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
   }
 
@@ -143,9 +140,11 @@ export class QuotationsFragmentComponent
   protected override onDataSet(data?: EditedObject<QuotationsFragment>): void {
     // fragment's text
     if (data?.baseText && data.value) {
-      this.frText = this._layerService.getTextFragment(
-        data.baseText,
-        TokenLocation.parse(data.value.location)!
+      this.frText.set(
+        this._layerService.getTextFragment(
+          data.baseText,
+          TokenLocation.parse(data.value.location)!
+        )
       );
     }
 
@@ -165,7 +164,7 @@ export class QuotationsFragmentComponent
   }
 
   public getNameFromId(id: string): string {
-    return this.workEntries?.find((e) => e.id === id)?.value || id;
+    return this.workEntries()?.find((e) => e.id === id)?.value || id;
   }
 
   public addEntry(): void {
@@ -180,8 +179,8 @@ export class QuotationsFragmentComponent
   }
 
   public editEntry(entry: QuotationEntry, index: number): void {
-    this.editedEntry = entry;
-    this.editedEntryIndex = index;
+    this.editedEntryIndex.set(index);
+    this.editedEntry.set(deepCopy(entry));
   }
 
   public saveEntry(entry: QuotationEntry): void {
@@ -189,10 +188,10 @@ export class QuotationsFragmentComponent
       return;
     }
     const entries = [...this.entries.value];
-    if (this.editedEntryIndex === -1) {
+    if (this.editedEntryIndex() === -1) {
       entries.push(entry);
     } else {
-      entries.splice(this.editedEntryIndex, 1, entry);
+      entries.splice(this.editedEntryIndex(), 1, entry);
     }
     this.entries.setValue(entries);
     this.entries.updateValueAndValidity();
@@ -205,8 +204,8 @@ export class QuotationsFragmentComponent
     if (!this.editedEntry) {
       return;
     }
-    this.editedEntryIndex = -1;
-    this.editedEntry = undefined;
+    this.editedEntryIndex.set(-1);
+    this.editedEntry.set(undefined);
   }
 
   public removeEntry(index: number): void {
@@ -216,7 +215,9 @@ export class QuotationsFragmentComponent
         if (!result) {
           return;
         }
-        this.entries.setValue([...this.entries.value].splice(index, 1));
+        const entries = [...this.entries.value];
+        entries.splice(index, 1);
+        this.entries.setValue(entries);
         this.entries.updateValueAndValidity();
         this.entries.markAsDirty();
       });

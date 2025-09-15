@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -93,12 +93,11 @@ export class MetadataPartComponent
   /**
    * metadata-types thesaurus entries.
    */
-  public typeEntries: ThesaurusEntry[] | undefined;
-
+  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   /**
    * metadata-names thesaurus entries.
    */
-  public nameEntries: ThesaurusEntry[] | undefined;
+  public readonly nameEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -135,15 +134,15 @@ export class MetadataPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'metadata-types';
     if (this.hasThesaurus(key)) {
-      this.typeEntries = thesauri[key].entries;
+      this.typeEntries.set(thesauri[key].entries);
     } else {
-      this.typeEntries = undefined;
+      this.typeEntries.set(undefined);
     }
     key = 'metadata-names';
     if (this.hasThesaurus(key)) {
-      this.nameEntries = thesauri[key].entries;
+      this.nameEntries.set(thesauri[key].entries);
     } else {
-      this.nameEntries = undefined;
+      this.nameEntries.set(undefined);
     }
   }
 

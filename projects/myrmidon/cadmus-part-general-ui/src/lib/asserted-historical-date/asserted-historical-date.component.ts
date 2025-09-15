@@ -75,7 +75,8 @@ export class AssertedHistoricalDateComponent {
 
     // when model changes, update form
     effect(() => {
-      this.updateForm(this.date());
+      const date = this.date();
+      this.updateForm(date);
     });
   }
 
@@ -121,6 +122,7 @@ export class AssertedHistoricalDateComponent {
     if (this.form.invalid) {
       return;
     }
-    this.date.set(this.getDate());
+    const date = this.getDate();
+    this.date.set(date);
   }
 }

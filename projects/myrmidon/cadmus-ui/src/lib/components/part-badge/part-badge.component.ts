@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, signal } from '@angular/core';
 
 import {
   Thesaurus,
@@ -65,11 +65,6 @@ export function getPartIdName(
   styleUrls: ['./part-badge.component.css'],
 })
 export class PartBadgeComponent {
-  public typeName: string | undefined;
-  public roleName: string | undefined;
-  public color: string;
-  public contrastColor: string;
-
   /**
    * The badge type: 0=part and role, 1=part only, 2=role only.
    */
@@ -90,13 +85,15 @@ export class PartBadgeComponent {
    */
   public readonly partTypeIds = input<PartTypeIds>();
 
+  public readonly typeName = signal<string | undefined>(undefined);
+  public readonly roleName = signal<string | undefined>(undefined);
+  public readonly color = signal<string>('transparent');
+  public readonly contrastColor = signal<string>('black');
+
   constructor(
     private _facetService: FacetService,
     private _colorService: ColorService
   ) {
-    this.color = 'transparent';
-    this.contrastColor = 'black';
-
     effect(() => {
       this.updateBadge(
         this.partTypeIds(),
@@ -153,22 +150,22 @@ export class PartBadgeComponent {
     facetDefinition?: FacetDefinition
   ): void {
     if (partTypeIds) {
-      this.color = this.getPartColor(
-        partTypeIds.typeId,
-        partTypeIds.roleId,
-        facetDefinition
+      this.color.set(
+        this.getPartColor(
+          partTypeIds.typeId,
+          partTypeIds.roleId,
+          facetDefinition
+        )
       );
-      this.typeName = getPartIdName(
-        partTypeIds.typeId,
-        partTypeIds.roleId,
-        typeThesaurus
+      this.typeName.set(
+        getPartIdName(partTypeIds.typeId, partTypeIds.roleId, typeThesaurus)
       );
-      this.roleName = this.getRoleIdName(partTypeIds.roleId, typeThesaurus);
+      this.roleName.set(this.getRoleIdName(partTypeIds.roleId, typeThesaurus));
     } else {
-      this.color = 'transparent';
-      this.typeName = undefined;
-      this.roleName = undefined;
+      this.color.set('transparent');
+      this.typeName.set(undefined);
+      this.roleName.set(undefined);
     }
-    this.contrastColor = this._colorService.getContrastColor(this.color);
+    this.contrastColor.set(this._colorService.getContrastColor(this.color()));
   }
 }

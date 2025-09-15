@@ -1,5 +1,4 @@
-
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -26,11 +25,7 @@ import { UserListComponent } from '@myrmidon/auth-jwt-admin';
     MatInputModule,
     MatProgressBarModule,
     MatTooltipModule,
-    UserListComponent
-],
+    UserListComponent,
+  ],
 })
-export class ManageUsersPageComponent implements OnInit {
-  constructor() {}
-
-  ngOnInit(): void {}
-}
+export class ManageUsersPageComponent {}

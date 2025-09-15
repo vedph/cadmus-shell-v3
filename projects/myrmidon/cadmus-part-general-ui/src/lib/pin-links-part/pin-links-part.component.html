@@ -11,11 +11,11 @@
     <mat-card-content>
       <cadmus-refs-asserted-composite-ids
         [ids]="links.value || []"
-        [idScopeEntries]="idScopeEntries"
-        [idTagEntries]="idTagEntries"
-        [assTagEntries]="assTagEntries"
-        [refTypeEntries]="refTypeEntries"
-        [refTagEntries]="refTagEntries"
+        [idScopeEntries]="idScopeEntries()"
+        [idTagEntries]="idTagEntries()"
+        [assTagEntries]="assTagEntries()"
+        [refTypeEntries]="refTypeEntries()"
+        [refTagEntries]="refTagEntries()"
         [pinByTypeMode]="true"
         [canSwitchMode]="true"
         [canEditTarget]="true"

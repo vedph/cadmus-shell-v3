@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -9,13 +9,6 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import {
-  trigger,
-  state,
-  style,
-  transition,
-  animate,
-} from '@angular/animations';
 
 import {
   MatCard,
@@ -53,23 +46,6 @@ import { WitnessesFragment, Witness } from '../witnesses-fragment';
   selector: 'cadmus-witnesses-fragment',
   templateUrl: './witnesses-fragment.component.html',
   styleUrls: ['./witnesses-fragment.component.css'],
-  animations: [
-    trigger('slideInOut', [
-      state(
-        'open',
-        style({
-          height: '100%',
-        })
-      ),
-      state(
-        'close',
-        style({
-          height: 0,
-        })
-      ),
-      transition('open <=> closed', [animate('300ms ease-in')]),
-    ]),
-  ],
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -103,9 +79,7 @@ export class WitnessesFragmentComponent
   private _txtEditorModel?: monaco.editor.ITextModel;
   private _noteEditorModel?: monaco.editor.ITextModel;
 
-  public currentWitnessOpen?: boolean;
-  public currentWitnessId?: string;
-  public editorOptions = {
+  public readonly editorOptions = {
     theme: 'vs-light',
     language: 'markdown',
     wordWrap: 'on',
@@ -113,7 +87,10 @@ export class WitnessesFragmentComponent
     automaticLayout: true,
   };
 
-  public frText?: string;
+  public readonly currentWitnessOpen = signal<boolean>(false);
+  public readonly currentWitnessId = signal<string | undefined>(undefined);
+  public readonly frText = signal<string | undefined>(undefined);
+
   public witnesses: FormControl;
   // single witness form
   public id: FormControl<string | null>;
@@ -239,10 +216,10 @@ export class WitnessesFragmentComponent
 
   public openCurrentWitness(witness?: Witness): void {
     if (!witness) {
-      this.currentWitnessId = undefined;
+      this.currentWitnessId.set(undefined);
       this.witness.reset();
     } else {
-      this.currentWitnessId = witness.id;
+      this.currentWitnessId.set(witness.id);
       this.id.setValue(witness.id);
       this.citation.setValue(witness.citation);
       this.text.setValue(witness.text);
@@ -251,13 +228,13 @@ export class WitnessesFragmentComponent
       this._noteEditorModel?.setValue(witness.note || '');
       this.witness.markAsPristine();
     }
-    this.currentWitnessOpen = true;
+    this.currentWitnessOpen.set(true);
     this.witness.enable();
   }
 
   public closeCurrentWitness(): void {
-    this.currentWitnessOpen = false;
-    this.currentWitnessId = undefined;
+    this.currentWitnessOpen.set(false);
+    this.currentWitnessId.set(undefined);
     this.witness.disable();
   }
 
@@ -302,9 +279,11 @@ export class WitnessesFragmentComponent
   protected override onDataSet(data?: EditedObject<WitnessesFragment>): void {
     // fragment's text
     if (data?.baseText && data.value) {
-      this.frText = this._layerService.getTextFragment(
-        data.baseText,
-        TokenLocation.parse(data.value.location)!
+      this.frText.set(
+        this._layerService.getTextFragment(
+          data.baseText,
+          TokenLocation.parse(data.value.location)!
+        )
       );
     }
     this.updateForm(data?.value);

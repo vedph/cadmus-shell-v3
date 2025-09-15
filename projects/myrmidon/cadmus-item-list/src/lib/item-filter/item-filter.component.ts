@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -74,7 +74,7 @@ export class ItemFilterComponent implements OnInit, OnDestroy {
   public user: FormControl<string | null>;
   public form: FormGroup;
 
-  public currentUser?: UserInfo;
+  public readonly currentUser = signal<UserInfo | undefined>(undefined);
 
   constructor(
     private _repository: ItemListRepository,
@@ -176,16 +176,16 @@ export class ItemFilterComponent implements OnInit, OnDestroy {
     const u = user as UserInfo | undefined;
     if (u) {
       this.user.setValue(u.userName);
-      this.currentUser = u;
+      this.currentUser.set(u);
     } else {
       this.user.setValue(null);
-      this.currentUser = undefined;
+      this.currentUser.set(undefined);
     }
   }
 
   public reset() {
     this.form.reset();
-    this.currentUser = undefined;
+    this.currentUser.set(undefined);
     this.apply();
   }
 

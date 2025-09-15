@@ -16,7 +16,7 @@
     <mat-card-content>
       <div class="form-row">
         <!-- free tag -->
-        @if (!tagEntries) {
+        @if (!tagEntries()) {
         <div>
           <mat-form-field>
             <mat-label>tag</mat-label>
@@ -33,7 +33,7 @@
           <mat-form-field>
             <mat-label>tag</mat-label>
             <mat-select formControlName="tag">
-              @for (e of tagEntries; track e.id) {
+              @for (e of tagEntries(); track e.id) {
               <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
             </mat-select>

@@ -31,7 +31,7 @@
         <tbody>
           @for (entry of entries.value; track entry; let i = $index; let first =
           $first; let last = $last) {
-          <tr [class.selected]="edited === entry">
+          <tr [class.selected]="i === editedIndex()">
             <td class="fit-width">
               <span class="nr">{{ i + 1 }}.</span>
               <button
@@ -70,7 +70,7 @@
               </button>
             </td>
             <td>
-              {{ entry.type | flatLookup : stateEntries : "id" : "value" }}
+              {{ entry.type | flatLookup : stateEntries() : "id" : "value" }}
             </td>
             <td>{{ entry.date | date : "yyyy-MM-dd" }}</td>
           </tr>
@@ -78,20 +78,20 @@
         </tbody>
       </table>
       }
-      <mat-expansion-panel [expanded]="edited" [disabled]="!edited">
-        @if (edited) {
+      <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
+        @if (edited()) {
         <fieldset>
           <mat-expansion-panel-header>
             <mat-panel-title>
               <span class="state-title">state</span>
-              <span class="nr">{{ editedIndex + 1 }}</span>
+              <span class="nr">{{ editedIndex() + 1 }}</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
           <cadmus-mat-physical-state
-            [featEntries]="featEntries"
-            [stateEntries]="stateEntries"
-            [reporterEntries]="reporterEntries"
-            [state]="edited"
+            [featEntries]="featEntries()"
+            [stateEntries]="stateEntries()"
+            [reporterEntries]="reporterEntries()"
+            [state]="edited()"
             (stateChange)="saveState($event!)"
             (stateCancel)="closeState()"
           />

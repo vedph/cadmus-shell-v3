@@ -57,11 +57,11 @@
             </span>
             <!-- child controls -->
             <!-- type (bound) -->
-            @if (typeEntries?.length) {
+            @if (typeEntries()?.length) {
             <mat-form-field class="type-col">
               <mat-label>type</mat-label>
               <mat-select formControlName="type">
-                @for (e of typeEntries; track e.id) {
+                @for (e of typeEntries(); track e.id) {
                 <mat-option [value]="e.id">{{ e.value }}</mat-option>
                 }
               </mat-select>
@@ -87,12 +87,12 @@
               <mat-error>type too long</mat-error>
               }
             </mat-form-field>
-            } @if (nameEntries?.length) {
+            } @if (nameEntries()?.length) {
             <!-- name (bound) -->
             <mat-form-field>
               <mat-label>name</mat-label>
               <mat-select formControlName="name">
-                @for (e of nameEntries; track e.id) {
+                @for (e of nameEntries(); track e.id) {
                 <mat-option [value]="e.id">{{ e.value }}</mat-option>
                 }
               </mat-select>

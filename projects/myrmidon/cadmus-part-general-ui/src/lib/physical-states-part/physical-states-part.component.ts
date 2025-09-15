@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -22,7 +22,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { NgxToolsValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
+import { NgxToolsValidators, FlatLookupPipe, deepCopy } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -79,15 +79,15 @@ export class PhysicalStatesPartComponent
   extends ModelEditorComponentBase<PhysicalStatesPart>
   implements OnInit
 {
-  public editedIndex: number;
-  public edited: PhysicalState | undefined;
+  public readonly editedIndex = signal<number>(-1);
+  public readonly edited = signal<PhysicalState | undefined>(undefined);
 
   // physical-states
-  public stateEntries?: ThesaurusEntry[];
+  public readonly stateEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // physical-state-features
-  public featEntries?: ThesaurusEntry[];
+  public readonly featEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // physical-state-reporters
-  public reporterEntries?: ThesaurusEntry[];
+  public readonly reporterEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   public entries: FormControl<PhysicalState[]>;
 
@@ -97,7 +97,6 @@ export class PhysicalStatesPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this.editedIndex = -1;
     // form
     this.entries = formBuilder.control([], {
       // at least 1 entry
@@ -119,21 +118,21 @@ export class PhysicalStatesPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'physical-states';
     if (this.hasThesaurus(key)) {
-      this.stateEntries = thesauri[key].entries;
+      this.stateEntries.set(thesauri[key].entries);
     } else {
-      this.stateEntries = undefined;
+      this.stateEntries.set(undefined);
     }
     key = 'physical-state-features';
     if (this.hasThesaurus(key)) {
-      this.featEntries = thesauri[key].entries;
+      this.featEntries.set(thesauri[key].entries);
     } else {
-      this.featEntries = undefined;
+      this.featEntries.set(undefined);
     }
     key = 'physical-state-reporters';
     if (this.hasThesaurus(key)) {
-      this.reporterEntries = thesauri[key].entries;
+      this.reporterEntries.set(thesauri[key].entries);
     } else {
-      this.reporterEntries = undefined;
+      this.reporterEntries.set(undefined);
     }
   }
 
@@ -166,27 +165,27 @@ export class PhysicalStatesPartComponent
 
   public addState(): void {
     const state: PhysicalState = {
-      type: this.stateEntries?.length ? this.stateEntries[0].id : '',
+      type: this.stateEntries()?.length ? this.stateEntries()![0].id : '',
     };
     this.editState(state, -1);
   }
 
   public editState(entry: PhysicalState, index: number): void {
-    this.editedIndex = index;
-    this.edited = entry;
+    this.editedIndex.set(index);
+    this.edited.set(deepCopy(entry));
   }
 
   public closeState(): void {
-    this.editedIndex = -1;
-    this.edited = undefined;
+    this.editedIndex.set(-1);
+    this.edited.set(undefined);
   }
 
   public saveState(entry: PhysicalState): void {
     const entries = [...this.entries.value];
-    if (this.editedIndex === -1) {
+    if (this.editedIndex() === -1) {
       entries.push(entry);
     } else {
-      entries.splice(this.editedIndex, 1, entry);
+      entries.splice(this.editedIndex(), 1, entry);
     }
     this.entries.setValue(entries);
     this.entries.markAsDirty();
@@ -199,7 +198,7 @@ export class PhysicalStatesPartComponent
       .confirm('Confirmation', 'Delete state?')
       .subscribe((yes: boolean | undefined) => {
         if (yes) {
-          if (this.editedIndex === index) {
+          if (this.editedIndex() === index) {
             this.closeState();
           }
           const entries = [...this.entries.value];

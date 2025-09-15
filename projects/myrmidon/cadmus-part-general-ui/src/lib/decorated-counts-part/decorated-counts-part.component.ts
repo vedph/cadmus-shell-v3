@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -71,10 +71,9 @@ export class DecoratedCountsPartComponent
   public counts: FormControl<DecoratedCount[]>;
 
   // decorated-count-ids
-  public idEntries: ThesaurusEntry[] | undefined;
-
+  public readonly idEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // decorated-count-tags
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -98,15 +97,15 @@ export class DecoratedCountsPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'decorated-count-ids';
     if (this.hasThesaurus(key)) {
-      this.idEntries = thesauri[key].entries;
+      this.idEntries.set(thesauri[key].entries);
     } else {
-      this.idEntries = undefined;
+      this.idEntries.set(undefined);
     }
     key = 'decorated-count-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -74,10 +74,7 @@ export class ChronologyFragmentComponent
   extends ModelEditorComponentBase<ChronologyFragment>
   implements OnInit
 {
-  public tagEntries?: ThesaurusEntry[];
-
-  // the date being edited in its text form
-  public initialDate: HistoricalDateModel | undefined;
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   public date: FormControl<HistoricalDateModel | null>;
   public tag: FormControl<string | null>;
@@ -109,9 +106,9 @@ export class ChronologyFragmentComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     const key = 'chronology-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
   }
 
@@ -120,7 +117,6 @@ export class ChronologyFragmentComponent
       this.form.reset();
     } else {
       // date
-      this.initialDate = fragment.date;
       this.date.setValue(fragment.date);
       // label and tag
       this.label.setValue(fragment.label || null);

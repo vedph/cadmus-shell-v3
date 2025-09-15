@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -54,10 +54,11 @@ import { ItemSearchRepository } from '../state/item-search.repository';
 })
 export class ItemSearchComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
-  public user?: User;
-  public userLevel: number;
-  public facets: FacetDefinition[] = [];
-  public flags: FlagDefinition[] = [];
+
+  public readonly user = signal<User | undefined>(undefined);
+  public readonly userLevel = signal<number>(0);
+  public readonly facets = signal<FacetDefinition[]>([]);
+  public readonly flags = signal<FlagDefinition[]>([]);
   public loading$: Observable<boolean | undefined>;
   public query$: Observable<string | undefined>;
   public page$: Observable<DataPage<ItemInfo>>;
@@ -72,7 +73,6 @@ export class ItemSearchComponent implements OnInit, OnDestroy {
     private _userLevelService: UserLevelService,
     private _appRepository: AppRepository
   ) {
-    this.userLevel = 0;
     this.page$ = this._repository.page$;
     this.query$ = this._repository.query$;
     this.lastQueries$ = this._repository.lastQueries$;
@@ -83,14 +83,14 @@ export class ItemSearchComponent implements OnInit, OnDestroy {
   public async ngOnInit() {
     this._sub = this._authService.currentUser$.subscribe(
       (user: User | null) => {
-        this.user = user ?? undefined;
-        this.userLevel = this._userLevelService.getCurrentUserLevel();
+        this.user.set(user ?? undefined);
+        this.userLevel.set(this._userLevelService.getCurrentUserLevel());
       }
     );
 
     await this._appRepository.load();
-    this.facets = this._appRepository.getFacets();
-    this.flags = this._appRepository.getFlags();
+    this.facets.set(this._appRepository.getFacets());
+    this.flags.set(this._appRepository.getFlags());
   }
 
   public ngOnDestroy(): void {
@@ -113,7 +113,7 @@ export class ItemSearchComponent implements OnInit, OnDestroy {
   }
 
   public deleteItem(item: ItemInfo): void {
-    if (this.user?.roles.every((r) => r !== 'admin' && r !== 'editor')) {
+    if (this.user()?.roles.every((r) => r !== 'admin' && r !== 'editor')) {
       return;
     }
 

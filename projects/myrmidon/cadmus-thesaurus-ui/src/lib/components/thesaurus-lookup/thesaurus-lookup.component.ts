@@ -1,5 +1,12 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, effect, input, OnInit, output } from '@angular/core';
+import {
+  Component,
+  effect,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 import {
   UntypedFormBuilder,
   UntypedFormControl,
@@ -84,7 +91,7 @@ export class ThesaurusLookupComponent implements OnInit {
   public form: UntypedFormGroup;
   public lookup: UntypedFormControl;
   public ids$: Observable<string[]> | undefined;
-  public id: string | undefined;
+  public readonly id = signal<string | undefined>(undefined);
 
   constructor(formBuilder: UntypedFormBuilder) {
     // form
@@ -142,13 +149,13 @@ export class ThesaurusLookupComponent implements OnInit {
   }
 
   public clear(): void {
-    this.id = undefined;
+    this.id.set(undefined);
     this.lookup.setValue(null);
     this.entryChange.emit(null);
   }
 
   public pickId(id: string): void {
-    this.id = id;
+    this.id.set(id);
     this.entryChange.emit(id);
   }
 }

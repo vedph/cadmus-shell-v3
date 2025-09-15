@@ -4,14 +4,14 @@
     <a mat-button routerLink="/home">Cadmus</a>
 
     <!-- items menu -->
-    @if (logged && itemBrowsers) {
+    @if (logged() && itemBrowsers()) {
     <button type="button" mat-button [matMenuTriggerFor]="itemMenu">
       Items
     </button>
     }
     <mat-menu #itemMenu>
       <a mat-menu-item routerLink="/items">Items</a>
-      @for (entry of itemBrowsers; track entry.id) {
+      @for (entry of itemBrowsers(); track entry.id) {
       <a
         mat-menu-item
         [routerLink]="'item-browser/' + getItemBrowserRoute(entry.id)"
@@ -20,20 +20,14 @@
       }
     </mat-menu>
     <!-- item menu -->
-    @if (logged && !itemBrowsers) {
+    @if (logged() && !itemBrowsers()) {
     <button type="button" mat-button routerLink="/items">Items</button>
-    }
-
+    } @if (logged()) {
     <!-- search menu -->
-    @if (logged) {
     <button type="button" mat-button routerLink="/search">Search</button>
-    }
     <!-- graph menu -->
-    @if (logged) {
     <button type="button" mat-button routerLink="/graph">Graph</button>
-    }
     <!-- stats menu -->
-    @if (logged) {
     <button type="button" mat-button routerLink="/stats">Stats</button>
     }
 
@@ -53,28 +47,25 @@
     <span class="tb-fill-remaining-space"></span>
 
     <!-- user -->
-    @if (user) {
+    @if (user()) {
     <div>
       <!-- indicators -->
       <img
         alt="avatar"
-        [src]="user.email | gravatar : 32"
-        [alt]="user.userName"
+        [src]="user()!.email | gravatar : 32"
+        [alt]="user()!.userName"
       />
-      @if (user && user.roles.includes('admin')) {
+      @if (user() && user()!.roles.includes('admin')) {
       <mat-icon class="small-icon" title="admin">build</mat-icon>
-      } @if (user && !user.emailConfirmed) {
+      } @if (user() && !user()!.emailConfirmed) {
       <mat-icon
         class="small-icon"
         title="You must verify your email address! Please check your mailbox {{
-          user.email
+          user()!.email
         }}"
         >feedback</mat-icon
       >
       }
-      <!-- <button mat-icon-button [mat-menu-trigger-for]="menu">
-              <mat-icon>more_vert</mat-icon>
-            </button> -->
       <!-- user menu -->
       <button type="button" mat-button [matMenuTriggerFor]="userMenu">
         User
@@ -83,7 +74,7 @@
         <a mat-menu-item routerLink="/reset-password">Reset password</a>
       </mat-menu>
       <!-- admin menu -->
-      @if (user && user.roles.includes('admin')) {
+      @if (user() && user()!.roles.includes('admin')) {
       <button type="button" mat-button [matMenuTriggerFor]="adminMenu">
         Admin
       </button>
@@ -98,7 +89,7 @@
     }
 
     <!-- login -->
-    @if (!logged) {
+    @if (!logged()) {
     <button
       type="button"
       mat-icon-button
@@ -109,7 +100,7 @@
     </button>
     }
     <!-- logout -->
-    @if (logged) {
+    @if (logged()) {
     <button type="button" mat-icon-button (click)="logout()">
       <mat-icon>logout</mat-icon>
     </button>
@@ -128,7 +119,7 @@
       <a rel="noopener" href="http://www.fusisoft.it" target="_blank"
         >Daniele Fusi</a
       >
-      - version {{ version }}
+      - version {{ version() }}
     </p>
   </div>
 </footer>

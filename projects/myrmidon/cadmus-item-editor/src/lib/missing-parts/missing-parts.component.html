@@ -1,9 +1,9 @@
-@if (missingDefinitions.length) {
+@if (missingDefinitions().length) {
 <div>
   <h3><mat-icon class="mat-warn">warning</mat-icon>&nbsp; Missing Parts</h3>
   <table>
     <tbody>
-      @for (def of missingDefinitions; track def) {
+      @for (def of missingDefinitions(); track def) {
       <tr>
         <td>
           <button

@@ -35,7 +35,7 @@
         <tbody>
           @for ( entry of events.value; track entry; let i = $index; let first =
           $first; let last = $last) {
-          <tr [class.selected]="editedEvent === entry">
+          <tr [class.selected]="i === editedEventIndex()">
             <td class="fit-width">
               <span class="nr">{{ i + 1 }}.</span>
               <button
@@ -74,7 +74,9 @@
               </button>
             </td>
             <td>
-              {{ entry.type | flatLookup : eventTypeEntries : "id" : "value" }}
+              {{
+                entry.type | flatLookup : eventTypeEntries() : "id" : "value"
+              }}
             </td>
             <td>{{ entry.tag }}</td>
             <td>{{ entry.eid }}</td>
@@ -87,30 +89,33 @@
       }
 
       <!-- event editor -->
-      <mat-expansion-panel [expanded]="editedEvent" [disabled]="!editedEvent">
-        @if (editedEvent) {
+      @if (editedEvent()) {
+      <mat-expansion-panel
+        [expanded]="editedEvent()"
+        [disabled]="!editedEvent()"
+      >
         <mat-expansion-panel-header>
           <span class="edited-title">event</span>
-          <span class="nr">{{ editedEventIndex + 1 }}</span>
+          <span class="nr">{{ editedEventIndex() + 1 }}</span>
         </mat-expansion-panel-header>
-        }
         <fieldset>
           <cadmus-historical-event-editor
-            [eventTagEntries]="eventTagEntries"
-            [eventTypeEntries]="eventTypeEntries"
-            [relationEntries]="relationEntries"
-            [ctTagEntries]="ctTagEntries"
-            [assTagEntries]="assTagEntries"
-            [refTagEntries]="refTagEntries"
-            [refTypeEntries]="refTypeEntries"
-            [idScopeEntries]="idScopeEntries"
-            [idTagEntries]="idTagEntries"
-            [event]="editedEvent"
+            [eventTagEntries]="eventTagEntries()"
+            [eventTypeEntries]="eventTypeEntries()"
+            [relationEntries]="relationEntries()"
+            [ctTagEntries]="ctTagEntries()"
+            [assTagEntries]="assTagEntries()"
+            [refTagEntries]="refTagEntries()"
+            [refTypeEntries]="refTypeEntries()"
+            [idScopeEntries]="idScopeEntries()"
+            [idTagEntries]="idTagEntries()"
+            [event]="editedEvent()"
             (eventChange)="onEventSave($event!)"
             (editorClose)="closeEvent()"
           />
         </fieldset>
       </mat-expansion-panel>
+      }
     </mat-card-content>
     <mat-card-actions>
       <cadmus-close-save-buttons

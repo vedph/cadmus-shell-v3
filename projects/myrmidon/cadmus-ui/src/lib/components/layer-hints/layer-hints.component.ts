@@ -1,19 +1,11 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  output,
-  input,
-  effect,
-} from '@angular/core';
+import { Component, output, input, effect } from '@angular/core';
 import {
   FormGroup,
   FormArray,
   FormBuilder,
   FormsModule,
   ReactiveFormsModule,
+  FormControl,
 } from '@angular/forms';
 
 import { MatIconButton, MatButton } from '@angular/material/button';
@@ -52,13 +44,13 @@ export class LayerHintsComponent {
   public readonly requestPatch = output<string[]>();
 
   public form: FormGroup;
-  public checks: FormArray;
+  public checks: FormArray<FormControl<boolean>>;
 
   constructor(
     private _formBuilder: FormBuilder,
     private _dialogService: DialogService
   ) {
-    this.checks = _formBuilder.array([]);
+    this.checks = _formBuilder.array<FormControl<boolean>>([]);
     this.form = _formBuilder.group({
       checks: this.checks,
     });
@@ -69,9 +61,9 @@ export class LayerHintsComponent {
   }
 
   private updateChecks(hints: LayerHint[]) {
-    this.checks.controls = [];
+    this.checks.clear();
     for (let i = 0; i < hints.length; i++) {
-      this.checks.push(this._formBuilder.control(false));
+      this.checks.push(this._formBuilder.control(false, { nonNullable: true }));
     }
   }
 
@@ -114,10 +106,9 @@ export class LayerHintsComponent {
       .subscribe((ok: boolean) => {
         if (ok) {
           const patches: string[] = [];
-          for (let i = 0; i < this.checks.controls.length; i++) {
-            const n = this.checks.controls[i].value;
-            if (n) {
-              patches.push(this.hints()[n - 1].patchOperation!);
+          for (let i = 0; i < this.checks.length; i++) {
+            if (this.checks.at(i).value) {
+              patches.push(this.hints()[i].patchOperation!);
             }
           }
           this.requestPatch.emit(patches);

@@ -20,8 +20,8 @@
         </mat-expansion-panel-header>
         <cadmus-refs-doc-references
           [references]="references.value"
-          [typeEntries]="typeEntries"
-          [tagEntries]="tagEntries"
+          [typeEntries]="typeEntries()"
+          [tagEntries]="tagEntries()"
           (referencesChange)="onReferencesChange($event)"
         />
       </mat-expansion-panel>

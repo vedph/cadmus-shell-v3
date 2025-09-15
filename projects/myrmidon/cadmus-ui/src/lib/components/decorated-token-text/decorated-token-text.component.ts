@@ -5,6 +5,7 @@ import {
   ElementRef,
   input,
   effect,
+  signal,
 } from '@angular/core';
 
 import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
@@ -39,7 +40,7 @@ export class DecoratedTokenTextComponent implements OnInit {
    */
   public readonly selectedLocation = input<TokenLocation>();
 
-  public text?: string; // rendered HTML text
+  public readonly text = signal<string | undefined>(undefined); // rendered HTML text
 
   constructor(private _textLayerService: TextLayerService) {
     effect(() => {
@@ -56,10 +57,8 @@ export class DecoratedTokenTextComponent implements OnInit {
     locations: TokenLocation[],
     selectedLocation?: TokenLocation
   ): void {
-    this.text = this._textLayerService.render(
-      text,
-      locations,
-      selectedLocation
+    this.text.set(
+      this._textLayerService.render(text, locations, selectedLocation)
     );
   }
 }

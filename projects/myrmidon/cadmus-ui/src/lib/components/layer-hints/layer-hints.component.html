@@ -27,7 +27,9 @@
             mat-icon-button
             matTooltip="Move this fragment to {{ targetLocation() }}"
             [disabled]="
-              disabled() || !targetLocation() || targetLocation() === hint.location
+              disabled() ||
+              !targetLocation() ||
+              targetLocation() === hint.location
             "
             (click)="emitRequestMove(hint)"
           >
@@ -50,8 +52,8 @@
           @if (hint.patchOperation) {
           <mat-checkbox
             matTooltip="Apply this patch"
-            [disabled]="disabled()"
-            [value]="(i + 1).toString()"
+            [disabled]="disabled() || false"
+            [formControl]="checks.at(i)"
           >
             {{ hint.patchOperation }}
           </mat-checkbox>

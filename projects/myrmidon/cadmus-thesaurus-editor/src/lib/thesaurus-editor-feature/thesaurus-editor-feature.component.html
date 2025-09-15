@@ -2,7 +2,7 @@
 <mat-progress-bar />
 }
 <cadmus-thesaurus-editor
-  [thesaurus]="thesaurus"
+  [thesaurus]="thesaurus()"
   [lookupFn]="wrapLookup(thesService)"
   (thesaurusChange)="onThesaurusChange($event!)"
   (editorClose)="cancel()"

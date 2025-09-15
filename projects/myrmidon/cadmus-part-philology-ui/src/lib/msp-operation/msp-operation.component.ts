@@ -1,4 +1,4 @@
-import { Component, OnInit, output, model, effect } from '@angular/core';
+import { Component, OnInit, output, model, effect, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -78,7 +78,7 @@ export class MspOperationComponent implements OnInit {
 
   public readonly operationClose = output();
 
-  public visualExpanded?: boolean;
+  public readonly visualExpanded = signal<boolean>(false);
 
   // form
   public form: FormGroup;

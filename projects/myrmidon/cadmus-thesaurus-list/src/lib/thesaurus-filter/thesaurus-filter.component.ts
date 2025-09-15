@@ -7,6 +7,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -63,9 +64,9 @@ export class ThesaurusFilterComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // update form when filter changes
-    this.filter$?.subscribe((f) => {
+    this.filter$?.pipe(takeUntilDestroyed()).subscribe((f) => {
       this.updateForm(f);
     });
   }

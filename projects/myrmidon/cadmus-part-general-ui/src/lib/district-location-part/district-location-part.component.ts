@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -76,12 +76,13 @@ export class DistrictLocationPartComponent
 {
   public place: FormControl<ProperName | null>;
   public note: FormControl<string | null>;
-  public initialName?: ProperName | null;
+
+  public readonly name = signal<ProperName | undefined>(undefined);
 
   // district-name-piece-types
-  public typeEntries?: ThesaurusEntry[];
+  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // district-name-lang-entries
-  public langEntries?: ThesaurusEntry[];
+  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -102,21 +103,27 @@ export class DistrictLocationPartComponent
   }
 
   private updateThesauri(thesauri: ThesauriSet): void {
-    const key = 'district-name-piece-types';
+    let key = 'district-name-piece-types';
     if (this.hasThesaurus(key)) {
-      this.typeEntries = thesauri[key].entries;
+      this.typeEntries.set(thesauri[key].entries);
     } else {
-      this.typeEntries = undefined;
+      this.typeEntries.set(undefined);
+    }
+    key = 'district-name-lang-entries';
+    if (this.hasThesaurus(key)) {
+      this.langEntries.set(thesauri[key].entries);
+    } else {
+      this.langEntries.set(undefined);
     }
   }
 
   private updateForm(part?: DistrictLocationPart | null): void {
     if (!part) {
-      this.initialName = undefined;
+      this.name.set(undefined);
       this.form.reset();
       return;
     }
-    this.initialName = part.place;
+    this.name.set(part.place);
     this.place.setValue(part.place || null);
     this.note.setValue(part.note || null);
 

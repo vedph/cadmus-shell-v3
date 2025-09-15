@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, signal } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -43,22 +43,20 @@ import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
 export class LayerDemoComponent {
   @ViewChild('resultElem') _resultElement?: ElementRef;
 
-  public locations: TokenLocation[];
-  public result: string;
-  public userLocation?: TokenLocation;
+  public readonly locations = signal<TokenLocation[]>([]);
+  public readonly result = signal<string>('');
+  public readonly userLocation = signal<TokenLocation | undefined>(undefined);
+  public readonly textSize = signal<number>(14);
+
   // form
   public rendition: FormGroup;
   public text: FormControl<string | null>;
   public location: FormControl<string | null>;
 
-  public textSize: number;
-
   constructor(
     formBuilder: FormBuilder,
     private _textLayerService: TextLayerService
   ) {
-    this.textSize = 14;
-    this.locations = [];
     this.text = formBuilder.control(
       'alpha beta\ngamma\ndelta epsilon waw\nzeta'
     );
@@ -67,34 +65,37 @@ export class LayerDemoComponent {
       text: this.text,
       location: this.location,
     });
-    this.result = '';
   }
 
   public makeLarger(): void {
-    const size = this.textSize + 2;
+    const size = this.textSize() + 2;
     if (size > 24) {
       return;
     }
-    this.textSize = size;
+    this.textSize.set(size);
   }
 
   public makeSmaller(): void {
-    const size = this.textSize - 2;
+    const size = this.textSize() - 2;
     if (size < 12) {
       return;
     }
-    this.textSize = size;
+    this.textSize.set(size);
   }
 
   private removeOverlaps(loc: TokenLocation): void {
-    for (let i = this.locations.length - 1; i > -1; i--) {
-      if (loc === this.locations[i]) {
+    const locations = [...this.locations()];
+
+    for (let i = locations.length - 1; i > -1; i--) {
+      if (loc === locations[i]) {
         continue;
       }
-      if (loc.overlaps(this.locations[i])) {
-        this.locations.splice(i, 1);
+      if (loc.overlaps(locations[i])) {
+        locations.splice(i, 1);
       }
     }
+
+    this.locations.set(locations);
   }
 
   public addLocation(): void {
@@ -106,46 +107,49 @@ export class LayerDemoComponent {
       return;
     }
 
+    const locations = [...this.locations()];
     let done = false;
-    for (let i = 0; i < this.locations.length && !done; i++) {
-      const n = loc.compareTo(this.locations[i]);
+    for (let i = 0; i < locations.length && !done; i++) {
+      const n = loc.compareTo(locations[i]);
       // nothing to do if equal
       if (n === 0) {
         return;
       }
       // insert before nearest bigger sort value
       if (n < 0) {
-        this.locations.splice(i, 0, loc);
+        locations.splice(i, 0, loc);
         done = true;
       }
     }
     // append if not yet inserted
     if (!done) {
-      this.locations.push(loc);
+      locations.push(loc);
     }
+    this.locations.set(locations);
 
     // remove all the overlapping locations
     this.removeOverlaps(loc);
   }
 
   public removeLocation(loc: TokenLocation): void {
-    const i = this.locations.indexOf(loc);
+    const i = this.locations().indexOf(loc);
     if (i > -1) {
-      this.locations.splice(i, 1);
+      const locations = [...this.locations()];
+      locations.splice(i, 1);
+      this.locations.set(locations);
     }
   }
 
   public clearLocations(): void {
-    this.locations.length = 0;
+    this.locations.set([]);
   }
 
   public render(): void {
     if (!this.text.value) {
       return;
     }
-    this.result = this._textLayerService.render(
-      this.text.value,
-      this.locations
+    this.result.set(
+      this._textLayerService.render(this.text.value, this.locations())
     );
   }
 
@@ -153,17 +157,19 @@ export class LayerDemoComponent {
     if (!this.text.value) {
       return;
     }
-    this.userLocation =
+    this.userLocation.set(
       this._textLayerService.getSelectedLocationForNew(
         this._textLayerService.getSelectedRange()!,
         this.text.value
-      ) || undefined;
+      ) || undefined
+    );
   }
 
   public getLocationForEdit(): void {
-    this.userLocation =
+    this.userLocation.set(
       this._textLayerService.getSelectedLocationForEdit(
         this._textLayerService.getSelectedRange()!
-      ) || undefined;
+      ) || undefined
+    );
   }
 }

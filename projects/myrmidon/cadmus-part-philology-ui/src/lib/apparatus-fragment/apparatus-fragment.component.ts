@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -28,7 +28,7 @@ import { MatInput } from '@angular/material/input';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsValidators, SafeHtmlPipe } from '@myrmidon/ngx-tools';
+import { deepCopy, NgxToolsValidators, SafeHtmlPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -89,25 +89,25 @@ export class ApparatusFragmentComponent
   extends ModelEditorComponentBase<ApparatusFragment>
   implements OnInit
 {
-  public editedEntryIndex: number;
-  public frText?: string;
-  public editedEntry?: ApparatusEntry;
-
-  public tag: FormControl<string | null>;
-  public entries: FormControl<ApparatusEntry[]>;
-
-  public tagEntries?: ThesaurusEntry[];
-  public witEntries?: ThesaurusEntry[];
-  public authEntries?: ThesaurusEntry[];
-  public authTagEntries?: ThesaurusEntry[];
+  // thesauri
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly witEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly authEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly authTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   /**
    * Author/work tags. This can be alternative or additional
    * to authEntries, and allows picking the work from a tree
    * of authors and works.
-   */
-  public workEntries?: ThesaurusEntry[];
+  */
+ public readonly workEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
-  public summary?: string;
+ public readonly editedEntryIndex = signal<number>(-1);
+ public readonly editedEntry = signal<ApparatusEntry | undefined>(undefined);
+ public readonly frText = signal<string | undefined>(undefined);
+ public readonly summary = signal<string | undefined>(undefined);
+
+ public tag: FormControl<string | null>;
+ public entries: FormControl<ApparatusEntry[]>;
 
   constructor(
     authService: AuthJwtService,
@@ -117,7 +117,6 @@ export class ApparatusFragmentComponent
     private _summaryService: ApparatusEntrySummaryService
   ) {
     super(authService, formBuilder);
-    this.editedEntryIndex = -1;
     // form
     this.entries = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -140,47 +139,47 @@ export class ApparatusFragmentComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'apparatus-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
 
     key = 'apparatus-witnesses';
     if (this.hasThesaurus(key)) {
-      this.witEntries = thesauri[key].entries;
+      this.witEntries.set(thesauri[key].entries);
     } else {
-      this.witEntries = undefined;
+      this.witEntries.set(undefined);
     }
 
     key = 'apparatus-authors';
     if (this.hasThesaurus(key)) {
-      this.authEntries = thesauri[key].entries;
+      this.authEntries.set(thesauri[key].entries);
     } else {
-      this.authEntries = undefined;
+      this.authEntries.set(undefined);
     }
 
     key = 'apparatus-author-tags';
     if (this.hasThesaurus(key)) {
-      this.authTagEntries = thesauri[key].entries;
+      this.authTagEntries.set(thesauri[key].entries);
     } else {
-      this.authTagEntries = undefined;
+      this.authTagEntries.set(undefined);
     }
 
     key = 'author-works';
     if (this.hasThesaurus(key)) {
-      this.workEntries = thesauri[key].entries;
+      this.workEntries.set(thesauri[key].entries);
     } else {
-      this.workEntries = undefined;
+      this.workEntries.set(undefined);
     }
   }
 
   private updateForm(fragment?: ApparatusFragment | null): void {
     if (!fragment) {
-      this.summary = undefined;
+      this.summary.set(undefined);
       this.form?.reset();
       return;
     }
-    this.summary = this._summaryService.build(fragment);
+    this.summary.set(this._summaryService.build(fragment));
     this.tag.setValue(fragment.tag || null);
     this.entries.setValue(fragment.entries || []);
     this.form.markAsPristine();
@@ -189,10 +188,10 @@ export class ApparatusFragmentComponent
   protected override onDataSet(data?: EditedObject<ApparatusFragment>): void {
     // fragment's text
     if (data?.baseText && data.value) {
-      this.frText = this._layerService.getTextFragment(
+      this.frText.set(this._layerService.getTextFragment(
         data.baseText,
         TokenLocation.parse(data.value.location)!
-      );
+      ));
     }
 
     // thesauri
@@ -242,8 +241,8 @@ export class ApparatusFragmentComponent
   }
 
   public editEntry(entry: ApparatusEntry, index: number): void {
-    this.editedEntry = entry;
-    this.editedEntryIndex = index;
+    this.editedEntryIndex.set(index);
+    this.editedEntry.set(deepCopy(entry));
   }
 
   public saveEntry(entry: ApparatusEntry): void {
@@ -251,16 +250,16 @@ export class ApparatusFragmentComponent
       return;
     }
     const entries = [...this.entries.value];
-    if (this.editedEntryIndex === -1) {
+    if (this.editedEntryIndex() === -1) {
       entries.push(entry);
     } else {
-      entries.splice(this.editedEntryIndex, 1, entry);
+      entries.splice(this.editedEntryIndex(), 1, entry);
     }
     this.entries.setValue(entries);
     this.entries.markAsDirty();
     this.entries.updateValueAndValidity();
 
-    this.summary = this._summaryService.build(this.getValue());
+    this.summary.set(this._summaryService.build(this.getValue()));
     this.closeEntry();
   }
 
@@ -268,8 +267,8 @@ export class ApparatusFragmentComponent
     if (!this.editedEntry) {
       return;
     }
-    this.editedEntryIndex = -1;
-    this.editedEntry = undefined;
+    this.editedEntryIndex.set(-1);
+    this.editedEntry.set(undefined);
   }
 
   public removeEntry(index: number): void {
@@ -285,7 +284,7 @@ export class ApparatusFragmentComponent
         this.entries.markAsDirty();
         this.entries.updateValueAndValidity();
 
-        this.summary = this._summaryService.build(this.getValue());
+        this.summary.set(this._summaryService.build(this.getValue()));
       });
   }
 
@@ -301,7 +300,7 @@ export class ApparatusFragmentComponent
     this.entries.markAsDirty();
     this.entries.updateValueAndValidity();
 
-    this.summary = this._summaryService.build(this.getValue());
+    this.summary.set(this._summaryService.build(this.getValue()));
   }
 
   public moveEntryDown(index: number): void {
@@ -317,6 +316,6 @@ export class ApparatusFragmentComponent
     this.entries.markAsDirty();
     this.entries.updateValueAndValidity();
 
-    this.summary = this._summaryService.build(this.getValue());
+    this.summary.set(this._summaryService.build(this.getValue()));
   }
 }

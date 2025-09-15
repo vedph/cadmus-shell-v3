@@ -16,7 +16,7 @@
         <mat-form-field>
           <mat-label>language</mat-label>
           <mat-select [formControl]="newLanguage">
-            @for (t of langEntries; track t.id) {
+            @for (t of langEntries(); track t.id) {
             <mat-option [value]="t.id">
               {{ t.value }}
             </mat-option>

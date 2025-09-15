@@ -1,4 +1,11 @@
-import { Component, effect, input, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  effect,
+  input,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   FormBuilder,
@@ -72,12 +79,12 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
    */
   public readonly typeEntries = input<ThesaurusEntry[]>();
 
-  public layers: DecoratedLayerPartInfo[] = [];
-  public segments: ExportedSegment[] = [];
-  public frHtml: string[] = [];
-  public frLabels: string[] = [];
-  public busy?: boolean;
-  public item?: Item;
+  public readonly layers = signal<DecoratedLayerPartInfo[]>([]);
+  public readonly segments = signal<ExportedSegment[]>([]);
+  public readonly frHtml = signal<string[]>([]);
+  public readonly frLabels = signal<string[]>([]);
+  public readonly busy = signal<boolean>(false);
+  public readonly item = signal<Item | undefined>(undefined);
 
   public selectedLayer: FormControl<DecoratedLayerPartInfo | null>;
 
@@ -131,8 +138,8 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
 
   private loadLayer(): void {
     const layer = this.selectedLayer.value;
-    const layers = !layer || layer.id === 'all' ? this.layers : [layer];
-    this.busy = true;
+    const layers = !layer || layer.id === 'all' ? this.layers() : [layer];
+    this.busy.set(true);
 
     this._previewService
       .getTextSegments(
@@ -142,13 +149,13 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe({
         next: (spans) => {
-          this.busy = false;
+          this.busy.set(false);
           // convert initial/final WS into mid dot
           this.adjustSpanWS(spans);
-          this.segments = spans;
+          this.segments.set(spans);
         },
         error: (error) => {
-          this.busy = false;
+          this.busy.set(false);
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
             error
@@ -161,13 +168,13 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   }
 
   private loadItem(source?: PartPreviewSource): void {
-    if (this.busy) {
+    if (this.busy()) {
       return;
     }
     if (!source?.partId) {
-      this.item = undefined;
-      this.layers = [];
-      this.segments = [];
+      this.item.set(undefined);
+      this.layers.set([]);
+      this.segments.set([]);
       return;
     }
     forkJoin({
@@ -177,14 +184,14 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe({
         next: (result) => {
-          this.busy = false;
-          this.item = result.item || undefined;
+          this.busy.set(false);
+          this.item.set(result.item || undefined);
           this.assignLayerColors(result.layers);
-          this.layers = result.layers;
+          this.layers.set(result.layers);
           // select layer if requested
           if (source!.layerId) {
             this.selectedLayer.setValue(
-              this.layers.find((l) => l.roleId === source!.layerId) || null
+              this.layers().find((l) => l.roleId === source!.layerId) || null
             );
             if (this.selectedLayer.value) {
               this.loadLayer();
@@ -192,7 +199,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          this.busy = false;
+          this.busy.set(false);
           console.error(`Error previewing text part ${source!.partId}`, error);
           this._snackbar.open('Error previewing text part ' + source!.partId);
         },
@@ -205,17 +212,17 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   }
 
   private showFragments(fragmentIds: string[]): void {
-    if (this.busy || !fragmentIds.length) {
+    if (this.busy() || !fragmentIds.length) {
       return;
     }
-    this.busy = true;
+    this.busy.set(true);
     // load all the fragments linked to this block
     const loaders$: Observable<RenditionResult>[] = [];
     const labels: string[] = [];
     for (let i = 0; i < fragmentIds.length; i++) {
       const m = this.parseFragmentId(fragmentIds[i]);
       labels.push(m[2]);
-      const layer = this.layers.find(
+      const layer = this.layers().find(
         (l) => l.typeId === m[1] && (!l.roleId || l.roleId === m[2])
       )!;
       loaders$.push(
@@ -229,12 +236,12 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe({
         next: (renditions) => {
-          this.busy = false;
-          this.frHtml = renditions.map((r) => r.result);
-          this.frLabels = labels;
+          this.busy.set(false);
+          this.frHtml.set(renditions.map((r) => r.result));
+          this.frLabels.set(labels);
         },
         error: (error) => {
-          this.busy = false;
+          this.busy.set(false);
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
             error

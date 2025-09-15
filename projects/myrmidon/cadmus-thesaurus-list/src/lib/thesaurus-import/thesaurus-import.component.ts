@@ -1,4 +1,4 @@
-import { Component, EventEmitter, output, Output } from '@angular/core';
+import { Component, EventEmitter, output, Output, signal } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import {
   AbstractControl,
@@ -87,6 +87,9 @@ interface UploadResult {
 export class ThesaurusImportComponent {
   private _sub?: Subscription;
 
+  public readonly uploadStart = output();
+  public readonly uploadEnd = output<boolean>();
+
   public file: FormControl<File | null>;
   public mode: FormControl<string>;
   public excelSheet: FormControl<number>;
@@ -95,12 +98,9 @@ export class ThesaurusImportComponent {
   public dryRun: FormControl<boolean>;
   public form: FormGroup;
 
-  public uploadProgress: number = 0;
-  public uploading: boolean = false;
-  public result?: UploadResult;
-
-  public readonly uploadStart = output();
-  public readonly uploadEnd = output<boolean>();
+  public readonly uploadProgress = signal<number>(0);
+  public readonly uploading = signal<boolean>(false);
+  public readonly result = signal<UploadResult | undefined>(undefined);
 
   constructor(
     formBuilder: FormBuilder,
@@ -155,8 +155,8 @@ export class ThesaurusImportComponent {
     if (!this.form.valid) {
       return;
     }
-    this.result = undefined;
-    this.uploading = true;
+    this.result.set(undefined);
+    this.uploading.set(true);
     this.uploadStart.emit();
 
     // URL
@@ -192,10 +192,10 @@ export class ThesaurusImportComponent {
       })
       .subscribe((event) => {
         if (event.type === HttpEventType.UploadProgress) {
-          this.uploadProgress = Math.round((event.loaded / event.total!) * 100);
+          this.uploadProgress.set(Math.round((event.loaded / event.total!) * 100));
         } else if (event.type === HttpEventType.Response) {
-          this.uploading = false;
-          this.result = event.body as UploadResult;
+          this.uploading.set(false);
+          this.result.set(event.body as UploadResult);
           this.uploadEnd.emit(true);
         }
       });
@@ -204,8 +204,8 @@ export class ThesaurusImportComponent {
   public onCancel() {
     // cancel the upload request
     this._sub?.unsubscribe();
-    this.uploading = false;
-    this.uploadProgress = 0;
+    this.uploading.set(false);
+    this.uploadProgress.set(0);
     this.uploadEnd.emit(false);
   }
 }

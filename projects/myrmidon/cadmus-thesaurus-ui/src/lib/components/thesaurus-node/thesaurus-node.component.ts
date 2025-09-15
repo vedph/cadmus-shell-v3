@@ -4,6 +4,7 @@ import {
   ElementRef,
   model,
   output,
+  signal,
   ViewChild,
 } from '@angular/core';
 import {
@@ -45,23 +46,19 @@ import { ThesaurusNode } from '../../services/thesaurus-nodes.service';
   ],
 })
 export class ThesaurusNodeComponent {
-  public editing: boolean;
+  public readonly node = model<ThesaurusNode>();
+  public readonly request = output<ComponentSignal<ThesaurusNode>>();
 
   public id: FormControl<string | null>;
   public value: FormControl<string | null>;
   public form: FormGroup;
 
-  public indent: string;
+  public readonly editing = signal<boolean>(false);
+  public readonly indent = signal<string>('');
 
   @ViewChild('nodeVal') nodeValRef: ElementRef | undefined;
 
-  public readonly node = model<ThesaurusNode>();
-
-  public readonly signal = output<ComponentSignal<ThesaurusNode>>();
-
   constructor(formBuilder: FormBuilder) {
-    this.editing = false;
-    this.indent = '';
     // form
     this.id = formBuilder.control(null, [
       Validators.required,
@@ -82,19 +79,19 @@ export class ThesaurusNodeComponent {
   }
 
   private updateForm(node: ThesaurusNode | undefined): void {
-    this.editing = false;
+    this.editing.set(false);
     if (!node) {
       this.form.reset();
-      this.indent = '';
+      this.indent.set('');
       return;
     }
     this.id.setValue(node.id);
     this.value.setValue(node.value);
-    this.indent = '\u2022'.repeat((node.level || 1) - 1);
+    this.indent.set('\u2022'.repeat((node.level || 1) - 1));
   }
 
   public toggleEdit(on: boolean): void {
-    this.editing = on;
+    this.editing.set(on);
     if (on) {
       setTimeout(() => {
         this.nodeValRef?.nativeElement.focus();
@@ -118,12 +115,12 @@ export class ThesaurusNodeComponent {
       return;
     }
     this.form.markAsPristine();
-    this.editing = false;
+    this.editing.set(false);
     this.node.set(this.getNode());
   }
 
-  public emitSignal(id: string) {
-    this.signal.emit({
+  public emitRequest(id: string) {
+    this.request.emit({
       id: id,
       payload: this.getNode(),
     });

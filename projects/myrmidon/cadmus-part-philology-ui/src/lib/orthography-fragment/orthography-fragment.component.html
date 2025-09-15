@@ -9,7 +9,7 @@
         {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
-        {{ frText }}
+        {{ frText() }}
       </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
@@ -112,20 +112,20 @@
           </div>
 
           <!-- operations -->
-          @if (currentOperation) {
+          @if (currentOperation()) {
           <div [@slideInOut]>
             <cadmus-msp-operation
-              [operation]="currentOperation"
+              [operation]="currentOperation()"
               (operationChange)="currentOperationSaved($event!)"
               (operationClose)="currentOperationClosed()"
             />
           </div>
           }
         </div>
-        @if (tagEntries?.length) {
+        @if (tagEntries()?.length) {
         <div style="grid-area: tags">
           <cadmus-thesaurus-tree
-            [entries]="tagEntries"
+            [entries]="tagEntries()"
             rootLabel="tags"
             [renderLabel]="renderLabel"
             (entryChange)="onTagChange($event)"

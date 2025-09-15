@@ -9,20 +9,20 @@
         {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
-        {{ frText }}
+        {{ frText() }}
       </mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
       <div class="form-row">
         <!-- tag -->
-        @if (tagEntries?.length) {
+        @if (tagEntries()?.length) {
         <div>
           <mat-form-field>
             <mat-label>tag</mat-label>
             <mat-select formControlName="tag">
               <mat-option [value]="null">(none)</mat-option>
-              @for (e of tagEntries; track e.id) {
+              @for (e of tagEntries(); track e.id) {
               <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
             </mat-select>
@@ -62,7 +62,7 @@
         <tbody>
           @for ( entry of entries.value; track entry; let i = $index; let first
           = $first; let last = $last) {
-          <tr [class.selected]="entry === editedEntry">
+          <tr [class.selected]="i === editedEntryIndex()">
             <td class="fit-width">
               <span class="nr">{{ i + 1 }}.</span>
               <button
@@ -115,27 +115,27 @@
           }
         </tbody>
       </table>
-      @if (summary) {
-      <div [innerHtml]="summary | safeHtml : 'html'"></div>
+      @if (summary()) {
+      <div [innerHtml]="summary() | safeHtml : 'html'"></div>
       }
 
       <!-- entry editor -->
-      @if (editedEntry) {
+      @if (editedEntry()) {
       <fieldset>
-        <mat-expansion-panel [expanded]="editedEntry" [disabled]="!editedEntry">
+        <mat-expansion-panel [expanded]="editedEntry()" [disabled]="!editedEntry()">
           <mat-expansion-panel-header>
             <mat-panel-title>
               <span class="entry-title">entry</span>
-              <span class="nr">{{ editedEntryIndex + 1 }}</span>
+              <span class="nr">{{ editedEntryIndex() + 1 }}</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
           <cadmus-apparatus-entry
-            [entry]="editedEntry"
-            [tagEntries]="tagEntries"
-            [witEntries]="witEntries"
-            [authEntries]="authEntries"
-            [authTagEntries]="authTagEntries"
-            [workEntries]="workEntries"
+            [entry]="editedEntry()"
+            [tagEntries]="tagEntries()"
+            [witEntries]="witEntries()"
+            [authEntries]="authEntries()"
+            [authTagEntries]="authTagEntries()"
+            [workEntries]="workEntries()"
             (entryChange)="saveEntry($event!)"
             (editorClose)="closeEntry()"
           />

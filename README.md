@@ -23,28 +23,28 @@ Latest versions:
 - cadmus-core: 12.0.2
 - cadmus-flags-pg: 15.0.0
 - cadmus-flags-ui: 15.0.0
-- cadmus-graph-pg: 14.0.1
-- cadmus-graph-pg-ex: 15.0.0
-- cadmus-graph-ui: 14.0.2
-- cadmus-graph-ui-ex: 15.0.1
-- cadmus-item-editor: 15.0.1
-- cadmus-item-list: 15.0.1
-- cadmus-item-search: 15.0.0
-- cadmus-layer-demo: 14.0.0
-- cadmus-part-general-pg: 15.0.4
-- cadmus-part-general-ui: 14.0.4
-- cadmus-part-philology-pg: 15.0.0
-- cadmus-part-philology-ui: 14.0.0
-- cadmus-preview-pg: 16.0.0
-- cadmus-preview-ui: 16.0.0
+- cadmus-graph-pg: 15.0.0
+- cadmus-graph-pg-ex: 16.0.0
+- cadmus-graph-ui: 15.0.0
+- cadmus-graph-ui-ex: 16.0.0
+- cadmus-item-editor: 16.0.0
+- cadmus-item-list: 16.0.0
+- cadmus-item-search: 16.0.0
+- cadmus-layer-demo: 15.0.0
+- cadmus-part-general-pg: 16.0.0
+- cadmus-part-general-ui: 15.0.0
+- cadmus-part-philology-pg: 16.0.0
+- cadmus-part-philology-ui: 15.0.0
+- cadmus-preview-pg: 17.0.0
+- cadmus-preview-ui: 17.0.0
 - cadmus-profile-core: 12.0.0
 - cadmus-state: 14.0.0
-- cadmus-statistics: 0.0.2
-- cadmus-thesaurus-editor: 15.0.1
-- cadmus-thesaurus-list: 15.0.1
-- cadmus-thesaurus-ui: 14.0.0
-- cadmus-ui: 14.0.0
-- cadmus-ui-pg: 15.0.0
+- cadmus-statistics: 1.0.0
+- cadmus-thesaurus-editor: 16.0.0
+- cadmus-thesaurus-list: 16.0.0
+- cadmus-thesaurus-ui: 15.0.0
+- cadmus-ui: 15.0.0
+- cadmus-ui-pg: 16.0.0
 
 Dependencies:
 
@@ -209,6 +209,15 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ```
 
 ## History
+
+- 2025-09-13:
+  - updated bricks to their `OnPush`-based version.
+  - ⚠️ refactored components so that their state is fully reactive. This is the first step towards a future Zone-less system.
+  - ⚠️ removed legacy modules from `@myrmidon/cadmus-part-general-pg` and `@myrmidon/cadmus-part-philology-pg`, `@myrmidon/cadmus-preview-pg`, replacing them with the routes to export.
+  - removed legacy animations from some old components.
+  - added `forceConsistentCasingInFileNames`=true and `sourceMap`=true to libraries `tsconfig.json`.
+  - minor fixes and improvements.
+  - bumped all versions to their next major release. Effectively there is no breaking change, except for those listed above with ⚠️, but this allows to easily distinguish this code generation from the previous one. Note that `cadmus-api`, `cadmus-core`, `cadmus-flags-*`, `cadmus-profile-core`, `cadmus-state` were not changed as they did not require any modification.
 
 - 2025-09-01: fixed performance of tracking expressions in item editor by tracking parts by the combination of their type ID and role ID, groups by their key, and facets by their ID (`@myrmidon/cadmus-item-editor`).
 - 2025-08-31:

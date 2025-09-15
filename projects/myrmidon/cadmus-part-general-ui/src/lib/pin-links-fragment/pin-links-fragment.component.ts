@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -70,22 +70,22 @@ export class PinLinksFragmentComponent
 
   // settings
   // by-type: true/false
-  public pinByTypeMode?: boolean;
+  public readonly pinByTypeMode = signal<boolean>(true);
   // switch-mode: true/false
-  public canSwitchMode?: boolean;
+  public readonly canSwitchMode = signal<boolean>(true);
   // edit-target: true/false
-  public canEditTarget?: boolean;
+  public readonly canEditTarget = signal<boolean>(true);
 
   // pin-link-scopes
-  public idScopeEntries?: ThesaurusEntry[];
+  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // pin-link-tags
-  public idTagEntries?: ThesaurusEntry[];
+  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // pin-link-assertion-tags
-  public assTagEntries?: ThesaurusEntry[];
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // pin-link-docref-types
-  public refTypeEntries?: ThesaurusEntry[];
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // pin-link-docref-tags
-  public refTagEntries?: ThesaurusEntry[];
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -110,33 +110,33 @@ export class PinLinksFragmentComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'pin-link-scopes';
     if (this.hasThesaurus(key)) {
-      this.idScopeEntries = thesauri[key].entries;
+      this.idScopeEntries.set(thesauri[key].entries);
     } else {
-      this.idScopeEntries = undefined;
+      this.idScopeEntries.set(undefined);
     }
     key = 'pin-link-tags';
     if (this.hasThesaurus(key)) {
-      this.idTagEntries = thesauri[key].entries;
+      this.idTagEntries.set(thesauri[key].entries);
     } else {
-      this.idTagEntries = undefined;
+      this.idTagEntries.set(undefined);
     }
     key = 'pin-link-assertion-tags';
     if (this.hasThesaurus(key)) {
-      this.assTagEntries = thesauri[key].entries;
+      this.assTagEntries.set(thesauri[key].entries);
     } else {
-      this.assTagEntries = undefined;
+      this.assTagEntries.set(undefined);
     }
     key = 'pin-link-docref-types';
     if (this.hasThesaurus(key)) {
-      this.refTypeEntries = thesauri[key].entries;
+      this.refTypeEntries.set(thesauri[key].entries);
     } else {
-      this.refTypeEntries = undefined;
+      this.refTypeEntries.set(undefined);
     }
     key = 'pin-link-docref-tags';
     if (this.hasThesaurus(key)) {
-      this.refTagEntries = thesauri[key].entries;
+      this.refTagEntries.set(thesauri[key].entries);
     } else {
-      this.refTagEntries = undefined;
+      this.refTagEntries.set(undefined);
     }
   }
 

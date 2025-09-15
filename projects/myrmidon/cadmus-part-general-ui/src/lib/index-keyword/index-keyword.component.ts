@@ -77,7 +77,8 @@ export class IndexKeywordComponent {
     });
 
     effect(() => {
-      this.updateForm(this.keyword());
+      const keyword = this.keyword();
+      this.updateForm(keyword);
     });
   }
 
@@ -112,6 +113,7 @@ export class IndexKeywordComponent {
     if (this.form.invalid) {
       return;
     }
-    this.keyword.set(this.getKeyword());
+    const keyword = this.getKeyword();
+    this.keyword.set(keyword);
   }
 }

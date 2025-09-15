@@ -79,14 +79,14 @@
       type="button"
       (click)="reset()"
       matTooltip="Reset filters"
-      [disabled]="disabled"
+      [disabled]="disabled()"
     >
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
       type="submit"
       mat-icon-button
-      [disabled]="disabled"
+      [disabled]="disabled()"
       matTooltip="Apply filters"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>

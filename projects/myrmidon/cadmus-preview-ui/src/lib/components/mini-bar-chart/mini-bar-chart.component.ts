@@ -31,7 +31,6 @@ export interface MiniBarChartOptions {
  */
 @Component({
   selector: 'minichart-bar',
-  standalone: true,
   imports: [],
   templateUrl: './mini-bar-chart.component.html',
   styleUrl: './mini-bar-chart.component.scss',

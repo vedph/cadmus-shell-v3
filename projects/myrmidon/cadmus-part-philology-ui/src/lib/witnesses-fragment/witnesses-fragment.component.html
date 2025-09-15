@@ -9,7 +9,7 @@
         {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
-        {{ frText }}
+        {{ frText() }}
       </mat-card-subtitle>
     </mat-card-header>
 
@@ -96,7 +96,7 @@
       </table>
       }
       <hr />
-      @if (currentWitnessOpen) {
+      @if (currentWitnessOpen()) {
       <div [@slideInOut]>
         <form [formGroup]="witness" (submit)="saveCurrentWitness()">
           <!-- id -->

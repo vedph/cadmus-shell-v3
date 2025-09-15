@@ -1,4 +1,3 @@
-
 import { Component, computed, input, output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -30,8 +29,8 @@ const F_EOL_TAIL = 'eol-tail';
     FormsModule,
     ReactiveFormsModule,
     ColorToContrastPipe,
-    MiniBarChartComponent
-],
+    MiniBarChartComponent,
+  ],
   templateUrl: './text-segments-view.component.html',
   styleUrl: './text-segments-view.component.css',
 })
@@ -85,13 +84,10 @@ export class TextSegmentsViewComponent {
     if (!range?.fragmentIds?.length || !this.layers()) {
       return;
     }
-    // add a chart item for each fragment ID
     let chartItems: MiniBarChartItem[] = [];
 
     for (let i = 0; i < range.fragmentIds.length; i++) {
       const id = range.fragmentIds[i];
-
-      // find the layer targeted by the fragment ID
       const m = /^([^:]+):([^@]+)/.exec(id);
       if (!m) {
         continue;
@@ -102,7 +98,6 @@ export class TextSegmentsViewComponent {
       if (!layer) {
         continue;
       }
-      // return a chart item for this segment's fragment ID
       chartItems.push({
         id: id,
         label: this._typeMap.get(layer.roleId!) || layer.roleId!,
@@ -111,6 +106,7 @@ export class TextSegmentsViewComponent {
       });
     }
     if (chartItems.length) {
+      // assign a new array reference
       segment.chartItems = chartItems;
     }
   }
@@ -121,9 +117,11 @@ export class TextSegmentsViewComponent {
 
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
-      row.push(segment);
-      this.addChartItems(segment);
-      if (segment.features?.some(f => f.name === F_EOL_TAIL)) {
+      // create a new object to avoid mutation
+      const decorated: DecoratedSegment = { ...segment };
+      this.addChartItems(decorated);
+      row.push(decorated);
+      if (segment.features?.some((f) => f.name === F_EOL_TAIL)) {
         rows.push(row);
         row = [];
       }

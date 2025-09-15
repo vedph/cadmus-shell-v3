@@ -37,7 +37,7 @@
           </thead>
           <tbody>
             @for (k of keywords.value; track k) {
-            <tr [class.selected]="editedKeyword === k">
+            <tr [class.selected]="editedKeyword() === k">
               <td class="fit-width">
                 <button
                   mat-icon-button
@@ -58,7 +58,7 @@
               </td>
               <td>{{ k.indexId }}</td>
               <td>
-                {{ k.language | flatLookup : langEntries : "id" : "value" }}
+                {{ k.language | flatLookup : langEntries() : "id" : "value" }}
               </td>
               <td>{{ k.value }}</td>
             </tr>
@@ -66,20 +66,20 @@
           </tbody>
         </table>
       </div>
-      } @if (editedKeyword) {
+      } @if (editedKeyword()) {
       <fieldset>
         <mat-expansion-panel
-          [disabled]="!editedKeyword"
-          [expanded]="editedKeyword"
+          [disabled]="!editedKeyword()"
+          [expanded]="editedKeyword()"
         >
           <mat-expansion-panel-header>
             <mat-panel-title> keyword </mat-panel-title>
           </mat-expansion-panel-header>
           <cadmus-index-keyword
-            [keyword]="editedKeyword"
-            [idxEntries]="idxEntries"
-            [langEntries]="langEntries"
-            [tagEntries]="tagEntries"
+            [keyword]="editedKeyword()"
+            [idxEntries]="idxEntries()"
+            [langEntries]="langEntries()"
+            [tagEntries]="tagEntries()"
             (editorClose)="onKeywordClose()"
             (keywordChange)="onKeywordChange($event!)"
           />

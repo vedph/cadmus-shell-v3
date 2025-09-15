@@ -1,10 +1,10 @@
 @if (node()) {
 <div>
   <!-- display -->
-  @if (!editing) {
+  @if (!editing()) {
   <div class="node">
     <!-- indent -->
-    <span class="node-ind">{{ indent }}</span>
+    <span class="node-ind">{{ indent() }}</span>
     <!-- node -->
     <span class="node-ord">{{ node()?.ordinal }}</span>
     <span class="node-id">{{ node()?.id }}</span>
@@ -26,7 +26,7 @@
         type="button"
         mat-icon-button
         matTooltip="Expand this node"
-        (click)="emitSignal('expand')"
+        (click)="emitRequest('expand')"
       >
         <mat-icon>expand_more</mat-icon>
       </button>
@@ -37,7 +37,7 @@
         type="button"
         mat-icon-button
         matTooltip="Collapse this node"
-        (click)="emitSignal('collapse')"
+        (click)="emitRequest('collapse')"
       >
         <mat-icon>expand_less</mat-icon>
       </button>
@@ -55,7 +55,7 @@
         type="button"
         mat-icon-button
         matTooltip="Move this entry up"
-        (click)="emitSignal('move-up')"
+        (click)="emitRequest('move-up')"
       >
         <mat-icon>arrow_upward</mat-icon>
       </button>
@@ -66,7 +66,7 @@
         type="button"
         mat-icon-button
         matTooltip="Move this entry down"
-        (click)="emitSignal('move-down')"
+        (click)="emitRequest('move-down')"
       >
         <mat-icon>arrow_downward</mat-icon>
       </button>
@@ -76,7 +76,7 @@
         type="button"
         mat-icon-button
         matTooltip="Delete this entry"
-        (click)="emitSignal('delete')"
+        (click)="emitRequest('delete')"
       >
         <mat-icon class="mat-warn">remove_circle</mat-icon>
       </button>
@@ -85,7 +85,7 @@
         type="button"
         mat-icon-button
         matTooltip="Add a sibling after this node"
-        (click)="emitSignal('add-sibling')"
+        (click)="emitRequest('add-sibling')"
       >
         <mat-icon class="mat-primary">add_box</mat-icon>
       </button>
@@ -94,7 +94,7 @@
         type="button"
         mat-icon-button
         matTooltip="Add a child of this node"
-        (click)="emitSignal('add-child')"
+        (click)="emitRequest('add-child')"
       >
         <mat-icon>library_add</mat-icon>
       </button>
@@ -102,7 +102,7 @@
   </div>
   }
   <!-- edit -->
-  @if (editing) {
+  @else {
   <div>
     <form
       [formGroup]="form"

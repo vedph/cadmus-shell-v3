@@ -5,6 +5,7 @@ import {
   input,
   OnInit,
   output,
+  signal,
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import {
@@ -103,7 +104,8 @@ export class LookupPinComponent implements OnInit {
   public form: UntypedFormGroup;
   public lookup: UntypedFormControl;
   public entries$: Observable<DataPinInfo[]> | undefined;
-  public entry: DataPinInfo | undefined;
+
+  public readonly entry = signal<DataPinInfo | undefined>(undefined);
 
   constructor(
     formBuilder: UntypedFormBuilder,
@@ -189,7 +191,7 @@ export class LookupPinComponent implements OnInit {
   }
 
   public clear(): void {
-    this.entry = undefined;
+    this.entry.set(undefined);
     this.lookup.setValue(null);
     this.entryChange.emit(null);
   }
@@ -199,7 +201,7 @@ export class LookupPinComponent implements OnInit {
   }
 
   public pickEntry(entry: DataPinInfo): void {
-    this.entry = entry;
+    this.entry.set(entry);
     this.entryChange.emit(entry);
     if (this.resetOnPick()) {
       this.clear();

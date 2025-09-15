@@ -14,9 +14,9 @@
         <fieldset>
           <legend i18n>place</legend>
           <cadmus-refs-proper-name
-            [langEntries]="langEntries"
-            [typeEntries]="typeEntries"
-            [name]="initialName || undefined"
+            [langEntries]="langEntries()"
+            [typeEntries]="typeEntries()"
+            [name]="name()"
             [hideAssertion]="true"
             (nameChange)="onNameChange($event)"
           />

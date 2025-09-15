@@ -73,12 +73,12 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Pins Reference</mat-panel-title>
         </mat-expansion-panel-header>
-        @if (partDefs?.length) {
+        @if (partDefs()?.length) {
         <div>
           <mat-form-field>
             <mat-label>part/fr.</mat-label>
             <mat-select [formControl]="partDef">
-              @for (def of partDefs; track def) {
+              @for (def of partDefs(); track def) {
               <mat-option [value]="def.typeId" [matTooltip]="def.description">
                 {{ def.name }} ({{ def.typeId.startsWith("fr.") ? "F" : "P" }})
               </mat-option>
@@ -86,9 +86,9 @@
             </mat-select>
           </mat-form-field>
           <!-- selected part's pins -->
-          @if (loadingPinDefs) {
+          @if (loadingPinDefs()) {
           <mat-progress-bar mode="indeterminate" />
-          } @if (pinDefs?.length) {
+          } @if (pinDefs().length) {
           <table class="pins">
             <thead>
               <tr>
@@ -100,7 +100,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (pd of pinDefs; track pd) {
+              @for (pd of pinDefs(); track pd) {
               <tr>
                 <td>
                   <button

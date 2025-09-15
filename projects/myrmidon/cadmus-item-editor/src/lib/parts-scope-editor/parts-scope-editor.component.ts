@@ -8,6 +8,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -23,7 +24,6 @@ import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 
 import { EditedItemRepository } from '../state/edited-item.repository';
-import { Subscription } from 'rxjs';
 
 export interface PartScopeSetRequest {
   ids: string[];

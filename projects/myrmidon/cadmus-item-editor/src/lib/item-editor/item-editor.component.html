@@ -8,7 +8,7 @@
     </mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>
-    @if (id) {
+    @if (id()) {
     <p>
       ID:
       <input
@@ -28,12 +28,12 @@
       Created {{ item.timeCreated | date : "yyyy-MM-dd HH:mm:ss" }} by
       {{ item.creatorId }}.
     </p>
-    } @if (busy) {
+    } @if (busy()) {
     <mat-progress-bar mode="indeterminate" />
     }
 
     <!-- item content -->
-    <mat-tab-group [selectedIndex]="id ? 1 : 0">
+    <mat-tab-group [selectedIndex]="id() ? 1 : 0">
       <!-- metadata -->
       <mat-tab label="Metadata">
         <form [formGroup]="metadata" (ngSubmit)="save()">
@@ -118,24 +118,24 @@
           <!-- flags -->
           <fieldset>
             <legend>flags</legend>
-            @if (flagDefinitions) {
+            @if (flagDefinitions().length) {
             <div formArrayName="flagChecks">
               @for (c of flagChecks.controls; track c; let i = $index) { @if
-              (userLevel < 4 && flagDefinitions[i].isAdmin === true) {
+              (userLevel() < 4 && flagDefinitions()[i].isAdmin === true) {
               <span
-                [style.color]="'#' + flagDefinitions[i].colorKey"
+                [style.color]="'#' + flagDefinitions()[i].colorKey"
                 style="margin-left: 12px"
                 >&#x25c6;</span
               >
               &nbsp;
-              {{ flagDefinitions[i].label }}
+              {{ flagDefinitions()[i].label }}
               } @else {
               <mat-checkbox class="flag" [formControlName]="i">
-                <span [style.color]="'#' + flagDefinitions[i].colorKey"
+                <span [style.color]="'#' + flagDefinitions()[i].colorKey"
                   >&#x2b24;</span
                 >
                 &nbsp;
-                {{ flagDefinitions[i].label }}
+                {{ flagDefinitions()[i].label }}
               </mat-checkbox>
               } }
             </div>
@@ -144,7 +144,7 @@
           <br />
 
           <!-- action buttons -->
-          @if (userLevel > 1) {
+          @if (userLevel() > 1) {
           <div class="form-row">
             <button
               type="button"
@@ -158,7 +158,7 @@
               type="submit"
               mat-flat-button
               class="mat-primary"
-              [disabled]="busy"
+              [disabled]="busy()"
               matTooltip="Save metadata"
               (click)="save()"
             >
@@ -170,7 +170,7 @@
       </mat-tab>
 
       <!-- parts -->
-      @if (id) {
+      @if (id()) {
       <mat-tab label="Parts">
         <div class="new-part">
           <form [formGroup]="newPart" class="form-row">
@@ -193,7 +193,7 @@
               mat-flat-button
               class="mat-primary"
               type="button"
-              [disabled]="userLevel < 2 || busy || !newPart.valid"
+              [disabled]="userLevel() < 2 || busy() || !newPart.valid"
               (click)="addPart()"
               matTooltip="Add a new part of the selected type"
             >
@@ -232,20 +232,21 @@
                   <button
                     mat-icon-button
                     type="button"
-                    [disabled]="busy"
+                    [disabled]="busy()"
                     (click)="editPart(part)"
                     matTooltip="Edit this part"
                   >
                     <mat-icon class="mat-primary">create</mat-icon>
                   </button>
                   <!-- delete -->
-                  @if ( user?.roles?.length && (user?.roles?.includes('admin')
-                  || user?.roles?.includes('editor') ||
-                  user?.roles?.includes('operator')) ) {
+                  @if ( user()?.roles?.length &&
+                  (user()?.roles?.includes('admin') ||
+                  user()?.roles?.includes('editor') ||
+                  user()?.roles?.includes('operator')) ) {
                   <button
                     mat-icon-button
                     type="button"
-                    [disabled]="userLevel < 2 || busy"
+                    [disabled]="userLevel() < 2 || busy()"
                     (click)="deletePart(part)"
                     matTooltip="Delete this part"
                   >
@@ -317,7 +318,7 @@
           (addRequest)="addPart($event)"
         />
       </mat-tab>
-      } @if (id) {
+      } @if (id()) {
       <mat-tab label="Layers">
         @if (layerPartInfos$ | async; as parts) {
         <table id="layers">
@@ -347,7 +348,7 @@
                   type="button"
                   mat-icon-button
                   matTooltip="Add this layer part"
-                  [disabled]="userLevel < 2"
+                  [disabled]="userLevel() < 2"
                   (click)="addLayerPart(part)"
                 >
                   <mat-icon class="mat-primary">add_circle</mat-icon>
@@ -357,7 +358,7 @@
                   type="button"
                   mat-icon-button
                   matTooltip="Delete this layer part"
-                  [disabled]="userLevel < 2"
+                  [disabled]="userLevel() < 2"
                   (click)="deletePart(part)"
                 >
                   <mat-icon class="mat-warn">delete</mat-icon>
@@ -390,10 +391,8 @@
                 />
               </td>
               <td
-                [ngClass]="{
-                  'count-n': part.fragmentCount,
-                  'count-z': !part.fragmentCount
-                }"
+                [class.count-n]="part.fragmentCount"
+                [class.count-z]="!part.fragmentCount"
               >
                 {{ part.fragmentCount }}
               </td>
@@ -415,7 +414,7 @@
         <!-- [parts]="parts | sort: 'typeId' | sort: 'roleId'" -->
         <cadmus-parts-scope-editor
           [parts]="parts"
-          [readonly]="userLevel < 2 || busy ? true : false"
+          [readonly]="userLevel() < 2 || busy() ? true : false"
           (setScopeRequest)="setPartsScope($event)"
         />
       </mat-tab>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -28,7 +28,11 @@ import {
 } from '@angular/material/expansion';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import {
+  deepCopy,
+  FlatLookupPipe,
+  NgxToolsValidators,
+} from '@myrmidon/ngx-tools';
 
 import {
   ThesauriSet,
@@ -82,11 +86,12 @@ export class IndexKeywordsPartComponent
   extends ModelEditorComponentBase<IndexKeywordsPart>
   implements OnInit
 {
-  public editedKeyword?: IndexKeyword;
+  public readonly editedKeyword = signal<IndexKeyword | undefined>(undefined);
+
   // thesaurus
-  public idxEntries: ThesaurusEntry[] | undefined;
-  public langEntries: ThesaurusEntry[] | undefined;
-  public tagEntries: ThesaurusEntry[] | undefined;
+  public readonly idxEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   public keywords: FormControl<IndexKeyword[]>;
 
@@ -112,21 +117,21 @@ export class IndexKeywordsPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'languages';
     if (this.hasThesaurus(key)) {
-      this.langEntries = thesauri[key].entries;
+      this.langEntries.set(thesauri[key].entries);
     } else {
-      this.langEntries = undefined;
+      this.langEntries.set(undefined);
     }
     key = 'keyword-indexes';
     if (this.hasThesaurus(key)) {
-      this.idxEntries = thesauri[key].entries;
+      this.idxEntries.set(thesauri[key].entries);
     } else {
-      this.idxEntries = undefined;
+      this.idxEntries.set(undefined);
     }
     key = 'keyword-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
   }
 
@@ -221,8 +226,8 @@ export class IndexKeywordsPartComponent
 
   public addNewKeyword(): void {
     const keyword: IndexKeyword = {
-      indexId: this.idxEntries?.length ? this.idxEntries[0].id : undefined,
-      language: this.langEntries?.length ? this.langEntries[0].id : 'eng',
+      indexId: this.idxEntries()?.length ? this.idxEntries()![0].id : undefined,
+      language: this.langEntries()?.length ? this.langEntries()![0].id : 'eng',
       value: '',
     };
     this.editKeyword(keyword);
@@ -237,15 +242,15 @@ export class IndexKeywordsPartComponent
   }
 
   public editKeyword(keyword: IndexKeyword): void {
-    this.editedKeyword = keyword;
+    this.editedKeyword.set(deepCopy(keyword));
   }
 
   public onKeywordClose(): void {
-    this.editedKeyword = undefined;
+    this.editedKeyword.set(undefined);
   }
 
   public onKeywordChange(keyword: IndexKeyword): void {
     this.addKeyword(keyword);
-    this.editedKeyword = undefined;
+    this.editedKeyword.set(undefined);
   }
 }

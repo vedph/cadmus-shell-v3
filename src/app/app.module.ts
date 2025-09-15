@@ -74,14 +74,12 @@ import { TxtEmojiCtePlugin } from '@myrmidon/cadmus-text-ed-txt';
 import { GEONAMES_USERNAME_TOKEN } from '@myrmidon/cadmus-refs-geonames-lookup';
 
 // libraries in this workspace
-// notice that when you import the libraries into another workspace, you must change
-// these imports with @myrmidon/... rather than projects/myrmidon/... .
-import { CadmusApiModule } from 'projects/myrmidon/cadmus-api/src/public-api';
-import { CadmusCoreModule } from 'projects/myrmidon/cadmus-core/src/public-api';
-import { CadmusProfileCoreModule } from 'projects/myrmidon/cadmus-profile-core/src/public-api';
-import { CadmusStateModule } from 'projects/myrmidon/cadmus-state/src/public-api';
-import { CadmusUiModule } from 'projects/myrmidon/cadmus-ui/src/public-api';
-import { CadmusUiPgModule } from 'projects/myrmidon/cadmus-ui-pg/src/public-api';
+import { CadmusApiModule } from '@myrmidon/cadmus-api';
+import { CadmusCoreModule } from '@myrmidon/cadmus-core';
+import { CadmusProfileCoreModule } from '@myrmidon/cadmus-profile-core';
+import { CadmusStateModule } from '@myrmidon/cadmus-state';
+import { CadmusUiModule } from '@myrmidon/cadmus-ui';
+import { CadmusUiPgModule } from '@myrmidon/cadmus-ui-pg';
 
 // locals
 import { AppRoutingModule } from './app-routing.module';

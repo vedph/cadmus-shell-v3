@@ -41,7 +41,7 @@
                 >
                   <mat-icon class="mat-primary">mode_edit</mat-icon>
                 </button>
-                @if (userLevel > 2) {
+                @if (userLevel() > 2) {
                 <button
                   mat-icon-button
                   type="button"
@@ -98,7 +98,7 @@
     </div>
   </mat-card-content>
   <mat-card-actions>
-    @if (userLevel > 1) {
+    @if (userLevel() > 1) {
     <button
       type="button"
       class="mat-primary"

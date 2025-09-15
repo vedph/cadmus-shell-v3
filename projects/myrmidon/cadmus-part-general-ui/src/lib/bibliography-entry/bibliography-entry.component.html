@@ -323,7 +323,7 @@
         </div>
       </form>
       <!-- list -->
-      @if (keywords.length) {
+      @if (keywords().length) {
       <table>
         <thead>
           <tr>
@@ -333,7 +333,7 @@
           </tr>
         </thead>
         <tbody>
-          @for ( k of keywords; track k; let i = $index; let first = $first; let
+          @for ( k of keywords(); track k; let i = $index; let first = $first; let
           last = $last) {
           <tr>
             <td>

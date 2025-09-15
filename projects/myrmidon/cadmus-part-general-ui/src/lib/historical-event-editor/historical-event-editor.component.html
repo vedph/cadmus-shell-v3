@@ -186,7 +186,7 @@
         </thead>
         <tbody>
           @for (e of relatedEntities.value; track e.id; let i = $index) {
-          <tr [class.selected]="editedEntity === e">
+          <tr [class.selected]="i === editedEntityIndex()">
             <td class="fit-width">
               <button
                 type="button"
@@ -215,7 +215,10 @@
       </table>
 
       <!-- entity editor -->
-      <mat-expansion-panel [disabled]="!editedEntity" [expanded]="editedEntity">
+      <mat-expansion-panel
+        [disabled]="!editedEntity()"
+        [expanded]="editedEntity()"
+      >
         <mat-expansion-panel-header>entity</mat-expansion-panel-header>
         <fieldset>
           <cadmus-related-entity
@@ -225,7 +228,7 @@
             [assTagEntries]="assTagEntries()"
             [refTagEntries]="refTagEntries()"
             [refTypeEntries]="refTypeEntries()"
-            [entity]="editedEntity"
+            [entity]="editedEntity()"
             (entityChange)="onEntityChange($event!)"
             (editorClose)="closeEntity()"
           />

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -31,8 +31,8 @@ import {
   ],
 })
 export class LoginPageComponent {
-  public busy = false;
-  public error?: string;
+  public readonly busy = signal<boolean>(false);
+  public readonly error = signal<string | undefined>(undefined);
 
   constructor(
     private _authService: AuthJwtService,
@@ -41,7 +41,7 @@ export class LoginPageComponent {
   ) {}
 
   public onLoginRequest(credentials: Credentials): void {
-    this.busy = true;
+    this.busy.set(true);
 
     this._authService.login(credentials.name, credentials.password).subscribe({
       next: (user) => {
@@ -49,14 +49,14 @@ export class LoginPageComponent {
         this._router.navigate([credentials.returnUrl || '/items']);
       },
       error: (error) => {
-        this.error = 'Login failed';
+        this.error.set('Login failed');
         console.error(this.error, error);
-        this._snackbar.open(this.error, 'Dismiss', {
+        this._snackbar.open(this.error()!, 'Dismiss', {
           duration: 5000,
         });
       },
       complete: () => {
-        this.busy = false;
+        this.busy.set(false);
       },
     });
   }

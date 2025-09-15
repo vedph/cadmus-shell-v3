@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -73,17 +73,17 @@ export class ExternalIdsPartComponent
   public ids: FormControl<AssertedId[]>;
 
   // external-id-scopes
-  public idScopeEntries: ThesaurusEntry[] | undefined;
+  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // external-id-tags
-  public idTagEntries: ThesaurusEntry[] | undefined;
+  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   // thesauri for assertions:
   // assertion-tags
-  public assTagEntries: ThesaurusEntry[] | undefined;
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // doc-reference-types
-  public refTypeEntries: ThesaurusEntry[] | undefined;
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // doc-reference-tags
-  public refTagEntries: ThesaurusEntry[] | undefined;
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -107,37 +107,37 @@ export class ExternalIdsPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'assertion-tags';
     if (this.hasThesaurus(key)) {
-      this.assTagEntries = thesauri[key].entries;
+      this.assTagEntries.set(thesauri[key].entries);
     } else {
-      this.assTagEntries = undefined;
+      this.assTagEntries.set(undefined);
     }
 
     key = 'doc-reference-types';
     if (this.hasThesaurus(key)) {
-      this.refTypeEntries = thesauri[key].entries;
+      this.refTypeEntries.set(thesauri[key].entries);
     } else {
-      this.refTypeEntries = undefined;
+      this.refTypeEntries.set(undefined);
     }
 
     key = 'doc-reference-tags';
     if (this.hasThesaurus(key)) {
-      this.refTagEntries = thesauri[key].entries;
+      this.refTagEntries.set(thesauri[key].entries);
     } else {
-      this.refTagEntries = undefined;
+      this.refTagEntries.set(undefined);
     }
 
     key = 'external-id-scopes';
     if (this.hasThesaurus(key)) {
-      this.idScopeEntries = thesauri[key].entries;
+      this.idScopeEntries.set(thesauri[key].entries);
     } else {
-      this.idScopeEntries = undefined;
+      this.idScopeEntries.set(undefined);
     }
 
     key = 'external-id-tags';
     if (this.hasThesaurus(key)) {
-      this.idTagEntries = thesauri[key].entries;
+      this.idTagEntries.set(thesauri[key].entries);
     } else {
-      this.idTagEntries = undefined;
+      this.idTagEntries.set(undefined);
     }
   }
 

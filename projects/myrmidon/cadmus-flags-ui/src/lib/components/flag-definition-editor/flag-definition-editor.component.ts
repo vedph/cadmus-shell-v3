@@ -104,7 +104,9 @@ export class FlagDefinitionEditorComponent {
 
     this.id.setValue(this.getBit(definition.id) + 1);
     this.label.setValue(definition.label);
-    this.colorKey.setValue('#' + definition.colorKey || null);
+    this.colorKey.setValue(
+      definition.colorKey ? '#' + definition.colorKey : null
+    );
     this.description.setValue(definition.description);
     this.isAdmin.setValue(definition.isAdmin === true);
 

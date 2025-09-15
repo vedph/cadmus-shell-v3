@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -35,9 +35,9 @@ export class PartPreviewComponent {
    */
   public readonly source = input<PartPreviewSource>();
 
-  public busy?: boolean;
-  public item?: Item;
-  public html?: string;
+  public readonly busy = signal<boolean>(false);
+  public readonly item = signal<Item | undefined>(undefined);
+  public readonly html = signal<string | undefined>(undefined);
 
   constructor(
     private _previewService: PreviewService,
@@ -48,16 +48,16 @@ export class PartPreviewComponent {
   }
 
   public refresh(source?: PartPreviewSource): void {
-    if (this.busy) {
+    if (this.busy()) {
       return;
     }
     if (!source?.partId) {
-      this.item = undefined;
-      this.html = undefined;
+      this.item.set(undefined);
+      this.html.set(undefined);
       return;
     }
 
-    this.busy = true;
+    this.busy.set(true);
     forkJoin({
       item: this._itemService.getItem(source.itemId, false),
       preview: this._previewService.renderPart(source.itemId, source.partId),
@@ -65,12 +65,12 @@ export class PartPreviewComponent {
       .pipe(take(1))
       .subscribe({
         next: (result) => {
-          this.busy = false;
-          this.item = result.item || undefined;
-          this.html = result.preview.result;
+          this.busy.set(false);
+          this.item.set(result.item || undefined);
+          this.html.set(result.preview.result);
         },
         error: (error) => {
-          this.busy = false;
+          this.busy.set(false);
           console.error(`Error previewing part ${source!.partId}`, error);
           this._snackbar.open('Error previewing part ' + source!.partId);
         },

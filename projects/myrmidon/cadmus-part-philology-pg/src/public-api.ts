@@ -7,4 +7,4 @@ export * from './lib/orthography-fragment-feature/orthography-fragment-feature.c
 export * from './lib/quotations-fragment-feature/quotations-fragment-feature.component';
 export * from './lib/witnesses-fragment-feature/witnesses-fragment-feature.component';
 
-export * from './lib/cadmus-part-philology-pg.module';
+export * from './lib/cadmus-part-philology-pg.routes';

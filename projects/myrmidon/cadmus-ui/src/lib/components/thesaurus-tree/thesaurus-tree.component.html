@@ -18,21 +18,14 @@
   <mat-form-field>
     <mat-label>find</mat-label>
     <input matInput [formControl]="filter" />
-    <button
-      type="button"
-      matSuffix
-      mat-icon-button
-      (click)="resetFilter()"
-    >
+    <button type="button" matSuffix mat-icon-button (click)="resetFilter()">
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
   </mat-form-field>
   @if (foundNodes) {
   <span
-    [ngClass]="{
-      'found-count': foundNodes.length,
-      'not-found-count': foundNodes.length === 0
-    }"
+    [class.found-count]="foundNodes.length"
+    [class.not-found-count]="foundNodes.length === 0"
     >{{ foundNodes.length }}</span
   >
   }

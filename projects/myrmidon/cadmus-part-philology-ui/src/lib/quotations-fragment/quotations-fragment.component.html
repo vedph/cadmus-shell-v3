@@ -9,7 +9,7 @@
         {{ data()?.value?.location }}</mat-card-title
       >
       <mat-card-subtitle>
-        {{ frText }}
+        {{ frText() }}
       </mat-card-subtitle>
     </mat-card-header>
 
@@ -29,7 +29,7 @@
         <tbody>
           @for ( entry of entries.value; track entry; let i = $index; let first
           = $first; let last = $last) {
-          <tr [class.selected]="editedEntryIndex === i">
+          <tr [class.selected]="editedEntryIndex() === i">
             <td>
               <button
                 mat-icon-button
@@ -79,15 +79,18 @@
         <mat-icon>add_circle</mat-icon> entry
       </button>
       <!-- entry editor -->
-      @if (editedEntry) {
-      <mat-expansion-panel [expanded]="editedEntry" [disabled]="!editedEntry">
+      @if (editedEntry()) {
+      <mat-expansion-panel
+        [expanded]="editedEntry()"
+        [disabled]="!editedEntry()"
+      >
         <mat-expansion-panel-header>
-          <mat-panel-title> #{{ editedEntryIndex + 1 }} </mat-panel-title>
+          <mat-panel-title> #{{ editedEntryIndex() + 1 }} </mat-panel-title>
         </mat-expansion-panel-header>
         <cadmus-quotation-entry
-          [entry]="editedEntry"
-          [workDictionary]="workDictionary"
-          [tagEntries]="tagEntries"
+          [entry]="editedEntry()"
+          [workDictionary]="workDictionary()"
+          [tagEntries]="tagEntries()"
           (editorClose)="closeEntry()"
           (entryChange)="saveEntry($event!)"
         />

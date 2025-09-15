@@ -14,7 +14,7 @@
           type="button"
           mat-flat-button
           color="primary"
-          [disabled]="maxDateCount > 0 && dates.value.length >= maxDateCount"
+          [disabled]="maxDateCount() > 0 && dates.value.length >= maxDateCount()"
           (click)="addDate()"
         >
           <mat-icon>add_circle</mat-icon> date
@@ -32,7 +32,7 @@
         <tbody>
           @for (date of dates.value; track date; let i = $index; let first =
           $first; let last = $last) {
-          <tr [class.selected]="date === edited">
+          <tr [class.selected]="i === editedIndex()">
             <td class="fit-width">
               <button
                 type="button"
@@ -72,24 +72,24 @@
               </button>
             </td>
             <td>{{ date | historicalDate }}</td>
-            <td>{{ date.tag | flatLookup : tagEntries : "id" : "value" }}</td>
+            <td>{{ date.tag | flatLookup : tagEntries() : "id" : "value" }}</td>
           </tr>
           }
         </tbody>
       </table>
-      } @if (edited) {
+      } @if (edited()) {
       <fieldset>
-        <mat-expansion-panel [expanded]="edited" [disabled]="!edited">
+        <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
           <mat-expansion-panel-header>
             <mat-panel-title>Date #</mat-panel-title>
           </mat-expansion-panel-header>
           <cadmus-asserted-historical-date
-            [date]="edited"
+            [date]="edited()"
             (dateChange)="saveDate($event!)"
-            [tagEntries]="tagEntries"
-            [assertionTagEntries]="assertionTagEntries"
-            [docReferenceTagEntries]="docReferenceTagEntries"
-            [docReferenceTypeEntries]="docReferenceTypeEntries"
+            [tagEntries]="tagEntries()"
+            [assertionTagEntries]="assertionTagEntries()"
+            [docReferenceTagEntries]="docReferenceTagEntries()"
+            [docReferenceTypeEntries]="docReferenceTypeEntries()"
             (dateCancel)="closeDate()"
           />
         </mat-expansion-panel>

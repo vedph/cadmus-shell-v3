@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
@@ -16,6 +16,7 @@ import {
   AppRepository,
 } from '@myrmidon/cadmus-state';
 import { ThesaurusEditorComponent } from '@myrmidon/cadmus-thesaurus-ui';
+import { deepCopy } from '@myrmidon/ngx-tools';
 
 @Component({
   selector: 'lib-thesaurus-editor-feature',
@@ -24,12 +25,13 @@ import { ThesaurusEditorComponent } from '@myrmidon/cadmus-thesaurus-ui';
   imports: [MatProgressBar, AsyncPipe, ThesaurusEditorComponent],
 })
 export class ThesaurusEditorFeatureComponent implements OnInit {
-  public id?: string;
-  public user?: User;
-  public userLevel: number;
+  public readonly id = signal<string | undefined>(undefined);
+  public readonly user = signal<User | undefined>(undefined);
+  public userLevel = signal<number>(0);
+
   public loading$: Observable<boolean>;
   public saving$: Observable<boolean>;
-  public thesaurus?: Thesaurus;
+  public readonly thesaurus = signal<Thesaurus | undefined>(undefined);
 
   constructor(
     private _route: ActivatedRoute,
@@ -42,10 +44,10 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     private _snackbar: MatSnackBar
   ) {
     this.id = this._route.snapshot.params['id'];
-    if (this.id === 'new') {
-      this.id = undefined;
+    if (this.id() === 'new') {
+      this.id.set(undefined);
     }
-    this.userLevel = userLevelService.getCurrentUserLevel();
+    this.userLevel.set(userLevelService.getCurrentUserLevel());
     this.loading$ = this._repository.loading$;
     this.saving$ = this._repository.saving$;
   }
@@ -57,11 +59,11 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     // update form whenever we get new data
     this._repository.thesaurus$.subscribe(
       (thesaurus: Thesaurus | undefined) => {
-        this.thesaurus = thesaurus;
+        this.thesaurus.set(deepCopy(thesaurus));
       }
     );
 
-    this._repository.load(this.id);
+    this._repository.load(this.id());
   }
 
   public wrapLookup(service: ThesaurusService) {
@@ -71,7 +73,7 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
   }
 
   public onThesaurusChange(thesaurus: Thesaurus): void {
-    this.thesaurus = thesaurus;
+    this.thesaurus.set(thesaurus);
     this.save();
   }
 
@@ -88,13 +90,13 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
 
   private doSave(): void {
     // save and reload as edited if was new
-    this._repository.save(this.thesaurus!).then((saved: Thesaurus) => {
+    this._repository.save(this.thesaurus()!).then((saved: Thesaurus) => {
       this._snackbar.open('Thesaurus saved', 'OK', {
         duration: 1500,
       });
       this._appRepository.loadThesauri();
-      if (!this.id) {
-        this.id = saved.id;
+      if (!this.id()) {
+        this.id.set(saved.id);
         // https://stackoverflow.com/questions/40983055/how-to-reload-the-current-route-with-the-angular-2-router
         this._router
           .navigateByUrl('/', { skipLocationChange: true })
@@ -106,19 +108,19 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
   }
 
   public save(): void {
-    if (this.userLevel < 3) {
+    if (this.userLevel() < 3) {
       return;
     }
 
     // if the thesaurus is new, or its id has changed,
     // ensure that a thesaurus with that id does not already exist
-    if (!this.id || this.id !== this.thesaurus!.id) {
+    if (!this.id() || this.id() !== this.thesaurus()!.id) {
       this.thesService
-        .thesaurusExists(this.thesaurus!.id)
+        .thesaurusExists(this.thesaurus()!.id)
         .then((exists: boolean) => {
           if (exists) {
             this._snackbar.open(
-              `A thesaurus with ID ${this.thesaurus!.id}\nalready exists!`,
+              `A thesaurus with ID ${this.thesaurus()!.id}\nalready exists!`,
               'OK'
             );
           } else {

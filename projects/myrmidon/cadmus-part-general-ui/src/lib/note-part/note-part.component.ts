@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, Optional, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -89,7 +89,7 @@ export class NotePartComponent
   public tag: FormControl<string | null>;
   public text: FormControl<string | null>;
 
-  public tagEntries?: ThesaurusEntry[];
+  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(
     authService: AuthJwtService,
@@ -188,9 +188,9 @@ export class NotePartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     const key = 'note-tags';
     if (this.hasThesaurus(key)) {
-      this.tagEntries = thesauri[key].entries;
+      this.tagEntries.set(thesauri[key].entries);
     } else {
-      this.tagEntries = undefined;
+      this.tagEntries.set(undefined);
     }
   }
 

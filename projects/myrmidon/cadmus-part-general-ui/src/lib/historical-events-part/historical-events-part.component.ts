@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -26,7 +26,11 @@ import {
   MatExpansionPanelHeader,
 } from '@angular/material/expansion';
 
-import { NgxToolsValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
+import {
+  NgxToolsValidators,
+  FlatLookupPipe,
+  deepCopy,
+} from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { AssertedChronotopesPipe } from '@myrmidon/cadmus-refs-asserted-chronotope';
@@ -85,41 +89,59 @@ export class HistoricalEventsPartComponent
   extends ModelEditorComponentBase<HistoricalEventsPart>
   implements OnInit
 {
-  public editedEventIndex: number;
-  public editedEvent: HistoricalEvent | undefined;
+  public readonly editedEventIndex = signal<number>(-1);
+  public readonly editedEvent = signal<HistoricalEvent | undefined>(undefined);
 
   /**
    * Thesaurus event-types.
    */
-  public eventTypeEntries: ThesaurusEntry[] | undefined;
+  public readonly eventTypeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   /**
    * Thesaurus event-tags.
    */
-  public eventTagEntries: ThesaurusEntry[] | undefined;
+  public readonly eventTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   /**
    * Thesaurus event-relations.
    */
-  public relationEntries: ThesaurusEntry[] | undefined;
+  public readonly relationEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   /**
    * Thesaurus chronotope-tags.
    */
-  public ctTagEntries: ThesaurusEntry[] | undefined;
+  public readonly ctTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   /**
    * Thesaurus assertion-tags.
    */
-  public assTagEntries: ThesaurusEntry[] | undefined;
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   /**
    * Thesaurus doc-reference-tags.
    */
-  public refTagEntries: ThesaurusEntry[] | undefined;
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   /**
    * Thesaurus doc-reference-types.
    */
-  public refTypeEntries: ThesaurusEntry[] | undefined;
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   // pin-link-scopes
-  public idScopeEntries?: ThesaurusEntry[];
+  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
   // pin-link-tags
-  public idTagEntries?: ThesaurusEntry[];
+  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
 
   public events: FormControl<HistoricalEvent[]>;
 
@@ -129,7 +151,6 @@ export class HistoricalEventsPartComponent
     private _dialogService: DialogService
   ) {
     super(authService, formBuilder);
-    this.editedEventIndex = -1;
     // form
     this.events = formBuilder.control([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
@@ -150,58 +171,58 @@ export class HistoricalEventsPartComponent
   private updateThesauri(thesauri: ThesauriSet): void {
     let key = 'event-types';
     if (this.hasThesaurus(key)) {
-      this.eventTypeEntries = thesauri[key].entries;
+      this.eventTypeEntries.set(thesauri[key].entries);
     } else {
-      this.eventTypeEntries = undefined;
+      this.eventTypeEntries.set(undefined);
     }
     key = 'event-tags';
     if (this.hasThesaurus(key)) {
-      this.eventTagEntries = thesauri[key].entries;
+      this.eventTagEntries.set(thesauri[key].entries);
     } else {
-      this.eventTagEntries = undefined;
+      this.eventTagEntries.set(undefined);
     }
     key = 'event-relations';
     if (this.hasThesaurus(key)) {
-      this.relationEntries = thesauri[key].entries;
+      this.relationEntries.set(thesauri[key].entries);
     } else {
-      this.relationEntries = undefined;
+      this.relationEntries.set(undefined);
     }
     key = 'chronotope-tags';
     if (this.hasThesaurus(key)) {
-      this.ctTagEntries = thesauri[key].entries;
+      this.ctTagEntries.set(thesauri[key].entries);
     } else {
-      this.ctTagEntries = undefined;
+      this.ctTagEntries.set(undefined);
     }
     key = 'assertion-tags';
     if (this.hasThesaurus(key)) {
-      this.assTagEntries = thesauri[key].entries;
+      this.assTagEntries.set(thesauri[key].entries);
     } else {
-      this.assTagEntries = undefined;
+      this.assTagEntries.set(undefined);
     }
     key = 'doc-reference-tags';
     if (this.hasThesaurus(key)) {
-      this.refTagEntries = thesauri[key].entries;
+      this.refTagEntries.set(thesauri[key].entries);
     } else {
-      this.refTagEntries = undefined;
+      this.refTagEntries.set(undefined);
     }
     key = 'doc-reference-types';
     if (this.hasThesaurus(key)) {
-      this.refTypeEntries = thesauri[key].entries;
+      this.refTypeEntries.set(thesauri[key].entries);
     } else {
-      this.refTypeEntries = undefined;
+      this.refTypeEntries.set(undefined);
     }
     // pin-link
     key = 'pin-link-scopes';
     if (this.hasThesaurus(key)) {
-      this.idScopeEntries = thesauri[key].entries;
+      this.idScopeEntries.set(thesauri[key].entries);
     } else {
-      this.idScopeEntries = undefined;
+      this.idScopeEntries.set(undefined);
     }
     key = 'pin-link-tags';
     if (this.hasThesaurus(key)) {
-      this.idTagEntries = thesauri[key].entries;
+      this.idTagEntries.set(thesauri[key].entries);
     } else {
-      this.idTagEntries = undefined;
+      this.idTagEntries.set(undefined);
     }
   }
 
@@ -236,31 +257,33 @@ export class HistoricalEventsPartComponent
   }
 
   public closeEvent(): void {
-    this.editedEventIndex = -1;
-    this.editedEvent = undefined;
+    this.editedEventIndex.set(-1);
+    this.editedEvent.set(undefined);
   }
 
   public addEvent(): void {
     this.editEvent(
       {
         eid: '',
-        type: this.eventTypeEntries?.length ? this.eventTypeEntries[0].id : '',
+        type: this.eventTypeEntries()?.length
+          ? this.eventTypeEntries()![0].id
+          : '',
       },
       -1
     );
   }
 
   public editEvent(event: HistoricalEvent, index: number): void {
-    this.editedEventIndex = index;
-    this.editedEvent = event;
+    this.editedEventIndex.set(index);
+    this.editedEvent.set(deepCopy(event));
   }
 
   public onEventSave(event: HistoricalEvent): void {
     const events = [...this.events.value];
-    if (this.editedEventIndex === -1) {
+    if (this.editedEventIndex() === -1) {
       events.push(event);
     } else {
-      events[this.editedEventIndex] = event;
+      events[this.editedEventIndex()] = event;
     }
     this.events.setValue(events);
     this.events.updateValueAndValidity();
@@ -274,7 +297,7 @@ export class HistoricalEventsPartComponent
       .pipe(take(1))
       .subscribe((yes) => {
         if (yes) {
-          if (this.editedEventIndex === index) {
+          if (this.editedEventIndex() === index) {
             this.closeEvent();
           }
           const entries = [...this.events.value];

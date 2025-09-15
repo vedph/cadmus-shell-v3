@@ -10,7 +10,7 @@ import { AuthJwtService } from '@myrmidon/auth-jwt-login';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  public logged: boolean;
+  public readonly logged: boolean;
 
   constructor(authService: AuthJwtService) {
     this.logged = authService.currentUserValue !== null;

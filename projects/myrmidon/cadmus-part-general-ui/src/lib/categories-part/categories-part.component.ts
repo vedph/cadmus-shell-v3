@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -66,7 +66,8 @@ export class CategoriesPartComponent
   implements OnInit
 {
   public categories: FormControl<ThesaurusEntry[]>;
-  public entries?: ThesaurusEntry[];
+
+  public readonly entries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -96,7 +97,7 @@ export class CategoriesPartComponent
     // map the category IDs to the corresponding thesaurus
     // entries, if any -- else just use the IDs
     const entries: ThesaurusEntry[] = part.categories.map((id) => {
-      const entry = this.entries!.find((e) => e.id === id);
+      const entry = this.entries()?.find((e) => e.id === id);
       return entry
         ? entry
         : {
@@ -127,7 +128,7 @@ export class CategoriesPartComponent
     // thesauri
     const key = 'categories';
     if (this.hasThesaurus(key)) {
-      this.entries = data?.thesauri[key].entries || [];
+      this.entries.set(data?.thesauri[key].entries || []);
     }
     // tree
     this.updateForm(data?.value);
