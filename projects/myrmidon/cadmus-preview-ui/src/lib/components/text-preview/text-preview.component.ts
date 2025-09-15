@@ -68,6 +68,7 @@ export interface DecoratedLayerPartInfo extends LayerPartInfo {
 })
 export class TextPreviewComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
+  private _isLoading = false;
 
   /**
    * The source of the part to be previewed.
@@ -99,17 +100,21 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
     this.selectedLayer = formBuilder.control(null);
 
     effect(() => {
-      this.loadItem(this.source());
+      const source = this.source();
+      if (this._isLoading) {
+        return;
+      }
+      this.loadItem(source);
     });
   }
 
   public ngOnInit(): void {
     this._sub = this.selectedLayer.valueChanges.subscribe((_) => {
-      if (!this.busy) {
+      if (!this._isLoading) {
         this.loadLayer();
       }
     });
-    this.loadItem();
+    // Don't call loadItem() here - the effect will handle it
   }
 
   public ngOnDestroy(): void {
@@ -139,6 +144,12 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   private loadLayer(): void {
     const layer = this.selectedLayer.value;
     const layers = !layer || layer.id === 'all' ? this.layers() : [layer];
+
+    if (this._isLoading) {
+      return;
+    }
+
+    this._isLoading = true;
     this.busy.set(true);
 
     this._previewService
@@ -150,12 +161,14 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (spans) => {
           this.busy.set(false);
+          this._isLoading = false;
           // convert initial/final WS into mid dot
           this.adjustSpanWS(spans);
           this.segments.set(spans);
         },
         error: (error) => {
           this.busy.set(false);
+          this._isLoading = false;
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
             error
@@ -168,15 +181,20 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   }
 
   private loadItem(source?: PartPreviewSource): void {
-    if (this.busy()) {
+    if (this._isLoading) {
       return;
     }
+
     if (!source?.partId) {
       this.item.set(undefined);
       this.layers.set([]);
       this.segments.set([]);
       return;
     }
+
+    this._isLoading = true;
+    this.busy.set(true);
+
     forkJoin({
       item: this._itemService.getItem(source!.itemId, false),
       layers: this._itemService.getItemLayerInfo(source.itemId, false),
@@ -185,6 +203,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (result) => {
           this.busy.set(false);
+          this._isLoading = false;
           this.item.set(result.item || undefined);
           this.assignLayerColors(result.layers);
           this.layers.set(result.layers);
@@ -200,6 +219,7 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.busy.set(false);
+          this._isLoading = false;
           console.error(`Error previewing text part ${source!.partId}`, error);
           this._snackbar.open('Error previewing text part ' + source!.partId);
         },
@@ -212,10 +232,13 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   }
 
   private showFragments(fragmentIds: string[]): void {
-    if (this.busy() || !fragmentIds.length) {
+    if (this._isLoading || !fragmentIds.length) {
       return;
     }
+
+    this._isLoading = true;
     this.busy.set(true);
+
     // load all the fragments linked to this block
     const loaders$: Observable<RenditionResult>[] = [];
     const labels: string[] = [];
@@ -237,11 +260,13 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (renditions) => {
           this.busy.set(false);
+          this._isLoading = false;
           this.frHtml.set(renditions.map((r) => r.result));
           this.frLabels.set(labels);
         },
         error: (error) => {
           this.busy.set(false);
+          this._isLoading = false;
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
             error
