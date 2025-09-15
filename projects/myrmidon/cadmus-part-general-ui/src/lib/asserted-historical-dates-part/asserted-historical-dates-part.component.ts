@@ -17,7 +17,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { deepCopy, FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import {
+  deepCopy,
+  FlatLookupPipe,
+  NgxToolsValidators,
+} from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -184,7 +188,10 @@ export class AssertedHistoricalDatesPartComponent
 
   public addDate(): void {
     // check max count if set
-    if (this.maxDateCount() > 0 && this.dates.value.length >= this.maxDateCount()) {
+    if (
+      this.maxDateCount() > 0 &&
+      this.dates.value.length >= this.maxDateCount()
+    ) {
       return;
     }
 
@@ -215,13 +222,13 @@ export class AssertedHistoricalDatesPartComponent
       return;
     }
 
-    const entries = [...this.dates.value];
+    const dates = [...this.dates.value];
     if (this.editedIndex() === -1) {
-      entries.push(entry);
+      dates.push(entry);
     } else {
-      entries.splice(this.editedIndex(), 1, entry);
+      dates.splice(this.editedIndex(), 1, entry);
     }
-    this.dates.setValue(entries);
+    this.dates.setValue(dates);
     this.dates.markAsDirty();
     this.dates.updateValueAndValidity();
     this.closeDate();
@@ -235,9 +242,9 @@ export class AssertedHistoricalDatesPartComponent
           if (this.editedIndex() === index) {
             this.closeDate();
           }
-          const entries = [...this.dates.value];
-          entries.splice(index, 1);
-          this.dates.setValue(entries);
+          const dates = [...this.dates.value];
+          dates.splice(index, 1);
+          this.dates.setValue(dates);
           this.dates.markAsDirty();
           this.dates.updateValueAndValidity();
         }
@@ -248,11 +255,11 @@ export class AssertedHistoricalDatesPartComponent
     if (index < 1) {
       return;
     }
-    const entry = this.dates.value[index];
-    const entries = [...this.dates.value];
-    entries.splice(index, 1);
-    entries.splice(index - 1, 0, entry);
-    this.dates.setValue(entries);
+    const date = this.dates.value[index];
+    const dates = [...this.dates.value];
+    dates.splice(index, 1);
+    dates.splice(index - 1, 0, date);
+    this.dates.setValue(dates);
     this.dates.markAsDirty();
     this.dates.updateValueAndValidity();
   }
@@ -261,11 +268,11 @@ export class AssertedHistoricalDatesPartComponent
     if (index + 1 >= this.dates.value.length) {
       return;
     }
-    const entry = this.dates.value[index];
-    const entries = [...this.dates.value];
-    entries.splice(index, 1);
-    entries.splice(index + 1, 0, entry);
-    this.dates.setValue(entries);
+    const date = this.dates.value[index];
+    const dates = [...this.dates.value];
+    dates.splice(index, 1);
+    dates.splice(index + 1, 0, date);
+    this.dates.setValue(dates);
     this.dates.markAsDirty();
     this.dates.updateValueAndValidity();
   }

@@ -1,4 +1,3 @@
-
 import { Component, effect, input, model, output } from '@angular/core';
 import {
   FormBuilder,
@@ -38,8 +37,8 @@ import {
     MatSelectModule,
     MatTooltipModule,
     HistoricalDateComponent,
-    AssertionComponent
-],
+    AssertionComponent,
+  ],
   templateUrl: './asserted-historical-date.component.html',
   styleUrl: './asserted-historical-date.component.css',
 })
@@ -86,9 +85,11 @@ export class AssertedHistoricalDateComponent {
       return;
     }
 
-    this.tag.setValue(date.tag || null);
-    this.hd.setValue(date ? { a: date.a, b: date.b } : null);
-    this.assertion.setValue(date.assertion || null);
+    this.tag.setValue(date.tag || null, { emitEvent: false });
+    this.hd.setValue(date ? { a: date.a, b: date.b } : null, {
+      emitEvent: false,
+    });
+    this.assertion.setValue(date.assertion || null, { emitEvent: false });
 
     this.form.markAsPristine();
   }
