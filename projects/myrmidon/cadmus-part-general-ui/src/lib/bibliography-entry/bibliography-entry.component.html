@@ -92,8 +92,8 @@
       <fieldset>
         <legend>author(s)</legend>
         <cadmus-bib-authors-editor
-          [parentForm]="form"
-          [controlName]="'authors'"
+          [authors]="authors.value"
+          (authorsChange)="onAuthorsChange($event)"
           [roleEntries]="roleEntries()"
         />
       </fieldset>
@@ -127,11 +127,14 @@
     <!-- container -->
     <mat-tab label="Container">
       <!-- contributors -->
-      <cadmus-bib-authors-editor
-        [parentForm]="form"
-        [controlName]="'contributors'"
-        [roleEntries]="roleEntries()"
-      />
+      <fieldset>
+        <legend>container author(s)</legend>
+        <cadmus-bib-authors-editor
+          [authors]="contributors.value"
+          (authorsChange)="onContributorsChange($event)"
+          [roleEntries]="roleEntries()"
+        />
+      </fieldset>
 
       <!-- container -->
       <div>
@@ -333,10 +336,10 @@
           </tr>
         </thead>
         <tbody>
-          @for ( k of keywords(); track k; let i = $index; let first = $first; let
-          last = $last) {
+          @for ( k of keywords(); track k; let i = $index; let first = $first;
+          let last = $last) {
           <tr>
-            <td>
+            <td class="fit-width">
               <button
                 mat-icon-button
                 type="button"

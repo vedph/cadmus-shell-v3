@@ -19,12 +19,13 @@
   "peerDependencies": {
     "@angular/common": "^20.0.0",
     "@angular/core": "^20.0.0",
+    "@angular/material": "^20.0.0",
     "@myrmidon/ngx-tools": "^2.0.0",
     "@myrmidon/ngx-mat-tools": "^1.0.0",
     "@myrmidon/cadmus-refs-lookup": "^10.0.3",
-    "@myrmidon/cadmus-api": "^14.0.2",
+    "@myrmidon/cadmus-api": "^14.0.3",
     "@myrmidon/cadmus-graph-ui": "^15.0.0",
-    "@myrmidon/cadmus-graph-ui-ex": "^15.0.0"
+    "@myrmidon/cadmus-graph-ui-ex": "^16.0.0"
   },
   "sideEffects": false
 }

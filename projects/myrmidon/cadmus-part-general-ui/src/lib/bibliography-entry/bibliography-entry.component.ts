@@ -14,7 +14,6 @@ import {
   FormBuilder,
   FormControl,
   Validators,
-  FormArray,
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
@@ -39,6 +38,8 @@ import {
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import { Keyword } from '../keywords-part';
 import { BibEntry, BibAuthor } from '../bibliography-part';
@@ -95,11 +96,11 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
   public type: FormControl<string | null>;
   public tag: FormControl<string | null>;
   public language: FormControl<string | null>;
-  public authors: FormArray;
+  public authors: FormControl<BibAuthor[]>;
   public title: FormControl<string | null>;
   public note: FormControl<string | null>;
   // form - container
-  public contributors: FormArray;
+  public contributors: FormControl<BibAuthor[]>;
   public container: FormControl<string | null>;
   public edition: FormControl<number | null>;
   public number: FormControl<string | null>;
@@ -118,63 +119,68 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
 
   public form: FormGroup;
 
-  constructor(private _formBuilder: FormBuilder) {
+  constructor(formBuilder: FormBuilder) {
     // form - general
-    this.key = _formBuilder.control(null, Validators.maxLength(300));
-    this.type = _formBuilder.control(null, [
+    this.key = formBuilder.control(null, Validators.maxLength(300));
+    this.type = formBuilder.control(null, [
       Validators.required,
       Validators.maxLength(50),
     ]);
-    this.tag = _formBuilder.control(null, Validators.maxLength(50));
-    this.language = _formBuilder.control(null, [
+    this.tag = formBuilder.control(null, Validators.maxLength(50));
+    this.language = formBuilder.control(null, [
       Validators.required,
       Validators.pattern(/^[a-z]{3}$/),
     ]);
-    this.authors = _formBuilder.array([], Validators.required);
-    this.title = _formBuilder.control(null, [
+    this.authors = formBuilder.control<BibAuthor[]>([], {
+      validators: NgxToolsValidators.strictMinLengthValidator(1),
+      nonNullable: true,
+    });
+    this.title = formBuilder.control(null, [
       Validators.required,
       Validators.maxLength(300),
     ]);
-    this.note = _formBuilder.control(null, Validators.maxLength(1000));
+    this.note = formBuilder.control(null, Validators.maxLength(1000));
     // form - container
-    this.contributors = _formBuilder.array([]);
-    this.container = _formBuilder.control(null, Validators.maxLength(300));
-    this.edition = _formBuilder.control(null, [
+    this.contributors = formBuilder.control<BibAuthor[]>([], {
+      nonNullable: true,
+    });
+    this.container = formBuilder.control(null, Validators.maxLength(300));
+    this.edition = formBuilder.control(null, [
       Validators.min(0),
       Validators.max(100),
     ]);
-    this.number = _formBuilder.control(null, Validators.maxLength(50));
-    this.publisher = _formBuilder.control(null, Validators.maxLength(100));
-    this.placePub = _formBuilder.control(null, Validators.maxLength(100));
-    this.yearPub = _formBuilder.control(null, [
+    this.number = formBuilder.control(null, Validators.maxLength(50));
+    this.publisher = formBuilder.control(null, Validators.maxLength(100));
+    this.placePub = formBuilder.control(null, Validators.maxLength(100));
+    this.yearPub = formBuilder.control(null, [
       Validators.min(0),
       Validators.max(new Date().getFullYear()),
     ]);
-    this.location = _formBuilder.control(null, Validators.maxLength(500));
-    this.accessDate = _formBuilder.control(new Date());
-    this.firstPage = _formBuilder.control(null, [
+    this.location = formBuilder.control(null, Validators.maxLength(500));
+    this.accessDate = formBuilder.control(new Date());
+    this.firstPage = formBuilder.control(null, [
       Validators.min(0),
       Validators.max(10000),
     ]);
-    this.lastPage = _formBuilder.control(null, [
+    this.lastPage = formBuilder.control(null, [
       Validators.min(0),
       Validators.max(10000),
     ]);
     // form - keywords
-    this.keyLanguage = _formBuilder.control(null, [
+    this.keyLanguage = formBuilder.control(null, [
       Validators.required,
       Validators.pattern(/^[a-z]{3}$/),
     ]);
-    this.keyValue = _formBuilder.control(null, [
+    this.keyValue = formBuilder.control(null, [
       Validators.required,
       Validators.maxLength(100),
     ]);
-    this.keyForm = _formBuilder.group({
+    this.keyForm = formBuilder.group({
       keyLanguage: this.keyLanguage,
       keyValue: this.keyValue,
     });
 
-    this.form = _formBuilder.group({
+    this.form = formBuilder.group({
       key: this.key,
       type: this.type,
       tag: this.tag,
@@ -220,34 +226,6 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     this._sub?.unsubscribe();
   }
 
-  private getAuthorGroup(author?: BibAuthor): FormGroup {
-    return this._formBuilder.group({
-      lastName: this._formBuilder.control(author?.lastName, [
-        Validators.required,
-        Validators.maxLength(50),
-      ]),
-      firstName: this._formBuilder.control(
-        author?.firstName,
-        Validators.maxLength(50)
-      ),
-      roleId: this._formBuilder.control(
-        author?.roleId || null,
-        Validators.maxLength(50)
-      ),
-    });
-  }
-
-  private setAuthors(authors: BibAuthor[], ctl: FormArray): void {
-    if (!authors) {
-      this.authors.reset();
-      return;
-    }
-    for (let i = 0; i < authors.length; i++) {
-      ctl.push(this.getAuthorGroup(authors[i]));
-    }
-    this.authors.markAsPristine();
-  }
-
   private updateForm(entry?: BibEntry): void {
     if (!entry) {
       this.form.reset();
@@ -258,10 +236,10 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     this.type.setValue(entry.typeId);
     this.tag.setValue(entry.tag || null);
     this.language.setValue(entry.language);
-    this.setAuthors(entry.authors || [], this.authors);
+    this.authors.setValue(entry.authors || []);
     this.title.setValue(entry.title);
     this.note.setValue(entry.note || null);
-    this.setAuthors(entry.contributors || [], this.contributors);
+    this.contributors.setValue(entry.contributors || []);
     this.container.setValue(entry.container || null);
     this.edition.setValue(entry.edition || null);
     this.number.setValue(entry.number || null);
@@ -277,30 +255,18 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     this.form.markAsPristine();
   }
 
-  private getAuthors(ctl: FormArray): BibAuthor[] {
-    const authors: BibAuthor[] = [];
-
-    for (let i = 0; i < ctl.length; i++) {
-      const g = ctl.at(i) as FormGroup;
-      authors.push({
-        lastName: g.controls['lastName'].value?.trim(),
-        firstName: g.controls['firstName'].value?.trim(),
-        roleId: g.controls['roleId'].value?.trim(),
-      });
-    }
-    return authors.length ? authors : [];
-  }
-
   private getEntry(): BibEntry {
     return {
       key: this.key.value?.trim(),
       typeId: this.type.value?.trim() || '',
       tag: this.tag.value?.trim(),
       language: this.language.value || '',
-      authors: this.getAuthors(this.authors),
+      authors: this.authors.value || [],
       title: this.title.value?.trim() || '',
       note: this.note.value?.trim(),
-      contributors: this.getAuthors(this.contributors),
+      contributors: this.contributors.value?.length
+        ? this.contributors.value
+        : undefined,
       container: this.container.value?.trim(),
       edition: this.edition.value || undefined,
       number: this.number.value?.trim(),
@@ -315,6 +281,19 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     };
   }
 
+  public onAuthorsChange(authors: BibAuthor[]): void {
+    this.authors.setValue(authors || []);
+    this.authors.markAsDirty();
+    this.authors.updateValueAndValidity();
+  }
+
+  public onContributorsChange(contributors: BibAuthor[]): void {
+    this.contributors.setValue(contributors || []);
+    this.contributors.markAsDirty();
+    this.contributors.updateValueAndValidity();
+  }
+
+  // #region Keywords
   public addKeyword(): void {
     if (this.keyForm.invalid) {
       return;
@@ -365,6 +344,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     keywords.splice(index + 1, 0, k);
     this.keywords.set(keywords);
   }
+  //#endregion
 
   public cancel(): void {
     this.editorClose.emit();

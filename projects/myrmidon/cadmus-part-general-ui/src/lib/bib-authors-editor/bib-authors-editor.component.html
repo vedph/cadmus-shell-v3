@@ -1,101 +1,86 @@
-@if (parentForm()) {
-<form [formGroup]="parentForm()">
-  <div [formArrayName]="controlName()">
-    @if (!authors || !authors.length) {
-    <div style="margin: 8px 0">
-      <button
-        type="button"
-        mat-flat-button
-        (click)="addAuthor()"
-        class="mat-primary"
-      >
-        <mat-icon>add_circle</mat-icon>
-        author
-      </button>
-    </div>
-    } @for ( item of authors?.controls; track item; let i = $index; let first =
-    $first; let last = $last) {
-    <div>
-      <!-- child form -->
-      <div [formGroupName]="i" class="form-row">
-        <!-- child actions -->
-        <div>
-          {{ i + 1 }}.
+<div>
+  <div>
+    <button type="button" mat-flat-button color="primary" (click)="addAuthor()">
+      <mat-icon>add_circle</mat-icon> author
+    </button>
+  </div>
+  @if (authors().length) {
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>last</th>
+        <th>first</th>
+        <th>role</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (author of authors(); track author; let i = $index; let first =
+      $first; let last = $last) {
+      <tr [class.selected]="author === editedAuthor()">
+        <td class="fit-width">
           <button
-            mat-icon-button
             type="button"
-            matTooltip="Remove this author"
-            (click)="removeAuthor(i)"
+            mat-icon-button
+            color="primary"
+            matTooltip="Edit this author"
+            (click)="editAuthor(author, i)"
           >
-            <mat-icon class="mat-warn">remove_circle</mat-icon>
+            <mat-icon class="mat-primary">edit</mat-icon>
           </button>
           <button
-            mat-icon-button
             type="button"
-            matTooltip="Add author below"
-            (click)="addAuthorBelow(i)"
-          >
-            <mat-icon class="mat-primary">add_circle</mat-icon>
-          </button>
-          <button
+            mat-icon-button
+            matTooltip="Move this author up"
             [disabled]="first"
-            mat-icon-button
-            type="button"
-            matTooltip="Move author up"
             (click)="moveAuthorUp(i)"
           >
             <mat-icon>arrow_upward</mat-icon>
           </button>
           <button
-            [disabled]="last"
-            mat-icon-button
             type="button"
-            matTooltip="Move author down"
+            mat-icon-button
+            matTooltip="Move this author down"
+            [disabled]="last"
             (click)="moveAuthorDown(i)"
           >
             <mat-icon>arrow_downward</mat-icon>
           </button>
-        </div>
-        <!-- child controls -->
-        <!-- last -->
-        <mat-form-field>
-          <mat-label>last name</mat-label>
-          <input matInput formControlName="lastName" spellcheck="false" />
-          @if ( item.get('lastName')?.hasError('required') &&
-          (item.get('lastName')?.dirty || item.get('lastName')?.touched) ) {
-          <mat-error>last name required</mat-error>
-          } @if ( item.get('lastName')?.hasError('maxLength') &&
-          (item.get('lastName')?.dirty || item.get('lastName')?.touched) ) {
-          <mat-error>too long</mat-error>
-          }
-        </mat-form-field>
-        <!-- first -->
-        <mat-form-field>
-          <mat-label>first name</mat-label>
-          <input matInput formControlName="firstName" spellcheck="false" />
-          <mat-error>too long</mat-error>
-        </mat-form-field>
-        <!-- roleId -->
-        @if (roleEntries()?.length) {
-        <mat-form-field>
-          <mat-label>role</mat-label>
-          <mat-select formControlName="roleId">
-            <mat-option [value]="null">(no role)</mat-option>
-            @for (e of roleEntries(); track e.id) {
-            <mat-option [value]="e.id">{{ e.value }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        } @else {
-        <mat-form-field>
-          <mat-label>role</mat-label>
-          <input matInput formControlName="roleId" spellcheck="false" />
-          <mat-error>too long</mat-error>
-        </mat-form-field>
-        }
-      </div>
-    </div>
-    }
-  </div>
-</form>
-}
+          <button
+            type="button"
+            mat-icon-button
+            color="warn"
+            matTooltip="Delete this author"
+            (click)="deleteAuthor(i)"
+          >
+            <mat-icon class="mat-warn">remove_circle</mat-icon>
+          </button>
+        </td>
+        <td>{{ author.lastName }}</td>
+        <td>{{ author.firstName }}</td>
+        <td>
+          {{ author.roleId | flatLookup : roleEntries() : "id" : "value" }}
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+  } @if (editedAuthor()) {
+  <fieldset>
+    <mat-expansion-panel
+      [expanded]="editedAuthor()"
+      [disabled]="!editedAuthor()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title>author #{{ editedAuthorIndex() + 1 }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <cadmus-bib-author-editor
+        [author]="editedAuthor()"
+        [roleEntries]="roleEntries()"
+        (authorChange)="saveAuthor($event!)"
+        (cancelEdit)="closeAuthor()"
+      />
+    </mat-expansion-panel>
+  </fieldset>
+  }
+</div>

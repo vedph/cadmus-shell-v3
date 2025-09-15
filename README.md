@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-15: refactored authors/contributors editing in bibliography entry editor.
 - 2025-09-13:
   - updated bricks to their `OnPush`-based version.
   - ⚠️ refactored components so that their state is fully reactive. This is the first step towards a future Zone-less system.

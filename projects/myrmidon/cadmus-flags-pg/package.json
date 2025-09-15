@@ -16,7 +16,8 @@
   "peerDependencies": {
     "@angular/common": "^20.0.0",
     "@angular/core": "^20.0.0",
-    "@myrmidon/auth-jwt-login": "^8.0.0",
+    "@angular/material": "^20.0.0",
+    "@myrmidon/auth-jwt-login": "^8.0.2",
     "@myrmidon/cadmus-flags-ui": "^15.0.0"
   },
   "dependencies": {

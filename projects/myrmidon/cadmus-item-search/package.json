@@ -22,7 +22,7 @@
     "@myrmidon/paged-data-browsers": "^5.0.2",
     "@myrmidon/cadmus-api": "^14.0.3",
     "@myrmidon/cadmus-state": "^14.0.0",
-    "@myrmidon/cadmus-ui": "^14.0.0"
+    "@myrmidon/cadmus-ui": "^15.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
