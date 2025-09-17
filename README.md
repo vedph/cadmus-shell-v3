@@ -210,6 +210,8 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-17: edit frame stats page uses signals.
+
 ### 17.0.0
 
 - 2025-09-15:
