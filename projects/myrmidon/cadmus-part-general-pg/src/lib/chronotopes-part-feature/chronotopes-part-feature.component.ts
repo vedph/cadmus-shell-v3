@@ -33,6 +33,7 @@ export class ChronotopesPartFeatureComponent
       thesaurusService,
       editorService
     );
+    this.roleIdInThesauri = true;
   }
 
   protected override getReqThesauriIds(): string[] {

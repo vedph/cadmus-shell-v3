@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-18: added more role-dependent thesauri to general parts.
 - 2025-09-17: edit frame stats page uses signals.
 
 ### 17.0.0
