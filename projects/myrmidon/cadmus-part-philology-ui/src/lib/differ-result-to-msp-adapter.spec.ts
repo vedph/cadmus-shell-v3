@@ -2,12 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { diff_match_patch } from 'diff-match-patch';
 import { DifferResultToMspAdapter } from './differ-result-to-msp-adapter';
 import { MspOperator } from './msp-operation';
-import { CadmusCoreModule } from '@myrmidon/cadmus-core';
 
 describe('Class: DifferResultToMspAdapter', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [CadmusCoreModule],
+      imports: [],
     });
   });
 

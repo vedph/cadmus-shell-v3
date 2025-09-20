@@ -1,0 +1,143 @@
+import { EditOperation, OperationType, ParseException } from './edit-operation';
+
+// Swap edit operation
+export class SwapEditOperation extends EditOperation {
+  public at2: number = 0;
+  public run2: number = 1;
+  public inputText2?: string;
+
+  public get type(): OperationType {
+    return OperationType.Swap;
+  }
+
+  public execute(input: string): string {
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
+
+    EditOperation.validatePosition(input, this.at, this.run);
+    EditOperation.validatePosition(input, this.at2, this.run2);
+
+    if (
+      this.at === this.at2 ||
+      (this.at < this.at2 && this.at + this.run > this.at2) ||
+      (this.at2 < this.at && this.at2 + this.run2 > this.at)
+    ) {
+      throw new Error('Swap positions cannot overlap');
+    }
+
+    const firstText = input.slice(this.at - 1, this.at - 1 + this.run);
+    const secondText = input.slice(this.at2 - 1, this.at2 - 1 + this.run2);
+
+    let result = input;
+
+    // replace in order of highest position first to avoid index shifting
+    if (this.at > this.at2) {
+      result =
+        result.slice(0, this.at - 1) +
+        secondText +
+        result.slice(this.at - 1 + this.run);
+      result =
+        result.slice(0, this.at2 - 1) +
+        firstText +
+        result.slice(this.at2 - 1 + this.run2);
+    } else {
+      result =
+        result.slice(0, this.at2 - 1) +
+        firstText +
+        result.slice(this.at2 - 1 + this.run2);
+      result =
+        result.slice(0, this.at - 1) +
+        secondText +
+        result.slice(this.at - 1 + this.run);
+    }
+
+    return result;
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: "A"@NxN<>"B"@MxM or @NxN<>@MxM
+    const pattern =
+      /(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?\s*<>\s*(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid swap operation format. Expected: "text1"@position1<>"text2"@position2',
+        text
+      );
+    }
+
+    this.inputText = match[1] || undefined;
+
+    const position = parseInt(match[2], 10);
+    if (isNaN(position) || position < 1) {
+      throw new ParseException(
+        'First position must be a positive integer',
+        match[2]
+      );
+    }
+    this.at = position;
+
+    this.run = 1;
+    if (match[3]) {
+      const length = parseInt(match[3], 10);
+      if (isNaN(length) || length < 1) {
+        throw new ParseException(
+          'First length must be a positive integer',
+          match[3]
+        );
+      }
+      this.run = length;
+    }
+
+    this.inputText2 = match[4] || undefined;
+
+    const secondPosition = parseInt(match[5], 10);
+    if (isNaN(secondPosition) || secondPosition < 1) {
+      throw new ParseException(
+        'Second position must be a positive integer',
+        match[5]
+      );
+    }
+    this.at2 = secondPosition;
+
+    this.run2 = 1;
+    if (match[6]) {
+      const secondLength = parseInt(match[6], 10);
+      if (isNaN(secondLength) || secondLength < 1) {
+        throw new ParseException(
+          'Second length must be a positive integer',
+          match[6]
+        );
+      }
+      this.run2 = secondLength;
+    }
+
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = '';
+
+    if (this.inputText) result += `"${this.inputText}"`;
+
+    result += `@${this.at}`;
+    if (this.run > 1) result += `x${this.run}`;
+    result += '<>';
+
+    if (this.inputText2) result += `"${this.inputText2}"`;
+
+    result += `@${this.at2}`;
+    if (this.run2 > 1) result += `x${this.run2}`;
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+
+    return result;
+  }
+}

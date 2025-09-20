@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HAMMER_LOADER } from '@angular/platform-browser';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { OrthographyFragmentComponent } from './orthography-fragment.component';
 import { MspOperationComponent } from '../msp-operation/msp-operation.component';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('OrthographyFragmentComponent', () => {
   let component: OrthographyFragmentComponent;
@@ -17,25 +16,11 @@ describe('OrthographyFragmentComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         MspOperationComponent,
         OrthographyFragmentComponent,
       ],
       // https://github.com/angular/components/issues/14668
-      providers: [
-        {
-          provide: HAMMER_LOADER,
-          useValue: () => new Promise(() => {}),
-        },
-        {
-          provide: 'apiEndpoint',
-          useValue: 'http://localhost:60380/api/',
-        },
-        {
-          provide: 'databaseId',
-          useValue: 'cadmus',
-        },
-      ],
+      providers: [provideHttpClientTesting()],
     }).compileComponents();
   }));
 
