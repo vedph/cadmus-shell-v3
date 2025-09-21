@@ -1,0 +1,24 @@
+div#container {
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+}
+div#c-label {
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 6px;
+  height: 1.5em;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+div#c-id {
+  margin-top: 4px;
+  margin-bottom: 16px;
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 6px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
