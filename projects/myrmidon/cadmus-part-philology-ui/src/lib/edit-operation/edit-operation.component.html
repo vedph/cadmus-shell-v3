@@ -37,24 +37,47 @@
         </mat-form-field>
       </div>
       <!-- preview -->
-      @if (inputText() || outputText()) {
-      <div class="form-row">
-        <span class="input">{{ inputText() }}</span>
-        <span class="arrow">→</span>
-        <span class="output">{{ outputText() }}</span>
-      </div>
-      }
-      <!-- text view -->
-      @if (inputText()) {
-      <div class="form-row">
-        <cadmus-char-text-view
-          [lines]="[inputText()!]"
-          (charPick)="onCharPick($event)"
-          (rangePick)="onRangePick($event)"
-        />
-        <div class="coords">{{ pickedCoords() }}</div>
-      </div>
-      }
+      <fieldset>
+        @if (inputText() || outputText()) {
+        <div class="form-row">
+          <span class="input">{{ inputText() }}</span>
+          <span class="arrow">→</span>
+          <span class="output">{{ outputText() }}</span>
+        </div>
+        }
+        <!-- text view -->
+        @if (inputText()) {
+        <div class="form-row">
+          <cadmus-char-text-view
+            [lines]="[inputText()!]"
+            (charPick)="onCharPick($event)"
+            (rangePick)="onRangePick($event)"
+          />
+          <div class="coords">{{ pickedCoords() }}</div>
+          <button
+            type="button"
+            mat-icon-button
+            [disabled]="!pickedCoords()"
+            (click)="setAtRunFromPickedCoords()"
+            matTooltip="Set at+run to picked coords"
+          >
+            <mat-icon>arrow_drop_down</mat-icon>
+          </button>
+          @if (type.value === 'MoveBefore' || type.value === 'MoveAfter' ||
+          type.value === 'Swap') {
+          <button
+            type="button"
+            mat-icon-button
+            [disabled]="!pickedCoords()"
+            (click)="setToRunFromPickedCoords()"
+            matTooltip="Set to+run to picked coords"
+          >
+            <mat-icon>arrow_drop_down</mat-icon>
+          </button>
+          }
+        </div>
+        }
+      </fieldset>
       <!-- visual editor -->
       <mat-expansion-panel
         [expanded]="expanded()"

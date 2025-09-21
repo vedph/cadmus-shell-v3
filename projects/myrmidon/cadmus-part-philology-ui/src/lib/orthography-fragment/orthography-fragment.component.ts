@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -113,9 +113,12 @@ export class OrthographyFragmentComponent
     undefined
   );
   public readonly editedOperationIndex = signal<number>(-1);
-  public readonly operationText = signal<string | undefined>(undefined);
 
   public readonly frText = signal<string | undefined>(undefined);
+
+  public readonly operationText = computed<string>(() => {
+    return this.frText() || '';
+  });
 
   constructor(
     authService: AuthJwtService,
@@ -148,7 +151,6 @@ export class OrthographyFragmentComponent
 
   public override ngOnInit(): void {
     super.ngOnInit();
-    this.operationText.set(this.frText());
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {

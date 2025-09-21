@@ -79,7 +79,7 @@ export class EditOperationComponent {
   /**
    * The input text where the operation is applied.
    */
-  public readonly inputText = input<string | undefined>(undefined);
+  public readonly inputText = input.required<string>();
 
   /**
    * True to hide the tags picker.
@@ -330,6 +330,45 @@ export class EditOperationComponent {
     this.pickedCoords.set(
       `${chars[0].n}x${chars[chars.length - 1].n + 1 - chars[0].n}`
     );
+  }
+
+  private parsePickedCoords(): { at: number; run: number } | null {
+    const coords = this.pickedCoords();
+    if (!coords) return null;
+
+    const parts = coords.split('x');
+    if (parts.length === 0) return null;
+
+    const at = parseInt(parts[0], 10);
+    if (isNaN(at) || at < 1) return null;
+
+    let run = 1;
+    if (parts.length > 1) {
+      const len = parseInt(parts[1], 10);
+      if (isNaN(len) || len < 1) return null;
+      run = at + len - 1;
+    }
+    return { at, run };
+  }
+
+  public setAtRunFromPickedCoords(): void {
+    const coords = this.pickedCoords();
+    if (!coords) return;
+    const parsed = this.parsePickedCoords();
+    if (!parsed) return;
+    this.at.setValue(parsed.at);
+    this.run.setValue(parsed.run);
+    this.expanded.set(true);
+  }
+
+  public setToRunFromPickedCoords(): void {
+    const coords = this.pickedCoords();
+    if (!coords) return;
+    const parsed = this.parsePickedCoords();
+    if (!parsed) return;
+    this.to.setValue(parsed.at);
+    this.toRun.setValue(parsed.run);
+    this.expanded.set(true);
   }
 
   public cancel(): void {
