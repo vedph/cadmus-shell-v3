@@ -32,7 +32,7 @@ export class ParseException extends Error {
 // Base class for edit operations
 export abstract class EditOperation {
   protected static readonly coordinateRegex = /@(\d+)(?:[x×](\d+))?/i;
-  protected static readonly noteRegex = /\(([^)]*)\)/;
+  protected static readonly noteRegex = /\{([^}]*)\}/;
   protected static readonly tagsRegex = /\[([^\]]*)\]/;
 
   public type: OperationType = OperationType.Replace;
@@ -534,9 +534,9 @@ export class DeleteEditOperation extends EditOperation {
     if (this.run > 1) result += `x${this.run}`;
     result += '!';
 
-    if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
       result += ` [${this.tags.join(' ')}]`;
+    if (this.note) result += ` {${this.note}}`;
 
     return result;
   }
@@ -593,9 +593,9 @@ export class InsertAfterEditOperation extends EditOperation {
   public override toString(): string {
     let result = `@${this.at}=+"${this.text || ''}"`;
 
-    if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
       result += ` [${this.tags.join(' ')}]`;
+    if (this.note) result += ` {${this.note}}`;
 
     return result;
   }
@@ -648,9 +648,9 @@ export class InsertBeforeEditOperation extends EditOperation {
   public override toString(): string {
     let result = `@${this.at}+="${this.text}"`;
 
-    if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
       result += ` [${this.tags.join(' ')}]`;
+    if (this.note) result += ` {${this.note}}`;
 
     return result;
   }
@@ -744,9 +744,9 @@ export class MoveAfterEditOperation extends EditOperation {
     if (this.run > 1) result += `x${this.run}`;
     result += `->@${this.to}`;
 
-    if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
       result += ` [${this.tags.join(' ')}]`;
+    if (this.note) result += ` {${this.note}}`;
 
     return result;
   }
@@ -842,9 +842,9 @@ export class MoveBeforeEditOperation extends EditOperation {
     if (this.run > 1) result += `x${this.run}`;
     result += `>@${this.to}`;
 
-    if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
       result += ` [${this.tags.join(' ')}]`;
+    if (this.note) result += ` {${this.note}}`;
 
     return result;
   }
@@ -922,9 +922,9 @@ export class ReplaceEditOperation extends EditOperation {
     if (this.run > 1) result += `x${this.run}`;
     result += `="${this.text || ''}"`;
 
-    if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
       result += ` [${this.tags.join(' ')}]`;
+    if (this.note) result += ` {${this.note}}`;
 
     return result;
   }
@@ -1068,9 +1068,9 @@ export class SwapEditOperation extends EditOperation {
     result += `@${this.to}`;
     if (this.toRun! > 1) result += `x${this.toRun!}`;
 
-    if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
       result += ` [${this.tags.join(' ')}]`;
+    if (this.note) result += ` {${this.note}}`;
 
     return result;
   }

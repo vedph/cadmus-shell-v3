@@ -1,5 +1,4 @@
-import { DeleteEditOperation } from './delete-edit-operation';
-import { ParseException } from './edit-operation';
+import { DeleteEditOperation, ParseException } from './edit-operation';
 
 describe('DeleteEditOperation', () => {
   describe('parse', () => {
@@ -123,7 +122,7 @@ describe('DeleteEditOperation', () => {
       op.run = 2;
       op.note = 'note';
       op.tags = ['a', 'b'];
-      expect(op.toString()).toBe('"foo"@2x2! (note) [a b]');
+      expect(op.toString()).toBe('"foo"@2x2! [a b] {note}');
     });
   });
 });

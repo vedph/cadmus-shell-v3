@@ -1,5 +1,4 @@
-import { InsertAfterEditOperation } from './insert-after-edit-operation';
-import { ParseException } from './edit-operation';
+import { InsertAfterEditOperation, ParseException } from './edit-operation';
 
 describe('InsertAfterEditOperation', () => {
   it('should insert at start', () => {
@@ -102,6 +101,6 @@ describe('InsertAfterEditOperation', () => {
 
     const s = op.toString();
 
-    expect(s).toBe('@2=+"abc" (note) [t1 t2]');
+    expect(s).toBe('@2=+"abc" [t1 t2] {note}');
   });
 });

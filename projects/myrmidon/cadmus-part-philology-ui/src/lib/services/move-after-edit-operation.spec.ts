@@ -1,5 +1,4 @@
-import { MoveAfterEditOperation } from './move-after-edit-operation';
-import { ParseException } from './edit-operation';
+import { MoveAfterEditOperation, ParseException } from './edit-operation';
 
 describe('MoveAfterEditOperation', () => {
   // Execute_MoveSingleChar_Forward
@@ -175,6 +174,6 @@ describe('MoveAfterEditOperation', () => {
     op.note = 'note';
     op.tags = ['t1', 't2'];
 
-    expect(op.toString()).toBe('"abc"@2x3->@5 (note) [t1 t2]');
+    expect(op.toString()).toBe('"abc"@2x3->@5 [t1 t2] {note}');
   });
 });

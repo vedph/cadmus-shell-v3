@@ -1,5 +1,4 @@
-import { SwapEditOperation } from './swap-edit-operation';
-import { ParseException } from './edit-operation';
+import { SwapEditOperation, ParseException } from './edit-operation';
 
 describe('SwapEditOperation', () => {
   it('should swap single chars', () => {
@@ -159,6 +158,6 @@ describe('SwapEditOperation', () => {
 
     const s = op.toString();
 
-    expect(s).toBe('"abc"@2x2<>"def"@5x2 (note) [t1 t2]');
+    expect(s).toBe('"abc"@2x2<>"def"@5x2 [t1 t2] {note}');
   });
 });

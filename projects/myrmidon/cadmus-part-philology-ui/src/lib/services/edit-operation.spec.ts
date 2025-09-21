@@ -1,10 +1,12 @@
-import { EditOperation, OperationType } from './edit-operation';
-import { InsertAfterEditOperation } from './insert-after-edit-operation';
-import { InsertBeforeEditOperation } from './insert-before-edit-operation';
-import { DeleteEditOperation } from './delete-edit-operation';
-import { ReplaceEditOperation } from './replace-edit-operation';
-import { MoveBeforeEditOperation } from './move-before-edit-operation';
-import { MoveAfterEditOperation } from './move-after-edit-operation';
+import {
+  DeleteEditOperation,
+  EditOperation,
+  InsertAfterEditOperation,
+  InsertBeforeEditOperation,
+  MoveAfterEditOperation,
+  MoveBeforeEditOperation,
+  ReplaceEditOperation,
+} from './edit-operation';
 
 describe('EditOperation.diff', () => {
   it('Diff_BothEmpty_ReturnsEmpty', () => {
@@ -43,7 +45,7 @@ describe('EditOperation.diff', () => {
     expect(op instanceof ReplaceEditOperation).toBeTrue();
     expect(op.at).toBe(2);
     expect(op.run).toBe(1);
-    expect(op.replacementText).toBe('d');
+    expect(op.text).toBe('d');
     expect(op.inputText).toBe('b');
   });
 
@@ -75,7 +77,7 @@ describe('EditOperation.diff', () => {
     const rep1 = ops[0] as ReplaceEditOperation;
     expect(rep1.at).toBe(2);
     expect(rep1.inputText).toBe('b');
-    expect(rep1.replacementText).toBe('z');
+    expect(rep1.text).toBe('z');
 
     // 2. delete 'd' at position 4
     expect(ops[1] instanceof DeleteEditOperation).toBeTrue();
@@ -88,7 +90,7 @@ describe('EditOperation.diff', () => {
     const rep2 = ops[2] as ReplaceEditOperation;
     expect(rep2.at).toBe(5);
     expect(rep2.inputText).toBe('f');
-    expect(rep2.replacementText).toBe('d');
+    expect(rep2.text).toBe('d');
   });
 
   it('Diff_MultipleEdits_WithAdjustment', () => {
@@ -100,7 +102,7 @@ describe('EditOperation.diff', () => {
     const rep = ops[0] as ReplaceEditOperation;
     expect(rep.at).toBe(2);
     expect(rep.inputText).toBe('b');
-    expect(rep.replacementText).toBe('z');
+    expect(rep.text).toBe('z');
 
     // 2. move 'd' from position 4 to position 6 (replacing 'f')
     expect(ops[1] instanceof MoveBeforeEditOperation).toBeTrue();
@@ -168,7 +170,7 @@ describe('EditOperation.diff', () => {
     const op = ops[0] as ReplaceEditOperation;
     expect(op instanceof ReplaceEditOperation).toBeTrue();
     expect(op.at).toBe(1);
-    expect(op.replacementText).toBe('x');
+    expect(op.text).toBe('x');
     expect(op.inputText).toBe('a');
   });
 
@@ -178,7 +180,7 @@ describe('EditOperation.diff', () => {
     const op = ops[0] as ReplaceEditOperation;
     expect(op instanceof ReplaceEditOperation).toBeTrue();
     expect(op.at).toBe(3);
-    expect(op.replacementText).toBe('x');
+    expect(op.text).toBe('x');
     expect(op.inputText).toBe('c');
   });
 

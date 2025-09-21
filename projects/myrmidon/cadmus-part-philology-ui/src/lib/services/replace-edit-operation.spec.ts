@@ -1,5 +1,4 @@
-import { ReplaceEditOperation } from './replace-edit-operation';
-import { ParseException } from './edit-operation';
+import { ReplaceEditOperation, ParseException } from './edit-operation';
 
 describe('ReplaceEditOperation', () => {
   it('should replace a single character', () => {
@@ -133,6 +132,6 @@ describe('ReplaceEditOperation', () => {
 
     const s = op.toString();
 
-    expect(s).toBe('"abc"@2x3="XY" (note) [t1 t2]');
+    expect(s).toBe('"abc"@2x3="XY" [t1 t2] {note}');
   });
 });

@@ -1,5 +1,4 @@
-import { MoveBeforeEditOperation } from './move-before-edit-operation';
-import { ParseException } from './edit-operation';
+import { MoveBeforeEditOperation, ParseException } from './edit-operation';
 
 describe('MoveBeforeEditOperation', () => {
   it('should move single char forward', () => {
@@ -162,6 +161,6 @@ describe('MoveBeforeEditOperation', () => {
 
     const s = op.toString();
 
-    expect(s).toBe('"abc"@2x3>@5 (note) [t1 t2]');
+    expect(s).toBe('"abc"@2x3>@5 [t1 t2] {note}');
   });
 });
