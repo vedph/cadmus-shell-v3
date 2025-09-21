@@ -63,11 +63,23 @@
           </div>
 
           <!-- operations -->
-          <div>
+          <div class="form-row">
+            <button
+              type="button"
+              [disabled]="
+                !frText() || !standard.value || frText() === standard.value
+              "
+              mat-icon-button
+              class="mat-warn"
+              (click)="addByDiffing()"
+              matTooltip="Set operations by diffing standard against base text"
+            >
+              <mat-icon>add_to_photos</mat-icon>
+            </button>
             <button
               type="button"
               mat-flat-button
-              color="primary"
+              class="mat-primary"
               (click)="addOperation()"
             >
               <mat-icon>add_circle</mat-icon> operation
@@ -90,7 +102,7 @@
                   <button
                     type="button"
                     mat-icon-button
-                    color="primary"
+                    class="mat-primary"
                     matTooltip="Edit this operation"
                     (click)="editOperation(operation, i)"
                   >
@@ -117,7 +129,7 @@
                   <button
                     type="button"
                     mat-icon-button
-                    color="warn"
+                    class="mat-warn"
                     matTooltip="Delete this operation"
                     (click)="deleteOperation(i)"
                   >

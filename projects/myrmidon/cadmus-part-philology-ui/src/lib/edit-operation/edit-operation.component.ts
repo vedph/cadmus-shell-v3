@@ -151,7 +151,9 @@ export class EditOperationComponent {
     this.run = new FormControl<number>(1, {
       nonNullable: true,
     });
-    this.text = new FormControl<string | null>(null);
+    this.text = new FormControl<string | null>(null, {
+      validators: Validators.maxLength(500),
+    });
     this.to = new FormControl<number>(0, {
       nonNullable: true,
       validators: NgxToolsValidators.conditionalValidator(

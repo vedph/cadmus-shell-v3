@@ -94,11 +94,7 @@ export class OrthographyFragmentComponent
   extends ModelEditorComponentBase<OrthographyFragment>
   implements OnInit
 {
-  public standard: FormControl<string>;
-  public language: FormControl<string | null>;
-  public tag: FormControl<string | null>;
-  public note: FormControl<string | null>;
-  public operations: FormControl<EditOperation[]>;
+  public readonly frText = signal<string | undefined>(undefined);
 
   // orthography-languages
   public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
@@ -113,8 +109,6 @@ export class OrthographyFragmentComponent
     undefined
   );
   public readonly editedOperationIndex = signal<number>(-1);
-
-  public readonly frText = signal<string | undefined>(undefined);
 
   public readonly operationText = computed<string>(() => {
     // if we're adding the first operation or editing the first one,
@@ -137,6 +131,12 @@ export class OrthographyFragmentComponent
     }
     return text;
   });
+
+  public standard: FormControl<string>;
+  public language: FormControl<string | null>;
+  public tag: FormControl<string | null>;
+  public note: FormControl<string | null>;
+  public operations: FormControl<EditOperation[]>;
 
   constructor(
     authService: AuthJwtService,
@@ -326,6 +326,27 @@ export class OrthographyFragmentComponent
     this.operations.setValue(entries);
     this.operations.markAsDirty();
     this.operations.updateValueAndValidity();
+  }
+
+  public addByDiffing(): void {
+    const a = this.frText();
+    const b = this.standard.value?.trim();
+    if (!a || !b || a === b) {
+      return;
+    }
+    const operations = EditOperation.diff(a, b);
+    if (operations.length) {
+      this._dialogService
+        .confirm('Confirmation', 'Reset operations via diffing?')
+        .subscribe((yes: boolean | undefined) => {
+          if (yes) {
+            this.closeOperation();
+            this.operations.setValue(operations);
+            this.operations.markAsDirty();
+            this.operations.updateValueAndValidity();
+          }
+        });
+    }
   }
   //#endregion
 
