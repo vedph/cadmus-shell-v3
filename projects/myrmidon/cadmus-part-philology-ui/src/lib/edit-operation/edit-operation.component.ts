@@ -32,13 +32,8 @@ import {
   ParseException,
   EditOperation,
   OperationType,
+  SwapEditOperation,
 } from '../services/edit-operation';
-import { ReplaceEditOperation } from '../services/replace-edit-operation';
-import { InsertBeforeEditOperation } from '../services/insert-before-edit-operation';
-import { MoveBeforeEditOperation } from '../services/move-before-edit-operation';
-import { DeleteEditOperation } from '../services/delete-edit-operation';
-import { MoveAfterEditOperation } from '../services/move-after-edit-operation';
-import { SwapEditOperation } from '../services/swap-edit-operation';
 
 /**
  * Editor for a single edit operation.

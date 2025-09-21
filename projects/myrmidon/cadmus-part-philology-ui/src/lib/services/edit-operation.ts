@@ -1,11 +1,3 @@
-import { DeleteEditOperation } from './delete-edit-operation';
-import { InsertAfterEditOperation } from './insert-after-edit-operation';
-import { InsertBeforeEditOperation } from './insert-before-edit-operation';
-import { MoveAfterEditOperation } from './move-after-edit-operation';
-import { MoveBeforeEditOperation } from './move-before-edit-operation';
-import { ReplaceEditOperation } from './replace-edit-operation';
-import { SwapEditOperation } from './swap-edit-operation';
-
 // Operation type enumeration
 export enum OperationType {
   Replace = 'Replace',
@@ -474,5 +466,626 @@ export abstract class EditOperation {
       }
     }
     return -1;
+  }
+}
+
+// Delete edit operation
+export class DeleteEditOperation extends EditOperation {
+  public get type(): OperationType {
+    return OperationType.Delete;
+  }
+
+  public execute(input: string): string {
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
+
+    EditOperation.validatePosition(input, this.at, this.run);
+    return input.slice(0, this.at - 1) + input.slice(this.at - 1 + this.run);
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: "A"@NxN! or @NxN!
+    const pattern = /(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?\s*!/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid delete operation format. Expected: "text"@position! or @position!',
+        text
+      );
+    }
+
+    this.inputText = match[1] || undefined;
+
+    const position = parseInt(match[2], 10);
+    if (isNaN(position) || position < 1) {
+      throw new ParseException('Position must be a positive integer', match[2]);
+    }
+    this.at = position;
+
+    this.run = 1;
+    if (match[3]) {
+      const length = parseInt(match[3], 10);
+      if (isNaN(length) || length < 1) {
+        throw new ParseException('Length must be a positive integer', match[3]);
+      }
+      this.run = length;
+    }
+
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = '';
+
+    if (this.inputText) {
+      result += `"${this.inputText}"`;
+    }
+
+    result += `@${this.at}`;
+    if (this.run > 1) result += `x${this.run}`;
+    result += '!';
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags && this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+
+    return result;
+  }
+}
+
+// Insert after edit operation
+export class InsertAfterEditOperation extends EditOperation {
+  public get type(): OperationType {
+    return OperationType.InsertAfter;
+  }
+
+  constructor() {
+    super();
+    this.text = '';
+  }
+
+  public execute(input: string): string {
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
+
+    if (this.at === 0) return input + this.text;
+
+    EditOperation.validatePosition(input, this.at);
+    return input.slice(0, this.at) + this.text + input.slice(this.at);
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: @N=+"B"
+    const pattern = /@(\d+)\s*=\+\s*"([^"]*)"/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid insert-after operation format. Expected: @position=+"text"',
+        text
+      );
+    }
+
+    const position = parseInt(match[1], 10);
+    if (isNaN(position) || position < 0) {
+      throw new ParseException(
+        'Position must be a non-negative integer',
+        match[1]
+      );
+    }
+    this.at = position;
+
+    this.text = match[2];
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = `@${this.at}=+"${this.text}"`;
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
+
+    return result;
+  }
+}
+
+// Insert before edit operation
+export class InsertBeforeEditOperation extends EditOperation {
+  public get type(): OperationType {
+    return OperationType.InsertBefore;
+  }
+
+  constructor() {
+    super();
+    this.text = '';
+  }
+
+  public execute(input: string): string {
+    if (this.at === 0) return this.text + input;
+
+    EditOperation.validatePosition(input, this.at);
+    return input.slice(0, this.at - 1) + this.text + input.slice(this.at - 1);
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: @N+="B"
+    const pattern = /@(\d+)\s*\+=\s*"([^"]*)"/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid insert-before operation format. Expected: @position+="text"',
+        text
+      );
+    }
+
+    const position = parseInt(match[1], 10);
+    if (isNaN(position) || position < 0) {
+      throw new ParseException(
+        'Position must be a non-negative integer',
+        match[1]
+      );
+    }
+    this.at = position;
+
+    this.text = match[2];
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = `@${this.at}+="${this.text}"`;
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
+
+    return result;
+  }
+}
+
+// Move after edit operation
+export class MoveAfterEditOperation extends EditOperation {
+  public get type(): OperationType {
+    return OperationType.MoveAfter;
+  }
+
+  constructor() {
+    super();
+    this.to = 1;
+  }
+
+  public execute(input: string): string {
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
+
+    EditOperation.validatePosition(input, this.at, this.run);
+    EditOperation.validatePosition(input, this.to!);
+
+    const textToMove = input.slice(this.at - 1, this.at - 1 + this.run);
+    let result =
+      input.slice(0, this.at - 1) + input.slice(this.at - 1 + this.run);
+
+    // adjust target position if it's after the removed text
+    let adjustedTargetPosition = this.to!;
+    if (this.to! > this.at) adjustedTargetPosition -= this.run;
+
+    // insert after target position
+    result =
+      result.slice(0, adjustedTargetPosition) +
+      textToMove +
+      result.slice(adjustedTargetPosition);
+
+    return result;
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: "A"@N->@M or @N->@M
+    const pattern = /(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?\s*->\s*@(\d+)/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid move-after operation format. ' +
+          'Expected: "text"@position->@targetposition or @position->@targetposition',
+        text
+      );
+    }
+
+    this.inputText = match[1] || undefined;
+
+    const position = parseInt(match[2], 10);
+    if (isNaN(position) || position < 1) {
+      throw new ParseException('Position must be a positive integer', match[2]);
+    }
+    this.at = position;
+
+    this.run = 1;
+    if (match[3]) {
+      const length = parseInt(match[3], 10);
+      if (isNaN(length) || length < 1) {
+        throw new ParseException('Length must be a positive integer', match[3]);
+      }
+      this.run = length;
+    }
+
+    const targetPosition = parseInt(match[4], 10);
+    if (isNaN(targetPosition) || targetPosition < 1) {
+      throw new ParseException(
+        'Target position must be a positive integer',
+        match[4]
+      );
+    }
+    this.to = targetPosition;
+
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = '';
+
+    if (this.inputText) result += `"${this.inputText}"`;
+
+    result += `@${this.at}`;
+    if (this.run > 1) result += `x${this.run}`;
+    result += `->@${this.to}`;
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
+
+    return result;
+  }
+}
+
+// Move before edit operation
+export class MoveBeforeEditOperation extends EditOperation {
+  public get type(): OperationType {
+    return OperationType.MoveBefore;
+  }
+
+  constructor() {
+    super();
+    this.to = 1;
+  }
+
+  public execute(input: string): string {
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
+
+    EditOperation.validatePosition(input, this.at, this.run);
+    EditOperation.validatePosition(input, this.to!);
+
+    const textToMove = input.slice(this.at - 1, this.at - 1 + this.run);
+    let result =
+      input.slice(0, this.at - 1) + input.slice(this.at - 1 + this.run);
+
+    // adjust target position if it's after the removed text
+    let adjustedTargetPosition = this.to!;
+    if (this.to! > this.at) {
+      adjustedTargetPosition -= this.run;
+    }
+
+    // insert at target position
+    result =
+      result.slice(0, adjustedTargetPosition - 1) +
+      textToMove +
+      result.slice(adjustedTargetPosition - 1);
+
+    return result;
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: "A"@N>@M or @N>@M
+    const pattern = /(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?\s*>\s*@(\d+)/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid move-before operation format. ' +
+          'Expected: "text"@position>@targetposition or @position>@targetposition',
+        text
+      );
+    }
+
+    this.inputText = match[1] || undefined;
+
+    const position = parseInt(match[2], 10);
+    if (isNaN(position) || position < 1) {
+      throw new ParseException('Position must be a positive integer', match[2]);
+    }
+    this.at = position;
+
+    this.run = 1;
+    if (match[3]) {
+      const length = parseInt(match[3], 10);
+      if (isNaN(length) || length < 1) {
+        throw new ParseException('Length must be a positive integer', match[3]);
+      }
+      this.run = length;
+    }
+
+    const targetPosition = parseInt(match[4], 10);
+    if (isNaN(targetPosition) || targetPosition < 1) {
+      throw new ParseException(
+        'Target position must be a positive integer',
+        match[4]
+      );
+    }
+    this.to = targetPosition;
+
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = '';
+
+    if (this.inputText) result += `"${this.inputText}"`;
+
+    result += `@${this.at}`;
+    if (this.run > 1) result += `x${this.run}`;
+    result += `>@${this.to}`;
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
+
+    return result;
+  }
+}
+
+// Replace edit operation
+export class ReplaceEditOperation extends EditOperation {
+  public get type(): OperationType {
+    return OperationType.Replace;
+  }
+
+  constructor() {
+    super();
+    this.run = 1;
+    this.text = '';
+  }
+
+  public execute(input: string): string {
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
+
+    if (this.run < 1) {
+      throw new RangeError(`Run ${this.run} is out of range for a replace`);
+    }
+
+    EditOperation.validatePosition(input, this.at, this.run);
+    return (
+      input.slice(0, this.at - 1) +
+      this.text +
+      input.slice(this.at - 1 + this.run)
+    );
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: "A"@NxN="B" or @NxN="B"
+    const pattern = /(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?\s*=\s*"([^"]*)"/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid replace operation format. Expected: "oldtext"@position="newtext" or @position="newtext"',
+        text
+      );
+    }
+
+    this.inputText = match[1] || undefined;
+
+    const position = parseInt(match[2], 10);
+    if (isNaN(position) || position < 1) {
+      throw new ParseException('Position must be a positive integer', match[2]);
+    }
+    this.at = position;
+
+    this.run = 1;
+    if (match[3]) {
+      const length = parseInt(match[3], 10);
+      if (isNaN(length) || length < 1) {
+        throw new ParseException('Length must be a positive integer', match[3]);
+      }
+      this.run = length;
+    }
+
+    this.text = match[4];
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = '';
+
+    if (this.inputText) result += `"${this.inputText}"`;
+
+    result += `@${this.at}`;
+    if (this.run > 1) result += `x${this.run}`;
+    result += `="${this.text}"`;
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
+
+    return result;
+  }
+}
+
+// Swap edit operation
+export class SwapEditOperation extends EditOperation {
+  public inputText2?: string;
+
+  public get type(): OperationType {
+    return OperationType.Swap;
+  }
+
+  constructor() {
+    super();
+    this.at = 1;
+    this.run = 1;
+    this.to = 1;
+    this.toRun = 1;
+  }
+
+  public execute(input: string): string {
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
+
+    EditOperation.validatePosition(input, this.at, this.run);
+    EditOperation.validatePosition(input, this.to!, this.toRun);
+
+    if (
+      this.at === this.to! ||
+      (this.at < this.to! && this.at + this.run > this.to!) ||
+      (this.to! < this.at && this.to! + this.toRun! > this.at)
+    ) {
+      throw new Error('Swap positions cannot overlap');
+    }
+
+    const firstText = input.slice(this.at - 1, this.at - 1 + this.run);
+    const secondText = input.slice(this.to! - 1, this.to! - 1 + this.toRun!);
+
+    let result = input;
+
+    // replace in order of highest position first to avoid index shifting
+    if (this.at > this.to!) {
+      result =
+        result.slice(0, this.at - 1) +
+        secondText +
+        result.slice(this.at - 1 + this.run);
+      result =
+        result.slice(0, this.to! - 1) +
+        firstText +
+        result.slice(this.to! - 1 + this.toRun!);
+    } else {
+      result =
+        result.slice(0, this.to! - 1) +
+        firstText +
+        result.slice(this.to! - 1 + this.toRun!);
+      result =
+        result.slice(0, this.at - 1) +
+        secondText +
+        result.slice(this.at - 1 + this.run);
+    }
+
+    return result;
+  }
+
+  public parse(text: string): void {
+    if (!text) {
+      throw new Error('Text cannot be null or undefined');
+    }
+
+    // pattern: "A"@NxN<>"B"@MxM or @NxN<>@MxM
+    const pattern =
+      /(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?\s*<>\s*(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?/i;
+    const match = pattern.exec(text);
+
+    if (!match) {
+      throw new ParseException(
+        'Invalid swap operation format. Expected: "text1"@position1<>"text2"@position2',
+        text
+      );
+    }
+
+    this.inputText = match[1] || undefined;
+
+    const position = parseInt(match[2], 10);
+    if (isNaN(position) || position < 1) {
+      throw new ParseException(
+        'First position must be a positive integer',
+        match[2]
+      );
+    }
+    this.at = position;
+
+    this.run = 1;
+    if (match[3]) {
+      const length = parseInt(match[3], 10);
+      if (isNaN(length) || length < 1) {
+        throw new ParseException(
+          'First length must be a positive integer',
+          match[3]
+        );
+      }
+      this.run = length;
+    }
+
+    this.inputText2 = match[4] || undefined;
+
+    const secondPosition = parseInt(match[5], 10);
+    if (isNaN(secondPosition) || secondPosition < 1) {
+      throw new ParseException(
+        'Second position must be a positive integer',
+        match[5]
+      );
+    }
+    this.to = secondPosition;
+
+    this.toRun = 1;
+    if (match[6]) {
+      const secondLength = parseInt(match[6], 10);
+      if (isNaN(secondLength) || secondLength < 1) {
+        throw new ParseException(
+          'Second length must be a positive integer',
+          match[6]
+        );
+      }
+      this.toRun = secondLength;
+    }
+
+    this.parseNoteAndTags(text);
+  }
+
+  public override toString(): string {
+    let result = '';
+
+    if (this.inputText) result += `"${this.inputText}"`;
+
+    result += `@${this.at}`;
+    if (this.run > 1) result += `x${this.run}`;
+    result += '<>';
+
+    if (this.inputText2) result += `"${this.inputText2}"`;
+
+    result += `@${this.to}`;
+    if (this.toRun! > 1) result += `x${this.toRun!}`;
+
+    if (this.note) result += ` (${this.note})`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
+
+    return result;
   }
 }

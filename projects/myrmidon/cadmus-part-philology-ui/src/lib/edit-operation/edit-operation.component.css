@@ -1,3 +1,6 @@
+.full-width {
+  width: 100%;
+}
 .long-text {
   width: 100%;
   max-width: 800px;
@@ -20,4 +23,7 @@
 }
 .output {
   font-size: 110%;
+}
+.r-field {
+  width: 6em;
 }

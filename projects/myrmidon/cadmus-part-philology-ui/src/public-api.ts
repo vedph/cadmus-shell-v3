@@ -15,11 +15,4 @@ export * from './lib/quotations-fragment/quotations-fragment.component';
 export * from './lib/witnesses-fragment';
 export * from './lib/witnesses-fragment/witnesses-fragment.component';
 
-export * from './lib/services/delete-edit-operation';
 export * from './lib/services/edit-operation';
-export * from './lib/services/insert-after-edit-operation';
-export * from './lib/services/insert-before-edit-operation';
-export * from './lib/services/move-after-edit-operation';
-export * from './lib/services/move-before-edit-operation';
-export * from './lib/services/replace-edit-operation';
-export * from './lib/services/swap-edit-operation';

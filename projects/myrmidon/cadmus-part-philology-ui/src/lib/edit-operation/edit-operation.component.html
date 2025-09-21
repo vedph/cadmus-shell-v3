@@ -1,7 +1,7 @@
 <form [formGroup]="form" (submit)="save()">
   <!-- dsl -->
   <div>
-    <mat-form-field>
+    <mat-form-field class="full-width">
       <mat-label>DSL</mat-label>
       <input matInput [formControl]="dsl" />
       @if ($any(dsl).errors?.maxLength && (dsl.dirty || dsl.touched)) {
@@ -35,11 +35,13 @@
     </mat-form-field>
   </div>
   <!-- preview -->
+  @if (inputText() || outputText()) {
   <div class="form-row">
     <span class="input">{{ inputText() }}</span>
     <span class="arrow">→</span>
     <span class="output">{{ outputText() }}</span>
   </div>
+  }
   <!-- TODO coords helper -->
   <!-- visual editor -->
   <mat-expansion-panel
@@ -82,7 +84,7 @@
       </mat-form-field>
 
       <!-- at -->
-      <mat-form-field>
+      <mat-form-field class="nr-field">
         <mat-label>at</mat-label>
         <input matInput type="number" min="1" [formControl]="at" />
         @if ($any(at).errors?.required && (at.dirty || at.touched)) {
@@ -91,7 +93,7 @@
       </mat-form-field>
 
       <!-- run -->
-      <mat-form-field>
+      <mat-form-field class="nr-field">
         <mat-label>run</mat-label>
         <input matInput type="number" min="1" [formControl]="run" />
         @if ($any(run).errors?.required && (run.dirty || run.touched)) {
@@ -118,7 +120,7 @@
     @if (type.value === 'MoveBefore' || type.value === 'MoveAfter' || type.value
     === 'Swap') {
     <div class="form-row">
-      <mat-form-field>
+      <mat-form-field class="nr-field">
         <mat-label>to</mat-label>
         <input matInput type="number" min="1" [formControl]="to" />
         @if ($any(to).errors?.required && (to.dirty || to.touched)) {
@@ -128,7 +130,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field>
+      <mat-form-field class="nr-field">
         <mat-label>to run</mat-label>
         <input matInput type="number" min="1" [formControl]="toRun" />
         @if ($any(toRun).errors?.required && (toRun.dirty || toRun.touched)) {
