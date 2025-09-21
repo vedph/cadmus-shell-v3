@@ -2,12 +2,18 @@ import { EditOperation, OperationType, ParseException } from './edit-operation';
 
 // Swap edit operation
 export class SwapEditOperation extends EditOperation {
-  public at2: number = 0;
-  public run2: number = 1;
   public inputText2?: string;
 
   public get type(): OperationType {
     return OperationType.Swap;
+  }
+
+  constructor() {
+    super();
+    this.at = 1;
+    this.run = 1;
+    this.to = 1;
+    this.toRun = 1;
   }
 
   public execute(input: string): string {
@@ -16,36 +22,36 @@ export class SwapEditOperation extends EditOperation {
     }
 
     EditOperation.validatePosition(input, this.at, this.run);
-    EditOperation.validatePosition(input, this.at2, this.run2);
+    EditOperation.validatePosition(input, this.to!, this.toRun);
 
     if (
-      this.at === this.at2 ||
-      (this.at < this.at2 && this.at + this.run > this.at2) ||
-      (this.at2 < this.at && this.at2 + this.run2 > this.at)
+      this.at === this.to! ||
+      (this.at < this.to! && this.at + this.run > this.to!) ||
+      (this.to! < this.at && this.to! + this.toRun! > this.at)
     ) {
       throw new Error('Swap positions cannot overlap');
     }
 
     const firstText = input.slice(this.at - 1, this.at - 1 + this.run);
-    const secondText = input.slice(this.at2 - 1, this.at2 - 1 + this.run2);
+    const secondText = input.slice(this.to! - 1, this.to! - 1 + this.toRun!);
 
     let result = input;
 
     // replace in order of highest position first to avoid index shifting
-    if (this.at > this.at2) {
+    if (this.at > this.to!) {
       result =
         result.slice(0, this.at - 1) +
         secondText +
         result.slice(this.at - 1 + this.run);
       result =
-        result.slice(0, this.at2 - 1) +
+        result.slice(0, this.to! - 1) +
         firstText +
-        result.slice(this.at2 - 1 + this.run2);
+        result.slice(this.to! - 1 + this.toRun!);
     } else {
       result =
-        result.slice(0, this.at2 - 1) +
+        result.slice(0, this.to! - 1) +
         firstText +
-        result.slice(this.at2 - 1 + this.run2);
+        result.slice(this.to! - 1 + this.toRun!);
       result =
         result.slice(0, this.at - 1) +
         secondText +
@@ -104,9 +110,9 @@ export class SwapEditOperation extends EditOperation {
         match[5]
       );
     }
-    this.at2 = secondPosition;
+    this.to = secondPosition;
 
-    this.run2 = 1;
+    this.toRun = 1;
     if (match[6]) {
       const secondLength = parseInt(match[6], 10);
       if (isNaN(secondLength) || secondLength < 1) {
@@ -115,7 +121,7 @@ export class SwapEditOperation extends EditOperation {
           match[6]
         );
       }
-      this.run2 = secondLength;
+      this.toRun = secondLength;
     }
 
     this.parseNoteAndTags(text);
@@ -132,11 +138,12 @@ export class SwapEditOperation extends EditOperation {
 
     if (this.inputText2) result += `"${this.inputText2}"`;
 
-    result += `@${this.at2}`;
-    if (this.run2 > 1) result += `x${this.run2}`;
+    result += `@${this.to}`;
+    if (this.toRun! > 1) result += `x${this.toRun!}`;
 
     if (this.note) result += ` (${this.note})`;
-    if (this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
 
     return result;
   }

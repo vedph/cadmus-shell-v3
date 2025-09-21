@@ -6,6 +6,7 @@ export * from './lib/apparatus-entry/apparatus-entry.component';
 export * from './lib/apparatus-fragment';
 export * from './lib/apparatus-fragment/apparatus-fragment.component';
 export * from './lib/msp-operation/msp-operation.component';
+export * from './lib/edit-operation/edit-operation.component';
 export * from './lib/orthography-fragment';
 export * from './lib/orthography-fragment/orthography-fragment.component';
 export * from './lib/quotation-entry/quotation-entry.component';

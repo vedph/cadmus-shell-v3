@@ -2,10 +2,13 @@ import { EditOperation, OperationType, ParseException } from './edit-operation';
 
 // Insert after edit operation
 export class InsertAfterEditOperation extends EditOperation {
-  public text: string = '';
-
   public get type(): OperationType {
     return OperationType.InsertAfter;
+  }
+
+  constructor() {
+    super();
+    this.text = '';
   }
 
   public execute(input: string): string {
@@ -52,7 +55,8 @@ export class InsertAfterEditOperation extends EditOperation {
     let result = `@${this.at}=+"${this.text}"`;
 
     if (this.note) result += ` (${this.note})`;
-    if (this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
 
     return result;
   }

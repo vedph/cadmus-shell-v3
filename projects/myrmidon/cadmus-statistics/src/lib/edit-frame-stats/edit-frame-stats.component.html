@@ -40,8 +40,7 @@
         <button
           type="button"
           mat-raised-button
-          color="primary"
-          class="refresh-btn"
+          class="mat-primary refresh-btn"
           (click)="refresh()"
           [disabled]="loading()"
         >
@@ -72,7 +71,7 @@
   <mat-card class="error-card">
     <mat-card-content>
       <div class="error-content">
-        <mat-icon color="warn">error</mat-icon>
+        <mat-icon class="mat-warn">error</mat-icon>
         <span>{{ error() }}</span>
       </div>
     </mat-card-content>

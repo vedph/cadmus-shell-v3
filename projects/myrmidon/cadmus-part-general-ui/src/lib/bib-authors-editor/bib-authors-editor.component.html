@@ -1,6 +1,6 @@
 <div>
   <div>
-    <button type="button" mat-flat-button color="primary" (click)="addAuthor()">
+    <button type="button" mat-flat-button class="mat-primary" (click)="addAuthor()">
       <mat-icon>add_circle</mat-icon> author
     </button>
   </div>
@@ -22,7 +22,7 @@
           <button
             type="button"
             mat-icon-button
-            color="primary"
+            class="mat-primary"
             matTooltip="Edit this author"
             (click)="editAuthor(author, i)"
           >
@@ -49,7 +49,7 @@
           <button
             type="button"
             mat-icon-button
-            color="warn"
+            class="mat-warn"
             matTooltip="Delete this author"
             (click)="deleteAuthor(i)"
           >

@@ -8,10 +8,10 @@ import { SwapEditOperation } from './swap-edit-operation';
 
 // Operation type enumeration
 export enum OperationType {
+  Replace = 'Replace',
   Delete = 'Delete',
   InsertBefore = 'InsertBefore',
   InsertAfter = 'InsertAfter',
-  Replace = 'Replace',
   MoveBefore = 'MoveBefore',
   MoveAfter = 'MoveAfter',
   Swap = 'Swap',
@@ -28,26 +28,35 @@ export class ParseException extends Error {
     this.inputSubstring = inputSubstring;
     this.position = position;
   }
+
+  public override toString(): string {
+    return `${this.name}: ${this.message} at "${this.inputSubstring}"` +
+      (this.position >= 0 ? ` (position ${this.position})` : '');
+  }
 }
 
 // Base class for edit operations
 export abstract class EditOperation {
-  protected readonly coordinateRegex = /@(\d+)(?:[x×](\d+))?/i;
-  protected readonly noteRegex = /\(([^)]*)\)/;
-  protected readonly tagsRegex = /\[([^\]]*)\]/;
+  protected static readonly coordinateRegex = /@(\d+)(?:[x×](\d+))?/i;
+  protected static readonly noteRegex = /\(([^)]*)\)/;
+  protected static readonly tagsRegex = /\[([^\]]*)\]/;
 
   public abstract get type(): OperationType;
   public inputText?: string;
-  public at: number = 0;
+  public at: number = 1;
   public run: number = 1;
-  public note: string = '';
-  public tags: string[] = [];
+  public note?: string;
+  public tags?: string[];
+
+  public text?: string; // for insert/replace operations
+  public to?: number; // for move/swap operations
+  public toRun?: number; // for move/swap operations
 
   public abstract execute(input: string): string;
   public abstract parse(text: string): void;
 
   protected parseCoordinates(text: string): [number, number] {
-    const coordsMatch = this.coordinateRegex.exec(text);
+    const coordsMatch = EditOperation.coordinateRegex.exec(text);
     if (!coordsMatch) {
       throw new ParseException(
         'Invalid coordinate format. Expected @N or @NxN',
@@ -77,12 +86,12 @@ export abstract class EditOperation {
   }
 
   protected parseNoteAndTags(input: string): void {
-    const noteMatch = this.noteRegex.exec(input);
+    const noteMatch = EditOperation.noteRegex.exec(input);
     if (noteMatch) {
       this.note = noteMatch[1].trim();
     }
 
-    const tagsMatch = this.tagsRegex.exec(input);
+    const tagsMatch = EditOperation.tagsRegex.exec(input);
     if (tagsMatch) {
       const tagsText = tagsMatch[1].trim();
       if (tagsText) {
@@ -166,6 +175,27 @@ export abstract class EditOperation {
     }
   }
 
+  public static createOperation(type: OperationType): EditOperation {
+    switch (type) {
+      case OperationType.Delete:
+        return new DeleteEditOperation();
+      case OperationType.Replace:
+        return new ReplaceEditOperation();
+      case OperationType.InsertBefore:
+        return new InsertBeforeEditOperation();
+      case OperationType.InsertAfter:
+        return new InsertBeforeEditOperation();
+      case OperationType.MoveBefore:
+        return new MoveBeforeEditOperation();
+      case OperationType.MoveAfter:
+        return new MoveAfterEditOperation();
+      case OperationType.Swap:
+        return new SwapEditOperation();
+      default:
+        throw new Error(`Unsupported operation type: ${type}`);
+    }
+  }
+
   private static parseTypedOperation<T extends EditOperation>(
     ctor: new () => T,
     dslText: string
@@ -194,7 +224,7 @@ export abstract class EditOperation {
       } else if (op instanceof InsertAfterEditOperation) {
         addedText = op.text;
       } else if (!insertOnly && op instanceof ReplaceEditOperation) {
-        addedText = op.replacementText;
+        addedText = op.text;
       }
 
       if (addedText === text) {
@@ -260,7 +290,7 @@ export abstract class EditOperation {
           } else if (otherOp instanceof InsertAfterEditOperation) {
             addedText = otherOp.text;
           } else if (!insertOnly && otherOp instanceof ReplaceEditOperation) {
-            addedText = otherOp.replacementText;
+            addedText = otherOp.text;
           }
 
           // check if the deleted text matches the added text
@@ -283,7 +313,7 @@ export abstract class EditOperation {
           moveOp.to = this.getTargetPositionForMove(addOp, currentOp);
           moveOp.inputText = currentOp.inputText;
           moveOp.note = currentOp.note;
-          moveOp.tags = [...currentOp.tags];
+          moveOp.tags = currentOp.tags ? [...currentOp.tags] : [];
 
           // copy notes and tags from the add operation if
           // the delete operation doesn't have them
@@ -291,7 +321,7 @@ export abstract class EditOperation {
             moveOp.note = addOp.note;
           }
 
-          if (moveOp.tags.length === 0 && addOp.tags.length > 0) {
+          if (moveOp.tags.length === 0 && addOp.tags && addOp.tags.length > 0) {
             moveOp.tags = [...addOp.tags];
           }
 
@@ -394,7 +424,7 @@ export abstract class EditOperation {
           const replace = new ReplaceEditOperation();
           replace.at = currentPosition;
           replace.run = 1;
-          replace.replacementText = target[targetIndex];
+          replace.text = target[targetIndex];
           replace.inputText = includeInputText
             ? source[sourceIndex]
             : undefined;

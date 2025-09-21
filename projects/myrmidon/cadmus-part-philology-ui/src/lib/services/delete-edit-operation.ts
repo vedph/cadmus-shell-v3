@@ -63,7 +63,7 @@ export class DeleteEditOperation extends EditOperation {
     result += '!';
 
     if (this.note) result += ` (${this.note})`;
-    if (this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+    if (this.tags && this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
 
     return result;
   }

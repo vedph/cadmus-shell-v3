@@ -6,8 +6,8 @@ describe('SwapEditOperation', () => {
     const op = new SwapEditOperation();
     op.at = 2;
     op.run = 1;
-    op.at2 = 4;
-    op.run2 = 1;
+    op.to = 4;
+    op.toRun = 1;
     const a = 'abcde';
 
     const b = op.execute(a);
@@ -19,8 +19,8 @@ describe('SwapEditOperation', () => {
     const op = new SwapEditOperation();
     op.at = 2;
     op.run = 2;
-    op.at2 = 5;
-    op.run2 = 2;
+    op.to = 5;
+    op.toRun = 2;
     const a = 'abcdefg';
 
     const b = op.execute(a);
@@ -32,8 +32,8 @@ describe('SwapEditOperation', () => {
     const op = new SwapEditOperation();
     op.at = 2;
     op.run = 3;
-    op.at2 = 4;
-    op.run2 = 2;
+    op.to = 4;
+    op.toRun = 2;
     const a = 'abcdefg';
 
     expect(() => op.execute(a)).toThrowError();
@@ -43,8 +43,8 @@ describe('SwapEditOperation', () => {
     const op = new SwapEditOperation();
     op.at = 0;
     op.run = 1;
-    op.at2 = 3;
-    op.run2 = 1;
+    op.to = 3;
+    op.toRun = 1;
     const a = 'abc';
 
     expect(() => op.execute(a)).toThrowError();
@@ -54,8 +54,8 @@ describe('SwapEditOperation', () => {
     const op = new SwapEditOperation();
     op.at = 1;
     op.run = 1;
-    op.at2 = 0;
-    op.run2 = 1;
+    op.to = 0;
+    op.toRun = 1;
     const a = 'abc';
 
     expect(() => op.execute(a)).toThrowError();
@@ -69,8 +69,8 @@ describe('SwapEditOperation', () => {
     expect(op.at).toBe(2);
     expect(op.run).toBe(2);
     expect(op.inputText2).toBe('def');
-    expect(op.at2).toBe(5);
-    expect(op.run2).toBe(2);
+    expect(op.to).toBe(5);
+    expect(op.toRun).toBe(2);
   });
 
   it('should parse positions only', () => {
@@ -81,8 +81,8 @@ describe('SwapEditOperation', () => {
     expect(op.at).toBe(2);
     expect(op.run).toBe(1);
     expect(op.inputText2).toBeUndefined();
-    expect(op.at2).toBe(4);
-    expect(op.run2).toBe(1);
+    expect(op.to).toBe(4);
+    expect(op.toRun).toBe(1);
   });
 
   it('should parse positions and lengths with x', () => {
@@ -93,8 +93,8 @@ describe('SwapEditOperation', () => {
     expect(op.at).toBe(2);
     expect(op.run).toBe(2);
     expect(op.inputText2).toBeUndefined();
-    expect(op.at2).toBe(5);
-    expect(op.run2).toBe(2);
+    expect(op.to).toBe(5);
+    expect(op.toRun).toBe(2);
   });
 
   it('should parse positions and lengths with times sign', () => {
@@ -105,8 +105,8 @@ describe('SwapEditOperation', () => {
     expect(op.at).toBe(2);
     expect(op.run).toBe(2);
     expect(op.inputText2).toBeUndefined();
-    expect(op.at2).toBe(5);
-    expect(op.run2).toBe(2);
+    expect(op.to).toBe(5);
+    expect(op.toRun).toBe(2);
   });
 
   it('should throw on invalid format', () => {
@@ -138,8 +138,8 @@ describe('SwapEditOperation', () => {
     const op = new SwapEditOperation();
     op.at = 2;
     op.run = 2;
-    op.at2 = 5;
-    op.run2 = 2;
+    op.to = 5;
+    op.toRun = 2;
 
     const s = op.toString();
 
@@ -152,8 +152,8 @@ describe('SwapEditOperation', () => {
     op.at = 2;
     op.run = 2;
     op.inputText2 = 'def';
-    op.at2 = 5;
-    op.run2 = 2;
+    op.to = 5;
+    op.toRun = 2;
     op.note = 'note';
     op.tags = ['t1', 't2'];
 

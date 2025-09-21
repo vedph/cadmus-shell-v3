@@ -3,14 +3,12 @@ import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
   FormGroup,
-  FormArray,
   FormBuilder,
   Validators,
   UntypedFormGroup,
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { take } from 'rxjs/operators';
 
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -26,18 +24,21 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatToolbar } from '@angular/material/toolbar';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-
-import { diff_match_patch } from 'diff-match-patch';
+import { MatOption, MatSelect } from '@angular/material/select';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
 
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
-  renderLabelFromLastColon,
   ThesaurusTreeComponent,
 } from '@myrmidon/cadmus-ui';
+import { deepCopy } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -48,15 +49,13 @@ import {
   TokenLocation,
 } from '@myrmidon/cadmus-core';
 
-import { DifferResultToMspAdapter } from '../differ-result-to-msp-adapter';
-import { MspOperation } from '../msp-operation';
-import { MspValidators } from '../msp-validators';
 import { OrthographyFragment } from '../orthography-fragment';
-import { MspOperationComponent } from '../msp-operation/msp-operation.component';
+import { EditOperation, OperationType } from '../services/edit-operation';
+import { EditOperationComponent } from '../edit-operation/edit-operation.component';
 
 /**
  * Orthography fragment.
- * Thesauri: orthography-tags (optional).
+ * Thesauri: orthography-languages, orthography-tags, orthography-op-tags.
  */
 @Component({
   selector: 'cadmus-orthography-fragment',
@@ -72,54 +71,77 @@ import { MspOperationComponent } from '../msp-operation/msp-operation.component'
     MatCardTitle,
     MatCardSubtitle,
     MatCardContent,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
     MatFormField,
     MatLabel,
     MatInput,
     MatError,
-    MatToolbar,
+    MatSelect,
+    MatOption,
     MatButton,
     MatTooltip,
     MatIconButton,
-    MspOperationComponent,
     MatCardActions,
     TitleCasePipe,
     ThesaurusTreeComponent,
     CloseSaveButtonsComponent,
+    EditOperationComponent,
   ],
 })
 export class OrthographyFragmentComponent
   extends ModelEditorComponentBase<OrthographyFragment>
   implements OnInit
 {
-  private _currentOperationIndex: number;
-  private _differ?: any;
-  private _adapter?: DifferResultToMspAdapter;
-
   public standard: FormControl<string>;
-  public operations: FormArray;
+  public language: FormControl<string | null>;
+  public tag: FormControl<string | null>;
+  public note: FormControl<string | null>;
+  public operations: FormControl<EditOperation[]>;
 
+  // orthography-languages
+  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  // orthography-tags
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  // orthography-op-tags
+  public readonly opTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
 
-  public readonly currentOperation = signal<MspOperation | undefined>(undefined);
+  public readonly editedOperation = signal<EditOperation | undefined>(
+    undefined
+  );
+  public readonly editedOperationIndex = signal<number>(-1);
   public readonly frText = signal<string | undefined>(undefined);
 
   constructor(
     authService: AuthJwtService,
-    private _formBuilder: FormBuilder,
+    formBuilder: FormBuilder,
     private _layerService: TextLayerService,
     private _dialogService: DialogService,
     private _clipboard: Clipboard,
     private _snackbar: MatSnackBar
   ) {
-    super(authService, _formBuilder);
-    this._currentOperationIndex = -1;
-
+    super(authService, formBuilder);
     // form
-    this.standard = _formBuilder.control('', {
+    this.standard = formBuilder.control('', {
       validators: [Validators.required, Validators.maxLength(100)],
       nonNullable: true,
     });
-    this.operations = _formBuilder.array([]);
+    this.language = formBuilder.control(null, {
+      validators: Validators.maxLength(50),
+    });
+    this.tag = formBuilder.control(null, {
+      validators: Validators.maxLength(50),
+    });
+    this.note = formBuilder.control(null, {
+      validators: Validators.maxLength(200),
+    });
+    this.operations = formBuilder.control([], {
+      validators: [Validators.required],
+      nonNullable: true,
+    });
   }
 
   public override ngOnInit(): void {
@@ -129,16 +151,31 @@ export class OrthographyFragmentComponent
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
     return formBuilder.group({
       standard: this.standard,
+      language: this.language,
+      tag: this.tag,
+      note: this.note,
       operations: this.operations,
     });
   }
 
   private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'orthography-tags';
+    let key = 'orthography-languages';
+    if (this.hasThesaurus(key)) {
+      this.langEntries.set(thesauri[key].entries);
+    } else {
+      this.langEntries.set(undefined);
+    }
+    key = 'orthography-tags';
     if (this.hasThesaurus(key)) {
       this.tagEntries.set(thesauri[key].entries);
     } else {
       this.tagEntries.set(undefined);
+    }
+    key = 'orthography-op-tags';
+    if (this.hasThesaurus(key)) {
+      this.opTagEntries.set(thesauri[key].entries);
+    } else {
+      this.opTagEntries.set(undefined);
     }
   }
 
@@ -147,10 +184,18 @@ export class OrthographyFragmentComponent
       this.form.reset();
     } else {
       this.standard.setValue(fragment.standard);
-      if (fragment.operations) {
-        for (const op of fragment.operations) {
-          this.addOperation(op);
-        }
+      this.language.setValue(fragment.language || null);
+      this.tag.setValue(fragment.tag || null);
+      this.note.setValue(fragment.note || null);
+      try {
+        this.operations.setValue(
+          fragment.operations?.map((text) =>
+            EditOperation.parseOperation(text)
+          ) || []
+        );
+      } catch (error) {
+        console.error('Error parsing operations', error, fragment.operations);
+        this.operations.setValue([]);
       }
       this.form.markAsPristine();
     }
@@ -159,10 +204,12 @@ export class OrthographyFragmentComponent
   protected override onDataSet(data?: EditedObject<OrthographyFragment>): void {
     // fragment's text
     if (data?.baseText && data.value) {
-      this.frText.set(this._layerService.getTextFragment(
-        data.baseText,
-        TokenLocation.parse(data.value.location)!
-      ));
+      this.frText.set(
+        this._layerService.getTextFragment(
+          data.baseText,
+          TokenLocation.parse(data.value.location)!
+        )
+      );
     }
 
     // thesauri
@@ -173,42 +220,60 @@ export class OrthographyFragmentComponent
     this.updateForm(data?.value);
   }
 
-  public addOperation(operation?: string): void {
-    this.operations.push(
-      this._formBuilder.group({
-        text: this._formBuilder.control(operation, [
-          Validators.required,
-          MspValidators.msp,
-        ]),
-      })
+  protected override getValue(): OrthographyFragment {
+    const fragment = this.getEditedFragment() as OrthographyFragment;
+    fragment.standard = this.standard.value;
+    fragment.language = this.language.value?.trim() || undefined;
+    fragment.tag = this.tag.value?.trim() || undefined;
+    fragment.note = this.note.value?.trim() || undefined;
+    fragment.operations = this.operations.value.map((op) => op.toString());
+    return fragment;
+  }
+
+  //#region operations
+  public addOperation(): void {
+    const operation: EditOperation = EditOperation.createOperation(
+      OperationType.Replace
     );
-    this.operations.updateValueAndValidity();
+    this.editOperation(operation, -1);
+  }
+
+  public editOperation(operation: EditOperation, index: number): void {
+    this.editedOperationIndex.set(index);
+    this.editedOperation.set(deepCopy(operation));
+  }
+
+  public closeOperation(): void {
+    this.editedOperationIndex.set(-1);
+    this.editedOperation.set(undefined);
+  }
+
+  public saveOperation(operation: EditOperation): void {
+    const operations = [...this.operations.value];
+    if (this.editedOperationIndex() === -1) {
+      operations.push(operation);
+    } else {
+      operations.splice(this.editedOperationIndex(), 1, operation);
+    }
+    this.operations.setValue(operations);
     this.operations.markAsDirty();
+    this.operations.updateValueAndValidity();
+    this.closeOperation();
   }
 
   public deleteOperation(index: number): void {
     this._dialogService
-      .confirm('Warning', `Delete operation #${index + 1}?`)
-      .pipe(take(1))
-      .subscribe((ok: boolean) => {
-        if (ok) {
-          this.operations.removeAt(index);
-          this.operations.updateValueAndValidity();
+      .confirm('Confirmation', 'Delete Operation?')
+      .subscribe((yes: boolean | undefined) => {
+        if (yes) {
+          if (this.editedOperationIndex() === index) {
+            this.closeOperation();
+          }
+          const operations = [...this.operations.value];
+          operations.splice(index, 1);
+          this.operations.setValue(operations);
           this.operations.markAsDirty();
-        }
-      });
-  }
-
-  public clearOperations(): void {
-    this._dialogService
-      .confirm('Warning', 'Delete all the operations?')
-      .pipe(take(1))
-      .subscribe((ok: boolean) => {
-        if (ok) {
-          this.operations.clear();
           this.operations.updateValueAndValidity();
-          this.operations.markAsDirty();
-          this.currentOperationClosed();
         }
       });
   }
@@ -217,101 +282,26 @@ export class OrthographyFragmentComponent
     if (index < 1) {
       return;
     }
-    const item = this.operations.controls[index];
-    this.operations.removeAt(index);
-    this.operations.insert(index - 1, item);
-    this.operations.updateValueAndValidity();
+    const entry = this.operations.value[index];
+    const entries = [...this.operations.value];
+    entries.splice(index, 1);
+    entries.splice(index - 1, 0, entry);
+    this.operations.setValue(entries);
     this.operations.markAsDirty();
+    this.operations.updateValueAndValidity();
   }
 
   public moveOperationDown(index: number): void {
-    if (index + 1 >= this.operations.length) {
+    if (index + 1 >= this.operations.value.length) {
       return;
     }
-    const item = this.operations.controls[index];
-    this.operations.removeAt(index);
-    this.operations.insert(index + 1, item);
+    const entry = this.operations.value[index];
+    const entries = [...this.operations.value];
+    entries.splice(index, 1);
+    entries.splice(index + 1, 0, entry);
+    this.operations.setValue(entries);
+    this.operations.markAsDirty();
     this.operations.updateValueAndValidity();
-    this.operations.markAsDirty();
   }
-
-  public editOperation(index: number): void {
-    const form = this.operations.at(index) as FormGroup;
-    this._currentOperationIndex = index;
-    this.currentOperation.set(
-      MspOperation.parse(form.controls['text'].value) || undefined
-    );
-  }
-
-  public currentOperationSaved(operation: MspOperation): void {
-    if (this._currentOperationIndex === -1) {
-      return;
-    }
-    const form = this.operations.at(this._currentOperationIndex) as FormGroup;
-    form.controls['text'].setValue(operation.toString());
-    form.controls['text'].updateValueAndValidity();
-    form.controls['text'].markAsDirty();
-    this._currentOperationIndex = -1;
-    this.currentOperation.set(undefined);
-  }
-
-  public currentOperationClosed(): void {
-    this._currentOperationIndex = -1;
-    this.currentOperation.set(undefined);
-  }
-
-  private getOperations(): string[] {
-    const ops: string[] = [];
-
-    for (let i = 0; i < this.operations.controls.length; i++) {
-      const form = this.operations.at(i) as FormGroup;
-      const op = MspOperation.parse(form.controls['text'].value);
-      if (op) {
-        ops.push(op.toString());
-      }
-    }
-
-    return ops;
-  }
-
-  protected getValue(): OrthographyFragment {
-    const fr = this.getEditedFragment() as OrthographyFragment;
-    fr.standard = this.standard.value.trim();
-    fr.operations = this.getOperations();
-    return fr;
-  }
-
-  public autoAddOperations(): void {
-    // we must have both A and B text
-    if (!this.frText || !this.standard.value) {
-      return;
-    }
-
-    // instantiate the diffing engine if required
-    if (!this._differ) {
-      this._differ = new diff_match_patch();
-      this._adapter = new DifferResultToMspAdapter();
-    }
-
-    // set operations
-    const result = this._differ.diff_main(this.frText, this.standard.value);
-    const ops = this._adapter!.adapt(result);
-
-    this.operations.markAsDirty();
-    this.operations.clear();
-    for (const op of ops) {
-      this.addOperation(op.toString());
-    }
-  }
-
-  public renderLabel(label: string): string {
-    return renderLabelFromLastColon(label);
-  }
-
-  public onTagChange(tag: ThesaurusEntry): void {
-    this._clipboard.copy(tag.id);
-    this._snackbar.open('Tag copied: ' + tag.id, 'OK', {
-      duration: 2000,
-    });
-  }
+  //#endregion
 }

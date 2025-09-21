@@ -5,18 +5,36 @@
   border-radius: 4px;
   padding: 2px 4px;
 }
-div#container {
-  display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: 1fr auto;
-  grid-template-areas: "editor tags";
+.form-row {
+  display: flex;
   gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
-@media only screen and (max-width: 959px) {
-  div#container {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "editor"
-      "tags";
-  }
+.form-row * {
+  flex: 0 0 auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+tbody tr:nth-child(odd) {
+  background-color: #e2e2e2;
+}
+th {
+  text-align: left;
+  font-weight: normal;
+  color: silver;
+}
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}
+tr.selected {
+  background-color: #d0d0d0 !important;
+}
+fieldset {
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 6px;
 }

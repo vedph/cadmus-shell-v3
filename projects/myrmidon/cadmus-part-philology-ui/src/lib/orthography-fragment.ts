@@ -5,6 +5,9 @@ import { Fragment } from '@myrmidon/cadmus-core';
  */
 export interface OrthographyFragment extends Fragment {
   standard: string;
+  language?: string;
+  tag?: string;
+  note?: string;
   operations?: string[];
 }
 
@@ -23,15 +26,27 @@ export const ORTHOGRAPHY_FRAGMENT_SCHEMA = {
   properties: {
     location: {
       $id: '#/properties/location',
-      type: 'string'
+      type: 'string',
     },
     baseText: {
       $id: '#/properties/baseText',
-      type: 'string'
+      type: 'string',
     },
     standard: {
       $id: '#/properties/standard',
-      type: 'string'
+      type: 'string',
+    },
+    language: {
+      $id: '#/properties/language',
+      type: 'string',
+    },
+    tag: {
+      $id: '#/properties/tag',
+      type: 'string',
+    },
+    note: {
+      $id: '#/properties/note',
+      type: 'string',
     },
     operations: {
       $id: '#/properties/operations',
@@ -40,8 +55,8 @@ export const ORTHOGRAPHY_FRAGMENT_SCHEMA = {
         $id: '#/properties/operations/items',
         type: 'string',
         pattern:
-          '(?:"([^"]+)")?\\@(\\d+)(?:[x×](\\d+))?\\s*([=>~])\\s*(?:"([^"]*)")?(?:\\@(\\d+)(?:[x×](\\d+))?)?(?:\\s*\\[([^\\]{]+)\\])?(?:\\s*\\{([^}]+)})?'
-      }
-    }
-  }
+          '(?:"([^"]+)")?\\@(\\d+)(?:[x×](\\d+))?\\s*([=>~])\\s*(?:"([^"]*)")?(?:\\@(\\d+)(?:[x×](\\d+))?)?(?:\\s*\\[([^\\]{]+)\\])?(?:\\s*\\{([^}]+)})?',
+      },
+    },
+  },
 };

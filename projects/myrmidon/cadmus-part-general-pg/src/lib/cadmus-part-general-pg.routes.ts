@@ -58,7 +58,7 @@ import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feat
 import { TokenTextPartFeatureComponent } from './token-text-part-feature/token-text-part-feature.component';
 
 // https://github.com/ng-packagr/ng-packagr/issues/778
-export const CADMUS_PART_GENERAL_ROUTES: Routes = [
+export const CADMUS_PART_GENERAL_PG_ROUTES: Routes = [
   {
     path: `${ASSERTED_HISTORICAL_DATES_PART_TYPEID}/:pid`,
     pathMatch: 'full',

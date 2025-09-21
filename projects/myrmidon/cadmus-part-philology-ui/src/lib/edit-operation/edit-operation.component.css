@@ -1,0 +1,23 @@
+.long-text {
+  width: 100%;
+  max-width: 800px;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}
+.input {
+  font-size: 110%;
+}
+.arrow {
+  font-size: 150%;
+  line-height: 1;
+}
+.output {
+  font-size: 110%;
+}

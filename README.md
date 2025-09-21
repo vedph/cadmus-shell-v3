@@ -32,14 +32,14 @@ Latest versions:
 - cadmus-item-search: 16.0.0
 - cadmus-layer-demo: 15.0.0
 - cadmus-part-general-pg: 16.0.0
-- cadmus-part-general-ui: 15.0.0
-- cadmus-part-philology-pg: 16.0.0
-- cadmus-part-philology-ui: 15.0.0
+- cadmus-part-general-ui: 15.0.1
+- cadmus-part-philology-pg: 16.1.0
+- cadmus-part-philology-ui: 15.1.0
 - cadmus-preview-pg: 17.0.0
 - cadmus-preview-ui: 17.0.0
 - cadmus-profile-core: 12.0.0
 - cadmus-state: 14.0.0
-- cadmus-statistics: 1.0.0
+- cadmus-statistics: 1.0.1
 - cadmus-thesaurus-editor: 16.0.0
 - cadmus-thesaurus-list: 16.0.0
 - cadmus-thesaurus-ui: 15.0.0
@@ -210,6 +210,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-21:
+  - ⚠️ refactored orthography fragment (`@myrmidon/cadmus-part-philology-ui`, `@myrmidon/cadmus-part-philology-pg`).
+  - fixes to button colors in `@myrmidon/cadmus-statistics` and `@myrmidon/cadmus-part-general-ui`.
 - 2025-09-18: added more role-dependent thesauri to general parts.
 - 2025-09-17: edit frame stats page uses signals.
 

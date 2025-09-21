@@ -13,7 +13,7 @@
         <button
           type="button"
           mat-flat-button
-          color="primary"
+          class="mat-primary"
           [disabled]="maxDateCount() > 0 && dates.value.length >= maxDateCount()"
           (click)="addDate()"
         >
@@ -37,7 +37,7 @@
               <button
                 type="button"
                 mat-icon-button
-                color="primary"
+                class="mat-primary"
                 matTooltip="Edit this date"
                 (click)="editDate(date, i)"
               >
@@ -64,7 +64,7 @@
               <button
                 type="button"
                 mat-icon-button
-                color="warn"
+                class="mat-warn"
                 matTooltip="Delete this date"
                 (click)="deleteDate(i)"
               >

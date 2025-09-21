@@ -2,10 +2,14 @@ import { EditOperation, OperationType, ParseException } from './edit-operation';
 
 // Replace edit operation
 export class ReplaceEditOperation extends EditOperation {
-  public replacementText: string = '';
-
   public get type(): OperationType {
     return OperationType.Replace;
+  }
+
+  constructor() {
+    super();
+    this.run = 1;
+    this.text = '';
   }
 
   public execute(input: string): string {
@@ -20,7 +24,7 @@ export class ReplaceEditOperation extends EditOperation {
     EditOperation.validatePosition(input, this.at, this.run);
     return (
       input.slice(0, this.at - 1) +
-      this.replacementText +
+      this.text +
       input.slice(this.at - 1 + this.run)
     );
   }
@@ -58,7 +62,7 @@ export class ReplaceEditOperation extends EditOperation {
       this.run = length;
     }
 
-    this.replacementText = match[4];
+    this.text = match[4];
     this.parseNoteAndTags(text);
   }
 
@@ -69,10 +73,11 @@ export class ReplaceEditOperation extends EditOperation {
 
     result += `@${this.at}`;
     if (this.run > 1) result += `x${this.run}`;
-    result += `="${this.replacementText}"`;
+    result += `="${this.text}"`;
 
     if (this.note) result += ` (${this.note})`;
-    if (this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
 
     return result;
   }

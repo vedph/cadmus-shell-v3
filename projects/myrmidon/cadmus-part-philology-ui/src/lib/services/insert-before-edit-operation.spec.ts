@@ -85,8 +85,7 @@ describe('InsertBeforeEditOperation', () => {
     op.at = 2;
     op.text = 'abc';
     op.note = 'note';
-    op.tags.push('t1');
-    op.tags.push('t2');
+    op.tags = ['t1', 't2'];
 
     const s = op.toString();
 

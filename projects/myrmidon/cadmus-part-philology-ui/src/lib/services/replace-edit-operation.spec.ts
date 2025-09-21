@@ -6,7 +6,7 @@ describe('ReplaceEditOperation', () => {
     const op = new ReplaceEditOperation();
     op.at = 2;
     op.run = 1;
-    op.replacementText = 'X';
+    op.text = 'X';
     const a = 'abcde';
 
     const b = op.execute(a);
@@ -18,7 +18,7 @@ describe('ReplaceEditOperation', () => {
     const op = new ReplaceEditOperation();
     op.at = 2;
     op.run = 3;
-    op.replacementText = 'XY';
+    op.text = 'XY';
     const a = 'abcdef';
 
     const b = op.execute(a);
@@ -30,7 +30,7 @@ describe('ReplaceEditOperation', () => {
     const op = new ReplaceEditOperation();
     op.at = 0;
     op.run = 1;
-    op.replacementText = 'X';
+    op.text = 'X';
     const a = 'abc';
 
     expect(() => op.execute(a)).toThrowError(RangeError);
@@ -40,7 +40,7 @@ describe('ReplaceEditOperation', () => {
     const op = new ReplaceEditOperation();
     op.at = 2;
     op.run = 0;
-    op.replacementText = 'X';
+    op.text = 'X';
     const a = 'abc';
 
     expect(() => op.execute(a)).toThrowError(RangeError);
@@ -53,7 +53,7 @@ describe('ReplaceEditOperation', () => {
     expect(op.inputText).toBe('abc');
     expect(op.at).toBe(2);
     expect(op.run).toBe(1);
-    expect(op.replacementText).toBe('X');
+    expect(op.text).toBe('X');
   });
 
   it('should parse quoted text, position, length, replacement', () => {
@@ -63,7 +63,7 @@ describe('ReplaceEditOperation', () => {
     expect(op.inputText).toBe('abc');
     expect(op.at).toBe(2);
     expect(op.run).toBe(3);
-    expect(op.replacementText).toBe('XY');
+    expect(op.text).toBe('XY');
   });
 
   it('should parse position only', () => {
@@ -73,7 +73,7 @@ describe('ReplaceEditOperation', () => {
     expect(op.inputText).toBeUndefined();
     expect(op.at).toBe(4);
     expect(op.run).toBe(1);
-    expect(op.replacementText).toBe('Z');
+    expect(op.text).toBe('Z');
   });
 
   it('should parse position and length with x', () => {
@@ -83,7 +83,7 @@ describe('ReplaceEditOperation', () => {
     expect(op.inputText).toBeUndefined();
     expect(op.at).toBe(4);
     expect(op.run).toBe(2);
-    expect(op.replacementText).toBe('Z');
+    expect(op.text).toBe('Z');
   });
 
   it('should parse position and length with times sign', () => {
@@ -93,7 +93,7 @@ describe('ReplaceEditOperation', () => {
     expect(op.inputText).toBeUndefined();
     expect(op.at).toBe(4);
     expect(op.run).toBe(2);
-    expect(op.replacementText).toBe('Z');
+    expect(op.text).toBe('Z');
   });
 
   it('should throw for invalid format', () => {
@@ -115,7 +115,7 @@ describe('ReplaceEditOperation', () => {
     const op = new ReplaceEditOperation();
     op.at = 2;
     op.run = 3;
-    op.replacementText = 'XY';
+    op.text = 'XY';
 
     const s = op.toString();
 
@@ -127,7 +127,7 @@ describe('ReplaceEditOperation', () => {
     op.inputText = 'abc';
     op.at = 2;
     op.run = 3;
-    op.replacementText = 'XY';
+    op.text = 'XY';
     op.note = 'note';
     op.tags = ['t1', 't2'];
 

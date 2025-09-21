@@ -99,7 +99,7 @@ export const routes: Routes = [
     path: 'items/:iid/general',
     loadChildren: () =>
       import('@myrmidon/cadmus-part-general-pg').then(
-        (module) => module.CADMUS_PART_GENERAL_ROUTES
+        (module) => module.CADMUS_PART_GENERAL_PG_ROUTES
       ),
     canActivate: [jwtGuard],
   },

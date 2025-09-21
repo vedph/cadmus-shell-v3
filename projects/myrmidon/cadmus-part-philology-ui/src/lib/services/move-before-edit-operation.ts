@@ -2,10 +2,13 @@ import { EditOperation, OperationType, ParseException } from './edit-operation';
 
 // Move before edit operation
 export class MoveBeforeEditOperation extends EditOperation {
-  public to: number = 0;
-
   public get type(): OperationType {
     return OperationType.MoveBefore;
+  }
+
+  constructor() {
+    super();
+    this.to = 1;
   }
 
   public execute(input: string): string {
@@ -14,15 +17,15 @@ export class MoveBeforeEditOperation extends EditOperation {
     }
 
     EditOperation.validatePosition(input, this.at, this.run);
-    EditOperation.validatePosition(input, this.to);
+    EditOperation.validatePosition(input, this.to!);
 
     const textToMove = input.slice(this.at - 1, this.at - 1 + this.run);
     let result =
       input.slice(0, this.at - 1) + input.slice(this.at - 1 + this.run);
 
     // adjust target position if it's after the removed text
-    let adjustedTargetPosition = this.to;
-    if (this.to > this.at) {
+    let adjustedTargetPosition = this.to!;
+    if (this.to! > this.at) {
       adjustedTargetPosition -= this.run;
     }
 
@@ -91,7 +94,8 @@ export class MoveBeforeEditOperation extends EditOperation {
     result += `>@${this.to}`;
 
     if (this.note) result += ` (${this.note})`;
-    if (this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
 
     return result;
   }

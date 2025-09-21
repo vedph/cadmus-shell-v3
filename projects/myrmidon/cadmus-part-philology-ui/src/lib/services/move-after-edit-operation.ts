@@ -2,10 +2,13 @@ import { EditOperation, OperationType, ParseException } from './edit-operation';
 
 // Move after edit operation
 export class MoveAfterEditOperation extends EditOperation {
-  public to: number = 0;
-
   public get type(): OperationType {
     return OperationType.MoveAfter;
+  }
+
+  constructor() {
+    super();
+    this.to = 1;
   }
 
   public execute(input: string): string {
@@ -14,15 +17,15 @@ export class MoveAfterEditOperation extends EditOperation {
     }
 
     EditOperation.validatePosition(input, this.at, this.run);
-    EditOperation.validatePosition(input, this.to);
+    EditOperation.validatePosition(input, this.to!);
 
     const textToMove = input.slice(this.at - 1, this.at - 1 + this.run);
     let result =
       input.slice(0, this.at - 1) + input.slice(this.at - 1 + this.run);
 
     // adjust target position if it's after the removed text
-    let adjustedTargetPosition = this.to;
-    if (this.to > this.at) adjustedTargetPosition -= this.run;
+    let adjustedTargetPosition = this.to!;
+    if (this.to! > this.at) adjustedTargetPosition -= this.run;
 
     // insert after target position
     result =
@@ -44,7 +47,8 @@ export class MoveAfterEditOperation extends EditOperation {
 
     if (!match) {
       throw new ParseException(
-        'Invalid move-after operation format. Expected: "text"@position->@targetposition or @position->@targetposition',
+        'Invalid move-after operation format. ' +
+          'Expected: "text"@position->@targetposition or @position->@targetposition',
         text
       );
     }
@@ -88,7 +92,8 @@ export class MoveAfterEditOperation extends EditOperation {
     result += `->@${this.to}`;
 
     if (this.note) result += ` (${this.note})`;
-    if (this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
 
     return result;
   }
