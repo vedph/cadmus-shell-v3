@@ -15,6 +15,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { merge } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 // material
 import { MatButtonModule } from '@angular/material/button';
@@ -26,6 +29,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import {
@@ -56,6 +60,8 @@ import {
   styleUrl: './edit-operation.component.css',
 })
 export class EditOperationComponent {
+  private _outputDirty = signal<number>(0);
+
   public readonly operation = model<EditOperation | undefined>();
 
   /**
@@ -67,7 +73,8 @@ export class EditOperationComponent {
    * The output text after applying the operation.
    */
   public readonly outputText = computed<string | undefined>(() => {
-    const operation = this.operation();
+    const dirty = this._outputDirty(); // force recompute when dirty changes
+    const operation = this.getOperation();
     const input = this.inputText();
     if (!operation || !input) return undefined;
 
@@ -124,7 +131,13 @@ export class EditOperationComponent {
     this.text = new FormControl<string | null>(null);
     this.to = new FormControl<number>(0, {
       nonNullable: true,
-      validators: Validators.min(1),
+      validators: NgxToolsValidators.conditionalValidator(
+        () =>
+          this.type.value === 'MoveBefore' ||
+          this.type.value === 'MoveAfter' ||
+          this.type.value === 'Swap',
+        Validators.min(1)
+      ),
     });
     this.toRun = new FormControl<number>(0, { nonNullable: true });
     this.tags = new FormControl<string | null>(null, {
@@ -150,6 +163,20 @@ export class EditOperationComponent {
       const operation = this.operation();
       this.updateForm(operation);
     });
+
+    // whenever type, at, run, to, toRun, text change, set output dirty
+    merge(
+      this.type.valueChanges,
+      this.at.valueChanges,
+      this.run.valueChanges,
+      this.to.valueChanges,
+      this.toRun.valueChanges,
+      this.text.valueChanges
+    )
+      .pipe(debounceTime(300), takeUntilDestroyed())
+      .subscribe(() => {
+        this._outputDirty.set(this._outputDirty() + 1);
+      });
   }
 
   private updateForm(operation: EditOperation | undefined | null): void {

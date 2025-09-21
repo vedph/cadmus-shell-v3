@@ -141,6 +141,7 @@
           <cadmus-edit-operation
             [tagEntries]="tagEntries()"
             [opTagEntries]="opTagEntries()"
+            [inputText]="frText()"
             [operation]="editedOperation()"
             (operationChange)="saveOperation($event!)"
             (cancelEdit)="closeOperation()"

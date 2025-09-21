@@ -235,7 +235,8 @@ export class OrthographyFragmentComponent
     const operation: EditOperation = EditOperation.createOperation(
       OperationType.Replace
     );
-    this.editOperation(operation, -1);
+    this.editedOperationIndex.set(-1);
+    this.editedOperation.set(operation);
   }
 
   public editOperation(operation: EditOperation, index: number): void {

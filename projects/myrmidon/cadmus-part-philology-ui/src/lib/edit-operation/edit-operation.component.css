@@ -16,6 +16,7 @@
 }
 .input {
   font-size: 110%;
+  color: darkred;
 }
 .arrow {
   font-size: 150%;
@@ -23,7 +24,8 @@
 }
 .output {
   font-size: 110%;
+  color: darkgreen;
 }
-.r-field {
+.nr-field {
   width: 6em;
 }

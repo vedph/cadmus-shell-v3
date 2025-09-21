@@ -22,8 +22,10 @@ export class ParseException extends Error {
   }
 
   public override toString(): string {
-    return `${this.name}: ${this.message} at "${this.inputSubstring}"` +
-      (this.position >= 0 ? ` (position ${this.position})` : '');
+    return (
+      `${this.name}: ${this.message} at "${this.inputSubstring}"` +
+      (this.position >= 0 ? ` (position ${this.position})` : '')
+    );
   }
 }
 
@@ -532,7 +534,8 @@ export class DeleteEditOperation extends EditOperation {
     result += '!';
 
     if (this.note) result += ` (${this.note})`;
-    if (this.tags && this.tags.length > 0) result += ` [${this.tags.join(' ')}]`;
+    if (this.tags && this.tags.length > 0)
+      result += ` [${this.tags.join(' ')}]`;
 
     return result;
   }
@@ -554,10 +557,10 @@ export class InsertAfterEditOperation extends EditOperation {
       throw new Error('Input cannot be null or undefined');
     }
 
-    if (this.at === 0) return input + this.text;
+    if (this.at === 0) return input + (this.text || '');
 
     EditOperation.validatePosition(input, this.at);
-    return input.slice(0, this.at) + this.text + input.slice(this.at);
+    return input.slice(0, this.at) + (this.text || '') + input.slice(this.at);
   }
 
   public parse(text: string): void {
@@ -590,7 +593,7 @@ export class InsertAfterEditOperation extends EditOperation {
   }
 
   public override toString(): string {
-    let result = `@${this.at}=+"${this.text}"`;
+    let result = `@${this.at}=+"${this.text || ''}"`;
 
     if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
@@ -882,7 +885,7 @@ export class ReplaceEditOperation extends EditOperation {
     EditOperation.validatePosition(input, this.at, this.run);
     return (
       input.slice(0, this.at - 1) +
-      this.text +
+      (this.text || '') +
       input.slice(this.at - 1 + this.run)
     );
   }
@@ -931,7 +934,7 @@ export class ReplaceEditOperation extends EditOperation {
 
     result += `@${this.at}`;
     if (this.run > 1) result += `x${this.run}`;
-    result += `="${this.text}"`;
+    result += `="${this.text || ''}"`;
 
     if (this.note) result += ` (${this.note})`;
     if (this.tags && this.tags.length > 0)
