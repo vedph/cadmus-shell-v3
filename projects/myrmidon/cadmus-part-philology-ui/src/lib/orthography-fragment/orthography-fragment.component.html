@@ -14,6 +14,7 @@
     </mat-card-header>
     <mat-card-content>
       <div id="container">
+        <!-- EDITOR -->
         <div id="editor">
           <div class="form-row">
             <!-- standard -->
@@ -129,6 +130,7 @@
               }
             </tbody>
           </table>
+          <!-- operation editor -->
           } @if (editedOperation()) {
           <fieldset>
             <mat-expansion-panel
@@ -144,7 +146,7 @@
                 [hideTagsPicker]="true"
                 [tagEntries]="tagEntries()"
                 [opTagEntries]="opTagEntries()"
-                [inputText]="frText()"
+                [inputText]="operationText()"
                 [operation]="editedOperation()"
                 (operationChange)="saveOperation($event!)"
                 (cancelEdit)="closeOperation()"
@@ -153,6 +155,7 @@
           </fieldset>
           }
         </div>
+        <!-- TAGS -->
         <div id="tags">
           @if (tagEntries()?.length) {
           <fieldset>

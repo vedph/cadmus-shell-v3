@@ -44,6 +44,10 @@ import {
   OperationType,
   SwapEditOperation,
 } from '../services/edit-operation';
+import {
+  CharTextViewComponent,
+  NumberedChar,
+} from '../char-text-view/char-text-view.component';
 
 /**
  * Editor for a single edit operation.
@@ -62,6 +66,7 @@ import {
     MatSelectModule,
     MatTooltipModule,
     ThesaurusTreeComponent,
+    CharTextViewComponent,
   ],
   templateUrl: './edit-operation.component.html',
   styleUrl: './edit-operation.component.css',
@@ -107,6 +112,8 @@ export class EditOperationComponent {
    * for the operation).
    */
   public readonly expanded = signal<boolean>(false);
+
+  public readonly pickedCoords = signal<string | undefined>(undefined);
 
   // orthography-tags
   public readonly tagEntries = input<ThesaurusEntry[] | undefined>(undefined);
@@ -312,6 +319,17 @@ export class EditOperationComponent {
     this._snackbar.open('Tag copied: ' + tag.id, 'OK', {
       duration: 2000,
     });
+  }
+
+  public onCharPick(char: NumberedChar): void {
+    this.pickedCoords.set(`${char.n}`);
+  }
+
+  public onRangePick(chars: NumberedChar[]): void {
+    if (!chars || chars.length === 0) return;
+    this.pickedCoords.set(
+      `${chars[0].n}x${chars[chars.length - 1].n + 1 - chars[0].n}`
+    );
   }
 
   public cancel(): void {

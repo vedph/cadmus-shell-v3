@@ -29,6 +29,11 @@
 .nr-field {
   width: 6em;
 }
+.coords {
+  font-size: 105%;
+  color: #296D9C;
+  margin-left: 16px;
+}
 fieldset {
   border: 1px solid silver;
   border-radius: 6px;

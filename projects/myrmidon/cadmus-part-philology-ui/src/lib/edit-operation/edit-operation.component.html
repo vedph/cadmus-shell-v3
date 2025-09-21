@@ -44,7 +44,17 @@
         <span class="output">{{ outputText() }}</span>
       </div>
       }
-      <!-- TODO coords helper -->
+      <!-- text view -->
+      @if (inputText()) {
+      <div class="form-row">
+        <cadmus-char-text-view
+          [lines]="[inputText()!]"
+          (charPick)="onCharPick($event)"
+          (rangePick)="onRangePick($event)"
+        />
+        <div class="coords">{{ pickedCoords() }}</div>
+      </div>
+      }
       <!-- visual editor -->
       <mat-expansion-panel
         [expanded]="expanded()"

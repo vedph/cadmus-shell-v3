@@ -113,6 +113,8 @@ export class OrthographyFragmentComponent
     undefined
   );
   public readonly editedOperationIndex = signal<number>(-1);
+  public readonly operationText = signal<string | undefined>(undefined);
+
   public readonly frText = signal<string | undefined>(undefined);
 
   constructor(
@@ -146,6 +148,7 @@ export class OrthographyFragmentComponent
 
   public override ngOnInit(): void {
     super.ngOnInit();
+    this.operationText.set(this.frText());
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
