@@ -35,7 +35,7 @@ export abstract class EditOperation {
   protected static readonly noteRegex = /\(([^)]*)\)/;
   protected static readonly tagsRegex = /\[([^\]]*)\]/;
 
-  public abstract get type(): OperationType;
+  public type: OperationType = OperationType.Replace;
   public inputText?: string;
   public at: number = 1;
   public run: number = 1;
@@ -473,8 +473,9 @@ export abstract class EditOperation {
 
 // Delete edit operation
 export class DeleteEditOperation extends EditOperation {
-  public get type(): OperationType {
-    return OperationType.Delete;
+  constructor() {
+    super();
+    this.type = OperationType.Delete;
   }
 
   public execute(input: string): string {
@@ -543,12 +544,9 @@ export class DeleteEditOperation extends EditOperation {
 
 // Insert after edit operation
 export class InsertAfterEditOperation extends EditOperation {
-  public get type(): OperationType {
-    return OperationType.InsertAfter;
-  }
-
   constructor() {
     super();
+    this.type = OperationType.InsertAfter;
     this.text = '';
   }
 
@@ -605,12 +603,9 @@ export class InsertAfterEditOperation extends EditOperation {
 
 // Insert before edit operation
 export class InsertBeforeEditOperation extends EditOperation {
-  public get type(): OperationType {
-    return OperationType.InsertBefore;
-  }
-
   constructor() {
     super();
+    this.type = OperationType.InsertBefore;
     this.text = '';
   }
 
@@ -663,12 +658,9 @@ export class InsertBeforeEditOperation extends EditOperation {
 
 // Move after edit operation
 export class MoveAfterEditOperation extends EditOperation {
-  public get type(): OperationType {
-    return OperationType.MoveAfter;
-  }
-
   constructor() {
     super();
+    this.type = OperationType.MoveAfter;
     this.to = 1;
   }
 
@@ -762,12 +754,9 @@ export class MoveAfterEditOperation extends EditOperation {
 
 // Move before edit operation
 export class MoveBeforeEditOperation extends EditOperation {
-  public get type(): OperationType {
-    return OperationType.MoveBefore;
-  }
-
   constructor() {
     super();
+    this.type = OperationType.MoveBefore;
     this.to = 1;
   }
 
@@ -863,12 +852,9 @@ export class MoveBeforeEditOperation extends EditOperation {
 
 // Replace edit operation
 export class ReplaceEditOperation extends EditOperation {
-  public get type(): OperationType {
-    return OperationType.Replace;
-  }
-
   constructor() {
     super();
+    this.type = OperationType.Replace;
     this.run = 1;
     this.text = '';
   }
@@ -948,12 +934,9 @@ export class ReplaceEditOperation extends EditOperation {
 export class SwapEditOperation extends EditOperation {
   public inputText2?: string;
 
-  public get type(): OperationType {
-    return OperationType.Swap;
-  }
-
   constructor() {
     super();
+    this.type = OperationType.Swap;
     this.at = 1;
     this.run = 1;
     this.to = 1;

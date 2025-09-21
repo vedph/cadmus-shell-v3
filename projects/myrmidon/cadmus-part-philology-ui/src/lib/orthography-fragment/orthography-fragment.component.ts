@@ -241,7 +241,7 @@ export class OrthographyFragmentComponent
 
   public editOperation(operation: EditOperation, index: number): void {
     this.editedOperationIndex.set(index);
-    this.editedOperation.set(deepCopy(operation));
+    this.editedOperation.set(structuredClone(operation));
   }
 
   public closeOperation(): void {
