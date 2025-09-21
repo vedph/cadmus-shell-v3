@@ -117,7 +117,25 @@ export class OrthographyFragmentComponent
   public readonly frText = signal<string | undefined>(undefined);
 
   public readonly operationText = computed<string>(() => {
-    return this.frText() || '';
+    // if we're adding the first operation or editing the first one,
+    // its input is equal to the input text received from the fragment
+    if (
+      this.editedOperationIndex() === 0 ||
+      (this.editedOperationIndex() === -1 && !this.operations.value.length)
+    ) {
+      return this.frText() || '';
+    }
+    // else, the input must be calculated by executing one operation
+    // after the another, starting from the fragment text with the first
+    // operation, and up to the operation being edited (excluded)
+    let text = this.frText() || '';
+    for (let i = 0; i < this.operations.value.length; i++) {
+      if (i === this.editedOperationIndex()) {
+        break;
+      }
+      text = this.operations.value[i].execute(text);
+    }
+    return text;
   });
 
   constructor(
