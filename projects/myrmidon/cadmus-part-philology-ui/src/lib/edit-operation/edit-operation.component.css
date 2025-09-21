@@ -29,3 +29,37 @@
 .nr-field {
   width: 6em;
 }
+fieldset {
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 6px;
+}
+legend {
+  color: silver;
+}
+div#container {
+  display: grid;
+  grid-template-rows: auto;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "editor tags";
+  gap: 8px;
+}
+div#editor {
+  grid-area: editor;
+}
+div#tags {
+  grid-area: tags;
+}
+
+/* lt-md */
+@media only screen and (max-width: 959px) {
+  div#container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "editor"
+      "tags";
+  }
+  .noif-lt-md {
+    display: none;
+  }
+}

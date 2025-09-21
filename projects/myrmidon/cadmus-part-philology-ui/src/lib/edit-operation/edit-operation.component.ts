@@ -28,9 +28,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
+import {
+  renderLabelFromLastColon,
+  ThesaurusTreeComponent,
+} from '@myrmidon/cadmus-ui';
 
 import {
   ParseException,
@@ -55,6 +61,7 @@ import {
     MatInputModule,
     MatSelectModule,
     MatTooltipModule,
+    ThesaurusTreeComponent,
   ],
   templateUrl: './edit-operation.component.html',
   styleUrl: './edit-operation.component.css',
@@ -68,6 +75,11 @@ export class EditOperationComponent {
    * The input text where the operation is applied.
    */
   public readonly inputText = input<string | undefined>(undefined);
+
+  /**
+   * True to hide the tags picker.
+   */
+  public readonly hideTagsPicker = input<boolean>(false);
 
   /**
    * The output text after applying the operation.
@@ -114,7 +126,11 @@ export class EditOperationComponent {
   public note: FormControl<string | null>;
   public form: FormGroup;
 
-  constructor(formBuilder: FormBuilder) {
+  constructor(
+    formBuilder: FormBuilder,
+    private _clipboard: Clipboard,
+    private _snackbar: MatSnackBar
+  ) {
     // form
     this.dsl = new FormControl<string | null>(null, {
       validators: Validators.maxLength(1000),
@@ -285,6 +301,17 @@ export class EditOperationComponent {
     this.setInputTexts(op);
 
     return op;
+  }
+
+  public renderLabel(label: string): string {
+    return renderLabelFromLastColon(label);
+  }
+
+  public onTagChange(tag: ThesaurusEntry): void {
+    this._clipboard.copy(tag.id);
+    this._snackbar.open('Tag copied: ' + tag.id, 'OK', {
+      duration: 2000,
+    });
   }
 
   public cancel(): void {

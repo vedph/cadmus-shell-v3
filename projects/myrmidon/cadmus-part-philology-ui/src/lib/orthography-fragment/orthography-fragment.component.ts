@@ -36,9 +36,9 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  renderLabelFromLastColon,
   ThesaurusTreeComponent,
 } from '@myrmidon/cadmus-ui';
-import { deepCopy } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -305,4 +305,15 @@ export class OrthographyFragmentComponent
     this.operations.updateValueAndValidity();
   }
   //#endregion
+
+  public renderLabel(label: string): string {
+    return renderLabelFromLastColon(label);
+  }
+
+  public onTagChange(tag: ThesaurusEntry): void {
+    this._clipboard.copy(tag.id);
+    this._snackbar.open('Tag copied: ' + tag.id, 'OK', {
+      duration: 2000,
+    });
+  }
 }
