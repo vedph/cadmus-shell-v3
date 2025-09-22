@@ -52,7 +52,6 @@
           @if (hint.patchOperation) {
           <mat-checkbox
             matTooltip="Apply this patch"
-            [disabled]="disabled() || false"
             [formControl]="checks.at(i)"
           >
             {{ hint.patchOperation }}

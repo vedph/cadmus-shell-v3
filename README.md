@@ -30,7 +30,7 @@ Latest versions:
 - cadmus-item-editor: 16.0.0
 - cadmus-item-list: 16.0.0
 - cadmus-item-search: 16.0.0
-- cadmus-layer-demo: 15.0.0
+- cadmus-layer-demo: 15.0.1
 - cadmus-part-general-pg: 16.0.0
 - cadmus-part-general-ui: 15.0.1
 - cadmus-part-philology-pg: 16.1.0
@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-22: remove disabled in mat-checkbox in `@myrmidon/cadmus-ui` layer hints.
 - 2025-09-21:
   - ⚠️ refactored orthography fragment (`@myrmidon/cadmus-part-philology-ui`, `@myrmidon/cadmus-part-philology-pg`).
   - fixes to button colors in `@myrmidon/cadmus-statistics` and `@myrmidon/cadmus-part-general-ui`.
