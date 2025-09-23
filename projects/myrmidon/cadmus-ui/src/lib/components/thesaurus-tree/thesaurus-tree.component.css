@@ -67,17 +67,50 @@ span.found-count {
   margin: 0 4px;
   padding: 2px 4px;
   color: white;
-  background-color: #0CC078;
+  background-color: #0cc078;
   border-radius: 6px;
 }
 span.not-found-count {
   margin: 0 4px;
   padding: 2px 4px;
   color: white;
-  background-color: #FB6962;
+  background-color: #fb6962;
   border-radius: 6px;
 }
 
 .hilite {
-  background-color: #FDFD96;
+  background-color: #fdfd96;
+}
+
+.filter-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.tree-container {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: auto;
+  max-height: 500px;
+}
+
+.tree-wrapper {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+}
+
+.no-entries {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.no-entries p {
+  margin: 0;
 }

@@ -1,0 +1,80 @@
+<div id="container">
+  <!-- filters -->
+  <div id="filters" class="form-row">
+    <form [formGroup]="form" (submit)="findLabels()" class="form-row">
+      <mat-form-field>
+        <mat-label>label</mat-label>
+        <input matInput [formControl]="label" />
+        @if ($any(label).errors?.required && (label.dirty || label.touched)) {
+        <mat-error>label required</mat-error>
+        }
+      </mat-form-field>
+      <button type="submit" mat-icon-button class="mat-primary">
+        <mat-icon>search</mat-icon>
+      </button>
+      <button type="button" mat-icon-button (click)="removeHilites()">
+        <mat-icon class="mat-warn">clear</mat-icon>
+      </button>
+    </form>
+    <fieldset>
+      <legend>filter</legend>
+      <cadmus-thes-paged-tree-filter
+        [filter]="filter$ | async"
+        (filterChange)="onFilterChange($event)"
+      />
+    </fieldset>
+  </div>
+
+  <!-- tree -->
+  <div id="tree">
+    <!-- progress -->
+    @if (loading()) {
+    <div>
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+    }
+    <!-- nodes -->
+    @if (nodes$ | async; as nodes) {
+    <div>
+      @for (node of nodes; track node.id; let i = $index) {
+      <div class="button-row" [class.hilite]="node.hilite">
+        <pdb-browser-tree-node
+          [node]="node"
+          [debug]="debug.value"
+          [paging]="
+            node.expanded &&
+            i + 1 < nodes.length &&
+            nodes[i + 1].paging.pageCount > 1
+              ? nodes[i + 1].paging
+              : undefined
+          "
+          [hideFilter]="hideFilter.value"
+          [hideLoc]="hideLoc.value"
+          (toggleExpandedRequest)="onToggleExpanded($any($event))"
+          (changePageRequest)="onPageChangeRequest($event)"
+          (editNodeFilterRequest)="onEditFilterRequest($any($event))"
+        />
+        @if (!node.hasChildren) {
+        <button type="button" mat-icon-button (click)="onNodeClick(node)">
+          <mat-icon class="mat-primary">check_circle</mat-icon>
+        </button>
+        }
+      </div>
+      }
+    </div>
+    }
+    <div class="form-row">
+      <mat-checkbox [formControl]="debug">debug</mat-checkbox>
+      <mat-checkbox [formControl]="hideFilter">no filter</mat-checkbox>
+      <mat-checkbox [formControl]="hideLoc">no loc.</mat-checkbox>
+      <button
+        type="button"
+        mat-flat-button
+        (click)="collapseAll()"
+        style="margin-left: 24px"
+      >
+        collapse
+      </button>
+    </div>
+  </div>
+</div>

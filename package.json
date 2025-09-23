@@ -61,7 +61,7 @@
     "@myrmidon/cadmus-ui-note-set": "^10.0.1",
     "@myrmidon/ngx-mat-tools": "^1.0.0",
     "@myrmidon/ngx-tools": "^2.0.0",
-    "@myrmidon/paged-data-browsers": "^5.0.2",
+    "@myrmidon/paged-data-browsers": "^5.0.3",
     "3d-force-graph": "^1.79.0",
     "d3-force": "^3.0.0",
     "diff-match-patch": "^1.0.5",
