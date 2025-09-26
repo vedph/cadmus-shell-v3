@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { TiledTextPartComponent } from './tiled-text-part.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
 import { TextTileComponent } from '../text-tile/text-tile.component';
 import { TiledDataComponent } from '../tiled-data/tiled-data.component';
+import { TiledTextPartComponent } from './tiled-text-part.component';
 
 describe('TiledTextPartComponent', () => {
   let component: TiledTextPartComponent;
@@ -15,11 +16,11 @@ describe('TiledTextPartComponent', () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         TiledDataComponent,
         TextTileComponent,
         TiledTextPartComponent,
       ],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   }));
 

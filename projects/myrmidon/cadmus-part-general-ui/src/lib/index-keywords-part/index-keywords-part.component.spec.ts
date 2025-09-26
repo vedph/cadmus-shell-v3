@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { IndexKeywordsPartComponent } from './index-keywords-part.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { IndexKeywordComponent } from '../index-keyword/index-keyword.component';
 
 describe('IndexKeywordsPartComponent', () => {
@@ -14,10 +15,10 @@ describe('IndexKeywordsPartComponent', () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         IndexKeywordComponent,
         IndexKeywordsPartComponent,
       ],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   }));
 

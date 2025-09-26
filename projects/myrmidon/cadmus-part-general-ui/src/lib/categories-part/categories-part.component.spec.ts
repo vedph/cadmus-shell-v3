@@ -1,4 +1,6 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { CategoriesPartComponent } from './categories-part.component';
 import { CommonModule } from '@angular/common';
@@ -16,6 +18,7 @@ describe('CategoriesPartComponent', () => {
         ReactiveFormsModule,
         CategoriesPartComponent,
       ],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   }));
 

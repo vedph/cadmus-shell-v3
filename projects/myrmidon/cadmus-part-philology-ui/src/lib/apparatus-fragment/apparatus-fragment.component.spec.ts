@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ApparatusFragmentComponent } from './apparatus-fragment.component';
 import { ApparatusEntryComponent } from '../apparatus-entry/apparatus-entry.component';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('ApparatusFragmentComponent', () => {
   let component: ApparatusFragmentComponent;
@@ -16,9 +17,12 @@ describe('ApparatusFragmentComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         ApparatusEntryComponent,
         ApparatusFragmentComponent,
+      ],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
       ],
     }).compileComponents();
   }));

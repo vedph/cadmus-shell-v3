@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HAMMER_LOADER } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
@@ -18,15 +18,10 @@ describe('KeywordsPartComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         KeywordsPartComponent,
       ],
       // https://github.com/angular/components/issues/14668
       providers: [
-        {
-          provide: HAMMER_LOADER,
-          useValue: () => new Promise(() => {}),
-        },
         {
           provide: MatDialog,
           useValue: {
@@ -41,6 +36,8 @@ describe('KeywordsPartComponent', () => {
             afterClosed: () => {},
           },
         },
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
   }));

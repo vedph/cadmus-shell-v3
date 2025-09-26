@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { HistoricalEventEditorComponent } from './historical-event-editor.component';
 
@@ -8,9 +10,9 @@ describe('HistoricalEventEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [HistoricalEventEditorComponent]
-})
-    .compileComponents();
+      imports: [HistoricalEventEditorComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
   });
 
   beforeEach(() => {

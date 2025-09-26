@@ -1,7 +1,8 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { ChronologyFragmentComponent } from './chronology-fragment.component';
 
@@ -15,8 +16,11 @@ describe('ChronologyFragmentComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         ChronologyFragmentComponent,
+      ],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
       ],
     }).compileComponents();
   }));

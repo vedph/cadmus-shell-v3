@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { DecoratedCountsPartComponent } from './decorated-counts-part.component';
 
@@ -8,9 +10,9 @@ describe('DecoratedCountsPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DecoratedCountsPartComponent]
-    })
-    .compileComponents();
+      imports: [DecoratedCountsPartComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DecoratedCountsPartComponent);
     component = fixture.componentInstance;

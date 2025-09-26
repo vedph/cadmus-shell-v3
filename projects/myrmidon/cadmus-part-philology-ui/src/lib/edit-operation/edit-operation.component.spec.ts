@@ -8,12 +8,13 @@ describe('EditOperationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditOperationComponent]
-    })
-    .compileComponents();
+      imports: [EditOperationComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EditOperationComponent);
     component = fixture.componentInstance;
+    // provide required input
+    // component.inputText.set('abcde');
     fixture.detectChanges();
   });
 

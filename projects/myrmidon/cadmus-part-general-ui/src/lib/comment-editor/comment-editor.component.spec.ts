@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { CommentEditorComponent } from './comment-editor.component';
 
@@ -8,9 +10,9 @@ describe('CommentEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [CommentEditorComponent]
-})
-    .compileComponents();
+      imports: [CommentEditorComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
   });
 
   beforeEach(() => {

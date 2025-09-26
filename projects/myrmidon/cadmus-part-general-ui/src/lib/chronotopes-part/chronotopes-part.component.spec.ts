@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { ChronotopesPartComponent } from './chronotopes-part.component';
 
@@ -8,9 +10,9 @@ describe('ChronotopesPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [ChronotopesPartComponent]
-})
-    .compileComponents();
+      imports: [ChronotopesPartComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
   });
 
   beforeEach(() => {

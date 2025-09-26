@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { AssertedHistoricalDatesPartComponent } from './asserted-historical-dates-part.component';
 
@@ -8,9 +10,9 @@ describe('AssertedHistoricalDatesPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AssertedHistoricalDatesPartComponent]
-    })
-    .compileComponents();
+      imports: [AssertedHistoricalDatesPartComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AssertedHistoricalDatesPartComponent);
     component = fixture.componentInstance;

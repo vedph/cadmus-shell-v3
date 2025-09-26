@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { DocReferencesPartComponent } from './doc-references-part.component';
 
@@ -8,9 +10,9 @@ describe('DocReferencesPartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [DocReferencesPartComponent]
-})
-    .compileComponents();
+      imports: [DocReferencesPartComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
   });
 
   beforeEach(() => {

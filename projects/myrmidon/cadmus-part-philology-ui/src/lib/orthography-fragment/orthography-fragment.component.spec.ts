@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 import { OrthographyFragmentComponent } from './orthography-fragment.component';
 import { MspOperationComponent } from '../msp-operation/msp-operation.component';
@@ -19,8 +20,7 @@ describe('OrthographyFragmentComponent', () => {
         MspOperationComponent,
         OrthographyFragmentComponent,
       ],
-      // https://github.com/angular/components/issues/14668
-      providers: [provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   }));
 
