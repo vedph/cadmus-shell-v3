@@ -1,24 +1,35 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { Component, signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { EditOperationComponent } from './edit-operation.component';
 
-describe('EditOperationComponent', () => {
-  let component: EditOperationComponent;
-  let fixture: ComponentFixture<EditOperationComponent>;
+// a minimal host component for testing, embedding the component to test
+// so that we can pass it its required inputs
+@Component({
+  standalone: true,
+  template: `<cadmus-edit-operation inputText="abcde" />`,
+  imports: [EditOperationComponent],
+})
+class TestHostComponent {}
+
+describe('EditOperationComponent (Host Component Test)', () => {
+  let hostFixture: ComponentFixture<TestHostComponent>;
+  let hostComponent: TestHostComponent;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditOperationComponent],
+      imports: [TestHostComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(EditOperationComponent);
-    component = fixture.componentInstance;
-    // provide required input
-    // component.inputText.set('abcde');
-    fixture.detectChanges();
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
+    hostFixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should create the EditOperationComponent', () => {
+    const childDebug = hostFixture.debugElement.query(
+      By.directive(EditOperationComponent)
+    );
+    expect(childDebug).toBeTruthy();
   });
 });
