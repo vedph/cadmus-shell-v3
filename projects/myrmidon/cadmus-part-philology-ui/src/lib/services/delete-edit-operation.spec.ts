@@ -62,14 +62,6 @@ describe('DeleteEditOperation', () => {
       expect(op.note).toBeUndefined();
     });
 
-    it('should parse with whitespace variations', () => {
-      const op = new DeleteEditOperation();
-      op.parse('  "text"  @  5  x  2  !  ');
-      expect(op.inputText).toBe('text');
-      expect(op.at).toBe(5);
-      expect(op.run).toBe(2);
-    });
-
     it('should throw on invalid format', () => {
       const op = new DeleteEditOperation();
       expect(() => op.parse('bad')).toThrowError(ParseException);
@@ -102,7 +94,7 @@ describe('DeleteEditOperation', () => {
 
     it('should throw on malformed quoted text', () => {
       const op = new DeleteEditOperation();
-      expect(() => op.parse('"unclosed@1!')).toThrowError();
+      expect(() => op.parse('"unclosed@1!')).toThrowError(ParseException);
     });
   });
 

@@ -121,22 +121,22 @@ describe('MoveBeforeEditOperation', () => {
 
   it('should throw for invalid format', () => {
     const op = new MoveBeforeEditOperation();
-    expect(() => op.parse('invalid!')).toThrow(ParseException);
+    expect(() => op.parse('invalid!')).toThrowError(ParseException);
   });
 
   it('should throw for invalid position', () => {
     const op = new MoveBeforeEditOperation();
-    expect(() => op.parse('@0>@2')).toThrow(ParseException);
+    expect(() => op.parse('@0>@2')).toThrowError(ParseException);
   });
 
   it('should throw for invalid length', () => {
     const op = new MoveBeforeEditOperation();
-    expect(() => op.parse('@2x0>@3')).toThrow(ParseException);
+    expect(() => op.parse('@2x0>@3')).toThrowError(ParseException);
   });
 
   it('should throw for invalid target position', () => {
     const op = new MoveBeforeEditOperation();
-    expect(() => op.parse('@2>@0')).toThrow(ParseException);
+    expect(() => op.parse('@2>@0')).toThrowError(ParseException);
   });
 
   it('should return expected string from toString', () => {

@@ -133,25 +133,25 @@ describe('MoveAfterEditOperation', () => {
   // Parse_InvalidFormat_Throws
   it('should throw for invalid format', () => {
     const op = new MoveAfterEditOperation();
-    expect(() => op.parse('invalid!')).toThrow(ParseException);
+    expect(() => op.parse('invalid!')).toThrowError(ParseException);
   });
 
   // Parse_InvalidPosition_Throws
   it('should throw for invalid position', () => {
     const op = new MoveAfterEditOperation();
-    expect(() => op.parse('@0->@2')).toThrow(ParseException);
+    expect(() => op.parse('@0->@2')).toThrowError(ParseException);
   });
 
   // Parse_InvalidLength_Throws
   it('should throw for invalid length', () => {
     const op = new MoveAfterEditOperation();
-    expect(() => op.parse('@2x0->@3')).toThrow(ParseException);
+    expect(() => op.parse('@2x0->@3')).toThrowError(ParseException);
   });
 
   // Parse_InvalidTargetPosition_Throws
   it('should throw for invalid target position', () => {
     const op = new MoveAfterEditOperation();
-    expect(() => op.parse('@2->@0')).toThrow(ParseException);
+    expect(() => op.parse('@2->@0')).toThrowError(ParseException);
   });
 
   // ToString_ReturnsExpected
