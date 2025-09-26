@@ -23,7 +23,7 @@
     "@myrmidon/cadmus-state": "^14.0.0",
     "@myrmidon/cadmus-ui": "^15.0.0",
     "@myrmidon/cadmus-ui-pg": "^16.0.0",
-    "@myrmidon/cadmus-part-philology-ui": "^15.1.0"
+    "@myrmidon/cadmus-part-philology-ui": "^16.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

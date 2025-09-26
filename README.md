@@ -34,7 +34,7 @@ Latest versions:
 - cadmus-part-general-pg: 16.0.0
 - cadmus-part-general-ui: 15.0.1
 - cadmus-part-philology-pg: 16.1.0
-- cadmus-part-philology-ui: 15.1.0
+- cadmus-part-philology-ui: 16.0.0
 - cadmus-preview-pg: 17.0.0
 - cadmus-preview-ui: 17.0.0
 - cadmus-profile-core: 12.0.0
@@ -210,6 +210,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-26:
+  - completed new orthography fragment.
+  - fixes to tests.
 - 2025-09-25: removed `diff-match-patch`, no longer required after refactoring orthography fragment.
 - 2025-09-23: 🆕 replaced implementation of thesaurus tree component in `@myrmidon/cadmus-ui` (5.1.0) with a new one based on paged tree browser, thus removing issues with legacy Angular Material tree controls and providing a cleaner interface with richer features.
 - 2025-09-22: remove disabled in mat-checkbox in `@myrmidon/cadmus-ui` layer hints.
