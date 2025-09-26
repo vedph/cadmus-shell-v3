@@ -1,3 +1,4 @@
+// OBSOLETE: use edit-operation instead
 import { TestBed } from '@angular/core/testing';
 import { MspOperation, MspOperator } from './msp-operation';
 import { TextRange } from '@myrmidon/cadmus-core';

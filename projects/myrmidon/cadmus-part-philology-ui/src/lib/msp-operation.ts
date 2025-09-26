@@ -1,3 +1,4 @@
+// OBSOLETE: use edit-operation instead
 import { TextRange } from '@myrmidon/cadmus-core';
 
 /**

@@ -1,3 +1,4 @@
+// OBSOLETE: use edit-operation.component.ts instead
 import { AbstractControl } from '@angular/forms';
 import { MspOperation } from './msp-operation';
 

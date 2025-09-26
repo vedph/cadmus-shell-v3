@@ -40,6 +40,7 @@ import { MspValidators } from '../msp-validators';
 
 /**
  * Single misspelling operation editor.
+ * OBSOLETE: use edit-operation component instead.
  */
 @Component({
   selector: 'cadmus-msp-operation',
