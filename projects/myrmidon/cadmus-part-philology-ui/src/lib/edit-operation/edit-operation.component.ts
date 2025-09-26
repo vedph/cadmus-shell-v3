@@ -74,6 +74,9 @@ import {
 export class EditOperationComponent {
   private _outputDirty = signal<number>(0);
 
+  /**
+   * The edit operation being edited (model).
+   */
   public readonly operation = model<EditOperation | undefined>();
 
   /**
@@ -113,6 +116,9 @@ export class EditOperationComponent {
    */
   public readonly expanded = signal<boolean>(false);
 
+  /**
+   * The last coordinates picked using the char picker.
+   */
   public readonly pickedCoords = signal<string | undefined>(undefined);
 
   // orthography-tags
@@ -120,6 +126,9 @@ export class EditOperationComponent {
   // orthography-op-tags
   public readonly opTagEntries = input<ThesaurusEntry[] | undefined>(undefined);
 
+  /**
+   * Cancel the edit operation.
+   */
   public readonly cancelEdit = output();
 
   public dsl: FormControl<string | null>;
@@ -227,6 +236,8 @@ export class EditOperationComponent {
     this.parseError.set(undefined);
     try {
       const op = EditOperation.parseOperation(this.dsl.value);
+      // override input text
+      op.inputText = this.inputText();
       this.operation.set(op);
     } catch (error) {
       this.parseError.set(
