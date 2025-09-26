@@ -493,7 +493,7 @@ export class DeleteEditOperation extends EditOperation {
     }
 
     // pattern: "A"@NxN! or @NxN!
-    const pattern = /(?:"([^"]*)")?\s*@(\d+)(?:[x×](\d+))?\s*!/i;
+    const pattern = /^(?:(?:"([^"]*)")\s*)?@(\d+)(?:[x×](\d+))?\s*!/i;
     const match = pattern.exec(text);
 
     if (!match) {
