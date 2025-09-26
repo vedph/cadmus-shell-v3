@@ -213,6 +213,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 - 2025-09-26:
   - completed new orthography fragment.
   - fixes to tests.
+  - marked legacy MSP code as obsolete. In future versions it will be removed.
 - 2025-09-25: removed `diff-match-patch`, no longer required after refactoring orthography fragment.
 - 2025-09-23: 🆕 replaced implementation of thesaurus tree component in `@myrmidon/cadmus-ui` (5.1.0) with a new one based on paged tree browser, thus removing issues with legacy Angular Material tree controls and providing a cleaner interface with richer features.
 - 2025-09-22: remove disabled in mat-checkbox in `@myrmidon/cadmus-ui` layer hints.
