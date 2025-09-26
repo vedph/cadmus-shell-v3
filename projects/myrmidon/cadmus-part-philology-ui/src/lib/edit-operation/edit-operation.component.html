@@ -31,7 +31,10 @@
           >
             <mat-icon>arrow_circle_down</mat-icon>
           </button>
-          <mat-hint>@NxN ! ="" +="" =+"" &gt;@N -&gt;@N &lt;&gt;@NxN &#123;note&#125; [tags]</mat-hint>
+          <mat-hint
+            >@NxN ! ="" +="" =+"" &gt;@N -&gt;@N &lt;&gt;@NxN &#123;note&#125;
+            [tags]</mat-hint
+          >
           @if (parseError()) {
           <mat-error>{{ parseError() }}</mat-error>
           }
@@ -221,6 +224,29 @@
         </button>
       </div>
     </form>
+    <div>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>DSL Help</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div id="help">
+          <ul>
+            <li>delete <code>@NxN!</code> (=replace of A with zero)</li>
+            <li>replace <code>@NxN="X"</code></li>
+            <li>insert-before <code>@N+="X"</code></li>
+            <li>insert-after <code>@N=+"X"</code></li>
+            <li>move-before <code>@N&gt;@N</code></li>
+            <li>move-after <code>@N-&gt;@N</code></li>
+            <li>swap <code>@NxN&lt;&gt;@NxN</code></li>
+          </ul>
+          <p>Each operation can be followed by:</p>
+          <ol>
+            <li>a note in curly braces;</li>
+            <li>tags in square brackets (space-separated).</li>
+          </ol>
+        </div>
+      </mat-expansion-panel>
+    </div>
   </div>
   <div id="tags">
     @if (!hideTagsPicker() && tagEntries()?.length) {

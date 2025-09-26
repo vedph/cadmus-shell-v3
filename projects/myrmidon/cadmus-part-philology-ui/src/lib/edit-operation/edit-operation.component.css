@@ -42,6 +42,11 @@ fieldset {
 legend {
   color: silver;
 }
+div#help {
+  margin: 8px;
+  font-size: 85%;
+  color: #444;
+}
 div#container {
   display: grid;
   grid-template-rows: auto;
