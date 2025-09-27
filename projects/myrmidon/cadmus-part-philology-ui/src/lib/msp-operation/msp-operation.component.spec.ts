@@ -1,8 +1,6 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HAMMER_LOADER } from '@angular/platform-browser';
 
 import { MspOperationComponent } from './msp-operation.component';
 
@@ -12,21 +10,19 @@ describe('MspOperationComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-    imports: [
+      imports: [
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         MspOperationComponent,
-    ],
-    // https://github.com/angular/components/issues/14668
-    providers: [
+      ],
+      // https://github.com/angular/components/issues/14668
+      providers: [
         {
-            provide: HAMMER_LOADER,
-            useValue: () => new Promise(() => { }),
+          useValue: () => new Promise(() => {}),
         },
-    ],
-}).compileComponents();
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

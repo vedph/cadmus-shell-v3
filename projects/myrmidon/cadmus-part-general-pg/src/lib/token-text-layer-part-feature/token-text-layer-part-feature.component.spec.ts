@@ -3,7 +3,6 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TokenTextLayerPartFeatureComponent } from './token-text-layer-part-feature.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
   CurrentItemBarComponent,
   CurrentLayerPartBarComponent,
@@ -21,7 +20,6 @@ describe('TokenTextLayerPartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         TokenTextLayerPartFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668

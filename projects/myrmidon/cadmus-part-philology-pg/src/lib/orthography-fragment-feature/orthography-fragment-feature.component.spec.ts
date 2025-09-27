@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { OrthographyFragmentFeatureComponent } from './orthography-fragment-feature.component';
 import {
   OrthographyFragmentComponent,
   MspOperationComponent,
   ORTHOGRAPHY_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-philology-ui';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog'
+;
+import { OrthographyFragmentFeatureComponent } from './orthography-fragment-feature.component';
 
 describe('OrthographyFragmentFeatureComponent', () => {
   let component: OrthographyFragmentFeatureComponent;
@@ -21,7 +21,6 @@ describe('OrthographyFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         OrthographyFragmentFeatureComponent,
       ],
       providers: [

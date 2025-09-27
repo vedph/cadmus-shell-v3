@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { QuotationEntryComponent } from './quotation-entry.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('QuotationEntryComponent', () => {
   let component: QuotationEntryComponent;
@@ -13,7 +12,6 @@ describe('QuotationEntryComponent', () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         QuotationEntryComponent,
       ],
     }).compileComponents();

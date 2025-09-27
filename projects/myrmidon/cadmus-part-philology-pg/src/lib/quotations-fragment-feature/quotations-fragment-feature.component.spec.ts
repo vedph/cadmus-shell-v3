@@ -8,7 +8,6 @@ import {
 } from '@myrmidon/cadmus-part-philology-ui';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
 
 describe('QuotationsFragmentFeatureComponent', () => {
@@ -21,7 +20,6 @@ describe('QuotationsFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         QuotationsFragmentFeatureComponent,
       ],
       providers: [

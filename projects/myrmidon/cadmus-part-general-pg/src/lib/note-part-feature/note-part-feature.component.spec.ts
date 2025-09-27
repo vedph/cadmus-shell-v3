@@ -1,7 +1,6 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HAMMER_LOADER } from '@angular/platform-browser';
 
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 
@@ -10,8 +9,6 @@ import {
   NotePartComponent,
   NOTE_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-import { RouterTestingModule } from '@angular/router/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
@@ -27,8 +24,6 @@ describe('NotePartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
-        RouterTestingModule,
         NgeMonacoModule,
         NgeMarkdownModule,
         NotePartFeatureComponent,
@@ -36,7 +31,6 @@ describe('NotePartFeatureComponent', () => {
       // https://github.com/angular/components/issues/14668
       providers: [
         {
-          provide: HAMMER_LOADER,
           useValue: () => new Promise(() => {}),
         },
         {

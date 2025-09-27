@@ -22,7 +22,7 @@ Latest versions:
 - cadmus-api: 14.0.3
 - cadmus-core: 12.0.2
 - cadmus-flags-pg: 15.0.0
-- cadmus-flags-ui: 15.0.0
+- cadmus-flags-ui: 15.0.1
 - cadmus-graph-pg: 15.0.0
 - cadmus-graph-pg-ex: 16.0.0
 - cadmus-graph-ui: 15.0.0
@@ -210,6 +210,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-09-27:
+  - removed legacy animations from `@myrmidon/cadmus-flags-ui`.
+  - removed legacy dependencies from tests.
 - 2025-09-26:
   - completed new orthography fragment.
   - fixes to tests.

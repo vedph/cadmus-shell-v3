@@ -1,12 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HAMMER_LOADER } from '@angular/platform-browser';
 
 import { TextTileRow } from '@myrmidon/cadmus-part-general-ui';
-import { TokenLocation, CadmusCoreModule } from '@myrmidon/cadmus-core';
+import { TokenLocation } from '@myrmidon/cadmus-core';
 import { TiledTextLayerView } from './tiled-text-layer-view';
 
 describe('TiledTextLayerView', () => {
@@ -14,21 +11,7 @@ describe('TiledTextLayerView', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        BrowserAnimationsModule,
-        RouterTestingModule,
-        CadmusCoreModule,
-      ],
-      // https://github.com/angular/components/issues/14668
-      providers: [
-        {
-          provide: HAMMER_LOADER,
-          useValue: () => new Promise(() => {})
-        }
-      ]
+      imports: [CommonModule, FormsModule, ReactiveFormsModule],
     }).compileComponents();
   });
 
@@ -37,15 +20,15 @@ describe('TiledTextLayerView', () => {
     for (let y = 1; y <= 3; y++) {
       const row = {
         y,
-        tiles: []
+        tiles: [],
       };
       rows.push(row);
       for (let x = 1; x <= y; x++) {
         row.tiles.push({
           x,
           data: {
-            text: 'c' + y + '-' + x
-          }
+            text: 'c' + y + '-' + x,
+          },
         });
       }
     }

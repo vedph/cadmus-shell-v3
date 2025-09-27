@@ -1,5 +1,4 @@
 import { AsyncPipe } from '@angular/common';
-import { animate, style, transition, trigger } from '@angular/animations';
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -16,6 +15,11 @@ import {
   MatCardContent,
 } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
+import {
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+} from '@angular/material/expansion';
 
 import { AppRepository } from '@myrmidon/cadmus-state';
 
@@ -27,18 +31,6 @@ import { FlagListRepository } from './flag-list.repository';
   selector: 'cadmus-flag-list',
   templateUrl: './flag-list.component.html',
   styleUrls: ['./flag-list.component.scss'],
-  animations: [
-    trigger('inOutAnimation', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0 }),
-        animate('1s ease-out', style({ height: '100%', opacity: 1 })),
-      ]),
-      transition(':leave', [
-        style({ height: 300, opacity: 1 }),
-        animate('0.5s ease-in', style({ height: 0, opacity: 0 })),
-      ]),
-    ]),
-  ],
   imports: [
     MatProgressBar,
     MatIconButton,
@@ -50,6 +42,9 @@ import { FlagListRepository } from './flag-list.repository';
     FlagDefinitionEditorComponent,
     MatTooltip,
     MatButton,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
     AsyncPipe,
     FlagBitPipe,
   ],

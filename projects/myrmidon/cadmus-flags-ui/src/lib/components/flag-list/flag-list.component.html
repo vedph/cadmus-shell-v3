@@ -34,21 +34,22 @@
     </tbody>
   </table>
   } @if (editedFlag$ | async; as editedFlag) {
-  <mat-card appearance="outlined" [@inOutAnimation]>
-    <mat-card-header>
-      <mat-card-title>Flag #{{ editedFlag.id }}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <cadmus-flag-definition-editor
-        [flag]="editedFlag"
-        (editorClose)="onFlagEditorClose()"
-        (flagChange)="onFlagChange($event!)"
-      />
-    </mat-card-content>
-  </mat-card>
+  <mat-expansion-panel
+    [expanded]="editedFlag$ | async"
+    [disabled]="!(editedFlag$ | async)"
+  >
+    <mat-expansion-panel-header>
+      <mat-panel-title>Flag #{{ editedFlag.id }}</mat-panel-title>
+    </mat-expansion-panel-header>
+    <cadmus-flag-definition-editor
+      [flag]="editedFlag"
+      (editorClose)="onFlagEditorClose()"
+      (flagChange)="onFlagChange($event!)"
+    />
+  </mat-expansion-panel>
   }
 
-  <div class="form-row" style="margin-top: 8px;">
+  <div class="form-row" style="margin-top: 8px">
     <button
       type="button"
       mat-icon-button

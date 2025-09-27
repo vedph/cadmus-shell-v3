@@ -4,9 +4,7 @@ import { DecoratedTokenTextComponent } from './decorated-token-text.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { CadmusMaterialModule } from '@myrmidon/cadmus-material';
-import { HAMMER_LOADER } from '@angular/platform-browser';
-import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
+import { SafeHtmlPipe } from '@myrmidon/ngx-tools';
 
 describe('DecoratedTokenTextComponent', () => {
   let component: DecoratedTokenTextComponent;
@@ -14,22 +12,15 @@ describe('DecoratedTokenTextComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-    imports: [
+      imports: [
         CommonModule,
         FormsModule,
         RouterModule,
         ReactiveFormsModule,
-        CadmusMaterialModule,
-        DecoratedTokenTextComponent, SafeHtmlPipe,
-    ],
-    // https://github.com/angular/components/issues/14668
-    providers: [
-        {
-            provide: HAMMER_LOADER,
-            useValue: () => new Promise(() => { }),
-        },
-    ],
-}).compileComponents();
+        DecoratedTokenTextComponent,
+        SafeHtmlPipe,
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

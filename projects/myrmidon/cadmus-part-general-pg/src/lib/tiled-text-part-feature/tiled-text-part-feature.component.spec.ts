@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TiledTextPartFeatureComponent } from './tiled-text-part-feature.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
   TILED_TEXT_PART_TYPEID,
   TiledDataComponent,
@@ -21,7 +20,6 @@ describe('TiledTextPartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         TiledTextPartFeatureComponent,
       ],
       providers: [

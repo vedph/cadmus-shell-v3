@@ -2,7 +2,6 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BibliographyPartFeatureComponent } from './bibliography-part-feature.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BIBLIOGRAPHY_PART_TYPEID } from '@myrmidon/cadmus-part-general-ui';
 
 describe('BibliographyPartFeatureComponent', () => {
@@ -14,7 +13,6 @@ describe('BibliographyPartFeatureComponent', () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         BibliographyPartFeatureComponent,
       ],
       providers: [

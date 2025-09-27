@@ -3,7 +3,6 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TiledTextLayerPartFeatureComponent } from './tiled-text-layer-part-feature.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import {
   TILED_TEXT_PART_TYPEID,
@@ -20,7 +19,6 @@ describe('TiledTextLayerPartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         TiledTextLayerPartFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668

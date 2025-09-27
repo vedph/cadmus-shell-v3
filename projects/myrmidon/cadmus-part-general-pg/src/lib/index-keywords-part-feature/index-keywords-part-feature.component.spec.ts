@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { IndexKeywordsPartFeatureComponent } from './index-keywords-part-feature.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { INDEX_KEYWORDS_PART_TYPEID } from '@myrmidon/cadmus-part-general-ui';
 
 describe('IndexKeywordsPartFeatureComponent', () => {
@@ -14,7 +13,6 @@ describe('IndexKeywordsPartFeatureComponent', () => {
       imports: [
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule,
         IndexKeywordsPartFeatureComponent,
       ],
       providers: [

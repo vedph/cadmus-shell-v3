@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ApparatusFragmentFeatureComponent } from './apparatus-fragment-feature.component';
 import {
@@ -21,7 +20,6 @@ describe('ApparatusFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         ApparatusFragmentFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668

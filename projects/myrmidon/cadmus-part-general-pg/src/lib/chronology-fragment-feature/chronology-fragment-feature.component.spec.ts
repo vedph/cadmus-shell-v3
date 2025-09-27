@@ -8,7 +8,6 @@ import {
   ChronologyFragmentComponent,
   CHRONOLOGY_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 
 describe('ChronologyFragmentFeatureComponent', () => {
@@ -21,7 +20,6 @@ describe('ChronologyFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         ChronologyFragmentFeatureComponent,
       ],
       providers: [

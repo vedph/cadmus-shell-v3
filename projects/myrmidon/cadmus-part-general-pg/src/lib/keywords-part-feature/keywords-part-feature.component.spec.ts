@@ -8,7 +8,6 @@ import {
   KeywordsPartComponent,
   KEYWORDS_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 describe('KeywordsPartFeatureComponent', () => {
@@ -21,7 +20,6 @@ describe('KeywordsPartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         KeywordsPartFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668

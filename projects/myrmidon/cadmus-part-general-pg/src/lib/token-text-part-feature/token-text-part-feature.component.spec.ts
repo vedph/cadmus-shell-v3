@@ -11,8 +11,6 @@ import {
   TILED_TEXT_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
 
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
 describe('TokenTextPartFeatureComponent', () => {
   let component: TokenTextPartFeatureComponent;
   let fixture: ComponentFixture<TokenTextPartFeatureComponent>;
@@ -23,7 +21,6 @@ describe('TokenTextPartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         NgeMonacoModule,
         TokenTextPartFeatureComponent,
       ],

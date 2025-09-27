@@ -8,7 +8,6 @@ import {
   HistoricalDatePartComponent,
   HISTORICAL_DATE_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('HistoricalDatePartFeatureComponent', () => {
   let component: HistoricalDatePartFeatureComponent;
@@ -20,7 +19,6 @@ describe('HistoricalDatePartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         HistoricalDatePartFeatureComponent,
       ],
       providers: [
