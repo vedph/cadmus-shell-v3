@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-general-pg",
-  "version": "16.0.2",
+  "version": "16.0.3",
   "description": "Cadmus - general parts wrappers.",
   "keywords": [
     "Cadmus"
@@ -21,7 +21,7 @@
     "@myrmidon/ngx-mat-tools": "^1.0.0",
     "@myrmidon/cadmus-core": "^12.0.2",
     "@myrmidon/cadmus-state": "^14.0.0",
-    "@myrmidon/cadmus-ui": "^15.0.0",
+    "@myrmidon/cadmus-ui": "^15.1.0",
     "@myrmidon/cadmus-ui-pg": "^16.0.0",
     "@myrmidon/cadmus-part-general-ui": "^15.0.0"
   },

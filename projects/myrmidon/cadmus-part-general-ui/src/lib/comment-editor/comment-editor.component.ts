@@ -69,8 +69,9 @@ import { CommentFragment } from '../comment-fragment';
 
 /**
  * Comment part/fragment editor component.
- * Thesauri: comment-tags, doc-reference-tags, doc-reference-types, comment-categories,
- * languages, keyword-indexes, keyword-tags, comment-id-scopes, comment-id-tags,
+ * Thesauri: comment-tags, doc-reference-tags, doc-reference-types,
+ * comment-categories, comment-keyword-languages, comment-keyword-indexes,
+ * comment-keyword-tags, comment-id-scopes, comment-id-tags,
  * assertion-tags.
  */
 @Component({
@@ -118,13 +119,6 @@ export class CommentEditorComponent
   private _editorModel?: monaco.editor.ITextModel;
   private _editor?: monaco.editor.IStandaloneCodeEditor;
 
-  public tag: FormControl<string | null>;
-  public text: FormControl<string | null>;
-  public references: FormControl<DocReference[]>;
-  public links: FormControl<AssertedCompositeId[]>;
-  public categories: FormControl<ThesaurusEntry[]>;
-  public keywords: FormArray;
-
   // comment-tags
   public readonly comTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // doc-reference-tags
@@ -133,11 +127,11 @@ export class CommentEditorComponent
   public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // comment-categories
   public readonly catEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  // languages
+  // comment-keyword-languages
   public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  // keyword-indexes
+  // comment-keyword-indexes
   public readonly idxEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  // keyword-tags
+  // comment-keyword-tags
   public readonly keyTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // comment-id-scopes
   public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
@@ -145,6 +139,13 @@ export class CommentEditorComponent
   public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // assertion-tags
   public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+
+  public tag: FormControl<string | null>;
+  public text: FormControl<string | null>;
+  public references: FormControl<DocReference[]>;
+  public links: FormControl<AssertedCompositeId[]>;
+  public categories: FormControl<ThesaurusEntry[]>;
+  public keywords: FormArray;
 
   constructor(
     authService: AuthJwtService,
@@ -275,21 +276,21 @@ export class CommentEditorComponent
       this.catEntries.set(undefined);
     }
 
-    key = 'languages';
+    key = 'comment-keyword-languages';
     if (this.hasThesaurus(key)) {
       this.langEntries.set(thesauri[key].entries);
     } else {
       this.langEntries.set(undefined);
     }
 
-    key = 'keyword-indexes';
+    key = 'comment-keyword-indexes';
     if (this.hasThesaurus(key)) {
       this.idxEntries.set(thesauri[key].entries);
     } else {
       this.idxEntries.set(undefined);
     }
 
-    key = 'keyword-tags';
+    key = 'comment-keyword-tags';
     if (this.hasThesaurus(key)) {
       this.keyTagEntries.set(thesauri[key].entries);
     } else {

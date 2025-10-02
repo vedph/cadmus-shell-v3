@@ -31,8 +31,8 @@ Latest versions:
 - cadmus-item-list: 16.0.0
 - cadmus-item-search: 16.0.0
 - cadmus-layer-demo: 15.0.1
-- cadmus-part-general-pg: 16.0.0
-- cadmus-part-general-ui: 15.0.1
+- cadmus-part-general-pg: 16.0.3
+- cadmus-part-general-ui: 15.0.2
 - cadmus-part-philology-pg: 16.1.0
 - cadmus-part-philology-ui: 16.0.0
 - cadmus-preview-pg: 17.0.0
@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-10-02: renamed comment part and fragment thesauri.
 - 2025-09-27:
   - removed legacy animations from `@myrmidon/cadmus-flags-ui`.
   - removed legacy dependencies from tests.
