@@ -127,10 +127,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       Validators.maxLength(50),
     ]);
     this.tag = formBuilder.control(null, Validators.maxLength(50));
-    this.language = formBuilder.control(null, [
-      Validators.required,
-      Validators.pattern(/^[a-z]{3}$/),
-    ]);
+    this.language = formBuilder.control(null, Validators.maxLength(50));
     this.authors = formBuilder.control<BibAuthor[]>([], {
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
@@ -167,10 +164,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       Validators.max(10000),
     ]);
     // form - keywords
-    this.keyLanguage = formBuilder.control(null, [
-      Validators.required,
-      Validators.pattern(/^[a-z]{3}$/),
-    ]);
+    this.keyLanguage = formBuilder.control('', [Validators.required]);
     this.keyValue = formBuilder.control(null, [
       Validators.required,
       Validators.maxLength(100),
@@ -235,7 +229,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
     this.key.setValue(entry.key || null);
     this.type.setValue(entry.typeId);
     this.tag.setValue(entry.tag || null);
-    this.language.setValue(entry.language);
+    this.language.setValue(entry.language || null);
     this.authors.setValue(entry.authors || []);
     this.title.setValue(entry.title);
     this.note.setValue(entry.note || null);
@@ -260,7 +254,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       key: this.key.value?.trim(),
       typeId: this.type.value?.trim() || '',
       tag: this.tag.value?.trim(),
-      language: this.language.value || '',
+      language: this.language.value || undefined,
       authors: this.authors.value || [],
       title: this.title.value?.trim() || '',
       note: this.note.value?.trim(),

@@ -13,7 +13,7 @@ export interface BibEntry {
   tag?: string;
   authors?: BibAuthor[];
   title: string;
-  language: string;
+  language?: string;
   container?: string;
   contributors?: BibAuthor[];
   edition?: number;
@@ -106,7 +106,7 @@ export const BIBLIOGRAPHY_PART_SCHEMA = {
         anyOf: [
           {
             type: 'object',
-            required: ['typeId', 'title', 'language'],
+            required: ['typeId', 'title'],
             properties: {
               typeId: {
                 type: 'string',
