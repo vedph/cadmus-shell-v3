@@ -67,7 +67,9 @@
                 <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
             </td>
-            <td>{{ entryTypeToString(entry.typeId) }}</td>
+            <td>
+              {{ entry.typeId | flatLookup : typeEntries() : "id" : "value" }}
+            </td>
             <td>{{ getAuthors(entry.authors || []) }}</td>
             <td>{{ entry.title }}</td>
           </tr>

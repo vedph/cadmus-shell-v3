@@ -22,7 +22,11 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { deepCopy, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import {
+  deepCopy,
+  FlatLookupPipe,
+  NgxToolsValidators,
+} from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
@@ -70,6 +74,7 @@ import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-e
     TitleCasePipe,
     BibliographyEntryComponent,
     CloseSaveButtonsComponent,
+    FlatLookupPipe,
   ],
 })
 export class BibliographyPartComponent
@@ -162,14 +167,6 @@ export class BibliographyPartComponent
 
     // form
     this.updateForm(data?.value);
-  }
-
-  public entryTypeToString(id?: string): string {
-    if (!id || !this.typeEntries()?.entries) {
-      return '';
-    }
-    const entry = this.typeEntries()?.find((e) => e.id === id);
-    return entry ? entry.value : id;
   }
 
   protected getValue(): BibliographyPart {

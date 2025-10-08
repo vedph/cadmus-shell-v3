@@ -39,7 +39,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import { Keyword } from '../keywords-part';
 import { BibEntry, BibAuthor } from '../bibliography-part';
@@ -73,6 +73,7 @@ import { BibAuthorsEditorComponent } from '../bib-authors-editor/bib-authors-edi
     MatTooltip,
     MatIcon,
     MatIconButton,
+    FlatLookupPipe,
   ],
 })
 export class BibliographyEntryComponent implements OnInit, OnDestroy {

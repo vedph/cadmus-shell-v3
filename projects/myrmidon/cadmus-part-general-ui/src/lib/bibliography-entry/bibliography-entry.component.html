@@ -68,10 +68,7 @@
         <mat-form-field>
           <mat-label>language</mat-label>
           <input matInput [formControl]="language" />
-          @if ( language.hasError('required') && (language.dirty ||
-          language.touched) ) {
-          <mat-error>required</mat-error>
-          } @if ( language.hasError('pattern') && (language.dirty ||
+          @if ( language.hasError('pattern') && (language.dirty ||
           language.touched) ) {
           <mat-error>invalid</mat-error>
           }
@@ -367,7 +364,9 @@
                 <mat-icon>arrow_downward</mat-icon>
               </button>
             </td>
-            <td>{{ k.language }}</td>
+            <td>
+              {{ k.language | flatLookup : langEntries() : "id" : "value" }}
+            </td>
             <td>{{ k.value }}</td>
           </tr>
           }

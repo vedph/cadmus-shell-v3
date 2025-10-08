@@ -212,7 +212,8 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 - 2025-10-08:
   - bibliography entry language not required, as per backend model (`@myrmidon/cadmus-part-general-ui`).
-  - updated packages.
+  - fixed missing lookup for bibliography entry language.
+  - updated Angular and packages.
 - 2025-10-02: renamed comment part and fragment thesauri.
 - 2025-09-27:
   - removed legacy animations from `@myrmidon/cadmus-flags-ui`.
