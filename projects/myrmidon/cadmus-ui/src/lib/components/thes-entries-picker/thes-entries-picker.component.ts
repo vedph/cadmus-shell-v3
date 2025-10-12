@@ -1,4 +1,11 @@
-import { Component, computed, input, model } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  model,
+  untracked,
+} from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   FormBuilder,
@@ -8,12 +15,23 @@ import {
   Validators,
 } from '@angular/forms';
 
+import {
+  CdkDragDrop,
+  CdkDropList,
+  CdkDrag,
+  moveItemInArray,
+  CdkDragPlaceholder,
+} from '@angular/cdk/drag-drop';
+import {
+  MatChipListbox,
+  MatChipOption,
+  MatChipRemove,
+} from '@angular/material/chips';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { MatFormField } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
-import { MatRipple } from '@angular/material/core';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { renderLabelFromLastColon } from '../thesaurus-tree/static-thes-paged-tree-store.service';
@@ -35,12 +53,16 @@ export const CUSTOM_ENTRY_PREFIX = '$';
   selector: 'cadmus-thes-entries-picker',
   imports: [
     ReactiveFormsModule,
+    CdkDropList,
+    CdkDrag,
+    MatChipListbox,
+    MatChipOption,
+    MatChipRemove,
     MatExpansionPanel,
     MatFormField,
     MatIconButton,
     MatIcon,
     MatInput,
-    MatRipple,
     MatTooltip,
     ThesaurusTreeComponent,
   ],
@@ -63,6 +85,12 @@ export class ThesEntriesPickerComponent {
    * their hierarchy.
    */
   public readonly hierarchicLabels = input<boolean>(false);
+
+  /**
+   * True to automatically sort entries (disables drag-and-drop).
+   * When false, entries can be manually reordered via drag-and-drop.
+   */
+  public readonly autoSort = input<boolean>(false);
 
   /**
    * True to allow custom values (not in the entries list).
@@ -91,7 +119,7 @@ export class ThesEntriesPickerComponent {
 
   /**
    * The number of remaining entries that can be picked (0=unlimited).
-   * This is displayed only if limit > 1.
+   * This is displayed only if maxEntries > 1.
    */
   public readonly remaining = computed(() => {
     if (this.maxEntries() > 0) {
@@ -117,6 +145,24 @@ export class ThesEntriesPickerComponent {
       id: this.id,
       value: this.value,
     });
+    // if auto-sort is turned on and we have entries, sort them
+    effect(
+      () => {
+        // only track autoSort() changes, not entries()
+        const shouldSort = this.autoSort();
+
+        if (shouldSort) {
+          // use untracked to read entries without creating a dependency
+          const currentEntries = untracked(() => this.entries());
+          if (currentEntries.length > 1) {
+            const entries = [...currentEntries];
+            this.sortEntries(entries);
+            this.entries.set(entries);
+          }
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
 
   // need arrow function to use 'this'
@@ -149,7 +195,9 @@ export class ThesEntriesPickerComponent {
 
     const entries = [...this.entries()];
     entries.push(entry);
-    this.sortEntries(entries);
+    if (this.autoSort()) {
+      this.sortEntries(entries);
+    }
     this.entries.set(entries);
   }
 
@@ -174,7 +222,9 @@ export class ThesEntriesPickerComponent {
     }
     const entries = [...this.entries()];
     entries.push(customEntry);
-    this.sortEntries(entries);
+    if (this.autoSort()) {
+      this.sortEntries(entries);
+    }
     this.entries.set(entries);
     this.form.reset();
   }
@@ -186,5 +236,17 @@ export class ThesEntriesPickerComponent {
 
   public clear(): void {
     this.entries.set([]);
+    // if min > 0, expand the picker
+    if (this.minEntries() > 0 && !this.expanded()) {
+      setTimeout(() => {
+        this.expanded.set(true);
+      }, 0);
+    }
+  }
+
+  public onDrop(event: CdkDragDrop<ThesaurusEntry[]>): void {
+    const entries = [...this.entries()];
+    moveItemInArray(entries, event.previousIndex, event.currentIndex);
+    this.entries.set(entries);
   }
 }

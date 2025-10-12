@@ -132,7 +132,6 @@ const ANIMAL_ENTRIES: ThesaurusEntry[] = [
     MatCardTitle,
     MatCheckbox,
     MatFormField,
-    MatIcon,
     MatInput,
     MatLabel,
     JsonPipe,
@@ -150,6 +149,9 @@ export class ThesEntriesPickerDemoPageComponent {
     nonNullable: true,
   });
   public readonly custom: FormControl<boolean> = new FormControl(false, {
+    nonNullable: true,
+  });
+  public readonly autoSort: FormControl<boolean> = new FormControl(false, {
     nonNullable: true,
   });
   public readonly min: FormControl<number> = new FormControl(0, {

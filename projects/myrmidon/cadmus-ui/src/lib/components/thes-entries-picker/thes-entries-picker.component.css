@@ -1,3 +1,6 @@
+#container {
+  width: 100%;
+}
 .form-row {
   display: flex;
   gap: 8px;
@@ -16,19 +19,94 @@
 .muted {
   color: gray;
 }
-.entry {
-  display: inline-block;
-  padding: 4px 8px;
-  border: 1px solid silver;
-  border-radius: 4px;
-  background-color: #f0f0f0;
-  cursor: pointer;
-}
 fieldset {
   border: 1px solid silver;
   border-radius: 8px;
   padding: 8px 16px;
 }
-#container {
-  width: 100%;
+
+/* chips and drag-and-drop */
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  padding: 4px;
+}
+.chip-wrapper {
+  display: inline-flex;
+  position: relative;
+  margin: 2px;
+}
+.chip-list mat-chip-option:not([cdkDragDisabled]) {
+  cursor: grab;
+}
+.chip-list mat-chip-option:not([cdkDragDisabled]):active {
+  cursor: grabbing;
+}
+.chip-list mat-chip-option[cdkDragDisabled] {
+  cursor: default;
+}
+.chip-list .empty-message {
+  margin-left: 0;
+}
+/* Prevent chip selection highlighting */
+.chip-list mat-chip-option.mat-mdc-chip-selected {
+  background-color: inherit;
+}
+.chip-list mat-chip-option:not(.error).mat-mdc-chip-selected {
+  background-color: #e0e0e0;
+}
+/* Error styling for chips */
+mat-chip-option.error {
+  background-color: #ffebee !important;
+  border: 1px solid darkred;
+}
+/* The chip being dragged */
+.cdk-drag-preview {
+  opacity: 0.95;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transform: rotate(3deg);
+}
+/* The placeholder with vertical drop line */
+.drag-placeholder {
+  width: 4px;
+  background: #1976d2;
+  border-radius: 2px;
+  height: 36px;
+  box-shadow: 0 0 8px rgba(25, 118, 210, 0.6);
+  animation: pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.1);
+  }
+}
+
+/* Hide the wrapper being dragged */
+.chip-list .cdk-drag-placeholder {
+  opacity: 0;
+  width: 4px;
+  min-width: 4px;
+}
+
+/* Smooth transition for reordering */
+.chip-wrapper {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .chip-wrapper:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Add visual feedback when dragging */
+.cdk-drop-list-dragging .chip-wrapper {
+  will-change: transform;
 }

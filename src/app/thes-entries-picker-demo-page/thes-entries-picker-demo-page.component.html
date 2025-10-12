@@ -1,14 +1,14 @@
 <mat-card>
   <mat-card-header>
-    <mat-icon mat-card-avatar>account_tree</mat-icon>
     <mat-card-title>
       <strong>Thesaurus Entries Picker Demo</strong>
     </mat-card-title>
   </mat-card-header>
-  <mat-card-content>
+  <mat-card-content style="margin-top: 16px">
     <div>
       <form class="form-row">
         <mat-checkbox [formControl]="custom">custom</mat-checkbox>
+        <mat-checkbox [formControl]="autoSort">auto-sort</mat-checkbox>
         <mat-form-field class="nr">
           <mat-label>min</mat-label>
           <input matInput type="number" min="0" [formControl]="min" />
@@ -25,6 +25,7 @@
         [availableEntries]="availableEntries()"
         [hierarchicLabels]="hierarchicLabels()"
         [allowCustom]="custom.value"
+        [autoSort]="autoSort.value"
         [minEntries]="min.value"
         [maxEntries]="max.value"
         [entries]="entries()"

@@ -5,25 +5,53 @@
     <span class="nr" [class.error]="entries().length < minEntries()">{{
       entries().length
     }}</span>
+    <!-- max-->
     @if (maxEntries() > 1) {
     <span class="muted">/{{ maxEntries() }}</span>
+    @if (remaining()) {
     <span class="muted">: -{{ remaining() }}</span>
-    } @if (minEntries() > 0) {
+    } }
+    <!-- min -->
+    @if (minEntries()) {
+    <!-- min with error -->
+    @if (entries().length < minEntries()) {
+    <span class="error"> (min {{ minEntries() }})</span>
+    }
+    <!-- min without error -->
+    @else {
     <span class="muted"> (min {{ minEntries() }})</span>
-    }
+    } }
     <!-- list -->
-    @for (e of entries(); track e.id) {
-    <span
-      matRipple
-      matRippleColor="red"
-      class="entry"
-      [class.error]="!allowCustom() && e.id.startsWith('$')"
-      (click)="removeEntry(e)"
-      >{{ renderLabel(e.value) }}</span
+    <mat-chip-listbox
+      [cdkDropListDisabled]="autoSort()"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      (cdkDropListDropped)="onDrop($event)"
+      class="chip-list"
     >
-    } @empty {
-    <span class="muted">{{ emptyMessage() }}</span>
-    }
+      @for (e of entries(); track e.id; let idx = $index) {
+      <div class="chip-wrapper">
+        <mat-chip-option
+          [cdkDragDisabled]="autoSort()"
+          cdkDrag
+          [class.error]="!allowCustom() && e.id.startsWith('$')"
+        >
+          {{ renderLabel(e.value) }}
+          <button
+            type="button"
+            matChipRemove
+            (click)="removeEntry(e)"
+            aria-label="Remove entry"
+          >
+            <mat-icon class="mat-warn">cancel</mat-icon>
+          </button>
+        </mat-chip-option>
+      </div>
+      } @empty {
+      <span class="muted empty-message">{{ emptyMessage() }}</span>
+      }
+    </mat-chip-listbox>
+
     <!-- clear -->
     @if (entries().length > 0) {
     <button
@@ -69,7 +97,7 @@
       </div>
       @if (allowCustom()) {
       <div>
-        <form>
+        <form [formGroup]="form" (submit)="addCustomEntry()">
           <fieldset>
             <legend>custom</legend>
             <div class="form-row">
@@ -90,11 +118,13 @@
                 />
               </mat-form-field>
               <button
-                type="button"
+                type="submit"
                 mat-icon-button
                 matTooltip="Add custom entry"
-                (click)="addCustomEntry()"
-                [disabled]="!form.valid || entries().length >= maxEntries()"
+                [disabled]="
+                  !form.valid ||
+                  (maxEntries() > 0 && entries().length >= maxEntries())
+                "
               >
                 <mat-icon class="mat-primary">check_circle</mat-icon>
               </button>
