@@ -14,6 +14,7 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
 import { LoginPageComponent } from './login-page/login-page.component';
 import { EditFrameStatsPageComponent } from './edit-frame-stats-page/edit-frame-stats-page.component';
 import { GraphDemoPageComponent } from './graph-demo-page/graph-demo-page.component';
+import { ThesEntriesPickerDemoPageComponent } from './thes-entries-picker-demo-page/thes-entries-picker-demo-page.component';
 
 export const routes: Routes = [
   // auth
@@ -45,6 +46,10 @@ export const routes: Routes = [
       import('@myrmidon/cadmus-layer-demo').then(
         (module) => module.LayerDemoComponent
       ),
+  },
+  {
+    path: 'demo/picker',
+    component: ThesEntriesPickerDemoPageComponent,
   },
   {
     path: 'demo/graph',

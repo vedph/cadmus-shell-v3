@@ -12,7 +12,6 @@
 }
 .nr {
   font-weight: bold;
-  margin-right: 4px;
 }
 .muted {
   color: gray;
@@ -30,26 +29,6 @@ fieldset {
   border-radius: 8px;
   padding: 8px 16px;
 }
-div#picker {
-  grid-area: picker;
-}
-div#picked {
-  grid-area: picked;
-}
-div#container {
-  display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: auto auto;
-  grid-template-areas: "picker picked";
-  gap: 8px;
-}
-/* lt-md */
-@media only screen and (max-width: 959px) {
-  div#container {
-    grid-template-rows: 1fr auto;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "picker"
-      "picked";
-  }
+#container {
+  width: 100%;
 }

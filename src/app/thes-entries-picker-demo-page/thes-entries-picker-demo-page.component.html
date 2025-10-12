@@ -1,0 +1,43 @@
+<mat-card>
+  <mat-card-header>
+    <mat-icon mat-card-avatar>account_tree</mat-icon>
+    <mat-card-title>
+      <strong>Thesaurus Entries Picker Demo</strong>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div>
+      <form class="form-row">
+        <mat-checkbox [formControl]="custom">custom</mat-checkbox>
+        <mat-form-field class="nr">
+          <mat-label>min</mat-label>
+          <input matInput type="number" min="0" [formControl]="min" />
+        </mat-form-field>
+        <mat-form-field class="nr">
+          <mat-label>max</mat-label>
+          <input matInput type="number" min="0" [formControl]="max" />
+        </mat-form-field>
+      </form>
+    </div>
+    <hr />
+    <div>
+      <cadmus-thes-entries-picker
+        [availableEntries]="availableEntries()"
+        [hierarchicLabels]="hierarchicLabels()"
+        [allowCustom]="custom.value"
+        [minEntries]="min.value"
+        [maxEntries]="max.value"
+        [entries]="entries()"
+        (entriesChange)="onEntriesChange($event)"
+      />
+    </div>
+    <hr />
+    @if (entries().length > 0) {
+    <div>
+      <code>
+        <pre>{{ entries() | json }}</pre>
+      </code>
+    </div>
+    }
+  </mat-card-content>
+</mat-card>
