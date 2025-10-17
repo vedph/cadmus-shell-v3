@@ -1,4 +1,4 @@
-import { Component, effect, input, signal } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 
 import {
   Thesaurus,
@@ -7,8 +7,9 @@ import {
   ThesaurusEntry,
 } from '@myrmidon/cadmus-core';
 import { FacetService } from '@myrmidon/cadmus-api';
+import { MatTooltip } from '@angular/material/tooltip';
 
-import { ColorService } from '../../services/color.service';
+import { ColorToContrastPipe } from '@myrmidon/ngx-tools';
 
 export enum PartBadgeType {
   partAndRole = 0,
@@ -61,6 +62,7 @@ export function getPartIdName(
  */
 @Component({
   selector: 'cadmus-part-badge',
+  imports: [MatTooltip, ColorToContrastPipe],
   templateUrl: './part-badge.component.html',
   styleUrls: ['./part-badge.component.css'],
 })
@@ -85,23 +87,80 @@ export class PartBadgeComponent {
    */
   public readonly partTypeIds = input<PartTypeIds>();
 
-  public readonly typeName = signal<string | undefined>(undefined);
-  public readonly roleName = signal<string | undefined>(undefined);
-  public readonly color = signal<string>('transparent');
-  public readonly contrastColor = signal<string>('black');
+  /**
+   * The part type name.
+   */
+  public readonly typeName = computed(() => {
+    const partTypeIds = this.partTypeIds();
+    const typeThesaurus = this.typeThesaurus();
 
-  constructor(
-    private _facetService: FacetService,
-    private _colorService: ColorService
-  ) {
-    effect(() => {
-      this.updateBadge(
-        this.partTypeIds(),
-        this.typeThesaurus(),
-        this.facetDefinition()
+    if (!partTypeIds) {
+      return undefined;
+    }
+
+    return getPartIdName(partTypeIds.typeId, partTypeIds.roleId, typeThesaurus);
+  });
+
+  /**
+   * The part role name.
+   */
+  public readonly roleName = computed(() => {
+    const partTypeIds = this.partTypeIds();
+    const typeThesaurus = this.typeThesaurus();
+
+    if (!partTypeIds) {
+      return undefined;
+    }
+
+    return this.getRoleIdName(partTypeIds.roleId, typeThesaurus);
+  });
+
+  /**
+   * The part badge color.
+   */
+  public readonly color = computed(() => {
+    const partTypeIds = this.partTypeIds();
+    const facetDefinition = this.facetDefinition();
+
+    if (!partTypeIds) {
+      return 'transparent';
+    }
+
+    return this.getPartColor(
+      partTypeIds.typeId,
+      partTypeIds.roleId,
+      facetDefinition
+    );
+  });
+
+  /**
+   * The part definition matching the part type ID and role ID.
+   */
+  public readonly partDefinition = computed(() => {
+    const partTypeIds = this.partTypeIds();
+    const facetDefinition = this.facetDefinition();
+
+    if (!partTypeIds || !facetDefinition?.partDefinitions) {
+      return undefined;
+    }
+
+    // First try to find exact match with typeId:roleId
+    if (partTypeIds.roleId) {
+      const exactMatch = facetDefinition.partDefinitions.find(
+        (pd) => pd.typeId === `${partTypeIds.typeId}:${partTypeIds.roleId}`
       );
-    });
-  }
+      if (exactMatch) {
+        return exactMatch;
+      }
+    }
+
+    // Fallback to match by typeId only
+    return facetDefinition.partDefinitions.find(
+      (pd) => pd.typeId === partTypeIds.typeId
+    );
+  });
+
+  constructor(private _facetService: FacetService) {}
 
   private getPartColor(
     typeId: string,
@@ -118,7 +177,7 @@ export class PartBadgeComponent {
    * Get the role's human-friendly name from its ID.
    * @param roleId The role ID.
    * @param typeThesaurus The types thesaurus.
-   * @returns The name.?
+   * @returns The name or undefined.
    */
   private getRoleIdName(
     roleId?: string,
@@ -142,30 +201,5 @@ export class PartBadgeComponent {
     }
     entry = typeThesaurus.entries?.find((e) => e.id === roleId);
     return entry ? entry.value : roleId;
-  }
-
-  private updateBadge(
-    partTypeIds?: PartTypeIds,
-    typeThesaurus?: Thesaurus,
-    facetDefinition?: FacetDefinition
-  ): void {
-    if (partTypeIds) {
-      this.color.set(
-        this.getPartColor(
-          partTypeIds.typeId,
-          partTypeIds.roleId,
-          facetDefinition
-        )
-      );
-      this.typeName.set(
-        getPartIdName(partTypeIds.typeId, partTypeIds.roleId, typeThesaurus)
-      );
-      this.roleName.set(this.getRoleIdName(partTypeIds.roleId, typeThesaurus));
-    } else {
-      this.color.set('transparent');
-      this.typeName.set(undefined);
-      this.roleName.set(undefined);
-    }
-    this.contrastColor.set(this._colorService.getContrastColor(this.color()));
   }
 }

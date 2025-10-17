@@ -43,7 +43,7 @@ Latest versions:
 - cadmus-thesaurus-editor: 16.0.0
 - cadmus-thesaurus-list: 16.0.0
 - cadmus-thesaurus-ui: 15.0.0
-- cadmus-ui: 15.1.1
+- cadmus-ui: 15.1.2
 - cadmus-ui-pg: 16.0.0
 
 Dependencies:
@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-10-17: refactored part badge and added tooltip to it.
 - 2025-10-12: 🆕 added `ThesEntriesPickerComponent` to `@myrmidon/cadmus-ui`.
 - 2025-10-08:
   - bibliography entry language not required, as per backend model (`@myrmidon/cadmus-part-general-ui`).

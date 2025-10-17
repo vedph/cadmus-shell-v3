@@ -2,7 +2,8 @@
 <span
   class="part-badge"
   [style.background-color]="color()"
-  [style.color]="contrastColor()"
+  [style.color]="color() | colorToContrast"
+  [matTooltip]="partDefinition()?.description"
 >
   {{ typeName() }}
 </span>
