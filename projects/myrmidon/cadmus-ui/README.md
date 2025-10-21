@@ -29,7 +29,7 @@ This library contains shared UI components, services and validators for Cadmus:
 1. import `ThesEntriesPickerComponent` from `@myrmidon/cadmus-ui` and add it to your component's `imports`. It is assumed that your component has thesauri entries properties in (usually input) signals, like:
 
 ```ts
-public readonly posEntries = input<ThesaurusEntry[] | undefined>();
+public readonly posEntries = input.required<ThesaurusEntry[] | undefined>();
 public readonly tagEntries = input<ThesaurusEntry[] | undefined>();
 ```
 
@@ -51,70 +51,55 @@ private mapIdsToEntries(ids: string[], entries: ThesaurusEntry[] | undefined): T
 }
 ```
 
-3. if you have an ID field which can be free (=when no thesaurus entries are specified for it), add a `FormControl` for it, e.g.:
+3. add form controls for entries. In this example `pos` is for a single entry, `tags` is for an array of entries.
 
 ```ts
-this.pos = formBuilder.control('', {
-  nonNullable: true,
-  validators: [
-    // required only if no posEntries are provided (i.e. pos is a free text string)
-    NgxToolsValidators.conditionalValidator(
-      () => !this.posEntries()?.length,
-      Validators.required
-    ),
-    Validators.maxLength(100),
-  ],
-});
+public pos: FormControl<ThesaurusEntry>;
+public tags: FormControl<ThesaurusEntry[]>;
+
+// ... in constructor:
+
+// single entry (required)
+this.pos = formBuilder.control(
+  { id: '', value: '' },
+  {
+    nonNullable: true,
+    validators: Validators.required,
+  }
+);
+// multiple entries (optional)
+this.tags = formBuilder.control([], { nonNullable: true });
 ```
 
 4. when setting the UI from data, follow this example:
 
 ```ts
-// add properties:
-public pos: FormControl<string>;
-public tags: FormControl<ThesaurusEntry[]>;
-
-// add in constructor:
-// ...
-this.pos = formBuilder.control('', {
-  nonNullable: true,
-  validators: [
-    // required only if no posEntries are provided (i.e. pos is a free text string)
-    NgxToolsValidators.conditionalValidator(
-      () => !this.posEntries()?.length,
-      Validators.required
-    ),
-    Validators.maxLength(100),
-  ],
-});
-this.tags = formBuilder.control([], { nonNullable: true });
-// ...
-
-// when updating form controls:
 private updateForm(data: WordForm | undefined | null): void {
   if (!data) {
-    this.posEntry.set(undefined);
     this.formCtl.reset();
   } else {
-    if (this.posEntries()?.length) {
-      this.posEntry.set(this.mapIdToEntry(data.pos, this.posEntries())!);
-    }
-    this.pos.setValue(data.pos || '');
+    this.pos.setValue(this.mapIdToEntry(data.pos, this.posEntries()) || this.posEntries()?.[0]!);
     this.tags.setValue(this.mapIdsToEntries(data.tags || [], this.tagEntries()));
     // ...
     this.formCtl.markAsPristine();
   }
 }
 
- public onTagEntriesChange(entries: ThesaurusEntry[]): void {
+public onPosEntriesChange(entries: ThesaurusEntry[]): void {
+  this.pos.setValue(entries[0]);
+  this.pos.markAsDirty();
+  this.pos.updateValueAndValidity();
+}
+
+public onTagEntriesChange(entries: ThesaurusEntry[]): void {
   this.tags.setValue(entries);
   this.tags.markAsDirty();
   this.tags.updateValueAndValidity();
 }
 
- private getData(): WordForm {
+private getData(): WordForm {
   return {
-    pos: (this.posEntries()?.length ? this.posEntry()?.id : this.pos.value) || '',
+    pos: this.pos.value.id,
     tags: this.tags.value.map((e) => e.id),
     // ...
   };
@@ -124,28 +109,17 @@ private updateForm(data: WordForm | undefined | null): void {
 5. add the corresponding components in the HTML template. Here the first example (`pos`) refers to the above mentioned situation, where entries might be present or not, for a single thesaurus ID to pick; the second one (`tags`) to an array of IDs to pick from a thesaurus:
 
 ```html
-<!-- pos -->
-@if (posEntries()?.length) {
+<!-- pos (always bound) -->
 <cadmus-thes-entries-picker
   [availableEntries]="posEntries()!"
-  [entries]="posEntry() ? [posEntry()!] : []"
+  [entries]="[this.pos.value]"
   [hierarchicLabels]="true"
   [minEntries]="1"
   [maxEntries]="1"
+  (entriesChange)="onPosEntriesChange($event!)"
 />
-} @else {
-<mat-form-field>
-  <mat-label>POS</mat-label>
-  <input matInput [formControl]="pos" />
-  @if ($any(pos).errors?.required && (pos.dirty || pos.touched)) {
-  <mat-error>POS required</mat-error>
-  } @if ($any(pos).errors?.maxLength && (pos.dirty || pos.touched)) {
-  <mat-error>POS too long</mat-error>
-  }
-</mat-form-field>
-}
 
-<!-- tags -->
+@if (tagEntries()?.length) {
 <div>
   <fieldset>
     <legend>tags</legend>
@@ -156,4 +130,5 @@ private updateForm(data: WordForm | undefined | null): void {
     />
   </fieldset>
 </div>
+}
 ```
