@@ -35,7 +35,7 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   renderLabelFromLastColon,
-  ThesaurusTreeComponent,
+  ThesEntriesPickerComponent,
 } from '@myrmidon/cadmus-ui';
 
 import {
@@ -65,8 +65,8 @@ import {
     MatInputModule,
     MatSelectModule,
     MatTooltipModule,
-    ThesaurusTreeComponent,
     CharTextViewComponent,
+    ThesEntriesPickerComponent,
   ],
   templateUrl: './edit-operation.component.html',
   styleUrl: './edit-operation.component.css',
@@ -138,7 +138,7 @@ export class EditOperationComponent {
   public text: FormControl<string | null>;
   public to: FormControl<number>;
   public toRun: FormControl<number>;
-  public tags: FormControl<string | null>;
+  public tags: FormControl<ThesaurusEntry[]>;
   public note: FormControl<string | null>;
   public form: FormGroup;
 
@@ -174,8 +174,8 @@ export class EditOperationComponent {
       ),
     });
     this.toRun = new FormControl<number>(0, { nonNullable: true });
-    this.tags = new FormControl<string | null>(null, {
-      validators: Validators.maxLength(1000),
+    this.tags = new FormControl<ThesaurusEntry[]>([], {
+      nonNullable: true,
     });
     this.note = new FormControl<string | null>(null, {
       validators: Validators.maxLength(5000),
@@ -213,6 +213,16 @@ export class EditOperationComponent {
       });
   }
 
+  private mapIdsToEntries(
+    ids: string[],
+    entries: ThesaurusEntry[] | undefined
+  ): ThesaurusEntry[] {
+    if (!entries) return ids.map((id) => ({ id, value: id }));
+    return ids.map(
+      (id) => entries.find((e) => e.id === id) || { id, value: id }
+    );
+  }
+
   private updateForm(operation: EditOperation | undefined | null): void {
     if (!operation) {
       this.form.reset();
@@ -223,7 +233,11 @@ export class EditOperationComponent {
       this.text.setValue(operation.text || null);
       this.to.setValue(operation.to || 0);
       this.toRun.setValue(operation.toRun || 0);
-      this.tags.setValue(operation.tags ? operation.tags.join(' ') : null);
+      this.tags.setValue(
+        operation.tags
+          ? this.mapIdsToEntries(operation.tags, this.opTagEntries())
+          : []
+      );
       this.note.setValue(operation.note || null);
       this.form.markAsPristine();
     }
@@ -256,6 +270,12 @@ export class EditOperationComponent {
     this.dsl.setValue(op.toString());
   }
 
+  public onOpTagEntriesChange(entries: ThesaurusEntry[]) {
+    this.tags.setValue(entries);
+    this.tags.markAsDirty();
+    this.tags.updateValueAndValidity();
+  }
+
   private setInputTexts(op: EditOperation): void {
     const inputText = this.inputText();
     if (!inputText) return;
@@ -282,12 +302,6 @@ export class EditOperationComponent {
   }
 
   private getOperation(): EditOperation | undefined {
-    // extract tags from space-separated string removing extra spaces and duplicates
-    const tags: string[] | undefined = this.tags.value
-      ?.split(' ')
-      .map((t) => t.trim())
-      .filter((t, i, a) => t && a.indexOf(t) === i);
-
     // create operation and set its properties
     const op = EditOperation.createOperation(this.type.value);
     op.at = this.at.value;
@@ -315,7 +329,9 @@ export class EditOperationComponent {
       op.toRun = undefined;
     }
 
-    op.tags = tags && tags.length > 0 ? tags : [];
+    op.tags = this.tags.value.length
+      ? this.tags.value.map((t) => t.id)
+      : undefined;
     op.note = this.note.value?.trim() || undefined;
     // calculate input texts
     this.setInputTexts(op);

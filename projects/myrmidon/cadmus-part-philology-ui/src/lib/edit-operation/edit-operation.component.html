@@ -1,264 +1,250 @@
-<div id="container">
-  <div id="editor">
-    <form [formGroup]="form" (submit)="save()">
-      <!-- dsl -->
-      <div>
-        <mat-form-field class="full-width">
-          <mat-label>DSL</mat-label>
-          <input matInput [formControl]="dsl" />
-          @if ($any(dsl).errors?.maxLength && (dsl.dirty || dsl.touched)) {
-          <mat-error>DSL too long</mat-error>
-          }
-          <button
-            type="button"
-            class="mat-warn"
-            mat-icon-button
-            matSuffix
-            matTooltip="Update DSL"
-            [disabled]="form.invalid"
-            (click)="updateDsl()"
-          >
-            <mat-icon>arrow_circle_up</mat-icon>
-          </button>
-          <button
-            type="button"
-            class="mat-primary"
-            mat-icon-button
-            matSuffix
-            matTooltip="Parse DSL"
-            [disabled]="!dsl.value"
-            (click)="parseOperation()"
-          >
-            <mat-icon>arrow_circle_down</mat-icon>
-          </button>
-          <mat-hint
-            >@NxN ! ="" +="" =+"" &gt;@N -&gt;@N &lt;&gt;@NxN &#123;note&#125;
-            [tags]</mat-hint
-          >
-          @if (parseError()) {
-          <mat-error>{{ parseError() }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-      <!-- preview -->
-      <fieldset>
-        @if (inputText() || outputText()) {
-        <div class="form-row">
-          <span class="input">{{ inputText() }}</span>
-          <span class="arrow">→</span>
-          <span class="output">{{ outputText() }}</span>
-        </div>
+<div>
+  <form [formGroup]="form" (submit)="save()">
+    <!-- dsl -->
+    <div>
+      <mat-form-field class="full-width">
+        <mat-label>DSL</mat-label>
+        <input matInput [formControl]="dsl" />
+        @if ($any(dsl).errors?.maxLength && (dsl.dirty || dsl.touched)) {
+        <mat-error>DSL too long</mat-error>
         }
-        <!-- text view -->
-        @if (inputText()) {
-        <div class="form-row">
-          <cadmus-char-text-view
-            [lines]="[inputText()!]"
-            (charPick)="onCharPick($event)"
-            (rangePick)="onRangePick($event)"
-          />
-          <div class="coords">{{ pickedCoords() }}</div>
-          <button
-            type="button"
-            mat-icon-button
-            [disabled]="!pickedCoords()"
-            (click)="setAtRunFromPickedCoords()"
-            matTooltip="Set at+run to picked coords"
-          >
-            <mat-icon>arrow_drop_down</mat-icon>
-          </button>
-          @if (type.value === 'MoveBefore' || type.value === 'MoveAfter' ||
-          type.value === 'Swap') {
-          <button
-            type="button"
-            mat-icon-button
-            [disabled]="!pickedCoords()"
-            (click)="setToRunFromPickedCoords()"
-            matTooltip="Set to+run to picked coords"
-          >
-            <mat-icon>arrow_drop_down</mat-icon>
-          </button>
-          }
-        </div>
+        <button
+          type="button"
+          class="mat-warn"
+          mat-icon-button
+          matSuffix
+          matTooltip="Update DSL"
+          [disabled]="form.invalid"
+          (click)="updateDsl()"
+        >
+          <mat-icon>arrow_circle_up</mat-icon>
+        </button>
+        <button
+          type="button"
+          class="mat-primary"
+          mat-icon-button
+          matSuffix
+          matTooltip="Parse DSL"
+          [disabled]="!dsl.value"
+          (click)="parseOperation()"
+        >
+          <mat-icon>arrow_circle_down</mat-icon>
+        </button>
+        <mat-hint
+          >@NxN ! ="" +="" =+"" &gt;@N -&gt;@N &lt;&gt;@NxN &#123;note&#125;
+          [tags]</mat-hint
+        >
+        @if (parseError()) {
+        <mat-error>{{ parseError() }}</mat-error>
         }
-      </fieldset>
-      <!-- visual editor -->
-      <mat-expansion-panel
-        [expanded]="expanded()"
-        (expandedChange)="expanded.set($event)"
-      >
-        <mat-expansion-panel-header>
-          <mat-panel-title>visual</mat-panel-title>
-        </mat-expansion-panel-header>
-        <div class="form-row">
-          <!-- type -->
-          <mat-form-field>
-            <mat-label>type</mat-label>
-            <mat-select [formControl]="type">
-              <mat-option value="Replace"
-                ><mat-icon>layers</mat-icon> replace</mat-option
-              >
-              <mat-option value="Delete"
-                ><mat-icon>close</mat-icon>delete</mat-option
-              >
-              <mat-option value="InsertBefore"
-                ><mat-icon>last_page</mat-icon> insert before</mat-option
-              >
-              <mat-option value="InsertAfter"
-                ><mat-icon>first_page</mat-icon> insert after</mat-option
-              >
-              <mat-option value="MoveBefore"
-                ><mat-icon>login</mat-icon> move before</mat-option
-              >
-              <mat-option value="MoveAfter"
-                ><mat-icon>logout</mat-icon> move after</mat-option
-              >
-              <mat-option value="Swap"
-                ><mat-icon>compare_arrows</mat-icon> swap</mat-option
-              >
-            </mat-select>
-            @if ($any(type).errors?.required && (type.dirty || type.touched)) {
-            <mat-error>type required</mat-error>
-            }
-          </mat-form-field>
-
-          <!-- at -->
-          <mat-form-field class="nr-field">
-            <mat-label>at</mat-label>
-            <input matInput type="number" min="1" [formControl]="at" />
-            @if ($any(at).errors?.required && (at.dirty || at.touched)) {
-            <mat-error>at required</mat-error>
-            }
-          </mat-form-field>
-
-          <!-- run -->
-          <mat-form-field class="nr-field">
-            <mat-label>run</mat-label>
-            <input matInput type="number" min="1" [formControl]="run" />
-            @if ($any(run).errors?.required && (run.dirty || run.touched)) {
-            <mat-error>run required</mat-error>
-            }
-          </mat-form-field>
-        </div>
-
-        <!-- text -->
-        @if (type.value === 'Replace' || type.value === 'InsertBefore' ||
-        type.value === 'InsertAfter') {
-        <div>
-          <mat-form-field>
-            <mat-label>text</mat-label>
-            <input matInput [formControl]="text" />
-            @if ($any(text).errors?.maxLength && (text.dirty || text.touched)) {
-            <mat-error>text too long</mat-error>
-            }
-          </mat-form-field>
-        </div>
-        }
-
-        <!-- to and toRun -->
-        @if (type.value === 'MoveBefore' || type.value === 'MoveAfter' ||
-        type.value === 'Swap') {
-        <div class="form-row">
-          <mat-form-field class="nr-field">
-            <mat-label>to</mat-label>
-            <input matInput type="number" min="1" [formControl]="to" />
-            @if ($any(to).errors?.required && (to.dirty || to.touched)) {
-            <mat-error>to required</mat-error>
-            } @if ($any(to).errors?.min && (to.dirty || to.touched)) {
-            <mat-error>to must be ≥ 1</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field class="nr-field">
-            <mat-label>to run</mat-label>
-            <input matInput type="number" min="1" [formControl]="toRun" />
-            @if ($any(toRun).errors?.required && (toRun.dirty || toRun.touched))
-            {
-            <mat-error>to run required</mat-error>
-            }
-          </mat-form-field>
-        </div>
-        }
-
-        <!-- tags -->
-        <div>
-          <mat-form-field class="long-text">
-            <mat-label>tags</mat-label>
-            <textarea matInput [formControl]="tags" rows="3"></textarea>
-            @if ($any(tags).errors?.maxLength && (tags.dirty || tags.touched)) {
-            <mat-error>tags too long</mat-error>
-            }
-            <mat-hint>tags separated by spaces</mat-hint>
-          </mat-form-field>
-        </div>
-
-        <!-- note -->
-        <div>
-          <mat-form-field class="long-text">
-            <mat-label>note</mat-label>
-            <textarea matInput [formControl]="note" rows="3"></textarea>
-            @if ($any(note).errors?.maxLength && (note.dirty || note.touched)) {
-            <mat-error>note too long</mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </mat-expansion-panel>
-
-      <!-- buttons -->
+      </mat-form-field>
+    </div>
+    <!-- preview -->
+    <fieldset>
+      @if (inputText() || outputText()) {
       <div class="form-row">
+        <span class="input">{{ inputText() }}</span>
+        <span class="arrow">→</span>
+        <span class="output">{{ outputText() }}</span>
+      </div>
+      }
+      <!-- text view -->
+      @if (inputText()) {
+      <div class="form-row">
+        <cadmus-char-text-view
+          [lines]="[inputText()!]"
+          (charPick)="onCharPick($event)"
+          (rangePick)="onRangePick($event)"
+        />
+        <div class="coords">{{ pickedCoords() }}</div>
         <button
           type="button"
           mat-icon-button
-          matTooltip="Discard changes"
-          (click)="cancel()"
+          [disabled]="!pickedCoords()"
+          (click)="setAtRunFromPickedCoords()"
+          matTooltip="Set at+run to picked coords"
         >
-          <mat-icon class="mat-warn">clear</mat-icon>
+          <mat-icon>arrow_drop_down</mat-icon>
         </button>
+        @if (type.value === 'MoveBefore' || type.value === 'MoveAfter' ||
+        type.value === 'Swap') {
         <button
-          type="submit"
+          type="button"
           mat-icon-button
-          matTooltip="Accept changes"
-          [disabled]="form.invalid || form.pristine"
+          [disabled]="!pickedCoords()"
+          (click)="setToRunFromPickedCoords()"
+          matTooltip="Set to+run to picked coords"
         >
-          <mat-icon class="mat-primary">check_circle</mat-icon>
+          <mat-icon>arrow_drop_down</mat-icon>
         </button>
+        }
       </div>
-    </form>
-    <div>
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>DSL Help</mat-panel-title>
-        </mat-expansion-panel-header>
-        <div id="help">
-          <ul>
-            <li>delete <code>@NxN!</code> (=replace of A with zero)</li>
-            <li>replace <code>@NxN="X"</code></li>
-            <li>insert-before <code>@N+="X"</code></li>
-            <li>insert-after <code>@N=+"X"</code></li>
-            <li>move-before <code>@N&gt;@N</code></li>
-            <li>move-after <code>@N-&gt;@N</code></li>
-            <li>swap <code>@NxN&lt;&gt;@NxN</code></li>
-          </ul>
-          <p>Each operation can be followed by:</p>
-          <ol>
-            <li>a note in curly braces;</li>
-            <li>tags in square brackets (space-separated).</li>
-          </ol>
-        </div>
-      </mat-expansion-panel>
-    </div>
-  </div>
-  <div id="tags">
-    @if (!hideTagsPicker() && tagEntries()?.length) {
-    <fieldset>
-      <legend>tags picker</legend>
-      <cadmus-thesaurus-tree
-        [entries]="tagEntries()"
-        rootLabel="tags"
-        [renderLabel]="renderLabel"
-        (entryChange)="onTagChange($event)"
-      />
+      }
     </fieldset>
-    }
+    <!-- visual editor -->
+    <mat-expansion-panel
+      [expanded]="expanded()"
+      (expandedChange)="expanded.set($event)"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title>visual</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="form-row">
+        <!-- type -->
+        <mat-form-field>
+          <mat-label>type</mat-label>
+          <mat-select [formControl]="type">
+            <mat-option value="Replace"
+              ><mat-icon>layers</mat-icon> replace</mat-option
+            >
+            <mat-option value="Delete"
+              ><mat-icon>close</mat-icon>delete</mat-option
+            >
+            <mat-option value="InsertBefore"
+              ><mat-icon>last_page</mat-icon> insert before</mat-option
+            >
+            <mat-option value="InsertAfter"
+              ><mat-icon>first_page</mat-icon> insert after</mat-option
+            >
+            <mat-option value="MoveBefore"
+              ><mat-icon>login</mat-icon> move before</mat-option
+            >
+            <mat-option value="MoveAfter"
+              ><mat-icon>logout</mat-icon> move after</mat-option
+            >
+            <mat-option value="Swap"
+              ><mat-icon>compare_arrows</mat-icon> swap</mat-option
+            >
+          </mat-select>
+          @if ($any(type).errors?.required && (type.dirty || type.touched)) {
+          <mat-error>type required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- at -->
+        <mat-form-field class="nr-field">
+          <mat-label>at</mat-label>
+          <input matInput type="number" min="1" [formControl]="at" />
+          @if ($any(at).errors?.required && (at.dirty || at.touched)) {
+          <mat-error>at required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- run -->
+        <mat-form-field class="nr-field">
+          <mat-label>run</mat-label>
+          <input matInput type="number" min="1" [formControl]="run" />
+          @if ($any(run).errors?.required && (run.dirty || run.touched)) {
+          <mat-error>run required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- text -->
+      @if (type.value === 'Replace' || type.value === 'InsertBefore' ||
+      type.value === 'InsertAfter') {
+      <div>
+        <mat-form-field>
+          <mat-label>text</mat-label>
+          <input matInput [formControl]="text" />
+          @if ($any(text).errors?.maxLength && (text.dirty || text.touched)) {
+          <mat-error>text too long</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      }
+
+      <!-- to and toRun -->
+      @if (type.value === 'MoveBefore' || type.value === 'MoveAfter' ||
+      type.value === 'Swap') {
+      <div class="form-row">
+        <mat-form-field class="nr-field">
+          <mat-label>to</mat-label>
+          <input matInput type="number" min="1" [formControl]="to" />
+          @if ($any(to).errors?.required && (to.dirty || to.touched)) {
+          <mat-error>to required</mat-error>
+          } @if ($any(to).errors?.min && (to.dirty || to.touched)) {
+          <mat-error>to must be ≥ 1</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="nr-field">
+          <mat-label>to run</mat-label>
+          <input matInput type="number" min="1" [formControl]="toRun" />
+          @if ($any(toRun).errors?.required && (toRun.dirty || toRun.touched)) {
+          <mat-error>to run required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      }
+
+      <!-- tags -->
+      @if (opTagEntries()?.length) {
+      <div>
+        <fieldset>
+          <legend>tags</legend>
+          <cadmus-thes-entries-picker
+            [availableEntries]="opTagEntries()!"
+            [entries]="tags.value"
+            (entriesChange)="onOpTagEntriesChange($event!)"
+          />
+        </fieldset>
+      </div>
+      }
+
+      <!-- note -->
+      <div>
+        <mat-form-field class="long-text">
+          <mat-label>note</mat-label>
+          <textarea matInput [formControl]="note" rows="3"></textarea>
+          @if ($any(note).errors?.maxLength && (note.dirty || note.touched)) {
+          <mat-error>note too long</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- buttons -->
+    <div class="form-row">
+      <button
+        type="button"
+        mat-icon-button
+        matTooltip="Discard changes"
+        (click)="cancel()"
+      >
+        <mat-icon class="mat-warn">clear</mat-icon>
+      </button>
+      <button
+        type="submit"
+        mat-icon-button
+        matTooltip="Accept changes"
+        [disabled]="form.invalid || form.pristine"
+      >
+        <mat-icon class="mat-primary">check_circle</mat-icon>
+      </button>
+    </div>
+  </form>
+  <div>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>DSL Help</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div id="help">
+        <ul>
+          <li>delete <code>@NxN!</code> (=replace of A with zero)</li>
+          <li>replace <code>@NxN="X"</code></li>
+          <li>insert-before <code>@N+="X"</code></li>
+          <li>insert-after <code>@N=+"X"</code></li>
+          <li>move-before <code>@N&gt;@N</code></li>
+          <li>move-after <code>@N-&gt;@N</code></li>
+          <li>swap <code>@NxN&lt;&gt;@NxN</code></li>
+        </ul>
+        <p>Each operation can be followed by:</p>
+        <ol>
+          <li>a note in curly braces;</li>
+          <li>tags in square brackets (space-separated).</li>
+        </ol>
+      </div>
+    </mat-expansion-panel>
   </div>
 </div>

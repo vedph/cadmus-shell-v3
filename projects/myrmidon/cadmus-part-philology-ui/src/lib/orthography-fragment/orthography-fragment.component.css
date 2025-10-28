@@ -57,22 +57,3 @@ div#container {
   grid-template-areas: "editor tags";
   gap: 8px;
 }
-div#editor {
-  grid-area: editor;
-}
-div#tags {
-  grid-area: tags;
-}
-
-/* lt-md */
-@media only screen and (max-width: 959px) {
-  div#container {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "editor"
-      "tags";
-  }
-  .noif-lt-md {
-    display: none;
-  }
-}

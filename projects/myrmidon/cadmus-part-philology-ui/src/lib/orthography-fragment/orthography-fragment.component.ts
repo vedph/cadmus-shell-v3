@@ -37,7 +37,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   renderLabelFromLastColon,
-  ThesaurusTreeComponent,
+  ThesEntriesPickerComponent,
 } from '@myrmidon/cadmus-ui';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
@@ -85,7 +85,7 @@ import { EditOperationComponent } from '../edit-operation/edit-operation.compone
     MatIconButton,
     MatCardActions,
     TitleCasePipe,
-    ThesaurusTreeComponent,
+    ThesEntriesPickerComponent,
     CloseSaveButtonsComponent,
     EditOperationComponent,
   ],
@@ -152,7 +152,7 @@ export class OrthographyFragmentComponent
 
   public standard: FormControl<string>;
   public language: FormControl<string | null>;
-  public tag: FormControl<string | null>;
+  public tags: FormControl<ThesaurusEntry[]>;
   public note: FormControl<string | null>;
   public operations: FormControl<EditOperation[]>;
 
@@ -173,14 +173,11 @@ export class OrthographyFragmentComponent
     this.language = formBuilder.control(null, {
       validators: Validators.maxLength(50),
     });
-    this.tag = formBuilder.control(null, {
-      validators: Validators.maxLength(50),
-    });
+    this.tags = formBuilder.control([], { nonNullable: true });
     this.note = formBuilder.control(null, {
       validators: Validators.maxLength(200),
     });
     this.operations = formBuilder.control([], {
-      validators: [Validators.required],
       nonNullable: true,
     });
   }
@@ -193,7 +190,7 @@ export class OrthographyFragmentComponent
     return formBuilder.group({
       standard: this.standard,
       language: this.language,
-      tag: this.tag,
+      tag: this.tags,
       note: this.note,
       operations: this.operations,
     });
@@ -220,13 +217,25 @@ export class OrthographyFragmentComponent
     }
   }
 
+  private mapIdsToEntries(
+    ids: string[],
+    entries: ThesaurusEntry[] | undefined
+  ): ThesaurusEntry[] {
+    if (!entries) return ids.map((id) => ({ id, value: id }));
+    return ids.map(
+      (id) => entries.find((e) => e.id === id) || { id, value: id }
+    );
+  }
+
   private updateForm(fragment?: OrthographyFragment | null): void {
     if (!fragment) {
       this.form.reset();
     } else {
       this.standard.setValue(fragment.standard);
       this.language.setValue(fragment.language || null);
-      this.tag.setValue(fragment.tag || null);
+      this.tags.setValue(
+        this.mapIdsToEntries(fragment.tags || [], this.tagEntries()) || []
+      );
       this.note.setValue(fragment.note || null);
       try {
         this.operations.setValue(
@@ -261,11 +270,19 @@ export class OrthographyFragmentComponent
     this.updateForm(data?.value);
   }
 
+  public onTagEntriesChange(entries: ThesaurusEntry[]): void {
+    this.tags.setValue(entries);
+    this.tags.markAsDirty();
+    this.tags.updateValueAndValidity();
+  }
+
   protected override getValue(): OrthographyFragment {
     const fragment = this.getEditedFragment() as OrthographyFragment;
     fragment.standard = this.standard.value;
     fragment.language = this.language.value?.trim() || undefined;
-    fragment.tag = this.tag.value?.trim() || undefined;
+    fragment.tags = this.tags.value.length
+      ? this.tags.value.map((entry) => entry.id)
+      : undefined;
     fragment.note = this.note.value?.trim() || undefined;
     fragment.operations = this.operations.value.map((op) => op.toString());
     return fragment;

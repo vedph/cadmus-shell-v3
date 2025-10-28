@@ -160,8 +160,7 @@ export class ThesEntriesPickerComponent {
             this.entries.set(entries);
           }
         }
-      },
-      { allowSignalWrites: true }
+      }
     );
   }
 

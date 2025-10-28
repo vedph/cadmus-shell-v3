@@ -6,7 +6,7 @@ import { Fragment } from '@myrmidon/cadmus-core';
 export interface OrthographyFragment extends Fragment {
   standard: string;
   language?: string;
-  tag?: string;
+  tags?: string[];
   note?: string;
   operations?: string[];
 }
@@ -40,9 +40,12 @@ export const ORTHOGRAPHY_FRAGMENT_SCHEMA = {
       $id: '#/properties/language',
       type: 'string',
     },
-    tag: {
-      $id: '#/properties/tag',
-      type: 'string',
+    tags: {
+      $id: '#/properties/tags',
+      type: 'array',
+      items: {
+        type: 'string',
+      },
     },
     note: {
       $id: '#/properties/note',

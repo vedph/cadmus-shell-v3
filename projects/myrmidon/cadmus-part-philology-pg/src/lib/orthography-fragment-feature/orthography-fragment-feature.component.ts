@@ -35,6 +35,6 @@ export class OrthographyFragmentFeatureComponent
   }
 
   protected override getReqThesauriIds(): string[] {
-    return ['orthography-tags', 'orthography-op-tags'];
+    return ['orthography-languages', 'orthography-tags', 'orthography-op-tags'];
   }
 }
