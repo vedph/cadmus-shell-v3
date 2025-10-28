@@ -67,113 +67,19 @@
         </div>
 
         <!-- operations -->
-        <div class="form-row">
-          <!-- add operations -->
-          <button
-            type="button"
-            [disabled]="
-              !frText() || !standard.value || frText() === standard.value
-            "
-            mat-icon-button
-            class="mat-warn"
-            (click)="addByDiffing()"
-            matTooltip="Set operations by diffing standard against base text"
-          >
-            <mat-icon>add_to_photos</mat-icon>
-          </button>
-          <!-- add operation -->
-          <button
-            type="button"
-            mat-flat-button
-            class="mat-primary"
-            (click)="addOperation()"
-          >
-            <mat-icon>add_circle</mat-icon> operation
-          </button>
-          <!-- output text -->
-          <div class="output-text">{{ outputText() }}</div>
-        </div>
-        @if (operations.value.length) {
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>type</th>
-              <th>operation</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (operation of operations.value; track operation; let i =
-            $index; let first = $first; let last = $last) {
-            <tr [class.selected]="i === editedOperationIndex()">
-              <td class="fit-width">
-                <button
-                  type="button"
-                  mat-icon-button
-                  class="mat-primary"
-                  matTooltip="Edit this operation"
-                  (click)="editOperation(operation, i)"
-                >
-                  <mat-icon class="mat-primary">edit</mat-icon>
-                </button>
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Move this operation up"
-                  [disabled]="first"
-                  (click)="moveOperationUp(i)"
-                >
-                  <mat-icon>arrow_upward</mat-icon>
-                </button>
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Move this operation down"
-                  [disabled]="last"
-                  (click)="moveOperationDown(i)"
-                >
-                  <mat-icon>arrow_downward</mat-icon>
-                </button>
-                <button
-                  type="button"
-                  mat-icon-button
-                  class="mat-warn"
-                  matTooltip="Delete this operation"
-                  (click)="deleteOperation(i)"
-                >
-                  <mat-icon class="mat-warn">remove_circle</mat-icon>
-                </button>
-              </td>
-              <td>{{ operation.type }}</td>
-              <td>{{ operation.toString() }}</td>
-            </tr>
-            }
-          </tbody>
-        </table>
-        <!-- operation editor -->
-        } @if (editedOperation()) {
-        <fieldset>
-          <mat-expansion-panel
-            [expanded]="editedOperation()"
-            [disabled]="!editedOperation()"
-          >
-            <mat-expansion-panel-header>
-              <mat-panel-title
-                >operation #{{ editedOperationIndex() + 1 }}</mat-panel-title
-              >
-            </mat-expansion-panel-header>
-            <cadmus-edit-operation
-              [hideTagsPicker]="true"
+        <div>
+          <fieldset>
+            <legend>operations</legend>
+            <cadmus-edit-operation-set
+              [baseText]="frText() || ''"
+              [targetText]="standard.value"
               [tagEntries]="tagEntries()"
               [opTagEntries]="opTagEntries()"
-              [inputText]="operationText()"
-              [operation]="editedOperation()"
-              (operationChange)="saveOperation($event!)"
-              (cancelEdit)="closeOperation()"
+              [operations]="operations.value"
+              (operationsChange)="onOperationsChange($event!)"
             />
-          </mat-expansion-panel>
-        </fieldset>
-        }
+          </fieldset>
+        </div>
       </div>
     </mat-card-content>
     <mat-card-actions>

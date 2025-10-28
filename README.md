@@ -213,7 +213,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 - 2025-10-28:
   - updated Angular and packages.
   - ⚠️ changed `OrthographyFragment.tag` (`string`) to `OrthographyFragment.tags` (`string[]`) in `@myrmidon/cadmus-part-philology-ui`.
-  - refactored orthography fragment UI.
+  - refactored orthography fragment UI and added `EditOperationSetComponent` to allow reusing the operations set logic outside this library.
   - fixed missing `orthography-languages` thesaurus in wrapper in `@myrmidon/cadmus-part-philology-pg`.
   - removed obsolete `allowSignalWrites` from entries picker in `@myrmidon/cadmus-ui`.
 - 2025-10-17: refactored part badge and added tooltip to it.

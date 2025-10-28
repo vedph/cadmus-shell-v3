@@ -8,6 +8,7 @@ export * from './lib/apparatus-fragment/apparatus-fragment.component';
 export * from './lib/msp-operation/msp-operation.component';
 export * from './lib/char-text-view/char-text-view.component';
 export * from './lib/edit-operation/edit-operation.component';
+export * from './lib/edit-operation-set/edit-operation-set.component';
 export * from './lib/orthography-fragment';
 export * from './lib/orthography-fragment/orthography-fragment.component';
 export * from './lib/quotation-entry/quotation-entry.component';
