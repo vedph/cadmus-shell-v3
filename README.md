@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-10-28: updated Angular and packages.
 - 2025-10-17: refactored part badge and added tooltip to it.
 - 2025-10-12: 🆕 added `ThesEntriesPickerComponent` to `@myrmidon/cadmus-ui`.
 - 2025-10-08:
