@@ -23,6 +23,9 @@
   word-break: break-word;
   flex: 1 1 auto;
 }
+.mt-16 {
+  margin-top: 16px;
+}
 table {
   width: 100%;
   border-collapse: collapse;

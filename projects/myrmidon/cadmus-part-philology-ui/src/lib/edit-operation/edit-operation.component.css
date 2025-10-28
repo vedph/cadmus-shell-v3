@@ -34,6 +34,9 @@
   color: #296D9C;
   margin-left: 16px;
 }
+.mt-16 {
+  margin-top: 16px;
+}
 fieldset {
   border: 1px solid silver;
   border-radius: 6px;
