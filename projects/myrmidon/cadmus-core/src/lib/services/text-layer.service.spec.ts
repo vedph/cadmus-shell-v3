@@ -3,7 +3,7 @@ import { TestBed, inject } from '@angular/core/testing';
 import { TokenLocation } from '../token-location';
 import { TextLayerService, SelectedRange } from './text-layer.service';
 
-fdescribe('TextLayerService', () => {
+describe('TextLayerService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [TextLayerService],
