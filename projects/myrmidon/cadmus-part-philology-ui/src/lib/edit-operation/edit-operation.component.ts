@@ -190,10 +190,13 @@ export class EditOperationComponent {
     });
 
     // when model changes, update form
-    effect(() => {
-      const operation = this.operation();
-      this.updateForm(operation);
-    });
+    effect(
+      () => {
+        const operation = this.operation();
+        this.updateForm(operation);
+      },
+      { allowSignalWrites: true }
+    );
 
     // whenever type, at, run, to, toRun, text change, set output dirty
     merge(
@@ -279,7 +282,7 @@ export class EditOperationComponent {
 
     // the op input text is equal to inputText substring defined by at-1 and run
     if (inputText && op.at && op.run && op.at <= inputText.length) {
-      op.inputText = inputText.substring(op.at - 1, op.run);
+      op.inputText = inputText.substring(op.at - 1, op.at - 1 + op.run);
     }
 
     // the op input text 2 is equal to inputText substring defined by to-1 and toRun
@@ -293,7 +296,7 @@ export class EditOperationComponent {
     ) {
       (op as SwapEditOperation).inputText2 = inputText.substring(
         op.to - 1,
-        op.toRun
+        op.to - 1 + op.toRun
       );
     }
   }
@@ -372,7 +375,7 @@ export class EditOperationComponent {
     if (parts.length > 1) {
       const len = parseInt(parts[1], 10);
       if (isNaN(len) || len < 1) return null;
-      run = at + len - 1;
+      run = len;
     }
     return { at, run };
   }
