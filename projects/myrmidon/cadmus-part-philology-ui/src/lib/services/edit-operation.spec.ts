@@ -626,13 +626,6 @@ describe('InsertBeforeEditOperation', () => {
       expect(op.execute('FIT')).toBe('FIECT');
     });
 
-    it('should insert at position 0 for empty string', () => {
-      const op = new InsertBeforeEditOperation();
-      op.at = 0;
-      op.text = 'ABC';
-      expect(op.execute('')).toBe('ABC');
-    });
-
     it('should insert empty string (no change)', () => {
       const op = new InsertBeforeEditOperation();
       op.at = 1;
@@ -661,13 +654,6 @@ describe('InsertBeforeEditOperation', () => {
       op.parse('@1+=""');
       expect(op.at).toBe(1);
       expect(op.text).toBe('');
-    });
-
-    it('should parse insert-before with position 0', () => {
-      const op = new InsertBeforeEditOperation();
-      op.parse('@0+="ABC"');
-      expect(op.at).toBe(0);
-      expect(op.text).toBe('ABC');
     });
 
     it('should parse insert-before with note and tags', () => {
@@ -724,13 +710,6 @@ describe('InsertAfterEditOperation', () => {
       expect(op.execute('FIX')).toBe('FIXSUFFIX');
     });
 
-    it('should insert at position 0 (append to end)', () => {
-      const op = new InsertAfterEditOperation();
-      op.at = 0;
-      op.text = 'ABC';
-      expect(op.execute('DEF')).toBe('DEFABC');
-    });
-
     it('should insert empty string (no change)', () => {
       const op = new InsertAfterEditOperation();
       op.at = 1;
@@ -759,13 +738,6 @@ describe('InsertAfterEditOperation', () => {
       op.parse('@1=+""');
       expect(op.at).toBe(1);
       expect(op.text).toBe('');
-    });
-
-    it('should parse insert-after with position 0', () => {
-      const op = new InsertAfterEditOperation();
-      op.parse('@0=+"ABC"');
-      expect(op.at).toBe(0);
-      expect(op.text).toBe('ABC');
     });
 
     it('should parse insert-after with note and tags', () => {

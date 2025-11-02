@@ -660,8 +660,6 @@ export class InsertAfterEditOperation extends EditOperation {
       throw new Error('Input cannot be null or undefined');
     }
 
-    if (this.at === 0) return input + (this.text || '');
-
     EditOperation.validatePosition(input, this.at);
     return input.slice(0, this.at) + (this.text || '') + input.slice(this.at);
   }
@@ -719,7 +717,9 @@ export class InsertBeforeEditOperation extends EditOperation {
   }
 
   public execute(input: string): string {
-    if (this.at === 0) return this.text + input;
+    if (!input) {
+      throw new Error('Input cannot be null or undefined');
+    }
 
     EditOperation.validatePosition(input, this.at);
     return input.slice(0, this.at - 1) + this.text + input.slice(this.at - 1);
