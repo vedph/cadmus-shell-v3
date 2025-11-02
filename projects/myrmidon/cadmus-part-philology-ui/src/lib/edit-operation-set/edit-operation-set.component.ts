@@ -15,7 +15,10 @@ import { EditOperation, OperationType } from '../services/edit-operation';
 import { EditOperationComponent } from '../edit-operation/edit-operation.component';
 
 /**
- * A set of edit operations to be applied to a base text.
+ * A set of edit operations to be applied to a base text. This shows the list
+ * of operations, allows adding, editing, deleting, and reordering them,
+ * and shows the resulting output text. It also allows adding operations
+ * by diffing the base text with a target text.
  */
 @Component({
   selector: 'cadmus-edit-operation-set',
@@ -97,16 +100,36 @@ export class EditOperationSetComponent {
    * from the input text and ending with the last operation.
    */
   public readonly outputText = computed<string>(() => {
-    try {
-      let text = this.baseText() || '';
-      for (let i = 0; i < this.operations().length; i++) {
-        text = this.operations()[i].execute(text);
-      }
-      return text;
-    } catch (error) {
-      console.error('Error calculating output text', error);
-      return '';
+    const texts = this.operationTexts();
+    if (texts.length === 0) {
+      return this.baseText() || '';
     }
+    return texts[texts.length - 1].output;
+  });
+
+  /**
+   * The input and output text for each operation in the list.
+   * Each item contains the input text before the operation and the
+   * output text after the operation.
+   */
+  public readonly operationTexts = computed<
+    Array<{ input: string; output: string }>
+  >(() => {
+    const results: Array<{ input: string; output: string }> = [];
+    let text = this.baseText() || '';
+
+    for (let i = 0; i < this.operations().length; i++) {
+      const input = text;
+      try {
+        text = this.operations()[i].execute(text);
+        results.push({ input, output: text });
+      } catch (error) {
+        console.error(`Error executing operation ${i}`, error);
+        results.push({ input, output: '(error)' });
+      }
+    }
+
+    return results;
   });
 
   constructor(private _dialogService: DialogService) {}
@@ -164,6 +187,14 @@ export class EditOperationSetComponent {
     entries.splice(index, 1);
     entries.splice(index - 1, 0, entry);
     this.operations.set(entries);
+
+    // update edited index if the moved operation is being edited
+    if (this.editedOperationIndex() === index) {
+      this.editedOperationIndex.set(index - 1);
+    } else if (this.editedOperationIndex() === index - 1) {
+      // if the operation above was being edited, it moves down
+      this.editedOperationIndex.set(index);
+    }
   }
 
   public moveOperationDown(index: number): void {
@@ -175,6 +206,14 @@ export class EditOperationSetComponent {
     entries.splice(index, 1);
     entries.splice(index + 1, 0, entry);
     this.operations.set(entries);
+
+    // update edited index if the moved operation is being edited
+    if (this.editedOperationIndex() === index) {
+      this.editedOperationIndex.set(index + 1);
+    } else if (this.editedOperationIndex() === index + 1) {
+      // if the operation below was being edited, it moves up
+      this.editedOperationIndex.set(index);
+    }
   }
 
   public addByDiffing(): void {

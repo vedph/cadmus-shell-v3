@@ -30,6 +30,7 @@
         <th></th>
         <th>type</th>
         <th>operation</th>
+        <th>input → output</th>
       </tr>
     </thead>
     <tbody>
@@ -76,6 +77,11 @@
         </td>
         <td>{{ operation.type }}</td>
         <td>{{ operation.toString() }}</td>
+        <td>
+          <span class="input-text">{{ operationTexts()[i].input }}</span>
+          <span class="arrow">→</span>
+          <span class="output-text">{{ operationTexts()[i].output }}</span>
+        </td>
       </tr>
       }
     </tbody>
