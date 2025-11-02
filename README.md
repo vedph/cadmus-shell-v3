@@ -34,7 +34,7 @@ Latest versions:
 - cadmus-part-general-pg: 16.0.3
 - cadmus-part-general-ui: 15.0.3
 - cadmus-part-philology-pg: 16.1.2
-- cadmus-part-philology-ui: 16.0.0
+- cadmus-part-philology-ui: 16.0.2
 - cadmus-preview-pg: 17.0.0
 - cadmus-preview-ui: 17.0.0
 - cadmus-profile-core: 12.0.0
@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-11-02: refactor orthography fragment editor (fixes and minor model changes).
 - 2025-10-28:
   - updated Angular and packages.
   - ⚠️ changed `OrthographyFragment.tag` (`string`) to `OrthographyFragment.tags` (`string[]`) in `@myrmidon/cadmus-part-philology-ui`.
