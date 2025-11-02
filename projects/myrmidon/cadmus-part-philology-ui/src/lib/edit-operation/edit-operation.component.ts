@@ -31,7 +31,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   renderLabelFromLastColon,
@@ -162,13 +161,6 @@ export class EditOperationComponent {
     });
     this.to = new FormControl<number>(0, {
       nonNullable: true,
-      validators: NgxToolsValidators.conditionalValidator(
-        () =>
-          this.type.value === 'MoveBefore' ||
-          this.type.value === 'MoveAfter' ||
-          this.type.value === 'Swap',
-        Validators.min(1)
-      ),
     });
     this.toRun = new FormControl<number>(0, { nonNullable: true });
     this.tags = new FormControl<ThesaurusEntry[]>([], {
@@ -190,13 +182,22 @@ export class EditOperationComponent {
     });
 
     // when model changes, update form
-    effect(
-      () => {
-        const operation = this.operation();
-        this.updateForm(operation);
-      },
-      { allowSignalWrites: true }
-    );
+    effect(() => {
+      const operation = this.operation();
+      this.updateForm(operation);
+    });
+
+    // when type changes, update validators for 'to' field
+    this.type.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((type) => {
+        if (type === 'MoveBefore' || type === 'MoveAfter' || type === 'Swap') {
+          this.to.setValidators(Validators.min(1));
+        } else {
+          this.to.clearValidators();
+        }
+        this.to.updateValueAndValidity();
+      });
 
     // whenever type, at, run, to, toRun, text change, set output dirty
     merge(
