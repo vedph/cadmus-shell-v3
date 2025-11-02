@@ -31,11 +31,12 @@
         <th>type</th>
         <th>operation</th>
         <th>input → output</th>
+        <th>tags</th>
       </tr>
     </thead>
     <tbody>
-      @for (operation of operations(); track operation; let i = $index; let
-      first = $first; let last = $last) {
+      @for (operation of operations(); track trackByOperation($index,
+      operation); let i = $index; let first = $first; let last = $last) {
       <tr [class.selected]="i === editedOperationIndex()">
         <td class="fit-width">
           <button
@@ -81,6 +82,13 @@
           <span class="input-text">{{ operationTexts()[i].input }}</span>
           <span class="arrow">→</span>
           <span class="output-text">{{ operationTexts()[i].output }}</span>
+        </td>
+        <td>
+          @for (tag of operation.tags; track tag) {
+          <mat-chip>{{
+            tag | flatLookup : opTagEntries() : "id" : "value"
+          }}</mat-chip>
+          }
         </td>
       </tr>
       }

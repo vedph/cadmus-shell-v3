@@ -1,6 +1,4 @@
 import { Component, computed, input, model, signal } from '@angular/core';
-import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -10,6 +8,11 @@ import {
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 import { MatTooltip } from '@angular/material/tooltip';
+
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
+import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { FlatLookupPipe } from '@myrmidon/ngx-tools';
+import { MatChip } from '@angular/material/chips';
 
 import { EditOperation, OperationType } from '../services/edit-operation';
 import { EditOperationComponent } from '../edit-operation/edit-operation.component';
@@ -24,6 +27,7 @@ import { EditOperationComponent } from '../edit-operation/edit-operation.compone
   selector: 'cadmus-edit-operation-set',
   imports: [
     MatButton,
+    MatChip,
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
@@ -31,6 +35,7 @@ import { EditOperationComponent } from '../edit-operation/edit-operation.compone
     MatIconButton,
     MatTooltip,
     EditOperationComponent,
+    FlatLookupPipe,
   ],
   templateUrl: './edit-operation-set.component.html',
   styleUrl: './edit-operation-set.component.css',
@@ -133,6 +138,14 @@ export class EditOperationSetComponent {
   });
 
   constructor(private _dialogService: DialogService) {}
+
+  /**
+   * TrackBy function for the operations list to avoid performance warnings.
+   * Uses the operation's string representation as a unique identifier.
+   */
+  public trackByOperation(index: number, operation: EditOperation): string {
+    return `${index}-${operation.toString()}`;
+  }
 
   public addOperation(): void {
     const operation: EditOperation = EditOperation.createOperation(
