@@ -4,11 +4,12 @@ import { Fragment } from '@myrmidon/cadmus-core';
  * The orthography layer fragment server model.
  */
 export interface OrthographyFragment extends Fragment {
-  standard: string;
+  reference: string;
   language?: string;
   tags?: string[];
   note?: string;
   operations?: string[];
+  isTextTarget?: boolean;
 }
 
 export const ORTHOGRAPHY_FRAGMENT_TYPEID = 'fr.it.vedph.orthography';
@@ -22,7 +23,7 @@ export const ORTHOGRAPHY_FRAGMENT_SCHEMA = {
     '.json',
   type: 'object',
   title: 'OrthographyFragment',
-  required: ['location', 'standard'],
+  required: ['location', 'reference'],
   properties: {
     location: {
       $id: '#/properties/location',
@@ -32,8 +33,8 @@ export const ORTHOGRAPHY_FRAGMENT_SCHEMA = {
       $id: '#/properties/baseText',
       type: 'string',
     },
-    standard: {
-      $id: '#/properties/standard',
+    reference: {
+      $id: '#/properties/reference',
       type: 'string',
     },
     language: {
@@ -60,6 +61,10 @@ export const ORTHOGRAPHY_FRAGMENT_SCHEMA = {
         pattern:
           '(?:"([^"]+)")?\\@(\\d+)(?:[x×](\\d+))?\\s*([=>~])\\s*(?:"([^"]*)")?(?:\\@(\\d+)(?:[x×](\\d+))?)?(?:\\s*\\[([^\\]{]+)\\])?(?:\\s*\\{([^}]+)})?',
       },
+    },
+    isTextTarget: {
+      $id: '#/properties/isTextTarget',
+      type: 'boolean',
     },
   },
 };

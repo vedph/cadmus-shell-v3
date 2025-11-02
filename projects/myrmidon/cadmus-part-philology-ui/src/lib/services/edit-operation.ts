@@ -9,7 +9,9 @@ export enum OperationType {
   Swap = 'Swap',
 }
 
-// Custom exception for parsing errors
+/**
+ * Exception thrown when parsing an edit operation fails.
+ */
 export class ParseException extends Error {
   public readonly inputSubstring: string;
   public readonly position: number;
@@ -29,24 +31,86 @@ export class ParseException extends Error {
   }
 }
 
-// Base class for edit operations
+/**
+ * Base class for edit operations. An edit operation represents a single
+ * modification to be applied to a text string, such as insertion, deletion,
+ * replacement, moving, or swapping of text segments.
+ */
 export abstract class EditOperation {
   protected static readonly coordinateRegex = /@(\d+)(?:[x×](\d+))?/i;
   protected static readonly noteRegex = /\{([^}]*)\}/;
   protected static readonly tagsRegex = /\[([^\]]*)\]/;
 
+  /**
+   * The operation type.
+   */
   public type: OperationType = OperationType.Replace;
+  /**
+   * The input text relevant to the operation, if any. This is usually
+   * calculated from at and run.
+   */
   public inputText?: string;
+  /**
+   * The position (1-based) in the text where the operation applies.
+   */
   public at: number = 1;
+  /**
+   * The number of characters the operation applies to starting from `at`.
+   */
   public run: number = 1;
+  /**
+   * An optional note associated with the operation.
+   */
   public note?: string;
+  /**
+   * Optional tags associated with the operation.
+   */
   public tags?: string[];
+  /**
+   * The text to insert or replace with, if applicable.
+   */
+  public text?: string;
+  /**
+   * The target position (1-based) for move/swap operations.
+   */
+  public to?: number;
+  /**
+   * The target run length for swap operations.
+   */
+  public toRun?: number;
 
-  public text?: string; // for insert/replace operations
-  public to?: number; // for move/swap operations
-  public toRun?: number; // for move/swap operations
-
+  /**
+   * Executes the edit operation on the given input text.
+   * @param input The input text.
+   */
   public abstract execute(input: string): string;
+
+  /**
+   * Parses the edit operation from the given DSL text. Syntax depends on
+   * the operation type:
+   * - delete `"A"@NxN!` (this is just a replace of A with zero)
+   * - insert-before `@N+="X"`
+   * - insert-after `@N=+"X"`
+   * - replace `"A"@NxN="X"`
+   * - move-before `"A"@N>@N`
+   * - move-after `"A"@N->@N`
+   * - swap `"A"@NxN<>"X"@NxN`
+   * where:
+   * - `"A"` stands for the text value of the selected input in the operation.
+   * This is optional, but often added for clarity. When producing operations
+   * by diffing, you can choose whether to add this or not.
+   * - `"X"` stands for the text value which is replacing the input or being
+   * added to the input or being swapped with the input.
+   * - `@NxN` or just `@N` is the coordinates of the characters selected.
+   * The first `N` is the ordinal in the input (=A) word: 1=first character,
+   * 2=second, etc. The second `N` after the `x` (which can also be replaced
+   * by `×`) is the number of characters to select; when not specified, it
+   * defaults to 1. So, given an input form "FECIT", `@1`="F", `@3x2`="CI".
+   * - after all the operations, we can add a free text note between `{}`:
+   * e.g. `"X"@1="V" {my note here}` and/or string tags separated by spaces
+   * and included in `[]`: e.g. `"X"@1="V" [tag1 tag2]`.
+   * @param text The DSL text.
+   */
   public abstract parse(text: string): void;
 
   protected parseCoordinates(text: string): [number, number] {
@@ -116,13 +180,18 @@ export abstract class EditOperation {
     }
   }
 
+  /**
+   * Parses an edit operation from the given DSL text.
+   * @param text The DSL text representing the operation.
+   * @returns Parsed operation.
+   */
   public static parseOperation(text: string): EditOperation {
     if (!text || text.trim().length === 0) {
       throw new ParseException('DSL text cannot be empty', text);
     }
 
     try {
-      // Determine operation type based on operators
+      // determine operation type based on operators
       if (text.includes('!')) {
         return this.parseTypedOperation<DeleteEditOperation>(
           DeleteEditOperation,
@@ -169,6 +238,11 @@ export abstract class EditOperation {
     }
   }
 
+  /**
+   * Creates an empty operation instance of the specified type.
+   * @param type The operation type.
+   * @returns The operation instance.
+   */
   public static createOperation(type: OperationType): EditOperation {
     switch (type) {
       case OperationType.Delete:
@@ -335,6 +409,28 @@ export abstract class EditOperation {
     return adjusted;
   }
 
+  /**
+   * Diffs source and target texts to produce a list of edit operations which
+   * transform source into target.
+   * @param source The source text.
+   * @param target The target text.
+   * @param includeInputText True to populate operation.inputText (deleted or
+   *        replaced text) and to set empty strings for insert operations when
+   *        desired. Useful for human-readable output.
+   * @param adjust If true, post-process the raw diff to detect pairs of a
+   *        Delete operation and a single matching Add/Replace operation that
+   *        effectively move the same text. Those pairs are converted into a
+   *        MoveBefore operation (i.e. a "move" rather than separate delete +
+   *        insert). This makes the resulting operation list more compact and
+   *        semantically clearer when text is moved.
+   * @param insertOnly When true, the adjustment step considers only pure
+   *        insert operations (InsertBefore/InsertAfter) as candidates for
+   *        matching deleted text; Replace operations are ignored. When false,
+   *        Replace operations are also eligible to be considered as adding the
+   *        same text (and therefore be turned into a move together with the
+   *        delete).
+   * @returns Array of EditOperation objects that transform source into target.
+   */
   public static diff(
     source: string,
     target: string,
@@ -359,7 +455,7 @@ export abstract class EditOperation {
     }
 
     if (!target || target.length === 0) {
-      // Delete entire source
+      // delete entire source
       const deleteOp = new DeleteEditOperation();
       deleteOp.at = 1;
       deleteOp.run = source.length;
@@ -471,7 +567,10 @@ export abstract class EditOperation {
   }
 }
 
-// Delete edit operation
+//#region Delete edit operation
+/**
+ * Delete edit operation.
+ */
 export class DeleteEditOperation extends EditOperation {
   constructor() {
     super();
@@ -541,8 +640,12 @@ export class DeleteEditOperation extends EditOperation {
     return result;
   }
 }
+//#endregion
 
-// Insert after edit operation
+//#region Insert-after edit operations
+/**
+ * Insert-after edit operation.
+ */
 export class InsertAfterEditOperation extends EditOperation {
   constructor() {
     super();
@@ -600,8 +703,12 @@ export class InsertAfterEditOperation extends EditOperation {
     return result;
   }
 }
+//#endregion
 
-// Insert before edit operation
+//#region Insert-before edit operations
+/**
+ * Insert-before edit operation.
+ */
 export class InsertBeforeEditOperation extends EditOperation {
   constructor() {
     super();
@@ -655,8 +762,12 @@ export class InsertBeforeEditOperation extends EditOperation {
     return result;
   }
 }
+//#endregion
 
-// Move after edit operation
+//#region Move-after edit operations
+/**
+ * Move-after edit operation.
+ */
 export class MoveAfterEditOperation extends EditOperation {
   constructor() {
     super();
@@ -751,8 +862,12 @@ export class MoveAfterEditOperation extends EditOperation {
     return result;
   }
 }
+//#endregion
 
-// Move before edit operation
+//#region Move-before edit operations
+/**
+ * Move-before edit operation.
+ */
 export class MoveBeforeEditOperation extends EditOperation {
   constructor() {
     super();
@@ -849,8 +964,12 @@ export class MoveBeforeEditOperation extends EditOperation {
     return result;
   }
 }
+//#endregion
 
-// Replace edit operation
+//#region Replace edit operation
+/**
+ * Replace edit operation.
+ */
 export class ReplaceEditOperation extends EditOperation {
   constructor() {
     super();
@@ -929,8 +1048,12 @@ export class ReplaceEditOperation extends EditOperation {
     return result;
   }
 }
+//#endregion
 
-// Swap edit operation
+//#region Swap edit operations
+/**
+ * Swap edit operation.
+ **/
 export class SwapEditOperation extends EditOperation {
   public inputText2?: string;
 
@@ -1075,3 +1198,4 @@ export class SwapEditOperation extends EditOperation {
     return result;
   }
 }
+//#endregion

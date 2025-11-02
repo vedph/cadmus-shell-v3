@@ -1,4 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, computed, OnInit, signal, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -21,17 +22,11 @@ import {
   MatCardContent,
   MatCardActions,
 } from '@angular/material/card';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatOption, MatSelect } from '@angular/material/select';
-import {
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
 
 import {
   CloseSaveButtonsComponent,
@@ -39,7 +34,6 @@ import {
   renderLabelFromLastColon,
   ThesEntriesPickerComponent,
 } from '@myrmidon/cadmus-ui';
-import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   TextLayerService,
@@ -72,18 +66,13 @@ import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-
     MatCardTitle,
     MatCardSubtitle,
     MatCardContent,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
+    MatCheckbox,
     MatFormField,
     MatLabel,
     MatInput,
     MatError,
     MatSelect,
     MatOption,
-    MatButton,
-    MatTooltip,
-    MatIconButton,
     MatCardActions,
     TitleCasePipe,
     ThesEntriesPickerComponent,
@@ -96,7 +85,34 @@ export class OrthographyFragmentComponent
   extends ModelEditorComponentBase<OrthographyFragment>
   implements OnInit
 {
+  private _destroyRef = inject(DestroyRef);
+  private readonly _reference = signal<string>('');
+  private readonly _textTarget = signal<boolean>(false);
+
+  /**
+   * The fragment text.
+   */
   public readonly frText = signal<string | undefined>(undefined);
+
+  /**
+   * The source text: either the reference (if textTarget is true) or
+   * the fragment text.
+   */
+  public readonly sourceText = computed<string | undefined>(() => {
+    const text = this.frText();
+    const reference = this._reference();
+    return this._textTarget() ? reference : text;
+  });
+
+  /**
+   * The target text: either the fragment text (if textTarget is true) or
+   * the reference.
+   */
+  public readonly targetText = computed<string | undefined>(() => {
+    const text = this.frText();
+    const reference = this._reference();
+    return this._textTarget() ? text : reference;
+  });
 
   // orthography-languages
   public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
@@ -107,23 +123,23 @@ export class OrthographyFragmentComponent
     undefined
   );
 
-  public standard: FormControl<string>;
+  public reference: FormControl<string>;
   public language: FormControl<string | null>;
   public tags: FormControl<ThesaurusEntry[]>;
   public note: FormControl<string | null>;
   public operations: FormControl<EditOperation[]>;
+  public textTarget: FormControl<boolean>;
 
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
     private _layerService: TextLayerService,
-    private _dialogService: DialogService,
     private _clipboard: Clipboard,
     private _snackbar: MatSnackBar
   ) {
     super(authService, formBuilder);
     // form
-    this.standard = formBuilder.control('', {
+    this.reference = formBuilder.control('', {
       validators: [Validators.required, Validators.maxLength(100)],
       nonNullable: true,
     });
@@ -137,6 +153,19 @@ export class OrthographyFragmentComponent
     this.operations = formBuilder.control([], {
       nonNullable: true,
     });
+    this.textTarget = formBuilder.control(false, { nonNullable: true });
+
+    // subscribe to form control changes to update signals
+    this.reference.valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((value) => {
+        this._reference.set(value);
+      });
+    this.textTarget.valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((value) => {
+        this._textTarget.set(value);
+      });
   }
 
   public override ngOnInit(): void {
@@ -145,11 +174,12 @@ export class OrthographyFragmentComponent
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
     return formBuilder.group({
-      standard: this.standard,
+      standard: this.reference,
       language: this.language,
       tag: this.tags,
       note: this.note,
       operations: this.operations,
+      textTarget: this.textTarget,
     });
   }
 
@@ -187,13 +217,19 @@ export class OrthographyFragmentComponent
   private updateForm(fragment?: OrthographyFragment | null): void {
     if (!fragment) {
       this.form.reset();
+      this._reference.set('');
+      this._textTarget.set(false);
     } else {
-      this.standard.setValue(fragment.standard);
+      this.reference.setValue(fragment.reference);
+      this._reference.set(fragment.reference);
       this.language.setValue(fragment.language || null);
       this.tags.setValue(
         this.mapIdsToEntries(fragment.tags || [], this.tagEntries()) || []
       );
       this.note.setValue(fragment.note || null);
+      const textTargetValue = fragment.isTextTarget || false;
+      this.textTarget.setValue(textTargetValue);
+      this._textTarget.set(textTargetValue);
       try {
         this.operations.setValue(
           fragment.operations?.map((text) =>
@@ -235,7 +271,7 @@ export class OrthographyFragmentComponent
 
   protected override getValue(): OrthographyFragment {
     const fragment = this.getEditedFragment() as OrthographyFragment;
-    fragment.standard = this.standard.value;
+    fragment.reference = this.reference.value;
     fragment.language = this.language.value?.trim() || undefined;
     fragment.tags = this.tags.value.length
       ? this.tags.value.map((entry) => entry.id)

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-philology-ui",
-  "version": "16.0.1",
+  "version": "16.0.2",
   "description": "Cadmus - philologic parts.",
   "keywords": [
     "Cadmus"
@@ -21,7 +21,7 @@
     "@myrmidon/ngx-tools": "^2.0.0",
     "@myrmidon/ngx-mat-tools": "^1.0.0",
     "@myrmidon/cadmus-core": "^12.0.2",
-    "@myrmidon/cadmus-ui": "^15.1.2"
+    "@myrmidon/cadmus-ui": "^15.1.3"
   },
   "dependencies": {
     "tslib": "^2.3.0"

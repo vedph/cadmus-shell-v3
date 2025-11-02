@@ -64,7 +64,7 @@
           (click)="setAtRunFromPickedCoords()"
           matTooltip="Set at+run to picked coords"
         >
-          <mat-icon>arrow_drop_down</mat-icon>
+          <mat-icon>arrow_drop_down_circle</mat-icon>
         </button>
         @if (type.value === 'MoveBefore' || type.value === 'MoveAfter' ||
         type.value === 'Swap') {
@@ -72,10 +72,10 @@
           type="button"
           mat-icon-button
           [disabled]="!pickedCoords()"
-          (click)="setToRunFromPickedCoords()"
-          matTooltip="Set to+run to picked coords"
+          (click)="setToFromPickedCoords()"
+          matTooltip="Set to to picked coords"
         >
-          <mat-icon>arrow_drop_down</mat-icon>
+          <mat-icon>download_for_offline</mat-icon>
         </button>
         }
       </div>
@@ -170,7 +170,7 @@
 
         <mat-form-field class="nr-field">
           <mat-label>to run</mat-label>
-          <input matInput type="number" min="1" [formControl]="toRun" />
+          <input matInput type="number" min="0" [formControl]="toRun" />
           @if ($any(toRun).errors?.required && (toRun.dirty || toRun.touched)) {
           <mat-error>to run required</mat-error>
           }

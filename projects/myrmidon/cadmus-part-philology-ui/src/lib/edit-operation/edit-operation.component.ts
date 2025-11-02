@@ -390,13 +390,12 @@ export class EditOperationComponent {
     this.expanded.set(true);
   }
 
-  public setToRunFromPickedCoords(): void {
+  public setToFromPickedCoords(): void {
     const coords = this.pickedCoords();
     if (!coords) return;
     const parsed = this.parsePickedCoords();
     if (!parsed) return;
     this.to.setValue(parsed.at);
-    this.toRun.setValue(parsed.run);
     this.expanded.set(true);
   }
 

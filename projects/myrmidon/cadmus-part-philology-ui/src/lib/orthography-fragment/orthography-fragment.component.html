@@ -16,16 +16,16 @@
       <!-- EDITOR -->
       <div>
         <div class="form-row">
-          <!-- standard -->
+          <!-- reference -->
           <mat-form-field>
-            <mat-label>standard</mat-label>
-            <input matInput [formControl]="standard" />
-            @if ($any(standard).errors?.required && (standard.dirty ||
-            standard.touched)) {
-            <mat-error>standard required</mat-error>
-            } @if ($any(standard).errors?.maxLength && (standard.dirty ||
-            standard.touched)) {
-            <mat-error>standard too long</mat-error>
+            <mat-label>reference</mat-label>
+            <input matInput [formControl]="reference" />
+            @if ($any(reference).errors?.required && (reference.dirty ||
+            reference.touched)) {
+            <mat-error>reference required</mat-error>
+            } @if ($any(reference).errors?.maxLength && (reference.dirty ||
+            reference.touched)) {
+            <mat-error>reference too long</mat-error>
             }
           </mat-form-field>
 
@@ -51,6 +51,9 @@
           </mat-form-field>
           }
 
+          <!-- text target -->
+          <mat-checkbox [formControl]="textTarget">ref. → text</mat-checkbox>
+
           <!-- tag -->
           @if (tagEntries()?.length) {
           <div>
@@ -71,8 +74,8 @@
           <fieldset>
             <legend>operations</legend>
             <cadmus-edit-operation-set
-              [baseText]="frText() || ''"
-              [targetText]="standard.value"
+              [baseText]="sourceText() || ''"
+              [targetText]="targetText() || ''"
               [tagEntries]="tagEntries()"
               [opTagEntries]="opTagEntries()"
               [operations]="operations.value"
