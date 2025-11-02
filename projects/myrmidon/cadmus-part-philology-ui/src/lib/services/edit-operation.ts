@@ -35,6 +35,8 @@ export class ParseException extends Error {
  * Base class for edit operations. An edit operation represents a single
  * modification to be applied to a text string, such as insertion, deletion,
  * replacement, moving, or swapping of text segments.
+ * Operations refer to their input text via coordinates represented by 1-based
+ * positions.
  */
 export abstract class EditOperation {
   protected static readonly coordinateRegex = /@(\d+)(?:[x×](\d+))?/i;
@@ -252,7 +254,7 @@ export abstract class EditOperation {
       case OperationType.InsertBefore:
         return new InsertBeforeEditOperation();
       case OperationType.InsertAfter:
-        return new InsertBeforeEditOperation();
+        return new InsertAfterEditOperation();
       case OperationType.MoveBefore:
         return new MoveBeforeEditOperation();
       case OperationType.MoveAfter:

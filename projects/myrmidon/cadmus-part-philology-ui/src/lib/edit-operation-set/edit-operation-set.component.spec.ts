@@ -14,6 +14,7 @@ describe('EditOperationSetComponent', () => {
 
     fixture = TestBed.createComponent(EditOperationSetComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('baseText', 'test');
     fixture.detectChanges();
   });
 
