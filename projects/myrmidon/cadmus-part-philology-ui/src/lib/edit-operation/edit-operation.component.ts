@@ -50,7 +50,9 @@ import {
 } from '../char-text-view/char-text-view.component';
 
 /**
- * Editor for a single edit operation.
+ * Editor for a single edit operation. This component can either parse an
+ * operation from its DSL representation, or build it using a visual form.
+ * It calculates the output text after applying the operation to the input text.
  */
 @Component({
   selector: 'cadmus-edit-operation',
@@ -83,11 +85,6 @@ export class EditOperationComponent {
    * The input text where the operation is applied.
    */
   public readonly inputText = input.required<string>();
-
-  /**
-   * True to hide the tags picker.
-   */
-  public readonly hideTagsPicker = input<boolean>(false);
 
   /**
    * The output text after applying the operation.
