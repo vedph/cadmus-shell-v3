@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-11-07: updated Angular and packages.
 - 2025-11-02: refactor orthography fragment editor (fixes and minor model changes).
 - 2025-10-28:
   - updated Angular and packages.
