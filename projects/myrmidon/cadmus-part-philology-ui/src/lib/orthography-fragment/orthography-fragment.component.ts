@@ -1,4 +1,12 @@
-import { Component, computed, OnInit, signal, DestroyRef, inject } from '@angular/core';
+import {
+  Component,
+  computed,
+  OnInit,
+  signal,
+  DestroyRef,
+  inject,
+  effect,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
 import {
@@ -88,6 +96,7 @@ export class OrthographyFragmentComponent
   private _destroyRef = inject(DestroyRef);
   private readonly _reference = signal<string>('');
   private readonly _textTarget = signal<boolean>(false);
+  private readonly _operations = signal<EditOperation[]>([]);
 
   /**
    * The fragment text.
@@ -166,6 +175,22 @@ export class OrthographyFragmentComponent
       .subscribe((value) => {
         this._textTarget.set(value);
       });
+    this.operations.valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((value) => {
+        this._operations.set(value);
+      });
+
+    // disable reference if operations exist
+    effect(() => {
+      const disabled = this._operations()?.length > 0;
+      if (disabled) {
+        this.reference.disable();
+      } else {
+        this.reference.enable();
+      }
+      return disabled;
+    });
   }
 
   public override ngOnInit(): void {
@@ -236,6 +261,11 @@ export class OrthographyFragmentComponent
             EditOperation.parseOperation(text)
           ) || []
         );
+        if (this.operations.value?.length) {
+          this.reference.disable();
+        } else {
+          this.reference.enable();
+        }
       } catch (error) {
         console.error('Error parsing operations', error, fragment.operations);
         this.operations.setValue([]);
