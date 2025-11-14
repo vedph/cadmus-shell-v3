@@ -28,7 +28,7 @@ Latest versions:
 - cadmus-graph-ui: 15.0.0
 - cadmus-graph-ui-ex: 16.0.0
 - cadmus-item-editor: 16.0.0
-- cadmus-item-list: 16.0.0
+- cadmus-item-list: 16.0.1
 - cadmus-item-search: 16.0.0
 - cadmus-layer-demo: 15.0.1
 - cadmus-part-general-pg: 16.0.3
@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-11-14: fix user filter in items list.
 - 2025-11-07:
   - updated Angular and packages.
   - disable reference input text when there are any operations in orthography fragment editor.

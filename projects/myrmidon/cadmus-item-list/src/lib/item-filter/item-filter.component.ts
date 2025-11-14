@@ -172,8 +172,8 @@ export class ItemFilterComponent implements OnInit, OnDestroy {
     };
   }
 
-  public onUserChange(user?: unknown): void {
-    const u = user as UserInfo | undefined;
+  public onUserChange(user?: any): void {
+    const u = user?.user as UserInfo | undefined;
     if (u) {
       this.user.setValue(u.userName);
       this.currentUser.set(u);

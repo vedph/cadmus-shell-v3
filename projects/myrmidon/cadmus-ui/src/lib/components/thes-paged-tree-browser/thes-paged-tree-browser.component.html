@@ -37,7 +37,7 @@
     @if (nodes$ | async; as nodes) {
     <div>
       @for (node of nodes; track node.id; let i = $index) {
-      <div class="button-row" [class.hilite]="node.hilite">
+      <div class="button-row" [class.hilite]="$any(node).hilite">
         <pdb-browser-tree-node
           [node]="node"
           [debug]="debug.value"
