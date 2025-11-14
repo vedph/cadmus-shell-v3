@@ -1,9 +1,9 @@
 <div class="cadmus-text-span-view-row">
   <!-- rows -->
-  @for (row of rows(); track row) {
+  @for (row of rows(); track $index) {
   <div class="row">
     <!-- row -->
-    @for (segment of row; track segment) {
+    @for (segment of row; track segment._uniqueId) {
     <!-- col -->
     <div
       class="col"

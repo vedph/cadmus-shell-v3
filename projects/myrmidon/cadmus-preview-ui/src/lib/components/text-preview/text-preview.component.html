@@ -22,7 +22,7 @@
         <mat-label>layer</mat-label>
         <mat-select [formControl]="selectedLayer">
           <mat-option [value]="{ id: 'all' }">all</mat-option>
-          @for (l of layers(); track l) {
+          @for (l of layers(); track l.id) {
           <mat-option [value]="l">{{
             l.roleId | flatLookup : typeEntries() : "id" : "value"
           }}</mat-option>
@@ -50,10 +50,10 @@
   @if (frHtml().length) {
   <div id="fragments">
     <mat-tab-group>
-      @for (html of frHtml(); track html; let i = $index) {
+      @for (html of frHtml(); track $index) {
       <mat-tab
         [label]="
-          $any(frLabels()[i] | flatLookup : typeEntries() : 'id' : 'value')
+          $any(frLabels()[$index] | flatLookup : typeEntries() : 'id' : 'value')
         "
       >
         <div [innerHtml]="html | safeHtml : 'html'"></div>

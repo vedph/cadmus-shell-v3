@@ -15,6 +15,7 @@ import {
 
 interface DecoratedSegment extends ExportedSegment {
   chartItems?: MiniBarChartItem[];
+  _uniqueId?: number;
 }
 
 // the feature name for end of line at segment end
@@ -118,7 +119,7 @@ export class TextSegmentsViewComponent {
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
       // create a new object to avoid mutation
-      const decorated: DecoratedSegment = { ...segment };
+      const decorated: DecoratedSegment = { ...segment, _uniqueId: i };
       this.addChartItems(decorated);
       row.push(decorated);
       if (segment.features?.some((f) => f.name === F_EOL_TAIL)) {
