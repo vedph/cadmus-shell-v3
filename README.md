@@ -210,7 +210,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2025-11-14: fix user filter in items list.
+- 2025-11-14:
+  - fix user filter in items list.
+  - refactoring text preview implementation.
 - 2025-11-07:
   - updated Angular and packages.
   - disable reference input text when there are any operations in orthography fragment editor.
