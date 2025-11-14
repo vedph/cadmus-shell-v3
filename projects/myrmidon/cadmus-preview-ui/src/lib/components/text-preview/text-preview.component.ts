@@ -1,10 +1,10 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   effect,
   input,
-  OnDestroy,
-  OnInit,
   signal,
+  untracked,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -13,7 +13,8 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { forkJoin, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -51,6 +52,7 @@ export interface DecoratedLayerPartInfo extends LayerPartInfo {
   selector: 'cadmus-text-preview',
   templateUrl: './text-preview.component.html',
   styleUrls: ['./text-preview.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatProgressBar,
     MatFormField,
@@ -66,9 +68,8 @@ export interface DecoratedLayerPartInfo extends LayerPartInfo {
     TextSegmentsViewComponent,
   ],
 })
-export class TextPreviewComponent implements OnInit, OnDestroy {
-  private _sub?: Subscription;
-  private _isLoading = false;
+export class TextPreviewComponent {
+  private readonly _isLoading = signal<boolean>(false);
 
   /**
    * The source of the part to be previewed.
@@ -87,7 +88,10 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   public readonly busy = signal<boolean>(false);
   public readonly item = signal<Item | undefined>(undefined);
 
-  public selectedLayer: FormControl<DecoratedLayerPartInfo | null>;
+  public readonly selectedLayer: FormControl<DecoratedLayerPartInfo | null>;
+  public readonly selectedLayerValue: ReturnType<
+    typeof toSignal<DecoratedLayerPartInfo | null | undefined>
+  >;
 
   constructor(
     private _previewService: PreviewService,
@@ -98,27 +102,41 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   ) {
     // form
     this.selectedLayer = formBuilder.control(null);
+    this.selectedLayerValue = toSignal(this.selectedLayer.valueChanges);
 
+    // react to source changes
     effect(() => {
       const source = this.source();
-      if (this._isLoading) {
-        return;
-      }
-      this.loadItem(source);
+      console.log('[EFFECT-SOURCE] Triggered. source:', source);
+      // Use untracked to prevent signal writes in loadItem from retriggering
+      // Only track the source input signal
+      untracked(() => {
+        console.log('[EFFECT-SOURCE] isLoading:', this._isLoading());
+        if (!this._isLoading()) {
+          console.log('[EFFECT-SOURCE] Calling loadItem');
+          this.loadItem(source);
+        } else {
+          console.log('[EFFECT-SOURCE] Skipped loadItem (loading)');
+        }
+      });
     });
-  }
 
-  public ngOnInit(): void {
-    this._sub = this.selectedLayer.valueChanges.subscribe((_) => {
-      if (!this._isLoading) {
-        this.loadLayer();
-      }
+    // react to selected layer changes
+    effect(() => {
+      const layer = this.selectedLayerValue();
+      console.log('[EFFECT-LAYER] Triggered. layer:', layer);
+      // Use untracked to read _isLoading without tracking it as a dependency
+      untracked(() => {
+        console.log('[EFFECT-LAYER] isLoading (untracked):', this._isLoading());
+        // Only load if we have a valid selection and not currently loading
+        if (!this._isLoading() && layer !== undefined) {
+          console.log('[EFFECT-LAYER] Calling loadLayer');
+          this.loadLayer();
+        } else {
+          console.log('[EFFECT-LAYER] Skipped loadLayer. isLoading:', this._isLoading(), 'layer:', layer);
+        }
+      });
     });
-    // Don't call loadItem() here - the effect will handle it
-  }
-
-  public ngOnDestroy(): void {
-    this._sub?.unsubscribe();
   }
 
   private adjustSpanWS(spans: ExportedSegment[]): void {
@@ -142,14 +160,17 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   }
 
   private loadLayer(): void {
+    console.log('[loadLayer] Called');
     const layer = this.selectedLayer.value;
     const layers = !layer || layer.id === 'all' ? this.layers() : [layer];
 
-    if (this._isLoading) {
+    if (this._isLoading()) {
+      console.log('[loadLayer] Aborted (already loading)');
       return;
     }
 
-    this._isLoading = true;
+    console.log('[loadLayer] Setting isLoading=true, starting request');
+    this._isLoading.set(true);
     this.busy.set(true);
 
     this._previewService
@@ -160,15 +181,18 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe({
         next: (spans) => {
+          console.log('[loadLayer] Success, setting isLoading=false');
           this.busy.set(false);
-          this._isLoading = false;
+          this._isLoading.set(false);
           // convert initial/final WS into mid dot
           this.adjustSpanWS(spans);
           this.segments.set(spans);
+          console.log('[loadLayer] Done');
         },
         error: (error) => {
+          console.log('[loadLayer] Error, setting isLoading=false');
           this.busy.set(false);
-          this._isLoading = false;
+          this._isLoading.set(false);
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
             error
@@ -181,18 +205,22 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   }
 
   private loadItem(source?: PartPreviewSource): void {
-    if (this._isLoading) {
+    console.log('[loadItem] Called with source:', source);
+    if (this._isLoading()) {
+      console.log('[loadItem] Aborted (already loading)');
       return;
     }
 
     if (!source?.partId) {
+      console.log('[loadItem] No partId, clearing data');
       this.item.set(undefined);
       this.layers.set([]);
       this.segments.set([]);
       return;
     }
 
-    this._isLoading = true;
+    console.log('[loadItem] Setting isLoading=true, starting forkJoin');
+    this._isLoading.set(true);
     this.busy.set(true);
 
     forkJoin({
@@ -202,24 +230,32 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe({
         next: (result) => {
+          console.log('[loadItem] forkJoin success, setting isLoading=false');
           this.busy.set(false);
-          this._isLoading = false;
+          this._isLoading.set(false);
           this.item.set(result.item || undefined);
           this.assignLayerColors(result.layers);
           this.layers.set(result.layers);
           // select layer if requested
           if (source!.layerId) {
+            console.log('[loadItem] Setting selectedLayer to specific layer:', source!.layerId);
             this.selectedLayer.setValue(
               this.layers().find((l) => l.roleId === source!.layerId) || null
             );
-            if (this.selectedLayer.value) {
-              this.loadLayer();
-            }
+            // loadLayer will be called by the effect when selectedLayer changes
+          } else {
+            // set default "all" value to trigger initial load
+            console.log('[loadItem] Setting selectedLayer to "all"');
+            this.selectedLayer.setValue({
+              id: 'all',
+            } as DecoratedLayerPartInfo);
           }
+          console.log('[loadItem] Done');
         },
         error: (error) => {
+          console.log('[loadItem] forkJoin error, setting isLoading=false');
           this.busy.set(false);
-          this._isLoading = false;
+          this._isLoading.set(false);
           console.error(`Error previewing text part ${source!.partId}`, error);
           this._snackbar.open('Error previewing text part ' + source!.partId);
         },
@@ -232,11 +268,11 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
   }
 
   private showFragments(fragmentIds: string[]): void {
-    if (this._isLoading || !fragmentIds.length) {
+    if (this._isLoading() || !fragmentIds.length) {
       return;
     }
 
-    this._isLoading = true;
+    this._isLoading.set(true);
     this.busy.set(true);
 
     // load all the fragments linked to this block
@@ -260,13 +296,13 @@ export class TextPreviewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (renditions) => {
           this.busy.set(false);
-          this._isLoading = false;
+          this._isLoading.set(false);
           this.frHtml.set(renditions.map((r) => r.result));
           this.frLabels.set(labels);
         },
         error: (error) => {
           this.busy.set(false);
-          this._isLoading = false;
+          this._isLoading.set(false);
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
             error
