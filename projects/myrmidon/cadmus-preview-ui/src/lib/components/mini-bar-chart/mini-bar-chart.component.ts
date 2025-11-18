@@ -11,7 +11,6 @@ import {
   AfterViewInit,
 } from '@angular/core';
 
-
 export interface MiniBarChartItem {
   id?: string;
   label: string;
@@ -283,5 +282,14 @@ export class MiniBarChartComponent implements AfterViewInit {
     const saturation = 65 + (index % 3) * 5;
     const lightness = 75 - (index % 3) * 5;
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+
+  /**
+   * Track by function for the @for loop.
+   * Uses id if available, otherwise falls back to label.
+   * This prevents unnecessary re-rendering when data reference changes.
+   */
+  public trackByItem(_index: number, item: MiniBarChartItem): string | number {
+    return item.id ?? item.label;
   }
 }
