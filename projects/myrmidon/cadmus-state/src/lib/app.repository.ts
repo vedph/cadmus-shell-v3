@@ -192,7 +192,7 @@ export class AppRepository {
     for (let facet of this._facets$.value) {
       for (let part of facet.partDefinitions) {
         if (part.typeId === typeId && (!roleId || part.roleId === roleId)) {
-          return facet.colorKey;
+          return part.colorKey;
         }
       }
     }

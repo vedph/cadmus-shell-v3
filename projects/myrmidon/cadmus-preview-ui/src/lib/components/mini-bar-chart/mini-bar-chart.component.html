@@ -20,7 +20,7 @@
             (click)="onClick(item)"
             [attr.class]="'bar ' + (activeItem() === item ? 'active' : '')"
             />
-            @if (!options()?.noLabels && canShowLabel(item)) {
+            @if (!options().noLabels && canShowLabel(item)) {
               <text
                 [attr.x]="getLabelX(i, item)"
                 [attr.y]="getLabelY(i, item)"
@@ -37,7 +37,6 @@
         }
       </g>
     </svg>
-    <!-- Fixed tooltip positioning -->
     @if (tooltipVisible()) {
       <div
         class="tooltip"

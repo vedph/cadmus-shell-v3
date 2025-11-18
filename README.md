@@ -210,6 +210,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-11-18:
+  - fix to part color get in `@myrmidon/cadmus-state`.
+  - minor improvements to text preview in `@myrmidon/preview-ui`.
 - 2025-11-14:
   - fix user filter in items list.
   - refactoring text preview implementation.
