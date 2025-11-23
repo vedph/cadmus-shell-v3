@@ -11,7 +11,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 🐋 Quick **Docker** image build:
 
-1. `npm run build-lib`;
+1. `pnpm run build-lib`;
 2. update version in `env.js` (and Docker files), and then `ng build --configuration=production`;
 3. `docker build . -t vedph2020/cadmus-shell:17.0.0 -t vedph2020/cadmus-shell:latest` (replace with the current version).
 
