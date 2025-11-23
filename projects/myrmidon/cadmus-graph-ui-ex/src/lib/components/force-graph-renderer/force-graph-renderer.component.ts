@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -128,7 +128,7 @@ export type GraphMode = '2d' | '3d';
       }
     `,
   ],
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
 })
 export class ForceGraphRendererComponent
   implements OnInit, OnDestroy, OnChanges, AfterViewInit

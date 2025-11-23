@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   computed,
@@ -56,7 +56,6 @@ import {
 @Component({
   selector: 'cadmus-edit-operation',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatCheckboxModule,
@@ -67,8 +66,8 @@ import {
     MatSelectModule,
     MatTooltipModule,
     CharTextViewComponent,
-    ThesEntriesPickerComponent,
-  ],
+    ThesEntriesPickerComponent
+],
   templateUrl: './edit-operation.component.html',
   styleUrl: './edit-operation.component.css',
 })

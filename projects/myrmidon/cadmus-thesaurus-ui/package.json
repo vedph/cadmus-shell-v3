@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-thesaurus-ui",
-  "version": "15.0.0",
+  "version": "15.0.1",
   "description": "Cadmus - thesauri UI components.",
   "keywords": [
     "Cadmus"
@@ -14,12 +14,12 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^20.0.0",
-    "@angular/core": "^20.0.0",
-    "@angular/material": "^20.0.0",
-    "@myrmidon/ngx-tools": "^2.0.0",
-    "@myrmidon/paged-data-browsers": "^5.0.2",
-    "@myrmidon/cadmus-ui": "^15.0.0"
+    "@angular/common": "^20.0.0 || ^21.0.0",
+    "@angular/core": "^20.0.0 || ^21.0.0",
+    "@angular/material": "^20.0.0 || ^21.0.0",
+    "@myrmidon/ngx-tools": "^2.0.2",
+    "@myrmidon/paged-data-browsers": "^5.1.2",
+    "@myrmidon/cadmus-ui": "^15.1.4"
   },
   "dependencies": {
     "tslib": "^2.3.0"

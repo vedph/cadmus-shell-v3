@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, effect, input, model, output } from '@angular/core';
 import {
   FormBuilder,
@@ -24,7 +24,6 @@ import { BibAuthor } from '../bibliography-part';
 @Component({
   selector: 'cadmus-bib-author-editor',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatCheckboxModule,
@@ -32,8 +31,8 @@ import { BibAuthor } from '../bibliography-part';
     MatIconModule,
     MatInputModule,
     MatSelectModule,
-    MatTooltipModule,
-  ],
+    MatTooltipModule
+],
   templateUrl: './bib-author-editor.component.html',
   styleUrl: './bib-author-editor.component.css',
 })

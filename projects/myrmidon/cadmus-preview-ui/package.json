@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-preview-ui",
-  "version": "17.0.2",
+  "version": "17.0.3",
   "description": "Cadmus - preview components.",
   "keywords": [
     "Cadmus"
@@ -14,13 +14,13 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^20.0.0",
-    "@angular/core": "^20.0.0",
-    "@angular/material": "^20.0.0",
-    "@myrmidon/ngx-tools": "2.0.1",
-    "@myrmidon/ngx-mat-tools": "1.0.0",
-    "@myrmidon/cadmus-api": "^14.0.3",
-    "@myrmidon/cadmus-state": "^14.0.0"
+    "@angular/common": "^20.0.0 || ^21.0.0",
+    "@angular/core": "^20.0.0 || ^21.0.0",
+    "@angular/material": "^20.0.0 || ^21.0.0",
+    "@myrmidon/ngx-tools": "2.0.2",
+    "@myrmidon/ngx-mat-tools": "1.0.1",
+    "@myrmidon/cadmus-api": "^14.0.4",
+    "@myrmidon/cadmus-state": "^14.0.2"
   },
   "dependencies": {
     "tslib": "^2.3.0"

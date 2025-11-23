@@ -19,32 +19,32 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 14.0.3
-- cadmus-core: 12.0.2
-- cadmus-flags-pg: 15.0.0
-- cadmus-flags-ui: 15.0.1
-- cadmus-graph-pg: 15.0.0
-- cadmus-graph-pg-ex: 16.0.0
-- cadmus-graph-ui: 15.0.0
-- cadmus-graph-ui-ex: 16.0.0
-- cadmus-item-editor: 16.0.0
-- cadmus-item-list: 16.0.1
-- cadmus-item-search: 16.0.0
+- cadmus-api: 14.0.4
+- cadmus-core: 12.0.3
+- cadmus-flags-pg: 15.0.2
+- cadmus-flags-ui: 15.0.2
+- cadmus-graph-pg: 15.0.2
+- cadmus-graph-pg-ex: 16.0.1
+- cadmus-graph-ui: 15.0.1
+- cadmus-graph-ui-ex: 16.0.1
+- cadmus-item-editor: 16.0.1
+- cadmus-item-list: 16.0.2
+- cadmus-item-search: 16.0.1
 - cadmus-layer-demo: 15.0.1
-- cadmus-part-general-pg: 16.0.3
-- cadmus-part-general-ui: 15.0.3
-- cadmus-part-philology-pg: 16.1.2
-- cadmus-part-philology-ui: 16.0.3
-- cadmus-preview-pg: 17.0.0
-- cadmus-preview-ui: 17.0.0
-- cadmus-profile-core: 12.0.0
-- cadmus-state: 14.0.0
-- cadmus-statistics: 1.0.1
-- cadmus-thesaurus-editor: 16.0.0
-- cadmus-thesaurus-list: 16.0.0
-- cadmus-thesaurus-ui: 15.0.0
-- cadmus-ui: 15.1.3
-- cadmus-ui-pg: 16.0.0
+- cadmus-part-general-pg: 16.0.4
+- cadmus-part-general-ui: 15.0.4
+- cadmus-part-philology-pg: 16.1.3
+- cadmus-part-philology-ui: 16.0.4
+- cadmus-preview-pg: 17.0.1
+- cadmus-preview-ui: 17.0.3
+- cadmus-profile-core: 12.0.1
+- cadmus-state: 14.0.2
+- cadmus-statistics: 1.0.2
+- cadmus-thesaurus-editor: 16.0.1
+- cadmus-thesaurus-list: 16.0.1
+- cadmus-thesaurus-ui: 15.0.1
+- cadmus-ui: 15.1.4
+- cadmus-ui-pg: 16.0.1
 
 Dependencies:
 
@@ -210,7 +210,10 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- ⚠️ 2025-11-23: upgraded to Angular 21.
+- ⚠️ 2025-11-23:
+  - upgraded to Angular 21.
+  - migrated to `pnpm`.
+  - fixed import issue: `pnpm remove three.js` and then `pnpm add three@^0.181.2`.
 - 2025-11-18:
   - fix to part color get in `@myrmidon/cadmus-state`.
   - minor improvements to text preview in `@myrmidon/preview-ui`.

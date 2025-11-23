@@ -7,7 +7,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -33,7 +33,6 @@ import { ItemEditFrameStats, StatsService } from '@myrmidon/cadmus-api';
 @Component({
   selector: 'cadmus-edit-frame-stats',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     NgxEchartsDirective,
     MatCardModule,
@@ -43,8 +42,8 @@ import { ItemEditFrameStats, StatsService } from '@myrmidon/cadmus-api';
     MatSelectModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatIconModule,
-  ],
+    MatIconModule
+],
   templateUrl: './edit-frame-stats.component.html',
   styleUrl: './edit-frame-stats.component.css',
 })

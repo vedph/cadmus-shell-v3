@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-statistics",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cadmus - data statistics.",
   "keywords": [
     "Cadmus"
@@ -14,11 +14,11 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^20.0.0",
-    "@angular/core": "^20.0.0",
-    "ngx-echarts": "^20.0.0",
+    "@angular/common": "^20.0.0 || ^21.0.0",
+    "@angular/core": "^20.0.0 || ^21.0.0",
+    "ngx-echarts": "^20.0.2",
     "echarts": "^6.0.0",
-    "@myrmidon/cadmus-api": "^14.0.3"
+    "@myrmidon/cadmus-api": "^14.0.4"
   },
   "dependencies": {
     "tslib": "^2.3.0"
