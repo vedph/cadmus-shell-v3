@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- ⚠️ 2025-11-23: upgraded to Angular 21.
 - 2025-11-18:
   - fix to part color get in `@myrmidon/cadmus-state`.
   - minor improvements to text preview in `@myrmidon/preview-ui`.
