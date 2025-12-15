@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2025-12-15: updated Angular and packages.
 - ⚠️ 2025-11-23:
   - upgraded to Angular 21.
   - migrated to `pnpm`.
