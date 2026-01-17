@@ -132,3 +132,15 @@ private getData(): WordForm {
 </div>
 }
 ```
+
+## History
+
+### 16.0.0
+
+- 2026-01-17: removed thesaurus related components, which were moved into `@myrmidon/cadmus-thesaurus-store`. As for names:
+  - `ThesEntriesPickerComponent` => `ThesaurusEntriesPickerComponent`
+  - `ThesPagedTreeBrowserComponent` => `ThesaurusBrowserComponent`
+  - `StaticThesPagedTreeStoreService` => `StaticThesaurusPagedTreeStoreService`
+  - `ThesaurusTreeComponent` => unchanged
+
+This library also contains the new `EditableThesaurusBrowserComponent`, meant to replace the legacy thesaurus editor from `@myrmidon/cadmus-thesaurus-editor` and related libraries.

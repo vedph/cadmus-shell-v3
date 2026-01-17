@@ -34,8 +34,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   renderLabelFromLastColon,
-  ThesEntriesPickerComponent,
-} from '@myrmidon/cadmus-ui';
+  ThesaurusEntriesPickerComponent,
+} from '@myrmidon/cadmus-thesaurus-store';
 
 import {
   ParseException,
@@ -66,7 +66,7 @@ import {
     MatSelectModule,
     MatTooltipModule,
     CharTextViewComponent,
-    ThesEntriesPickerComponent
+    ThesaurusEntriesPickerComponent
 ],
   templateUrl: './edit-operation.component.html',
   styleUrl: './edit-operation.component.css',

@@ -41,7 +41,7 @@ import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   renderLabelFromLastColon,
   ThesaurusTreeComponent,
-} from '@myrmidon/cadmus-ui';
+} from '@myrmidon/cadmus-thesaurus-store';
 
 import { HistoricalEvent, RelatedEntity } from '../historical-events-part';
 import { RelatedEntityComponent } from '../related-entity/related-entity.component';

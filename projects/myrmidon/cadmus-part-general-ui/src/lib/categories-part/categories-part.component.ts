@@ -7,6 +7,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { TitleCasePipe } from '@angular/common';
 
 import {
   MatCard,
@@ -28,12 +29,13 @@ import { ThesaurusEntry, EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+} from '@myrmidon/cadmus-ui';
+import {
   renderLabelFromLastColon,
   ThesaurusTreeComponent,
-} from '@myrmidon/cadmus-ui';
+} from '@myrmidon/cadmus-thesaurus-store';
 
 import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
-import { TitleCasePipe } from '@angular/common';
 
 /**
  * Categories component editor.

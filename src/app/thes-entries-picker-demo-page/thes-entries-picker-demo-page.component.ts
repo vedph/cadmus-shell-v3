@@ -1,6 +1,6 @@
 import { JsonPipe } from '@angular/common';
 import { Component, signal } from '@angular/core';
-import { Form, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
   MatCard,
   MatCardContent,
@@ -8,13 +8,12 @@ import {
   MatCardTitle,
 } from '@angular/material/card';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
-  ThesaurusEntry,
-  ThesEntriesPickerComponent,
-} from '@myrmidon/cadmus-ui';
+  ThesaurusEntriesPickerComponent,
+} from '@myrmidon/cadmus-thesaurus-store';
 
 const ALPHABET_ENTRIES: ThesaurusEntry[] = [
   { id: 'a', value: 'alpha' },
@@ -135,7 +134,7 @@ const ANIMAL_ENTRIES: ThesaurusEntry[] = [
     MatInput,
     MatLabel,
     JsonPipe,
-    ThesEntriesPickerComponent,
+    ThesaurusEntriesPickerComponent,
   ],
   templateUrl: './thes-entries-picker-demo-page.component.html',
   styleUrl: './thes-entries-picker-demo-page.component.scss',

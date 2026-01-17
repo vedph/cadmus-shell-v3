@@ -32,9 +32,9 @@ Latest versions:
 - cadmus-item-search: 16.0.1
 - cadmus-layer-demo: 15.0.1
 - cadmus-part-general-pg: 16.0.4
-- cadmus-part-general-ui: 15.0.4
+- cadmus-part-general-ui: 16.0.0
 - cadmus-part-philology-pg: 16.1.3
-- cadmus-part-philology-ui: 16.0.4
+- cadmus-part-philology-ui: 17.0.0
 - cadmus-preview-pg: 17.0.1
 - cadmus-preview-ui: 17.0.3
 - cadmus-profile-core: 12.0.1
@@ -43,7 +43,7 @@ Latest versions:
 - cadmus-thesaurus-editor: 16.0.1
 - cadmus-thesaurus-list: 16.0.1
 - cadmus-thesaurus-ui: 15.0.1
-- cadmus-ui: 15.1.4
+- cadmus-ui: 16.0.0
 - cadmus-ui-pg: 16.0.1
 
 Dependencies:
@@ -210,6 +210,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2026-01-17: ⚠️ moved thesauri components from `@myrmidon/cadmus-ui` to `@myrmidon/cadmus-thesaurus-store`. This affected `@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-philology-ui`.
 - 2025-12-15: updated Angular and packages.
 - ⚠️ 2025-11-23:
   - upgraded to Angular 21.

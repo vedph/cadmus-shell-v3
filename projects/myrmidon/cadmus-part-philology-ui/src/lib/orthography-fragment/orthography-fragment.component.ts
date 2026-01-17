@@ -39,9 +39,11 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
-  renderLabelFromLastColon,
-  ThesEntriesPickerComponent,
 } from '@myrmidon/cadmus-ui';
+import {
+  renderLabelFromLastColon,
+  ThesaurusEntriesPickerComponent,
+} from '@myrmidon/cadmus-thesaurus-store';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   TextLayerService,
@@ -83,7 +85,7 @@ import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-
     MatOption,
     MatCardActions,
     TitleCasePipe,
-    ThesEntriesPickerComponent,
+    ThesaurusEntriesPickerComponent,
     CloseSaveButtonsComponent,
     EditOperationSetComponent,
     EditOperationComponent,
@@ -129,7 +131,7 @@ export class OrthographyFragmentComponent
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // orthography-op-tags
   public readonly opTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
 
   public reference: FormControl<string>;
@@ -144,7 +146,7 @@ export class OrthographyFragmentComponent
     formBuilder: FormBuilder,
     private _layerService: TextLayerService,
     private _clipboard: Clipboard,
-    private _snackbar: MatSnackBar
+    private _snackbar: MatSnackBar,
   ) {
     super(authService, formBuilder);
     // form
@@ -231,11 +233,11 @@ export class OrthographyFragmentComponent
 
   private mapIdsToEntries(
     ids: string[],
-    entries: ThesaurusEntry[] | undefined
+    entries: ThesaurusEntry[] | undefined,
   ): ThesaurusEntry[] {
     if (!entries) return ids.map((id) => ({ id, value: id }));
     return ids.map(
-      (id) => entries.find((e) => e.id === id) || { id, value: id }
+      (id) => entries.find((e) => e.id === id) || { id, value: id },
     );
   }
 
@@ -249,7 +251,7 @@ export class OrthographyFragmentComponent
       this._reference.set(fragment.reference);
       this.language.setValue(fragment.language || null);
       this.tags.setValue(
-        this.mapIdsToEntries(fragment.tags || [], this.tagEntries()) || []
+        this.mapIdsToEntries(fragment.tags || [], this.tagEntries()) || [],
       );
       this.note.setValue(fragment.note || null);
       const textTargetValue = fragment.isTextTarget || false;
@@ -258,8 +260,8 @@ export class OrthographyFragmentComponent
       try {
         this.operations.setValue(
           fragment.operations?.map((text) =>
-            EditOperation.parseOperation(text)
-          ) || []
+            EditOperation.parseOperation(text),
+          ) || [],
         );
         if (this.operations.value?.length) {
           this.reference.disable();
@@ -280,8 +282,8 @@ export class OrthographyFragmentComponent
       this.frText.set(
         this._layerService.getTextFragment(
           data.baseText,
-          TokenLocation.parse(data.value.location)!
-        )
+          TokenLocation.parse(data.value.location)!,
+        ),
       );
     }
 

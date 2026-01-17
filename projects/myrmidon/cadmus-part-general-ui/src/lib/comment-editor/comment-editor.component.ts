@@ -1,4 +1,11 @@
-import { Component, Inject, OnDestroy, OnInit, Optional, signal } from '@angular/core';
+import {
+  Component,
+  Inject,
+  OnDestroy,
+  OnInit,
+  Optional,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -32,6 +39,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
+import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -56,13 +64,13 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
-  renderLabelFromLastColon,
-  ThesaurusTreeComponent,
 } from '@myrmidon/cadmus-ui';
 
 import { Comment, CommentPart, COMMENT_PART_TYPEID } from '../comment-part';
-
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+import {
+  renderLabelFromLastColon,
+  ThesaurusTreeComponent,
+} from '@myrmidon/cadmus-thesaurus-store';
 
 import { IndexKeyword } from '../index-keywords-part';
 import { CommentFragment } from '../comment-fragment';
@@ -120,11 +128,17 @@ export class CommentEditorComponent
   private _editor?: monaco.editor.IStandaloneCodeEditor;
 
   // comment-tags
-  public readonly comTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly comTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // comment-categories
   public readonly catEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // comment-keyword-languages
@@ -132,13 +146,21 @@ export class CommentEditorComponent
   // comment-keyword-indexes
   public readonly idxEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // comment-keyword-tags
-  public readonly keyTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly keyTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // comment-id-scopes
-  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // comment-id-tags
-  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
   public tag: FormControl<string | null>;
   public text: FormControl<string | null>;
@@ -153,7 +175,7 @@ export class CommentEditorComponent
     private _editService: CadmusTextEdService,
     @Inject(CADMUS_TEXT_ED_BINDINGS_TOKEN)
     @Optional()
-    private _editorBindings?: CadmusTextEdBindings
+    private _editorBindings?: CadmusTextEdBindings,
   ) {
     super(authService, formBuilder);
     // form
@@ -219,7 +241,7 @@ export class CommentEditorComponent
         this.text.setValue(this._editorModel!.getValue());
         this.text.markAsDirty();
         this.text.updateValueAndValidity();
-      })
+      }),
     );
 
     // plugins
@@ -227,7 +249,7 @@ export class CommentEditorComponent
       Object.keys(this._editorBindings).forEach((key) => {
         const n = parseInt(key, 10);
         console.log(
-          'Binding ' + n + ' to ' + this._editorBindings![key as any]
+          'Binding ' + n + ' to ' + this._editorBindings![key as any],
         );
         this._editor!.addCommand(n, () => {
           this.applyEdit(this._editorBindings![key as any]);
@@ -362,7 +384,7 @@ export class CommentEditorComponent
   }
 
   protected override onDataSet(
-    data?: EditedObject<CommentPart | CommentFragment>
+    data?: EditedObject<CommentPart | CommentFragment>,
   ): void {
     // thesauri
     if (data?.thesauri) {
@@ -422,7 +444,7 @@ export class CommentEditorComponent
     }
     const entries: ThesaurusEntry[] = Object.assign(
       [],
-      this.categories.value || []
+      this.categories.value || [],
     );
     entries.push(entry);
 
@@ -455,7 +477,7 @@ export class CommentEditorComponent
     return this.formBuilder.group({
       indexId: this.formBuilder.control(
         keyword?.indexId,
-        Validators.maxLength(50)
+        Validators.maxLength(50),
       ),
       tag: this.formBuilder.control(keyword?.tag, Validators.maxLength(50)),
       language: this.formBuilder.control(keyword?.language, [
