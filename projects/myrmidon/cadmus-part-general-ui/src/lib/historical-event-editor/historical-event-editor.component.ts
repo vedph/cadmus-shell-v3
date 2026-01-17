@@ -123,6 +123,10 @@ export class HistoricalEventEditorComponent {
    * Thesaurus doc-reference-types.
    */
   public readonly refTypeEntries = input<ThesaurusEntry[]>();
+  /**
+   * Thesaurus asserted-id-features.
+   */
+  public readonly idFeatureEntries = input<ThesaurusEntry[]>();
 
   /**
    * The number of event type portions to cut from the event type ID when

@@ -80,7 +80,7 @@ import { CommentFragment } from '../comment-fragment';
  * Thesauri: comment-tags, doc-reference-tags, doc-reference-types,
  * comment-categories, comment-keyword-languages, comment-keyword-indexes,
  * comment-keyword-tags, comment-id-scopes, comment-id-tags,
- * assertion-tags.
+ * assertion-tags, asserted-id-features.
  */
 @Component({
   selector: 'cadmus-comment-editor',
@@ -159,6 +159,10 @@ export class CommentEditorComponent
   );
   // assertion-tags
   public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
+  // asserted-id-features
+  public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(
     undefined,
   );
 
@@ -337,6 +341,12 @@ export class CommentEditorComponent
       this.assTagEntries.set(thesauri[key].entries);
     } else {
       this.assTagEntries.set(undefined);
+    }
+    key = 'asserted-id-features';
+    if (this.hasThesaurus(key)) {
+      this.featureEntries.set(thesauri[key].entries);
+    } else {
+      this.featureEntries.set(undefined);
     }
   }
 

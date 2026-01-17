@@ -42,11 +42,14 @@ export class HistoricalEventsPartFeatureComponent
       'event-tags',
       'event-relations',
       'chronotope-tags',
+      'asserted-id-scopes',
+      'asserted-id-tags',
       'assertion-tags',
       'doc-reference-tags',
       'doc-reference-types',
       'pin-link-scopes',
       'pin-link-tags',
+      'asserted-id-features',
     ];
   }
 }

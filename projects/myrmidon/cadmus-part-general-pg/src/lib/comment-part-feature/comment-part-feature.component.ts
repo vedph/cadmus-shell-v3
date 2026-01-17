@@ -48,6 +48,7 @@ export class CommentPartFeatureComponent
       'comment-id-scopes',
       'comment-id-tags',
       'assertion-tags',
+      'asserted-id-features',
     ];
   }
 }

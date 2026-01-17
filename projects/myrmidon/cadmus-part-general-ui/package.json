@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-general-ui",
-  "version": "16.0.0",
+  "version": "16.0.1",
   "description": "Cadmus - generic parts.",
   "keywords": [
     "Cadmus"
@@ -20,7 +20,7 @@
     "@cisstech/nge": "^18.3.0",
     "@myrmidon/ngx-tools": "^2.0.2",
     "@myrmidon/ngx-mat-tools": "^1.0.1",
-    "@myrmidon/cadmus-refs-asserted-ids": "^10.0.12",
+    "@myrmidon/cadmus-refs-asserted-ids": "^10.0.13",
     "@myrmidon/cadmus-refs-doc-references": "^10.0.3",
     "@myrmidon/cadmus-refs-historical-date": "9.1.1",
     "@myrmidon/cadmus-refs-asserted-chronotope": "10.0.6",

@@ -69,6 +69,10 @@ export class RelatedEntityComponent {
    * Thesaurus doc-reference-types.
    */
   public readonly refTypeEntries = input<ThesaurusEntry[]>();
+  /**
+   * Thesaurus asserted-id-features.
+   */
+  public readonly idFeatureEntries = input<ThesaurusEntry[]>();
 
   public readonly editorClose = output();
 

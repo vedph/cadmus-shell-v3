@@ -41,7 +41,7 @@ import { PinLinksPart, PIN_LINKS_PART_TYPEID } from '../pin-links-part';
 /**
  * PinLinksPart editor component.
  * Thesauri: pin-link-scopes, pin-link-tags, pin-link-assertion-tags,
- * pin-link-docref-types, pin-link-docref-tags.
+ * pin-link-docref-types, pin-link-docref-tags, asserted-id-features.
  */
 @Component({
   selector: 'cadmus-pin-links-part',
@@ -78,6 +78,8 @@ export class PinLinksPartComponent
   public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // pin-link-docref-tags
   public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  // asserted-id-features
+  public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -129,6 +131,12 @@ export class PinLinksPartComponent
       this.refTagEntries.set(thesauri[key].entries);
     } else {
       this.refTagEntries.set(undefined);
+    }
+    key = 'asserted-id-features';
+    if (this.hasThesaurus(key)) {
+      this.featureEntries.set(thesauri[key].entries);
+    } else {
+      this.featureEntries.set(undefined);
     }
   }
 

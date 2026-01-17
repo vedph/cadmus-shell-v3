@@ -57,7 +57,7 @@ import {
  * Historical events part.
  * Thesauri: event-types, event-tags, event-relations, chronotope-tags,
  * asserted-id-scopes, asserted-id-tags, assertion-tags, doc-reference-tags,
- * doc-reference-types, pin-link-scopes, pin-link-tags.
+ * doc-reference-types, pin-link-scopes, pin-link-tags, asserted-id-features.
  */
 @Component({
   selector: 'cadmus-historical-events-part',
@@ -142,6 +142,10 @@ export class HistoricalEventsPartComponent
   public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
     undefined
   );
+  // asserted-id-features
+  public readonly idFeatureEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined
+  );
 
   public events: FormControl<HistoricalEvent[]>;
 
@@ -223,6 +227,12 @@ export class HistoricalEventsPartComponent
       this.idTagEntries.set(thesauri[key].entries);
     } else {
       this.idTagEntries.set(undefined);
+    }
+    key = 'asserted-id-features';
+    if (this.hasThesaurus(key)) {
+      this.idFeatureEntries.set(thesauri[key].entries);
+    } else {
+      this.idFeatureEntries.set(undefined);
     }
   }
 
