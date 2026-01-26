@@ -32,9 +32,11 @@ import {
 } from '@myrmidon/cadmus-part-philology-ui';
 import { PartEditorKeys } from '@myrmidon/cadmus-core';
 import { DISTRICT_LOCATION_PART_TYPEID } from '@myrmidon/cadmus-part-general-ui';
+import { TAXO_STORE_NODES_PART_TYPEID } from '@myrmidon/cadmus-part-taxo-ui';
 
 const GENERAL = 'general';
 const PHILOLOGY = 'philology';
+const TAXONOMY = 'taxonomy';
 const TOKEN_TEXT_LAYER_PART_TYPEID = 'it.vedph.token-text-layer';
 const TILED_TEXT_LAYER_PART_TYPEID = 'it.vedph.tiled-text-layer';
 
@@ -111,6 +113,10 @@ export const PART_EDITOR_KEYS: PartEditorKeys = {
   },
   [TOKEN_TEXT_PART_TYPEID]: {
     part: GENERAL,
+  },
+  // taxonomy
+  [TAXO_STORE_NODES_PART_TYPEID]: {
+    part: TAXONOMY,
   },
   // layer parts
   [TOKEN_TEXT_LAYER_PART_TYPEID]: {

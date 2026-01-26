@@ -1,0 +1,31 @@
+{
+  "name": "@myrmidon/cadmus-part-taxo-pg",
+  "version": "0.0.1",
+  "description": "Cadmus - Taxonomies part wrappers.",
+  "keywords": [
+    "Cadmus",
+    "taxonomies"
+  ],
+  "homepage": "https://github.com/vedph/cadmus-shell-v3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vedph/cadmus-shell-v3"
+  },
+  "author": {
+    "name": "Daniele Fusi"
+  },
+  "peerDependencies": {
+    "@angular/common": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@myrmidon/cadmus-core": "^12.0.3",
+    "@myrmidon/cadmus-ui": "^16.0.0",
+    "@myrmidon/taxo-store-api": "^0.0.1",
+    "@myrmidon/taxo-store-editor": "^0.0.1",
+    "@myrmidon/taxo-store-picker": "^0.0.1",
+    "@myrmidon/cadmus-part-taxo-ui": "^0.0.1"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

@@ -1,0 +1,64 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-card>
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>picture_in_picture</mat-icon>
+      </div>
+      <mat-card-title [matBadge]="nodeIds.value.length" matBadgeOverlap="false">
+        {{ (modelName() | titlecase) || "Taxo Store Nodes Part" }}
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div id="container">
+        <div id="picker">
+          <ts-taxo-store-picker
+            [treeId]="treeId()"
+            [hasTopNodeFilter]="hasTopNodeFilter()"
+            [hasFlagsFilter]="hasFlagsFilter()"
+            [availableFlags]="availableFlags()"
+            [canEdit]="canEdit()"
+            [canAdd]="canAdd()"
+            [canDelete]="canDelete()"
+            (nodePick)="addNode($event!)"
+          />
+        </div>
+        <div id="picked">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>name</th>
+                <th>ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (n of nodeIds.value; track n.value; let i = $index) {
+                <tr>
+                  <td>
+                    <button
+                      type="button"
+                      mat-icon-button
+                      (click)="removeNode(i)"
+                      matTooltip="Remove node"
+                    >
+                      <mat-icon color="warn">delete</mat-icon>
+                    </button>
+                  </td>
+                  <td>{{ n.name }}</td>
+                  <td class="muted">{{ n.value }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <cadmus-close-save-buttons
+        [form]="form"
+        [noSave]="userLevel < 2"
+        (closeRequest)="close()"
+      />
+    </mat-card-actions>
+  </mat-card>
+</form>

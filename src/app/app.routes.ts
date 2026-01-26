@@ -44,7 +44,7 @@ export const routes: Routes = [
     path: 'demo/layers',
     loadComponent: () =>
       import('@myrmidon/cadmus-layer-demo').then(
-        (module) => module.LayerDemoComponent
+        (module) => module.LayerDemoComponent,
       ),
   },
   {
@@ -61,7 +61,7 @@ export const routes: Routes = [
     path: 'items/:id',
     loadComponent: () =>
       import('@myrmidon/cadmus-item-editor').then(
-        (module) => module.ItemEditorComponent
+        (module) => module.ItemEditorComponent,
       ),
     canActivate: [jwtGuard],
     canDeactivate: [pendingChangesGuard],
@@ -70,7 +70,7 @@ export const routes: Routes = [
     path: 'items',
     loadComponent: () =>
       import('@myrmidon/cadmus-item-list').then(
-        (module) => module.ItemListComponent
+        (module) => module.ItemListComponent,
       ),
     canActivate: [jwtGuard],
   },
@@ -78,7 +78,7 @@ export const routes: Routes = [
     path: 'search',
     loadComponent: () =>
       import('@myrmidon/cadmus-item-search').then(
-        (module) => module.ItemSearchComponent
+        (module) => module.ItemSearchComponent,
       ),
     canActivate: [jwtGuard],
   },
@@ -87,7 +87,7 @@ export const routes: Routes = [
     path: 'thesauri/:id',
     loadComponent: () =>
       import('@myrmidon/cadmus-thesaurus-editor').then(
-        (module) => module.ThesaurusEditorFeatureComponent
+        (module) => module.ThesaurusEditorFeatureComponent,
       ),
     canActivate: [editorGuard],
   },
@@ -95,7 +95,7 @@ export const routes: Routes = [
     path: 'thesauri',
     loadComponent: () =>
       import('@myrmidon/cadmus-thesaurus-list').then(
-        (module) => module.ThesaurusListComponent
+        (module) => module.ThesaurusListComponent,
       ),
     canActivate: [editorGuard],
   },
@@ -104,7 +104,7 @@ export const routes: Routes = [
     path: 'items/:iid/general',
     loadChildren: () =>
       import('@myrmidon/cadmus-part-general-pg').then(
-        (module) => module.CADMUS_PART_GENERAL_PG_ROUTES
+        (module) => module.CADMUS_PART_GENERAL_PG_ROUTES,
       ),
     canActivate: [jwtGuard],
   },
@@ -112,7 +112,15 @@ export const routes: Routes = [
     path: 'items/:iid/philology',
     loadChildren: () =>
       import('@myrmidon/cadmus-part-philology-pg').then(
-        (module) => module.CADMUS_PART_PHILOLOGY_PG_ROUTES
+        (module) => module.CADMUS_PART_PHILOLOGY_PG_ROUTES,
+      ),
+    canActivate: [jwtGuard],
+  },
+  {
+    path: 'items/:iid/taxonomy',
+    loadChildren: () =>
+      import('@myrmidon/cadmus-part-taxo-pg').then(
+        (module) => module.CADMUS_PART_TAXO_PG_ROUTES,
       ),
     canActivate: [jwtGuard],
   },
@@ -121,7 +129,7 @@ export const routes: Routes = [
     path: 'graph',
     loadComponent: () =>
       import('@myrmidon/cadmus-graph-pg-ex').then(
-        (module) => module.GraphEditorExFeatureComponent
+        (module) => module.GraphEditorExFeatureComponent,
       ),
     canActivate: [jwtGuard],
   },
@@ -130,7 +138,7 @@ export const routes: Routes = [
     path: 'preview',
     loadChildren: () =>
       import('@myrmidon/cadmus-preview-pg').then(
-        (module) => module.CADMUS_PART_PREVIEW_PG_ROUTES
+        (module) => module.CADMUS_PART_PREVIEW_PG_ROUTES,
       ),
     canActivate: [jwtGuard],
   },
@@ -139,7 +147,7 @@ export const routes: Routes = [
     path: 'flags',
     loadComponent: () =>
       import('@myrmidon/cadmus-flags-pg').then(
-        (module) => module.FlagsEditorFeatureComponent
+        (module) => module.FlagsEditorFeatureComponent,
       ),
     canActivate: [jwtGuard],
   },

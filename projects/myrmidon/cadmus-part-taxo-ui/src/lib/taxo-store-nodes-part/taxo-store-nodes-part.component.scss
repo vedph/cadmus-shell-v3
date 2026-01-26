@@ -1,0 +1,43 @@
+div#container {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "picker picked";
+  gap: 8px;
+}
+
+/* lt-md */
+@media only screen and (max-width: 959px) {
+  div#container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "picker"
+      "picked";
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+tbody tr:nth-child(odd) {
+  background-color: #e2e2e2;
+}
+th {
+  text-align: left;
+  font-weight: normal;
+  color: silver;
+}
+td {
+  padding: 4px 6px;
+}
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}
+tr.selected {
+  background-color: #d0d0d0 !important;
+}
+.muted {
+  color: gray;
+}

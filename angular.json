@@ -875,6 +875,58 @@
           }
         }
       }
+    },
+    "@myrmidon/cadmus-part-taxo-ui": {
+      "projectType": "library",
+      "root": "projects/myrmidon/cadmus-part-taxo-ui",
+      "sourceRoot": "projects/myrmidon/cadmus-part-taxo-ui/src",
+      "prefix": "cadmus",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/myrmidon/cadmus-part-taxo-ui/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/myrmidon/cadmus-part-taxo-ui/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/myrmidon/cadmus-part-taxo-ui/tsconfig.spec.json"
+          }
+        }
+      }
+    },
+    "@myrmidon/cadmus-part-taxo-pg": {
+      "projectType": "library",
+      "root": "projects/myrmidon/cadmus-part-taxo-pg",
+      "sourceRoot": "projects/myrmidon/cadmus-part-taxo-pg/src",
+      "prefix": "cadmus",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/myrmidon/cadmus-part-taxo-pg/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/myrmidon/cadmus-part-taxo-pg/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/myrmidon/cadmus-part-taxo-pg/tsconfig.spec.json"
+          }
+        }
+      }
     }
   },
   "schematics": {

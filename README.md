@@ -35,6 +35,8 @@ Latest versions:
 - cadmus-part-general-ui: 16.0.0
 - cadmus-part-philology-pg: 16.1.3
 - cadmus-part-philology-ui: 17.0.0
+- cadmus-part-taxo-pg: 0.0.1
+- cadmus-part-taxo-ui: 0.0.1
 - cadmus-preview-pg: 17.0.1
 - cadmus-preview-ui: 17.0.3
 - cadmus-profile-core: 12.0.1
@@ -196,6 +198,8 @@ ng g library @myrmidon/cadmus-part-general-pg --prefix cadmus --force
 ng g library @myrmidon/cadmus-part-general-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-part-philology-pg --prefix cadmus --force
 ng g library @myrmidon/cadmus-part-philology-ui --prefix cadmus --force
+ng g library @myrmidon/cadmus-part-taxo-ui --prefix cadmus --force
+ng g library @myrmidon/cadmus-part-taxo-pg --prefix cadmus --force
 ng g library @myrmidon/cadmus-preview-pg --prefix cadmus --force
 ng g library @myrmidon/cadmus-preview-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-profile-core --prefix cadmus --force
@@ -210,6 +214,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2026-01-26: 🆕 added two new libraries for taxonomies parts using the [taxonomies store](https://github.com/vedph/taxo-store) and integrated them in the API shell demo.
 - 2026-01-17: ⚠️ moved thesauri components from `@myrmidon/cadmus-ui` to `@myrmidon/cadmus-thesaurus-store`. This affected `@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-ui`.
 - 2025-12-15: updated Angular and packages.
 - ⚠️ 2025-11-23:

@@ -51,6 +51,12 @@
       "@myrmidon/cadmus-part-philology-ui": [
         "./dist/myrmidon/cadmus-part-philology-ui"
       ],
+      "@myrmidon/cadmus-part-taxo-pg": [
+        "./dist/myrmidon/cadmus-part-taxo-pg"
+      ],
+      "@myrmidon/cadmus-part-taxo-ui": [
+        "./dist/myrmidon/cadmus-part-taxo-ui"
+      ],
       "@myrmidon/cadmus-preview-pg": [
         "./dist/myrmidon/cadmus-preview-pg"
       ],
@@ -102,5 +108,13 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "references": [
+    {
+      "path": "./projects/myrmidon/cadmus-part-taxo-pg/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/myrmidon/cadmus-part-taxo-pg/tsconfig.spec.json"
+    }
+  ]
 }
