@@ -68,15 +68,15 @@ export class AppRepository {
     private _flagService: FlagService,
     private _thesaurusService: ThesaurusService,
     private _previewService: PreviewService,
-    private _settingService: EditorSettingsService
+    private _settingService: EditorSettingsService,
   ) {
     this._facets$ = new BehaviorSubject<FacetDefinition[]>([]);
     this._flags$ = new BehaviorSubject<FlagDefinition[]>([]);
     this._typeThesaurus$ = new BehaviorSubject<Thesaurus | undefined>(
-      undefined
+      undefined,
     );
     this._itemBrowserThesaurus$ = new BehaviorSubject<Thesaurus | undefined>(
-      undefined
+      undefined,
     );
     this._previewJKeys$ = new BehaviorSubject<string[]>([]);
     this._previewFKeys$ = new BehaviorSubject<string[]>([]);
@@ -84,14 +84,26 @@ export class AppRepository {
     this._settingsCache = new Map<string, any>();
   }
 
+  /**
+   * Get the loaded model types thesaurus.
+   * @returns Thesaurus or undefined if not loaded.
+   */
   public getTypeThesaurus(): Thesaurus | undefined {
     return this._typeThesaurus$.value;
   }
 
+  /**
+   * Get the loaded items facets.
+   * @returns The facets.
+   */
   public getFacets(): FacetDefinition[] {
     return this._facets$.value;
   }
 
+  /**
+   * Get the loaded items flags.
+   * @returns The flags.
+   */
   public getFlags(): FlagDefinition[] {
     return this._flags$.value;
   }
@@ -135,7 +147,7 @@ export class AppRepository {
           this._previewFKeys$.next(result.fKeys);
           this._previewCKeys$.next(result.cKeys);
           console.log(
-            `AppRepository loaded (facets: ${result.facets.length}, flags: ${result.flags.length})`
+            `AppRepository loaded (facets: ${result.facets.length}, flags: ${result.flags.length})`,
           );
           resolve();
         },
@@ -218,11 +230,13 @@ export class AppRepository {
 
   /**
    * Get the editor setting with the specified ID.
+   * @param id The setting ID.
+   * @param reload True to force reloading from server.
    * @returns Promise with the settings object.
    */
-  public getSetting(id: string): Promise<any> {
+  public getSetting<T>(id: string, reload = false): Promise<T | undefined> {
     return new Promise((resolve, reject) => {
-      if (this._settingsCache.has(id)) {
+      if (this._settingsCache.has(id) && !reload) {
         resolve(this._settingsCache.get(id));
         return;
       }
@@ -239,14 +253,47 @@ export class AppRepository {
   }
 
   /**
+   * Set the editor setting with the specified ID.
+   * @param id The setting ID.
+   * @param setting The setting to store.
+   */
+  public setSetting<T>(id: string, setting: T): void {
+    this._settingService.addSetting(id, setting).subscribe({
+      next: () => {
+        this._settingsCache.set(id, setting);
+      },
+      error: (err) => {
+        console.error(`Error setting setting ${id}:`, err);
+      },
+    });
+  }
+
+  /**
    * Get the editor setting for the specified part or fragment type ID,
    * optionally having the specified role ID.
    * @param typeId The part or fragment type ID.
    * @param roleId The optional role ID.
+   * @param reload True to force reloading from server.
    * @returns Promise with settings object.
    */
-  public getSettingFor(typeId: string, roleId?: string): Promise<any> {
+  public getSettingFor<T>(
+    typeId: string,
+    roleId?: string,
+    reload = false,
+  ): Promise<T | undefined> {
     const id = roleId ? `${typeId}_${roleId}` : typeId;
-    return this.getSetting(id);
+    return this.getSetting(id, reload);
+  }
+
+  /**
+   * Set the editor setting for the specified part or fragment type ID,
+   * optionally having the specified role ID.
+   * @param typeId The part or fragment type ID.
+   * @param setting The setting to store.
+   * @param roleId The optional role ID.
+   */
+  public setSettingFor<T>(typeId: string, setting: T, roleId?: string): void {
+    const id = roleId ? `${typeId}_${roleId}` : typeId;
+    this.setSetting(id, setting);
   }
 }

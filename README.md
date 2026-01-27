@@ -40,7 +40,7 @@ Latest versions:
 - cadmus-preview-pg: 17.0.1
 - cadmus-preview-ui: 17.0.3
 - cadmus-profile-core: 12.0.1
-- cadmus-state: 14.0.2
+- cadmus-state: 14.0.3
 - cadmus-statistics: 1.0.2
 - cadmus-thesaurus-editor: 16.0.1
 - cadmus-thesaurus-list: 16.0.1
@@ -214,6 +214,7 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
+- 2026-01-27: improved `AppRepository` for settings management.
 - 2026-01-26: 🆕 added two new libraries for taxonomies parts using the [taxonomies store](https://github.com/vedph/taxo-store) and integrated them in the API shell demo.
 - 2026-01-17: ⚠️ moved thesauri components from `@myrmidon/cadmus-ui` to `@myrmidon/cadmus-thesaurus-store`. This affected `@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-ui`.
 - 2025-12-15: updated Angular and packages.
