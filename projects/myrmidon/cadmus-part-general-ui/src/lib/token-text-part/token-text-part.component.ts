@@ -43,6 +43,7 @@ import {
   TokenTextLine,
 } from '../token-text-part';
 import { EditedObject } from '@myrmidon/cadmus-core';
+import { MonacoEditorHelper } from '../monaco-editor-helper';
 
 /**
  * Editor component for base text, as referenced by token-based layers.
@@ -79,10 +80,7 @@ export class TokenTextPartComponent
   extends ModelEditorComponentBase<TokenTextPart>
   implements OnInit, OnDestroy
 {
-  // Monaco
-  private readonly _disposables: monaco.IDisposable[] = [];
-  private _editorModel?: monaco.editor.ITextModel;
-  private _editor?: monaco.editor.IStandaloneCodeEditor;
+  private _textHelper!: MonacoEditorHelper;
 
   public citation: FormControl<string | null>;
   public text: FormControl<string | null>;
@@ -99,6 +97,8 @@ export class TokenTextPartComponent
     this.citation = formBuilder.control(null);
     this.text = formBuilder.control(null, Validators.required);
     this.transform = formBuilder.control('ws');
+    // Monaco helper (using 'txt' for plain text)
+    this._textHelper = new MonacoEditorHelper(this.text, 'txt');
   }
 
   public override ngOnInit(): void {
@@ -107,30 +107,11 @@ export class TokenTextPartComponent
 
   public override ngOnDestroy() {
     super.ngOnDestroy();
-    this._disposables.forEach((d) => d.dispose());
+    this._textHelper.dispose();
   }
 
   public onCreateEditor(editor: monaco.editor.IEditor) {
-    editor.updateOptions({
-      minimap: {
-        side: 'right',
-      },
-      wordWrap: 'on',
-      automaticLayout: true,
-    });
-    this._editorModel =
-      this._editorModel ||
-      monaco.editor.createModel(this.text?.value || '', 'txt');
-    editor.setModel(this._editorModel);
-    this._editor = editor as monaco.editor.IStandaloneCodeEditor;
-
-    this._disposables.push(
-      this._editorModel.onDidChangeContent((e) => {
-        this.text.setValue(this._editorModel!.getValue());
-        this.text.markAsDirty();
-        this.text.updateValueAndValidity();
-      })
-    );
+    this._textHelper.initEditor(editor);
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
@@ -174,7 +155,7 @@ export class TokenTextPartComponent
     }
     this.citation.setValue(part.citation || null);
     this.text.setValue(this.getTextFromModel(part));
-    this._editorModel?.setValue(this.text.value || '');
+    this._textHelper.setValue(this.text.value || '');
     this.form.markAsPristine();
   }
 
@@ -248,6 +229,7 @@ export class TokenTextPartComponent
               break;
           }
           this.text.setValue(text);
+          this._textHelper.setValue(text);
           this.text.updateValueAndValidity();
           this.text.markAsDirty();
         }

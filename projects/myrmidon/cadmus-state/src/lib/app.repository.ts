@@ -240,7 +240,7 @@ export class AppRepository {
         resolve(this._settingsCache.get(id));
         return;
       }
-      this._settingService.getSetting(id).subscribe({
+      this._settingService.getSetting<T>(id).subscribe({
         next: (setting) => {
           this._settingsCache.set(id, setting);
           resolve(setting);
@@ -258,7 +258,7 @@ export class AppRepository {
    * @param setting The setting to store.
    */
   public setSetting<T>(id: string, setting: T): void {
-    this._settingService.addSetting(id, setting).subscribe({
+    this._settingService.addSetting<T>(id, setting).subscribe({
       next: () => {
         this._settingsCache.set(id, setting);
       },

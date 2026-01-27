@@ -85,7 +85,7 @@ export class AssertedHistoricalDatesPartComponent
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // assertion-tags
   public readonly assertionTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   // doc-reference-types
   public readonly docReferenceTypeEntries = signal<
@@ -93,7 +93,7 @@ export class AssertedHistoricalDatesPartComponent
   >(undefined);
   // doc-reference-tags
   public readonly docReferenceTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
 
   public dates: FormControl<AssertedDate[]>;
@@ -101,7 +101,7 @@ export class AssertedHistoricalDatesPartComponent
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
   ) {
     super(authService, formBuilder);
     // form
@@ -158,7 +158,7 @@ export class AssertedHistoricalDatesPartComponent
       return;
     }
     this._appRepository
-      ?.getSettingFor(part.typeId, part.roleId)
+      ?.getSettingFor<{ maxDateCount?: number }>(part.typeId, part.roleId)
       .then((setting) => {
         this.maxDateCount.set(setting?.maxDateCount || -1);
       }) || -1;
@@ -167,7 +167,7 @@ export class AssertedHistoricalDatesPartComponent
   }
 
   protected override onDataSet(
-    data?: EditedObject<AssertedHistoricalDatesPart>
+    data?: EditedObject<AssertedHistoricalDatesPart>,
   ): void {
     // thesauri
     if (data?.thesauri) {
@@ -180,7 +180,7 @@ export class AssertedHistoricalDatesPartComponent
 
   protected getValue(): AssertedHistoricalDatesPart {
     let part = this.getEditedPart(
-      ASSERTED_HISTORICAL_DATES_PART_TYPEID
+      ASSERTED_HISTORICAL_DATES_PART_TYPEID,
     ) as AssertedHistoricalDatesPart;
     part.dates = this.dates.value || [];
     return part;

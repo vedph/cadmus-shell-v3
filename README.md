@@ -32,15 +32,15 @@ Latest versions:
 - cadmus-item-search: 16.0.1
 - cadmus-layer-demo: 15.0.1
 - cadmus-part-general-pg: 16.0.5
-- cadmus-part-general-ui: 16.0.0
+- cadmus-part-general-ui: 16.0.2
 - cadmus-part-philology-pg: 16.1.3
 - cadmus-part-philology-ui: 17.0.0
 - cadmus-part-taxo-pg: 0.0.1
-- cadmus-part-taxo-ui: 0.0.1
+- cadmus-part-taxo-ui: 0.0.2
 - cadmus-preview-pg: 17.0.1
 - cadmus-preview-ui: 17.0.3
 - cadmus-profile-core: 12.0.1
-- cadmus-state: 14.0.3
+- cadmus-state: 14.0.4
 - cadmus-statistics: 1.0.2
 - cadmus-thesaurus-editor: 16.0.1
 - cadmus-thesaurus-list: 16.0.1
@@ -214,7 +214,9 @@ ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 
 ## History
 
-- 2026-01-27: improved `AppRepository` and `EditorSettingsService` for settings management.
+- 2026-01-27:
+  - improved `AppRepository` and `EditorSettingsService` for settings management. This affected libraries `@myrmidon/cadmus-api`, `@myrmidon/cadmus-part-taxo-ui`, `@myrmidon/cadmus-state`.
+  - added `MonacoEditorHelper` to general parts to avoid potential racing issues in components using the Monaco editor. This affected libraries `@myrmidon/cadmus-part-general-ui`.
 - 2026-01-26: 🆕 added two new libraries for taxonomies parts using the [taxonomies store](https://github.com/vedph/taxo-store) and integrated them in the API shell demo.
 - 2026-01-17: ⚠️ moved thesauri components from `@myrmidon/cadmus-ui` to `@myrmidon/cadmus-thesaurus-store`. This affected `@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-ui`.
 - 2025-12-15: updated Angular and packages.

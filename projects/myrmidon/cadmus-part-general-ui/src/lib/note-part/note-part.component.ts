@@ -1,4 +1,11 @@
-import { Component, Inject, OnDestroy, OnInit, Optional, signal } from '@angular/core';
+import {
+  Component,
+  Inject,
+  OnDestroy,
+  OnInit,
+  Optional,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -45,6 +52,7 @@ import {
 } from '@myrmidon/cadmus-text-ed';
 
 import { NotePart, NOTE_PART_TYPEID } from '../note-part';
+import { MonacoEditorHelper } from '../monaco-editor-helper';
 
 /**
  * Note part editor component.
@@ -81,10 +89,7 @@ export class NotePartComponent
   extends ModelEditorComponentBase<NotePart>
   implements OnInit, OnDestroy
 {
-  // Monaco
-  private readonly _disposables: monaco.IDisposable[] = [];
-  private _editorModel?: monaco.editor.ITextModel;
-  private _editor?: monaco.editor.IStandaloneCodeEditor;
+  private _textHelper!: MonacoEditorHelper;
 
   public tag: FormControl<string | null>;
   public text: FormControl<string | null>;
@@ -97,12 +102,14 @@ export class NotePartComponent
     private _editService: CadmusTextEdService,
     @Inject(CADMUS_TEXT_ED_BINDINGS_TOKEN)
     @Optional()
-    private _editorBindings?: CadmusTextEdBindings
+    private _editorBindings?: CadmusTextEdBindings,
   ) {
     super(authService, formBuilder);
     // form
     this.tag = formBuilder.control(null, Validators.maxLength(100));
     this.text = formBuilder.control(null, Validators.required);
+    // Monaco helper
+    this._textHelper = new MonacoEditorHelper(this.text, 'markdown');
   }
 
   public override ngOnInit(): void {
@@ -111,24 +118,23 @@ export class NotePartComponent
 
   public override ngOnDestroy() {
     super.ngOnDestroy();
-    this._disposables.forEach((d) => d.dispose());
+    this._textHelper.dispose();
   }
 
   private async applyEdit(selector: string) {
-    if (!this._editor) {
+    const editor = this._textHelper.editor;
+    if (!editor) {
       return;
     }
-    const selection = this._editor.getSelection();
-    const text = selection
-      ? this._editor.getModel()!.getValueInRange(selection)
-      : '';
+    const selection = editor.getSelection();
+    const text = selection ? editor.getModel()!.getValueInRange(selection) : '';
 
     const result = await this._editService.edit({
       selector,
       text: text,
     });
 
-    this._editor.executeEdits('my-source', [
+    editor.executeEdits('my-source', [
       {
         range: selection!,
         text: result.text,
@@ -138,45 +144,15 @@ export class NotePartComponent
   }
 
   public onCreateEditor(editor: monaco.editor.IEditor) {
-    editor.updateOptions({
-      minimap: {
-        side: 'right',
-      },
-      wordWrap: 'on',
-      automaticLayout: true,
-    });
-    this._editorModel =
-      this._editorModel ||
-      monaco.editor.createModel(this.text?.value || '', 'markdown');
-    editor.setModel(this._editorModel);
-    this._editor = editor as monaco.editor.IStandaloneCodeEditor;
-
-    this._disposables.push(
-      this._editorModel.onDidChangeContent((e) => {
-        this.text.setValue(this._editorModel!.getValue());
-        this.text.markAsDirty();
-        this.text.updateValueAndValidity();
-      })
-    );
+    this._textHelper.initEditor(editor);
 
     // plugins
     if (this._editorBindings) {
-      Object.keys(this._editorBindings).forEach((key) => {
-        const n = parseInt(key, 10);
-        console.log(
-          'Binding ' + n + ' to ' + this._editorBindings![key as any]
-        );
-        this._editor!.addCommand(n, () => {
-          this.applyEdit(this._editorBindings![key as any]);
-        });
+      this._textHelper.addBindings(this._editorBindings, (selector) => {
+        this.applyEdit(selector);
       });
     }
   }
-
-  // @HostListener('window:resize', ['$event'])
-  // public onResize(event: any) {
-  //   this._editor?.layout();
-  // }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
     return formBuilder.group({
@@ -201,7 +177,7 @@ export class NotePartComponent
     }
     this.tag.setValue(part.tag || null);
     this.text.setValue(part.text);
-    this._editorModel?.setValue(part.text || '');
+    this._textHelper.setValue(part.text || '');
     this.form.markAsPristine();
   }
 

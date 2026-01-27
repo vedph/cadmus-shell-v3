@@ -127,7 +127,7 @@ export class TaxoStoreNodesPartComponent
 
     // get the tree ID from settings -- we will override this if using a role ID
     this._appService
-      .getSettingFor(TAXO_STORE_NODES_PART_TYPEID)
+      .getSettingFor<TaxoStoreNodesPartSettings>(TAXO_STORE_NODES_PART_TYPEID)
       .then((value) => {
         const settings: TaxoStoreNodesPartSettings = value || DEFAULT_SETTINGS;
         this.updateSettings(settings);
@@ -149,7 +149,10 @@ export class TaxoStoreNodesPartComponent
     // set tree if from role ID if any
     if (this.identity()?.roleId) {
       this._appService
-        .getSettingFor(TAXO_STORE_NODES_PART_TYPEID, this.identity()!.roleId!)
+        .getSettingFor<TaxoStoreNodesPartSettings>(
+          TAXO_STORE_NODES_PART_TYPEID,
+          this.identity()!.roleId!,
+        )
         .then((value) => {
           const settings: TaxoStoreNodesPartSettings =
             value || DEFAULT_SETTINGS;

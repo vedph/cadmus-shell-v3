@@ -67,6 +67,7 @@ import {
 } from '@myrmidon/cadmus-ui';
 
 import { Comment, CommentPart, COMMENT_PART_TYPEID } from '../comment-part';
+import { MonacoEditorHelper } from '../monaco-editor-helper';
 import {
   renderLabelFromLastColon,
   ThesaurusTreeComponent,
@@ -122,10 +123,7 @@ export class CommentEditorComponent
   extends ModelEditorComponentBase<CommentPart | CommentFragment>
   implements OnInit, OnDestroy
 {
-  // Monaco
-  private readonly _disposables: monaco.IDisposable[] = [];
-  private _editorModel?: monaco.editor.ITextModel;
-  private _editor?: monaco.editor.IStandaloneCodeEditor;
+  private _textHelper!: MonacoEditorHelper;
 
   // comment-tags
   public readonly comTagEntries = signal<ThesaurusEntry[] | undefined>(
@@ -192,6 +190,8 @@ export class CommentEditorComponent
     this.links = formBuilder.control([], { nonNullable: true });
     this.categories = formBuilder.control([], { nonNullable: true });
     this.keywords = formBuilder.array([]);
+    // Monaco helper
+    this._textHelper = new MonacoEditorHelper(this.text, 'markdown');
   }
 
   public override ngOnInit(): void {
@@ -200,16 +200,17 @@ export class CommentEditorComponent
 
   public override ngOnDestroy() {
     super.ngOnDestroy();
-    this._disposables.forEach((d) => d.dispose());
+    this._textHelper.dispose();
   }
 
   private async applyEdit(selector: string) {
-    if (!this._editor) {
+    const editor = this._textHelper.editor;
+    if (!editor) {
       return;
     }
-    const selection = this._editor.getSelection();
+    const selection = editor.getSelection();
     const text = selection
-      ? this._editor.getModel()!.getValueInRange(selection)
+      ? editor.getModel()!.getValueInRange(selection)
       : '';
 
     const result = await this._editService.edit({
@@ -217,7 +218,7 @@ export class CommentEditorComponent
       text: text,
     });
 
-    this._editor.executeEdits('my-source', [
+    editor.executeEdits('my-source', [
       {
         range: selection!,
         text: result.text,
@@ -227,37 +228,12 @@ export class CommentEditorComponent
   }
 
   public onCreateEditor(editor: monaco.editor.IEditor) {
-    editor.updateOptions({
-      minimap: {
-        side: 'right',
-      },
-      wordWrap: 'on',
-      automaticLayout: true,
-    });
-    this._editorModel =
-      this._editorModel ||
-      monaco.editor.createModel(this.text?.value || '', 'markdown');
-    editor.setModel(this._editorModel);
-    this._editor = editor as monaco.editor.IStandaloneCodeEditor;
-
-    this._disposables.push(
-      this._editorModel.onDidChangeContent((e) => {
-        this.text.setValue(this._editorModel!.getValue());
-        this.text.markAsDirty();
-        this.text.updateValueAndValidity();
-      }),
-    );
+    this._textHelper.initEditor(editor);
 
     // plugins
     if (this._editorBindings) {
-      Object.keys(this._editorBindings).forEach((key) => {
-        const n = parseInt(key, 10);
-        console.log(
-          'Binding ' + n + ' to ' + this._editorBindings![key as any],
-        );
-        this._editor!.addCommand(n, () => {
-          this.applyEdit(this._editorBindings![key as any]);
-        });
+      this._textHelper.addBindings(this._editorBindings, (selector) => {
+        this.applyEdit(selector);
       });
     }
   }
@@ -357,7 +333,7 @@ export class CommentEditorComponent
     }
     this.tag.setValue(part.tag || null);
     this.text.setValue(part.text);
-    this._editorModel?.setValue(part.text || '');
+    this._textHelper.setValue(part.text || '');
     this.references.setValue(part.references || []);
     this.links.setValue(part.links || []);
     // keywords
