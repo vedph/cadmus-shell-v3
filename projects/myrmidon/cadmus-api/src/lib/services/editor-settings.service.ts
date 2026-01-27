@@ -5,7 +5,7 @@ import { ErrorService, EnvService } from '@myrmidon/ngx-tools';
 import { catchError, Observable, retry } from 'rxjs';
 
 /**
- * Editor settings service.
+ * Editor settings service. These settings are stored server-side.
  */
 @Injectable({
   providedIn: 'root',
@@ -14,16 +14,16 @@ export class EditorSettingsService {
   constructor(
     private _http: HttpClient,
     private _error: ErrorService,
-    private _env: EnvService
+    private _env: EnvService,
   ) {}
 
   /**
    * Get the setting with the specified ID.
    * @param id The setting's ID.
    */
-  public getSetting(id: string): Observable<any> {
+  public getSetting<T>(id: string): Observable<T> {
     return this._http
-      .get<any>(`${this._env.get('apiUrl')}settings/${id}`)
+      .get<T>(`${this._env.get('apiUrl')}settings/${id}`)
       .pipe(retry(3), catchError(this._error.handleError));
   }
 
@@ -32,9 +32,9 @@ export class EditorSettingsService {
    * @param id The setting's ID.
    * @param setting The setting object to add.
    */
-  public addSetting(id: string, setting: any): Observable<any> {
+  public addSetting<T>(id: string, setting: T): Observable<T> {
     return this._http
-      .post<any>(`${this._env.get('apiUrl')}settings/${id}`, setting)
+      .post<T>(`${this._env.get('apiUrl')}settings/${id}`, setting)
       .pipe(retry(3), catchError(this._error.handleError));
   }
 
