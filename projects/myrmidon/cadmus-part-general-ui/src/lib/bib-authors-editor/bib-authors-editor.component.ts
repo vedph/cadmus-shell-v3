@@ -72,7 +72,7 @@ export class BibAuthorsEditorComponent {
 
   public saveAuthor(author: BibAuthor): void {
     const authors = [...this.authors()];
-    if (this.editedAuthorIndex()) {
+    if (this.editedAuthorIndex() === -1) {
       authors.push(author);
     } else {
       authors.splice(this.editedAuthorIndex(), 1, author);

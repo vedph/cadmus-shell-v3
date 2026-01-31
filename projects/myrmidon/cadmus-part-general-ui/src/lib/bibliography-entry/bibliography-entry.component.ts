@@ -280,7 +280,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       accessDate: this.accessDate.value || undefined,
       firstPage: this.firstPage.value || undefined,
       lastPage: this.lastPage.value || undefined,
-      keywords: this.keywords.length ? this.keywords() : undefined,
+      keywords: this.keywords().length ? this.keywords() : undefined,
     };
   }
 

@@ -144,16 +144,12 @@ export class TiledTextPartComponent
    * according to the tiles position.
    */
   private adjustCoords(): void {
-    const rows = this.rows.value;
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      row.y = i + 1;
-      if (row.tiles) {
-        for (let j = 0; j < row.tiles.length; j++) {
-          row.tiles[j].x = j + 1;
-        }
-      }
-    }
+    const rows = this.rows.value.map((row, i) => ({
+      ...row,
+      y: i + 1,
+      tiles: row.tiles?.map((tile, j) => ({ ...tile, x: j + 1 })),
+    }));
+    this.rows.setValue(rows);
   }
 
   protected getValue(): TiledTextPart {
@@ -200,7 +196,11 @@ export class TiledTextPartComponent
     data[TEXT_TILE_TEXT_DATA_NAME] = 'text' + x;
     // clone tiles array and add new tile
     const tiles = row.tiles ? [...row.tiles, { x, data }] : [{ x, data }];
-    row.tiles = tiles;
+    // update rows immutably
+    const rows = this.rows.value.map((r) =>
+      r === row ? { ...r, tiles } : r
+    );
+    this.rows.setValue(rows);
     this.rows.markAsDirty();
     this.rows.updateValueAndValidity();
   }

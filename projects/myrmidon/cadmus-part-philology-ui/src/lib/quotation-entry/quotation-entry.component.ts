@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, model, effect, output, input } from '@angular/core';
+import { Component, model, effect, output, input, OnDestroy } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   FormBuilder,
@@ -9,7 +9,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
@@ -43,8 +43,9 @@ import { QuotationEntry } from '../quotations-fragment';
     AsyncPipe,
   ],
 })
-export class QuotationEntryComponent {
+export class QuotationEntryComponent implements OnDestroy {
   private _workDct: Record<string, ThesaurusEntry[]> | undefined;
+  private _authorSub?: Subscription;
 
   // list of authors, collected from _workDct
   public authors$: BehaviorSubject<ThesaurusEntry[]>;
@@ -100,7 +101,7 @@ export class QuotationEntryComponent {
       note: this.note,
     });
     // when author changes and we're using thesauri, get its works
-    this.author.valueChanges.subscribe((id) => {
+    this._authorSub = this.author.valueChanges.subscribe((id) => {
       if (this._workDct && id) {
         this.loadAuthorWorks(id);
       }
@@ -115,11 +116,17 @@ export class QuotationEntryComponent {
     });
   }
 
+  public ngOnDestroy(): void {
+    this._authorSub?.unsubscribe();
+  }
+
   private updateAuthorWorks(dct?: Record<string, ThesaurusEntry[]>): void {
+    this._workDct = dct;
     this.authors$.next(this._worksService.collectAuthors(dct) || []);
-    setTimeout(() => {
-      this.loadAuthorWorks(this.author.value!);
-    }, 700);
+    // load works for current author if set
+    if (this.author.value) {
+      this.loadAuthorWorks(this.author.value);
+    }
   }
 
   private loadAuthorWorks(authorId: string): void {
