@@ -22,7 +22,7 @@
         </div>
         @for (
           g of metadata.controls;
-          track g;
+          track $any(g).controls._uid.value;
           let i = $index;
           let first = $first;
           let last = $last

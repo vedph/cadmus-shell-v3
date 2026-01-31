@@ -108,13 +108,5 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  },
-  "references": [
-    {
-      "path": "./projects/myrmidon/cadmus-part-taxo-pg/tsconfig.lib.json"
-    },
-    {
-      "path": "./projects/myrmidon/cadmus-part-taxo-pg/tsconfig.spec.json"
-    }
-  ]
+  }
 }

@@ -95,6 +95,7 @@ export class MetadataPartComponent
   implements OnInit, OnDestroy
 {
   private _subs: Subscription[];
+  private _uidCounter = 0;
   public metadata: FormArray;
 
   /**
@@ -206,6 +207,7 @@ export class MetadataPartComponent
 
   private getMetadatumGroup(item?: Metadatum): FormGroup {
     return this.formBuilder.group({
+      _uid: this.formBuilder.control(++this._uidCounter),
       type: this.formBuilder.control(item?.type, Validators.maxLength(100)),
       name: this.formBuilder.control(item?.name, [
         Validators.required,

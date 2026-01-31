@@ -55,6 +55,7 @@
 
 ## 17.0.0
 
+- 2026-01-31: minor improvements and fixes to parts.
 - 2025-09-15:
   - refactored authors/contributors editing in bibliography entry editor.
   - generated Docker image.
