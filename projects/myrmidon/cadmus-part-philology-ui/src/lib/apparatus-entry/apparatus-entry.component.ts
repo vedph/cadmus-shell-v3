@@ -66,33 +66,31 @@ import {
   ],
 })
 export class ApparatusEntryComponent {
+  /**
+   * The apparatus entry being edited. When the user submits the edit,
+   * the corresponding entryChange event is emitted.
+   */
   public readonly entry = model<ApparatusEntry>();
+  public readonly editorClose = output();
 
-  /**
-   * Tags for apparatus entries.
-   */
+  // thesauri:
+  // apparatus-tags
   public readonly tagEntries = input<ThesaurusEntry[]>();
-  /**
-   * Witnesses.
-   */
+  // apparatus-witnesses
   public readonly witEntries = input<ThesaurusEntry[]>();
-  /**
-   * Authors.
-   */
+  // apparatus-authors
   public readonly authEntries = input<ThesaurusEntry[]>();
-  /**
-   * Author's tags.
-   */
+  // apparatus-author-tags
   public readonly authTagEntries = input<ThesaurusEntry[]>();
   /**
    * Author/work tags. This can be alternative or additional
    * to authEntries, and allows picking the work from a tree
    * of authors and works.
+   * Thesaurus: author-works.
    */
   public readonly workEntries = input<ThesaurusEntry[]>();
 
-  public readonly editorClose = output();
-
+  // form
   public type: FormControl<number>;
   public value: FormControl<string | null>;
   public normValue: FormControl<string | null>;
@@ -107,7 +105,7 @@ export class ApparatusEntryComponent {
 
   constructor(
     private _formBuilder: FormBuilder,
-    private _clipboard: Clipboard
+    private _clipboard: Clipboard,
   ) {
     this.type = _formBuilder.control(0, {
       validators: Validators.required,
@@ -119,7 +117,7 @@ export class ApparatusEntryComponent {
     this.accepted = _formBuilder.control(false, { nonNullable: true });
     this.subrange = _formBuilder.control(
       null,
-      Validators.pattern('^[0-9]+(?:-[0-9]+)?$')
+      Validators.pattern('^[0-9]+(?:-[0-9]+)?$'),
     );
     this.tag = _formBuilder.control(null, Validators.maxLength(50));
     this.groupId = _formBuilder.control(null, Validators.maxLength(50));
@@ -222,9 +220,9 @@ export class ApparatusEntryComponent {
         ]),
         note: this._formBuilder.control(
           witness?.note,
-          Validators.maxLength(1000)
+          Validators.maxLength(1000),
         ),
-      })
+      }),
     );
     this.form.markAsDirty();
   }
@@ -242,9 +240,9 @@ export class ApparatusEntryComponent {
         ]),
         note: this._formBuilder.control(
           author?.note,
-          Validators.maxLength(1000)
+          Validators.maxLength(1000),
         ),
-      })
+      }),
     );
     this.form.markAsDirty();
   }

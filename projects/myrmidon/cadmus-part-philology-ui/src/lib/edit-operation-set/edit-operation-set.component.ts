@@ -66,7 +66,7 @@ export class EditOperationSetComponent {
    * The currently edited operation (if any).
    */
   public readonly editedOperation = signal<EditOperation | undefined>(
-    undefined
+    undefined,
   );
   /**
    * The index of the currently edited operation (-1 if adding a new one).
@@ -149,7 +149,7 @@ export class EditOperationSetComponent {
 
   public addOperation(): void {
     const operation: EditOperation = EditOperation.createOperation(
-      OperationType.Replace
+      OperationType.Replace,
     );
     this.editedOperationIndex.set(-1);
     this.editedOperation.set(operation);

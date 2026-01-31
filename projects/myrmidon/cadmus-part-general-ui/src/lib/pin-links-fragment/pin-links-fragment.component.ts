@@ -77,17 +77,29 @@ export class PinLinksFragmentComponent
   public readonly canEditTarget = signal<boolean>(true);
 
   // pin-link-scopes
-  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // pin-link-tags
-  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // pin-link-assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // pin-link-docref-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // pin-link-docref-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // asserted-id-features
-  public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);

@@ -46,8 +46,10 @@ import { BibEntry, BibAuthor } from '../bibliography-part';
 import { BibAuthorsEditorComponent } from '../bib-authors-editor/bib-authors-editor.component';
 
 /**
- * Bibliography entry editor used by BibliographyPartComponent to edit a single
- * entry in the bibliography part.
+ * Dumb bibliography entry editor component, used by BibliographyPartComponent
+ * to edit a single entry in the bibliography part.
+ * Thesauri: bibliography-languages, bibliography-types, bibliography-tags,
+ * bibliography-author-roles.
  */
 @Component({
   selector: 'cadmus-bibliography-entry',
@@ -79,8 +81,16 @@ import { BibAuthorsEditorComponent } from '../bib-authors-editor/bib-authors-edi
 export class BibliographyEntryComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
 
+  /**
+   * The bibliography entry to edit.
+   */
   public readonly entry = model<BibEntry>();
+  /**
+   * The entry change event fired when the user saves the editing.
+   */
+  public readonly editorClose = output();
 
+  // thesauri:
   // bibliography-languages
   public readonly langEntries = input<ThesaurusEntry[]>();
   // bibliography-types
@@ -89,8 +99,6 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
   public readonly tagEntries = input<ThesaurusEntry[]>();
   // bibliography-author-roles
   public readonly roleEntries = input<ThesaurusEntry[]>();
-
-  public readonly editorClose = output();
 
   // form - general
   public key: FormControl<string | null>;
@@ -297,7 +305,7 @@ export class BibliographyEntryComponent implements OnInit, OnDestroy {
       !this.keywords().some(
         (k) =>
           k.language === this.keyLanguage.value &&
-          k.value === this.keyValue.value
+          k.value === this.keyValue.value,
       )
     ) {
       const keywords = [...this.keywords()];

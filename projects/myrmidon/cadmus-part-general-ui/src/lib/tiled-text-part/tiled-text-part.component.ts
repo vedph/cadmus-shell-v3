@@ -50,7 +50,6 @@ import {
   TEXT_TILE_TEXT_DATA_NAME,
   TextTile,
 } from '../tiled-text-part';
-import { deepCopy } from '@myrmidon/ngx-tools';
 
 interface Data {
   [key: string]: any;
@@ -106,7 +105,7 @@ export class TiledTextPartComponent
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
   ) {
     super(authService, formBuilder);
     // form
@@ -227,8 +226,8 @@ export class TiledTextPartComponent
             index + 1 < newTiles.length
               ? newTiles[index + 1]
               : newTiles.length > 0
-              ? newTiles[index - 1]
-              : undefined
+                ? newTiles[index - 1]
+                : undefined,
           );
           row.tiles = newTiles;
           this.adjustCoords();
@@ -304,7 +303,7 @@ export class TiledTextPartComponent
   }
 
   public editRowData(row: TextTileRow): void {
-    this._editedDataRow = deepCopy(row);
+    this._editedDataRow = structuredClone(row);
     this._editedDataTile = undefined;
     this.editedDataTitle.set(`Row ${row.y}`);
     this.editedData.set(this._editedDataRow?.data);
@@ -312,7 +311,7 @@ export class TiledTextPartComponent
   }
 
   public editTileData(tile: TextTile): void {
-    this._editedDataTile = deepCopy(tile);
+    this._editedDataTile = structuredClone(tile);
     this._editedDataRow = undefined;
     this.editedDataTitle.set(`Tile ${this.getTileCoords(tile)}`);
     this.editedData.set(this._editedDataTile?.data);
@@ -329,12 +328,20 @@ export class TiledTextPartComponent
   public saveEditedData(data: Data): void {
     if (this._editedDataTile) {
       // find and replace the tile in the rows array immutably
-      const rows = this.rows.value.map(row => {
-        if (row.tiles && row.tiles.some(t => t.x === this._editedDataTile!.x && t.data === this._editedDataTile!.data)) {
-          const tiles = row.tiles.map(t =>
-            t.x === this._editedDataTile!.x && t.data === this._editedDataTile!.data
+      const rows = this.rows.value.map((row) => {
+        if (
+          row.tiles &&
+          row.tiles.some(
+            (t) =>
+              t.x === this._editedDataTile!.x &&
+              t.data === this._editedDataTile!.data,
+          )
+        ) {
+          const tiles = row.tiles.map((t) =>
+            t.x === this._editedDataTile!.x &&
+            t.data === this._editedDataTile!.data
               ? { ...this._editedDataTile!, data }
-              : t
+              : t,
           );
           return { ...row, tiles };
         }
@@ -343,10 +350,10 @@ export class TiledTextPartComponent
       this.rows.setValue(rows);
     } else if (this._editedDataRow) {
       // find and replace the row in the rows array immutably
-      const rows = this.rows.value.map(row =>
+      const rows = this.rows.value.map((row) =>
         row.y === this._editedDataRow!.y
           ? { ...this._editedDataRow!, data }
-          : row
+          : row,
       );
       this.rows.setValue(rows);
     }

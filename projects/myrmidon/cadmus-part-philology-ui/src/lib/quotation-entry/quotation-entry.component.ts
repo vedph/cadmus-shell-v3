@@ -68,7 +68,7 @@ export class QuotationEntryComponent {
   constructor(
     formBuilder: FormBuilder,
     private _dialogService: DialogService,
-    private _worksService: QuotationWorksService
+    private _worksService: QuotationWorksService,
   ) {
     this.authors$ = new BehaviorSubject<ThesaurusEntry[]>([]);
     this.authorWorks$ = new BehaviorSubject<ThesaurusEntry[]>([]);

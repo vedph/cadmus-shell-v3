@@ -20,6 +20,10 @@ import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { IndexKeyword } from '../index-keywords-part';
 
+/**
+ * Index keyword editor component.
+ * Thesauri: index-keywords, index-keyword-tags, languages (all optional).
+ */
 @Component({
   selector: 'cadmus-index-keyword',
   templateUrl: './index-keyword.component.html',
@@ -41,8 +45,12 @@ import { IndexKeyword } from '../index-keywords-part';
 export class IndexKeywordComponent {
   public readonly keyword = model<IndexKeyword>();
 
+  // thesauri:
+  // index-keywords
   public readonly idxEntries = input<ThesaurusEntry[]>();
+  // index-keyword-tags
   public readonly tagEntries = input<ThesaurusEntry[]>();
+  // languages
   public readonly langEntries = input<ThesaurusEntry[]>();
 
   public readonly editorClose = output();

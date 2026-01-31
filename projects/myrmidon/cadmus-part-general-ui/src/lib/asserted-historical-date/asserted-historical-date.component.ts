@@ -24,6 +24,11 @@ import {
   HistoricalDateModel,
 } from '@myrmidon/cadmus-refs-historical-date';
 
+/**
+ * Dumb editor component for a single asserted historical date.
+ * Thesauri: asserted-historical-dates-tags, assertion-tags,
+ * doc-reference-types, doc-reference-tags.
+ */
 @Component({
   selector: 'cadmus-asserted-historical-date',
   imports: [
@@ -36,6 +41,7 @@ import {
     MatInputModule,
     MatSelectModule,
     MatTooltipModule,
+    // bricks
     HistoricalDateComponent,
     AssertionComponent,
   ],
@@ -43,7 +49,15 @@ import {
   styleUrl: './asserted-historical-date.component.css',
 })
 export class AssertedHistoricalDateComponent {
+  /**
+   * The date model to edit. The corresponding dateChange event
+   * is fired when the user saves the editing.
+   */
   public readonly date = model<AssertedDate>();
+
+  /**
+   * The cancel event fired when the user cancels editing.
+   */
   public readonly dateCancel = output();
 
   public tag: FormControl<string | null>;

@@ -23,7 +23,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import {
-  deepCopy,
   FlatLookupPipe,
   NgxToolsValidators,
 } from '@myrmidon/ngx-tools';
@@ -186,7 +185,7 @@ export class BibliographyPartComponent
 
   public editEntry(entry: BibEntry, index: number): void {
     this.editedIndex.set(index);
-    this.edited.set(deepCopy(entry));
+    this.edited.set(structuredClone(entry));
   }
 
   public closeEntry(): void {

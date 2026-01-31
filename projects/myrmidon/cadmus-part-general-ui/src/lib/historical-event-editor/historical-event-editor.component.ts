@@ -30,7 +30,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { deepCopy, FlatLookupPipe } from '@myrmidon/ngx-tools';
+import { FlatLookupPipe } from '@myrmidon/ngx-tools';
 import {
   AssertedChronotope,
   AssertedChronotopeSetComponent,
@@ -173,7 +173,7 @@ export class HistoricalEventEditorComponent {
       return this.relationEntries()!;
     }
     const filtered = this.relationEntries()!.filter((e) =>
-      e.id.startsWith(prefix)
+      e.id.startsWith(prefix),
     );
     return filtered;
   });
@@ -320,20 +320,20 @@ export class HistoricalEventEditorComponent {
           ? this.currentRelEntries()[0].id
           : '',
       },
-      -1
+      -1,
     );
   }
 
   public editEntity(entity: RelatedEntity, index: number): void {
     this.editedEntityIndex.set(index);
-    this.editedEntity.set(deepCopy(entity));
+    this.editedEntity.set(structuredClone(entity));
   }
 
   public onEntityChange(entity: RelatedEntity): void {
     // nope if already present
     if (
       this.relatedEntities.value.find(
-        (e) => e.id === entity.id && e.relation === entity.relation
+        (e) => e.id === entity.id && e.relation === entity.relation,
       )
     ) {
       this.closeEntity();

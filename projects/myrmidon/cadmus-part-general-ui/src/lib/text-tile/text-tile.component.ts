@@ -120,7 +120,9 @@ export class TextTileComponent implements OnInit, OnDestroy {
       this.form.reset();
       this.text.set(undefined);
     } else {
-      this.text.set(tile.data ? tile.data[TEXT_TILE_TEXT_DATA_NAME] : undefined);
+      this.text.set(
+        tile.data ? tile.data[TEXT_TILE_TEXT_DATA_NAME] : undefined,
+      );
       this.editedText.setValue(this.text() || null);
       this.form.markAsPristine();
     }

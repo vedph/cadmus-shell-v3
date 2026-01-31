@@ -17,11 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import {
-  deepCopy,
-  FlatLookupPipe,
-  NgxToolsValidators,
-} from '@myrmidon/ngx-tools';
+import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -77,10 +73,17 @@ export class AssertedHistoricalDatesPartComponent
   extends ModelEditorComponentBase<AssertedHistoricalDatesPart>
   implements OnInit
 {
+  /**
+   * The maximum allowed date count. -1 means no limit. The limit
+   * is set in the part backend settings.
+   */
   public readonly maxDateCount = signal<number>(-1);
+
+  // component state
   public readonly editedIndex = signal<number>(-1);
   public readonly edited = signal<AssertedDate | undefined>(undefined);
 
+  // thesauri:
   // asserted-historical-dates-tags
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // assertion-tags
@@ -96,6 +99,7 @@ export class AssertedHistoricalDatesPartComponent
     undefined,
   );
 
+  // form
   public dates: FormControl<AssertedDate[]>;
 
   constructor(
@@ -203,7 +207,7 @@ export class AssertedHistoricalDatesPartComponent
 
   public editDate(entry: AssertedDate, index: number): void {
     this.editedIndex.set(index);
-    this.edited.set(deepCopy(entry));
+    this.edited.set(structuredClone(entry));
   }
 
   public closeDate(): void {

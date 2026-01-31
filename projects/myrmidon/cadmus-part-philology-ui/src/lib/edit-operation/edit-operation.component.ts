@@ -1,4 +1,3 @@
-
 import {
   Component,
   computed,
@@ -66,8 +65,8 @@ import {
     MatSelectModule,
     MatTooltipModule,
     CharTextViewComponent,
-    ThesaurusEntriesPickerComponent
-],
+    ThesaurusEntriesPickerComponent,
+  ],
   templateUrl: './edit-operation.component.html',
   styleUrl: './edit-operation.component.css',
 })
@@ -140,7 +139,7 @@ export class EditOperationComponent {
   constructor(
     formBuilder: FormBuilder,
     private _clipboard: Clipboard,
-    private _snackbar: MatSnackBar
+    private _snackbar: MatSnackBar,
   ) {
     // form
     this.dsl = new FormControl<string | null>(null, {
@@ -187,16 +186,14 @@ export class EditOperationComponent {
     });
 
     // when type changes, update validators for 'to' field
-    this.type.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe((type) => {
-        if (type === 'MoveBefore' || type === 'MoveAfter' || type === 'Swap') {
-          this.to.setValidators(Validators.min(1));
-        } else {
-          this.to.clearValidators();
-        }
-        this.to.updateValueAndValidity();
-      });
+    this.type.valueChanges.pipe(takeUntilDestroyed()).subscribe((type) => {
+      if (type === 'MoveBefore' || type === 'MoveAfter' || type === 'Swap') {
+        this.to.setValidators(Validators.min(1));
+      } else {
+        this.to.clearValidators();
+      }
+      this.to.updateValueAndValidity();
+    });
 
     // whenever type, at, run, to, toRun, text change, set output dirty
     merge(
@@ -205,7 +202,7 @@ export class EditOperationComponent {
       this.run.valueChanges,
       this.to.valueChanges,
       this.toRun.valueChanges,
-      this.text.valueChanges
+      this.text.valueChanges,
     )
       .pipe(debounceTime(300), takeUntilDestroyed())
       .subscribe(() => {
@@ -215,11 +212,11 @@ export class EditOperationComponent {
 
   private mapIdsToEntries(
     ids: string[],
-    entries: ThesaurusEntry[] | undefined
+    entries: ThesaurusEntry[] | undefined,
   ): ThesaurusEntry[] {
     if (!entries) return ids.map((id) => ({ id, value: id }));
     return ids.map(
-      (id) => entries.find((e) => e.id === id) || { id, value: id }
+      (id) => entries.find((e) => e.id === id) || { id, value: id },
     );
   }
 
@@ -236,7 +233,7 @@ export class EditOperationComponent {
       this.tags.setValue(
         operation.tags
           ? this.mapIdsToEntries(operation.tags, this.opTagEntries())
-          : []
+          : [],
       );
       this.note.setValue(operation.note || null);
       this.form.markAsPristine();
@@ -257,7 +254,7 @@ export class EditOperationComponent {
       this.parseError.set(
         error instanceof ParseException
           ? (error as ParseException).toString()
-          : 'Unknown error'
+          : 'Unknown error',
       );
       return;
     }
@@ -296,7 +293,7 @@ export class EditOperationComponent {
     ) {
       (op as SwapEditOperation).inputText2 = inputText.substring(
         op.to - 1,
-        op.to - 1 + op.toRun
+        op.to - 1 + op.toRun,
       );
     }
   }
@@ -357,7 +354,7 @@ export class EditOperationComponent {
   public onRangePick(chars: NumberedChar[]): void {
     if (!chars || chars.length === 0) return;
     this.pickedCoords.set(
-      `${chars[0].n}x${chars[chars.length - 1].n + 1 - chars[0].n}`
+      `${chars[0].n}x${chars[chars.length - 1].n + 1 - chars[0].n}`,
     );
   }
 

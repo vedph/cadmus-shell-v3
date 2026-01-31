@@ -67,9 +67,11 @@ export class CategoriesPartComponent
   extends ModelEditorComponentBase<CategoriesPart>
   implements OnInit
 {
-  public categories: FormControl<ThesaurusEntry[]>;
-
+  // categories thesaurus entries
   public readonly entries = signal<ThesaurusEntry[] | undefined>(undefined);
+
+  // form
+  public categories: FormControl<ThesaurusEntry[]>;
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);

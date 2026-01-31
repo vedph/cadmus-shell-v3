@@ -23,7 +23,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { deepCopy, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -96,18 +96,24 @@ export class NamesPartComponent
   public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // thesauri for assertions:
   // assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
   public names: FormControl<AssertedProperName[]>;
 
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
   ) {
     super(authService, formBuilder);
     // form
@@ -210,7 +216,7 @@ export class NamesPartComponent
       this.edited.set(undefined);
     } else {
       this.editedIndex.set(index);
-      this.edited.set(deepCopy(this.names.value[index]));
+      this.edited.set(structuredClone(this.names.value[index]));
     }
   }
 
@@ -222,8 +228,8 @@ export class NamesPartComponent
       // else update replacing the old with the new name
       this.names.setValue(
         this.names.value.map((n: AssertedProperName, i: number) =>
-          i === this.editedIndex() ? name : n
-        )
+          i === this.editedIndex() ? name : n,
+        ),
       );
       this.names.updateValueAndValidity();
       this.names.markAsDirty();

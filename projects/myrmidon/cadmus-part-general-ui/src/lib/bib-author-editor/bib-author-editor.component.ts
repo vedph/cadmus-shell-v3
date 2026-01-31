@@ -1,4 +1,3 @@
-
 import { Component, effect, input, model, output } from '@angular/core';
 import {
   FormBuilder,
@@ -21,6 +20,10 @@ import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { BibAuthor } from '../bibliography-part';
 
+/**
+ * Dumb editor component for a bibliography record's author.
+ * Thesauri: bibliography-author-roles.
+ */
 @Component({
   selector: 'cadmus-bib-author-editor',
   imports: [
@@ -31,36 +34,42 @@ import { BibAuthor } from '../bibliography-part';
     MatIconModule,
     MatInputModule,
     MatSelectModule,
-    MatTooltipModule
-],
+    MatTooltipModule,
+  ],
   templateUrl: './bib-author-editor.component.html',
   styleUrl: './bib-author-editor.component.css',
 })
 export class BibAuthorEditorComponent {
+  /**
+   * The author model to edit. The corresponding authorChange event
+   * is fired when the user saves the editing.
+   */
   public readonly author = model<BibAuthor | undefined>();
+
+  /**
+   * The cancel event fired when the user cancels editing.
+   */
   public readonly cancelEdit = output();
 
+  // bibliography-author-roles
+  public readonly roleEntries = input<ThesaurusEntry[] | undefined>();
+
+  // form
   public lastName: FormControl<string>;
   public firstName: FormControl<string | null>;
   public role: FormControl<string | null>;
   public form: FormGroup;
 
-  // bibliography-author-roles
-  public readonly roleEntries = input<ThesaurusEntry[] | undefined>()
-
-  // track if the form is currently being updated programmatically
-  private _updatingForm = false;
-
-  constructor(private formBuilder: FormBuilder) {
+  constructor(formBuilder: FormBuilder) {
     // form
-    this.lastName = new FormControl('', {
+    this.lastName = formBuilder.control('', {
       validators: [Validators.required, Validators.maxLength(100)],
       nonNullable: true,
     });
-    this.firstName = new FormControl(null, {
+    this.firstName = formBuilder.control<string | null>(null, {
       validators: [Validators.maxLength(100)],
     });
-    this.role = new FormControl(null, {
+    this.role = formBuilder.control<string | null>(null, {
       validators: [Validators.maxLength(50)],
     });
     this.form = formBuilder.group({
@@ -77,8 +86,6 @@ export class BibAuthorEditorComponent {
   }
 
   private updateForm(author: BibAuthor | undefined | null): void {
-    this._updatingForm = true;
-
     if (!author) {
       this.form.reset();
     } else {
@@ -87,9 +94,6 @@ export class BibAuthorEditorComponent {
       this.role.setValue(author.roleId || null);
       this.form.markAsPristine();
     }
-
-    // reset guard only after marking controls
-    this._updatingForm = false;
   }
 
   private getAuthor(): BibAuthor {

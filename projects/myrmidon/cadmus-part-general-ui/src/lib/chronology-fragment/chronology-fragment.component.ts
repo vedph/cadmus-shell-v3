@@ -74,8 +74,10 @@ export class ChronologyFragmentComponent
   extends ModelEditorComponentBase<ChronologyFragment>
   implements OnInit
 {
+  // chronology-tags thesaurus entries
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
+  // form
   public date: FormControl<HistoricalDateModel | null>;
   public tag: FormControl<string | null>;
   public label: FormControl<string | null>;

@@ -8,7 +8,7 @@ import {
 } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { deepCopy, FlatLookupPipe } from '@myrmidon/ngx-tools';
+import { FlatLookupPipe } from '@myrmidon/ngx-tools';
 
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
@@ -17,7 +17,8 @@ import { BibAuthorEditorComponent } from '../bib-author-editor/bib-author-editor
 import { BibAuthor } from '../bibliography-part';
 
 /**
- * Editor for a set of bibliography authors.
+ * Dumb editor component for a set of bibliography authors.
+ * Thesauri: bibliography-author-roles.
  */
 @Component({
   selector: 'cadmus-bib-authors-editor',
@@ -32,12 +33,16 @@ import { BibAuthor } from '../bibliography-part';
     MatIcon,
     MatIconButton,
     FlatLookupPipe,
-    BibAuthorEditorComponent
+    BibAuthorEditorComponent,
   ],
   templateUrl: './bib-authors-editor.component.html',
   styleUrl: './bib-authors-editor.component.css',
 })
 export class BibAuthorsEditorComponent {
+  /**
+   * The authors being edited. The corresponding authorsChange event
+   * is fired when the user changes the authors.
+   */
   public readonly authors = model<BibAuthor[]>([]);
 
   // bibliography-author-roles
@@ -57,7 +62,7 @@ export class BibAuthorsEditorComponent {
 
   public editAuthor(author: BibAuthor, index: number): void {
     this.editedAuthorIndex.set(index);
-    this.editedAuthor.set(deepCopy(author));
+    this.editedAuthor.set(structuredClone(author));
   }
 
   public closeAuthor(): void {

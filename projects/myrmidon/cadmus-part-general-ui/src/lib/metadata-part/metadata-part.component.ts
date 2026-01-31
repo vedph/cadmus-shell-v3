@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -44,6 +44,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
+import { AppRepository } from '@myrmidon/cadmus-state';
 
 import {
   MetadataPart,
@@ -51,9 +52,15 @@ import {
   Metadatum,
 } from '../metadata-part';
 
+interface MetadataPartSetting {
+  noType?: boolean;
+}
+
 /**
  * Metadata part editor component.
  * Thesauri: metadata-types (optional).
+ * Settings: noType (boolean, optional) - if true, the metadata type field
+ * is not shown. This is globally applied to all metadata part instances.
  */
 @Component({
   selector: 'cadmus-metadata-part',
@@ -99,14 +106,27 @@ export class MetadataPartComponent
    */
   public readonly nameEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
+  // signal set to true when there metadata type should not be displayed;
+  // this is governed by a backend setting for all metadata part instances
+  public readonly noType = signal<boolean>(false);
+
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
     this._subs = [];
     // form
     this.metadata = formBuilder.array(
       [],
-      NgxToolsValidators.strictMinLengthValidator(1)
+      NgxToolsValidators.strictMinLengthValidator(1),
     );
+    // get setting for noType
+    const appRepository = inject(AppRepository);
+    appRepository
+      .getSettingFor<MetadataPartSetting>(METADATA_PART_TYPEID)
+      .then((setting) => {
+        if (setting && setting.noType === true) {
+          this.noType.set(true);
+        }
+      });
   }
 
   public override ngOnInit(): void {
@@ -160,7 +180,7 @@ export class MetadataPartComponent
           g.valueChanges.subscribe((_) => {
             this.metadata.updateValueAndValidity();
             this.metadata.markAsDirty();
-          })
+          }),
         );
         this.metadata.controls.push(g);
       }
@@ -204,7 +224,7 @@ export class MetadataPartComponent
       g.valueChanges.subscribe((_) => {
         this.metadata.updateValueAndValidity();
         this.metadata.markAsDirty();
-      })
+      }),
     );
     this.metadata.push(g);
     this.metadata.updateValueAndValidity();

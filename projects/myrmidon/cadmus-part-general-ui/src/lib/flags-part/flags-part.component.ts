@@ -83,7 +83,7 @@ export class FlagsPartComponent
 
   // flags mapped from thesaurus entries
   public featureFlags = computed<Flag[]>(
-    () => this.flagEntries()?.map((e) => entryToFlag(e)) || []
+    () => this.flagEntries()?.map((e) => entryToFlag(e)) || [],
   );
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
@@ -97,7 +97,7 @@ export class FlagsPartComponent
       { definitions: [], notes: {} },
       {
         nonNullable: true,
-      }
+      },
     );
   }
 
@@ -106,10 +106,12 @@ export class FlagsPartComponent
 
     // load settings for this part
     if (this._appRepository) {
-      this.settings.set(await this._appRepository.getSettingFor(
-        FLAGS_PART_TYPEID,
-        this.identity()?.roleId || undefined
-      ));
+      this.settings.set(
+        await this._appRepository.getSettingFor(
+          FLAGS_PART_TYPEID,
+          this.identity()?.roleId || undefined,
+        ),
+      );
       console.log('Flags part settings:', this.settings);
     }
   }

@@ -84,7 +84,8 @@ export class KeywordsPartComponent
   public newValue: FormControl<string | null>;
   public newForm: FormGroup;
 
-  // thesaurus
+  // thesauri:
+  // languages
   public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {

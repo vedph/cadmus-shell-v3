@@ -28,7 +28,7 @@ import { MatInput } from '@angular/material/input';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { deepCopy, NgxToolsValidators, SafeHtmlPipe } from '@myrmidon/ngx-tools';
+import { NgxToolsValidators, SafeHtmlPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -41,7 +41,7 @@ import {
   ThesauriSet,
   ThesaurusEntry,
   TokenLocation,
-  EditedObject
+  EditedObject,
 } from '@myrmidon/cadmus-core';
 
 import { ApparatusEntryComponent } from '../apparatus-entry/apparatus-entry.component';
@@ -93,28 +93,30 @@ export class ApparatusFragmentComponent
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   public readonly witEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   public readonly authEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  public readonly authTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly authTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   /**
    * Author/work tags. This can be alternative or additional
    * to authEntries, and allows picking the work from a tree
    * of authors and works.
-  */
- public readonly workEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+   */
+  public readonly workEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
- public readonly editedEntryIndex = signal<number>(-1);
- public readonly editedEntry = signal<ApparatusEntry | undefined>(undefined);
- public readonly frText = signal<string | undefined>(undefined);
- public readonly summary = signal<string | undefined>(undefined);
+  public readonly editedEntryIndex = signal<number>(-1);
+  public readonly editedEntry = signal<ApparatusEntry | undefined>(undefined);
+  public readonly frText = signal<string | undefined>(undefined);
+  public readonly summary = signal<string | undefined>(undefined);
 
- public tag: FormControl<string | null>;
- public entries: FormControl<ApparatusEntry[]>;
+  public tag: FormControl<string | null>;
+  public entries: FormControl<ApparatusEntry[]>;
 
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
     private _layerService: TextLayerService,
     private _dialogService: DialogService,
-    private _summaryService: ApparatusEntrySummaryService
+    private _summaryService: ApparatusEntrySummaryService,
   ) {
     super(authService, formBuilder);
     // form
@@ -188,10 +190,12 @@ export class ApparatusFragmentComponent
   protected override onDataSet(data?: EditedObject<ApparatusFragment>): void {
     // fragment's text
     if (data?.baseText && data.value) {
-      this.frText.set(this._layerService.getTextFragment(
-        data.baseText,
-        TokenLocation.parse(data.value.location)!
-      ));
+      this.frText.set(
+        this._layerService.getTextFragment(
+          data.baseText,
+          TokenLocation.parse(data.value.location)!,
+        ),
+      );
     }
 
     // thesauri
@@ -242,7 +246,7 @@ export class ApparatusFragmentComponent
 
   public editEntry(entry: ApparatusEntry, index: number): void {
     this.editedEntryIndex.set(index);
-    this.editedEntry.set(deepCopy(entry));
+    this.editedEntry.set(structuredClone(entry));
   }
 
   public saveEntry(entry: ApparatusEntry): void {

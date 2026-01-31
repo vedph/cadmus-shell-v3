@@ -73,7 +73,9 @@ export class PhysicalMeasurementsPartComponent
   // physical-size-units
   public readonly unitEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // physical-size-dim-tags
-  public readonly dimTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly dimTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // physical-size-set-names
   public readonly nameEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
@@ -127,7 +129,7 @@ export class PhysicalMeasurementsPartComponent
   }
 
   protected override onDataSet(
-    data?: EditedObject<PhysicalMeasurementsPart>
+    data?: EditedObject<PhysicalMeasurementsPart>,
   ): void {
     // thesauri
     if (data?.thesauri) {
@@ -140,7 +142,7 @@ export class PhysicalMeasurementsPartComponent
 
   protected getValue(): PhysicalMeasurementsPart {
     let part = this.getEditedPart(
-      PHYSICAL_MEASUREMENTS_PART_TYPEID
+      PHYSICAL_MEASUREMENTS_PART_TYPEID,
     ) as PhysicalMeasurementsPart;
     part.measurements = this.measurements.value || [];
     return part;

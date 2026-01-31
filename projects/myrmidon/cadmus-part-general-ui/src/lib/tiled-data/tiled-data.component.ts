@@ -87,7 +87,7 @@ export class TiledDataComponent implements OnInit, OnDestroy {
 
   constructor(
     private _formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
   ) {
     this._hiddenData = {};
     this.keys = [];
@@ -171,8 +171,8 @@ export class TiledDataComponent implements OnInit, OnDestroy {
         key.value,
         this._formBuilder.control(
           data[key.value],
-          Validators.maxLength(VALUE_MAX_LEN)
-        )
+          Validators.maxLength(VALUE_MAX_LEN),
+        ),
       );
     }
     this.keys = cache;

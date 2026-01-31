@@ -68,12 +68,14 @@ export class DecoratedCountsPartComponent
   extends ModelEditorComponentBase<DecoratedCountsPart>
   implements OnInit
 {
-  public counts: FormControl<DecoratedCount[]>;
-
+  // thesauri:
   // decorated-count-ids
   public readonly idEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // decorated-count-tags
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+
+  // form
+  public counts: FormControl<DecoratedCount[]>;
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -130,7 +132,7 @@ export class DecoratedCountsPartComponent
 
   protected getValue(): DecoratedCountsPart {
     let part = this.getEditedPart(
-      DECORATED_COUNTS_PART_TYPEID
+      DECORATED_COUNTS_PART_TYPEID,
     ) as DecoratedCountsPart;
     part.counts = this.counts.value || [];
     return part;

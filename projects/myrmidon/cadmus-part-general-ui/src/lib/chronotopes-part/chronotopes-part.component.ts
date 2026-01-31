@@ -22,7 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { deepCopy, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -79,9 +79,11 @@ export class ChronotopesPartComponent
   extends ModelEditorComponentBase<ChronotopesPart>
   implements OnInit
 {
+  // state
   public readonly editedIndex = signal<number>(-1);
   public readonly edited = signal<AssertedChronotope | undefined>(undefined);
 
+  // thesauri:
   // chronotope-place-tags
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // chronotope-assertion-tags
@@ -91,6 +93,7 @@ export class ChronotopesPartComponent
   // doc-reference-tags
   public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
+  // form
   public chronotopes: FormControl<AssertedChronotope[]>;
 
   constructor(
@@ -177,7 +180,7 @@ export class ChronotopesPartComponent
 
   public editChronotope(chronotope: AssertedChronotope, index: number): void {
     this.editedIndex.set(index);
-    this.edited.set(deepCopy(chronotope));
+    this.edited.set(structuredClone(chronotope));
   }
 
   public onChronotopeChange(chronotope: AssertedChronotope): void {

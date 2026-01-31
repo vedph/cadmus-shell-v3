@@ -28,11 +28,7 @@ import {
 } from '@angular/material/expansion';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import {
-  deepCopy,
-  FlatLookupPipe,
-  NgxToolsValidators,
-} from '@myrmidon/ngx-tools';
+import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
 
 import {
   ThesauriSet,
@@ -191,7 +187,7 @@ export class IndexKeywordsPartComponent
 
   protected getValue(): IndexKeywordsPart {
     let part = this.getEditedPart(
-      INDEX_KEYWORDS_PART_TYPEID
+      INDEX_KEYWORDS_PART_TYPEID,
     ) as IndexKeywordsPart;
     part.keywords = [...this.keywords.value];
     return part;
@@ -242,7 +238,7 @@ export class IndexKeywordsPartComponent
   }
 
   public editKeyword(keyword: IndexKeyword): void {
-    this.editedKeyword.set(deepCopy(keyword));
+    this.editedKeyword.set(structuredClone(keyword));
   }
 
   public onKeywordClose(): void {

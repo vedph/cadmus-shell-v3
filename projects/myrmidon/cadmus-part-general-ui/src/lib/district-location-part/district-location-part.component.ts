@@ -74,11 +74,14 @@ export class DistrictLocationPartComponent
   extends ModelEditorComponentBase<DistrictLocationPart>
   implements OnInit
 {
+  // form
   public place: FormControl<ProperName | null>;
   public note: FormControl<string | null>;
 
+  // state
   public readonly name = signal<ProperName | undefined>(undefined);
 
+  // thesauri:
   // district-name-piece-types
   public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // district-name-lang-entries

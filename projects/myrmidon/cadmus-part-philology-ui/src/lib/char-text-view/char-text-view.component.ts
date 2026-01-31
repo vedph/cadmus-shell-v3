@@ -25,7 +25,7 @@ interface NumberedCharView extends NumberedChar {
 })
 export class CharTextViewComponent {
   private readonly _lastSelectedChar = signal<NumberedChar | undefined>(
-    undefined
+    undefined,
   );
 
   /**
@@ -102,8 +102,8 @@ export class CharTextViewComponent {
           color: this.colorCallback()?.(char) || this.defaultColor(),
           borderColor:
             this.borderColorCallback()?.(char) || this.defaultBorderColor(),
-        }))
-      )
+        })),
+      ),
     );
   }
 
@@ -116,7 +116,7 @@ export class CharTextViewComponent {
         ...c,
         color: c.oldColor || this.defaultColor(),
         borderColor: c.oldBorderColor || this.defaultBorderColor(),
-      }))
+      })),
     );
     this.rows.set(newRows);
   }
@@ -134,7 +134,7 @@ export class CharTextViewComponent {
 
     for (let i = 0; i < rows.length; i++) {
       const charIndex = rows[i].findIndex(
-        (c) => c.n === char.n && c.value === char.value
+        (c) => c.n === char.n && c.value === char.value,
       );
       if (charIndex !== -1) {
         clickedRowIndex = i;
@@ -156,7 +156,7 @@ export class CharTextViewComponent {
 
       for (let i = 0; i < rows.length; i++) {
         const charIndex = rows[i].findIndex(
-          (c) => c.n === lastSelected.n && c.value === lastSelected.value
+          (c) => c.n === lastSelected.n && c.value === lastSelected.value,
         );
         if (charIndex !== -1) {
           lastRowIndex = i;

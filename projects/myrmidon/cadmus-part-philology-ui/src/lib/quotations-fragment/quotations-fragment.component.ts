@@ -23,7 +23,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { deepCopy, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -82,7 +82,7 @@ export class QuotationsFragmentComponent
   public readonly workEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   public readonly workDictionary = computed(() =>
-    this._worksService.buildDictionary(this.workEntries() || [])
+    this._worksService.buildDictionary(this.workEntries() || []),
   );
 
   public entries: FormControl<QuotationEntry[]>;
@@ -92,7 +92,7 @@ export class QuotationsFragmentComponent
     formBuilder: FormBuilder,
     private _layerService: TextLayerService,
     private _dialogService: DialogService,
-    private _worksService: QuotationWorksService
+    private _worksService: QuotationWorksService,
   ) {
     super(authService, formBuilder);
     // form
@@ -143,8 +143,8 @@ export class QuotationsFragmentComponent
       this.frText.set(
         this._layerService.getTextFragment(
           data.baseText,
-          TokenLocation.parse(data.value.location)!
-        )
+          TokenLocation.parse(data.value.location)!,
+        ),
       );
     }
 
@@ -174,13 +174,13 @@ export class QuotationsFragmentComponent
         work: '',
         citation: '',
       },
-      -1
+      -1,
     );
   }
 
   public editEntry(entry: QuotationEntry, index: number): void {
     this.editedEntryIndex.set(index);
-    this.editedEntry.set(deepCopy(entry));
+    this.editedEntry.set(structuredClone(entry));
   }
 
   public saveEntry(entry: QuotationEntry): void {

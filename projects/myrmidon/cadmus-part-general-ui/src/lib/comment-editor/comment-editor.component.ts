@@ -125,6 +125,7 @@ export class CommentEditorComponent
 {
   private _textHelper!: MonacoEditorHelper;
 
+  // thesauri:
   // comment-tags
   public readonly comTagEntries = signal<ThesaurusEntry[] | undefined>(
     undefined,
@@ -164,6 +165,7 @@ export class CommentEditorComponent
     undefined,
   );
 
+  // form
   public tag: FormControl<string | null>;
   public text: FormControl<string | null>;
   public references: FormControl<DocReference[]>;
@@ -209,9 +211,7 @@ export class CommentEditorComponent
       return;
     }
     const selection = editor.getSelection();
-    const text = selection
-      ? editor.getModel()!.getValueInRange(selection)
-      : '';
+    const text = selection ? editor.getModel()!.getValueInRange(selection) : '';
 
     const result = await this._editService.edit({
       selector,

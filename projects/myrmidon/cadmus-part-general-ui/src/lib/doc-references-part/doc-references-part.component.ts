@@ -48,7 +48,7 @@ interface DocReferencesPartSettings {
 /**
  * Document references part editor.
  * Thesauri: doc-reference-tags, doc-reference-types (all optional).
- * You can configure doc references lookup properties via settings.
+ * Settings: see DocReferencesPartSettings.
  */
 @Component({
   selector: 'cadmus-doc-references-part',
@@ -73,10 +73,15 @@ export class DocReferencesPartComponent
   extends ModelEditorComponentBase<DocReferencesPart>
   implements OnInit
 {
+  // form
   public references: FormControl<DocReference[]>;
 
+  // thesauri
+  // doc-reference-types
   public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  // doc-reference-tags
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+
   public readonly settings = signal<DocReferencesPartSettings | undefined>(
     undefined
   );

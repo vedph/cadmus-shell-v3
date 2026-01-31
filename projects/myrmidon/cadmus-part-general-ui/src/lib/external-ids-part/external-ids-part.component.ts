@@ -46,6 +46,7 @@ import {
  * IDs.
  * Thesauri: external-id-types, external-id-tags, assertion-tags,
  * doc-reference-types, doc-reference-tags (all optional).
+ * Note: this part is obsolete. You should rather use pin-links-part.
  */
 @Component({
   selector: 'cadmus-refs-external-ids-part',

@@ -50,6 +50,10 @@ import {
   HISTORICAL_DATE_PART_TYPEID,
 } from '../historical-date-part';
 
+/**
+ * Historical date part editor.
+ * Thesauri: doc-reference-tags, doc-reference-types (all optional).
+ */
 @Component({
   selector: 'cadmus-historical-date-part',
   templateUrl: './historical-date-part.component.html',
@@ -77,10 +81,14 @@ export class HistoricalDatePartComponent
   extends ModelEditorComponentBase<HistoricalDatePart>
   implements OnInit
 {
+  // form
   public references: FormControl<DocReference[]>;
   public date: FormControl<HistoricalDateModel>;
 
+  // thesauri:
+  // doc-reference-types
   public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  // doc-reference-tags
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
@@ -139,7 +147,7 @@ export class HistoricalDatePartComponent
 
   protected getValue(): HistoricalDatePart {
     let part = this.getEditedPart(
-      HISTORICAL_DATE_PART_TYPEID
+      HISTORICAL_DATE_PART_TYPEID,
     ) as HistoricalDatePart;
     part.date = this.date.value;
     part.references = this.references.value?.length

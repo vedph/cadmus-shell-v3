@@ -9,7 +9,7 @@ To do this, review this Angular component, ensuring the following:
 - detect `ngClass`/`ngStyle` usage so that they can be converted into `[class]` and `[style].
 - detect any mutable state (e.g., direct object mutation). Change detection is based on object _reference_ checks, so mutable patterns will lead to bugs. We must be sure to catch and fix them all. Be careful to detect changes inside objects or arrays.
 - in templates, there must be only the modern Angular `@if`/`@for` and the like, instead of `*ngIf`/`*ngFor`, etc.
-- when a component is editing a list of items, and passes via binding the item to edit to a child component (e.g. `this.edited.set(...)`), ensure that the object being passed is deeply cloned first, via `deepCopy` (e.g. `this.edited.set(deepCopy(objectToEdit))`). This is essential for the child editor to be notified of a new item to edit.
+- when a component is editing a list of items, and passes via binding the item to edit to a child component (e.g. `this.edited.set(...)`), ensure that the object being passed is deeply cloned first, via `structuredClone` (e.g. `this.edited.set(structuredClone(objectToEdit))`). This is essential for the child editor to be notified of a new item to edit.
 
 Please notice that:
 

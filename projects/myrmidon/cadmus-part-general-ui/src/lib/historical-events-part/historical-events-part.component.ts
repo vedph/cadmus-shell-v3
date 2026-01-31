@@ -26,11 +26,7 @@ import {
   MatExpansionPanelHeader,
 } from '@angular/material/expansion';
 
-import {
-  NgxToolsValidators,
-  FlatLookupPipe,
-  deepCopy,
-} from '@myrmidon/ngx-tools';
+import { NgxToolsValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { AssertedChronotopesPipe } from '@myrmidon/cadmus-refs-asserted-chronotope';
@@ -96,55 +92,55 @@ export class HistoricalEventsPartComponent
    * Thesaurus event-types.
    */
   public readonly eventTypeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   /**
    * Thesaurus event-tags.
    */
   public readonly eventTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   /**
    * Thesaurus event-relations.
    */
   public readonly relationEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   /**
    * Thesaurus chronotope-tags.
    */
   public readonly ctTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   /**
    * Thesaurus assertion-tags.
    */
   public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   /**
    * Thesaurus doc-reference-tags.
    */
   public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   /**
    * Thesaurus doc-reference-types.
    */
   public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   // pin-link-scopes
   public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   // pin-link-tags
   public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
   // asserted-id-features
   public readonly idFeatureEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined
+    undefined,
   );
 
   public events: FormControl<HistoricalEvent[]>;
@@ -152,7 +148,7 @@ export class HistoricalEventsPartComponent
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
   ) {
     super(authService, formBuilder);
     // form
@@ -247,7 +243,7 @@ export class HistoricalEventsPartComponent
   }
 
   protected override onDataSet(
-    data?: EditedObject<HistoricalEventsPart>
+    data?: EditedObject<HistoricalEventsPart>,
   ): void {
     // thesauri
     if (data?.thesauri) {
@@ -260,7 +256,7 @@ export class HistoricalEventsPartComponent
 
   protected getValue(): HistoricalEventsPart {
     let part = this.getEditedPart(
-      HISTORICAL_EVENTS_PART_TYPEID
+      HISTORICAL_EVENTS_PART_TYPEID,
     ) as HistoricalEventsPart;
     part.events = this.events.value || [];
     return part;
@@ -279,13 +275,13 @@ export class HistoricalEventsPartComponent
           ? this.eventTypeEntries()![0].id
           : '',
       },
-      -1
+      -1,
     );
   }
 
   public editEvent(event: HistoricalEvent, index: number): void {
     this.editedEventIndex.set(index);
-    this.editedEvent.set(deepCopy(event));
+    this.editedEvent.set(structuredClone(event));
   }
 
   public onEventSave(event: HistoricalEvent): void {

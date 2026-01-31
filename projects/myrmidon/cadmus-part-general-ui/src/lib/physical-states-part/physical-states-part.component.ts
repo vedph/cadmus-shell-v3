@@ -22,7 +22,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { NgxToolsValidators, FlatLookupPipe, deepCopy } from '@myrmidon/ngx-tools';
+import { NgxToolsValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -79,22 +79,29 @@ export class PhysicalStatesPartComponent
   extends ModelEditorComponentBase<PhysicalStatesPart>
   implements OnInit
 {
+  // state
   public readonly editedIndex = signal<number>(-1);
   public readonly edited = signal<PhysicalState | undefined>(undefined);
 
+  // thesauri:
   // physical-states
-  public readonly stateEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly stateEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // physical-state-features
   public readonly featEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // physical-state-reporters
-  public readonly reporterEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly reporterEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
+  // form
   public entries: FormControl<PhysicalState[]>;
 
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
   ) {
     super(authService, formBuilder);
     // form
@@ -157,7 +164,7 @@ export class PhysicalStatesPartComponent
 
   protected getValue(): PhysicalStatesPart {
     let part = this.getEditedPart(
-      PHYSICAL_STATES_PART_TYPEID
+      PHYSICAL_STATES_PART_TYPEID,
     ) as PhysicalStatesPart;
     part.states = this.entries.value || [];
     return part;
@@ -172,7 +179,7 @@ export class PhysicalStatesPartComponent
 
   public editState(entry: PhysicalState, index: number): void {
     this.editedIndex.set(index);
-    this.edited.set(deepCopy(entry));
+    this.edited.set(structuredClone(entry));
   }
 
   public closeState(): void {

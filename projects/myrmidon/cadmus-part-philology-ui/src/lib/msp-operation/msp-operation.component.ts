@@ -1,4 +1,11 @@
-import { Component, OnInit, output, model, effect, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  output,
+  model,
+  effect,
+  signal,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -151,7 +158,7 @@ export class MspOperationComponent implements OnInit {
       .pipe(
         filter((_) => !this._ignoreTextUpdate),
         debounceTime(300),
-        distinctUntilChanged()
+        distinctUntilChanged(),
       )
       .subscribe((_) => {
         try {
@@ -168,7 +175,7 @@ export class MspOperationComponent implements OnInit {
       .pipe(
         filter((_) => !this._ignoreVisualUpdate),
         debounceTime(300),
-        distinctUntilChanged()
+        distinctUntilChanged(),
       )
       .subscribe((_) => {
         try {
@@ -184,7 +191,7 @@ export class MspOperationComponent implements OnInit {
       .pipe(
         filter((_) => !this._ignoreVisualUpdate),
         debounceTime(300),
-        distinctUntilChanged()
+        distinctUntilChanged(),
       )
       .subscribe((_) => {
         this.adjustVisualForOperator();
@@ -195,7 +202,7 @@ export class MspOperationComponent implements OnInit {
 
   private updateFormControls(
     operation?: MspOperation,
-    updateText?: boolean
+    updateText?: boolean,
   ): void {
     if (!operation) {
       this.form.reset();
@@ -214,7 +221,7 @@ export class MspOperationComponent implements OnInit {
         tag: operation.tag,
         note: operation.note,
       },
-      noEvent
+      noEvent,
     );
 
     if (updateText) {
