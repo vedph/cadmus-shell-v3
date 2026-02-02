@@ -11,13 +11,13 @@ export class ThesaurusService {
   constructor(
     private _http: HttpClient,
     private _error: ErrorService,
-    private _env: EnvService
+    private _env: EnvService,
   ) {}
 
   private getFilterParams(
     pageNumber: number,
     pageSize: number,
-    filter?: ThesaurusFilter
+    filter?: ThesaurusFilter,
   ): HttpParams {
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
@@ -31,7 +31,7 @@ export class ThesaurusService {
     if (filter?.isAlias === false || filter?.isAlias === true) {
       httpParams = httpParams.set(
         'isAlias',
-        filter.isAlias === true ? 'true' : 'false'
+        filter.isAlias === true ? 'true' : 'false',
       );
     }
     return httpParams;
@@ -46,7 +46,7 @@ export class ThesaurusService {
   public getThesaurusIds(
     filter?: ThesaurusFilter,
     pageNumber = 1,
-    pageSize = 20
+    pageSize = 20,
   ): Observable<string[]> {
     const url = `${this._env.get('apiUrl')}thesauri-ids`;
 
@@ -103,7 +103,7 @@ export class ThesaurusService {
    */
   public getThesaurus(
     id: string,
-    emptyIfNotFound = false
+    emptyIfNotFound = false,
   ): Observable<Thesaurus> {
     let httpParams = new HttpParams();
     if (emptyIfNotFound) {
@@ -112,6 +112,21 @@ export class ThesaurusService {
     const url = `${this._env.get('apiUrl')}thesauri/${encodeURIComponent(id)}`;
     return this._http
       .get<Thesaurus>(url, {
+        params: httpParams,
+      })
+      .pipe(retry(3), catchError(this._error.handleError));
+  }
+
+  /**
+   * Get a list of thesauri IDs whose target ID is the specified one.
+   * @param targetId The target ID of the thesaurus.
+   * @returns An ordered list of thesauri IDs whose target ID is targetId.
+   */
+  public getThesaurusAliases(targetId: string): Observable<string[]> {
+    let httpParams = new HttpParams();
+    const url = `${this._env.get('apiUrl')}thesauri/${encodeURIComponent(targetId)}/aliases`;
+    return this._http
+      .get<string[]>(url, {
         params: httpParams,
       })
       .pipe(retry(3), catchError(this._error.handleError));
@@ -142,7 +157,7 @@ export class ThesaurusService {
   public getThesauri(
     filter: ThesaurusFilter,
     pageNumber = 1,
-    pageSize = 20
+    pageSize = 20,
   ): Observable<DataPage<Thesaurus>> {
     let httpParams = this.getFilterParams(pageNumber, pageSize, filter);
 
