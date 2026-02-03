@@ -1,6 +1,6 @@
 # History
 
-- 2026-02-03: refactored thesaurus list to add thesauri or thesauri aliases. This prepares the change of the thesaurus editor with an entries editor which implies an existing thesaurus.
+- 2026-02-03: refactored thesaurus list to add thesauri or thesauri aliases (`@myrmidon/cadmus-thesaurus-list`). This prepares the change of the thesaurus editor with an entries editor which implies an existing thesaurus.
 - 2026-02-02: added `getThesaurusAliases` to `ThesaurusService` in `@myrmidon/cadmus-api`.
 - 2026-01-31: minor improvements and fixes to parts.
 
