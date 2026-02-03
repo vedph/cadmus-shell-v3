@@ -11,96 +11,140 @@
 
       <!-- list -->
       @if (page$ | async; as page) {
-      <div id="list">
-        @if (loading$ | async) {
-        <div>
-          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-        </div>
-        }
-        <table>
-          <thead>
-            <th></th>
-            <th>id</th>
-            <th>entries</th>
-          </thead>
-          <tbody>
-            @for (thesaurus of page.items; track thesaurus.id) {
-            <tr>
-              <td class="fit-width">
+        <div id="list">
+          @if (loading$ | async) {
+            <div>
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </div>
+          }
+          <table>
+            <thead>
+              <th></th>
+              <th>id</th>
+              <th>entries</th>
+            </thead>
+            <tbody>
+              @for (thesaurus of page.items; track thesaurus.id) {
+                <tr>
+                  <td class="fit-width">
+                    <button
+                      mat-icon-button
+                      type="button"
+                      matTooltip="Edit {{ thesaurus.id }}"
+                      (click)="editThesaurus(thesaurus)"
+                    >
+                      <mat-icon class="mat-primary">mode_edit</mat-icon>
+                    </button>
+                    @if (userLevel() > 2) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        matTooltip="Delete {{ thesaurus.id }}"
+                        (click)="deleteThesaurus(thesaurus)"
+                      >
+                        <mat-icon class="mat-warn">delete</mat-icon>
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Download this thesaurus"
+                      [disabled]="downloading()"
+                      (click)="downloadThesaurus(thesaurus.id)"
+                    >
+                      <mat-icon>download</mat-icon>
+                    </button>
+                  </td>
+                  <td>{{ thesaurus.id }}</td>
+                  <td>
+                    {{ thesaurus.entries?.length || 0 }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <!-- pagination -->
+          <mat-paginator
+            [length]="page.total"
+            [pageIndex]="page.pageNumber - 1"
+            [pageSize]="page.pageSize"
+            [pageSizeOptions]="[5, 10, 20, 50, 100]"
+            (page)="onPageChange($event)"
+            [showFirstLastButtons]="true"
+          />
+
+          <!-- adder -->
+          <div>
+            <fieldset>
+              <legend>add thesaurus</legend>
+              <form
+                [formGroup]="newThesaurusForm"
+                (submit)="addThesaurus()"
+                class="form-row"
+              >
+                <!-- id -->
+                <mat-form-field>
+                  <mat-label>ID</mat-label>
+                  <input matInput [formControl]="newThesaurusId" />
+                  @if (
+                    $any(newThesaurusId).errors?.required &&
+                    (newThesaurusId.dirty || newThesaurusId.touched)
+                  ) {
+                    <mat-error>ID required</mat-error>
+                  }
+                  @if (
+                    $any(newThesaurusId).errors?.maxLength &&
+                    (newThesaurusId.dirty || newThesaurusId.touched)
+                  ) {
+                    <mat-error>ID too long</mat-error>
+                  }
+                </mat-form-field>
+                <!-- target ID (for alias) -->
+                <mat-form-field>
+                  <mat-label>target ID</mat-label>
+                  <input matInput [formControl]="newThesaurusTargetId" />
+                  @if (
+                    $any(newThesaurusTargetId).errors?.maxLength &&
+                    (newThesaurusTargetId.dirty || newThesaurusTargetId.touched)
+                  ) {
+                    <mat-error>ID too long</mat-error>
+                  }
+                  @if (newThesaurusForm.errors?.["sameTargetId"]) {
+                    <mat-error>Target ID must differ from ID</mat-error>
+                  }
+                </mat-form-field>
+                <!-- add button -->
                 <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Edit {{ thesaurus.id }}"
-                  (click)="editThesaurus(thesaurus)"
+                  type="submit"
+                  mat-flat-button
+                  color="primary"
+                  matTooltip="Add a new thesaurus (or alias if target ID is set)"
+                  [disabled]="newThesaurusForm.invalid || adding()"
                 >
-                  <mat-icon class="mat-primary">mode_edit</mat-icon>
+                  add
                 </button>
-                @if (userLevel() > 2) {
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Delete {{ thesaurus.id }}"
-                  (click)="deleteThesaurus(thesaurus)"
-                >
-                  <mat-icon class="mat-warn">delete</mat-icon>
-                </button>
+                @if (adding()) {
+                  <div>
+                    <mat-progress-bar mode="indeterminate" />
+                  </div>
                 }
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Download this thesaurus"
-                  [disabled]="downloading()"
-                  (click)="downloadThesaurus(thesaurus.id)"
-                >
-                  <mat-icon>download</mat-icon>
-                </button>
-              </td>
-              <td>{{ thesaurus.id }}</td>
-              <td>
-                {{ thesaurus.entries?.length || 0 }}
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-        <!-- pagination -->
-        <mat-paginator
-          [length]="page.total"
-          [pageIndex]="page.pageNumber - 1"
-          [pageSize]="page.pageSize"
-          [pageSizeOptions]="[5, 10, 20, 50, 100]"
-          (page)="onPageChange($event)"
-          [showFirstLastButtons]="true"
-        ></mat-paginator>
-        <!-- importer -->
-        @if (importEnabled()) {
-        <div>
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>Import thesauri</mat-panel-title>
-            </mat-expansion-panel-header>
-            <cadmus-thesaurus-import
-              (uploadEnd)="onUploadEnd()"
-            ></cadmus-thesaurus-import>
-          </mat-expansion-panel>
+              </form>
+            </fieldset>
+          </div>
+
+          <!-- importer -->
+          @if (importEnabled()) {
+            <div>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Import thesauri</mat-panel-title>
+                </mat-expansion-panel-header>
+                <cadmus-thesaurus-import (uploadEnd)="onUploadEnd()" />
+              </mat-expansion-panel>
+            </div>
+          }
         </div>
-        }
-      </div>
       }
     </div>
   </mat-card-content>
-  @if (userLevel() > 1) {
-  <mat-card-actions>
-    <button
-      type="button"
-      class="mat-primary"
-      mat-flat-button
-      matTooltip="Add a new thesaurus"
-      (click)="addThesaurus()"
-    >
-      <mat-icon>add_circle</mat-icon>
-      thesaurus
-    </button>
-  </mat-card-actions>
-  }
 </mat-card>
