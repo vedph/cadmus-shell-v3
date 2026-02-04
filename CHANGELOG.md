@@ -1,5 +1,35 @@
 # History
 
+- 2026-02-04: updated Angular and packages, adjusting lookup services to changes in lookup after adding lookup provider options. This implied minimal changes to these libraries:
+  - `@myrmidon/cadmus-graph-ui`
+  - `@myrmidon/cadmus-ui`
+  - 🆕 `@myrmidon/cadmus-part-general-ui`: for comment part, pin links part, pin links fragment, settings are fetched to configure lookup scopes if defined. The added code is like this:
+
+```ts
+// add settings model for the part:
+interface __NAME__PartSettings {
+  lookupProviderOptions?: LookupProviderOptions;
+}
+
+// add property:
+// lookup options depending on role
+public readonly lookupProviderOptions = signal<
+  LookupProviderOptions | undefined
+>(undefined);
+
+// in onDataSet handler, load settings:
+// settings
+this._appRepository
+  ?.getSettingFor<__NAME__PartSettings>(
+    __NAME__PART_TYPEID,
+    this.identity()?.roleId || undefined,
+  )
+  .then((settings) => {
+    const options = settings?.lookupProviderOptions;
+    this.lookupProviderOptions.set(options || undefined);
+  });
+```
+
 - 2026-02-03: refactored thesaurus list to add thesauri or thesauri aliases (`@myrmidon/cadmus-thesaurus-list`). This prepares the change of the thesaurus editor with an entries editor which implies an existing thesaurus.
 - 2026-02-02: added `getThesaurusAliases` to `ThesaurusService` in `@myrmidon/cadmus-api`.
 - 2026-01-31: minor improvements and fixes to parts.

@@ -35,13 +35,22 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
+import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
 
-import { PinLinksFragment } from '../pin-links-fragment';
+import {
+  PIN_LINKS_FRAGMENT_TYPEID,
+  PinLinksFragment,
+} from '../pin-links-fragment';
+
+interface PinLinksFragmentSettings {
+  lookupProviderOptions?: LookupProviderOptions;
+}
 
 /**
  * Pin-based links fragment editor component.
  * Thesauri: pin-link-scopes, pin-link-tags, pin-link-assertion-tags,
  * pin-link-docref-types, pin-link-docref-tags, asserted-id-features.
+ * Settings: lookupProviderOptions (LookupProviderOptions).
  */
 @Component({
   selector: 'cadmus-pin-links-fragment',
@@ -100,6 +109,10 @@ export class PinLinksFragmentComponent
   public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(
     undefined,
   );
+  // lookup options depending on role
+  public readonly lookupProviderOptions = signal<
+    LookupProviderOptions | undefined
+  >(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -174,7 +187,16 @@ export class PinLinksFragmentComponent
     if (data?.thesauri) {
       this.updateThesauri(data.thesauri);
     }
-
+    // settings
+    this._appRepository
+      ?.getSettingFor<PinLinksFragmentSettings>(
+        PIN_LINKS_FRAGMENT_TYPEID,
+        this.identity()?.roleId || undefined,
+      )
+      .then((settings) => {
+        const options = settings?.lookupProviderOptions;
+        this.lookupProviderOptions.set(options || undefined);
+      });
     // form
     this.updateForm(data?.value);
   }

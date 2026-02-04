@@ -9,7 +9,6 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { provideRouter, withViewTransitions } from '@angular/router';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 // material
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -46,7 +45,6 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withViewTransitions()),
-    provideAnimationsAsync(),
     provideNativeDateAdapter(),
     provideHttpClient(withInterceptors([jwtInterceptor]), withFetch()),
     // vendor
@@ -55,7 +53,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(
       NgxEchartsModule.forRoot({
         echarts: () => import('echarts'),
-      })
+      }),
     ),
 
     // parts and fragments type IDs to editor group keys mappings
@@ -98,7 +96,7 @@ export const appConfig: ApplicationConfig = {
         mdBoldCtePlugin: MdBoldCtePlugin,
         mdItalicCtePlugin: MdItalicCtePlugin,
         txtEmojiCtePlugin: TxtEmojiCtePlugin,
-        mdLinkCtePlugin: MdLinkCtePlugin
+        mdLinkCtePlugin: MdLinkCtePlugin,
       ) => {
         return {
           plugins: [

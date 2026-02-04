@@ -72,9 +72,14 @@ import {
   renderLabelFromLastColon,
   ThesaurusTreeComponent,
 } from '@myrmidon/cadmus-thesaurus-store';
+import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
 
 import { IndexKeyword } from '../index-keywords-part';
 import { CommentFragment } from '../comment-fragment';
+
+interface CommentPartSettings {
+  lookupProviderOptions?: LookupProviderOptions;
+}
 
 /**
  * Comment part/fragment editor component.
@@ -164,6 +169,10 @@ export class CommentEditorComponent
   public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(
     undefined,
   );
+  // lookup options depending on role
+  public readonly lookupProviderOptions = signal<
+    LookupProviderOptions | undefined
+  >(undefined);
 
   // form
   public tag: FormControl<string | null>;
@@ -376,7 +385,16 @@ export class CommentEditorComponent
     if (data?.thesauri) {
       this.updateThesauri(data.thesauri);
     }
-
+    // settings
+    this._appRepository
+      ?.getSettingFor<CommentPartSettings>(
+        COMMENT_PART_TYPEID,
+        this.identity()?.roleId || undefined,
+      )
+      .then((settings) => {
+        const options = settings?.lookupProviderOptions;
+        this.lookupProviderOptions.set(options || undefined);
+      });
     // form
     this.updateForm(data?.value);
   }

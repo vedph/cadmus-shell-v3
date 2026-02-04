@@ -27,6 +27,8 @@ export interface UserWithRoles {
   providedIn: 'root',
 })
 export class UserRefLookupService implements RefLookupService {
+  public readonly id = 'user';
+
   constructor(private _userService: UserService) {}
 
   public lookup(

@@ -37,11 +37,17 @@ import {
 } from '@myrmidon/cadmus-ui';
 
 import { PinLinksPart, PIN_LINKS_PART_TYPEID } from '../pin-links-part';
+import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
+
+interface PinLinksPartSettings {
+  lookupProviderOptions?: LookupProviderOptions;
+}
 
 /**
  * PinLinksPart editor component.
  * Thesauri: pin-link-scopes, pin-link-tags, pin-link-assertion-tags,
  * pin-link-docref-types, pin-link-docref-tags, asserted-id-features.
+ * Settings: lookupProviderOptions (LookupProviderOptions).
  */
 @Component({
   selector: 'cadmus-pin-links-part',
@@ -92,6 +98,11 @@ export class PinLinksPartComponent
   public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(
     undefined,
   );
+
+  // lookup options depending on role
+  public readonly lookupProviderOptions = signal<
+    LookupProviderOptions | undefined
+  >(undefined);
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
@@ -165,7 +176,18 @@ export class PinLinksPartComponent
     // thesauri
     if (data?.thesauri) {
       this.updateThesauri(data.thesauri);
-    } // form
+    }
+    // settings
+    this._appRepository
+      ?.getSettingFor<PinLinksPartSettings>(
+        PIN_LINKS_PART_TYPEID,
+        this.identity()?.roleId || undefined,
+      )
+      .then((settings) => {
+        const options = settings?.lookupProviderOptions;
+        this.lookupProviderOptions.set(options || undefined);
+      });
+    // form
     this.updateForm(data?.value);
   }
 

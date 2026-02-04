@@ -19,6 +19,8 @@ export interface GraphNodeLookupFilter extends RefLookupFilter {
   providedIn: 'root',
 })
 export class GraphNodeLookupService implements RefLookupService {
+  public readonly id = 'graph-node';
+
   constructor(private _graphService: GraphService) {}
 
   lookup(filter: GraphNodeLookupFilter, options?: any): Observable<any[]> {

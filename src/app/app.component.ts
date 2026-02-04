@@ -28,6 +28,10 @@ import {
 } from '@myrmidon/cadmus-refs-lookup';
 import { ViafRefLookupService } from '@myrmidon/cadmus-refs-viaf-lookup';
 import { GeoNamesRefLookupService } from '@myrmidon/cadmus-refs-geonames-lookup';
+import {
+  BiblissimaCandidate,
+  BiblissimaRefLookupService,
+} from '@myrmidon/cadmus-refs-biblissima-lookup';
 
 // cadmus
 import { AppRepository } from '@myrmidon/cadmus-state';
@@ -53,7 +57,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public readonly user = signal<User | undefined>(undefined);
   public readonly logged = signal<boolean>(false);
-  public readonly itemBrowsers = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly itemBrowsers = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   public readonly version = signal<string>('');
 
   constructor(
@@ -65,7 +71,8 @@ export class AppComponent implements OnInit, OnDestroy {
     env: EnvService,
     storage: RamStorageService,
     viaf: ViafRefLookupService,
-    geonames: GeoNamesRefLookupService
+    geonames: GeoNamesRefLookupService,
+    biblissima: BiblissimaRefLookupService,
   ) {
     this.version.set(env.get('version') || '');
 
@@ -82,6 +89,15 @@ export class AppComponent implements OnInit, OnDestroy {
         service: viaf,
         itemIdGetter: (item: any) => item?.viafid,
         itemLabelGetter: (item: any) => item?.term,
+      },
+      {
+        name: 'Biblissima+',
+        iconUrl: '/img/biblissima128.png',
+        description: 'Biblissima+ knowledge base',
+        label: 'entity',
+        service: biblissima,
+        itemIdGetter: (item: BiblissimaCandidate) => item?.id,
+        itemLabelGetter: (item: BiblissimaCandidate) => item?.name,
       },
       {
         name: 'geonames',
@@ -136,7 +152,7 @@ export class AppComponent implements OnInit, OnDestroy {
         } else {
           console.log('User logged out');
         }
-      })
+      }),
     );
 
     // when the thesaurus is loaded, get the item browsers
@@ -144,8 +160,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this._appRepository.itemBrowserThesaurus$.subscribe(
         (thesaurus: Thesaurus | undefined) => {
           this.itemBrowsers.set(thesaurus ? thesaurus.entries : undefined);
-        }
-      )
+        },
+      ),
     );
   }
 
