@@ -23,6 +23,10 @@ export class GraphNodeLookupService implements RefLookupService {
 
   constructor(private _graphService: GraphService) {}
 
+  getById(id: string): Observable<any | undefined> {
+    return this._graphService.getNode(parseInt(id, 10));
+  }
+
   lookup(filter: GraphNodeLookupFilter, options?: any): Observable<any[]> {
     if (!filter.text) {
       return of([]);
@@ -34,8 +38,8 @@ export class GraphNodeLookupService implements RefLookupService {
           filter.isClass === undefined || filter.isClass === null
             ? undefined
             : filter.isClass
-            ? true
-            : false,
+              ? true
+              : false,
         tag: filter.tag,
       })
       .pipe(map((p) => p.items));
