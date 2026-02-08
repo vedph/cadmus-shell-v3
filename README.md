@@ -19,7 +19,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 14.0.5
+- cadmus-api: 14.0.7
 - cadmus-core: 12.0.3
 - cadmus-flags-pg: 15.0.2
 - cadmus-flags-ui: 15.0.2
@@ -32,10 +32,10 @@ Latest versions:
 - cadmus-item-search: 16.0.1
 - cadmus-layer-demo: 15.0.1
 - cadmus-part-general-pg: 16.0.5
-- cadmus-part-general-ui: 16.0.3
+- cadmus-part-general-ui: 16.0.5
 - cadmus-part-philology-pg: 16.1.3
 - cadmus-part-philology-ui: 17.0.1
-- cadmus-part-taxo-pg: 0.0.1
+- cadmus-part-taxo-pg: 0.0.3
 - cadmus-part-taxo-ui: 0.0.2
 - cadmus-preview-pg: 17.0.1
 - cadmus-preview-ui: 17.0.3
@@ -45,7 +45,7 @@ Latest versions:
 - cadmus-thesaurus-editor: 16.0.1
 - cadmus-thesaurus-list: 16.0.1
 - cadmus-thesaurus-ui: 15.0.1
-- cadmus-ui: 16.0.0
+- cadmus-ui: 16.0.2
 - cadmus-ui-pg: 16.0.1
 
 Dependencies:

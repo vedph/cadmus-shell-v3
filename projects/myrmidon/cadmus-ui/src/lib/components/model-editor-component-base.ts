@@ -1,5 +1,6 @@
 import {
   Component,
+  Injector,
   OnDestroy,
   OnInit,
   output,
@@ -45,6 +46,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   implements OnInit, OnDestroy
 {
   private readonly _mebSubs: Subscription[] = [];
+  private readonly _injector = inject(Injector);
   protected readonly _appRepository?: AppRepository;
 
   /**
@@ -167,6 +169,36 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
         part.id = identity.partId;
       }
     }
+  }
+
+  /**
+   * Initialize automatic settings loading for this editor. Call this from
+   * the derived class constructor to opt into settings loading. When
+   * identity becomes available, settings are fetched using the specified
+   * type ID and the role ID from identity.
+   *
+   * @param typeId The part/fragment type ID for settings lookup.
+   * @param callback Called when settings are loaded (or with undefined
+   * if not found or on error).
+   */
+  protected initSettings<S>(
+    typeId: string,
+    callback: (settings: S | undefined) => void
+  ): void {
+    effect(
+      () => {
+        const identity = this.identity();
+        if (!identity || !this._appRepository) return;
+        this._appRepository
+          .getSettingFor<S>(typeId, identity.roleId || undefined)
+          .then((settings) => callback(settings))
+          .catch((err) => {
+            console.warn(`Failed to load settings for ${typeId}:`, err);
+            callback(undefined);
+          });
+      },
+      { injector: this._injector }
+    );
   }
 
   public ngOnInit(): void {

@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -44,8 +44,6 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
-import { AppRepository } from '@myrmidon/cadmus-state';
-
 import {
   MetadataPart,
   METADATA_PART_TYPEID,
@@ -119,10 +117,9 @@ export class MetadataPartComponent
       [],
       NgxToolsValidators.strictMinLengthValidator(1),
     );
-    // get setting for noType
-    const appRepository = inject(AppRepository);
-    appRepository
-      .getSettingFor<MetadataPartSetting>(METADATA_PART_TYPEID)
+    // get setting for noType (global, not role-specific)
+    this._appRepository
+      ?.getSettingFor<MetadataPartSetting>(METADATA_PART_TYPEID)
       .then((setting) => {
         if (setting && setting.noType === true) {
           this.noType.set(true);

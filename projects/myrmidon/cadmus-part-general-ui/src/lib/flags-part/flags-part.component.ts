@@ -99,21 +99,14 @@ export class FlagsPartComponent
         nonNullable: true,
       },
     );
+    // settings
+    this.initSettings<NoteSet>(FLAGS_PART_TYPEID, (settings) => {
+      this.settings.set(settings);
+    });
   }
 
-  public override async ngOnInit(): Promise<void> {
+  public override ngOnInit(): void {
     super.ngOnInit();
-
-    // load settings for this part
-    if (this._appRepository) {
-      this.settings.set(
-        await this._appRepository.getSettingFor(
-          FLAGS_PART_TYPEID,
-          this.identity()?.roleId || undefined,
-        ),
-      );
-      console.log('Flags part settings:', this.settings);
-    }
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {

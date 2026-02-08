@@ -93,19 +93,11 @@ export class DocReferencesPartComponent
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
-    this.loadSettings();
-  }
-
-  private async loadSettings() {
-    const settings = (await this._appRepository?.getSettingFor(
+    // settings
+    this.initSettings<DocReferencesPartSettings>(
       DOC_REFERENCES_PART_TYPEID,
-      this.identity()?.roleId || undefined
-    )) as DocReferencesPartSettings | undefined;
-
-    if (settings) {
-      console.log('DocReferencesPart settings', settings);
-      this.settings.set(settings);
-    }
+      (settings) => this.settings.set(settings),
+    );
   }
 
   public override ngOnInit(): void {

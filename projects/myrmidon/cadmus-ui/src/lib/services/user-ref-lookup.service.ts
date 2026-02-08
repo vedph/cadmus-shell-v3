@@ -33,7 +33,7 @@ export class UserRefLookupService implements RefLookupService {
 
   public lookup(
     filter: RefLookupFilter,
-    options?: any
+    options?: any,
   ): Observable<UserWithRoles[]> {
     return this._userService
       .getUsers(
@@ -41,13 +41,19 @@ export class UserRefLookupService implements RefLookupService {
           name: filter.text,
         },
         1,
-        filter.limit
+        filter.limit,
       )
       .pipe(
         map((page: DataPage<UserWithRoles>) => {
           return page.items;
-        })
+        }),
       );
+  }
+
+  public getById(id: string): Observable<UserWithRoles | undefined> {
+    return this._userService
+      .getUser(id)
+      .pipe(map((user) => user as UserWithRoles | undefined));
   }
 
   public getName(item: UserWithRoles): string {

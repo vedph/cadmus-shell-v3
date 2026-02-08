@@ -22,7 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsValidators, RamStorageService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -41,14 +41,30 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
+import { MatExpansionModule } from '@angular/material/expansion';
+import {
+  LOOKUP_CONFIGS_KEY,
+  LookupProviderOptions,
+  RefLookupConfig,
+} from '@myrmidon/cadmus-refs-lookup';
 
 import { ChronotopesPart, CHRONOTOPES_PART_TYPEID } from '../chronotopes-part';
-import { MatExpansionModule } from '@angular/material/expansion';
+
+interface ChronotopesPartSettings {
+  placeLookupServiceId?: string;
+  lookupProviderOptions?: LookupProviderOptions;
+}
 
 /**
  * Chronotopes part editor component.
  * Thesauri: chronotope-place-tags, chronotope-assertion-tags,
  * doc-reference-types, doc-reference-tags (all optional).
+ * Settings:
+ * - placeLookupServiceId (optional): if specified, the ID of the place
+ *   lookup service to use; if not specified, the place can be freely typed by the user.
+ * - lookupProviderOptions (optional): if specified, the options for the lookup provider.
+ *   When specified, it is assumed that there is a corresponding configuration in
+ *   `RamStorageService` with the same ID.
  */
 @Component({
   selector: 'cadmus-chronotopes-part',
@@ -87,11 +103,35 @@ export class ChronotopesPartComponent
   // chronotope-place-tags
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   // chronotope-assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
+
+  /**
+   * The optional configuration of the place lookup service, if any. If not set,
+   * the place can be freely typed by the user; if set, the place must be selected from
+   * the lookup results.
+   * This setting is specified by the part editor when loading data, by fetching
+   * backend settings with a property named `placeLookupServerId`. When this is specified,
+   * it is assumed that there is a corresponding configuration in `RamStorageService` with
+   * the same ID.
+   */
+  public readonly placeLookupConfig = signal<RefLookupConfig | undefined>(
+    undefined,
+  );
+
+  // lookup options depending on role
+  public readonly lookupProviderOptions = signal<
+    LookupProviderOptions | undefined
+  >(undefined);
 
   // form
   public chronotopes: FormControl<AssertedChronotope[]>;
@@ -99,7 +139,8 @@ export class ChronotopesPartComponent
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
+    private _storage: RamStorageService,
   ) {
     super(authService, formBuilder);
     // form
@@ -107,6 +148,11 @@ export class ChronotopesPartComponent
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
+    // settings
+    this.initSettings<ChronotopesPartSettings>(
+      CHRONOTOPES_PART_TYPEID,
+      (settings) => this.updateSettings(settings),
+    );
   }
 
   public override ngOnInit(): void {
@@ -149,12 +195,30 @@ export class ChronotopesPartComponent
     }
   }
 
-  private updateForm(model?: ChronotopesPart | null): void {
-    if (!model) {
+  private updateSettings(settings: ChronotopesPartSettings | undefined): void {
+    // place lookup config
+    if (settings?.placeLookupServiceId) {
+      const configs: RefLookupConfig[] =
+        this._storage.retrieve(LOOKUP_CONFIGS_KEY) || [];
+      const config = configs.find(
+        (c) => c.service?.id === settings.placeLookupServiceId!,
+      );
+      this.placeLookupConfig.set(config);
+    } else {
+      this.placeLookupConfig.set(undefined);
+    }
+    // lookup provider options
+    this.lookupProviderOptions.set(
+      settings?.lookupProviderOptions || undefined,
+    );
+  }
+
+  private updateForm(part?: ChronotopesPart | null): void {
+    if (!part) {
       this.form!.reset();
       return;
     }
-    this.chronotopes.setValue(model.chronotopes || []);
+    this.chronotopes.setValue(part.chronotopes || []);
     this.form.markAsPristine();
   }
 
@@ -192,11 +256,7 @@ export class ChronotopesPartComponent
     if (this.editedIndex() === -1) {
       chronotopes.push(this.edited()!);
     } else {
-      chronotopes.splice(
-        this.editedIndex(),
-        1,
-        this.edited()!
-      );
+      chronotopes.splice(this.editedIndex(), 1, this.edited()!);
     }
     this.chronotopes.setValue(chronotopes);
     this.chronotopes.updateValueAndValidity();

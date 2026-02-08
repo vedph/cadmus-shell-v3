@@ -203,6 +203,15 @@ export class CommentEditorComponent
     this.keywords = formBuilder.array([]);
     // Monaco helper
     this._textHelper = new MonacoEditorHelper(this.text, 'markdown');
+    // settings
+    this.initSettings<CommentPartSettings>(
+      COMMENT_PART_TYPEID,
+      (settings) => {
+        this.lookupProviderOptions.set(
+          settings?.lookupProviderOptions || undefined,
+        );
+      },
+    );
   }
 
   public override ngOnInit(): void {
@@ -385,16 +394,6 @@ export class CommentEditorComponent
     if (data?.thesauri) {
       this.updateThesauri(data.thesauri);
     }
-    // settings
-    this._appRepository
-      ?.getSettingFor<CommentPartSettings>(
-        COMMENT_PART_TYPEID,
-        this.identity()?.roleId || undefined,
-      )
-      .then((settings) => {
-        const options = settings?.lookupProviderOptions;
-        this.lookupProviderOptions.set(options || undefined);
-      });
     // form
     this.updateForm(data?.value);
   }

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-ui",
-  "version": "16.0.1",
+  "version": "16.0.2",
   "description": "Cadmus - general UI components.",
   "keywords": [
     "Cadmus"
@@ -18,7 +18,7 @@
     "@angular/core": "^20.0.0 || ^21.0.0",
     "@angular/material": "^20.0.0 || ^21.0.0",
     "@myrmidon/ngx-tools": "^2.0.2",
-    "@myrmidon/cadmus-refs-lookup": "^10.0.7",
+    "@myrmidon/cadmus-refs-lookup": "^10.0.8",
     "@myrmidon/cadmus-core": "^12.0.3"
   },
   "dependencies": {

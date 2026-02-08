@@ -112,6 +112,15 @@ export class PinLinksPartComponent
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
+    // settings
+    this.initSettings<PinLinksPartSettings>(
+      PIN_LINKS_PART_TYPEID,
+      (settings) => {
+        this.lookupProviderOptions.set(
+          settings?.lookupProviderOptions || undefined,
+        );
+      },
+    );
   }
 
   public override ngOnInit(): void {
@@ -177,16 +186,6 @@ export class PinLinksPartComponent
     if (data?.thesauri) {
       this.updateThesauri(data.thesauri);
     }
-    // settings
-    this._appRepository
-      ?.getSettingFor<PinLinksPartSettings>(
-        PIN_LINKS_PART_TYPEID,
-        this.identity()?.roleId || undefined,
-      )
-      .then((settings) => {
-        const options = settings?.lookupProviderOptions;
-        this.lookupProviderOptions.set(options || undefined);
-      });
     // form
     this.updateForm(data?.value);
   }

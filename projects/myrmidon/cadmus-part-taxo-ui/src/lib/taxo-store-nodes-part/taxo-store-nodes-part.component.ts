@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -25,7 +25,6 @@ import {
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
 import { StringPair } from '@myrmidon/cadmus-api';
-import { AppRepository } from '@myrmidon/cadmus-state';
 import { TaxoStoreNode } from '@myrmidon/taxo-store-api';
 import { TaxoStorePicker } from '@myrmidon/taxo-store-picker';
 
@@ -87,8 +86,6 @@ export class TaxoStoreNodesPartComponent
   extends ModelEditorComponentBase<TaxoStoreNodesPart>
   implements OnInit
 {
-  private readonly _appService: AppRepository;
-
   public nodeIds: FormControl<StringPair[]>;
 
   /**
@@ -106,13 +103,29 @@ export class TaxoStoreNodesPartComponent
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
-    this._appService = inject(AppRepository);
 
     // form
     this.nodeIds = formBuilder.control([], { nonNullable: true });
+
+    // settings: try role-specific first, fall back to global
+    this.initSettings<TaxoStoreNodesPartSettings>(
+      TAXO_STORE_NODES_PART_TYPEID,
+      (settings) => {
+        if (settings) {
+          this.applySettings(settings);
+        } else {
+          // role-specific not found, fall back to global settings
+          this._appRepository
+            ?.getSettingFor<TaxoStoreNodesPartSettings>(
+              TAXO_STORE_NODES_PART_TYPEID,
+            )
+            .then((global) => this.applySettings(global || DEFAULT_SETTINGS));
+        }
+      },
+    );
   }
 
-  private updateSettings(settings: TaxoStoreNodesPartSettings): void {
+  private applySettings(settings: TaxoStoreNodesPartSettings): void {
     this.treeId.set(settings.treeId);
     this.hasTopNodeFilter.set(!!settings.hasTopNodeFilter);
     this.hasFlagsFilter.set(!!settings.hasFlagsFilter);
@@ -124,14 +137,6 @@ export class TaxoStoreNodesPartComponent
 
   public override ngOnInit(): void {
     super.ngOnInit();
-
-    // get the tree ID from settings -- we will override this if using a role ID
-    this._appService
-      .getSettingFor<TaxoStoreNodesPartSettings>(TAXO_STORE_NODES_PART_TYPEID)
-      .then((value) => {
-        const settings: TaxoStoreNodesPartSettings = value || DEFAULT_SETTINGS;
-        this.updateSettings(settings);
-      });
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
@@ -145,21 +150,6 @@ export class TaxoStoreNodesPartComponent
       this.form.reset();
       return;
     }
-
-    // set tree if from role ID if any
-    if (this.identity()?.roleId) {
-      this._appService
-        .getSettingFor<TaxoStoreNodesPartSettings>(
-          TAXO_STORE_NODES_PART_TYPEID,
-          this.identity()!.roleId!,
-        )
-        .then((value) => {
-          const settings: TaxoStoreNodesPartSettings =
-            value || DEFAULT_SETTINGS;
-          this.updateSettings(settings);
-        });
-    }
-
     this.nodeIds.setValue(part.nodeIds || []);
     this.form.markAsPristine();
   }

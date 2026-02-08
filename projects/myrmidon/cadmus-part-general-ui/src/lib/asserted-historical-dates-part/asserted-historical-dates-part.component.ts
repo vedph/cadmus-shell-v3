@@ -114,6 +114,11 @@ export class AssertedHistoricalDatesPartComponent
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
+    // settings
+    this.initSettings<{ maxDateCount?: number }>(
+      ASSERTED_HISTORICAL_DATES_PART_TYPEID,
+      (settings) => this.maxDateCount.set(settings?.maxDateCount || -1),
+    );
   }
 
   public override ngOnInit(): void {
@@ -161,11 +166,6 @@ export class AssertedHistoricalDatesPartComponent
       this.form.reset();
       return;
     }
-    this._appRepository
-      ?.getSettingFor<{ maxDateCount?: number }>(part.typeId, part.roleId)
-      .then((setting) => {
-        this.maxDateCount.set(setting?.maxDateCount || -1);
-      }) || -1;
     this.dates.setValue(part.dates || []);
     this.form.markAsPristine();
   }

@@ -1,5 +1,9 @@
 # History
 
+- 2026-02-08:
+  - added `initSettings<S>` to `ModelEditorComponentBase`. All the part/fragment editors using settings should call this from their constructor to opt into settings loading. When `identity` becomes available, settings are fetched using the specified type ID and the role ID from identity. Hint: to update editors, look for those calling `getSettingFor`.
+  - added get user by ID method to users API and leveraged it in `UserRefLookupService`.
+  - added `getById` to graph lookup service.
 - 2026-02-04: updated Angular and packages, adjusting lookup services to changes in lookup after adding lookup provider options. This implied minimal changes to these libraries:
   - `@myrmidon/cadmus-graph-ui`
   - `@myrmidon/cadmus-ui`

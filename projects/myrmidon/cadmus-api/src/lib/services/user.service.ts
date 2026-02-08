@@ -29,7 +29,7 @@ export class UserService {
   constructor(
     private _http: HttpClient,
     private _error: ErrorService,
-    private _env: EnvService
+    private _env: EnvService,
   ) {}
 
   public getAllUsers(): Observable<DataPage<UserWithRoles>> {
@@ -43,7 +43,7 @@ export class UserService {
   public getUsers(
     filter: UserFilter,
     pageNumber = 1,
-    pageSize = 20
+    pageSize = 20,
   ): Observable<DataPage<UserWithRoles>> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
@@ -56,6 +56,20 @@ export class UserService {
       .get<DataPage<UserWithRoles>>(this._env.get('apiUrl') + 'users', {
         params: httpParams,
       })
+      .pipe(retry(3), catchError(this._error.handleError));
+  }
+
+  /**
+   * Get the user with the specified name.
+   *
+   * @param name The user name.
+   * @returns Observable with the user, or undefined if not found.
+   */
+  public getUser(name: string): Observable<UserWithRoles | undefined> {
+    return this._http
+      .get<UserWithRoles>(
+        this._env.get('apiUrl') + 'users/' + encodeURIComponent(name),
+      )
       .pipe(retry(3), catchError(this._error.handleError));
   }
 }
