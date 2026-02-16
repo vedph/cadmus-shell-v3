@@ -1,7 +1,7 @@
 {
-  "name": "@myrmidon/cadmus-thesaurus-list",
-  "version": "16.0.3",
-  "description": "Cadmus - thesauri list.",
+  "name": "@myrmidon/cadmus-profile-import",
+  "version": "0.0.1",
+  "description": "Cadmus - profile import (facets, settings).",
   "keywords": [
     "Cadmus"
   ],
@@ -18,11 +18,10 @@
     "@angular/core": "^20.0.0 || ^21.0.0",
     "@angular/material": "^20.0.0 || ^21.0.0",
     "@myrmidon/ngx-tools": "^2.0.2",
-    "@myrmidon/ngx-mat-tools": "^1.0.1",
-    "@myrmidon/cadmus-api": "^14.0.7",
-    "@myrmidon/cadmus-ui": "^16.0.2"
+    "@myrmidon/cadmus-api": "^14.0.7"
   },
   "dependencies": {
     "tslib": "^2.3.0"
-  }
+  },
+  "sideEffects": false
 }

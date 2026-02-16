@@ -1,5 +1,34 @@
 # History
 
+- 2026-02-16: 🆕 added `@myrmidon/cadmus-profile-import` with import pages for facets and settings, while also improving a bit the thesaurus importer in `@myrmidon/cadmus-thesaurus-list`. To integrate them in your app:
+
+1. `pnpm i @myrmidon/cadmus-profile-import`.
+2. add to your app routes:
+
+    ```ts
+      // cadmus - profile import
+      {
+        path: 'profile',
+        loadChildren: () =>
+          import('@myrmidon/cadmus-profile-import').then(
+            (module) => module.CADMUS_PROFILE_IMPORT_ROUTES,
+          ),
+        canActivate: [jwtAdminGuard],
+      },
+    ```
+
+3. add new entries to your app template admin menu:
+
+    ```html
+    <mat-menu #adminMenu>
+      <!-- ... -->
+      <a mat-menu-item routerLink="/profile/facets"> Import facets </a>
+      <a mat-menu-item routerLink="/profile/settings"> Import settings </a>
+    </mat-menu>
+    ```
+
+>⚠️ Ensure to update your backend API to get the new controllers with their additional endpoints to import facets and settings.
+
 - 2026-02-08:
   - added `initSettings<S>` to `ModelEditorComponentBase`. All the part/fragment editors using settings should call this from their constructor to opt into settings loading. When `identity` becomes available, settings are fetched using the specified type ID and the role ID from identity. Hint: to update editors, look for those calling `getSettingFor`.
   - added get user by ID method to users API and leveraged it in `UserRefLookupService`.

@@ -1,0 +1,33 @@
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 8px 0;
+  padding: 8px;
+}
+legend {
+  color: silver;
+}
+.hidden {
+  display: none;
+}
+.file-name {
+  color: royalblue;
+  margin-left: 16px;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}
+.error {
+  margin: 8px;
+  color: white;
+  padding: 4px 8px;
+  background-color: rgb(251, 57, 57);
+  border: 1px solid rgb(251, 57, 57);
+  border-radius: 6px;
+}

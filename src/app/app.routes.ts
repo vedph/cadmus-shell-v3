@@ -142,6 +142,15 @@ export const routes: Routes = [
       ),
     canActivate: [jwtGuard],
   },
+  // cadmus - profile import
+  {
+    path: 'profile',
+    loadChildren: () =>
+      import('@myrmidon/cadmus-profile-import').then(
+        (module) => module.CADMUS_PROFILE_IMPORT_ROUTES,
+      ),
+    canActivate: [jwtAdminGuard],
+  },
   // cadmus - flags
   {
     path: 'flags',

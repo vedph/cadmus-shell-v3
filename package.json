@@ -13,6 +13,7 @@
     "build-uip": "ng build @myrmidon/cadmus-ui-pg",
     "build-ths": "ng build @myrmidon/cadmus-profile-core && ng build @myrmidon/cadmus-thesaurus-ui && ng build @myrmidon/cadmus-thesaurus-editor && ng build @myrmidon/cadmus-thesaurus-list",
     "build-gen": "ng build @myrmidon/cadmus-part-general-ui && ng build @myrmidon/cadmus-part-general-pg",
+    "build-imp": "ng build @myrmidon/cadmus-profile-import",
     "build-phi": "ng build @myrmidon/cadmus-part-philology-ui && ng build @myrmidon/cadmus-part-philology-pg",
     "build-itm": "ng build @myrmidon/cadmus-item-list && ng build @myrmidon/cadmus-item-editor && ng build @myrmidon/cadmus-item-search && ng build @myrmidon/cadmus-layer-demo",
     "build-grp": "ng build @myrmidon/cadmus-graph-ui && ng build @myrmidon/cadmus-graph-ui-ex && ng build @myrmidon/cadmus-graph-pg && ng build @myrmidon/cadmus-graph-pg-ex",
@@ -20,7 +21,7 @@
     "build-flg": "ng build @myrmidon/cadmus-flags-ui && ng build @myrmidon/cadmus-flags-pg",
     "build-sta": "ng build @myrmidon/cadmus-statistics",
     "build-tax": "ng build @myrmidon/cadmus-part-taxo-ui && ng build @myrmidon/cadmus-part-taxo-pg",
-    "build-lib": "pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-uip && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax"
+    "build-lib": "pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-uip && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp"
   },
   "overrides": {
     "d3-selection": "3.0.0"
@@ -45,7 +46,7 @@
     "@myrmidon/auth-jwt-login": "8.0.3",
     "@myrmidon/cadmus-mat-physical-size": "^9.0.11",
     "@myrmidon/cadmus-mat-physical-state": "^9.0.2",
-    "@myrmidon/cadmus-refs-asserted-chronotope": "10.0.9",
+    "@myrmidon/cadmus-refs-asserted-chronotope": "11.0.0",
     "@myrmidon/cadmus-refs-asserted-ids": "^10.0.16",
     "@myrmidon/cadmus-refs-assertion": "10.0.6",
     "@myrmidon/cadmus-refs-biblissima-lookup": "^10.0.3",
@@ -53,7 +54,7 @@
     "@myrmidon/cadmus-refs-decorated-counts": "^9.0.2",
     "@myrmidon/cadmus-refs-doc-references": "^10.0.3",
     "@myrmidon/cadmus-refs-geonames-lookup": "^10.0.3",
-    "@myrmidon/cadmus-refs-historical-date": "9.1.1",
+    "@myrmidon/cadmus-refs-historical-date": "9.1.3",
     "@myrmidon/cadmus-refs-lookup": "^10.0.8",
     "@myrmidon/cadmus-refs-proper-name": "10.0.5",
     "@myrmidon/cadmus-refs-viaf-lookup": "^10.0.5",
@@ -92,7 +93,7 @@
     "@types/jasmine": "~6.0.0",
     "@types/three": "^0.182.0",
     "jasmine-core": "~6.0.1",
-    "jsdom": "^28.0.0",
+    "jsdom": "^28.1.0",
     "karma": "~6.4.4",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.1",

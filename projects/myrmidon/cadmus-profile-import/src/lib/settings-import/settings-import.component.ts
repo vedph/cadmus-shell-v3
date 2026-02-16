@@ -9,9 +9,9 @@ import {
 import { HttpEventType } from '@angular/common/http';
 import {
   AbstractControl,
-  ValidationErrors,
   FormsModule,
   ReactiveFormsModule,
+  ValidationErrors,
 } from '@angular/forms';
 import {
   FormBuilder,
@@ -22,16 +22,7 @@ import {
 import { Subscription } from 'rxjs';
 
 import { MatButton } from '@angular/material/button';
-import {
-  MatFormField,
-  MatLabel,
-  MatHint,
-  MatError,
-} from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatInput } from '@angular/material/input';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import {
   MatCard,
@@ -50,8 +41,7 @@ class FileExtensionValidator {
   validate(control: AbstractControl): ValidationErrors | null {
     const file = control.value as File | null;
     if (file) {
-      const fileName = file.name;
-      const extension = fileName.split('.').pop();
+      const extension = file.name.split('.').pop();
       if (!this.allowedExtensions.includes(extension!)) {
         return { invalidExtension: true };
       }
@@ -66,25 +56,20 @@ interface UploadResult {
 }
 
 /**
- * Thesaurus import component.
+ * Settings import component. Allows users to pick a JSON file
+ * and upload it to the API to import settings. Each setting is
+ * simply added or replaced; there is no mode selection.
  */
 @Component({
-  selector: 'cadmus-thesaurus-import',
-  templateUrl: './thesaurus-import.component.html',
-  styleUrls: ['./thesaurus-import.component.css'],
+  selector: 'cadmus-settings-import',
+  templateUrl: './settings-import.component.html',
+  styleUrls: ['./settings-import.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
     MatButton,
-    MatFormField,
-    MatLabel,
-    MatSelect,
-    MatOption,
-    MatHint,
-    MatError,
     MatCheckbox,
-    MatInput,
     MatProgressBar,
     MatCard,
     MatCardHeader,
@@ -92,7 +77,7 @@ interface UploadResult {
     MatCardContent,
   ],
 })
-export class ThesaurusImportComponent {
+export class SettingsImportComponent {
   private readonly _destroyRef = inject(DestroyRef);
   private _sub?: Subscription;
 
@@ -100,10 +85,6 @@ export class ThesaurusImportComponent {
   public readonly uploadEnd = output<boolean>();
 
   public file: FormControl<File | null>;
-  public mode: FormControl<string>;
-  public excelSheet: FormControl<number>;
-  public excelRow: FormControl<number>;
-  public excelColumn: FormControl<number>;
   public dryRun: FormControl<boolean>;
   public form: FormGroup;
 
@@ -114,50 +95,27 @@ export class ThesaurusImportComponent {
   constructor(
     formBuilder: FormBuilder,
     private _env: EnvService,
-    private _uploadService: UploadService,
+    private _uploadService: UploadService
   ) {
-    const fileExtensionValidator = new FileExtensionValidator([
-      'json',
-      'csv',
-      'xls',
-      'xlsx',
-    ]);
+    const fileExtensionValidator = new FileExtensionValidator(['json']);
     this.file = formBuilder.control(null, [
       Validators.required,
       (control) => fileExtensionValidator.validate(control),
     ]);
-
-    this.mode = formBuilder.control('R', {
-      validators: Validators.required,
-      nonNullable: true,
-    });
-    this.excelSheet = formBuilder.control(1, {
-      nonNullable: true,
-      validators: [Validators.min(1)],
-    });
-    this.excelRow = formBuilder.control(1, {
-      nonNullable: true,
-      validators: [Validators.min(1)],
-    });
-    this.excelColumn = formBuilder.control(1, {
-      nonNullable: true,
-      validators: [Validators.min(1)],
-    });
     this.dryRun = formBuilder.control(false, {
       nonNullable: true,
     });
     this.form = formBuilder.group({
       file: this.file,
-      mode: this.mode,
-      excelSheet: this.excelSheet,
-      excelRow: this.excelRow,
-      excelColumn: this.excelColumn,
       dryRun: this.dryRun,
     });
   }
 
-  public onFileSelected(event: any) {
-    this.file.setValue(event.target.files[0]);
+  public onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.file.setValue(input.files[0]);
+    }
   }
 
   public upload() {
@@ -168,27 +126,9 @@ export class ThesaurusImportComponent {
     this.uploading.set(true);
     this.uploadStart.emit();
 
-    // build URL with proper query string
-    const params: string[] = [];
-    if (this.mode.value !== 'R') {
-      params.push(`mode=${this.mode.value}`);
-    }
-    if (this.excelSheet.value !== 1) {
-      params.push(`excelSheet=${this.excelSheet.value}`);
-    }
-    if (this.excelRow.value !== 1) {
-      params.push(`excelRow=${this.excelRow.value}`);
-    }
-    if (this.excelColumn.value !== 1) {
-      params.push(`excelColumn=${this.excelColumn.value}`);
-    }
+    let url = `${this._env.get('apiUrl')}settings/import`;
     if (this.dryRun.value) {
-      params.push('dryRun=true');
-    }
-
-    let url = `${this._env.get('apiUrl')}thesauri/import`;
-    if (params.length) {
-      url += '?' + params.join('&');
+      url += '?dryRun=true';
     }
 
     this._sub = this._uploadService
@@ -198,7 +138,7 @@ export class ThesaurusImportComponent {
       .subscribe((event) => {
         if (event.type === HttpEventType.UploadProgress) {
           this.uploadProgress.set(
-            Math.round((event.loaded / event.total!) * 100),
+            Math.round((event.loaded / event.total!) * 100)
           );
         } else if (event.type === HttpEventType.Response) {
           this.uploading.set(false);

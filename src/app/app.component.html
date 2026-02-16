@@ -5,30 +5,31 @@
 
     <!-- items menu -->
     @if (logged() && itemBrowsers()) {
-    <button type="button" mat-button [matMenuTriggerFor]="itemMenu">
-      Items
-    </button>
+      <button type="button" mat-button [matMenuTriggerFor]="itemMenu">
+        Items
+      </button>
     }
     <mat-menu #itemMenu>
       <a mat-menu-item routerLink="/items">Items</a>
       @for (entry of itemBrowsers(); track entry.id) {
-      <a
-        mat-menu-item
-        [routerLink]="'item-browser/' + getItemBrowserRoute(entry.id)"
-        >{{ entry.value }}</a
-      >
+        <a
+          mat-menu-item
+          [routerLink]="'item-browser/' + getItemBrowserRoute(entry.id)"
+          >{{ entry.value }}</a
+        >
       }
     </mat-menu>
     <!-- item menu -->
     @if (logged() && !itemBrowsers()) {
-    <button type="button" mat-button routerLink="/items">Items</button>
-    } @if (logged()) {
-    <!-- search menu -->
-    <button type="button" mat-button routerLink="/search">Search</button>
-    <!-- graph menu -->
-    <button type="button" mat-button routerLink="/graph">Graph</button>
-    <!-- stats menu -->
-    <button type="button" mat-button routerLink="/stats">Stats</button>
+      <button type="button" mat-button routerLink="/items">Items</button>
+    }
+    @if (logged()) {
+      <!-- search menu -->
+      <button type="button" mat-button routerLink="/search">Search</button>
+      <!-- graph menu -->
+      <button type="button" mat-button routerLink="/graph">Graph</button>
+      <!-- stats menu -->
+      <button type="button" mat-button routerLink="/stats">Stats</button>
     }
 
     <!-- demo menu -->
@@ -51,62 +52,65 @@
 
     <!-- user -->
     @if (user()) {
-    <div>
-      <!-- indicators -->
-      <img
-        alt="avatar"
-        [src]="user()!.email | gravatar : 32"
-        [alt]="user()!.userName"
-      />
-      @if (user() && user()!.roles.includes('admin')) {
-      <mat-icon class="small-icon" title="admin">build</mat-icon>
-      } @if (user() && !user()!.emailConfirmed) {
-      <mat-icon
-        class="small-icon"
-        title="You must verify your email address! Please check your mailbox {{
-          user()!.email
-        }}"
-        >feedback</mat-icon
-      >
-      }
-      <!-- user menu -->
-      <button type="button" mat-button [matMenuTriggerFor]="userMenu">
-        User
-      </button>
-      <mat-menu #userMenu>
-        <a mat-menu-item routerLink="/reset-password">Reset password</a>
-      </mat-menu>
-      <!-- admin menu -->
-      @if (user() && user()!.roles.includes('admin')) {
-      <button type="button" mat-button [matMenuTriggerFor]="adminMenu">
-        Admin
-      </button>
-      }
-      <mat-menu #adminMenu>
-        <a mat-menu-item routerLink="/manage-users">Manage users</a>
-        <a mat-menu-item routerLink="/register-user">Register user</a>
-        <a mat-menu-item routerLink="/flags"> Flags </a>
-        <a mat-menu-item routerLink="/thesauri"> Thesauri </a>
-      </mat-menu>
-    </div>
+      <div>
+        <!-- indicators -->
+        <img
+          alt="avatar"
+          [src]="user()!.email | gravatar: 32"
+          [alt]="user()!.userName"
+        />
+        @if (user() && user()!.roles.includes("admin")) {
+          <mat-icon class="small-icon" title="admin">build</mat-icon>
+        }
+        @if (user() && !user()!.emailConfirmed) {
+          <mat-icon
+            class="small-icon"
+            title="You must verify your email address! Please check your mailbox {{
+              user()!.email
+            }}"
+            >feedback</mat-icon
+          >
+        }
+        <!-- user menu -->
+        <button type="button" mat-button [matMenuTriggerFor]="userMenu">
+          User
+        </button>
+        <mat-menu #userMenu>
+          <a mat-menu-item routerLink="/reset-password">Reset password</a>
+        </mat-menu>
+        <!-- admin menu -->
+        @if (user() && user()!.roles.includes("admin")) {
+          <button type="button" mat-button [matMenuTriggerFor]="adminMenu">
+            Admin
+          </button>
+        }
+        <mat-menu #adminMenu>
+          <a mat-menu-item routerLink="/manage-users">Manage users</a>
+          <a mat-menu-item routerLink="/register-user">Register user</a>
+          <a mat-menu-item routerLink="/flags"> Flags </a>
+          <a mat-menu-item routerLink="/thesauri"> Thesauri </a>
+          <a mat-menu-item routerLink="/profile/facets"> Import facets </a>
+          <a mat-menu-item routerLink="/profile/settings"> Import settings </a>
+        </mat-menu>
+      </div>
     }
 
     <!-- login -->
     @if (!logged()) {
-    <button
-      type="button"
-      mat-icon-button
-      [routerLink]="['/login']"
-      [queryParams]="{ returnUrl: 'items' }"
-    >
-      <mat-icon>login</mat-icon>
-    </button>
+      <button
+        type="button"
+        mat-icon-button
+        [routerLink]="['/login']"
+        [queryParams]="{ returnUrl: 'items' }"
+      >
+        <mat-icon>login</mat-icon>
+      </button>
     }
     <!-- logout -->
     @if (logged()) {
-    <button type="button" mat-icon-button (click)="logout()">
-      <mat-icon>logout</mat-icon>
-    </button>
+      <button type="button" mat-icon-button (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
     }
   </mat-toolbar>
 </header>
