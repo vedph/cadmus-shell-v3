@@ -46,20 +46,19 @@ export class LoginPageComponent {
     this._authService.login(credentials.name, credentials.password).subscribe({
       next: (user) => {
         console.log('User logged in', user);
+        this.busy.set(false);
         this._router.navigate([credentials.returnUrl || '/items']);
       },
       error: (error) => {
+        this.busy.set(false);
         this.error.set('Login failed');
-        console.error(this.error, error);
-        this._snackbar.open(this.error()!, 'Dismiss', {
+        this._snackbar.open('Login failed', 'Dismiss', {
           duration: 5000,
         });
       },
-      complete: () => {
-        this.busy.set(false);
-      },
     });
   }
+
   public onResetRequest(): void {
     this._router.navigate(['/reset-password']);
   }
