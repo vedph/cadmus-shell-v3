@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
@@ -12,6 +12,7 @@ import {
   selector: 'cadmus-part-preview-feature',
   templateUrl: './part-preview-feature.component.html',
   styleUrls: ['./part-preview-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatCard, MatCardHeader, MatCardContent, PartPreviewComponent],
 })
 export class PartPreviewFeatureComponent {

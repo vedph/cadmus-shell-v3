@@ -1,13 +1,14 @@
 <cadmus-current-item-bar/>
+@let loc = frLoc();
 <div class="base-text">
   <cadmus-decorated-token-text
-    [baseText]="data?.baseText || ''"
-    [locations]="frLoc ? [frLoc] : []"
+    [baseText]="data()?.baseText || ''"
+    [locations]="loc ? [loc] : []"
   />
 </div>
 <cadmus-pin-links-fragment
-  [identity]="identity"
-  [data]="$any(data)"
+  [identity]="identity()"
+  [data]="$any(data())"
   (dataChange)="save($event!.value!)"
   (editorClose)="close()"
   (dirtyChange)="onDirtyChange($event)"

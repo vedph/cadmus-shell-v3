@@ -1,4 +1,11 @@
-import { Component, output, input, effect, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  output,
+  input,
+  effect,
+  signal,
+} from '@angular/core';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -16,6 +23,7 @@ import { PartBadgeComponent } from '@myrmidon/cadmus-ui';
   selector: 'cadmus-missing-parts',
   templateUrl: './missing-parts.component.html',
   styleUrls: ['./missing-parts.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatIcon, MatIconButton, MatTooltip, PartBadgeComponent],
 })
 export class MissingPartsComponent {
@@ -47,7 +55,7 @@ export class MissingPartsComponent {
     }
     return parts.some(
       (p) =>
-        p.typeId === typeId && ((!p.roleId && !roleId) || p.roleId === roleId)
+        p.typeId === typeId && ((!p.roleId && !roleId) || p.roleId === roleId),
     );
   }
 

@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -54,6 +59,7 @@ interface DocReferencesPartSettings {
   selector: 'cadmus-doc-references-part',
   templateUrl: './doc-references-part.component.html',
   styleUrls: ['./doc-references-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -83,7 +89,7 @@ export class DocReferencesPartComponent
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   public readonly settings = signal<DocReferencesPartSettings | undefined>(
-    undefined
+    undefined,
   );
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
@@ -147,7 +153,7 @@ export class DocReferencesPartComponent
 
   protected getValue(): DocReferencesPart {
     let part = this.getEditedPart(
-      DOC_REFERENCES_PART_TYPEID
+      DOC_REFERENCES_PART_TYPEID,
     ) as DocReferencesPart;
     part.references = this.references.value;
     return part;

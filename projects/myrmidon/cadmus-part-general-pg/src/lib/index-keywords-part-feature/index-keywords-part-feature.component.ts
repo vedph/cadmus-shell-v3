@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { IndexKeywordsPartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-index-keywords-part-feature',
   templateUrl: './index-keywords-part-feature.component.html',
   styleUrls: ['./index-keywords-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, IndexKeywordsPartComponent],
 })
 export class IndexKeywordsPartFeatureComponent

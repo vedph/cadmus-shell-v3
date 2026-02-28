@@ -17,9 +17,9 @@
           <mat-label>language</mat-label>
           <mat-select [formControl]="newLanguage">
             @for (t of langEntries(); track t.id) {
-            <mat-option [value]="t.id">
-              {{ t.value }}
-            </mat-option>
+              <mat-option [value]="t.id">
+                {{ t.value }}
+              </mat-option>
             }
           </mat-select>
           <mat-error>select a language</mat-error>
@@ -34,12 +34,17 @@
             id="value"
             [formControl]="newValue"
           />
-          @if ( newValue.hasError('required') && (newValue.touched ||
-          newValue.dirty) ) {
-          <mat-error>enter a value</mat-error>
-          } @if ( newValue.hasError('maxLength') && (newValue.touched ||
-          newValue.dirty) ) {
-          <mat-error>value too long</mat-error>
+          @if (
+            newValue.hasError("required") &&
+            (newValue.touched || newValue.dirty)
+          ) {
+            <mat-error>enter a value</mat-error>
+          }
+          @if (
+            newValue.hasError("maxLength") &&
+            (newValue.touched || newValue.dirty)
+          ) {
+            <mat-error>value too long</mat-error>
           }
         </mat-form-field>
         <button
@@ -53,33 +58,33 @@
       </form>
       <hr />
       @if (keywords.valid) {
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>lang.</th>
-            <th>keyword</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (k of keywords.value; track k) {
-          <tr>
-            <td>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Delete this keyword"
-                (click)="deleteKeyword(k)"
-              >
-                <mat-icon class="mat-warn">remove_circle</mat-icon>
-              </button>
-            </td>
-            <td>{{ k.language }}</td>
-            <td>{{ k.value }}</td>
-          </tr>
-          }
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>lang.</th>
+              <th>keyword</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (k of keywords.value; track k) {
+              <tr>
+                <td>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Delete this keyword"
+                    (click)="deleteKeyword(k)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>{{ k.language }}</td>
+                <td>{{ k.value }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
     </mat-card-content>
     <mat-card-actions>

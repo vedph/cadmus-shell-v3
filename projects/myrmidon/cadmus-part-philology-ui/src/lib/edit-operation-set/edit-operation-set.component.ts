@@ -1,4 +1,11 @@
-import { Component, computed, input, model, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  model,
+  signal,
+} from '@angular/core';
 
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -39,6 +46,7 @@ import { EditOperationComponent } from '../edit-operation/edit-operation.compone
   ],
   templateUrl: './edit-operation-set.component.html',
   styleUrl: './edit-operation-set.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditOperationSetComponent {
   /**

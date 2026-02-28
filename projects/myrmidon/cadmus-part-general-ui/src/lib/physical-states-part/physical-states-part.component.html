@@ -20,82 +20,87 @@
         </button>
       </div>
       @if (entries.value.length) {
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>type</th>
-            <th>date</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (entry of entries.value; track entry; let i = $index; let first =
-          $first; let last = $last) {
-          <tr [class.selected]="i === editedIndex()">
-            <td class="fit-width">
-              <span class="nr">{{ i + 1 }}.</span>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Edit this state"
-                (click)="editState(entry, i)"
-              >
-                <mat-icon class="mat-primary">edit</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this state up"
-                [disabled]="first"
-                (click)="moveStateUp(i)"
-              >
-                <mat-icon>arrow_upward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this state down"
-                [disabled]="last"
-                (click)="moveStateDown(i)"
-              >
-                <mat-icon>arrow_downward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Delete this state"
-                (click)="deleteState(i)"
-              >
-                <mat-icon class="mat-warn">remove_circle</mat-icon>
-              </button>
-            </td>
-            <td>
-              {{ entry.type | flatLookup : stateEntries() : "id" : "value" }}
-            </td>
-            <td>{{ entry.date | date : "yyyy-MM-dd" }}</td>
-          </tr>
-          }
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>type</th>
+              <th>date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              entry of entries.value;
+              track entry;
+              let i = $index;
+              let first = $first;
+              let last = $last
+            ) {
+              <tr [class.selected]="i === editedIndex()">
+                <td class="fit-width">
+                  <span class="nr">{{ i + 1 }}.</span>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Edit this state"
+                    (click)="editState(entry, i)"
+                  >
+                    <mat-icon class="mat-primary">edit</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this state up"
+                    [disabled]="first"
+                    (click)="moveStateUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this state down"
+                    [disabled]="last"
+                    (click)="moveStateDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Delete this state"
+                    (click)="deleteState(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  {{ entry.type | flatLookup: stateEntries() : "id" : "value" }}
+                </td>
+                <td>{{ entry.date | date: "yyyy-MM-dd" }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
       <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
         @if (edited()) {
-        <fieldset>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <span class="state-title">state</span>
-              <span class="nr">{{ editedIndex() + 1 }}</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <cadmus-mat-physical-state
-            [featEntries]="featEntries()"
-            [stateEntries]="stateEntries()"
-            [reporterEntries]="reporterEntries()"
-            [state]="edited()"
-            (stateChange)="saveState($event!)"
-            (stateCancel)="closeState()"
-          />
-        </fieldset>
+          <fieldset>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span class="state-title">state</span>
+                <span class="nr">{{ editedIndex() + 1 }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <cadmus-mat-physical-state
+              [featEntries]="featEntries()"
+              [stateEntries]="stateEntries()"
+              [reporterEntries]="reporterEntries()"
+              [state]="edited()"
+              (stateChange)="saveState($event!)"
+              (stateCancel)="closeState()"
+            />
+          </fieldset>
         }
       </mat-expansion-panel>
     </mat-card-content>

@@ -1,4 +1,11 @@
-import { Component, model, effect, output, input } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  model,
+  effect,
+  output,
+  input,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -28,6 +35,7 @@ import { IndexKeyword } from '../index-keywords-part';
   selector: 'cadmus-index-keyword',
   templateUrl: './index-keyword.component.html',
   styleUrls: ['./index-keyword.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

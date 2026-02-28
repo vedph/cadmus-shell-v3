@@ -1,4 +1,4 @@
-import { Component, effect, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, model } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -40,6 +40,7 @@ import { PagedLinkedLiteralFilter } from '../../graph-walker';
     MatTooltip,
     MatIcon,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LinkedLiteralFilterComponent {
   /**

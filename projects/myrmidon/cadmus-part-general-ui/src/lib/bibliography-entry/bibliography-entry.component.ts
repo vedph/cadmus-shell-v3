@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   OnInit,
   OnDestroy,
@@ -55,6 +56,7 @@ import { BibAuthorsEditorComponent } from '../bib-authors-editor/bib-authors-edi
   selector: 'cadmus-bibliography-entry',
   templateUrl: './bibliography-entry.component.html',
   styleUrls: ['./bibliography-entry.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

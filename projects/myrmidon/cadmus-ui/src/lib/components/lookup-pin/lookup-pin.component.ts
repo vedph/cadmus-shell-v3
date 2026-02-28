@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   effect,
   Inject,
@@ -69,6 +70,7 @@ import { ItemService } from '@myrmidon/cadmus-api';
     MatIcon,
     AsyncPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LookupPinComponent implements OnInit {
   /**
@@ -146,10 +148,6 @@ export class LookupPinComponent implements OnInit {
         }
       })
     );
-    // setup initial value if its name was specified
-    if (this.initialValue()) {
-      this.resetToInitial();
-    }
   }
 
   private lookupEntries(

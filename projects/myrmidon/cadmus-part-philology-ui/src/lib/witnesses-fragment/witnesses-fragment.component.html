@@ -24,157 +24,172 @@
         <mat-icon>add_circle</mat-icon> witness
       </button>
       @if (witnesses.valid) {
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th>id</th>
-            <th>cit.</th>
-            <th>text</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for ( w of witnesses.value; track w; let i = $index; let first =
-          $first; let last = $last) {
-          <tr>
-            <td>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Edit this witness"
-                (click)="openCurrentWitness(w)"
-              >
-                <mat-icon class="mat-primary">edit</mat-icon>
-              </button>
-            </td>
-            <td>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this witness up"
-                (click)="moveWitnessUp(i)"
-                [disabled]="first"
-              >
-                <mat-icon>arrow_upwards</mat-icon>
-              </button>
-            </td>
-            <td>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this witness down"
-                (click)="moveWitnessDown(i)"
-                [disabled]="last"
-              >
-                <mat-icon>arrow_downwards</mat-icon>
-              </button>
-            </td>
-            <td>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Remove this witness"
-                (click)="deleteWitness(i)"
-              >
-                <mat-icon class="mat-warn">remove_circle</mat-icon>
-              </button>
-            </td>
-            <td>
-              {{ w.id }}
-            </td>
-            <td>
-              {{ w.citation }}
-            </td>
-            <td>
-              {{ w.text }}
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th>id</th>
+              <th>cit.</th>
+              <th>text</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              w of witnesses.value;
+              track w;
+              let i = $index;
+              let first = $first;
+              let last = $last
+            ) {
+              <tr>
+                <td>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Edit this witness"
+                    (click)="openCurrentWitness(w)"
+                  >
+                    <mat-icon class="mat-primary">edit</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this witness up"
+                    (click)="moveWitnessUp(i)"
+                    [disabled]="first"
+                  >
+                    <mat-icon>arrow_upwards</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this witness down"
+                    (click)="moveWitnessDown(i)"
+                    [disabled]="last"
+                  >
+                    <mat-icon>arrow_downwards</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Remove this witness"
+                    (click)="deleteWitness(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  {{ w.id }}
+                </td>
+                <td>
+                  {{ w.citation }}
+                </td>
+                <td>
+                  {{ w.text }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
       <hr />
       @if (currentWitnessOpen()) {
-      <div [@slideInOut]>
-        <form [formGroup]="witness" (submit)="saveCurrentWitness()">
-          <!-- id -->
-          <div>
-            <mat-form-field>
-              <mat-label>ID</mat-label>
-              <input
-                type="text"
-                matInput
-                formControlName="id"
-                spellcheck="false"
+        <div [@slideInOut]>
+          <form [formGroup]="witness" (submit)="saveCurrentWitness()">
+            <!-- id -->
+            <div>
+              <mat-form-field>
+                <mat-label>ID</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  formControlName="id"
+                  spellcheck="false"
+                />
+                @if (id.hasError("required") && (id.dirty || id.touched)) {
+                  <mat-error>ID required</mat-error>
+                }
+                @if (id.hasError("maxLength") && (id.dirty || id.touched)) {
+                  <mat-error>ID too long</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <!-- citation -->
+            <div>
+              <mat-form-field>
+                <mat-label>citation</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  formControlName="citation"
+                  spellcheck="false"
+                />
+                @if (
+                  citation.hasError("required") &&
+                  (citation.dirty || citation.touched)
+                ) {
+                  <mat-error>citation required</mat-error>
+                }
+                @if (
+                  citation.hasError("maxLength") &&
+                  (citation.dirty || citation.touched)
+                ) {
+                  <mat-error>citation too long</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <!-- text -->
+            <div>
+              <h3>Text</h3>
+              <nge-monaco-editor
+                style="--editor-height: 400px"
+                (ready)="onCreateTextEditor($event)"
               />
-              @if (id.hasError('required') && (id.dirty || id.touched)) {
-              <mat-error>ID required</mat-error>
-              } @if (id.hasError('maxLength') && (id.dirty || id.touched)) {
-              <mat-error>ID too long</mat-error>
+              @if (text.hasError("required") && (text.touched || text.dirty)) {
+                <mat-error>please enter some text</mat-error>
               }
-            </mat-form-field>
-          </div>
-          <!-- citation -->
-          <div>
-            <mat-form-field>
-              <mat-label>citation</mat-label>
-              <input
-                type="text"
-                matInput
-                formControlName="citation"
-                spellcheck="false"
+              <hr />
+              @if (text.value) {
+                <nge-markdown [data]="text.value || undefined" />
+              }
+            </div>
+            <!-- note -->
+            <div>
+              <h3>Note</h3>
+              <nge-monaco-editor
+                style="--editor-height: 400px"
+                (ready)="onCreateNoteEditor($event)"
               />
-              @if ( citation.hasError('required') && (citation.dirty ||
-              citation.touched) ) {
-              <mat-error>citation required</mat-error>
-              } @if ( citation.hasError('maxLength') && (citation.dirty ||
-              citation.touched) ) {
-              <mat-error>citation too long</mat-error>
+              <hr />
+              @if (note.value) {
+                <nge-markdown [data]="note.value || undefined" />
               }
-            </mat-form-field>
-          </div>
-          <!-- text -->
-          <div>
-            <h3>Text</h3>
-            <nge-monaco-editor
-              style="--editor-height: 400px"
-              (ready)="onCreateTextEditor($event)"
-            />
-            @if (text.hasError('required') && (text.touched || text.dirty)) {
-            <mat-error>please enter some text</mat-error>
-            }
-            <hr />
-            @if (text.value) {
-            <nge-markdown [data]="text.value || undefined" />
-            }
-          </div>
-          <!-- note -->
-          <div>
-            <h3>Note</h3>
-            <nge-monaco-editor
-              style="--editor-height: 400px"
-              (ready)="onCreateNoteEditor($event)"
-            />
-            <hr />
-            @if (note.value) {
-            <nge-markdown [data]="note.value || undefined" />
-            }
-          </div>
-          <button
-            type="button"
-            mat-icon-button
-            matTooltip="Close this witness"
-            (click)="closeCurrentWitness()"
-          >
-            <mat-icon class="mat-warn">clear</mat-icon>
-          </button>
-          <button type="submit" mat-icon-button matTooltip="Save this witness">
-            <mat-icon class="mat-primary">check_circle</mat-icon>
-          </button>
-        </form>
-      </div>
+            </div>
+            <button
+              type="button"
+              mat-icon-button
+              matTooltip="Close this witness"
+              (click)="closeCurrentWitness()"
+            >
+              <mat-icon class="mat-warn">clear</mat-icon>
+            </button>
+            <button
+              type="submit"
+              mat-icon-button
+              matTooltip="Save this witness"
+            >
+              <mat-icon class="mat-primary">check_circle</mat-icon>
+            </button>
+          </form>
+        </div>
       }
     </mat-card-content>
 

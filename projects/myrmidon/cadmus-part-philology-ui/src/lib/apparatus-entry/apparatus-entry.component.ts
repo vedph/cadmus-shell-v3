@@ -1,4 +1,11 @@
-import { Component, model, effect, output, input } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  model,
+  effect,
+  output,
+  input,
+} from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -44,6 +51,7 @@ import {
   selector: 'cadmus-apparatus-entry',
   templateUrl: './apparatus-entry.component.html',
   styleUrls: ['./apparatus-entry.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

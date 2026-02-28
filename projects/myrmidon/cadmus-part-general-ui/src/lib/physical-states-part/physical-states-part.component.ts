@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -54,6 +59,7 @@ import {
   selector: 'cadmus-physical-states-part',
   templateUrl: './physical-states-part.component.html',
   styleUrl: './physical-states-part.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

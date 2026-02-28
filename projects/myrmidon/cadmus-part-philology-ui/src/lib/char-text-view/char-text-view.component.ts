@@ -1,4 +1,11 @@
-import { Component, effect, input, output, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { ColorToContrastPipe } from '@myrmidon/ngx-tools';
 
 export interface NumberedChar {
@@ -22,6 +29,7 @@ interface NumberedCharView extends NumberedChar {
   imports: [ColorToContrastPipe],
   templateUrl: './char-text-view.component.html',
   styleUrl: './char-text-view.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CharTextViewComponent {
   private readonly _lastSelectedChar = signal<NumberedChar | undefined>(

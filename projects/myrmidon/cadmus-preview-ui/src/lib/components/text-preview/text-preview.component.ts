@@ -98,7 +98,7 @@ export class TextPreviewComponent {
     private _itemService: ItemService,
     private _appRepository: AppRepository,
     private _snackbar: MatSnackBar,
-    formBuilder: FormBuilder
+    formBuilder: FormBuilder,
   ) {
     // form
     this.selectedLayer = formBuilder.control(null);
@@ -133,7 +133,12 @@ export class TextPreviewComponent {
           console.log('[EFFECT-LAYER] Calling loadLayer');
           this.loadLayer();
         } else {
-          console.log('[EFFECT-LAYER] Skipped loadLayer. isLoading:', this._isLoading(), 'layer:', layer);
+          console.log(
+            '[EFFECT-LAYER] Skipped loadLayer. isLoading:',
+            this._isLoading(),
+            'layer:',
+            layer,
+          );
         }
       });
     });
@@ -151,7 +156,7 @@ export class TextPreviewComponent {
     for (let i = 0; i < layers.length; i++) {
       let color = this._appRepository.getPartColor(
         layers[i].typeId,
-        layers[i].roleId
+        layers[i].roleId,
       );
       if (color) {
         layers[i].color = '#' + color;
@@ -176,7 +181,7 @@ export class TextPreviewComponent {
     this._previewService
       .getTextSegments(
         this.source()!.partId,
-        layers.map((l) => l.id)
+        layers.map((l) => l.id),
       )
       .pipe(take(1))
       .subscribe({
@@ -195,10 +200,10 @@ export class TextPreviewComponent {
           this._isLoading.set(false);
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
-            error
+            error,
           );
           this._snackbar.open(
-            'Error previewing text part ' + this.source()!.partId
+            'Error previewing text part ' + this.source()!.partId,
           );
         },
       });
@@ -238,9 +243,12 @@ export class TextPreviewComponent {
           this.layers.set(result.layers);
           // select layer if requested
           if (source!.layerId) {
-            console.log('[loadItem] Setting selectedLayer to specific layer:', source!.layerId);
+            console.log(
+              '[loadItem] Setting selectedLayer to specific layer:',
+              source!.layerId,
+            );
             this.selectedLayer.setValue(
-              this.layers().find((l) => l.roleId === source!.layerId) || null
+              this.layers().find((l) => l.roleId === source!.layerId) || null,
             );
             // loadLayer will be called by the effect when selectedLayer changes
           } else {
@@ -282,12 +290,12 @@ export class TextPreviewComponent {
       const m = this.parseFragmentId(fragmentIds[i]);
       labels.push(m[2]);
       const layer = this.layers().find(
-        (l) => l.typeId === m[1] && (!l.roleId || l.roleId === m[2])
+        (l) => l.typeId === m[1] && (!l.roleId || l.roleId === m[2]),
       )!;
       loaders$.push(
         this._previewService
           .renderFragment(this.source()!.itemId, layer.id, +m[3])
-          .pipe(take(1))
+          .pipe(take(1)),
       );
     }
 
@@ -305,10 +313,10 @@ export class TextPreviewComponent {
           this._isLoading.set(false);
           console.error(
             `Error previewing text part ${this.source()!.partId}`,
-            error
+            error,
           );
           this._snackbar.open(
-            'Error previewing text part ' + this.source()!.partId
+            'Error previewing text part ' + this.source()!.partId,
           );
         },
       });

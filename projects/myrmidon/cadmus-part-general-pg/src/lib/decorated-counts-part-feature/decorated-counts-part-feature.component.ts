@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { DecoratedCountsPartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-decorated-counts-part-feature',
   templateUrl: './decorated-counts-part-feature.component.html',
   styleUrl: './decorated-counts-part-feature.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, DecoratedCountsPartComponent],
 })
 export class DecoratedCountsPartFeatureComponent

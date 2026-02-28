@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-graph-ui-ex",
-  "version": "16.0.1",
+  "version": "16.1.0",
   "description": "Cadmus - extensions to semantic graph components.",
   "keywords": [
     "Cadmus"
@@ -19,14 +19,14 @@
     "@angular/material": "^20.0.0 || ^21.0.0",
     "@myrmidon/ngx-tools": "^2.0.2",
     "@myrmidon/ngx-mat-tools": "^1.0.1",
-    "@myrmidon/cadmus-refs-lookup": "^10.0.6",
+    "@myrmidon/cadmus-refs-lookup": "^10.0.8",
     "@myrmidon/cadmus-core": "^12.0.3",
-    "@myrmidon/cadmus-api": "^14.0.4",
-    "@myrmidon/cadmus-graph-ui": "^15.0.1",
-    "force-graph": "^1.51.0",
-    "3d-force-graph": "^1.79.0",
+    "@myrmidon/cadmus-api": "^14.0.7",
+    "@myrmidon/cadmus-graph-ui": "^15.0.3",
+    "force-graph": "^1.51.1",
+    "3d-force-graph": "^1.79.1",
     "d3-force": "^3.0.0",
-    "three": "^0.181.2",
+    "three": "^0.183.2",
     "rxjs": "^7.0.0"
   },
   "dependencies": {

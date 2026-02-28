@@ -1,4 +1,4 @@
-import {
+﻿import {
   Component,
   computed,
   OnInit,
@@ -6,6 +6,7 @@ import {
   DestroyRef,
   inject,
   effect,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
@@ -66,6 +67,7 @@ import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-
   selector: 'cadmus-orthography-fragment',
   templateUrl: './orthography-fragment.component.html',
   styleUrls: ['./orthography-fragment.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

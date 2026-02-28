@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -64,6 +70,7 @@ interface MetadataPartSetting {
   selector: 'cadmus-metadata-part',
   templateUrl: './metadata-part.component.html',
   styleUrls: ['./metadata-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

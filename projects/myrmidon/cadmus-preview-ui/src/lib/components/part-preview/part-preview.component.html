@@ -1,31 +1,31 @@
 @if (item()) {
-<div>
-  <!-- progress -->
-  @if (busy()) {
   <div>
-    <mat-progress-bar mode="indeterminate" />
+    <!-- progress -->
+    @if (busy()) {
+      <div>
+        <mat-progress-bar mode="indeterminate" />
+      </div>
+    }
+    <!-- toolbar -->
+    <div id="toolbar">
+      <dl>
+        <dt>item</dt>
+        <dd>{{ item()!.title }}</dd>
+        <dt>item ID</dt>
+        <dd>{{ item()!.id }}</dd>
+        <dt>part ID</dt>
+        <dd>{{ source()!.partId }}</dd>
+      </dl>
+      <button
+        type="button"
+        mat-flat-button
+        (click)="refresh()"
+        [disabled]="busy()"
+      >
+        <mat-icon>refresh</mat-icon> refresh
+      </button>
+    </div>
+    <!-- preview -->
+    <div id="preview" [innerHtml]="html() | safeHtml: 'html'"></div>
   </div>
-  }
-  <!-- toolbar -->
-  <div id="toolbar">
-    <dl>
-      <dt>item</dt>
-      <dd>{{ item()!.title }}</dd>
-      <dt>item ID</dt>
-      <dd>{{ item()!.id }}</dd>
-      <dt>part ID</dt>
-      <dd>{{ source()!.partId }}</dd>
-    </dl>
-    <button
-      type="button"
-      mat-flat-button
-      (click)="refresh()"
-      [disabled]="busy()"
-    >
-      <mat-icon>refresh</mat-icon> refresh
-    </button>
-  </div>
-  <!-- preview -->
-  <div id="preview" [innerHtml]="html() | safeHtml : 'html'"></div>
-</div>
 }

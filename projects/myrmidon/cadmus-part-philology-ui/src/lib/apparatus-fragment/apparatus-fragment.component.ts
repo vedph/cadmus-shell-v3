@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -58,6 +63,7 @@ import { ApparatusEntrySummaryService } from './apparatus-entry-summary.service'
   selector: 'cadmus-apparatus-fragment',
   templateUrl: './apparatus-fragment.component.html',
   styleUrls: ['./apparatus-fragment.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

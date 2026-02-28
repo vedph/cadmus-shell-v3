@@ -1,6 +1,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 tbody tr:nth-child(odd) {
   background-color: #e2e2e2;
@@ -10,10 +11,21 @@ th {
   font-weight: normal;
   color: silver;
 }
+td {
+  padding: 0 2px;
+  word-break: break-word;
+}
 td.fit-width {
-  width: 1px;
+  width: 1%;
   white-space: nowrap;
 }
+td.nowrap {
+  white-space: nowrap;
+}
+td.description {
+  max-width: 600px;
+}
+
 .form-row {
   display: flex;
   gap: 8px;
@@ -22,10 +34,6 @@ td.fit-width {
 }
 .form-row * {
   flex: 0 0 auto;
-}
-td.fit-width {
-  width: 1px;
-  white-space: nowrap;
 }
 
 div#container {

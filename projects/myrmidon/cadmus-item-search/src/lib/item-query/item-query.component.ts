@@ -1,5 +1,6 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import {
+  ChangeDetectionStrategy,
   Component,
   OnInit,
   ViewChild,
@@ -62,6 +63,7 @@ interface PartDefViewModel {
   selector: 'cadmus-item-query',
   templateUrl: './item-query.component.html',
   styleUrls: ['./item-query.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardContent,
@@ -114,7 +116,7 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     formBuilder: FormBuilder,
     private _clipboard: Clipboard,
     private _appRepository: AppRepository,
-    private _itemService: ItemService
+    private _itemService: ItemService,
   ) {
     this.queryCtl = formBuilder.control(null, Validators.required);
     this.history = formBuilder.control(null);
@@ -201,11 +203,7 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
   }
 
   private focusQuery(): void {
-    if (this.queryElement) {
-      setTimeout(() => {
-        this.queryElement?.nativeElement.focus();
-      }, 500);
-    }
+    this.queryElement?.nativeElement.focus();
   }
 
   public ngAfterViewInit(): void {

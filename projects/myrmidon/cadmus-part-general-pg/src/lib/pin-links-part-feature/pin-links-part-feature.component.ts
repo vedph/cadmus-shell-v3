@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { PinLinksPartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-pin-links-part-feature',
   templateUrl: './pin-links-part-feature.component.html',
   styleUrls: ['./pin-links-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, PinLinksPartComponent],
 })
 export class PinLinksPartFeatureComponent

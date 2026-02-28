@@ -1,4 +1,10 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -51,6 +57,7 @@ import { QuotationWorksService } from './quotation-works.service';
   selector: 'cadmus-quotations-fragment',
   templateUrl: './quotations-fragment.component.html',
   styleUrls: ['./quotations-fragment.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

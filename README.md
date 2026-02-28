@@ -21,32 +21,32 @@ Latest versions:
 
 - cadmus-api: 14.0.7
 - cadmus-core: 12.0.3
-- cadmus-flags-pg: 15.0.2
-- cadmus-flags-ui: 15.0.2
-- cadmus-graph-pg: 15.0.2
-- cadmus-graph-pg-ex: 16.0.1
-- cadmus-graph-ui: 15.0.1
-- cadmus-graph-ui-ex: 16.0.1
-- cadmus-item-editor: 16.0.1
-- cadmus-item-list: 16.0.2
-- cadmus-item-search: 16.0.1
-- cadmus-layer-demo: 15.0.1
-- cadmus-part-general-pg: 16.0.5
-- cadmus-part-general-ui: 16.0.5
-- cadmus-part-philology-pg: 16.1.3
-- cadmus-part-philology-ui: 17.0.1
+- cadmus-flags-pg: 15.1.0
+- cadmus-flags-ui: 15.1.0
+- cadmus-graph-pg: 15.1.0
+- cadmus-graph-pg-ex: 16.1.0
+- cadmus-graph-ui: 15.1.0
+- cadmus-graph-ui-ex: 16.1.0
+- cadmus-item-editor: 16.1.0
+- cadmus-item-list: 16.1.0
+- cadmus-item-search: 16.1.0
+- cadmus-layer-demo: 15.1.0
+- cadmus-part-general-pg: 16.1.0
+- cadmus-part-general-ui: 16.1.0
+- cadmus-part-philology-pg: 16.2.0
+- cadmus-part-philology-ui: 17.1.0
 - cadmus-part-taxo-pg: 0.0.3
-- cadmus-part-taxo-ui: 0.0.2
-- cadmus-preview-pg: 17.0.1
-- cadmus-preview-ui: 17.0.3
+- cadmus-part-taxo-ui: 0.1.0
+- cadmus-preview-pg: 17.1.0
+- cadmus-preview-ui: 17.1.0
 - cadmus-profile-core: 12.0.1
-- cadmus-state: 14.0.4
-- cadmus-statistics: 1.0.2
-- cadmus-thesaurus-editor: 16.0.1
-- cadmus-thesaurus-list: 16.0.1
-- cadmus-thesaurus-ui: 15.0.1
-- cadmus-ui: 16.0.2
-- cadmus-ui-pg: 16.0.1
+- cadmus-state: 15.0.0
+- cadmus-statistics: 1.1.0
+- cadmus-thesaurus-editor: 16.1.0
+- cadmus-thesaurus-list: 16.1.0
+- cadmus-thesaurus-ui: 15.1.0
+- cadmus-ui: 16.1.0
+- cadmus-ui-pg: 16.1.0
 
 Dependencies:
 
@@ -222,5 +222,7 @@ ng g library @myrmidon/cadmus-thesaurus-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ```
+
+## History
 
 - ⌛ [history](CHANGELOG.md)

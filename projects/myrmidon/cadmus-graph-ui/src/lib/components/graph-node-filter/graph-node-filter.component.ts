@@ -1,4 +1,4 @@
-import { Component, input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, OnDestroy, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -57,6 +57,7 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
     MatChipRemove,
     AsyncPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphNodeFilterComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;

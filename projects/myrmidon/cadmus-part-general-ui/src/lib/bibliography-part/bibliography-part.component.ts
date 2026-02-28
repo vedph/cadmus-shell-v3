@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -22,10 +27,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import {
-  FlatLookupPipe,
-  NgxToolsValidators,
-} from '@myrmidon/ngx-tools';
+import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
@@ -56,6 +58,7 @@ import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-e
   selector: 'cadmus-bibliography-part',
   templateUrl: './bibliography-part.component.html',
   styleUrls: ['./bibliography-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -99,7 +102,7 @@ export class BibliographyPartComponent
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _dialogService: DialogService
+    private _dialogService: DialogService,
   ) {
     super(authService, formBuilder);
     // form

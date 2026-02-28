@@ -1,4 +1,10 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -67,6 +73,7 @@ function entryToFlag(entry: ThesaurusEntry): Flag {
   ],
   templateUrl: './flags-part.component.html',
   styleUrl: './flags-part.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlagsPartComponent
   extends ModelEditorComponentBase<FlagsPart>

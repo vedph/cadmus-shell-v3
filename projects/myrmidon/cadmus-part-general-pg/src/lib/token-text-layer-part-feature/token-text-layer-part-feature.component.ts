@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -52,6 +52,7 @@ import { CurrentItemBarComponent, CurrentLayerPartBarComponent } from '@myrmidon
   selector: 'cadmus-token-text-layer-part-feature',
   templateUrl: './token-text-layer-part-feature.component.html',
   styleUrls: ['./token-text-layer-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,

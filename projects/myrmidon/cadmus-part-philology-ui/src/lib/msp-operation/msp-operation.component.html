@@ -7,17 +7,18 @@
         <input matInput type="text" [formControl]="text" />
         <mat-hint>"a"&#64;AxR="b" [tag] &#123;note&#125;</mat-hint>
         @if (text.value) {
-        <button
-          type="button"
-          matSuffix
-          mat-icon-button
-          aria-label="Clear"
-          (click)="resetText()"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-        } @if (text.hasError('required') && (text.touched || text.dirty)) {
-        <mat-error>please enter an operation</mat-error>
+          <button
+            type="button"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="resetText()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+        @if (text.hasError("required") && (text.touched || text.dirty)) {
+          <mat-error>please enter an operation</mat-error>
         }
       </mat-form-field>
 
@@ -49,12 +50,15 @@
             <mat-form-field>
               <mat-label>A-range</mat-label>
               <input matInput type="text" [formControl]="rangeA" />
-              @if ( rangeA.hasError('required') && (rangeA.touched ||
-              rangeA.dirty) ) {
-              <mat-error>please enter a range</mat-error>
-              } @if ( rangeA.hasError('pattern') && (rangeA.touched ||
-              rangeA.dirty) ) {
-              <mat-error>invalid range (NxM)</mat-error>
+              @if (
+                rangeA.hasError("required") && (rangeA.touched || rangeA.dirty)
+              ) {
+                <mat-error>please enter a range</mat-error>
+              }
+              @if (
+                rangeA.hasError("pattern") && (rangeA.touched || rangeA.dirty)
+              ) {
+                <mat-error>invalid range (NxM)</mat-error>
               }
             </mat-form-field>
 
@@ -62,9 +66,10 @@
             <mat-form-field>
               <mat-label>A-value</mat-label>
               <input matInput type="text" [formControl]="valueA" />
-              @if ( valueA.hasError('maxLength') && (valueA.touched ||
-              valueA.dirty) ) {
-              <mat-error>too long</mat-error>
+              @if (
+                valueA.hasError("maxLength") && (valueA.touched || valueA.dirty)
+              ) {
+                <mat-error>too long</mat-error>
               }
             </mat-form-field>
           </div>
@@ -74,9 +79,10 @@
             <mat-form-field>
               <mat-label>B-range</mat-label>
               <input matInput type="text" [formControl]="rangeB" />
-              @if ( rangeB.hasError('pattern') && (rangeB.touched ||
-              rangeB.dirty) ) {
-              <mat-error>invalid range (NxM)</mat-error>
+              @if (
+                rangeB.hasError("pattern") && (rangeB.touched || rangeB.dirty)
+              ) {
+                <mat-error>invalid range (NxM)</mat-error>
               }
             </mat-form-field>
 
@@ -84,9 +90,10 @@
             <mat-form-field>
               <mat-label>B-value</mat-label>
               <input matInput type="text" [formControl]="valueB" />
-              @if ( valueB.hasError('maxLength') && (valueB.touched ||
-              valueB.dirty) ) {
-              <mat-error>too long</mat-error>
+              @if (
+                valueB.hasError("maxLength") && (valueB.touched || valueB.dirty)
+              ) {
+                <mat-error>too long</mat-error>
               }
             </mat-form-field>
           </div>
@@ -96,10 +103,11 @@
             <mat-form-field>
               <mat-label>tag</mat-label>
               <input matInput type="text" [formControl]="tag" />
-              @if (tag.hasError('maxLength') && (tag.touched || tag.dirty)) {
-              <mat-error>too long</mat-error>
-              } @if (tag.hasError('pattern') && (tag.touched || tag.dirty)) {
-              <mat-error>invalid tag</mat-error>
+              @if (tag.hasError("maxLength") && (tag.touched || tag.dirty)) {
+                <mat-error>too long</mat-error>
+              }
+              @if (tag.hasError("pattern") && (tag.touched || tag.dirty)) {
+                <mat-error>invalid tag</mat-error>
               }
             </mat-form-field>
 
@@ -107,11 +115,11 @@
             <mat-form-field>
               <mat-label>note</mat-label>
               <input matInput type="text" [formControl]="note" />
-              @if ( note.hasError('maxLength') && (note.touched || note.dirty) )
-              {
-              <mat-error>too long</mat-error>
-              } @if (note.hasError('pattern') && (note.touched || note.dirty)) {
-              <mat-error>invalid note</mat-error>
+              @if (note.hasError("maxLength") && (note.touched || note.dirty)) {
+                <mat-error>too long</mat-error>
+              }
+              @if (note.hasError("pattern") && (note.touched || note.dirty)) {
+                <mat-error>invalid note</mat-error>
               }
             </mat-form-field>
           </div>

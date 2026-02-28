@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
@@ -31,28 +31,33 @@ export abstract class EditPartFeatureBase
   /**
    * The part being edited.
    */
-  public data?: EditedObject<Part>;
+  public readonly data = signal<EditedObject<Part> | undefined>(undefined);
 
   /**
    * The identity of the part being edited. This gets built from the current
    * route.
    */
-  public identity: PartIdentity;
+  public readonly identity = signal<PartIdentity>({
+    itemId: '',
+    typeId: '',
+    partId: null,
+    roleId: null,
+  });
 
   /**
    * True when the wrapped editor component data is dirty.
    */
-  public dirty?: boolean;
+  public readonly dirty = signal<boolean | undefined>(undefined);
 
   /**
    * True when loading data.
    */
-  public loading?: boolean;
+  public readonly loading = signal<boolean | undefined>(undefined);
 
   /**
    * True when saving data.
    */
-  public saving?: boolean;
+  public readonly saving = signal<boolean | undefined>(undefined);
 
   /**
    * Set to true when you want the role ID (defined by identity) to affect
@@ -93,19 +98,19 @@ export abstract class EditPartFeatureBase
     if (roleId === 'default') {
       roleId = null;
     }
-    this.identity = {
+    this.identity.set({
       itemId: itemId,
       typeId: typeId,
       partId: partId,
       roleId: roleId,
-    };
+    });
 
     // subscriptions
-    this._loadingSub = this.editorService.loading$.subscribe(
-      (loading) => (this.loading = loading)
+    this._loadingSub = this.editorService.loading$.subscribe((loading) =>
+      this.loading.set(loading)
     );
-    this._savingSub = this.editorService.saving$.subscribe(
-      (saving) => (this.saving = saving)
+    this._savingSub = this.editorService.saving$.subscribe((saving) =>
+      this.saving.set(saving)
     );
   }
 
@@ -132,29 +137,29 @@ export abstract class EditPartFeatureBase
   }
 
   private suffixThesauriIds(ids: string[]): string[] {
-    if (!this.roleIdInThesauri || !ids.length || !this.identity.roleId) {
+    if (!this.roleIdInThesauri || !ids.length || !this.identity().roleId) {
       return ids;
     }
-    return ids.map((id) => this.suffixThesaurusId(id, this.identity.roleId!));
+    return ids.map((id) => this.suffixThesaurusId(id, this.identity().roleId!));
   }
 
   public ngOnInit(): void {
     // load data
-    this.loading = true;
+    this.loading.set(true);
     const thesIds = this.getReqThesauriIds();
     const sfxThesIds = this.suffixThesauriIds(thesIds);
 
     this.editorService
-      .load(this.identity, sfxThesIds)
+      .load(this.identity(), sfxThesIds)
       .then((data) => {
         if (data) {
           // if we loaded suffixed thesauri, add an unsuffixed alias to each
-          if (this.roleIdInThesauri && this.identity.roleId) {
+          if (this.roleIdInThesauri && this.identity().roleId) {
             for (let i = 0; i < sfxThesIds.length; i++) {
               data.thesauri[thesIds[i]] = data.thesauri[sfxThesIds[i]];
             }
           }
-          this.data = data;
+          this.data.set(data);
           this.onDataLoaded();
         }
       })
@@ -169,7 +174,7 @@ export abstract class EditPartFeatureBase
   }
 
   public canDeactivate(): boolean {
-    return !this.dirty;
+    return !this.dirty();
   }
 
   /**
@@ -181,7 +186,7 @@ export abstract class EditPartFeatureBase
    */
   public onDirtyChange(value: boolean): void {
     console.log('part dirty change (from editor): ' + value);
-    this.dirty = value;
+    this.dirty.set(value);
   }
 
   /**
@@ -196,9 +201,9 @@ export abstract class EditPartFeatureBase
       (saved: Part) => {
         // update the route-defined part ID if it was null (new part)
         console.log('Saved part ID: ' + saved.id);
-        if (!this.identity.partId) {
-          this.identity = { ...this.identity, partId: saved.id };
-          console.log('Updated identity: ', this.identity);
+        if (!this.identity().partId) {
+          this.identity.set({ ...this.identity(), partId: saved.id });
+          console.log('Updated identity: ', this.identity());
         }
         console.log('Part saved: ' + saved.id);
         this.snackbar.open('Part saved', 'OK', {
@@ -215,6 +220,6 @@ export abstract class EditPartFeatureBase
    * Close the editor by navigating back to the part's item.
    */
   public close(): void {
-    this.router.navigate(['items', this.identity.itemId]);
+    this.router.navigate(['items', this.identity().itemId]);
   }
 }

@@ -12,29 +12,32 @@
     </thead>
     <tbody>
       @for (ctl of checks.controls; track i; let i = $index) {
-      <tr formArrayName="checks">
-        <td class="fit-width">
-          <mat-checkbox [formControlName]="i" (change)="onCheckChanged()" />
-        </td>
-        <td>
-          <span
-            class="model-type"
-            [style.background-color]="
-              getPartColor($any(parts())[i].typeId, $any(parts())[i].roleId)
-            "
-            [style.color]="
-              getContrastColor($any(parts())[i].typeId, $any(parts())[i].roleId)
-            "
-            >{{ getTypeIdName($any(parts())[i].typeId) }}</span
-          >
-        </td>
-        <td>{{ getRoleIdName($any(parts())[i].roleId) }}</td>
-        <td>{{ $any(parts())[i].thesaurusScope }}</td>
-        <td>
-          {{ $any(parts())[i].timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
-        </td>
-        <td>{{ $any(parts())[i].userId }}</td>
-      </tr>
+        <tr formArrayName="checks">
+          <td class="fit-width">
+            <mat-checkbox [formControlName]="i" (change)="onCheckChanged()" />
+          </td>
+          <td>
+            <span
+              class="model-type"
+              [style.background-color]="
+                getPartColor($any(parts())[i].typeId, $any(parts())[i].roleId)
+              "
+              [style.color]="
+                getContrastColor(
+                  $any(parts())[i].typeId,
+                  $any(parts())[i].roleId
+                )
+              "
+              >{{ getTypeIdName($any(parts())[i].typeId) }}</span
+            >
+          </td>
+          <td>{{ getRoleIdName($any(parts())[i].roleId) }}</td>
+          <td>{{ $any(parts())[i].thesaurusScope }}</td>
+          <td>
+            {{ $any(parts())[i].timeModified | date: "yyyy-MM-dd HH:mm:ss" }}
+          </td>
+          <td>{{ $any(parts())[i].userId }}</td>
+        </tr>
       }
     </tbody>
   </table>
@@ -42,10 +45,11 @@
     <mat-form-field>
       <mat-label>scope</mat-label>
       <input matInput formControlName="scope" />
-      @if (scope.hasError('maxLength') && (scope.dirty || scope.touched)) {
-      <mat-error>too long</mat-error>
-      } @if (scope.hasError('pattern') && (scope.dirty || scope.touched)) {
-      <mat-error>invalid scope</mat-error>
+      @if (scope.hasError("maxLength") && (scope.dirty || scope.touched)) {
+        <mat-error>too long</mat-error>
+      }
+      @if (scope.hasError("pattern") && (scope.dirty || scope.touched)) {
+        <mat-error>invalid scope</mat-error>
       }
     </mat-form-field>
     <button

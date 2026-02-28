@@ -11,24 +11,25 @@
     <mat-card-content>
       <div>
         @if (flagEntries().length) {
-        <div>
-          <cadmus-ui-flag-set
-            [flags]="featureFlags()"
-            [checkedIds]="flags.value"
-            (checkedIdsChange)="onFlagsCheckedIdsChange($event)"
-          />
-        </div>
-        } @if (settings()) {
-        <div>
-          <fieldset>
-            <legend>notes</legend>
-            <cadmus-ui-note-set
-              [(set)]="notes.value"
-              (noteChange)="onNoteChange($event)"
-              (setChange)="onSetChange($event)"
+          <div>
+            <cadmus-ui-flag-set
+              [flags]="featureFlags()"
+              [checkedIds]="flags.value"
+              (checkedIdsChange)="onFlagsCheckedIdsChange($event)"
             />
-          </fieldset>
-        </div>
+          </div>
+        }
+        @if (settings()) {
+          <div>
+            <fieldset>
+              <legend>notes</legend>
+              <cadmus-ui-note-set
+                [(set)]="notes.value"
+                (noteChange)="onNoteChange($event)"
+                (setChange)="onSetChange($event)"
+              />
+            </fieldset>
+          </div>
         }
       </div>
     </mat-card-content>

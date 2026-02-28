@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   Inject,
   OnDestroy,
@@ -62,6 +63,7 @@ import { MonacoEditorHelper } from '../monaco-editor-helper';
   selector: 'cadmus-note-part',
   templateUrl: './note-part.component.html',
   styleUrls: ['./note-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

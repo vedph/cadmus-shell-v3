@@ -1,4 +1,10 @@
-import { Component, ViewChild, ElementRef, signal } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -23,6 +29,7 @@ import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
   selector: 'cadmus-layer-demo',
   templateUrl: './layer-demo.component.html',
   styleUrls: ['./layer-demo.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,
@@ -55,10 +62,10 @@ export class LayerDemoComponent {
 
   constructor(
     formBuilder: FormBuilder,
-    private _textLayerService: TextLayerService
+    private _textLayerService: TextLayerService,
   ) {
     this.text = formBuilder.control(
-      'alpha beta\ngamma\ndelta epsilon waw\nzeta'
+      'alpha beta\ngamma\ndelta epsilon waw\nzeta',
     );
     this.location = formBuilder.control('1.2@2x2');
     this.rendition = formBuilder.group({
@@ -149,7 +156,7 @@ export class LayerDemoComponent {
       return;
     }
     this.result.set(
-      this._textLayerService.render(this.text.value, this.locations())
+      this._textLayerService.render(this.text.value, this.locations()),
     );
   }
 
@@ -160,16 +167,16 @@ export class LayerDemoComponent {
     this.userLocation.set(
       this._textLayerService.getSelectedLocationForNew(
         this._textLayerService.getSelectedRange()!,
-        this.text.value
-      ) || undefined
+        this.text.value,
+      ) || undefined,
     );
   }
 
   public getLocationForEdit(): void {
     this.userLocation.set(
       this._textLayerService.getSelectedLocationForEdit(
-        this._textLayerService.getSelectedRange()!
-      ) || undefined
+        this._textLayerService.getSelectedRange()!,
+      ) || undefined,
     );
   }
 }

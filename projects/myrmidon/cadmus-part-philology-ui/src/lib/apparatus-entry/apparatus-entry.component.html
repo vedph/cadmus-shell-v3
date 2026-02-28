@@ -15,8 +15,8 @@
         >
         <mat-option [value]="3"><mat-icon>edit_note</mat-icon> note</mat-option>
       </mat-select>
-      @if (type.hasError('required') && (type.dirty || type.touched)) {
-      <mat-error></mat-error>
+      @if (type.hasError("required") && (type.dirty || type.touched)) {
+        <mat-error></mat-error>
       }
     </mat-form-field>
   </div>
@@ -26,8 +26,8 @@
     <mat-form-field>
       <mat-label>value</mat-label>
       <input matInput type="text" formControlName="value" />
-      @if (value.hasError('maxLength') && (value.dirty || value.touched)) {
-      <mat-error>too long</mat-error>
+      @if (value.hasError("maxLength") && (value.dirty || value.touched)) {
+        <mat-error>too long</mat-error>
       }
     </mat-form-field>
 
@@ -35,9 +35,11 @@
     <mat-form-field>
       <mat-label>normalized value</mat-label>
       <input matInput type="text" formControlName="normValue" />
-      @if ( normValue.hasError('maxLength') && (normValue.dirty ||
-      normValue.touched) ) {
-      <mat-error>too long</mat-error>
+      @if (
+        normValue.hasError("maxLength") &&
+        (normValue.dirty || normValue.touched)
+      ) {
+        <mat-error>too long</mat-error>
       }
     </mat-form-field>
 
@@ -48,48 +50,50 @@
     <mat-form-field>
       <mat-label>subrange</mat-label>
       <input matInput [formControl]="subrange" />
-      @if ( subrange.hasError('pattern') && (subrange.dirty || subrange.touched)
+      @if (
+        subrange.hasError("pattern") && (subrange.dirty || subrange.touched)
       ) {
-      <mat-error>invalid</mat-error>
+        <mat-error>invalid</mat-error>
       }
     </mat-form-field>
   </div>
 
   <!-- tag -->
   @if (tagEntries()?.length) {
-  <div>
-    <mat-form-field>
-      <mat-label>tag</mat-label>
-      <mat-select formControlName="tag">
-        <mat-option [value]="null">(none)</mat-option>
-        @for (e of tagEntries(); track e.id) {
-        <mat-option [value]="e.id">
-          {{ e.value }}
-        </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  </div>
+    <div>
+      <mat-form-field>
+        <mat-label>tag</mat-label>
+        <mat-select formControlName="tag">
+          <mat-option [value]="null">(none)</mat-option>
+          @for (e of tagEntries(); track e.id) {
+            <mat-option [value]="e.id">
+              {{ e.value }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
   } @else {
-  <div>
-    <mat-form-field>
-      <mat-label>tag</mat-label>
-      <input matInput type="text" formControlName="tag" />
-      @if (tag.hasError('maxLength') && (tag.dirty || tag.touched)) {
-      <mat-error>too long</mat-error>
-      }
-    </mat-form-field>
-    <!-- groupId -->
-    &nbsp;
-    <mat-form-field>
-      <mat-label>group ID</mat-label>
-      <input matInput type="text" formControlName="groupId" />
-      @if ( groupId.hasError('maxLength') && (groupId.dirty || groupId.touched)
-      ) {
-      <mat-error>too long</mat-error>
-      }
-    </mat-form-field>
-  </div>
+    <div>
+      <mat-form-field>
+        <mat-label>tag</mat-label>
+        <input matInput type="text" formControlName="tag" />
+        @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+          <mat-error>too long</mat-error>
+        }
+      </mat-form-field>
+      <!-- groupId -->
+      &nbsp;
+      <mat-form-field>
+        <mat-label>group ID</mat-label>
+        <input matInput type="text" formControlName="groupId" />
+        @if (
+          groupId.hasError("maxLength") && (groupId.dirty || groupId.touched)
+        ) {
+          <mat-error>too long</mat-error>
+        }
+      </mat-form-field>
+    </div>
   }
 
   <!-- note -->
@@ -97,8 +101,8 @@
     <mat-form-field class="long-text">
       <mat-label>note</mat-label>
       <textarea matInput formControlName="note" spellcheck="false"></textarea>
-      @if (note.hasError('maxLength') && (note.dirty || note.touched)) {
-      <mat-error>too long</mat-error>
+      @if (note.hasError("maxLength") && (note.dirty || note.touched)) {
+        <mat-error>too long</mat-error>
       }
     </mat-form-field>
   </div>
@@ -113,83 +117,97 @@
     </mat-expansion-panel-header>
 
     <div formArrayName="witnesses">
-      @for ( item of witnesses.controls; track item; let i = $index; let first =
-      $first; let last = $last) {
-      <div>
-        <div [formGroupName]="i" class="form-row">
-          <div>
-            {{ i + 1 }}.
-            <button
-              mat-icon-button
-              type="button"
-              matTooltip="Move this witness up"
-              [disabled]="first"
-              (click)="moveWitnessUp(i)"
-            >
-              <mat-icon>arrow_upward</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              matTooltip="Move this witness down"
-              [disabled]="last"
-              (click)="moveWitnessDown(i)"
-            >
-              <mat-icon>arrow_downward</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              matTooltip="Remove this witness"
-              (click)="removeWitness(i)"
-            >
-              <mat-icon class="mat-warn">remove_circle</mat-icon>
-            </button>
-          </div>
-          <!-- witness: value (bound) -->
-          @if (witEntries()?.length) {
-          <mat-form-field>
-            <mat-label>value</mat-label>
-            <mat-select formControlName="value">
-              @for (e of witEntries(); track e.id) {
-              <mat-option [value]="e.id">{{ e.value }}</mat-option>
+      @for (
+        item of witnesses.controls;
+        track item;
+        let i = $index;
+        let first = $first;
+        let last = $last
+      ) {
+        <div>
+          <div [formGroupName]="i" class="form-row">
+            <div>
+              {{ i + 1 }}.
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Move this witness up"
+                [disabled]="first"
+                (click)="moveWitnessUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Move this witness down"
+                [disabled]="last"
+                (click)="moveWitnessDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Remove this witness"
+                (click)="removeWitness(i)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
+              </button>
+            </div>
+            <!-- witness: value (bound) -->
+            @if (witEntries()?.length) {
+              <mat-form-field>
+                <mat-label>value</mat-label>
+                <mat-select formControlName="value">
+                  @for (e of witEntries(); track e.id) {
+                    <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                  }
+                </mat-select>
+                @if (
+                  $any(item)["controls"].value.errors?.required &&
+                  ($any(item)["controls"].value.dirty ||
+                    $any(item)["controls"].value.touched)
+                ) {
+                  <mat-error>value required</mat-error>
+                }
+              </mat-form-field>
+            }
+            <!-- witness: value (free) -->
+            @else {
+              <mat-form-field>
+                <mat-label>value</mat-label>
+                <input matInput formControlName="value" />
+                @if (
+                  $any(item)["controls"].value.errors?.required &&
+                  ($any(item)["controls"].value.dirty ||
+                    $any(item)["controls"].value.touched)
+                ) {
+                  <mat-error>value required</mat-error>
+                }
+                @if (
+                  $any(item)["controls"].value.errors?.maxLength &&
+                  ($any(item)["controls"].value.dirty ||
+                    $any(item)["controls"].value.touched)
+                ) {
+                  <mat-error>value too long</mat-error>
+                }
+              </mat-form-field>
+            }
+            <!-- witness: note -->
+            <mat-form-field>
+              <mat-label>note</mat-label>
+              <input matInput formControlName="note" />
+              @if (
+                $any(item)["controls"].note.errors?.maxLength &&
+                ($any(item)["controls"].note.dirty ||
+                  $any(item)["controls"].note.touched)
+              ) {
+                <mat-error>note too long</mat-error>
               }
-            </mat-select>
-            @if ( $any(item)['controls'].value.errors?.required &&
-            ($any(item)['controls'].value.dirty ||
-            $any(item)['controls'].value.touched) ) {
-            <mat-error>value required</mat-error>
-            }
-          </mat-form-field>
-          }
-          <!-- witness: value (free) -->
-          @else {
-          <mat-form-field>
-            <mat-label>value</mat-label>
-            <input matInput formControlName="value" />
-            @if ( $any(item)['controls'].value.errors?.required &&
-            ($any(item)['controls'].value.dirty ||
-            $any(item)['controls'].value.touched) ) {
-            <mat-error>value required</mat-error>
-            } @if ( $any(item)['controls'].value.errors?.maxLength &&
-            ($any(item)['controls'].value.dirty ||
-            $any(item)['controls'].value.touched) ) {
-            <mat-error>value too long</mat-error>
-            }
-          </mat-form-field>
-          }
-          <!-- witness: note -->
-          <mat-form-field>
-            <mat-label>note</mat-label>
-            <input matInput formControlName="note" />
-            @if ( $any(item)['controls'].note.errors?.maxLength &&
-            ($any(item)['controls'].note.dirty ||
-            $any(item)['controls'].note.touched) ) {
-            <mat-error>note too long</mat-error>
-            }
-          </mat-form-field>
+            </mat-form-field>
+          </div>
         </div>
-      </div>
       }
     </div>
     <button
@@ -212,114 +230,132 @@
     </mat-expansion-panel-header>
 
     <div formArrayName="authors">
-      @for ( item of authors.controls; track item; let i = $index; let first =
-      $first; let last = $last) {
-      <div [formGroupName]="i" class="form-row">
-        <div>
-          {{ i + 1 }}.
-          <button
-            mat-icon-button
-            type="button"
-            matTooltip="Move this author up"
-            [disabled]="first"
-            (click)="moveAuthorUp(i)"
-          >
-            <mat-icon>arrow_upward</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            type="button"
-            matTooltip="Move this author down"
-            [disabled]="last"
-            (click)="moveAuthorDown(i)"
-          >
-            <mat-icon>arrow_downward</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            type="button"
-            matTooltip="Remove this author"
-            (click)="removeAuthor(i)"
-          >
-            <mat-icon class="mat-warn">remove_circle</mat-icon>
-          </button>
+      @for (
+        item of authors.controls;
+        track item;
+        let i = $index;
+        let first = $first;
+        let last = $last
+      ) {
+        <div [formGroupName]="i" class="form-row">
+          <div>
+            {{ i + 1 }}.
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Move this author up"
+              [disabled]="first"
+              (click)="moveAuthorUp(i)"
+            >
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Move this author down"
+              [disabled]="last"
+              (click)="moveAuthorDown(i)"
+            >
+              <mat-icon>arrow_downward</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Remove this author"
+              (click)="removeAuthor(i)"
+            >
+              <mat-icon class="mat-warn">remove_circle</mat-icon>
+            </button>
+          </div>
+          <!-- author: value (bound) -->
+          @if (authEntries()?.length) {
+            <mat-form-field>
+              <mat-label>value</mat-label>
+              <mat-select formControlName="value">
+                @for (e of authEntries(); track e.id) {
+                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                }
+              </mat-select>
+              @if (
+                $any(item)["controls"].value.errors?.required &&
+                ($any(item)["controls"].value.dirty ||
+                  $any(item)["controls"].value.touched)
+              ) {
+                <mat-error>value required</mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- author: value (free) -->
+          @else {
+            <mat-form-field>
+              <mat-label>value</mat-label>
+              <input matInput formControlName="value" />
+              @if (
+                $any(item)["controls"].value.errors?.required &&
+                ($any(item)["controls"].value.dirty ||
+                  $any(item)["controls"].value.touched)
+              ) {
+                <mat-error>value required</mat-error>
+              }
+              @if (
+                $any(item)["controls"].value.errors?.maxLength &&
+                ($any(item)["controls"].value.dirty ||
+                  $any(item)["controls"].value.touched)
+              ) {
+                <mat-error>value too long</mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- author: location -->
+          <mat-form-field>
+            <mat-label>location</mat-label>
+            <input matInput formControlName="location" />
+            @if (
+              $any(item)["controls"].location.errors?.maxLength &&
+              ($any(item)["controls"].location.dirty ||
+                $any(item)["controls"].location.touched)
+            ) {
+              <mat-error>loc. too long</mat-error>
+            }
+          </mat-form-field>
+          <!-- author: tag (thesaurus) -->
+          @if (authTagEntries()?.length) {
+            <mat-form-field>
+              <mat-label>tag</mat-label>
+              <mat-select formControlName="tag">
+                @for (e of authTagEntries(); track e.id) {
+                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+          <!-- author: tag (free) -->
+          @else {
+            <mat-form-field>
+              <mat-label>tag</mat-label>
+              <input matInput formControlName="tag" />
+              @if (
+                $any(item)["controls"].tag.errors?.maxLength &&
+                ($any(item)["controls"].tag.dirty ||
+                  $any(item)["controls"].tag.touched)
+              ) {
+                <mat-error>tag too long</mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- author: note -->
+          <mat-form-field>
+            <mat-label>note</mat-label>
+            <input matInput formControlName="note" />
+            @if (
+              $any(item)["controls"].note.errors?.maxLength &&
+              ($any(item)["controls"].note.dirty ||
+                $any(item)["controls"].note.touched)
+            ) {
+              <mat-error>note too long</mat-error>
+            }
+          </mat-form-field>
         </div>
-        <!-- author: value (bound) -->
-        @if (authEntries()?.length) {
-        <mat-form-field>
-          <mat-label>value</mat-label>
-          <mat-select formControlName="value">
-            @for (e of authEntries(); track e.id) {
-            <mat-option [value]="e.id">{{ e.value }}</mat-option>
-            }
-          </mat-select>
-          @if ( $any(item)['controls'].value.errors?.required &&
-          ($any(item)['controls'].value.dirty ||
-          $any(item)['controls'].value.touched) ) {
-          <mat-error>value required</mat-error>
-          }
-        </mat-form-field>
-        }
-        <!-- author: value (free) -->
-        @else {
-        <mat-form-field>
-          <mat-label>value</mat-label>
-          <input matInput formControlName="value" />
-          @if ( $any(item)['controls'].value.errors?.required &&
-          ($any(item)['controls'].value.dirty ||
-          $any(item)['controls'].value.touched) ) {
-          <mat-error>value required</mat-error>
-          } @if ( $any(item)['controls'].value.errors?.maxLength &&
-          ($any(item)['controls'].value.dirty ||
-          $any(item)['controls'].value.touched) ) {
-          <mat-error>value too long</mat-error>
-          }
-        </mat-form-field>
-        }
-        <!-- author: location -->
-        <mat-form-field>
-          <mat-label>location</mat-label>
-          <input matInput formControlName="location" />
-          @if ( $any(item)['controls'].location.errors?.maxLength &&
-          ($any(item)['controls'].location.dirty ||
-          $any(item)['controls'].location.touched) ) {
-          <mat-error>loc. too long</mat-error>
-          }
-        </mat-form-field>
-        <!-- author: tag (thesaurus) -->
-        @if (authTagEntries()?.length) {
-        <mat-form-field>
-          <mat-label>tag</mat-label>
-          <mat-select formControlName="tag">
-            @for (e of authTagEntries(); track e.id) {
-            <mat-option [value]="e.id">{{ e.value }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        }
-        <!-- author: tag (free) -->
-        @else {
-        <mat-form-field>
-          <mat-label>tag</mat-label>
-          <input matInput formControlName="tag" />
-          @if ( $any(item)['controls'].tag.errors?.maxLength &&
-          ($any(item)['controls'].tag.dirty ||
-          $any(item)['controls'].tag.touched) ) {
-          <mat-error>tag too long</mat-error>
-          }
-        </mat-form-field>
-        }
-        <!-- author: note -->
-        <mat-form-field>
-          <mat-label>note</mat-label>
-          <input matInput formControlName="note" />
-          @if ( $any(item)['controls'].note.errors?.maxLength &&
-          ($any(item)['controls'].note.dirty ||
-          $any(item)['controls'].note.touched) ) {
-          <mat-error>note too long</mat-error>
-          }
-        </mat-form-field>
-      </div>
       }
     </div>
     <button
@@ -331,14 +367,14 @@
       <mat-icon>add_circle</mat-icon> author
     </button>
     @if (workEntries()?.length) {
-    <div>
-      <cadmus-thesaurus-tree
-        [entries]="workEntries()"
-        rootLabel="works"
-        [renderLabel]="renderLabel"
-        (entryChange)="onEntryChange($event)"
-      />
-    </div>
+      <div>
+        <cadmus-thesaurus-tree
+          [entries]="workEntries()"
+          rootLabel="works"
+          [renderLabel]="renderLabel"
+          (entryChange)="onEntryChange($event)"
+        />
+      </div>
     }
   </mat-expansion-panel>
 

@@ -1,4 +1,4 @@
-import { Component, output, input, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output, input, effect } from '@angular/core';
 import {
   FormGroup,
   FormArray,
@@ -30,6 +30,7 @@ import { LayerHint } from '@myrmidon/cadmus-core';
     MatCheckbox,
     MatButton,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayerHintsComponent {
   public readonly hints = input<LayerHint[]>([]);
@@ -82,13 +83,13 @@ export class LayerHintsComponent {
   }
 
   public emitRequestMove(hint: LayerHint) {
-    if (!this.targetLocation) {
+    if (!this.targetLocation()) {
       return;
     }
     this._dialogService
       .confirm(
         'Confirm Move',
-        `Move fragment at ${hint.location} to ${this.targetLocation}?`
+        `Move fragment at ${hint.location} to ${this.targetLocation()}?`
       )
       .subscribe((ok: boolean) => {
         if (ok) {

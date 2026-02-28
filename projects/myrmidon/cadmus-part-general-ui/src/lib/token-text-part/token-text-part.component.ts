@@ -1,4 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -53,6 +58,7 @@ import { MonacoEditorHelper } from '../monaco-editor-helper';
   selector: 'cadmus-token-text-part',
   templateUrl: './token-text-part.component.html',
   styleUrls: ['./token-text-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

@@ -1,30 +1,31 @@
 <div id="text">
   @for (row of rows(); track $index) {
-  <div class="line">
-    @if (hasLineNumber()) {
-    <div class="nr">
-      {{ rows().indexOf(row) + 1 }}
+    <div class="line">
+      @if (hasLineNumber()) {
+        <div class="nr">
+          {{ rows().indexOf(row) + 1 }}
+        </div>
+      }
+      @for (c of row; track c.n) {
+        <div matRipple id="container" (click)="onCharClick(c, $event)">
+          <div
+            id="c-label"
+            [style.fontSize]="c.emSize + 'em'"
+            [style.borderColor]="c.borderColor"
+          >
+            {{ c.value }}
+          </div>
+          <div
+            id="c-id"
+            [style.fontSize]="c.emSize / 2 + 'em'"
+            [style.color]="c.color | colorToContrast"
+            [style.borderColor]="c.borderColor"
+            [style.backgroundColor]="c.color"
+          >
+            {{ c.n }}
+          </div>
+        </div>
+      }
     </div>
-    } @for (c of row; track c.n) {
-    <div matRipple id="container" (click)="onCharClick(c, $event)">
-      <div
-        id="c-label"
-        [style.fontSize]="c.emSize + 'em'"
-        [style.borderColor]="c.borderColor"
-      >
-        {{ c.value }}
-      </div>
-      <div
-        id="c-id"
-        [style.fontSize]="c.emSize / 2 + 'em'"
-        [style.color]="c.color | colorToContrast"
-        [style.borderColor]="c.borderColor"
-        [style.backgroundColor]="c.color"
-      >
-        {{ c.n }}
-      </div>
-    </div>
-    }
-  </div>
   }
 </div>

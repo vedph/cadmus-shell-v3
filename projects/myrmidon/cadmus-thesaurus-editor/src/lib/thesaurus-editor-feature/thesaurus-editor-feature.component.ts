@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
@@ -16,12 +21,12 @@ import {
   AppRepository,
 } from '@myrmidon/cadmus-state';
 import { ThesaurusEditorComponent } from '@myrmidon/cadmus-thesaurus-ui';
-import { deepCopy } from '@myrmidon/ngx-tools';
 
 @Component({
   selector: 'lib-thesaurus-editor-feature',
   templateUrl: './thesaurus-editor-feature.component.html',
   styleUrls: ['./thesaurus-editor-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatProgressBar, AsyncPipe, ThesaurusEditorComponent],
 })
 export class ThesaurusEditorFeatureComponent implements OnInit {
@@ -41,7 +46,7 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     userLevelService: UserLevelService,
     public thesService: ThesaurusService,
     private _dialogService: DialogService,
-    private _snackbar: MatSnackBar
+    private _snackbar: MatSnackBar,
   ) {
     this.id.set(this._route.snapshot.params['id']);
     if (this.id() === 'new') {
@@ -59,8 +64,8 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     // update form whenever we get new data
     this._repository.thesaurus$.subscribe(
       (thesaurus: Thesaurus | undefined) => {
-        this.thesaurus.set(deepCopy(thesaurus));
-      }
+        this.thesaurus.set(structuredClone(thesaurus));
+      },
     );
 
     this._repository.load(this.id());
@@ -121,7 +126,7 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
           if (exists) {
             this._snackbar.open(
               `A thesaurus with ID ${this.thesaurus()!.id}\nalready exists!`,
-              'OK'
+              'OK',
             );
           } else {
             this.doSave();

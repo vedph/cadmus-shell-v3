@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { TextLayerPart } from '@myrmidon/cadmus-core';
 import { FacetService } from '@myrmidon/cadmus-api';
@@ -10,6 +16,7 @@ import { Subscription } from 'rxjs';
   selector: 'cadmus-current-layer-part-bar',
   templateUrl: './current-layer-part-bar.component.html',
   styleUrls: ['./current-layer-part-bar.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
   private _subs: Subscription[] = [];
@@ -18,7 +25,7 @@ export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
     private _appRepository: AppRepository,
     private _editedItemRepository: EditedItemRepository,
     private _editedLayerRepository: EditedLayerRepository,
-    private _facetService: FacetService
+    private _facetService: FacetService,
   ) {}
 
   public readonly typeId = signal<string | undefined>(undefined);
@@ -70,12 +77,12 @@ export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
     this._subs.push(
       this._editedItemRepository.facet$.subscribe((_) => {
         this.updateLabels();
-      })
+      }),
     );
     this._subs.push(
       this._editedLayerRepository.part$.subscribe((_) => {
         this.updateLabels();
-      })
+      }),
     );
     // ensure app data is loaded
     this._appRepository.load();

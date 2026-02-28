@@ -17,27 +17,27 @@
       <div class="form-row">
         <!-- tag -->
         @if (tagEntries()?.length) {
-        <div>
-          <mat-form-field>
-            <mat-label>tag</mat-label>
-            <mat-select formControlName="tag">
-              <mat-option [value]="null">(none)</mat-option>
-              @for (e of tagEntries(); track e.id) {
-              <mat-option [value]="e.id">{{ e.value }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+          <div>
+            <mat-form-field>
+              <mat-label>tag</mat-label>
+              <mat-select formControlName="tag">
+                <mat-option [value]="null">(none)</mat-option>
+                @for (e of tagEntries(); track e.id) {
+                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
         } @else {
-        <div>
-          <mat-form-field>
-            <mat-label>tag</mat-label>
-            <input matInput type="text" formControlName="tag" />
-            @if (tag.hasError('maxLength') && (tag.dirty || tag.touched)) {
-            <mat-error>too long</mat-error>
-            }
-          </mat-form-field>
-        </div>
+          <div>
+            <mat-form-field>
+              <mat-label>tag</mat-label>
+              <input matInput type="text" formControlName="tag" />
+              @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+                <mat-error>too long</mat-error>
+              }
+            </mat-form-field>
+          </div>
         }
         <!-- add button -->
         <button
@@ -60,87 +60,96 @@
           </tr>
         </thead>
         <tbody>
-          @for ( entry of entries.value; track entry; let i = $index; let first
-          = $first; let last = $last) {
-          <tr [class.selected]="i === editedEntryIndex()">
-            <td class="fit-width">
-              <span class="nr">{{ i + 1 }}.</span>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Edit entry"
-                (click)="editEntry(entry, i)"
-              >
-                <mat-icon class="mat-primary">edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Move entry up"
-                [disabled]="first"
-                (click)="moveEntryUp(i)"
-              >
-                <mat-icon>arrow_upward</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Move entry down"
-                [disabled]="last"
-                (click)="moveEntryDown(i)"
-              >
-                <mat-icon>arrow_downward</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Remove this entry"
-                (click)="removeEntry(i)"
-              >
-                <mat-icon class="mat-warn">remove_circle</mat-icon>
-              </button>
-            </td>
-            <td [matTooltip]="getEntryTypeDsc(entry.type)">
-              <mat-icon>{{ getEntryTypeIcon(entry.type) }}</mat-icon>
-            </td>
-            <td>
-              @if (entry.type === 3) {
-              <span>{{ entry.note }}</span>
-              } @if (entry.type !== 3) {
-              <span [class.lem]="entry.isAccepted">{{ entry.value }}</span>
-              }
-            </td>
-            <td>{{ entry.groupId }}</td>
-          </tr>
+          @for (
+            entry of entries.value;
+            track entry;
+            let i = $index;
+            let first = $first;
+            let last = $last
+          ) {
+            <tr [class.selected]="i === editedEntryIndex()">
+              <td class="fit-width">
+                <span class="nr">{{ i + 1 }}.</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Edit entry"
+                  (click)="editEntry(entry, i)"
+                >
+                  <mat-icon class="mat-primary">edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Move entry up"
+                  [disabled]="first"
+                  (click)="moveEntryUp(i)"
+                >
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Move entry down"
+                  [disabled]="last"
+                  (click)="moveEntryDown(i)"
+                >
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Remove this entry"
+                  (click)="removeEntry(i)"
+                >
+                  <mat-icon class="mat-warn">remove_circle</mat-icon>
+                </button>
+              </td>
+              <td [matTooltip]="getEntryTypeDsc(entry.type)">
+                <mat-icon>{{ getEntryTypeIcon(entry.type) }}</mat-icon>
+              </td>
+              <td>
+                @if (entry.type === 3) {
+                  <span>{{ entry.note }}</span>
+                }
+                @if (entry.type !== 3) {
+                  <span [class.lem]="entry.isAccepted">{{ entry.value }}</span>
+                }
+              </td>
+              <td>{{ entry.groupId }}</td>
+            </tr>
           }
         </tbody>
       </table>
       @if (summary()) {
-      <div [innerHtml]="summary() | safeHtml : 'html'"></div>
+        <div [innerHtml]="summary() | safeHtml: 'html'"></div>
       }
 
       <!-- entry editor -->
       @if (editedEntry()) {
-      <fieldset>
-        <mat-expansion-panel [expanded]="editedEntry()" [disabled]="!editedEntry()">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <span class="entry-title">entry</span>
-              <span class="nr">{{ editedEntryIndex() + 1 }}</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <cadmus-apparatus-entry
-            [entry]="editedEntry()"
-            [tagEntries]="tagEntries()"
-            [witEntries]="witEntries()"
-            [authEntries]="authEntries()"
-            [authTagEntries]="authTagEntries()"
-            [workEntries]="workEntries()"
-            (entryChange)="saveEntry($event!)"
-            (editorClose)="closeEntry()"
-          />
-        </mat-expansion-panel>
-      </fieldset>
+        <fieldset>
+          <mat-expansion-panel
+            [expanded]="editedEntry()"
+            [disabled]="!editedEntry()"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span class="entry-title">entry</span>
+                <span class="nr">{{ editedEntryIndex() + 1 }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <cadmus-apparatus-entry
+              [entry]="editedEntry()"
+              [tagEntries]="tagEntries()"
+              [witEntries]="witEntries()"
+              [authEntries]="authEntries()"
+              [authTagEntries]="authTagEntries()"
+              [workEntries]="workEntries()"
+              (entryChange)="saveEntry($event!)"
+              (editorClose)="closeEntry()"
+            />
+          </mat-expansion-panel>
+        </fieldset>
       }
     </mat-card-content>
 

@@ -12,24 +12,24 @@
           <!-- tag (bound) -->
           <div>
             @if (comTagEntries()?.length) {
-            <mat-form-field>
-              <mat-label>tag</mat-label>
-              <mat-select [formControl]="tag">
-                @for (e of comTagEntries(); track e.id) {
-                <mat-option [value]="e.id">{{ e.value }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+              <mat-form-field>
+                <mat-label>tag</mat-label>
+                <mat-select [formControl]="tag">
+                  @for (e of comTagEntries(); track e.id) {
+                    <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
             }
             <!-- tag (free) -->
             @else {
-            <mat-form-field>
-              <mat-label>tag</mat-label>
-              <input matInput [formControl]="tag" />
-              @if (tag.hasError('maxLength') && (tag.dirty || tag.touched)) {
-              <mat-error>tag too long</mat-error>
-              }
-            </mat-form-field>
+              <mat-form-field>
+                <mat-label>tag</mat-label>
+                <input matInput [formControl]="tag" />
+                @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+                  <mat-error>tag too long</mat-error>
+                }
+              </mat-form-field>
             }
           </div>
           <!-- text -->
@@ -38,8 +38,8 @@
               style="--editor-height: 800px"
               (ready)="onCreateEditor($event)"
             />
-            @if (text.hasError('required') && (text.touched || text.dirty)) {
-            <mat-error>text required</mat-error>
+            @if (text.hasError("required") && (text.touched || text.dirty)) {
+              <mat-error>text required</mat-error>
             }
           </div>
           <div id="pvw">
@@ -83,49 +83,54 @@
 
         <!-- categories -->
         @if (catEntries()?.length) {
-        <mat-tab label="categories">
-          <div id="container">
-            <div id="picker">
-              <fieldset>
-                <legend>available categories</legend>
-                <cadmus-thesaurus-tree
-                  [entries]="catEntries()"
-                  rootLabel="categories"
-                  [renderLabel]="renderLabel"
-                  (entryChange)="onCategoryChange($event)"
-                />
-              </fieldset>
+          <mat-tab label="categories">
+            <div id="container">
+              <div id="picker">
+                <fieldset>
+                  <legend>available categories</legend>
+                  <cadmus-thesaurus-tree
+                    [entries]="catEntries()"
+                    rootLabel="categories"
+                    [renderLabel]="renderLabel"
+                    (entryChange)="onCategoryChange($event)"
+                  />
+                </fieldset>
+              </div>
+              @if (categories.value.length) {
+                <div id="list">
+                  <fieldset>
+                    <legend>assigned categories</legend>
+                    <table>
+                      <tbody>
+                        @for (
+                          entry of categories.value;
+                          track entry;
+                          let i = $index
+                        ) {
+                          <tr>
+                            <td>
+                              <button
+                                type="button"
+                                mat-icon-button
+                                type="button"
+                                matTooltip="Remove this category"
+                                (click)="removeCategory(i)"
+                              >
+                                <mat-icon class="mat-warn"
+                                  >remove_circle</mat-icon
+                                >
+                              </button>
+                            </td>
+                            <td [matTooltip]="entry.id">{{ entry.value }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </fieldset>
+                </div>
+              }
             </div>
-            @if (categories.value.length) {
-            <div id="list">
-              <fieldset>
-                <legend>assigned categories</legend>
-                <table>
-                  <tbody>
-                    @for (entry of categories.value; track entry; let i =
-                    $index) {
-                    <tr>
-                      <td>
-                        <button
-                          type="button"
-                          mat-icon-button
-                          type="button"
-                          matTooltip="Remove this category"
-                          (click)="removeCategory(i)"
-                        >
-                          <mat-icon class="mat-warn">remove_circle</mat-icon>
-                        </button>
-                      </td>
-                      <td [matTooltip]="entry.id">{{ entry.value }}</td>
-                    </tr>
-                    }
-                  </tbody>
-                </table>
-              </fieldset>
-            </div>
-            }
-          </div>
-        </mat-tab>
+          </mat-tab>
         }
 
         <!-- keywords -->
@@ -143,144 +148,167 @@
               </button>
             </div>
             <!-- keyword -->
-            @for ( item of keywords.controls; track item; let i = $index; let
-            first = $first; let last = $last) {
-            <div>
-              <!-- child form -->
-              <div [formGroupName]="i" class="form-row">
-                <!-- child actions -->
-                <span>{{ i + 1 }}.</span>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Remove this keyword"
-                  (click)="removeKeyword(i)"
-                >
-                  <mat-icon class="mat-warn">remove_circle</mat-icon>
-                </button>
-                <button
-                  [disabled]="first"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move keyword up"
-                  (click)="moveKeywordUp(i)"
-                >
-                  <mat-icon>arrow_upward</mat-icon>
-                </button>
-                <button
-                  [disabled]="last"
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move keyword down"
-                  (click)="moveKeywordDown(i)"
-                >
-                  <mat-icon>arrow_downward</mat-icon>
-                </button>
-                <!-- child controls -->
-                <!-- indexId (bound) -->
-                @if (idxEntries()?.length) {
-                <mat-form-field>
-                  <mat-label>index</mat-label>
-                  <mat-select formControlName="indexId">
-                    @for (e of idxEntries(); track e.id) {
-                    <mat-option [value]="e.id">{{ e.value }}</mat-option>
+            @for (
+              item of keywords.controls;
+              track item;
+              let i = $index;
+              let first = $first;
+              let last = $last
+            ) {
+              <div>
+                <!-- child form -->
+                <div [formGroupName]="i" class="form-row">
+                  <!-- child actions -->
+                  <span>{{ i + 1 }}.</span>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Remove this keyword"
+                    (click)="removeKeyword(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                  <button
+                    [disabled]="first"
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Move keyword up"
+                    (click)="moveKeywordUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    [disabled]="last"
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Move keyword down"
+                    (click)="moveKeywordDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <!-- child controls -->
+                  <!-- indexId (bound) -->
+                  @if (idxEntries()?.length) {
+                    <mat-form-field>
+                      <mat-label>index</mat-label>
+                      <mat-select formControlName="indexId">
+                        @for (e of idxEntries(); track e.id) {
+                          <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  }
+                  <!-- indexId (free) -->
+                  @else {
+                    <mat-form-field>
+                      <mat-label>index</mat-label>
+                      <input matInput formControlName="indexId" />
+                      @if (
+                        $any(item)["controls"].indexId.errors?.maxLength &&
+                        ($any(item)["controls"].indexId.dirty ||
+                          $any(item)["controls"].indexId.touched)
+                      ) {
+                        <mat-error>ID too long</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+                  <!-- tag (bound) -->
+                  @if (keyTagEntries()?.length) {
+                    <mat-form-field>
+                      <mat-label>tag</mat-label>
+                      <mat-select formControlName="tag">
+                        @for (e of keyTagEntries(); track e.id) {
+                          <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  }
+                  <!-- tag (free) -->
+                  @else {
+                    <mat-form-field>
+                      <mat-label>tag</mat-label>
+                      <input matInput formControlName="tag" />
+                      @if (
+                        $any(item)["controls"].tag.errors?.maxLength &&
+                        ($any(item)["controls"].tag.dirty ||
+                          $any(item)["controls"].tag.touched)
+                      ) {
+                        <mat-error>tag too long</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+                  <!-- language (bound) -->
+                  @if (langEntries()?.length) {
+                    <mat-form-field>
+                      <mat-label>language</mat-label>
+                      <mat-select formControlName="language">
+                        @for (e of langEntries(); track e.id) {
+                          <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                        }
+                      </mat-select>
+                      @if (
+                        $any(item)["controls"].language.errors?.required &&
+                        ($any(item)["controls"].language.dirty ||
+                          $any(item)["controls"].language.touched)
+                      ) {
+                        <mat-error>language required</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+                  <!-- language (free) -->
+                  @else {
+                    <mat-form-field>
+                      <mat-label>language</mat-label>
+                      <input matInput formControlName="language" />
+                      @if (
+                        $any(item)["controls"].language.errors?.required &&
+                        ($any(item)["controls"].language.dirty ||
+                          $any(item)["controls"].language.touched)
+                      ) {
+                        <mat-error>language required</mat-error>
+                      }
+                      @if (
+                        $any(item)["controls"].language.errors?.maxLength &&
+                        ($any(item)["controls"].language.dirty ||
+                          $any(item)["controls"].language.touched)
+                      ) {
+                        <mat-error>language too long</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+                  <!-- value -->
+                  <mat-form-field>
+                    <mat-label>value</mat-label>
+                    <input matInput formControlName="value" />
+                    @if (
+                      $any(item)["controls"].value.errors?.required &&
+                      ($any(item)["controls"].value.dirty ||
+                        $any(item)["controls"].value.touched)
+                    ) {
+                      <mat-error>value required</mat-error>
                     }
-                  </mat-select>
-                </mat-form-field>
-                }
-                <!-- indexId (free) -->
-                @else {
-                <mat-form-field>
-                  <mat-label>index</mat-label>
-                  <input matInput formControlName="indexId" />
-                  @if ( $any(item)['controls'].indexId.errors?.maxLength &&
-                  ($any(item)['controls'].indexId.dirty ||
-                  $any(item)['controls'].indexId.touched) ) {
-                  <mat-error>ID too long</mat-error>
-                  }
-                </mat-form-field>
-                }
-                <!-- tag (bound) -->
-                @if (keyTagEntries()?.length) {
-                <mat-form-field>
-                  <mat-label>tag</mat-label>
-                  <mat-select formControlName="tag">
-                    @for (e of keyTagEntries(); track e.id) {
-                    <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                    @if (
+                      $any(item)["controls"].value.errors?.maxLength &&
+                      ($any(item)["controls"].value.dirty ||
+                        $any(item)["controls"].value.touched)
+                    ) {
+                      <mat-error>value too long</mat-error>
                     }
-                  </mat-select>
-                </mat-form-field>
-                }
-                <!-- tag (free) -->
-                @else {
-                <mat-form-field>
-                  <mat-label>tag</mat-label>
-                  <input matInput formControlName="tag" />
-                  @if ( $any(item)['controls'].tag.errors?.maxLength &&
-                  ($any(item)['controls'].tag.dirty ||
-                  $any(item)['controls'].tag.touched) ) {
-                  <mat-error>tag too long</mat-error>
-                  }
-                </mat-form-field>
-                }
-                <!-- language (bound) -->
-                @if (langEntries()?.length) {
-                <mat-form-field>
-                  <mat-label>language</mat-label>
-                  <mat-select formControlName="language">
-                    @for (e of langEntries(); track e.id) {
-                    <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                  </mat-form-field>
+                  <!-- note -->
+                  <mat-form-field>
+                    <mat-label>note</mat-label>
+                    <input matInput formControlName="note" />
+                    @if (
+                      $any(item)["controls"].note.errors?.maxLength &&
+                      ($any(item)["controls"].note.dirty ||
+                        $any(item)["controls"].note.touched)
+                    ) {
+                      <mat-error>note too long</mat-error>
                     }
-                  </mat-select>
-                  @if ( $any(item)['controls'].language.errors?.required &&
-                  ($any(item)['controls'].language.dirty ||
-                  $any(item)['controls'].language.touched) ) {
-                  <mat-error>language required</mat-error>
-                  }
-                </mat-form-field>
-                }
-                <!-- language (free) -->
-                @else {
-                <mat-form-field>
-                  <mat-label>language</mat-label>
-                  <input matInput formControlName="language" />
-                  @if ( $any(item)['controls'].language.errors?.required &&
-                  ($any(item)['controls'].language.dirty ||
-                  $any(item)['controls'].language.touched) ) {
-                  <mat-error>language required</mat-error>
-                  } @if ( $any(item)['controls'].language.errors?.maxLength &&
-                  ($any(item)['controls'].language.dirty ||
-                  $any(item)['controls'].language.touched) ) {
-                  <mat-error>language too long</mat-error>
-                  }
-                </mat-form-field>
-                }
-                <!-- value -->
-                <mat-form-field>
-                  <mat-label>value</mat-label>
-                  <input matInput formControlName="value" />
-                  @if ( $any(item)['controls'].value.errors?.required &&
-                  ($any(item)['controls'].value.dirty ||
-                  $any(item)['controls'].value.touched) ) {
-                  <mat-error>value required</mat-error>
-                  } @if ( $any(item)['controls'].value.errors?.maxLength &&
-                  ($any(item)['controls'].value.dirty ||
-                  $any(item)['controls'].value.touched) ) {
-                  <mat-error>value too long</mat-error>
-                  }
-                </mat-form-field>
-                <!-- note -->
-                <mat-form-field>
-                  <mat-label>note</mat-label>
-                  <input matInput formControlName="note" />
-                  @if ( $any(item)['controls'].note.errors?.maxLength &&
-                  ($any(item)['controls'].note.dirty ||
-                  $any(item)['controls'].note.touched) ) {
-                  <mat-error>note too long</mat-error>
-                  }
-                </mat-form-field>
+                  </mat-form-field>
+                </div>
               </div>
-            </div>
             }
           </div>
         </mat-tab>

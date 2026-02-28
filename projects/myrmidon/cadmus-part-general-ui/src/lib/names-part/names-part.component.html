@@ -20,83 +20,88 @@
         </button>
       </div>
       @if (names.value.length) {
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>name</th>
-            <th>rank</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for ( name of names.value; track name; let i = $index; let first =
-          $first; let last = $last) {
-          <tr [class.selected]="i === editedIndex()">
-            <td class="fit-width">
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Edit this name"
-                (click)="editName(i)"
-              >
-                <mat-icon class="mat-primary">edit</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this name up"
-                [disabled]="first"
-                (click)="moveNameUp(i)"
-              >
-                <mat-icon>arrow_upward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this name down"
-                [disabled]="last"
-                (click)="moveNameDown(i)"
-              >
-                <mat-icon>arrow_downward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Delete this name"
-                (click)="deleteName(i)"
-              >
-                <mat-icon class="mat-warn">remove_circle</mat-icon>
-              </button>
-            </td>
-            <td>{{ name | cadmusProperName }}</td>
-            <td>{{ name.assertion?.rank || 0 }}</td>
-          </tr>
-          }
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>name</th>
+              <th>rank</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              name of names.value;
+              track name;
+              let i = $index;
+              let first = $first;
+              let last = $last
+            ) {
+              <tr [class.selected]="i === editedIndex()">
+                <td class="fit-width">
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Edit this name"
+                    (click)="editName(i)"
+                  >
+                    <mat-icon class="mat-primary">edit</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this name up"
+                    [disabled]="first"
+                    (click)="moveNameUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this name down"
+                    [disabled]="last"
+                    (click)="moveNameDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Delete this name"
+                    (click)="deleteName(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>{{ name | cadmusProperName }}</td>
+                <td>{{ name.assertion?.rank || 0 }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
 
       <!-- name editor -->
       @if (edited()) {
-      <fieldset>
-        <mat-expansion-panel [expanded]="edited()">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              {{ edited() | cadmusProperName }}</mat-panel-title
-            ></mat-expansion-panel-header
-          >
-          <cadmus-refs-proper-name
-            [langEntries]="langEntries()"
-            [tagEntries]="tagEntries()"
-            [typeEntries]="typeEntries()"
-            [assTagEntries]="assTagEntries()"
-            [refTagEntries]="refTagEntries()"
-            [refTypeEntries]="refTypeEntries()"
-            [name]="edited()"
-            (nameChange)="onNameChange($event)"
-          />
-        </mat-expansion-panel>
-      </fieldset>
+        <fieldset>
+          <mat-expansion-panel [expanded]="edited()">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{ edited() | cadmusProperName }}</mat-panel-title
+              ></mat-expansion-panel-header
+            >
+            <cadmus-refs-proper-name
+              [langEntries]="langEntries()"
+              [tagEntries]="tagEntries()"
+              [typeEntries]="typeEntries()"
+              [assTagEntries]="assTagEntries()"
+              [refTagEntries]="refTagEntries()"
+              [refTypeEntries]="refTypeEntries()"
+              [name]="edited()"
+              (nameChange)="onNameChange($event)"
+            />
+          </mat-expansion-panel>
+        </fieldset>
       }
     </mat-card-content>
     <mat-card-actions>

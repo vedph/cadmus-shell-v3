@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
@@ -12,6 +12,7 @@ import { ExternalIdsPartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-refs-external-ids-part-feature',
   templateUrl: './external-ids-part-feature.component.html',
   styleUrls: ['./external-ids-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, ExternalIdsPartComponent],
 })
 export class ExternalIdsPartFeatureComponent

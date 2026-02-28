@@ -4,12 +4,15 @@
     <mat-form-field>
       <mat-label>last name</mat-label>
       <input matInput [formControl]="lastName" />
-      @if ($any(lastName).errors?.required && (lastName.dirty ||
-      lastName.touched)) {
-      <mat-error>last name required</mat-error>
-      } @if ($any(lastName).errors?.maxLength && (lastName.dirty ||
-      lastName.touched)) {
-      <mat-error>last name too long</mat-error>
+      @if (
+        $any(lastName).errors?.required && (lastName.dirty || lastName.touched)
+      ) {
+        <mat-error>last name required</mat-error>
+      }
+      @if (
+        $any(lastName).errors?.maxLength && (lastName.dirty || lastName.touched)
+      ) {
+        <mat-error>last name too long</mat-error>
       }
     </mat-form-field>
 
@@ -17,32 +20,34 @@
     <mat-form-field>
       <mat-label>first name</mat-label>
       <input matInput [formControl]="firstName" />
-      @if ($any(firstName).errors?.maxLength && (firstName.dirty ||
-      firstName.touched)) {
-      <mat-error>first name too long</mat-error>
+      @if (
+        $any(firstName).errors?.maxLength &&
+        (firstName.dirty || firstName.touched)
+      ) {
+        <mat-error>first name too long</mat-error>
       }
     </mat-form-field>
 
     <!-- role (bound) -->
     @if (roleEntries()?.length) {
-    <mat-form-field>
-      <mat-label>role</mat-label>
-      <mat-select [formControl]="role">
-        <mat-option [value]="undefined">-</mat-option>
-        @for (e of roleEntries(); track e.id) {
-        <mat-option [value]="e.id">{{ e.value }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+      <mat-form-field>
+        <mat-label>role</mat-label>
+        <mat-select [formControl]="role">
+          <mat-option [value]="undefined">-</mat-option>
+          @for (e of roleEntries(); track e.id) {
+            <mat-option [value]="e.id">{{ e.value }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     } @else {
-    <!-- role (free) -->
-    <mat-form-field>
-      <mat-label>role</mat-label>
-      <input matInput [formControl]="role" />
-      @if ($any(role).errors?.maxLength && (role.dirty || role.touched)) {
-      <mat-error>role too long</mat-error>
-      }
-    </mat-form-field>
+      <!-- role (free) -->
+      <mat-form-field>
+        <mat-label>role</mat-label>
+        <input matInput [formControl]="role" />
+        @if ($any(role).errors?.maxLength && (role.dirty || role.touched)) {
+          <mat-error>role too long</mat-error>
+        }
+      </mat-form-field>
     }
   </div>
 

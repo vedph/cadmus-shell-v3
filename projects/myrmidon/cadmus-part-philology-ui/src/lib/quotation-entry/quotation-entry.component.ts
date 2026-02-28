@@ -1,5 +1,13 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, model, effect, output, input, OnDestroy } from '@angular/core';
+﻿import { AsyncPipe } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  model,
+  effect,
+  output,
+  input,
+  OnDestroy,
+} from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   FormBuilder,
@@ -28,6 +36,7 @@ import { QuotationEntry } from '../quotations-fragment';
   selector: 'cadmus-quotation-entry',
   templateUrl: './quotation-entry.component.html',
   styleUrls: ['./quotation-entry.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

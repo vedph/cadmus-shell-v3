@@ -1,4 +1,4 @@
-import { Component, input, model, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model, output } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { take } from 'rxjs/operators';
@@ -48,6 +48,7 @@ import { GraphNodeEditorComponent } from '../graph-node-editor/graph-node-editor
     GraphNodeEditorComponent,
     AsyncPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphNodeListComponent {
   public loading$: Observable<boolean | undefined>;

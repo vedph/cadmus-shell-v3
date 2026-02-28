@@ -2,57 +2,61 @@
   <div class="form-row">
     <!-- index ID -->
     @if (idxEntries()?.length) {
-    <div>
-      <mat-form-field>
-        <mat-label>index ID</mat-label>
-        <mat-select [formControl]="indexId">
-          <mat-option [value]="''">(default)</mat-option>
-          @for (e of idxEntries(); track e.id) {
-          <mat-option [value]="e.id">{{ e.value }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
+      <div>
+        <mat-form-field>
+          <mat-label>index ID</mat-label>
+          <mat-select [formControl]="indexId">
+            <mat-option [value]="''">(default)</mat-option>
+            @for (e of idxEntries(); track e.id) {
+              <mat-option [value]="e.id">{{ e.value }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
     } @else {
-    <div>
-      <mat-form-field>
-        <mat-label>index ID</mat-label>
-        <input matInput type="text" [formControl]="indexId" />
-        @if ( indexId.hasError('maxLength') && (indexId.dirty ||
-        indexId.touched) ) {
-        <mat-error>index ID too long</mat-error>
-        } @if ( indexId.hasError('pattern') && (indexId.dirty ||
-        indexId.touched) ) {
-        <mat-error>invalid index ID</mat-error>
-        }
-      </mat-form-field>
-    </div>
+      <div>
+        <mat-form-field>
+          <mat-label>index ID</mat-label>
+          <input matInput type="text" [formControl]="indexId" />
+          @if (
+            indexId.hasError("maxLength") && (indexId.dirty || indexId.touched)
+          ) {
+            <mat-error>index ID too long</mat-error>
+          }
+          @if (
+            indexId.hasError("pattern") && (indexId.dirty || indexId.touched)
+          ) {
+            <mat-error>invalid index ID</mat-error>
+          }
+        </mat-form-field>
+      </div>
     }
 
     <!-- language -->
     @if (langEntries()?.length) {
-    <div>
-      <mat-form-field>
-        <mat-label>language</mat-label>
-        <mat-select [formControl]="language">
-          <mat-option [value]="null">(n/a)</mat-option>
-          @for (e of langEntries(); track e.id) {
-          <mat-option [value]="e.id">{{ e.value }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
+      <div>
+        <mat-form-field>
+          <mat-label>language</mat-label>
+          <mat-select [formControl]="language">
+            <mat-option [value]="null">(n/a)</mat-option>
+            @for (e of langEntries(); track e.id) {
+              <mat-option [value]="e.id">{{ e.value }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
     } @else {
-    <div>
-      <mat-form-field>
-        <mat-label>language</mat-label>
-        <input matInput type="text" [formControl]="language" />
-        @if ( language.hasError('pattern') && (language.dirty ||
-        language.touched) ) {
-        <mat-error>invalid language</mat-error>
-        }
-      </mat-form-field>
-    </div>
+      <div>
+        <mat-form-field>
+          <mat-label>language</mat-label>
+          <input matInput type="text" [formControl]="language" />
+          @if (
+            language.hasError("pattern") && (language.dirty || language.touched)
+          ) {
+            <mat-error>invalid language</mat-error>
+          }
+        </mat-form-field>
+      </div>
     }
 
     <!-- value -->
@@ -60,8 +64,8 @@
       <mat-form-field>
         <mat-label>value</mat-label>
         <input matInput type="text" [formControl]="value" autofocus />
-        @if (value.hasError('maxLength') && (value.dirty || value.touched)) {
-        <mat-error>value too long</mat-error>
+        @if (value.hasError("maxLength") && (value.dirty || value.touched)) {
+          <mat-error>value too long</mat-error>
         }
       </mat-form-field>
     </div>
@@ -70,24 +74,24 @@
     <div>
       <!-- tag (bound) -->
       @if (tagEntries()?.length) {
-      <mat-form-field>
-        <mat-label>tag</mat-label>
-        <mat-select [formControl]="tag">
-          @for (e of tagEntries(); track e.id) {
-          <mat-option [value]="e.id">{{ e.value }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+        <mat-form-field>
+          <mat-label>tag</mat-label>
+          <mat-select [formControl]="tag">
+            @for (e of tagEntries(); track e.id) {
+              <mat-option [value]="e.id">{{ e.value }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       }
       <!-- tag (free) -->
       @else {
-      <mat-form-field>
-        <mat-label>tag</mat-label>
-        <input matInput [formControl]="tag" />
-        @if (tag.hasError('maxLength') && (tag.dirty || tag.touched)) {
-        <mat-error>tag too long</mat-error>
-        }
-      </mat-form-field>
+        <mat-form-field>
+          <mat-label>tag</mat-label>
+          <input matInput [formControl]="tag" />
+          @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+            <mat-error>tag too long</mat-error>
+          }
+        </mat-form-field>
       }
     </div>
 
@@ -96,8 +100,8 @@
       <mat-form-field>
         <mat-label>note</mat-label>
         <input matInput type="text" [formControl]="note" />
-        @if (note.hasError('maxLength') && (note.dirty || note.touched)) {
-        <mat-error>note too long</mat-error>
+        @if (note.hasError("maxLength") && (note.dirty || note.touched)) {
+          <mat-error>note too long</mat-error>
         }
       </mat-form-field>
     </div>

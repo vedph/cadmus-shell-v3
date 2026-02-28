@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import { EditedObject } from '@myrmidon/cadmus-core';
 import {
@@ -59,6 +64,7 @@ interface Data {
   selector: 'cadmus-tiled-text-part',
   templateUrl: './tiled-text-part.component.html',
   styleUrls: ['./tiled-text-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -197,9 +203,7 @@ export class TiledTextPartComponent
     // clone tiles array and add new tile
     const tiles = row.tiles ? [...row.tiles, { x, data }] : [{ x, data }];
     // update rows immutably
-    const rows = this.rows.value.map((r) =>
-      r === row ? { ...r, tiles } : r
-    );
+    const rows = this.rows.value.map((r) => (r === row ? { ...r, tiles } : r));
     this.rows.setValue(rows);
     this.rows.markAsDirty();
     this.rows.updateValueAndValidity();

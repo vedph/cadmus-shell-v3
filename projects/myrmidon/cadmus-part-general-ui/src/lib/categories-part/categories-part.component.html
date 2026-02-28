@@ -26,29 +26,29 @@
 
         <!-- categories -->
         @if (categories.value.length) {
-        <fieldset id="list">
-          <legend>assigned categories</legend>
-          <table>
-            <tbody>
-              @for (entry of categories.value; track entry; let i = $index) {
-              <tr>
-                <td>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Remove this category"
-                    (click)="removeCategory(i)"
-                  >
-                    <mat-icon class="mat-warn">remove_circle</mat-icon>
-                  </button>
-                </td>
-                <td [matTooltip]="entry.id">{{ entry.value }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </fieldset>
+          <fieldset id="list">
+            <legend>assigned categories</legend>
+            <table>
+              <tbody>
+                @for (entry of categories.value; track entry; let i = $index) {
+                  <tr>
+                    <td>
+                      <button
+                        type="button"
+                        mat-icon-button
+                        type="button"
+                        matTooltip="Remove this category"
+                        (click)="removeCategory(i)"
+                      >
+                        <mat-icon class="mat-warn">remove_circle</mat-icon>
+                      </button>
+                    </td>
+                    <td [matTooltip]="entry.id">{{ entry.value }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </fieldset>
         }
       </div>
     </mat-card-content>

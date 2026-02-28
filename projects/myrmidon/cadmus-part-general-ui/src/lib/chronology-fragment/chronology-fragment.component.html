@@ -17,28 +17,28 @@
       <div class="form-row">
         <!-- free tag -->
         @if (!tagEntries()) {
-        <div>
-          <mat-form-field>
-            <mat-label>tag</mat-label>
-            <input type="text" matInput formControlName="tag" />
-            @if (tag.hasError('maxLength') && (tag.dirty || tag.touched)) {
-            <mat-error>tag too long</mat-error>
-            }
-          </mat-form-field>
-        </div>
+          <div>
+            <mat-form-field>
+              <mat-label>tag</mat-label>
+              <input type="text" matInput formControlName="tag" />
+              @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+                <mat-error>tag too long</mat-error>
+              }
+            </mat-form-field>
+          </div>
         }
         <!-- bound tag -->
         @else {
-        <div>
-          <mat-form-field>
-            <mat-label>tag</mat-label>
-            <mat-select formControlName="tag">
-              @for (e of tagEntries(); track e.id) {
-              <mat-option [value]="e.id">{{ e.value }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+          <div>
+            <mat-form-field>
+              <mat-label>tag</mat-label>
+              <mat-select formControlName="tag">
+                @for (e of tagEntries(); track e.id) {
+                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
         }
 
         <!-- label -->
@@ -46,9 +46,10 @@
           <mat-form-field>
             <mat-label>label</mat-label>
             <input matInput type="text" formControlName="label" />
-            @if ( label.hasError('maxLength') && (label.dirty || label.touched)
+            @if (
+              label.hasError("maxLength") && (label.dirty || label.touched)
             ) {
-            <mat-error>label too long</mat-error>
+              <mat-error>label too long</mat-error>
             }
           </mat-form-field>
         </div>
@@ -63,9 +64,11 @@
               formControlName="eventId"
               spellcheck="false"
             />
-            @if ( eventId.hasError('maxLength') && (eventId.dirty ||
-            eventId.touched) ) {
-            <mat-error>event ID too long</mat-error>
+            @if (
+              eventId.hasError("maxLength") &&
+              (eventId.dirty || eventId.touched)
+            ) {
+              <mat-error>event ID too long</mat-error>
             }
           </mat-form-field>
         </div>

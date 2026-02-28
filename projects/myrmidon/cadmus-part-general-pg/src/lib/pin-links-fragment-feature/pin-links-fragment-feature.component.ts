@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -15,6 +15,7 @@ import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
   selector: 'cadmus-pin-links-fragment-feature',
   templateUrl: './pin-links-fragment-feature.component.html',
   styleUrls: ['./pin-links-fragment-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CurrentItemBarComponent,
     DecoratedTokenTextComponent,

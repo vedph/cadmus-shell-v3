@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
@@ -69,6 +70,7 @@ import {
   ],
   templateUrl: './edit-operation.component.html',
   styleUrl: './edit-operation.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditOperationComponent {
   private _outputDirty = signal<number>(0);

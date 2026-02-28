@@ -21,101 +21,106 @@
         </button>
       </div>
       @if (events.value.length) {
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>type</th>
-            <th>tag</th>
-            <th>ID</th>
-            <th>place/date</th>
-            <th>rel.</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for ( entry of events.value; track entry; let i = $index; let first =
-          $first; let last = $last) {
-          <tr [class.selected]="i === editedEventIndex()">
-            <td class="fit-width">
-              <span class="nr">{{ i + 1 }}.</span>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Edit this event"
-                (click)="editEvent(entry, i)"
-              >
-                <mat-icon class="mat-primary">edit</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this event up"
-                [disabled]="first"
-                (click)="moveEventUp(i)"
-              >
-                <mat-icon>arrow_upward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this event down"
-                [disabled]="last"
-                (click)="moveEventDown(i)"
-              >
-                <mat-icon>arrow_downward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Delete this event"
-                (click)="deleteEvent(i)"
-              >
-                <mat-icon class="mat-warn">remove_circle</mat-icon>
-              </button>
-            </td>
-            <td>
-              {{
-                entry.type | flatLookup : eventTypeEntries() : "id" : "value"
-              }}
-            </td>
-            <td>{{ entry.tag }}</td>
-            <td>{{ entry.eid }}</td>
-            <td>{{ entry.chronotopes | assertedChronotopes }}</td>
-            <td>{{ entry.relatedEntities?.length || 0 }}</td>
-          </tr>
-          }
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>type</th>
+              <th>tag</th>
+              <th>ID</th>
+              <th>place/date</th>
+              <th>rel.</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              entry of events.value;
+              track entry;
+              let i = $index;
+              let first = $first;
+              let last = $last
+            ) {
+              <tr [class.selected]="i === editedEventIndex()">
+                <td class="fit-width">
+                  <span class="nr">{{ i + 1 }}.</span>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Edit this event"
+                    (click)="editEvent(entry, i)"
+                  >
+                    <mat-icon class="mat-primary">edit</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this event up"
+                    [disabled]="first"
+                    (click)="moveEventUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this event down"
+                    [disabled]="last"
+                    (click)="moveEventDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Delete this event"
+                    (click)="deleteEvent(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  {{
+                    entry.type | flatLookup: eventTypeEntries() : "id" : "value"
+                  }}
+                </td>
+                <td>{{ entry.tag }}</td>
+                <td>{{ entry.eid }}</td>
+                <td>{{ entry.chronotopes | assertedChronotopes }}</td>
+                <td>{{ entry.relatedEntities?.length || 0 }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
 
       <!-- event editor -->
       @if (editedEvent()) {
-      <mat-expansion-panel
-        [expanded]="editedEvent()"
-        [disabled]="!editedEvent()"
-      >
-        <mat-expansion-panel-header>
-          <span class="edited-title">event</span>
-          <span class="nr">{{ editedEventIndex() + 1 }}</span>
-        </mat-expansion-panel-header>
-        <fieldset>
-          <cadmus-historical-event-editor
-            [eventTagEntries]="eventTagEntries()"
-            [eventTypeEntries]="eventTypeEntries()"
-            [relationEntries]="relationEntries()"
-            [ctTagEntries]="ctTagEntries()"
-            [assTagEntries]="assTagEntries()"
-            [refTagEntries]="refTagEntries()"
-            [refTypeEntries]="refTypeEntries()"
-            [idScopeEntries]="idScopeEntries()"
-            [idTagEntries]="idTagEntries()"
-            [idFeatureEntries]="idFeatureEntries()"
-            [event]="editedEvent()"
-            (eventChange)="onEventSave($event!)"
-            (editorClose)="closeEvent()"
-          />
-        </fieldset>
-      </mat-expansion-panel>
+        <mat-expansion-panel
+          [expanded]="editedEvent()"
+          [disabled]="!editedEvent()"
+        >
+          <mat-expansion-panel-header>
+            <span class="edited-title">event</span>
+            <span class="nr">{{ editedEventIndex() + 1 }}</span>
+          </mat-expansion-panel-header>
+          <fieldset>
+            <cadmus-historical-event-editor
+              [eventTagEntries]="eventTagEntries()"
+              [eventTypeEntries]="eventTypeEntries()"
+              [relationEntries]="relationEntries()"
+              [ctTagEntries]="ctTagEntries()"
+              [assTagEntries]="assTagEntries()"
+              [refTagEntries]="refTagEntries()"
+              [refTypeEntries]="refTypeEntries()"
+              [idScopeEntries]="idScopeEntries()"
+              [idTagEntries]="idTagEntries()"
+              [idFeatureEntries]="idFeatureEntries()"
+              [event]="editedEvent()"
+              (eventChange)="onEventSave($event!)"
+              (editorClose)="closeEvent()"
+            />
+          </fieldset>
+        </mat-expansion-panel>
       }
     </mat-card-content>
     <mat-card-actions>

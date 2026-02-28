@@ -29,7 +29,7 @@
           <mat-label i18n>note</mat-label>
           <textarea matInput [formControl]="note"></textarea>
           @if ($any(note).errors?.maxLength && (note.dirty || note.touched)) {
-          <mat-error i18n>note too long</mat-error>
+            <mat-error i18n>note too long</mat-error>
           }
         </mat-form-field>
       </div>

@@ -1,4 +1,4 @@
-import { Component, effect, input, model, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, model, output, signal } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -39,6 +39,7 @@ import { UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
     MatIconButton,
     MatIcon,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphNodeEditorComponent {
   /**

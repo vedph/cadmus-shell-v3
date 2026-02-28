@@ -54,22 +54,22 @@
               </td>
               <td class="fit-width">
                 <cadmus-facet-badge
-                  [data]="{ definitions: facets, facetId: item.facetId }"
+                  [data]="{ definitions: facets(), facetId: item.facetId }"
                 />
               </td>
               <td class="fit-width">
                 <cadmus-flags-badge
-                  [data]="{ definitions: flags, flags: item.flags }"
+                  [data]="{ definitions: flags(), flags: item.flags }"
                 />
               </td>
               <td>{{ item.title }}</td>
               <td>{{ item.description }}</td>
-              <td class="noif-lt-md">{{ item.groupId }}</td>
-              <td class="noif-lt-md">{{ item.userId }}</td>
-              <td class="noif-lt-md">
+              <td class="noif-lt-md nowrap">{{ item.groupId }}</td>
+              <td class="noif-lt-md nowrap">{{ item.userId }}</td>
+              <td class="noif-lt-md nowrap">
                 {{ item.timeModified | date : "yyyy-MM-dd HH:mm" }}
               </td>
-              <td class="noif-lt-md">{{ item.creatorId }}</td>
+              <td class="noif-lt-md nowrap">{{ item.creatorId }}</td>
             </tr>
             }
           </tbody>

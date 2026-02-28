@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   OnInit,
   OnDestroy,
@@ -49,6 +50,7 @@ const VALUE_MAX_LEN = 100;
   selector: 'cadmus-tiled-data',
   templateUrl: './tiled-data.component.html',
   styleUrls: ['./tiled-data.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

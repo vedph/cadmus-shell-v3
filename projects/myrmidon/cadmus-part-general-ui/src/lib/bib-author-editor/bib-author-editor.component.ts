@@ -1,4 +1,11 @@
-import { Component, effect, input, model, output } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  model,
+  output,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -38,6 +45,7 @@ import { BibAuthor } from '../bibliography-part';
   ],
   templateUrl: './bib-author-editor.component.html',
   styleUrl: './bib-author-editor.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BibAuthorEditorComponent {
   /**

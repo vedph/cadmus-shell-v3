@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -11,6 +11,7 @@ import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
   selector: 'cadmus-physical-states-part-feature',
   templateUrl: './physical-states-part-feature.component.html',
   styleUrl: './physical-states-part-feature.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, PhysicalStatesPartComponent],
 })
 export class PhysicalStatesPartFeatureComponent

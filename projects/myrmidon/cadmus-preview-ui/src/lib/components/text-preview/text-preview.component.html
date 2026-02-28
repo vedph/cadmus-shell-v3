@@ -1,66 +1,70 @@
 @if (item()) {
-<div>
-  <!-- progress -->
-  @if (busy()) {
   <div>
-    <mat-progress-bar mode="indeterminate" />
-  </div>
-  }
-  <!-- toolbar -->
-  <div id="toolbar">
-    <dl>
-      <dt>item</dt>
-      <dd>{{ item()!.title }}</dd>
-      <dt>item ID</dt>
-      <dd>{{ item()!.id }}</dd>
-      <dt>part ID</dt>
-      <dd>{{ source()!.partId }}</dd>
-    </dl>
-    <div>
-      @if (layers().length) {
-      <mat-form-field>
-        <mat-label>layer</mat-label>
-        <mat-select [formControl]="selectedLayer">
-          <mat-option [value]="{ id: 'all' }">all</mat-option>
-          @for (l of layers(); track l.id) {
-          <mat-option [value]="l">{{
-            l.roleId | flatLookup : typeEntries() : "id" : "value"
-          }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      } @if (selectedLayer.value) {
-      <span style="margin-left: 6px">{{
-        selectedLayer.value.fragmentCount
-      }}</span>
-      }
+    <!-- progress -->
+    @if (busy()) {
+      <div>
+        <mat-progress-bar mode="indeterminate" />
+      </div>
+    }
+    <!-- toolbar -->
+    <div id="toolbar">
+      <dl>
+        <dt>item</dt>
+        <dd>{{ item()!.title }}</dd>
+        <dt>item ID</dt>
+        <dd>{{ item()!.id }}</dd>
+        <dt>part ID</dt>
+        <dd>{{ source()!.partId }}</dd>
+      </dl>
+      <div>
+        @if (layers().length) {
+          <mat-form-field>
+            <mat-label>layer</mat-label>
+            <mat-select [formControl]="selectedLayer">
+              <mat-option [value]="{ id: 'all' }">all</mat-option>
+              @for (l of layers(); track l.id) {
+                <mat-option [value]="l">{{
+                  l.roleId | flatLookup: typeEntries() : "id" : "value"
+                }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+        @if (selectedLayer.value) {
+          <span style="margin-left: 6px">{{
+            selectedLayer.value.fragmentCount
+          }}</span>
+        }
+      </div>
     </div>
+    <!-- preview -->
+    @if (segments().length) {
+      <div id="preview">
+        <cadmus-text-segments-view
+          [layers]="layers()"
+          [segments]="segments()"
+          (segmentClick)="onSegmentClick($event)"
+        />
+      </div>
+    }
+    <!-- fragments -->
+    @if (frHtml().length) {
+      <div id="fragments">
+        <mat-tab-group>
+          @for (html of frHtml(); track $index) {
+            <mat-tab
+              [label]="
+                $any(
+                  frLabels()[$index]
+                    | flatLookup: typeEntries() : 'id' : 'value'
+                )
+              "
+            >
+              <div [innerHtml]="html | safeHtml: 'html'"></div>
+            </mat-tab>
+          }
+        </mat-tab-group>
+      </div>
+    }
   </div>
-  <!-- preview -->
-  @if (segments().length) {
-  <div id="preview">
-    <cadmus-text-segments-view
-      [layers]="layers()"
-      [segments]="segments()"
-      (segmentClick)="onSegmentClick($event)"
-    />
-  </div>
-  }
-  <!-- fragments -->
-  @if (frHtml().length) {
-  <div id="fragments">
-    <mat-tab-group>
-      @for (html of frHtml(); track $index) {
-      <mat-tab
-        [label]="
-          $any(frLabels()[$index] | flatLookup : typeEntries() : 'id' : 'value')
-        "
-      >
-        <div [innerHtml]="html | safeHtml : 'html'"></div>
-      </mat-tab>
-      }
-    </mat-tab-group>
-  </div>
-  }
-</div>
 }

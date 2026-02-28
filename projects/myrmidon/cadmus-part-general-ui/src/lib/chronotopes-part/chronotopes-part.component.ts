@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -70,6 +75,7 @@ interface ChronotopesPartSettings {
   selector: 'cadmus-chronotopes-part',
   templateUrl: './chronotopes-part.component.html',
   styleUrls: ['./chronotopes-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

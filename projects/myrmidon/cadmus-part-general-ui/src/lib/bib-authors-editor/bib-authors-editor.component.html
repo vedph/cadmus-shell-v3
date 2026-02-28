@@ -1,86 +1,99 @@
 <div>
   <div>
-    <button type="button" mat-flat-button class="mat-primary" (click)="addAuthor()">
+    <button
+      type="button"
+      mat-flat-button
+      class="mat-primary"
+      (click)="addAuthor()"
+    >
       <mat-icon>add_circle</mat-icon> author
     </button>
   </div>
   @if (authors().length) {
-  <table>
-    <thead>
-      <tr>
-        <th></th>
-        <th>last</th>
-        <th>first</th>
-        <th>role</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (author of authors(); track author; let i = $index; let first =
-      $first; let last = $last) {
-      <tr [class.selected]="author === editedAuthor()">
-        <td class="fit-width">
-          <button
-            type="button"
-            mat-icon-button
-            class="mat-primary"
-            matTooltip="Edit this author"
-            (click)="editAuthor(author, i)"
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>last</th>
+          <th>first</th>
+          <th>role</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (
+          author of authors();
+          track author;
+          let i = $index;
+          let first = $first;
+          let last = $last
+        ) {
+          <tr [class.selected]="author === editedAuthor()">
+            <td class="fit-width">
+              <button
+                type="button"
+                mat-icon-button
+                class="mat-primary"
+                matTooltip="Edit this author"
+                (click)="editAuthor(author, i)"
+              >
+                <mat-icon class="mat-primary">edit</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this author up"
+                [disabled]="first"
+                (click)="moveAuthorUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this author down"
+                [disabled]="last"
+                (click)="moveAuthorDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                class="mat-warn"
+                matTooltip="Delete this author"
+                (click)="deleteAuthor(i)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
+              </button>
+            </td>
+            <td>{{ author.lastName }}</td>
+            <td>{{ author.firstName }}</td>
+            <td>
+              {{ author.roleId | flatLookup: roleEntries() : "id" : "value" }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+  @if (editedAuthor()) {
+    <fieldset>
+      <mat-expansion-panel
+        [expanded]="editedAuthor()"
+        [disabled]="!editedAuthor()"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title
+            >author #{{ editedAuthorIndex() + 1 }}</mat-panel-title
           >
-            <mat-icon class="mat-primary">edit</mat-icon>
-          </button>
-          <button
-            type="button"
-            mat-icon-button
-            matTooltip="Move this author up"
-            [disabled]="first"
-            (click)="moveAuthorUp(i)"
-          >
-            <mat-icon>arrow_upward</mat-icon>
-          </button>
-          <button
-            type="button"
-            mat-icon-button
-            matTooltip="Move this author down"
-            [disabled]="last"
-            (click)="moveAuthorDown(i)"
-          >
-            <mat-icon>arrow_downward</mat-icon>
-          </button>
-          <button
-            type="button"
-            mat-icon-button
-            class="mat-warn"
-            matTooltip="Delete this author"
-            (click)="deleteAuthor(i)"
-          >
-            <mat-icon class="mat-warn">remove_circle</mat-icon>
-          </button>
-        </td>
-        <td>{{ author.lastName }}</td>
-        <td>{{ author.firstName }}</td>
-        <td>
-          {{ author.roleId | flatLookup : roleEntries() : "id" : "value" }}
-        </td>
-      </tr>
-      }
-    </tbody>
-  </table>
-  } @if (editedAuthor()) {
-  <fieldset>
-    <mat-expansion-panel
-      [expanded]="editedAuthor()"
-      [disabled]="!editedAuthor()"
-    >
-      <mat-expansion-panel-header>
-        <mat-panel-title>author #{{ editedAuthorIndex() + 1 }}</mat-panel-title>
-      </mat-expansion-panel-header>
-      <cadmus-bib-author-editor
-        [author]="editedAuthor()"
-        [roleEntries]="roleEntries()"
-        (authorChange)="saveAuthor($event!)"
-        (cancelEdit)="closeAuthor()"
-      />
-    </mat-expansion-panel>
-  </fieldset>
+        </mat-expansion-panel-header>
+        <cadmus-bib-author-editor
+          [author]="editedAuthor()"
+          [roleEntries]="roleEntries()"
+          (authorChange)="saveAuthor($event!)"
+          (cancelEdit)="closeAuthor()"
+        />
+      </mat-expansion-panel>
+    </fieldset>
   }
 </div>

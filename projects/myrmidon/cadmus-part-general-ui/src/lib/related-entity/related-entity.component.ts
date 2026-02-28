@@ -1,4 +1,11 @@
-import { Component, effect, input, model, output } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  model,
+  output,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -32,6 +39,7 @@ import { RelatedEntity } from '../historical-events-part';
   selector: 'cadmus-related-entity',
   templateUrl: './related-entity.component.html',
   styleUrls: ['./related-entity.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

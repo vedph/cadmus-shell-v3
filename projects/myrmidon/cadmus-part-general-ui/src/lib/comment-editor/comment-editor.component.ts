@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   Inject,
   OnDestroy,
@@ -92,6 +93,7 @@ interface CommentPartSettings {
   selector: 'cadmus-comment-editor',
   templateUrl: './comment-editor.component.html',
   styleUrls: ['./comment-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -204,14 +206,11 @@ export class CommentEditorComponent
     // Monaco helper
     this._textHelper = new MonacoEditorHelper(this.text, 'markdown');
     // settings
-    this.initSettings<CommentPartSettings>(
-      COMMENT_PART_TYPEID,
-      (settings) => {
-        this.lookupProviderOptions.set(
-          settings?.lookupProviderOptions || undefined,
-        );
-      },
-    );
+    this.initSettings<CommentPartSettings>(COMMENT_PART_TYPEID, (settings) => {
+      this.lookupProviderOptions.set(
+        settings?.lookupProviderOptions || undefined,
+      );
+    });
   }
 
   public override ngOnInit(): void {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -12,6 +12,7 @@ import { BibliographyPartComponent } from '@myrmidon/cadmus-part-general-ui';
   imports: [CurrentItemBarComponent, BibliographyPartComponent],
   templateUrl: './bibliography-part-feature.component.html',
   styleUrls: ['./bibliography-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BibliographyPartFeatureComponent
   extends EditPartFeatureBase

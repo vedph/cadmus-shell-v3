@@ -1,9 +1,9 @@
 <form [formGroup]="form">
   <mat-autocomplete #lookupAuto="matAutocomplete">
     @for (id of ids$ | async; track id) {
-    <mat-option [value]="id" (onSelectionChange)="pickId(id)">
-      {{ id }}
-    </mat-option>
+      <mat-option [value]="id" (onSelectionChange)="pickId(id)">
+        {{ id }}
+      </mat-option>
     }
   </mat-autocomplete>
 

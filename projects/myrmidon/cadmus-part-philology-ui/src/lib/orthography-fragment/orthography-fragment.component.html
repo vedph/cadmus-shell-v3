@@ -20,35 +20,42 @@
           <mat-form-field>
             <mat-label>reference</mat-label>
             <input matInput [formControl]="reference" />
-            @if ($any(reference).errors?.required && (reference.dirty ||
-            reference.touched)) {
-            <mat-error>reference required</mat-error>
-            } @if ($any(reference).errors?.maxLength && (reference.dirty ||
-            reference.touched)) {
-            <mat-error>reference too long</mat-error>
+            @if (
+              $any(reference).errors?.required &&
+              (reference.dirty || reference.touched)
+            ) {
+              <mat-error>reference required</mat-error>
+            }
+            @if (
+              $any(reference).errors?.maxLength &&
+              (reference.dirty || reference.touched)
+            ) {
+              <mat-error>reference too long</mat-error>
             }
           </mat-form-field>
 
           <!-- language (bound) -->
           @if (langEntries()?.length) {
-          <mat-form-field>
-            <mat-label>language</mat-label>
-            <mat-select [formControl]="language">
-              @for (e of langEntries(); track e.id) {
-              <mat-option [value]="e.id">{{ e.value }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field>
+              <mat-label>language</mat-label>
+              <mat-select [formControl]="language">
+                @for (e of langEntries(); track e.id) {
+                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           } @else {
-          <!-- language (free) -->
-          <mat-form-field>
-            <mat-label>language</mat-label>
-            <input matInput [formControl]="language" />
-            @if ($any(language).errors?.maxLength && (language.dirty ||
-            language.touched)) {
-            <mat-error>language too long</mat-error>
-            }
-          </mat-form-field>
+            <!-- language (free) -->
+            <mat-form-field>
+              <mat-label>language</mat-label>
+              <input matInput [formControl]="language" />
+              @if (
+                $any(language).errors?.maxLength &&
+                (language.dirty || language.touched)
+              ) {
+                <mat-error>language too long</mat-error>
+              }
+            </mat-form-field>
           }
 
           <!-- text target -->
@@ -56,16 +63,16 @@
 
           <!-- tag -->
           @if (tagEntries()?.length) {
-          <div>
-            <fieldset>
-              <legend>tags</legend>
-              <cadmus-thesaurus-entries-picker
-                [availableEntries]="tagEntries()!"
-                [entries]="tags.value"
-                (entriesChange)="onTagEntriesChange($event!)"
-              />
-            </fieldset>
-          </div>
+            <div>
+              <fieldset>
+                <legend>tags</legend>
+                <cadmus-thesaurus-entries-picker
+                  [availableEntries]="tagEntries()!"
+                  [entries]="tags.value"
+                  (entriesChange)="onTagEntriesChange($event!)"
+                />
+              </fieldset>
+            </div>
           }
         </div>
 

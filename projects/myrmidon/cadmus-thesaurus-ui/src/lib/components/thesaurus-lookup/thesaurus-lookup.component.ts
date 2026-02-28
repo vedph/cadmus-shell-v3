@@ -1,5 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   Component,
   effect,
   input,
@@ -41,6 +42,7 @@ import { MatIcon } from '@angular/material/icon';
   selector: 'cadmus-thesaurus-lookup',
   templateUrl: './thesaurus-lookup.component.html',
   styleUrls: ['./thesaurus-lookup.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -117,7 +119,7 @@ export class ThesaurusLookupComponent implements OnInit {
       {
         id: filter,
       },
-      limit
+      limit,
     );
   }
 
@@ -140,12 +142,8 @@ export class ThesaurusLookupComponent implements OnInit {
         } else {
           return of([value]);
         }
-      })
+      }),
     );
-    // setup initial value if its name was specified
-    if (this.initialValue()) {
-      this.resetToInitial();
-    }
   }
 
   public clear(): void {

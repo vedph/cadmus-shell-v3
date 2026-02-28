@@ -5,9 +5,9 @@ import {
   signal,
   computed,
   OnDestroy,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -42,10 +42,11 @@ import { ItemEditFrameStats, StatsService } from '@myrmidon/cadmus-api';
     MatSelectModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatIconModule
-],
+    MatIconModule,
+  ],
   templateUrl: './edit-frame-stats.component.html',
   styleUrl: './edit-frame-stats.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditFrameStatsComponent implements OnDestroy {
   private readonly _destroy$ = new Subject<void>();
@@ -67,11 +68,11 @@ export class EditFrameStatsComponent implements OnDestroy {
   public readonly start: FormControl<Date | null> =
     new FormControl<Date | null>(null);
   public readonly end: FormControl<Date | null> = new FormControl<Date | null>(
-    null
+    null,
   );
   public readonly interval: FormControl<string> = new FormControl<string>(
     '1d',
-    { nonNullable: true }
+    { nonNullable: true },
   );
 
   // convert form control values to signals for reactive computation
@@ -157,9 +158,9 @@ export class EditFrameStatsComponent implements OnDestroy {
             let tooltip = '';
             if (stat.start && stat.end) {
               tooltip += `Period: ${new Date(
-                stat.start
+                stat.start,
               ).toLocaleDateString()} - ${new Date(
-                stat.end
+                stat.end,
               ).toLocaleDateString()}<br/>`;
             }
             params.forEach((param: any) => {
@@ -250,7 +251,7 @@ export class EditFrameStatsComponent implements OnDestroy {
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        takeUntil(this._destroy$)
+        takeUntil(this._destroy$),
       )
       .subscribe(() => {
         this.loadData();

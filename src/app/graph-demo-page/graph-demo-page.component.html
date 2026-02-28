@@ -1,11 +1,11 @@
 <div>
   <h2>Graph Demo</h2>
-  @if (!nodeId) {
+  @if (!nodeId()) {
   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   }
 
   <cadmus-graph-walker
-    [nodeId]="nodeId"
+    [nodeId]="nodeId()"
     [graphService]="graphService"
     [canPick]="true"
     [canMoveToSource]="true"

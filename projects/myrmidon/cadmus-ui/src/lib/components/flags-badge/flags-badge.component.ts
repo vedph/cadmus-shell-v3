@@ -1,4 +1,4 @@
-import { Component, effect, input, Input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
 
 import { MatTooltip } from '@angular/material/tooltip';
 
@@ -21,6 +21,7 @@ export interface FlagsBadgeData {
   templateUrl: './flags-badge.component.html',
   styleUrls: ['./flags-badge.component.css'],
   imports: [MatTooltip],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlagsBadgeComponent {
   public readonly data = input<FlagsBadgeData>();

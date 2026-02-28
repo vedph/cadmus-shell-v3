@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-preview-pg",
-  "version": "17.0.1",
+  "version": "17.1.0",
   "description": "Cadmus - preview wrapper components.",
   "keywords": [
     "Cadmus"
@@ -18,7 +18,7 @@
     "@angular/core": "^20.0.0 || ^21.0.0",
     "@myrmidon/ngx-tools": "^2.0.2",
     "@myrmidon/ngx-mat-tools": "^1.0.1",
-    "@myrmidon/cadmus-api": "^14.0.4",
+    "@myrmidon/cadmus-api": "^14.0.7",
     "@myrmidon/cadmus-preview-ui": "^17.0.3"
   },
   "dependencies": {

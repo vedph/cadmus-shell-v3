@@ -4,7 +4,7 @@
     <cadmus-force-graph-renderer
       [nodes]="(nodes$ | async) || []"
       [edges]="(edges$ | async) || []"
-      [mode]="graphMode"
+      [mode]="graphMode()"
       [update$]="update$"
       [center$]="center$"
       [zoomToFit$]="zoomToFit$"

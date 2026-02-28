@@ -16,9 +16,11 @@
             cdkAutosizeMaxRows="4"
             (keydown.enter)="submitQuery(); (false)"
           ></textarea>
-          @if ( queryCtl.hasError('required') && (queryCtl.dirty ||
-          queryCtl.touched) ) {
-          <mat-error>enter a query</mat-error>
+          @if (
+            queryCtl.hasError("required") &&
+            (queryCtl.dirty || queryCtl.touched)
+          ) {
+            <mat-error>enter a query</mat-error>
           }
         </mat-form-field>
         <button
@@ -43,28 +45,28 @@
       <br />
       <!-- history -->
       @if (lastQueries().length) {
-      <div>
-        <mat-form-field class="full-width">
-          <mat-label>history</mat-label>
-          <mat-select [formControl]="history">
-            @for (q of lastQueries(); track q) {
-            <mat-option [value]="q">
-              {{ q }}
-            </mat-option>
-            }
-          </mat-select>
-          <button
-            matSuffix
-            type="button"
-            mat-icon-button
-            matTooltip="Copy to query"
-            [disabled]="!history.value"
-            (click)="setQuery(history.value)"
-          >
-            <mat-icon>check_circle</mat-icon>
-          </button>
-        </mat-form-field>
-      </div>
+        <div>
+          <mat-form-field class="full-width">
+            <mat-label>history</mat-label>
+            <mat-select [formControl]="history">
+              @for (q of lastQueries(); track q) {
+                <mat-option [value]="q">
+                  {{ q }}
+                </mat-option>
+              }
+            </mat-select>
+            <button
+              matSuffix
+              type="button"
+              mat-icon-button
+              matTooltip="Copy to query"
+              [disabled]="!history.value"
+              (click)="setQuery(history.value)"
+            >
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
       }
       <br />
 
@@ -74,54 +76,60 @@
           <mat-panel-title>Pins Reference</mat-panel-title>
         </mat-expansion-panel-header>
         @if (partDefs()?.length) {
-        <div>
-          <mat-form-field>
-            <mat-label>part/fr.</mat-label>
-            <mat-select [formControl]="partDef">
-              @for (def of partDefs(); track def) {
-              <mat-option [value]="def.typeId" [matTooltip]="def.description">
-                {{ def.name }} ({{ def.typeId.startsWith("fr.") ? "F" : "P" }})
-              </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <!-- selected part's pins -->
-          @if (loadingPinDefs()) {
-          <mat-progress-bar mode="indeterminate" />
-          } @if (pinDefs().length) {
-          <table class="pins">
-            <thead>
-              <tr>
-                <th></th>
-                <th>name</th>
-                <th>type</th>
-                <th>tip</th>
-                <th>attrs</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (pd of pinDefs(); track pd) {
-              <tr>
-                <td>
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Copy name"
-                    (click)="copyToClipboard(pd.name)"
+          <div>
+            <mat-form-field>
+              <mat-label>part/fr.</mat-label>
+              <mat-select [formControl]="partDef">
+                @for (def of partDefs(); track def) {
+                  <mat-option
+                    [value]="def.typeId"
+                    [matTooltip]="def.description"
                   >
-                    <mat-icon class="mat-primary">content_copy</mat-icon>
-                  </button>
-                </td>
-                <td>{{ pd.name }}</td>
-                <td>{{ pinTypeIdToString(pd.type) }}</td>
-                <td style="max-width: 20em">{{ pd.tip }}</td>
-                <td>{{ pd.attributes }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-          }
-        </div>
+                    {{ def.name }} ({{
+                      def.typeId.startsWith("fr.") ? "F" : "P"
+                    }})
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <!-- selected part's pins -->
+            @if (loadingPinDefs()) {
+              <mat-progress-bar mode="indeterminate" />
+            }
+            @if (pinDefs().length) {
+              <table class="pins">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>name</th>
+                    <th>type</th>
+                    <th>tip</th>
+                    <th>attrs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (pd of pinDefs(); track pd) {
+                    <tr>
+                      <td>
+                        <button
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Copy name"
+                          (click)="copyToClipboard(pd.name)"
+                        >
+                          <mat-icon class="mat-primary">content_copy</mat-icon>
+                        </button>
+                      </td>
+                      <td>{{ pd.name }}</td>
+                      <td>{{ pinTypeIdToString(pd.type) }}</td>
+                      <td style="max-width: 20em">{{ pd.tip }}</td>
+                      <td>{{ pd.attributes }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
         }
       </mat-expansion-panel>
 

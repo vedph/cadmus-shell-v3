@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
 
@@ -9,6 +9,7 @@ import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
   selector: 'cadmus-current-item-bar',
   templateUrl: './current-item-bar.component.html',
   styleUrls: ['./current-item-bar.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, DatePipe],
 })
 export class CurrentItemBarComponent {

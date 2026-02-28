@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { DistrictLocationPartComponent } from '@myrmidon/cadmus-part-general-ui'
   selector: 'cadmus-district-location-part-feature',
   templateUrl: './district-location-part-feature.component.html',
   styleUrl: './district-location-part-feature.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, DistrictLocationPartComponent],
 })
 export class DistrictLocationPartFeatureComponent

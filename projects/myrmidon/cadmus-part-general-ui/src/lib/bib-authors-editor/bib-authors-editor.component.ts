@@ -1,4 +1,10 @@
-import { Component, input, model, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  model,
+  signal,
+} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import {
@@ -37,6 +43,7 @@ import { BibAuthor } from '../bibliography-part';
   ],
   templateUrl: './bib-authors-editor.component.html',
   styleUrl: './bib-authors-editor.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BibAuthorsEditorComponent {
   /**

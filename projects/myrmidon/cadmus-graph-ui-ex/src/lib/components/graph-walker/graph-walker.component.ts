@@ -1,10 +1,12 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   effect,
   input,
   OnDestroy,
   OnInit,
   output,
+  signal,
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { Observable, Subject, Subscription, take } from 'rxjs';
@@ -58,6 +60,7 @@ import {
     AsyncPipe,
     GraphNodeLabelPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphWalkerComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
@@ -87,7 +90,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   /**
    * The graph visualization mode (2D or 3D).
    */
-  public graphMode: GraphMode = '2d';
+  public readonly graphMode = signal<GraphMode>('2d');
 
   /**
    * Emitted when a graph node is picked by user.
@@ -223,7 +226,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   }
 
   public onGraphModeChange(mode: GraphMode): void {
-    this.graphMode = mode;
+    this.graphMode.set(mode);
   }
 
   public onPOutFilterChange(filter: PagedLinkedNodeFilter): void {

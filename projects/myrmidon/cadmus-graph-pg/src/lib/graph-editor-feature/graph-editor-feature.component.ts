@@ -1,4 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { take } from 'rxjs/operators';
 
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
@@ -15,6 +20,7 @@ import {
   selector: 'cadmus-graph-editor-feature',
   templateUrl: './graph-editor-feature.component.html',
   styleUrls: ['./graph-editor-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,
@@ -26,8 +32,9 @@ import {
   ],
 })
 export class GraphEditorFeatureComponent implements OnInit {
-  public nodeTagEntries?: ThesaurusEntry[];
-  public tripleTagEntries?: ThesaurusEntry[];
+  public readonly nodeTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
   constructor(private _thesService: ThesaurusService) {}
 
@@ -37,8 +44,7 @@ export class GraphEditorFeatureComponent implements OnInit {
       .pipe(take(1))
       .subscribe({
         next: (set: ThesauriSet) => {
-          this.nodeTagEntries = set['graph-node-tags']?.entries;
-          this.tripleTagEntries = set['graph-triple-tags']?.entries;
+          this.nodeTagEntries.set(set['graph-node-tags']?.entries);
         },
         error: (error) => {
           console.error('Error getting thesauri set', error);

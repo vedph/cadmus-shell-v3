@@ -8,7 +8,7 @@
       <mat-tab label="&#9679; nodes">
         <cadmus-graph-node-list
           [editedNode]="editedNode"
-          [tagEntries]="nodeTagEntries"
+          [tagEntries]="nodeTagEntries()"
           [hasWalker]="true"
           (nodeWalk)="onNodeWalk($event)"
         />

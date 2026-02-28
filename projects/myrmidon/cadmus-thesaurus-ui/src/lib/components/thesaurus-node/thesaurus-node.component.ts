@@ -1,7 +1,10 @@
 import {
+  afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   effect,
   ElementRef,
+  Injector,
   model,
   output,
   signal,
@@ -33,6 +36,7 @@ import { ThesaurusNode } from '../../services/thesaurus-nodes.service';
   selector: 'cadmus-thesaurus-node',
   templateUrl: './thesaurus-node.component.html',
   styleUrls: ['./thesaurus-node.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatIconButton,
     MatTooltip,
@@ -58,7 +62,10 @@ export class ThesaurusNodeComponent {
 
   @ViewChild('nodeVal') nodeValRef: ElementRef | undefined;
 
-  constructor(formBuilder: FormBuilder) {
+  constructor(
+    formBuilder: FormBuilder,
+    private _injector: Injector,
+  ) {
     // form
     this.id = formBuilder.control(null, [
       Validators.required,
@@ -93,9 +100,12 @@ export class ThesaurusNodeComponent {
   public toggleEdit(on: boolean): void {
     this.editing.set(on);
     if (on) {
-      setTimeout(() => {
-        this.nodeValRef?.nativeElement.focus();
-      }, 300);
+      afterNextRender(
+        () => {
+          this.nodeValRef?.nativeElement.focus();
+        },
+        { injector: this._injector },
+      );
     }
   }
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 
@@ -15,11 +15,12 @@ import { AppRepository } from '@myrmidon/cadmus-state';
   selector: 'cadmus-text-preview-feature',
   templateUrl: './text-preview-feature.component.html',
   styleUrls: ['./text-preview-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatCard, MatCardHeader, MatCardContent, TextPreviewComponent],
 })
 export class TextPreviewFeatureComponent {
   public source?: PartPreviewSource;
-  public typeEntries?: ThesaurusEntry[];
+  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
   constructor(route: ActivatedRoute, appRepository: AppRepository) {
     this.source = {
@@ -28,11 +29,11 @@ export class TextPreviewFeatureComponent {
       layerId: route.snapshot.queryParams['lid'],
     };
     appRepository.typeThesaurus$.pipe(take(1)).subscribe((t) => {
-      this.typeEntries = t?.entries;
+      this.typeEntries.set(t?.entries);
     });
     // ensure app data is loaded
     appRepository.load().then(() => {
-      this.typeEntries = appRepository.getTypeThesaurus()?.entries;
+      this.typeEntries.set(appRepository.getTypeThesaurus()?.entries);
     });
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-flags-pg",
-  "version": "15.0.2",
+  "version": "15.1.0",
   "description": "Cadmus - item flags UI wrapper.",
   "keywords": [
     "Cadmus"
@@ -17,7 +17,7 @@
     "@angular/common": "^20.0.0 || ^21.0.0",
     "@angular/core": "^20.0.0 || ^21.0.0",
     "@angular/material": "^20.0.0 || ^21.0.0",
-    "@myrmidon/auth-jwt-login": "^8.0.3",
+    "@myrmidon/auth-jwt-login": "^8.0.5",
     "@myrmidon/cadmus-flags-ui": "^15.0.2"
   },
   "dependencies": {

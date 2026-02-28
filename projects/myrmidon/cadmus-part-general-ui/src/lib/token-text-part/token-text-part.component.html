@@ -44,8 +44,8 @@
             style="--editor-height: 800px"
             (ready)="onCreateEditor($event)"
           />
-          @if (text.hasError('required') && (text.touched || text.dirty)) {
-          <mat-error>please enter some text</mat-error>
+          @if (text.hasError("required") && (text.touched || text.dirty)) {
+            <mat-error>please enter some text</mat-error>
           }
         </div>
       </div>

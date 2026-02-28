@@ -1,4 +1,10 @@
-import { Component, computed, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { ColorToContrastPipe } from '@myrmidon/ngx-tools';
@@ -34,6 +40,7 @@ const F_EOL_TAIL = 'eol-tail';
   ],
   templateUrl: './text-segments-view.component.html',
   styleUrl: './text-segments-view.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextSegmentsViewComponent {
   private readonly _typeMap: Map<string, string>;
@@ -94,7 +101,7 @@ export class TextSegmentsViewComponent {
         continue;
       }
       const layer = this.layers()!.find(
-        (l) => l.typeId === m![1] && l.roleId === m![2]
+        (l) => l.typeId === m![1] && l.roleId === m![2],
       );
       if (!layer) {
         continue;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -13,6 +13,7 @@ import { CategoriesPartComponent } from '@myrmidon/cadmus-part-general-ui';
   imports: [CurrentItemBarComponent, CategoriesPartComponent],
   templateUrl: './categories-part-feature.component.html',
   styleUrls: ['./categories-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesPartFeatureComponent
   extends EditPartFeatureBase

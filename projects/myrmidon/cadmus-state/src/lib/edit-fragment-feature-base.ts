@@ -10,7 +10,7 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditedObject, FragmentIdentity } from '@myrmidon/cadmus-core';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 
 import { FragmentEditorService } from './fragment-editor.service';
 
@@ -31,33 +31,41 @@ export abstract class EditFragmentFeatureBase
   /**
    * The fragment being edited.
    */
-  public data?: EditedObject<Fragment>;
+  public readonly data = signal<EditedObject<Fragment> | undefined>(undefined);
 
   /**
    * The identity of the fragment being edited. This gets built from the current
    * route.
    */
-  public identity: FragmentIdentity;
+  public readonly identity = signal<FragmentIdentity>({
+    itemId: '',
+    typeId: '',
+    partId: '',
+    roleId: null,
+    frTypeId: '',
+    frRoleId: null,
+    loc: '',
+  });
 
   /**
    * True when the wrapped editor component data is dirty.
    */
-  public dirty?: boolean;
+  public readonly dirty = signal<boolean | undefined>(undefined);
 
   /**
    * True when loading data.
    */
-  public loading?: boolean;
+  public readonly loading = signal<boolean | undefined>(undefined);
 
   /**
    * True when saving data.
    */
-  public saving?: boolean;
+  public readonly saving = signal<boolean | undefined>(undefined);
 
   /**
    * The location of the fragment being edited.
    */
-  public frLoc: TokenLocation | undefined;
+  public readonly frLoc = signal<TokenLocation | undefined>(undefined);
 
   constructor(
     private _router: Router,
@@ -74,7 +82,7 @@ export abstract class EditFragmentFeatureBase
     const loc = route.snapshot.params['loc'];
     const frRoleId = route.snapshot.queryParams['frrid'];
 
-    this.identity = {
+    this.identity.set({
       itemId: itemId,
       typeId: '',
       partId: partId,
@@ -82,14 +90,14 @@ export abstract class EditFragmentFeatureBase
       frTypeId: frTypeId,
       frRoleId: frRoleId,
       loc: loc,
-    };
+    });
 
     // subscriptions
-    this._loadingSub = this.editorService.loading$.subscribe(
-      (loading) => (this.loading = loading)
+    this._loadingSub = this.editorService.loading$.subscribe((loading) =>
+      this.loading.set(loading)
     );
-    this._savingSub = this.editorService.saving$.subscribe(
-      (saving) => (this.saving = saving)
+    this._savingSub = this.editorService.saving$.subscribe((saving) =>
+      this.saving.set(saving)
     );
   }
 
@@ -109,14 +117,14 @@ export abstract class EditFragmentFeatureBase
   protected onDataLoaded(): void {}
 
   public ngOnInit(): void {
-    this.loading = true;
-    this.frLoc = TokenLocation.parse(this.identity.loc) ?? undefined;
+    this.loading.set(true);
+    this.frLoc.set(TokenLocation.parse(this.identity().loc) ?? undefined);
     const thesIds = this.getReqThesauriIds();
     this.editorService
-      .load(this.identity, thesIds)
+      .load(this.identity(), thesIds)
       .then((data) => {
         if (data) {
-          this.data = data;
+          this.data.set(data);
           this.onDataLoaded();
         }
       })
@@ -131,7 +139,7 @@ export abstract class EditFragmentFeatureBase
   }
 
   public canDeactivate(): boolean {
-    return !this.dirty;
+    return !this.dirty();
   }
 
   /**
@@ -143,7 +151,7 @@ export abstract class EditFragmentFeatureBase
    */
   public onDirtyChange(value: boolean): void {
     console.log('part dirty change (from editor): ' + value);
-    this.dirty = value;
+    this.dirty.set(value);
   }
 
   /**
@@ -153,9 +161,9 @@ export abstract class EditFragmentFeatureBase
    */
   public save(fragment: Fragment): void {
     // update a copy of the edited part with new fragment
-    const part = { ...this.data!.layerPart } as TextLayerPart;
+    const part = { ...this.data()!.layerPart } as TextLayerPart;
     const frIndex = part.fragments.findIndex(
-      (f: { location: string }) => f.location === this.identity.loc
+      (f: { location: string }) => f.location === this.identity().loc
     );
     if (frIndex > -1) {
       part.fragments.splice(frIndex, 1, fragment);
@@ -180,17 +188,17 @@ export abstract class EditFragmentFeatureBase
 
   public close(): void {
     // /items/<id>/<part-group>/<part-typeid>/<part-id>?rid=<role-id>
-    const part = this.data!.layerPart!;
+    const part = this.data()!.layerPart!;
 
     const editorKey = this._libraryRouteService.getEditorKeyFromPartType(
       part.typeId,
       part.roleId
     );
 
-    const url = `/items/${this.identity.itemId}/${editorKey.partKey}/${part.typeId}/${this.identity.partId}`;
+    const url = `/items/${this.identity().itemId}/${editorKey.partKey}/${part.typeId}/${this.identity().partId}`;
     this._router.navigate([url], {
       queryParams: {
-        rid: this.identity.frTypeId,
+        rid: this.identity().frTypeId,
       },
     });
   }

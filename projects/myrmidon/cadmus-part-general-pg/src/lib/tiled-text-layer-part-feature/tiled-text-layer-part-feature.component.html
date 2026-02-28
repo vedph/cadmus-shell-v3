@@ -76,9 +76,9 @@
     }
 
     <!-- rows -->
-    @if (view) {
+    @if (view()) {
     <div>
-      @for (row of view.rows; track row; let iy = $index) {
+      @for (row of view()!.rows; track row; let iy = $index) {
       <div class="tile-row" style="display: flex; flex-flow: row wrap">
         <span class="row-nr">{{ iy + 1 }}</span>
         <!-- tile -->

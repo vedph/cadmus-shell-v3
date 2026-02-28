@@ -1,4 +1,11 @@
-import { Component, effect, input, model, output } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  model,
+  output,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -17,7 +24,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
-import { AssertedDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
+import { AssertedHistoricalDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
 import { Assertion, AssertionComponent } from '@myrmidon/cadmus-refs-assertion';
 import {
   HistoricalDateComponent,
@@ -47,13 +54,14 @@ import {
   ],
   templateUrl: './asserted-historical-date.component.html',
   styleUrl: './asserted-historical-date.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssertedHistoricalDateComponent {
   /**
    * The date model to edit. The corresponding dateChange event
    * is fired when the user saves the editing.
    */
-  public readonly date = model<AssertedDate>();
+  public readonly date = model<AssertedHistoricalDate>();
 
   /**
    * The cancel event fired when the user cancels editing.
@@ -93,7 +101,7 @@ export class AssertedHistoricalDateComponent {
     });
   }
 
-  private updateForm(date: AssertedDate | undefined | null): void {
+  private updateForm(date: AssertedHistoricalDate | undefined | null): void {
     if (!date) {
       this.form.reset();
       return;
@@ -108,7 +116,7 @@ export class AssertedHistoricalDateComponent {
     this.form.markAsPristine();
   }
 
-  private getDate(): AssertedDate {
+  private getDate(): AssertedHistoricalDate {
     return {
       tag: this.tag.value || undefined,
       a: this.hd.value!.a || undefined,

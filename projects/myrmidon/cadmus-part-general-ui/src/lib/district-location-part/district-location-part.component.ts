@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -51,6 +56,7 @@ import {
   selector: 'cadmus-district-location-part',
   templateUrl: './district-location-part.component.html',
   styleUrl: './district-location-part.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -140,7 +146,7 @@ export class DistrictLocationPartComponent
   }
 
   protected override onDataSet(
-    data?: EditedObject<DistrictLocationPart>
+    data?: EditedObject<DistrictLocationPart>,
   ): void {
     // thesauri
     if (data?.thesauri) {
@@ -153,7 +159,7 @@ export class DistrictLocationPartComponent
 
   protected getValue(): DistrictLocationPart {
     let part = this.getEditedPart(
-      DISTRICT_LOCATION_PART_TYPEID
+      DISTRICT_LOCATION_PART_TYPEID,
     ) as DistrictLocationPart;
 
     part.place = this.place.value || { language: '', pieces: [] };

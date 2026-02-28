@@ -56,7 +56,7 @@ export class EditedItemRepository {
 
   constructor(
     private _appRepository: AppRepository,
-    private _itemService: ItemService
+    private _itemService: ItemService,
   ) {
     this._loading$ = new BehaviorSubject<boolean | undefined>(undefined);
     this._item$ = new BehaviorSubject<Item | undefined>(undefined);
@@ -137,7 +137,7 @@ export class EditedItemRepository {
   }
 
   private pickDefaultFacet(
-    facets: FacetDefinition[]
+    facets: FacetDefinition[],
   ): FacetDefinition | undefined {
     if (!facets.length) {
       return undefined;
@@ -201,7 +201,7 @@ export class EditedItemRepository {
           this._item$.next(result.item!);
           this._parts$.next(result.item!.parts || []);
           this._partGroups$.next(
-            this._itemService.groupParts(result.item!.parts || [], facetParts)
+            this._itemService.groupParts(result.item!.parts || [], facetParts),
           );
           this._layersPartInfo$.next(result.layers);
           this._facet$.next(itemFacet);
@@ -316,7 +316,7 @@ export class EditedItemRepository {
         error: (error) => {
           console.error(
             `Error adding new layer part for item ${itemId}`,
-            error
+            error,
           );
           reject({
             message: 'Error adding new layer part for item ' + itemId,

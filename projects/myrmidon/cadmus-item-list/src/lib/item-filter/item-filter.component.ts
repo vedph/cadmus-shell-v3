@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -40,6 +46,7 @@ import { ItemListRepository } from '../state/item-list.repository';
   selector: 'cadmus-item-filter',
   templateUrl: './item-filter.component.html',
   styleUrls: ['./item-filter.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -80,7 +87,7 @@ export class ItemFilterComponent implements OnInit, OnDestroy {
     private _repository: ItemListRepository,
     public userLookupService: UserRefLookupService,
     public app: AppRepository,
-    formBuilder: FormBuilder
+    formBuilder: FormBuilder,
   ) {
     this.filter$ = _repository.filter$;
     this.title = formBuilder.control(null);

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   effect,
   model,
@@ -54,6 +55,7 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
     MatIconButton,
     MatIcon,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphTripleEditorComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;

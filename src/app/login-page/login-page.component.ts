@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -20,6 +20,7 @@ import {
   standalone: true,
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     MatCardModule,

@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   OnInit,
   output,
@@ -53,6 +54,7 @@ import { MspValidators } from '../msp-validators';
   selector: 'cadmus-msp-operation',
   templateUrl: './msp-operation.component.html',
   styleUrls: ['./msp-operation.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

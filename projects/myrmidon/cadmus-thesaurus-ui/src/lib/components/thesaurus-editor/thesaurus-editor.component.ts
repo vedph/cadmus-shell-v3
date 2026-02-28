@@ -1,4 +1,12 @@
-import { Component, effect, input, model, OnInit, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  model,
+  OnInit,
+  output,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -57,6 +65,7 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
   selector: 'cadmus-thesaurus-editor',
   templateUrl: './thesaurus-editor.component.html',
   styleUrls: ['./thesaurus-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,
@@ -120,7 +129,7 @@ export class ThesaurusEditorComponent implements OnInit {
     private _nodesService: ThesaurusNodesService,
     private _dialogService: DialogService,
     private _repository: ThesaurusNodeListRepository,
-    formBuilder: FormBuilder
+    formBuilder: FormBuilder,
   ) {
     this.loading$ = _repository.loading$;
     this.filter$ = _repository.filter$;
@@ -179,7 +188,7 @@ export class ThesaurusEditorComponent implements OnInit {
     } else {
       // not an alias: entries required, no target ID
       this.entryCount.setValidators(
-        NgxToolsValidators.strictMinLengthValidator(1)
+        NgxToolsValidators.strictMinLengthValidator(1),
       );
       this.targetId.setValidators(null);
     }
@@ -193,9 +202,6 @@ export class ThesaurusEditorComponent implements OnInit {
     this.alias.valueChanges.subscribe((_) => {
       this.updateValidators();
     });
-
-    // load
-    this.updateForm(this.thesaurus());
   }
 
   public onTargetIdChange(id: string | null): void {
@@ -319,7 +325,7 @@ export class ThesaurusEditorComponent implements OnInit {
     });
     this._nodesService.importEntries(
       entries,
-      thesaurus.id?.startsWith('model-types@')
+      thesaurus.id?.startsWith('model-types@'),
     );
     this.reset();
   }

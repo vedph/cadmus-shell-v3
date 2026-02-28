@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -20,6 +20,7 @@ import { ChronologyFragmentComponent } from '@myrmidon/cadmus-part-general-ui';
   ],
   templateUrl: './chronology-fragment-feature.component.html',
   styleUrls: ['./chronology-fragment-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChronologyFragmentFeatureComponent
   extends EditFragmentFeatureBase

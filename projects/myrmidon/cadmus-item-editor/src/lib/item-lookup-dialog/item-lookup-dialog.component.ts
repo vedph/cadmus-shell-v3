@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogConfig,
@@ -16,13 +16,14 @@ import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
   selector: 'cadmus-item-lookup-dialog',
   templateUrl: './item-lookup-dialog.component.html',
   styleUrl: './item-lookup-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RefLookupComponent],
 })
 export class ItemLookupDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<ItemLookupDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public config: MatDialogConfig,
-    public itemLookupService: ItemRefLookupService
+    public itemLookupService: ItemRefLookupService,
   ) {}
 
   public onCancel(): void {

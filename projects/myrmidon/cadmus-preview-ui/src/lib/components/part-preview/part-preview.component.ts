@@ -1,4 +1,10 @@
-import { Component, effect, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  signal,
+} from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -27,6 +33,7 @@ export interface PartPreviewSource {
   selector: 'cadmus-part-preview',
   templateUrl: './part-preview.component.html',
   styleUrls: ['./part-preview.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatProgressBar, MatButton, MatIcon, SafeHtmlPipe],
 })
 export class PartPreviewComponent {
@@ -44,7 +51,7 @@ export class PartPreviewComponent {
   constructor(
     private _previewService: PreviewService,
     private _itemService: ItemService,
-    private _snackbar: MatSnackBar
+    private _snackbar: MatSnackBar,
   ) {
     effect(() => {
       const source = this.source();

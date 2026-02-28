@@ -1,32 +1,36 @@
 <form [formGroup]="form" class="form-row" (submit)="save()">
   <!-- relation (bound) -->
   @if (relationEntries()?.length) {
-  <mat-form-field class="long-text">
-    <mat-label>relation</mat-label>
-    <mat-select [formControl]="relation">
-      @for (e of relationEntries(); track e.id) {
-      <mat-option [value]="e.id">{{ e.value }}</mat-option>
+    <mat-form-field class="long-text">
+      <mat-label>relation</mat-label>
+      <mat-select [formControl]="relation">
+        @for (e of relationEntries(); track e.id) {
+          <mat-option [value]="e.id">{{ e.value }}</mat-option>
+        }
+      </mat-select>
+      @if (
+        $any(relation).errors?.required && (relation.dirty || relation.touched)
+      ) {
+        <mat-error>relation required</mat-error>
       }
-    </mat-select>
-    @if ( $any(relation).errors?.required && (relation.dirty ||
-    relation.touched) ) {
-    <mat-error>relation required</mat-error>
-    }
-  </mat-form-field>
+    </mat-form-field>
   }
   <!-- relation (free) -->
   @else {
-  <mat-form-field class="long-text">
-    <mat-label>relation</mat-label>
-    <input matInput [formControl]="relation" />
-    @if ( $any(relation).errors?.required && (relation.dirty ||
-    relation.touched) ) {
-    <mat-error>relation required</mat-error>
-    } @if ( $any(relation).errors?.maxLength && (relation.dirty ||
-    relation.touched) ) {
-    <mat-error>relation too long</mat-error>
-    }
-  </mat-form-field>
+    <mat-form-field class="long-text">
+      <mat-label>relation</mat-label>
+      <input matInput [formControl]="relation" />
+      @if (
+        $any(relation).errors?.required && (relation.dirty || relation.touched)
+      ) {
+        <mat-error>relation required</mat-error>
+      }
+      @if (
+        $any(relation).errors?.maxLength && (relation.dirty || relation.touched)
+      ) {
+        <mat-error>relation too long</mat-error>
+      }
+    </mat-form-field>
   }
 
   <!-- id -->

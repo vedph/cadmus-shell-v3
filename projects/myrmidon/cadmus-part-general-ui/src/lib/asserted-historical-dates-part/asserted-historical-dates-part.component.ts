@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -34,7 +34,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
 } from '@myrmidon/cadmus-ui';
-import { AssertedDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
+import { AssertedHistoricalDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
 
 import {
   ASSERTED_HISTORICAL_DATES_PART_TYPEID,
@@ -68,6 +68,7 @@ import { AssertedHistoricalDateComponent } from '../asserted-historical-date/ass
   ],
   templateUrl: './asserted-historical-dates-part.component.html',
   styleUrl: './asserted-historical-dates-part.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssertedHistoricalDatesPartComponent
   extends ModelEditorComponentBase<AssertedHistoricalDatesPart>
@@ -81,7 +82,7 @@ export class AssertedHistoricalDatesPartComponent
 
   // component state
   public readonly editedIndex = signal<number>(-1);
-  public readonly edited = signal<AssertedDate | undefined>(undefined);
+  public readonly edited = signal<AssertedHistoricalDate | undefined>(undefined);
 
   // thesauri:
   // asserted-historical-dates-tags
@@ -100,7 +101,7 @@ export class AssertedHistoricalDatesPartComponent
   );
 
   // form
-  public dates: FormControl<AssertedDate[]>;
+  public dates: FormControl<AssertedHistoricalDate[]>;
 
   constructor(
     authService: AuthJwtService,
@@ -199,13 +200,13 @@ export class AssertedHistoricalDatesPartComponent
       return;
     }
 
-    const entry: AssertedDate = {
+    const entry: AssertedHistoricalDate = {
       a: { value: 0 },
     };
     this.editDate(entry, -1);
   }
 
-  public editDate(entry: AssertedDate, index: number): void {
+  public editDate(entry: AssertedHistoricalDate, index: number): void {
     this.editedIndex.set(index);
     this.edited.set(structuredClone(entry));
   }
@@ -215,7 +216,7 @@ export class AssertedHistoricalDatesPartComponent
     this.edited.set(undefined);
   }
 
-  public saveDate(entry: AssertedDate): void {
+  public saveDate(entry: AssertedHistoricalDate): void {
     // ensure that no date exists with the same value
     let newValue = new HistoricalDate(entry).getSortValue();
     if (

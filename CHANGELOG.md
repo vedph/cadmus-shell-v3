@@ -1,6 +1,73 @@
 # History
 
-- 2026-02-28: updated Angular and packages.
+- 2026-02-28:
+  - updated Angular and packages.
+  - ⚠️ migrate all components to `OnPush`, adjusting them where required. This prepares them for Zone-less apps. Libraries changed:
+    - `cadmus-flags-pg`
+    - `cadmus-flags-ui`
+    - `cadmus-graph-pg`
+    - `cadmus-graph-pg-ex`
+    - `cadmus-graph-ui`
+    - `cadmus-graph-ui-ex`
+    - `cadmus-item-editor`
+    - `cadmus-item-list`
+    - `cadmus-item-search`
+    - `cadmus-layer-demo`
+    - `cadmus-part-general-pg`
+    - `cadmus-part-general-ui`
+    - `cadmus-part-philology-pg`
+    - `cadmus-part-philology-ui`
+    - `cadmus-part-taxo-ui`
+    - `cadmus-preview-pg`
+    - `cadmus-preview-ui`
+    - ⚠️ `cadmus-state`: this is a breaking change because plain public get/set properties of `EditPartFeatureBase` and `EditFragmentFeatureBase` have been refactored as signals. This means that now they must be written with `set` and read by calling them, e.g. `this.data.set(...)` and `this.data()`, rather than `this.data = ...` and `this.data`. The properties are:
+      - `data`
+      - `identity`
+      - `dirty`
+      - `loading`
+      - `saving`
+      - `frLoc` (for `EditFragmentFeatureBase` only)
+    - `cadmus-statistics`
+    - `cadmus-thesaurus-editor`
+    - `cadmus-thesaurus-list`
+    - `cadmus-thesaurus-ui`
+    - `cadmus-ui-pg`
+    - `cadmus-ui`
+  - fixed `CloseSaveButtonsComponent`: with `OnPush`, the save button stayed disabled even when the form became valid, because `FormGroup` validity changes don't change the object reference. Fixed by adding an `invalid` signal that subscribes to `form.statusChanges` via an `effect()`, making the disabled binding reactive: `[disabled]="invalid()"`.
+  - demo app: migrated all components to `OnPush`. Fixed anti-pattern in `GraphDemoPageComponent`: `nodeId` converted from a plain mutable property (set async via subscription) to a signal; template updated to use `nodeId()`.
+
+👉 So, in **part templates** ensure to use `identity()` and `data()`:
+
+```html
+<cadmus-current-item-bar />
+<cadmus-decorated-counts-part
+  [identity]="identity()"
+  [data]="$any(data())"
+  (dataChange)="save($event!.value!)"
+  (editorClose)="close()"
+  (dirtyChange)="onDirtyChange($event)"
+/>
+```
+
+👉 Similarly, in **fragment templates** ensure to use `data()` and capture `frLoc()` with `@let` to avoid double-calling the signal:
+
+```html
+<cadmus-current-item-bar/>
+@let loc = frLoc();
+<div class="base-text">
+  <cadmus-decorated-token-text
+    [baseText]="data()?.baseText || ''"
+    [locations]="loc ? [loc] : []"
+  />
+</div>
+<cadmus-chronology-fragment
+  [data]="$any(data())"
+  (dataChange)="save($event!.value!)"
+  (editorClose)="close()"
+  (dirtyChange)="onDirtyChange($event)"
+/>
+```
+
 - 2026-02-16: 🆕 added `@myrmidon/cadmus-profile-import` with import pages for facets and settings, while also improving a bit the thesaurus importer in `@myrmidon/cadmus-thesaurus-list`. To integrate them in your app:
 
 1. `pnpm i @myrmidon/cadmus-profile-import`.

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { HistoricalEventsPartComponent } from '@myrmidon/cadmus-part-general-ui'
   selector: 'cadmus-historical-events-part-feature',
   templateUrl: './historical-events-part-feature.component.html',
   styleUrls: ['./historical-events-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, HistoricalEventsPartComponent],
 })
 export class HistoricalEventsPartFeatureComponent

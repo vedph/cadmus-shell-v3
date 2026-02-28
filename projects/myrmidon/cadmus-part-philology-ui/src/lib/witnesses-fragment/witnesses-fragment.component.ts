@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -46,6 +52,7 @@ import { WitnessesFragment, Witness } from '../witnesses-fragment';
   selector: 'cadmus-witnesses-fragment',
   templateUrl: './witnesses-fragment.component.html',
   styleUrls: ['./witnesses-fragment.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -102,7 +109,7 @@ export class WitnessesFragmentComponent
   constructor(
     authService: AuthJwtService,
     formBuilder: FormBuilder,
-    private _layerService: TextLayerService
+    private _layerService: TextLayerService,
   ) {
     super(authService, formBuilder);
     // form
@@ -154,7 +161,7 @@ export class WitnessesFragmentComponent
         this.text.setValue(this._txtEditorModel!.getValue());
         this.text.markAsDirty();
         this.text.updateValueAndValidity();
-      })
+      }),
     );
   }
 
@@ -176,7 +183,7 @@ export class WitnessesFragmentComponent
         this.note.setValue(this._noteEditorModel!.getValue());
         this.note.markAsDirty();
         this.note.updateValueAndValidity();
-      })
+      }),
     );
   }
 
@@ -282,8 +289,8 @@ export class WitnessesFragmentComponent
       this.frText.set(
         this._layerService.getTextFragment(
           data.baseText,
-          TokenLocation.parse(data.value.location)!
-        )
+          TokenLocation.parse(data.value.location)!,
+        ),
       );
     }
     this.updateForm(data?.value);

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { NamesPartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-names-part-feature',
   templateUrl: './names-part-feature.component.html',
   styleUrls: ['./names-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, NamesPartComponent],
 })
 export class NamesPartFeatureComponent

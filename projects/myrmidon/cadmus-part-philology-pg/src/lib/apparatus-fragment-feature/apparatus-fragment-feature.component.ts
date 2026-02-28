@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   EditFragmentFeatureBase,
@@ -19,6 +19,7 @@ import { ApparatusFragmentComponent } from '@myrmidon/cadmus-part-philology-ui';
   ],
   templateUrl: './apparatus-fragment-feature.component.html',
   styleUrls: ['./apparatus-fragment-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApparatusFragmentFeatureComponent
   extends EditFragmentFeatureBase

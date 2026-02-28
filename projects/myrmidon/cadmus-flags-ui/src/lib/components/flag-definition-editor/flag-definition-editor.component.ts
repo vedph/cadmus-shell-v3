@@ -1,4 +1,4 @@
-import { Component, effect, model, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, model, output } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -40,6 +40,7 @@ import { FlagDefinition } from '@myrmidon/cadmus-core';
     MatTooltip,
     MatIcon,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlagDefinitionEditorComponent {
   public readonly flag = model<FlagDefinition>();

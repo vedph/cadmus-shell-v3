@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -53,6 +58,7 @@ import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
   selector: 'cadmus-names-part',
   templateUrl: './names-part.component.html',
   styleUrls: ['./names-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

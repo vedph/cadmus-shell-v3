@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   OnInit,
   ElementRef,
@@ -35,6 +36,7 @@ import { Subscription } from 'rxjs';
   selector: 'cadmus-text-tile',
   templateUrl: './text-tile.component.html',
   styleUrls: ['./text-tile.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

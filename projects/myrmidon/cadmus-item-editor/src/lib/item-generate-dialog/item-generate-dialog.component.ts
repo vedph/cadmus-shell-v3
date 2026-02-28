@@ -1,4 +1,9 @@
-import { Component, Inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Inject,
+  signal,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -31,6 +36,7 @@ import { MatButton } from '@angular/material/button';
   selector: 'cadmus-item-generate-dialog',
   templateUrl: './item-generate-dialog.component.html',
   styleUrl: './item-generate-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     MatFormField,
@@ -55,7 +61,7 @@ export class ItemGenerateDialogComponent {
     formBuilder: FormBuilder,
     public dialogRef: MatDialogRef<ItemGenerateDialogComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public config: MatDialogConfig
+    public config: MatDialogConfig,
   ) {
     this.itemCount = formBuilder.control<number>(1, {
       nonNullable: true,

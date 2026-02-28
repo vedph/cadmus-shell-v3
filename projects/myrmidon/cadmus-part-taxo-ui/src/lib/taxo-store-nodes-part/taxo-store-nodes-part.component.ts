@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormBuilder,
@@ -81,6 +86,7 @@ const DEFAULT_SETTINGS: TaxoStoreNodesPartSettings = {
   ],
   templateUrl: './taxo-store-nodes-part.component.html',
   styleUrl: './taxo-store-nodes-part.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaxoStoreNodesPartComponent
   extends ModelEditorComponentBase<TaxoStoreNodesPart>

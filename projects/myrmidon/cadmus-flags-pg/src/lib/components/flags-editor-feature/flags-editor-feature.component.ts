@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import {
   MatCard,
   MatCardHeader,
@@ -12,6 +12,7 @@ import { FlagListComponent } from '@myrmidon/cadmus-flags-ui';
   selector: 'cadmus-flags-editor-feature',
   templateUrl: './flags-editor-feature.component.html',
   styleUrls: ['./flags-editor-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,

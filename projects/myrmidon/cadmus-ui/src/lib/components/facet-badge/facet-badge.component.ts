@@ -1,4 +1,4 @@
-import { Component, effect, input, Input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 
 import { MatTooltip } from '@angular/material/tooltip';
@@ -15,6 +15,7 @@ export interface FacetBadgeData {
   templateUrl: './facet-badge.component.html',
   styleUrls: ['./facet-badge.component.css'],
   imports: [MatTooltip],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FacetBadgeComponent {
   private _facetColors: { [key: string]: string };

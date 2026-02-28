@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -12,6 +12,7 @@ import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
   imports: [CurrentItemBarComponent, AssertedHistoricalDatesPartComponent],
   templateUrl: './asserted-historical-date-feature.component.html',
   styleUrl: './asserted-historical-date-feature.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssertedHistoricalDateFeatureComponent
   extends EditPartFeatureBase

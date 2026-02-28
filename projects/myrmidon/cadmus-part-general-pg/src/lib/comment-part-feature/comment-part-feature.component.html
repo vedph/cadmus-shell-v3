@@ -1,7 +1,7 @@
 <cadmus-current-item-bar/>
 <cadmus-comment-editor
-  [identity]="identity"
-  [data]="$any(data)"
+  [identity]="identity()"
+  [data]="$any(data())"
   (dataChange)="save($any($event!.value!))"
   (editorClose)="close()"
   (dirtyChange)="onDirtyChange($event)"

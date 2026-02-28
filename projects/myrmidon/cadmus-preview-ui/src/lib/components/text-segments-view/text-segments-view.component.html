@@ -1,28 +1,28 @@
 <div class="cadmus-text-span-view-row">
   <!-- rows -->
   @for (row of rows(); track $index) {
-  <div class="row">
-    <!-- row -->
-    @for (segment of row; track segment._uniqueId) {
-    <!-- col -->
-    <div
-      class="col"
-      (click)="onSegmentClick(segment)"
-      [style.background-color]="getSegmentColor(segment)"
-      [style.color]="getSegmentColor(segment) | colorToContrast"
-    >
-      <div class="bar">
-        <minichart-bar
-          [data]="segment.chartItems || []"
-          [options]="chartOptions"
-          (itemClicked)="onChartItemClicked($event)"
-        />
-      </div>
-      <div class="text">
-        {{ segment.text }}
-      </div>
+    <div class="row">
+      <!-- row -->
+      @for (segment of row; track segment._uniqueId) {
+        <!-- col -->
+        <div
+          class="col"
+          (click)="onSegmentClick(segment)"
+          [style.background-color]="getSegmentColor(segment)"
+          [style.color]="getSegmentColor(segment) | colorToContrast"
+        >
+          <div class="bar">
+            <minichart-bar
+              [data]="segment.chartItems || []"
+              [options]="chartOptions"
+              (itemClicked)="onChartItemClicked($event)"
+            />
+          </div>
+          <div class="text">
+            {{ segment.text }}
+          </div>
+        </div>
+      }
     </div>
-    }
-  </div>
   }
 </div>

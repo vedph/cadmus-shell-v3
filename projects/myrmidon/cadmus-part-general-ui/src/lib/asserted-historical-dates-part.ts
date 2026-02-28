@@ -1,11 +1,11 @@
 import { Part } from '@myrmidon/cadmus-core';
-import { AssertedDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
+import { AssertedHistoricalDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
 
 /**
  * The AssertedHistoricalDates part model.
  */
 export interface AssertedHistoricalDatesPart extends Part {
-  dates: AssertedDate[];
+  dates: AssertedHistoricalDate[];
 }
 
 /**

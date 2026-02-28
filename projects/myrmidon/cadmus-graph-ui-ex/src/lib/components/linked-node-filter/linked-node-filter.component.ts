@@ -1,4 +1,4 @@
-import { Component, effect, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, model } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -54,6 +54,7 @@ import { PagedLinkedNodeFilter } from '../../graph-walker';
     MatIcon,
     MatIconButton,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LinkedNodeFilterComponent {
   /**

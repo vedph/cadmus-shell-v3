@@ -1,4 +1,4 @@
-import { Component, effect, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, model } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -48,6 +48,7 @@ import { PagedTripleFilter } from '../../graph-walker';
     MatInput,
     MatTooltip,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TripleFilterComponent {
   /**

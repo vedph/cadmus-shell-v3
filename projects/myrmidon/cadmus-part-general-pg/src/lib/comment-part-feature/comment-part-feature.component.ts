@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -11,6 +11,7 @@ import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
   selector: 'cadmus-comment-part-feature',
   templateUrl: './comment-part-feature.component.html',
   styleUrls: ['./comment-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, CommentEditorComponent],
 })
 export class CommentPartFeatureComponent

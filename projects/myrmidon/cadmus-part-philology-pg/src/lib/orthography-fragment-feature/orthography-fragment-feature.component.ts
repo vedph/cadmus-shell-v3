@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   EditFragmentFeatureBase,
@@ -14,6 +14,7 @@ import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
   selector: 'cadmus-orthography-fragment-feature',
   templateUrl: './orthography-fragment-feature.component.html',
   styleUrls: ['./orthography-fragment-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CurrentItemBarComponent,
     DecoratedTokenTextComponent,

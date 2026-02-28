@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Inject, OnDestroy, signal } from '@angular/core';
 import { Thesaurus, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { Router, RouterModule } from '@angular/router';
 import { take } from 'rxjs/operators';
@@ -51,6 +51,7 @@ import { DC_SCHEME, OD_SCHEME } from './cit-schemes';
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, OnDestroy {
   private readonly _subs: Subscription[] = [];

@@ -25,66 +25,69 @@
       </div>
 
       @if (keywords.value.length) {
-      <div id="list">
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>index</th>
-              <th>lang.</th>
-              <th>keyword</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (k of keywords.value; track k) {
-            <tr [class.selected]="editedKeyword() === k">
-              <td class="fit-width">
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Edit this keyword"
-                  (click)="editKeyword(k)"
-                >
-                  <mat-icon class="mat-primary">edit</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Delete this keyword"
-                  (click)="deleteKeyword(k)"
-                >
-                  <mat-icon class="mat-warn">remove_circle</mat-icon>
-                </button>
-              </td>
-              <td>{{ k.indexId }}</td>
-              <td>
-                {{ k.language | flatLookup : langEntries() : "id" : "value" }}
-              </td>
-              <td>{{ k.value }}</td>
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      } @if (editedKeyword()) {
-      <fieldset>
-        <mat-expansion-panel
-          [disabled]="!editedKeyword()"
-          [expanded]="editedKeyword()"
-        >
-          <mat-expansion-panel-header>
-            <mat-panel-title> keyword </mat-panel-title>
-          </mat-expansion-panel-header>
-          <cadmus-index-keyword
-            [keyword]="editedKeyword()"
-            [idxEntries]="idxEntries()"
-            [langEntries]="langEntries()"
-            [tagEntries]="tagEntries()"
-            (editorClose)="onKeywordClose()"
-            (keywordChange)="onKeywordChange($event!)"
-          />
-        </mat-expansion-panel>
-      </fieldset>
+        <div id="list">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>index</th>
+                <th>lang.</th>
+                <th>keyword</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (k of keywords.value; track k) {
+                <tr [class.selected]="editedKeyword() === k">
+                  <td class="fit-width">
+                    <button
+                      mat-icon-button
+                      type="button"
+                      matTooltip="Edit this keyword"
+                      (click)="editKeyword(k)"
+                    >
+                      <mat-icon class="mat-primary">edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      type="button"
+                      matTooltip="Delete this keyword"
+                      (click)="deleteKeyword(k)"
+                    >
+                      <mat-icon class="mat-warn">remove_circle</mat-icon>
+                    </button>
+                  </td>
+                  <td>{{ k.indexId }}</td>
+                  <td>
+                    {{
+                      k.language | flatLookup: langEntries() : "id" : "value"
+                    }}
+                  </td>
+                  <td>{{ k.value }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      @if (editedKeyword()) {
+        <fieldset>
+          <mat-expansion-panel
+            [disabled]="!editedKeyword()"
+            [expanded]="editedKeyword()"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title> keyword </mat-panel-title>
+            </mat-expansion-panel-header>
+            <cadmus-index-keyword
+              [keyword]="editedKeyword()"
+              [idxEntries]="idxEntries()"
+              [langEntries]="langEntries()"
+              [tagEntries]="tagEntries()"
+              (editorClose)="onKeywordClose()"
+              (keywordChange)="onKeywordChange($event!)"
+            />
+          </mat-expansion-panel>
+        </fieldset>
       }
     </mat-card-content>
     <mat-card-actions>

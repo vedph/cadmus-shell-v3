@@ -1,4 +1,5 @@
-import {
+﻿import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
@@ -55,6 +56,7 @@ const RELATION_SEP = ':';
   selector: 'cadmus-historical-event-editor',
   templateUrl: './historical-event-editor.component.html',
   styleUrls: ['./historical-event-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

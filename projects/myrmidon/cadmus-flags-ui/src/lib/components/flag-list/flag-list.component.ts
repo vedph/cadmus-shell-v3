@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { FlagDefinition } from '@myrmidon/cadmus-core';
@@ -48,6 +48,7 @@ import { FlagListRepository } from './flag-list.repository';
     AsyncPipe,
     FlagBitPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlagListComponent {
   public flags$: Observable<FlagDefinition[]>;

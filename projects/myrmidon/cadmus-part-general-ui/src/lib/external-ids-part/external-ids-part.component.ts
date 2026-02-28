@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -52,6 +57,7 @@ import {
   selector: 'cadmus-refs-external-ids-part',
   templateUrl: './external-ids-part.component.html',
   styleUrls: ['./external-ids-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -74,17 +80,27 @@ export class ExternalIdsPartComponent
   public ids: FormControl<AssertedId[]>;
 
   // external-id-scopes
-  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // external-id-tags
-  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
   // thesauri for assertions:
   // assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);

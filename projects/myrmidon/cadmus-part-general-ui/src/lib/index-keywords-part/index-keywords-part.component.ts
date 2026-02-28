@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
@@ -55,6 +60,7 @@ import { IndexKeywordComponent } from '../index-keyword/index-keyword.component'
   selector: 'cadmus-index-keywords-part',
   templateUrl: './index-keywords-part.component.html',
   styleUrls: ['./index-keywords-part.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

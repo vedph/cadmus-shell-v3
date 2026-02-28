@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { take } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
@@ -39,9 +39,10 @@ import {
   ],
   templateUrl: './graph-demo-page.component.html',
   styleUrl: './graph-demo-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphDemoPageComponent implements OnInit {
-  public nodeId: number = 0;
+  public readonly nodeId = signal<number>(0);
 
   constructor(public graphService: GraphService) {
     console.log('GraphDemoPage constructor - graphService:', this.graphService);
@@ -54,7 +55,7 @@ export class GraphDemoPageComponent implements OnInit {
       .pipe(take(1))
       .subscribe((node) => {
         console.log('Node fetched:', node);
-        this.nodeId = node.id;
+        this.nodeId.set(node.id);
         console.log('NodeId set to:', this.nodeId);
       });
   }

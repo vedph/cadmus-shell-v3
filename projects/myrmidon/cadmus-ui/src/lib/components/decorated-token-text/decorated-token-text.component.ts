@@ -1,10 +1,8 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  OnInit,
-  ViewChild,
-  ElementRef,
-  input,
   effect,
+  input,
   signal,
 } from '@angular/core';
 
@@ -21,10 +19,9 @@ import { TokenLocation, TextLayerService } from '@myrmidon/cadmus-core';
   templateUrl: './decorated-token-text.component.html',
   styleUrls: ['./decorated-token-text.component.css'],
   imports: [SafeHtmlPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DecoratedTokenTextComponent implements OnInit {
-  @ViewChild('textElem') _textElement?: ElementRef;
-
+export class DecoratedTokenTextComponent {
   /**
    * The base text.
    */
@@ -46,10 +43,6 @@ export class DecoratedTokenTextComponent implements OnInit {
     effect(() => {
       this.decorate(this.baseText(), this.locations(), this.selectedLocation());
     });
-  }
-
-  public ngOnInit(): void {
-    this.decorate(this.baseText(), this.locations(), this.selectedLocation());
   }
 
   private decorate(

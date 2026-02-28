@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -84,6 +90,7 @@ import { HasPreviewPipe } from '../has-preview.pipe';
   selector: 'cadmus-item-editor',
   templateUrl: './item-editor.component.html',
   styleUrls: ['./item-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,
@@ -171,7 +178,7 @@ export class ItemEditorComponent
     private _authService: AuthJwtService,
     private _userLevelService: UserLevelService,
     private _messaging: MessagingService,
-    private _formBuilder: FormBuilder
+    private _formBuilder: FormBuilder,
   ) {
     this.id.set(this._route.snapshot.params['id']);
     if (this.id() === 'new') {
@@ -228,7 +235,7 @@ export class ItemEditorComponent
       this._authService.currentUser$.subscribe((user: User | null) => {
         this.user.set(user || undefined);
         this.userLevel.set(this._userLevelService.getCurrentUserLevel());
-      })
+      }),
     );
 
     // rebuild the flags controls array when flags definitions change
@@ -236,7 +243,7 @@ export class ItemEditorComponent
       this._appRepository.flags$.subscribe((defs) => {
         this.flagDefinitions.set(defs);
         this.buildFlagsControls();
-      })
+      }),
     );
 
     // when flags controls values change, update the flags value
@@ -245,14 +252,14 @@ export class ItemEditorComponent
         if (!this._flagsFrozen) {
           this.flags.setValue(this.getFlagsValue());
         }
-      })
+      }),
     );
 
     // update the metadata form when item changes (e.g. saved)
     this._subs.push(
       this.item$.subscribe((item) => {
         this.updateMetadataForm(item);
-      })
+      }),
     );
 
     // load the item (if any) and its lookup
@@ -403,7 +410,8 @@ export class ItemEditorComponent
     return groups.some((g) => {
       return g.parts.some(
         (p) =>
-          p.typeId === typeId && ((!p.roleId && !roleId) || p.roleId === roleId)
+          p.typeId === typeId &&
+          ((!p.roleId && !roleId) || p.roleId === roleId),
       );
     });
   }
@@ -412,7 +420,7 @@ export class ItemEditorComponent
     return getPartIdName(
       typeId,
       roleId,
-      this._appRepository.getTypeThesaurus()
+      this._appRepository.getTypeThesaurus(),
     )!;
   }
 
@@ -437,7 +445,7 @@ export class ItemEditorComponent
       this.id()!,
       'new',
       typeId,
-      roleId
+      roleId,
     );
 
     // navigate to the editor
@@ -449,7 +457,7 @@ export class ItemEditorComponent
               rid: route.rid,
             },
           }
-        : {}
+        : {},
     );
   }
 
@@ -459,7 +467,7 @@ export class ItemEditorComponent
       part.itemId,
       part.id,
       part.typeId,
-      part.roleId
+      part.roleId,
     );
 
     // navigate to the editor
@@ -471,7 +479,7 @@ export class ItemEditorComponent
               rid: route.rid,
             },
           }
-        : {}
+        : {},
     );
   }
 
@@ -513,7 +521,7 @@ export class ItemEditorComponent
             this.busy.set(false);
             console.error(error);
             this._snackbar.open('Error deleting part', 'OK');
-          }
+          },
         );
       });
   }
@@ -535,7 +543,7 @@ export class ItemEditorComponent
         }
         this._repository
           .addNewLayerPart(part.typeId, part.roleId)
-          .finally(() => (this.busy.set(false)));
+          .finally(() => this.busy.set(false));
       });
   }
 
@@ -561,7 +569,7 @@ export class ItemEditorComponent
       if (this.facet.value !== targetItem.facetId) {
         this._snackbar.open(
           'Cannot copy part to an item with a different facet',
-          'OK'
+          'OK',
         );
         return;
       }

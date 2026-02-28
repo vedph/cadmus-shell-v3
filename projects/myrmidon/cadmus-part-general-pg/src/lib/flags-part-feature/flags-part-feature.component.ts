@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -13,6 +13,7 @@ import { FlagsPartComponent } from '@myrmidon/cadmus-part-general-ui';
   imports: [CurrentItemBarComponent, FlagsPartComponent],
   templateUrl: './flags-part-feature.component.html',
   styleUrl: './flags-part-feature.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlagsPartFeatureComponent
   extends EditPartFeatureBase

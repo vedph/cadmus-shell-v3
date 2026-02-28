@@ -1,4 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 
@@ -29,6 +34,7 @@ const TAB_WALKER = 2;
   selector: 'cadmus-graph-editor-ex-feature',
   templateUrl: './graph-editor-ex-feature.component.html',
   styleUrls: ['./graph-editor-ex-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,
@@ -41,8 +47,9 @@ const TAB_WALKER = 2;
   ],
 })
 export class GraphEditorExFeatureComponent implements OnInit {
-  public nodeTagEntries?: ThesaurusEntry[];
-  public tripleTagEntries?: ThesaurusEntry[];
+  public readonly nodeTagEntries = signal<ThesaurusEntry[] | undefined>(
+    undefined,
+  );
 
   public tabIndex: number;
   public editedNode?: UriNode;
@@ -53,7 +60,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
     private _router: Router,
     private _itemService: ItemService,
     private _libraryRouteService: LibraryRouteService,
-    private _snackbar: MatSnackBar
+    private _snackbar: MatSnackBar,
   ) {
     this.tabIndex = 0;
     this.walkerNodeId = 0;
@@ -65,8 +72,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
       .pipe(take(1))
       .subscribe({
         next: (set: ThesauriSet) => {
-          this.nodeTagEntries = set['graph-node-tags']?.entries;
-          this.tripleTagEntries = set['graph-triple-tags']?.entries;
+          this.nodeTagEntries.set(set['graph-node-tags']?.entries);
         },
         error: (error) => {
           console.error('Error getting thesauri set', error);
@@ -120,7 +126,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
                 part.itemId,
                 part.id,
                 part.typeId,
-                part.roleId
+                part.roleId,
               );
 
               // navigate to the editor
@@ -132,7 +138,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
                         rid: route.rid,
                       },
                     }
-                  : {}
+                  : {},
               );
             }
           },

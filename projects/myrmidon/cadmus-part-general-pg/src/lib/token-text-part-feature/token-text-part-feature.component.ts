@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { TokenTextPartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-token-text-part-feature',
   templateUrl: './token-text-part-feature.component.html',
   styleUrls: ['./token-text-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, TokenTextPartComponent],
 })
 export class TokenTextPartFeatureComponent

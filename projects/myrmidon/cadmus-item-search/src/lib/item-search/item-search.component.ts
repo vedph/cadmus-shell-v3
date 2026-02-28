@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -35,6 +35,7 @@ import { ItemSearchRepository } from '../state/item-search.repository';
   selector: 'cadmus-item-search',
   templateUrl: './item-search.component.html',
   styleUrls: ['./item-search.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
     MatCardHeader,

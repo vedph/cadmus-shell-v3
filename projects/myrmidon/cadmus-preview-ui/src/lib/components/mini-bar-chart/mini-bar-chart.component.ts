@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
@@ -8,7 +9,6 @@ import {
   signal,
   effect,
   computed,
-  AfterViewInit,
 } from '@angular/core';
 
 export interface MiniBarChartItem {
@@ -33,8 +33,9 @@ export interface MiniBarChartOptions {
   imports: [],
   templateUrl: './mini-bar-chart.component.html',
   styleUrl: './mini-bar-chart.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MiniBarChartComponent implements AfterViewInit {
+export class MiniBarChartComponent {
   // inputs
   public readonly data = input<MiniBarChartItem[]>([]);
   public readonly options = input<MiniBarChartOptions>({});
@@ -96,13 +97,6 @@ export class MiniBarChartComponent implements AfterViewInit {
     effect(() => {
       this.updateChartDimensions();
     });
-  }
-
-  ngAfterViewInit() {
-    // Set initial dimensions after view initialization
-    setTimeout(() => {
-      this.updateChartDimensions();
-    }, 0);
   }
 
   @HostListener('window:resize')

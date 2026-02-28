@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-statistics",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Cadmus - data statistics.",
   "keywords": [
     "Cadmus"
@@ -16,9 +16,9 @@
   "peerDependencies": {
     "@angular/common": "^20.0.0 || ^21.0.0",
     "@angular/core": "^20.0.0 || ^21.0.0",
-    "ngx-echarts": "^20.0.2",
+    "ngx-echarts": "^21.0.0",
     "echarts": "^6.0.0",
-    "@myrmidon/cadmus-api": "^14.0.4"
+    "@myrmidon/cadmus-api": "^14.0.7"
   },
   "dependencies": {
     "tslib": "^2.3.0"

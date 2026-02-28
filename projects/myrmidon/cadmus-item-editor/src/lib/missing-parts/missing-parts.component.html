@@ -1,30 +1,30 @@
 @if (missingDefinitions().length) {
-<div>
-  <h3><mat-icon class="mat-warn">warning</mat-icon>&nbsp; Missing Parts</h3>
-  <table>
-    <tbody>
-      @for (def of missingDefinitions(); track def) {
-      <tr>
-        <td>
-          <button
-            type="button"
-            mat-icon-button
-            matTooltip="Add this part"
-            (click)="requestAddPart(def)"
-          >
-            <mat-icon>add_circle</mat-icon>
-          </button>
-        </td>
-        <td matTooltip="def.description">
-          <cadmus-part-badge
-            [partTypeIds]="def"
-            [facetDefinition]="facetDefinition()"
-            [typeThesaurus]="typeThesaurus()"
-          />
-        </td>
-      </tr>
-      }
-    </tbody>
-  </table>
-</div>
+  <div>
+    <h3><mat-icon class="mat-warn">warning</mat-icon>&nbsp; Missing Parts</h3>
+    <table>
+      <tbody>
+        @for (def of missingDefinitions(); track def) {
+          <tr>
+            <td>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Add this part"
+                (click)="requestAddPart(def)"
+              >
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </td>
+            <td matTooltip="def.description">
+              <cadmus-part-badge
+                [partTypeIds]="def"
+                [facetDefinition]="facetDefinition()"
+                [typeThesaurus]="typeThesaurus()"
+              />
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 }

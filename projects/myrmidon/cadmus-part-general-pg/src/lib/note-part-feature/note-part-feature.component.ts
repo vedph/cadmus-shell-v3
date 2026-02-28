@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { NotePartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-note-part-feature',
   templateUrl: './note-part-feature.component.html',
   styleUrls: ['./note-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, NotePartComponent],
 })
 export class NotePartFeatureComponent

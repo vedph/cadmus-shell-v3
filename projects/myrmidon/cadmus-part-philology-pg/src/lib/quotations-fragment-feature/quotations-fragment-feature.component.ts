@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -14,6 +14,7 @@ import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
   selector: 'cadmus-quotations-fragment-feature',
   templateUrl: './quotations-fragment-feature.component.html',
   styleUrls: ['./quotations-fragment-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CurrentItemBarComponent,
     DecoratedTokenTextComponent,

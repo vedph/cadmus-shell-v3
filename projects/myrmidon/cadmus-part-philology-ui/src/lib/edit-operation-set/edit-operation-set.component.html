@@ -24,97 +24,103 @@
     <div class="output-text">{{ outputText() }}</div>
   </div>
   @if (operations().length) {
-  <table class="mt-16">
-    <thead>
-      <tr>
-        <th></th>
-        <th>type</th>
-        <th>operation</th>
-        <th>input → output</th>
-        <th>tags</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (operation of operations(); track trackByOperation($index,
-      operation); let i = $index; let first = $first; let last = $last) {
-      <tr [class.selected]="i === editedOperationIndex()">
-        <td class="fit-width">
-          <button
-            type="button"
-            mat-icon-button
-            class="mat-primary"
-            matTooltip="Edit this operation"
-            (click)="editOperation(operation, i)"
+    <table class="mt-16">
+      <thead>
+        <tr>
+          <th></th>
+          <th>type</th>
+          <th>operation</th>
+          <th>input → output</th>
+          <th>tags</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (
+          operation of operations();
+          track trackByOperation($index, operation);
+          let i = $index;
+          let first = $first;
+          let last = $last
+        ) {
+          <tr [class.selected]="i === editedOperationIndex()">
+            <td class="fit-width">
+              <button
+                type="button"
+                mat-icon-button
+                class="mat-primary"
+                matTooltip="Edit this operation"
+                (click)="editOperation(operation, i)"
+              >
+                <mat-icon class="mat-primary">edit</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this operation up"
+                [disabled]="first"
+                (click)="moveOperationUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                matTooltip="Move this operation down"
+                [disabled]="last"
+                (click)="moveOperationDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                class="mat-warn"
+                matTooltip="Delete this operation"
+                (click)="deleteOperation(i)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
+              </button>
+            </td>
+            <td>{{ operation.type }}</td>
+            <td>{{ operation.toString() }}</td>
+            <td>
+              <span class="input-text">{{ operationTexts()[i].input }}</span>
+              <span class="arrow">→</span>
+              <span class="output-text">{{ operationTexts()[i].output }}</span>
+            </td>
+            <td>
+              @for (tag of operation.tags; track tag) {
+                <mat-chip>{{
+                  tag | flatLookup: opTagEntries() : "id" : "value"
+                }}</mat-chip>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <!-- operation editor -->
+  }
+  @if (editedOperation()) {
+    <fieldset>
+      <mat-expansion-panel
+        [expanded]="editedOperation()"
+        [disabled]="!editedOperation()"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title
+            >operation #{{ editedOperationIndex() + 1 }}</mat-panel-title
           >
-            <mat-icon class="mat-primary">edit</mat-icon>
-          </button>
-          <button
-            type="button"
-            mat-icon-button
-            matTooltip="Move this operation up"
-            [disabled]="first"
-            (click)="moveOperationUp(i)"
-          >
-            <mat-icon>arrow_upward</mat-icon>
-          </button>
-          <button
-            type="button"
-            mat-icon-button
-            matTooltip="Move this operation down"
-            [disabled]="last"
-            (click)="moveOperationDown(i)"
-          >
-            <mat-icon>arrow_downward</mat-icon>
-          </button>
-          <button
-            type="button"
-            mat-icon-button
-            class="mat-warn"
-            matTooltip="Delete this operation"
-            (click)="deleteOperation(i)"
-          >
-            <mat-icon class="mat-warn">remove_circle</mat-icon>
-          </button>
-        </td>
-        <td>{{ operation.type }}</td>
-        <td>{{ operation.toString() }}</td>
-        <td>
-          <span class="input-text">{{ operationTexts()[i].input }}</span>
-          <span class="arrow">→</span>
-          <span class="output-text">{{ operationTexts()[i].output }}</span>
-        </td>
-        <td>
-          @for (tag of operation.tags; track tag) {
-          <mat-chip>{{
-            tag | flatLookup : opTagEntries() : "id" : "value"
-          }}</mat-chip>
-          }
-        </td>
-      </tr>
-      }
-    </tbody>
-  </table>
-  <!-- operation editor -->
-  } @if (editedOperation()) {
-  <fieldset>
-    <mat-expansion-panel
-      [expanded]="editedOperation()"
-      [disabled]="!editedOperation()"
-    >
-      <mat-expansion-panel-header>
-        <mat-panel-title
-          >operation #{{ editedOperationIndex() + 1 }}</mat-panel-title
-        >
-      </mat-expansion-panel-header>
-      <cadmus-edit-operation
-        [tagEntries]="tagEntries()"
-        [opTagEntries]="opTagEntries()"
-        [inputText]="operationText()"
-        [operation]="editedOperation()"
-        (operationChange)="saveOperation($event!)"
-        (cancelEdit)="closeOperation()"
-      />
-    </mat-expansion-panel>
-  </fieldset>
+        </mat-expansion-panel-header>
+        <cadmus-edit-operation
+          [tagEntries]="tagEntries()"
+          [opTagEntries]="opTagEntries()"
+          [inputText]="operationText()"
+          [operation]="editedOperation()"
+          (operationChange)="saveOperation($event!)"
+          (cancelEdit)="closeOperation()"
+        />
+      </mat-expansion-panel>
+    </fieldset>
   }
 </div>

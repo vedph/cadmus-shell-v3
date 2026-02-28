@@ -1,4 +1,11 @@
-import { Component, input, output, effect, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+  effect,
+  OnDestroy,
+} from '@angular/core';
 import {
   FormGroup,
   FormArray,
@@ -39,6 +46,7 @@ export interface PartScopeSetRequest {
   selector: 'cadmus-parts-scope-editor',
   templateUrl: './parts-scope-editor.component.html',
   styleUrls: ['./parts-scope-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     MatCheckbox,
@@ -70,7 +78,7 @@ export class PartsScopeEditorComponent implements OnDestroy {
     private _dialogService: DialogService,
     private _appRepository: AppRepository,
     private _colorService: ColorService,
-    private _editedItemRepository: EditedItemRepository
+    private _editedItemRepository: EditedItemRepository,
   ) {
     this.checks = _formBuilder.array([], CustomValidators.minChecked(1));
     this._sub = this.checks.valueChanges.subscribe(() => {

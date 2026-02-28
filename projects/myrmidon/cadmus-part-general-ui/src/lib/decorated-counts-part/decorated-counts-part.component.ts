@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -49,6 +54,7 @@ import {
   selector: 'cadmus-decorated-counts-part',
   templateUrl: './decorated-counts-part.component.html',
   styleUrl: './decorated-counts-part.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

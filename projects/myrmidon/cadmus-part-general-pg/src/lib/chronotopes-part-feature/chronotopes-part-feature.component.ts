@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -11,6 +11,7 @@ import { ChronotopesPartComponent } from '@myrmidon/cadmus-part-general-ui';
   selector: 'cadmus-chronotopes-part-feature',
   templateUrl: './chronotopes-part-feature.component.html',
   styleUrls: ['./chronotopes-part-feature.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrentItemBarComponent, ChronotopesPartComponent],
 })
 export class ChronotopesPartFeatureComponent

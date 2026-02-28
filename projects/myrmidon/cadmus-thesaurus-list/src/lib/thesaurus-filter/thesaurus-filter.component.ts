@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -25,6 +25,7 @@ import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
   selector: 'cadmus-thesaurus-filter',
   templateUrl: './thesaurus-filter.component.html',
   styleUrls: ['./thesaurus-filter.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -48,7 +49,7 @@ export class ThesaurusFilterComponent {
 
   constructor(
     formBuilder: FormBuilder,
-    private _repository: ThesaurusListRepository
+    private _repository: ThesaurusListRepository,
   ) {
     this.filter$ = _repository.filter$;
     // form

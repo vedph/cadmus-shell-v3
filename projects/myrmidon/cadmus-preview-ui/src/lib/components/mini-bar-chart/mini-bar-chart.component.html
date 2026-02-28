@@ -7,44 +7,47 @@
     [attr.viewBox]="viewBox()"
   >
     <g [attr.transform]="transform()">
-      @for (item of normalizedData(); track trackByItem($index, item); let i =
-      $index) {
-      <g>
-        <rect
-          [attr.x]="options().vertical ? 0 : getStart(i)"
-          [attr.y]="options().vertical ? getStart(i) : 0"
-          [attr.width]="getWidth(item)"
-          [attr.height]="getHeight(item)"
-          [attr.fill]="item.color"
-          (mouseenter)="onMouseEnter(item, $event)"
-          (mouseleave)="onMouseLeave()"
-          (click)="onClick(item)"
-          [attr.class]="'bar ' + (activeItem() === item ? 'active' : '')"
-        />
-        @if (!options().noLabels && canShowLabel(item)) {
-        <text
-          [attr.x]="getLabelX(i, item)"
-          [attr.y]="getLabelY(i, item)"
-          [attr.transform]="getLabelTransform(i, item)"
-          [attr.fill]="getContrastColor(item.color)"
-          class="label"
-          dominant-baseline="middle"
-          text-anchor="middle"
-        >
-          {{ item.label }}
-        </text>
-        }
-      </g>
+      @for (
+        item of normalizedData();
+        track trackByItem($index, item);
+        let i = $index
+      ) {
+        <g>
+          <rect
+            [attr.x]="options().vertical ? 0 : getStart(i)"
+            [attr.y]="options().vertical ? getStart(i) : 0"
+            [attr.width]="getWidth(item)"
+            [attr.height]="getHeight(item)"
+            [attr.fill]="item.color"
+            (mouseenter)="onMouseEnter(item, $event)"
+            (mouseleave)="onMouseLeave()"
+            (click)="onClick(item)"
+            [attr.class]="'bar ' + (activeItem() === item ? 'active' : '')"
+          />
+          @if (!options().noLabels && canShowLabel(item)) {
+            <text
+              [attr.x]="getLabelX(i, item)"
+              [attr.y]="getLabelY(i, item)"
+              [attr.transform]="getLabelTransform(i, item)"
+              [attr.fill]="getContrastColor(item.color)"
+              class="label"
+              dominant-baseline="middle"
+              text-anchor="middle"
+            >
+              {{ item.label }}
+            </text>
+          }
+        </g>
       }
     </g>
   </svg>
   @if (tooltipVisible()) {
-  <div
-    class="tooltip"
-    [style.left.px]="tooltipPosition().x"
-    [style.top.px]="tooltipPosition().y"
-  >
-    {{ tooltipContent() }}
-  </div>
+    <div
+      class="tooltip"
+      [style.left.px]="tooltipPosition().x"
+      [style.top.px]="tooltipPosition().y"
+    >
+      {{ tooltipContent() }}
+    </div>
   }
 </div>

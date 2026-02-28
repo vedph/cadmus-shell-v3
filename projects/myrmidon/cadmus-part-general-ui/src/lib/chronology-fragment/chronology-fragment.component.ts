@@ -1,4 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
   FormControl,
@@ -48,6 +53,7 @@ import { ChronologyFragment } from '../chronology-fragment';
   selector: 'cadmus-chronology-fragment',
   templateUrl: './chronology-fragment.component.html',
   styleUrls: ['./chronology-fragment.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

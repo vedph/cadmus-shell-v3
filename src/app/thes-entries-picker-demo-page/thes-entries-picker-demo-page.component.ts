@@ -1,5 +1,5 @@
 import { JsonPipe } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
   MatCard,
@@ -138,6 +138,7 @@ const ANIMAL_ENTRIES: ThesaurusEntry[] = [
   ],
   templateUrl: './thes-entries-picker-demo-page.component.html',
   styleUrl: './thes-entries-picker-demo-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThesEntriesPickerDemoPageComponent {
   public readonly availableEntries = signal<ThesaurusEntry[]>(ANIMAL_ENTRIES);

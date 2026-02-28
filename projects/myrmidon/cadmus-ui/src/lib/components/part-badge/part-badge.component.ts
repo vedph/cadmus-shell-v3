@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, computed } from '@angular/core';
 
 import {
   Thesaurus,
@@ -65,6 +65,7 @@ export function getPartIdName(
   imports: [MatTooltip, ColorToContrastPipe],
   templateUrl: './part-badge.component.html',
   styleUrls: ['./part-badge.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartBadgeComponent {
   /**

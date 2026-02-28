@@ -1,19 +1,16 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  OnDestroy,
-  OnChanges,
-  SimpleChanges,
   ViewChild,
   AfterViewInit,
+  OnDestroy,
+  effect,
+  input,
+  output,
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -70,10 +67,12 @@ export type GraphMode = '2d' | '3d';
         <button
           type="button"
           mat-icon-button
-          matTooltip="Switch to {{ mode === '2d' ? '3D' : '2D' }} view"
+          matTooltip="Switch to {{ mode() === '2d' ? '3D' : '2D' }} view"
           (click)="toggleMode()"
         >
-          <mat-icon>{{ mode === '2d' ? 'view_in_ar' : 'view_quilt' }}</mat-icon>
+          <mat-icon>{{
+            mode() === '2d' ? 'view_in_ar' : 'view_quilt'
+          }}</mat-icon>
         </button>
         <button
           type="button"
@@ -129,23 +128,22 @@ export type GraphMode = '2d' | '3d';
     `,
   ],
   imports: [MatButtonModule, MatIconModule, MatTooltipModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ForceGraphRendererComponent
-  implements OnInit, OnDestroy, OnChanges, AfterViewInit
-{
+export class ForceGraphRendererComponent implements AfterViewInit, OnDestroy {
   @ViewChild('graphContainer', { static: true })
   graphContainer!: ElementRef<HTMLDivElement>;
 
-  @Input() nodes: GraphNode[] = [];
-  @Input() edges: Edge[] = [];
-  @Input() mode: GraphMode = '2d';
-  @Input() update$?: Subject<boolean>;
-  @Input() center$?: Subject<boolean>;
-  @Input() zoomToFit$?: Subject<any>;
+  public readonly nodes = input<GraphNode[]>([]);
+  public readonly edges = input<Edge[]>([]);
+  public readonly mode = input<GraphMode>('2d');
+  public readonly update$ = input<Subject<boolean>>();
+  public readonly center$ = input<Subject<boolean>>();
+  public readonly zoomToFit$ = input<Subject<any>>();
 
-  @Output() nodeSelect = new EventEmitter<GraphNode>();
-  @Output() nodeDoubleClick = new EventEmitter<GraphNode>();
-  @Output() modeChange = new EventEmitter<GraphMode>();
+  public readonly nodeSelect = output<GraphNode>();
+  public readonly nodeDoubleClick = output<GraphNode>();
+  public readonly modeChange = output<GraphMode>();
 
   private graph: any = null;
   private currentMode: GraphMode = '2d';
@@ -153,23 +151,27 @@ export class ForceGraphRendererComponent
   private resizeObserver?: ResizeObserver;
   private destroy$ = new Subject<void>();
 
-  ngOnInit(): void {
-    this.currentMode = this.mode;
+  constructor() {
+    // React to mode changes after graph initialization
+    effect(() => {
+      const m = this.mode();
+      if (!this.graph) return;
+      this.switchMode(m);
+    });
+
+    // React to data changes after graph initialization
+    effect(() => {
+      // Register signal dependencies
+      this.nodes();
+      this.edges();
+      this.updateGraphData();
+    });
   }
 
   ngAfterViewInit(): void {
+    this.currentMode = this.mode();
     this.initGraph();
     this.setupSubscriptions();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mode'] && !changes['mode'].firstChange) {
-      this.switchMode(this.mode);
-    }
-
-    if ((changes['nodes'] || changes['edges']) && this.graph) {
-      this.updateGraphData();
-    }
   }
 
   ngOnDestroy(): void {
@@ -277,7 +279,7 @@ export class ForceGraphRendererComponent
   }
 
   private convertToForceGraphData(): ForceGraphData {
-    const forceNodes: ForceGraphNode[] = this.nodes.map((node) => {
+    const forceNodes: ForceGraphNode[] = this.nodes().map((node) => {
       const label = node.label || String(node.id);
       const count = node.data?.count;
       const displayName = count ? `${label} (${count})` : label;
@@ -292,7 +294,7 @@ export class ForceGraphRendererComponent
       };
     });
 
-    const forceLinks: ForceGraphLink[] = this.edges.map((edge) => {
+    const forceLinks: ForceGraphLink[] = this.edges().map((edge) => {
       const label = edge.label || edge.data?.label || '';
 
       return {
@@ -415,7 +417,7 @@ export class ForceGraphRendererComponent
   private drawNode(
     node: ForceGraphNode,
     ctx: CanvasRenderingContext2D,
-    globalScale: number
+    globalScale: number,
   ): void {
     if (!node.__nodeData || !node.x || !node.y) return;
 
@@ -500,7 +502,7 @@ export class ForceGraphRendererComponent
   private drawLink(
     link: ForceGraphLink,
     ctx: CanvasRenderingContext2D,
-    globalScale: number
+    globalScale: number,
   ): void {
     if (!link.source || !link.target) return;
 
@@ -585,7 +587,7 @@ export class ForceGraphRendererComponent
       -textWidth / 2 - 1,
       -textHeight / 2 - 0.5,
       textWidth + 2,
-      textHeight + 1
+      textHeight + 1,
     );
 
     // Draw border
@@ -595,7 +597,7 @@ export class ForceGraphRendererComponent
       -textWidth / 2 - 1,
       -textHeight / 2 - 0.5,
       textWidth + 2,
-      textHeight + 1
+      textHeight + 1,
     );
 
     // Draw text
@@ -613,12 +615,12 @@ export class ForceGraphRendererComponent
       clearTimeout(this.clickTimeout);
       this.clickTimeout = null;
       // Double click detected
-      this.nodeDoubleClick.emit(node.__nodeData);
+      this.nodeDoubleClick.emit(node.__nodeData!);
     } else {
       // Set timeout for single click
       this.clickTimeout = setTimeout(() => {
         this.clickTimeout = null;
-        this.nodeSelect.emit(node.__nodeData);
+        this.nodeSelect.emit(node.__nodeData!);
       }, 300);
     }
   }
@@ -637,20 +639,23 @@ export class ForceGraphRendererComponent
   }
 
   private setupSubscriptions(): void {
-    if (this.update$) {
-      this.update$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    const update$ = this.update$();
+    if (update$) {
+      update$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.updateGraphData();
       });
     }
 
-    if (this.center$) {
-      this.center$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    const center$ = this.center$();
+    if (center$) {
+      center$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.centerView();
       });
     }
 
-    if (this.zoomToFit$) {
-      this.zoomToFit$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    const zoomToFit$ = this.zoomToFit$();
+    if (zoomToFit$) {
+      zoomToFit$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.zoomToFit();
       });
     }
@@ -678,7 +683,7 @@ export class ForceGraphRendererComponent
         this.graph.cameraPosition(
           { x: 0, y: 0, z: 400 },
           { x: 0, y: 0, z: 0 },
-          1000
+          1000,
         );
       }
     }
@@ -712,7 +717,7 @@ export class ForceGraphRendererComponent
         size * 0.8,
         size * 0.8,
         size * 0.5,
-        6
+        6,
       );
     } else {
       geometry = new THREE.SphereGeometry(size);
@@ -727,8 +732,8 @@ export class ForceGraphRendererComponent
     const count = nodeData.data?.count;
 
     // Get incoming link labels
-    const incomingLinks = this.edges.filter(
-      (edge) => edge.target === nodeData.id
+    const incomingLinks = this.edges().filter(
+      (edge) => edge.target === nodeData.id,
     );
     const linkLabels = incomingLinks
       .map((edge) => edge.label || edge.data?.label)
@@ -771,7 +776,7 @@ export class ForceGraphRendererComponent
 
         const nodePartLength = Math.max(
           5,
-          25 - count.toString().length - truncatedLinkText.length - 5
+          25 - count.toString().length - truncatedLinkText.length - 5,
         ); // 5 for " (: )"
         const truncatedLabel =
           label.length > nodePartLength

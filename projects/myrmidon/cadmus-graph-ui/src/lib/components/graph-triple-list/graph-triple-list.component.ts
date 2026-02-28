@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { take } from 'rxjs/operators';
@@ -44,6 +44,7 @@ import { GraphTripleListRepository } from '../../state/graph-triple-list.reposit
     AsyncPipe,
     EllipsisPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphTripleListComponent {
   public page$: Observable<DataPage<UriTriple>>;
