@@ -9,6 +9,7 @@ import {
   model,
   computed,
   inject,
+  signal,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -16,7 +17,7 @@ import {
   PristineChangeEvent,
   UntypedFormGroup,
 } from '@angular/forms';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { deepCopy } from '@myrmidon/ngx-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
@@ -65,9 +66,9 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   public userLevel: number;
 
   /**
-   * An observable with the current dirty state of the editor.
+   * A signal with the current dirty state of the editor.
    */
-  public isDirty$: BehaviorSubject<boolean>;
+  public readonly isDirty = signal<boolean>(false);
 
   /**
    * The identity of the edited model.
@@ -139,7 +140,6 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   ) {
     this.form = formBuilder.group({});
     this.userLevel = 0;
-    this.isDirty$ = new BehaviorSubject<boolean>(false);
     this._appRepository = inject(AppRepository);
 
     effect(() => {
@@ -209,9 +209,8 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
     this._mebSubs.push(
       this.form.events.subscribe((e) => {
         if (e instanceof PristineChangeEvent) {
-          console.log('dirty change: ', !e.pristine);
-          this.isDirty$.next(!e.pristine);
-          this.dirtyChange.emit(this.isDirty$.value);
+          this.isDirty.set(!e.pristine);
+          this.dirtyChange.emit(!e.pristine);
         }
       })
     );

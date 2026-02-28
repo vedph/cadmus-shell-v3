@@ -177,6 +177,7 @@ export class MonacoEditorHelper {
   private _model?: monaco.editor.ITextModel;
   private _editor?: monaco.editor.IStandaloneCodeEditor;
   private _pendingValue?: string;
+  private _settingValue = false;
   private readonly _disposables: monaco.IDisposable[] = [];
 
   constructor(
@@ -205,7 +206,12 @@ export class MonacoEditorHelper {
    */
   setValue(value: string): void {
     if (this._model) {
-      this._model.setValue(value);
+      this._settingValue = true;
+      try {
+        this._model.setValue(value);
+      } finally {
+        this._settingValue = false;
+      }
     } else {
       this._pendingValue = value;
     }
@@ -237,11 +243,15 @@ export class MonacoEditorHelper {
     editor.setModel(this._model);
     this._editor = editor as monaco.editor.IStandaloneCodeEditor;
 
-    // Sync model changes to form control
+    // Sync model changes to form control.
+    // _settingValue guards against marking the form dirty when the value is
+    // set programmatically (e.g. during data loading in updateForm).
     this._disposables.push(
       this._model.onDidChangeContent(() => {
         this._formControl.setValue(this._model!.getValue());
-        this._formControl.markAsDirty();
+        if (!this._settingValue) {
+          this._formControl.markAsDirty();
+        }
         this._formControl.updateValueAndValidity();
       }),
     );

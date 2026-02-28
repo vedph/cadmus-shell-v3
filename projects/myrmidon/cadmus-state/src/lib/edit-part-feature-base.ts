@@ -47,7 +47,7 @@ export abstract class EditPartFeatureBase
   /**
    * True when the wrapped editor component data is dirty.
    */
-  public readonly dirty = signal<boolean | undefined>(undefined);
+  public readonly dirty = signal<boolean>(false);
 
   /**
    * True when loading data.
@@ -211,6 +211,8 @@ export abstract class EditPartFeatureBase
         });
       },
       (reason) => {
+        // restore dirty: save failed, the editor data was not persisted
+        this.dirty.set(true);
         this.snackbar.open(reason.message, 'OK');
       }
     );

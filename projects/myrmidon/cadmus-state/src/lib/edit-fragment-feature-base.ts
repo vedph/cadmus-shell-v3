@@ -50,7 +50,7 @@ export abstract class EditFragmentFeatureBase
   /**
    * True when the wrapped editor component data is dirty.
    */
-  public readonly dirty = signal<boolean | undefined>(undefined);
+  public readonly dirty = signal<boolean>(false);
 
   /**
    * True when loading data.
@@ -150,7 +150,7 @@ export abstract class EditFragmentFeatureBase
    * @param value The value of the dirty state.
    */
   public onDirtyChange(value: boolean): void {
-    console.log('part dirty change (from editor): ' + value);
+    console.log('fragment dirty change (from editor): ' + value);
     this.dirty.set(value);
   }
 
@@ -180,6 +180,8 @@ export abstract class EditFragmentFeatureBase
         });
       },
       (error) => {
+        // restore dirty: save failed, the editor data was not persisted
+        this.dirty.set(true);
         console.error(error);
         this.snackbar.open('Error saving fragment', 'OK');
       }

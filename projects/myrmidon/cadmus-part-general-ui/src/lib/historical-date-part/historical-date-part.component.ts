@@ -124,6 +124,7 @@ export class HistoricalDatePartComponent
     }
     this.references.setValue(part.references || []);
     this.date.setValue(part.date);
+    this.form.markAsPristine();
   }
 
   private updateThesauri(thesauri: ThesauriSet): void {

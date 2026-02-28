@@ -1,7 +1,50 @@
 # History
 
-- 2026-02-28:
+- 2026-02-28: dirty-state reliability improvements across `cadmus-ui`, `cadmus-state`, `cadmus-part-general-ui`:
+  - bug fixes (no migration needed):
+    - `HistoricalDatePartComponent`: `updateForm()` was missing the `this.form.markAsPristine()` call after populating form controls, which caused a persistent false-positive dirty state every time the editor was opened.
+    - `MonacoEditorHelper`: the `onDidChangeContent` listener was unconditionally calling `markAsDirty()`, including for programmatic `setValue()` calls issued from `updateForm()`. A `_settingValue` guard flag now suppresses `markAsDirty()` during programmatic updates, so only genuine user input marks the control as dirty.
+    - `EditFragmentFeatureBase.onDirtyChange()`: fixed log message that erroneously said "part" instead of "fragment".
+    - `EditPartFeatureBase.save()` and `EditFragmentFeatureBase.save()`: on backend save failure the editor form had already been marked pristine (dirty = false), meaning the guard would not fire if the user navigated away immediately after. Both error handlers now call `this.dirty.set(true)` to restore the dirty flag.
+  - ⚠️ breaking changes:
+    - `cadmus-ui`: `ModelEditorComponentBase` `isDirty$: BehaviorSubject<boolean>` has been replaced by `isDirty: Signal<boolean>` (zoneless-safe). Migration steps for client code: 1. Search for `\.isDirty\$` across your project. 2. For every **read** (`isDirty$.value` or `.subscribe`): replace with a signal read `isDirty()` or wrap in `effect()`/`toObservable()`. There should be no external **writes** (`isDirty$.next()`) — that was always an internal call.
+    - `cadmus-state`: `EditPartFeatureBase` and `EditFragmentFeatureBase`: `dirty: Signal<boolean | undefined>` is now `dirty: Signal<boolean>` (initialized to `false` instead of `undefined`). Functionally equivalent — `!undefined === !false === true` — but removes the need for null-checks. Migration steps for client code: 1. Search for `dirty()` calls in your feature components or templates where you check for `undefined`, e.g. `dirty() === undefined` or `dirty() == null`. 2. Remove those undefined checks; `dirty()` is always a `boolean` now.
   - updated Angular and packages.
+  
+The dirty state check approach implemented in this workspace has been refactored. The workspace contains many part/fragment editors. Each is a component implementing `ModelEditorComponentBase<T>` where `T` is the model type, which can be a part or a fragment.
+
+These part/fragment editors are generic components which do not know about their context because we need a fully modular design. So, in turn they get wrapped into so-called "feature" components, which are thin wrapper components which become the target of a navigation route. This allows building a dynamic system where you add new parts/fragments with their editors and routes, defined in -pg libraries.
+
+As these are web editors, when the user navigates away from an editor we need to prompt him for confirmation; otherwise, he might unadvertently close an editor without saving.
+
+So this requires a guard, which checks for the dirty state of each editor component. This is `pendingChangesGuard` from cadmus-core; it is used to decide when the prompt is issued before navigating away. This guard assumes that the component under check implements interface `ComponentCanDeactivate` and invokes this method to check for its dirty state.
+
+In turn, the model editor base implements the interface with `canDeactivate`, which relies on the `dirty` signal; this is set by `onDirtyChange`. 
+
+The feature wrapper components derive from `EditPartFeatureBase` or `EditFragmentFeatureBase` according to whether they wrap a part or fragment editor. Both these base classes do implement `ComponentCanDeactivate`. So, in turn the wrapper needs to be notified by the wrapped child component when something changes in its root form state.
+
+To this end, the wrapper has an `onDirtyChange` event which handles the `dirtyChange` event fired by the wrapped editor. This `dirtyChange` is found in `ModelEditorComponentBase<T>`. In turn, it just reflects changes in `isDirty$`, and is a facility for propagating it to the parent's component. In the OnInit event handler there is this subscription:
+
+```ts
+// dirty check on form
+this._mebSubs.push(
+  this.form.events.subscribe((e) => {
+    if (e instanceof PristineChangeEvent) {
+      console.log('dirty change: ', !e.pristine);
+      this.isDirty$.next(!e.pristine);
+      this.dirtyChange.emit(this.isDirty$.value);
+    }
+  })
+);
+```
+
+So, the idea is that:
+
+1. the editor (derived from `ModelEditorComponentBase<T>`) fires `dirtyChange` when its form data change.
+2. the editor wrapper (the feature component) handles this event.
+3. the guard checks the feature component.
+
+- 2026-02-28:
   - ⚠️ migrate all components to `OnPush`, adjusting them where required. This prepares them for Zone-less apps. Libraries changed:
     - `cadmus-flags-pg`
     - `cadmus-flags-ui`
