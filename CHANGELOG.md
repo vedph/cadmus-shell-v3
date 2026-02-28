@@ -1,5 +1,7 @@
 # History
 
+## 18.0.0
+
 - 2026-02-28: dirty-state reliability improvements across `cadmus-ui`, `cadmus-state`, `cadmus-part-general-ui`:
   - bug fixes (no migration needed):
     - `HistoricalDatePartComponent`: `updateForm()` was missing the `this.form.markAsPristine()` call after populating form controls, which caused a persistent false-positive dirty state every time the editor was opened.
