@@ -1,5 +1,6 @@
 # History
 
+- 2026-02-28: updated Angular and packages.
 - 2026-02-16: 🆕 added `@myrmidon/cadmus-profile-import` with import pages for facets and settings, while also improving a bit the thesaurus importer in `@myrmidon/cadmus-thesaurus-list`. To integrate them in your app:
 
 1. `pnpm i @myrmidon/cadmus-profile-import`.
