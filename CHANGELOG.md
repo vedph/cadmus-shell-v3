@@ -47,7 +47,8 @@ So, the idea is that:
 3. the guard checks the feature component.
 
 - 2026-02-28:
-  - ⚠️ migrate all components to `OnPush`, adjusting them where required. This prepares them for Zone-less apps. Libraries changed:
+  - ⚠️ migrate all components to `OnPush`, adjusting them where required. This prepares them for Zone-less apps. In practice, look for `[identity]=` and `[data]=` in your part editors and ensure they have `()` to call the signal.
+ Libraries changed:
     - `cadmus-flags-pg`
     - `cadmus-flags-ui`
     - `cadmus-graph-pg`
