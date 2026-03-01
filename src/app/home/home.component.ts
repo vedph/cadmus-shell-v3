@@ -11,9 +11,9 @@ import { AuthJwtService } from '@myrmidon/auth-jwt-login';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-  public readonly logged: boolean;
+  public readonly logged = signal<boolean>(false);
 
   constructor(authService: AuthJwtService) {
-    this.logged = authService.currentUserValue !== null;
+    this.logged.set(authService.currentUserValue !== null);
   }
 }
