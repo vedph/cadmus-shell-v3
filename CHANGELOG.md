@@ -1,5 +1,7 @@
 # History
 
+- 2026-03-03: fixes to Monaco and Markdown preview in note and comment parts when used in zoneless environments.
+
 ## 18.0.0
 
 - 2026-02-28: dirty-state reliability improvements across `cadmus-ui`, `cadmus-state`, `cadmus-part-general-ui`:

@@ -32,9 +32,9 @@ Latest versions:
 - cadmus-item-search: 16.1.0
 - cadmus-layer-demo: 15.1.0
 - cadmus-part-general-pg: 16.1.0
-- cadmus-part-general-ui: 16.1.0
+- cadmus-part-general-ui: 16.1.1
 - cadmus-part-philology-pg: 16.2.0
-- cadmus-part-philology-ui: 17.1.0
+- cadmus-part-philology-ui: 17.1.1
 - cadmus-part-taxo-pg: 0.0.3
 - cadmus-part-taxo-ui: 0.1.0
 - cadmus-preview-pg: 17.1.0

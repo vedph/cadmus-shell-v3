@@ -1,8 +1,10 @@
 ﻿import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
+  inject,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
@@ -81,10 +83,16 @@ export class WitnessesFragmentComponent
   extends ModelEditorComponentBase<WitnessesFragment>
   implements OnInit, OnDestroy
 {
+  private readonly _cdr = inject(ChangeDetectorRef);
+
   // Monaco
   private readonly _disposables: monaco.IDisposable[] = [];
   private _txtEditorModel?: monaco.editor.ITextModel;
   private _noteEditorModel?: monaco.editor.ITextModel;
+  // Guards: the editors live inside @if(currentWitnessOpen()), so their
+  // (ready) events fire again on every re-open. Subscribe once per model.
+  private _txtEditorSubscribed = false;
+  private _noteEditorSubscribed = false;
 
   public readonly editorOptions = {
     theme: 'vs-light',
@@ -156,13 +164,22 @@ export class WitnessesFragmentComponent
       monaco.editor.createModel(this.text?.value || '', 'markdown');
     editor.setModel(this._txtEditorModel);
 
-    this._disposables.push(
-      this._txtEditorModel.onDidChangeContent((e) => {
-        this.text.setValue(this._txtEditorModel!.getValue());
-        this.text.markAsDirty();
-        this.text.updateValueAndValidity();
-      }),
-    );
+    // Subscribe only once: the model is reused across panel re-opens, but
+    // this callback fires again each time the @if block re-renders the editor.
+    // Without the guard, every re-open adds another duplicate listener.
+    // markForCheck() is required for zoneless apps: Monaco events fire outside
+    // Angular's change detection, so the view must be explicitly scheduled.
+    if (!this._txtEditorSubscribed) {
+      this._txtEditorSubscribed = true;
+      this._disposables.push(
+        this._txtEditorModel.onDidChangeContent(() => {
+          this.text.setValue(this._txtEditorModel!.getValue());
+          this.text.markAsDirty();
+          this.text.updateValueAndValidity();
+          this._cdr.markForCheck();
+        }),
+      );
+    }
   }
 
   public onCreateNoteEditor(editor: monaco.editor.IEditor) {
@@ -178,13 +195,17 @@ export class WitnessesFragmentComponent
       monaco.editor.createModel(this.note?.value || '', 'markdown');
     editor.setModel(this._noteEditorModel);
 
-    this._disposables.push(
-      this._noteEditorModel.onDidChangeContent((e) => {
-        this.note.setValue(this._noteEditorModel!.getValue());
-        this.note.markAsDirty();
-        this.note.updateValueAndValidity();
-      }),
-    );
+    if (!this._noteEditorSubscribed) {
+      this._noteEditorSubscribed = true;
+      this._disposables.push(
+        this._noteEditorModel.onDidChangeContent(() => {
+          this.note.setValue(this._noteEditorModel!.getValue());
+          this.note.markAsDirty();
+          this.note.updateValueAndValidity();
+          this._cdr.markForCheck();
+        }),
+      );
+    }
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {

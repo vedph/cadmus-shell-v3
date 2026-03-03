@@ -1,10 +1,12 @@
 ﻿import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Inject,
   OnDestroy,
   OnInit,
   Optional,
+  inject,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
@@ -111,7 +113,11 @@ export class NotePartComponent
     this.tag = formBuilder.control(null, Validators.maxLength(100));
     this.text = formBuilder.control(null, Validators.required);
     // Monaco helper
-    this._textHelper = new MonacoEditorHelper(this.text, 'markdown');
+    this._textHelper = new MonacoEditorHelper(
+      this.text,
+      'markdown',
+      inject(ChangeDetectorRef),
+    );
   }
 
   public override ngOnInit(): void {

@@ -1,8 +1,10 @@
 ﻿import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
@@ -104,7 +106,11 @@ export class TokenTextPartComponent
     this.text = formBuilder.control(null, Validators.required);
     this.transform = formBuilder.control('ws');
     // Monaco helper (using 'txt' for plain text)
-    this._textHelper = new MonacoEditorHelper(this.text, 'txt');
+    this._textHelper = new MonacoEditorHelper(
+      this.text,
+      'txt',
+      inject(ChangeDetectorRef),
+    );
   }
 
   public override ngOnInit(): void {

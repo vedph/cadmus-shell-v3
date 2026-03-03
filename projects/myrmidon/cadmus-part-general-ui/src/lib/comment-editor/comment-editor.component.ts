@@ -1,10 +1,12 @@
 ﻿import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Inject,
   OnDestroy,
   OnInit,
   Optional,
+  inject,
   signal,
 } from '@angular/core';
 import {
@@ -204,7 +206,11 @@ export class CommentEditorComponent
     this.categories = formBuilder.control([], { nonNullable: true });
     this.keywords = formBuilder.array([]);
     // Monaco helper
-    this._textHelper = new MonacoEditorHelper(this.text, 'markdown');
+    this._textHelper = new MonacoEditorHelper(
+      this.text,
+      'markdown',
+      inject(ChangeDetectorRef),
+    );
     // settings
     this.initSettings<CommentPartSettings>(COMMENT_PART_TYPEID, (settings) => {
       this.lookupProviderOptions.set(

@@ -1,3 +1,4 @@
+import { ChangeDetectorRef } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 /**
@@ -183,6 +184,7 @@ export class MonacoEditorHelper {
   constructor(
     private readonly _formControl: FormControl<string | null>,
     private readonly _language: string = 'markdown',
+    private readonly _cdRef?: ChangeDetectorRef,
   ) {}
 
   /**
@@ -246,6 +248,8 @@ export class MonacoEditorHelper {
     // Sync model changes to form control.
     // _settingValue guards against marking the form dirty when the value is
     // set programmatically (e.g. during data loading in updateForm).
+    // _cdRef.markForCheck() ensures the component view is re-checked in
+    // zoneless apps, where Monaco events fire outside Angular's CD mechanism.
     this._disposables.push(
       this._model.onDidChangeContent(() => {
         this._formControl.setValue(this._model!.getValue());
@@ -253,6 +257,7 @@ export class MonacoEditorHelper {
           this._formControl.markAsDirty();
         }
         this._formControl.updateValueAndValidity();
+        this._cdRef?.markForCheck();
       }),
     );
   }
