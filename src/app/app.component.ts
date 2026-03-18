@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 // myrmidon
 import { EnvService, RamStorageService } from '@myrmidon/ngx-tools';
 import { AuthJwtService, GravatarPipe, User } from '@myrmidon/auth-jwt-login';
+import { ThemeToggleComponent } from '@myrmidon/ngx-mat-tools';
 
 // bricks
 import {
@@ -48,6 +49,7 @@ import { DC_SCHEME, OD_SCHEME } from './cit-schemes';
     MatToolbarModule,
     MatTooltipModule,
     GravatarPipe,
+    ThemeToggleComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
