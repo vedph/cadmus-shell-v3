@@ -24,10 +24,10 @@
             <th>flags</th>
             <th>title</th>
             <th>description</th>
-            <th class="noif-lt-md">group</th>
-            <th class="noif-lt-md">user</th>
-            <th class="noif-lt-md">last saved</th>
-            <th class="noif-lt-md">creator</th>
+            <th class="noif-lt-md meta">group</th>
+            <th class="noif-lt-md meta">user</th>
+            <th class="noif-lt-md meta">last saved</th>
+            <th class="noif-lt-md meta">creator</th>
           </thead>
           <tbody>
             @for (item of page.items; track item.id) {
@@ -64,12 +64,12 @@
               </td>
               <td class="title">{{ item.title }}</td>
               <td>{{ item.description }}</td>
-              <td class="noif-lt-md nowrap">{{ item.groupId }}</td>
-              <td class="noif-lt-md nowrap">{{ item.userId }}</td>
-              <td class="noif-lt-md nowrap">
+              <td class="noif-lt-md meta">{{ item.groupId }}</td>
+              <td class="noif-lt-md meta">{{ item.userId }}</td>
+              <td class="noif-lt-md meta">
                 {{ item.timeModified | date : "yyyy-MM-dd HH:mm" }}
               </td>
-              <td class="noif-lt-md nowrap">{{ item.creatorId }}</td>
+              <td class="noif-lt-md meta">{{ item.creatorId }}</td>
             </tr>
             }
           </tbody>

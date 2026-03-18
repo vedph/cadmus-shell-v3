@@ -2,6 +2,11 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
+th,
+td {
+  padding: 4px 8px;
+  vertical-align: middle;
+}
 tbody tr:nth-child(odd) {
   background-color: var(--mat-sys-surface-container);
 }
@@ -16,19 +21,25 @@ tbody tr:hover {
 td.fit-width {
   width: 1px;
   white-space: nowrap;
+  padding-left: 0;
+  padding-right: 0;
 }
 tbody tr.selected {
   background-color: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);
 }
-td.nowrap {
-  white-space: nowrap;
-}
+/* Title never wraps; description absorbs the remaining width and wraps instead */
 td.title {
-  min-width: 200px;
+  white-space: nowrap;
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-td.description {
-  max-width: 600px;
+/* Compact metadata columns (group, user, date, creator) */
+td.meta,
+th.meta {
+  white-space: nowrap;
+  font-size: 0.8125rem;
 }
 
 .form-row {
