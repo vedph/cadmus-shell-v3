@@ -1,7 +1,7 @@
 th {
   text-align: left;
   font-weight: normal;
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 .form-row {
   display: flex;

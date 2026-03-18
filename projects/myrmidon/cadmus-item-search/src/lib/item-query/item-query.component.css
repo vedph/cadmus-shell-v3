@@ -5,10 +5,10 @@
 }
 .query-help h4 {
   font-weight: bold;
-  border-bottom: 1px solid silver;
+  border-bottom: 1px solid var(--mat-sys-on-surface-variant);
 }
 .query-help code {
-  color: chocolate;
+  color: var(--mat-sys-primary);
 }
 .full-width {
   width: 100%;
@@ -23,9 +23,9 @@ table.pins tbody tr:nth-child(odd) {
 table.pins th {
   text-align: left;
   font-weight: normal;
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 table.pins td {
   padding: 2px 4px;
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
 }

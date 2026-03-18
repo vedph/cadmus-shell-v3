@@ -1,9 +1,9 @@
 fieldset {
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 4px;
   padding: 8px;
   margin: 8px 0;
 }
 fieldset legend {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }

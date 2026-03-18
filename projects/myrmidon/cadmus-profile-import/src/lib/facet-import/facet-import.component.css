@@ -5,7 +5,7 @@ fieldset {
   padding: 8px;
 }
 legend {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 .hidden {
   display: none;
@@ -27,8 +27,8 @@ legend {
   margin: 8px;
   color: white;
   padding: 4px 8px;
-  background-color: rgb(251, 57, 57);
-  border: 1px solid rgb(251, 57, 57);
+  background-color: var(--mat-sys-error);
+  border: 1px solid var(--mat-sys-error);
   border-radius: 6px;
 }
 .reload-notice {
@@ -37,8 +37,8 @@ legend {
   align-items: center;
   margin: 16px 0;
   padding: 12px;
-  background-color: #fff3e0;
-  border: 1px solid #ffb74d;
+  background-color: var(--mat-sys-warning);
+  border: 1px solid var(--mat-sys-warning);
   border-radius: 4px;
-  color: #e65100;
+  color: var(--mat-sys-on-warning);
 }

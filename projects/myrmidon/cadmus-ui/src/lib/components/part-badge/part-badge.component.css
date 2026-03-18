@@ -4,6 +4,6 @@
 }
 .role-badge {
   padding: 4px;
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
 }

@@ -12,18 +12,18 @@
   font-size: 150%;
   letter-spacing: 2px;
   vertical-align: middle;
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
   flex: 0 0 auto;
 }
 .node-ord {
   font-size: 90%;
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
   margin: 0 4px 0 8px;
   flex: 0 0 auto;
 }
 .node-id {
-  background-color: #0aa668;
-  color: white;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
   border-radius: 6px;
   padding: 4px;
   margin: 0 4px;
@@ -40,7 +40,7 @@
   opacity: 1;
 }
 form {
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   padding: 0 8px;
   border-radius: 6px;
 }

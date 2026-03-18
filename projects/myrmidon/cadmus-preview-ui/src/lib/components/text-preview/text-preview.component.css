@@ -3,7 +3,7 @@ dl {
   border-radius: 6px;
 }
 dt {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 #toolbar {
   margin: 8px;
@@ -12,18 +12,18 @@ dt {
 #preview {
   margin: 8px;
   padding: 6px;
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
 }
 #fragment {
   margin: 8px;
   padding: 6px;
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
 }
 .row-nr {
   font-size: 95%;
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
   margin-bottom: 6px;
-  border-top: 1px solid silver;
+  border-top: 1px solid var(--mat-sys-on-surface-variant);
 }

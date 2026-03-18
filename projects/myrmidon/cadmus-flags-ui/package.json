@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-flags-ui",
-  "version": "15.1.0",
+  "version": "15.1.1",
   "description": "Cadmus - item flags UI.",
   "keywords": [
     "Cadmus"
@@ -21,8 +21,8 @@
     "@angular/core": "^20.0.0 || ^21.0.0",
     "@angular/material": "^20.0.0 || ^21.0.0",
     "@myrmidon/ngx-tools": "^2.0.2",
-    "@myrmidon/ngx-mat-tools": "^1.0.1",
-    "@myrmidon/cadmus-state": "^14.0.4"
+    "@myrmidon/ngx-mat-tools": "^1.0.2",
+    "@myrmidon/cadmus-state": "^15.0.0"
   },
   "sideEffects": false
 }

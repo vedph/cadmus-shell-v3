@@ -19,16 +19,16 @@ td.fit-width {
   white-space: nowrap;
 }
 fieldset {
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
   padding: 4px;
   margin: 8px 0;
 }
 legend {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 div#pvw {
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
   padding: 6px;
   margin: 16px 0;

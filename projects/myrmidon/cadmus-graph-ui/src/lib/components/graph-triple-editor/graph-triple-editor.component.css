@@ -10,16 +10,16 @@
   padding: 8px 16px;
 }
 fieldset#s {
-  border-color: green;
-  color: green;
+  border-color: var(--mat-sys-success);
+  color: var(--mat-sys-success);
 }
 fieldset#p {
-  border-color: orange;
-  color: orange;
+  border-color: var(--mat-sys-warning);
+  color: var(--mat-sys-warning);
 }
 fieldset#o {
-  border-color: royalblue;
-  color: royalblue;
+  border-color: var(--mat-sys-primary);
+  color: var(--mat-sys-primary);
 }
 .form-row {
   display: flex;

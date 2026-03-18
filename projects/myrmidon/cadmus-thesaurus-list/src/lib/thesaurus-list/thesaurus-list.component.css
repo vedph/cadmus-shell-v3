@@ -2,32 +2,32 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
+tbody tr:nth-child(odd) {
+  background-color: var(--mat-sys-surface-container);
+}
 th {
+  text-align: left;
   font-weight: normal;
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
+}
+tbody tr:hover {
+  background-color: var(--mat-sys-surface-container-high);
 }
 td.fit-width {
   width: 1px;
   white-space: nowrap;
 }
-tbody tr:nth-child(odd) {
-  background-color: #e2e2e2;
+tbody tr.selected {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
 }
-th {
-  text-align: left;
-  font-weight: normal;
-  color: silver;
-}
-td.command {
-  width: 24px;
-}
-fieldset {
-  border: 1px solid silver;
+  fieldset {
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
   padding: 6px;
 }
 legend {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 .form-row {
   display: flex;

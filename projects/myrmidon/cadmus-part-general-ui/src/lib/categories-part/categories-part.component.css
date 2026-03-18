@@ -9,7 +9,6 @@ mat-tree {
 }
 .mat-tree-node {
   padding: 0;
-  background-color: white;
 }
 .mat-nested-tree-node {
   top: -24px;
@@ -28,7 +27,7 @@ ul {
 }
 li {
   padding-left: 40px;
-  border: 1px dotted grey;
+  border: 1px dotted var(--mat-sys-on-surface-variant);
   border-width: 0 0 1px 1px;
   position: relative;
   top: -24px;
@@ -40,19 +39,19 @@ li div {
   top: 24px;
 }
 li ul {
-  border-top: 1px dotted grey;
+  border-top: 1px dotted var(--mat-sys-on-surface-variant);
   margin-left: -40px;
   padding-left: 60px;
 }
 .mat-nested-tree-node:last-child ul {
-  border-left: 1px solid white;
+  border-left: 1px solid var(--mat-sys-on-surface-variant);
   margin-left: -41px;
 }
 .mat-mdc-icon-button {
   z-index: 100;
 }
 h3 {
-  border-bottom: 1px solid silver;
+  border-bottom: 1px solid var(--mat-sys-on-surface-variant);
 }
 div#picker {
   grid-area: picker;
@@ -78,7 +77,7 @@ div#container {
   }
 }
 fieldset {
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 8px;
   padding: 8px 16px;
 }

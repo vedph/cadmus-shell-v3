@@ -3,33 +3,37 @@ table {
   border-collapse: collapse;
 }
 tbody tr:nth-child(odd) {
-  background-color: #e2e2e2;
+  background-color: var(--mat-sys-surface-container);
 }
 th {
   text-align: left;
   font-weight: normal;
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
+}
+tbody tr:hover {
+  background-color: var(--mat-sys-surface-container-high);
 }
 td.fit-width {
   width: 1px;
   white-space: nowrap;
 }
-tr.selected {
-  background-color: #d0d0d0 !important;
+tbody tr.selected {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
 }
 fieldset {
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
   padding: 6px;
 }
 .state-title {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
   margin-right: 8px;
 }
 .nr {
-  color: white;
-  background-color: #c0c0c0;
-  border: 1px solid #c0c0c0;
+  color: var(--mat-sys-on-surface-variant);
+  background-color: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 4px;
   padding: 0 2px;
 }

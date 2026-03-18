@@ -5,13 +5,13 @@ fieldset {
   padding: 8px;
 }
 legend {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 .hidden {
   display: none;
 }
 .file-name {
-  color: royalblue;
+  color: var(--mat-sys-primary);
   margin-left: 16px;
 }
 .form-row {
@@ -25,9 +25,9 @@ legend {
 }
 .error {
   margin: 8px;
-  color: white;
+  color: var(--mat-sys-on-error);
   padding: 4px 8px;
-  background-color: rgb(251, 57, 57);
-  border: 1px solid rgb(251, 57, 57);
+  background-color: var(--mat-sys-error);
+  border: 1px solid var(--mat-sys-error);
   border-radius: 6px;
 }

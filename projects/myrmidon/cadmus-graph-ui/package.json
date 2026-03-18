@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-graph-ui",
-  "version": "15.1.0",
+  "version": "15.1.1",
   "description": "Cadmus - semantic graph components.",
   "keywords": [
     "Cadmus"
@@ -18,9 +18,9 @@
     "@angular/core": "^20.0.0 || ^21.0.0",
     "@angular/material": "^20.0.0 || ^21.0.0",
     "@myrmidon/ngx-tools": "^2.0.2",
-    "@myrmidon/ngx-mat-tools": "^1.0.1",
-    "@myrmidon/paged-data-browsers": "^5.1.4",
-    "@myrmidon/cadmus-refs-lookup": "^10.0.8",
+    "@myrmidon/ngx-mat-tools": "^1.0.2",
+    "@myrmidon/paged-data-browsers": "^5.2.0",
+    "@myrmidon/cadmus-refs-lookup": "^10.0.9",
     "@myrmidon/cadmus-api": "^14.0.7"
   },
   "dependencies": {

@@ -22,31 +22,32 @@ Latest versions:
 - cadmus-api: 14.0.7
 - cadmus-core: 12.0.3
 - cadmus-flags-pg: 15.1.0
-- cadmus-flags-ui: 15.1.0
+- cadmus-flags-ui: 15.1.1
 - cadmus-graph-pg: 15.1.0
 - cadmus-graph-pg-ex: 16.1.0
-- cadmus-graph-ui: 15.1.0
-- cadmus-graph-ui-ex: 16.1.0
-- cadmus-item-editor: 16.1.0
-- cadmus-item-list: 16.1.0
-- cadmus-item-search: 16.1.0
-- cadmus-layer-demo: 15.1.0
+- cadmus-graph-ui: 15.1.1
+- cadmus-graph-ui-ex: 16.1.1
+- cadmus-item-editor: 16.1.1
+- cadmus-item-list: 16.1.1
+- cadmus-item-search: 16.1.1
+- cadmus-layer-demo: 15.1.1
 - cadmus-part-general-pg: 16.1.0
-- cadmus-part-general-ui: 16.1.1
+- cadmus-part-general-ui: 16.1.2
 - cadmus-part-philology-pg: 16.2.0
-- cadmus-part-philology-ui: 17.1.1
+- cadmus-part-philology-ui: 17.1.2
 - cadmus-part-taxo-pg: 0.0.3
-- cadmus-part-taxo-ui: 0.1.0
+- cadmus-part-taxo-ui: 0.1.1
 - cadmus-preview-pg: 17.1.0
-- cadmus-preview-ui: 17.1.0
+- cadmus-preview-ui: 17.1.1
 - cadmus-profile-core: 12.0.1
+- cadmus-profile-import: 0.0.2
 - cadmus-state: 15.0.0
 - cadmus-statistics: 1.1.0
 - cadmus-thesaurus-editor: 16.1.0
-- cadmus-thesaurus-list: 16.1.0
-- cadmus-thesaurus-ui: 15.1.0
-- cadmus-ui: 16.1.0
-- cadmus-ui-pg: 16.1.0
+- cadmus-thesaurus-list: 16.1.1
+- cadmus-thesaurus-ui: 15.1.1
+- cadmus-ui: 16.1.1
+- cadmus-ui-pg: 16.1.1
 
 Dependencies:
 

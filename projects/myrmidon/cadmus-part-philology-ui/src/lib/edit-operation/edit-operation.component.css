@@ -16,7 +16,7 @@
 }
 .input {
   font-size: 110%;
-  color: darkred;
+  color: var(--mat-sys-error);
 }
 .arrow {
   font-size: 150%;
@@ -24,29 +24,29 @@
 }
 .output {
   font-size: 110%;
-  color: darkgreen;
+  color: var(--mat-sys-success);
 }
 .nr-field {
   width: 6em;
 }
 .coords {
   font-size: 105%;
-  color: #296D9C;
+  color: var(--mat-sys-primary);
   margin-left: 16px;
 }
 .mt-16 {
   margin-top: 16px;
 }
 fieldset {
-  border: 1px solid silver;
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;
   padding: 6px;
 }
 legend {
-  color: silver;
+  color: var(--mat-sys-on-surface-variant);
 }
 div#help {
   margin: 8px;
   font-size: 85%;
-  color: #444;
+  color: var(--mat-sys-on-surface-variant);
 }

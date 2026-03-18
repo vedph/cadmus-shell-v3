@@ -1,8 +1,8 @@
 div.item-bar {
-  border: 2px solid #f0f0f0;
+  border: 2px solid var(--mat-sys-on-surface-variant);
   border-radius: 4px;
   padding: 4px;
-  background-color: #f0f0f0;
+  background-color: var(--mat-sys-surface);
   margin: 12px;
 }
 div.item-bar h2 {
@@ -15,5 +15,5 @@ div.item-bar p.dsc {
   font-style: italic;
 }
 div.item-bar p.ver {
-  color: #606060;
+  color: var(--mat-sys-on-surface-variant);
 }
