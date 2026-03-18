@@ -1,19 +1,21 @@
 div.item-bar {
-  border: 2px solid var(--mat-sys-on-surface-variant);
+  border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 4px;
+  background-color: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-primary-container);
+  margin: 6px;
   padding: 4px;
-  background-color: var(--mat-sys-surface);
-  margin: 12px;
 }
-div.item-bar h2 {
-  margin: 0 0 8px;
+.title {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-right: 0.5em;
 }
-div.item-bar p {
-  margin: 0 0 6px;
+.id {
+  font-size: 0.8em;
+  font-family: 'Courier New', Courier, monospace;
+  margin-right: 0.5em;
 }
-div.item-bar p.dsc {
-  font-style: italic;
-}
-div.item-bar p.ver {
-  color: var(--mat-sys-on-surface-variant);
+.dsc {
+  font-size: 0.9em;
 }

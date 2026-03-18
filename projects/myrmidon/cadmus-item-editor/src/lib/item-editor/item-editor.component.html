@@ -1,14 +1,17 @@
 <mat-card appearance="outlined">
   <mat-card-header>
-    <mat-card-title>
+    <mat-card-subtitle>
+      <cadmus-current-item-bar />
+    </mat-card-subtitle>
+    <!-- <mat-card-title>
       {{ (item$ | async)?.title || "Item" }}
     </mat-card-title>
     <mat-card-subtitle>
       {{ (item$ | async)?.description }}
-    </mat-card-subtitle>
+    </mat-card-subtitle> -->
   </mat-card-header>
   <mat-card-content>
-    @if (id()) {
+    <!-- @if (id()) {
     <p>
       ID:
       <input
@@ -28,8 +31,9 @@
       Created {{ item.timeCreated | date : "yyyy-MM-dd HH:mm:ss" }} by
       {{ item.creatorId }}.
     </p>
-    } @if (busy()) {
-    <mat-progress-bar mode="indeterminate" />
+    } -->
+    @if (busy()) {
+      <mat-progress-bar mode="indeterminate" />
     }
 
     <!-- item content -->
@@ -42,12 +46,15 @@
             <mat-form-field style="flex: 1 0 auto">
               <mat-label>title</mat-label>
               <input matInput type="text" id="title" [formControl]="title" />
-              @if ( title.hasError('required') && (title.touched || title.dirty)
+              @if (
+                title.hasError("required") && (title.touched || title.dirty)
               ) {
-              <mat-error>enter title</mat-error>
-              } @if ( title.hasError('maxLength') && (title.touched ||
-              title.dirty) ) {
-              <mat-error> title too long</mat-error>
+                <mat-error>enter title</mat-error>
+              }
+              @if (
+                title.hasError("maxLength") && (title.touched || title.dirty)
+              ) {
+                <mat-error> title too long</mat-error>
               }
             </mat-form-field>
 
@@ -60,12 +67,17 @@
                 id="sortKey"
                 [formControl]="sortKey"
               />
-              @if ( sortKey.hasError('required') && (sortKey.touched ||
-              sortKey.dirty) ) {
-              <mat-error>enter sort key</mat-error>
-              } @if ( sortKey.hasError('maxLength') && (sortKey.touched ||
-              sortKey.dirty) ) {
-              <mat-error>sort key too long</mat-error>
+              @if (
+                sortKey.hasError("required") &&
+                (sortKey.touched || sortKey.dirty)
+              ) {
+                <mat-error>enter sort key</mat-error>
+              }
+              @if (
+                sortKey.hasError("maxLength") &&
+                (sortKey.touched || sortKey.dirty)
+              ) {
+                <mat-error>sort key too long</mat-error>
               }
             </mat-form-field>
           </div>
@@ -80,12 +92,17 @@
                 id="description"
                 [formControl]="description"
               ></textarea>
-              @if ( description.hasError('required') && (description.touched ||
-              description.dirty) ) {
-              <mat-error>enter description</mat-error>
-              } @if ( description.hasError('maxLength') && (description.touched
-              || description.dirty) ) {
-              <mat-error>description too long</mat-error>
+              @if (
+                description.hasError("required") &&
+                (description.touched || description.dirty)
+              ) {
+                <mat-error>enter description</mat-error>
+              }
+              @if (
+                description.hasError("maxLength") &&
+                (description.touched || description.dirty)
+              ) {
+                <mat-error>description too long</mat-error>
               }
             </mat-form-field>
           </div>
@@ -96,9 +113,9 @@
               <mat-label>facet</mat-label>
               <mat-select [formControl]="facet" required="true">
                 @for (f of facets$ | async; track f.id) {
-                <mat-option [value]="f.id">
-                  {{ f.label }}
-                </mat-option>
+                  <mat-option [value]="f.id">
+                    {{ f.label }}
+                  </mat-option>
                 }
               </mat-select>
               <mat-error>please select a facet</mat-error>
@@ -108,9 +125,10 @@
             <mat-form-field>
               <mat-label>group ID</mat-label>
               <input matInput [formControl]="group" />
-              @if ( group.hasError('maxLength') && (group.dirty ||
-              group.touched) ) {
-              <mat-error>too long</mat-error>
+              @if (
+                group.hasError("maxLength") && (group.dirty || group.touched)
+              ) {
+                <mat-error>too long</mat-error>
               }
             </mat-form-field>
           </div>
@@ -119,305 +137,331 @@
           <fieldset>
             <legend>flags</legend>
             @if (flagDefinitions().length) {
-            <div formArrayName="flagChecks">
-              @for (c of flagChecks.controls; track c; let i = $index) { @if
-              (userLevel() < 4 && flagDefinitions()[i].isAdmin === true) {
-              <span
-                [style.color]="'#' + flagDefinitions()[i].colorKey"
-                style="margin-left: 12px"
-                >&#x25c6;</span
-              >
-              &nbsp;
-              {{ flagDefinitions()[i].label }}
-              } @else {
-              <mat-checkbox class="flag" [formControlName]="i">
-                <span [style.color]="'#' + flagDefinitions()[i].colorKey"
-                  >&#x2b24;</span
-                >
-                &nbsp;
-                {{ flagDefinitions()[i].label }}
-              </mat-checkbox>
-              } }
-            </div>
+              <div formArrayName="flagChecks">
+                @for (c of flagChecks.controls; track c; let i = $index) {
+                  @if (
+                    userLevel() < 4 && flagDefinitions()[i].isAdmin === true
+                  ) {
+                    <span
+                      [style.color]="'#' + flagDefinitions()[i].colorKey"
+                      style="margin-left: 12px"
+                      >&#x25c6;</span
+                    >
+                    &nbsp;
+                    {{ flagDefinitions()[i].label }}
+                  } @else {
+                    <mat-checkbox class="flag" [formControlName]="i">
+                      <span [style.color]="'#' + flagDefinitions()[i].colorKey"
+                        >&#x2b24;</span
+                      >
+                      &nbsp;
+                      {{ flagDefinitions()[i].label }}
+                    </mat-checkbox>
+                  }
+                }
+              </div>
             }
           </fieldset>
           <br />
 
           <!-- action buttons -->
           @if (userLevel() > 1) {
-          <div class="form-row">
-            <button
-              type="button"
-              mat-flat-button
-              class="mat-warn"
-              (click)="onGenerateItems()"
-            >
-              <mat-icon>copy_all</mat-icon> generate
-            </button>
-            <button
-              type="submit"
-              mat-flat-button
-              class="mat-primary"
-              [disabled]="busy()"
-              matTooltip="Save metadata"
-              (click)="save()"
-            >
-              <mat-icon>save</mat-icon> save
-            </button>
-          </div>
+            <div class="form-row">
+              <button
+                type="button"
+                mat-flat-button
+                class="mat-warn"
+                (click)="onGenerateItems()"
+              >
+                <mat-icon>copy_all</mat-icon> generate
+              </button>
+              <button
+                type="submit"
+                mat-flat-button
+                class="mat-primary"
+                [disabled]="busy()"
+                matTooltip="Save metadata"
+                (click)="save()"
+              >
+                <mat-icon>save</mat-icon> save
+              </button>
+            </div>
           }
         </form>
       </mat-tab>
 
       <!-- parts -->
       @if (id()) {
-      <mat-tab label="Parts">
-        <div class="new-part">
-          <form [formGroup]="newPart" class="form-row">
-            <mat-form-field>
-              <mat-label>part</mat-label>
-              <mat-select [formControl]="newPartType" required>
-                @for (p of newPartDefinitions$ | async; track p.typeId + ':' +
-                (p.roleId || '')) {
-                <mat-option [value]="p">
-                  <span [style.color]="'#' + p.colorKey" class="new-part-icon"
-                    >&#x2b24;</span
-                  >
-                  {{ getPartIdName(p.typeId, p.roleId) }}
-                </mat-option>
-                }
-              </mat-select>
-              <mat-error>part type required</mat-error>
-            </mat-form-field>
-            <button
-              mat-flat-button
-              class="mat-primary"
-              type="button"
-              [disabled]="userLevel() < 2 || busy() || !newPart.valid"
-              (click)="addPart()"
-              matTooltip="Add a new part of the selected type"
-            >
-              <mat-icon>add_circle</mat-icon>
-              part
-            </button>
-          </form>
-        </div>
-        <mat-divider></mat-divider>
-        @for (group of partGroups$ | async; track group.key) {
-        <mat-expansion-panel expanded="true" class="group-header">
-          <mat-expansion-panel-header>
-            <mat-panel-title
-              ><strong>{{ group.label }}</strong></mat-panel-title
-            >
-            <mat-panel-description>{{
-              group.parts.length
-            }}</mat-panel-description>
-          </mat-expansion-panel-header>
-          <table class="parts-table">
-            <thead>
-              <tr>
+        <mat-tab label="Parts">
+          <div class="new-part">
+            <form [formGroup]="newPart" class="form-row">
+              <mat-form-field>
+                <mat-label>part</mat-label>
+                <mat-select [formControl]="newPartType" required>
+                  @for (
+                    p of newPartDefinitions$ | async;
+                    track p.typeId + ":" + (p.roleId || "")
+                  ) {
+                    <mat-option [value]="p">
+                      <span
+                        [style.color]="'#' + p.colorKey"
+                        class="new-part-icon"
+                        >&#x2b24;</span
+                      >
+                      {{ getPartIdName(p.typeId, p.roleId) }}
+                    </mat-option>
+                  }
+                </mat-select>
+                <mat-error>part type required</mat-error>
+              </mat-form-field>
+              <button
+                mat-flat-button
+                class="mat-primary"
+                type="button"
+                [disabled]="userLevel() < 2 || busy() || !newPart.valid"
+                (click)="addPart()"
+                matTooltip="Add a new part of the selected type"
+              >
+                <mat-icon>add_circle</mat-icon>
+                part
+              </button>
+            </form>
+          </div>
+          <mat-divider></mat-divider>
+          @for (group of partGroups$ | async; track group.key) {
+            <mat-expansion-panel expanded="true" class="group-header">
+              <mat-expansion-panel-header>
+                <mat-panel-title
+                  ><strong>{{ group.label }}</strong></mat-panel-title
+                >
+                <mat-panel-description>{{
+                  group.parts.length
+                }}</mat-panel-description>
+              </mat-expansion-panel-header>
+              <table class="parts-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>type</th>
+                    <th>role</th>
+                    <th class="noif-lt-xs">modified</th>
+                    <th class="noif-lt-xs">user</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    part of group.parts;
+                    track part.typeId + ":" + (part.roleId || "")
+                  ) {
+                    <tr>
+                      <!-- edit -->
+                      <td class="fit-width">
+                        <button
+                          mat-icon-button
+                          type="button"
+                          [disabled]="busy()"
+                          (click)="editPart(part)"
+                          matTooltip="Edit this part"
+                        >
+                          <mat-icon class="mat-primary">create</mat-icon>
+                        </button>
+                        <!-- delete -->
+                        @if (
+                          user()?.roles?.length &&
+                          (user()?.roles?.includes("admin") ||
+                            user()?.roles?.includes("editor") ||
+                            user()?.roles?.includes("operator"))
+                        ) {
+                          <button
+                            mat-icon-button
+                            type="button"
+                            [disabled]="userLevel() < 2 || busy()"
+                            (click)="deletePart(part)"
+                            matTooltip="Delete this part"
+                          >
+                            <mat-icon class="mat-warn">delete</mat-icon>
+                          </button>
+                        }
+                        <!-- copy -->
+                        <button
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Copy this part ID"
+                          [cdkCopyToClipboard]="part.id"
+                        >
+                          <mat-icon>assignment</mat-icon>
+                        </button>
+                        <!-- copy into item -->
+                        <button
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Copy part into another item"
+                          (click)="onCopyPart(part)"
+                        >
+                          <mat-icon>open_in_new</mat-icon>
+                        </button>
+                        <!-- preview -->
+                        @if (
+                          part
+                            | hasPreview
+                              : (previewJKeys$ | async)
+                              : (previewFKeys$ | async)
+                        ) {
+                          <button
+                            mat-icon-button
+                            type="button"
+                            matTooltip="Preview this part"
+                            (click)="previewPart(part)"
+                          >
+                            <mat-icon>preview</mat-icon>
+                          </button>
+                        }
+                      </td>
+                      <td>
+                        <cadmus-part-badge
+                          [partTypeIds]="part"
+                          [facetDefinition]="(facet$ | async) || undefined"
+                          [badgeType]="1"
+                          [typeThesaurus]="
+                            (typeThesaurus$ | async) || undefined
+                          "
+                        />
+                      </td>
+                      <td>
+                        <cadmus-part-badge
+                          [partTypeIds]="part"
+                          [facetDefinition]="(facet$ | async) || undefined"
+                          [badgeType]="2"
+                          [typeThesaurus]="
+                            (typeThesaurus$ | async) || undefined
+                          "
+                        />
+                      </td>
+                      <td class="noif-lt-xs">
+                        {{ part.timeModified | date: "yyyy-MM-dd HH:mm:ss" }}
+                      </td>
+                      <td class="noif-lt-xs">{{ part.userId }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </mat-expansion-panel>
+          }
+          <cadmus-missing-parts
+            [facetDefinition]="(facet$ | async) || undefined"
+            [partDefinitions]="(facet$ | async)?.partDefinitions"
+            [parts]="(parts$ | async) || undefined"
+            [typeThesaurus]="(typeThesaurus$ | async) || undefined"
+            (addRequest)="addPart($event)"
+          />
+        </mat-tab>
+      }
+      @if (id()) {
+        <mat-tab label="Layers">
+          @if (layerPartInfos$ | async; as parts) {
+            <table id="layers">
+              <thead>
                 <th></th>
                 <th>type</th>
                 <th>role</th>
-                <th class="noif-lt-xs">modified</th>
-                <th class="noif-lt-xs">user</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (part of group.parts; track part.typeId + ':' + (part.roleId
-              || '')) {
-              <tr>
-                <!-- edit -->
-                <td class="fit-width">
-                  <button
-                    mat-icon-button
-                    type="button"
-                    [disabled]="busy()"
-                    (click)="editPart(part)"
-                    matTooltip="Edit this part"
-                  >
-                    <mat-icon class="mat-primary">create</mat-icon>
-                  </button>
-                  <!-- delete -->
-                  @if ( user()?.roles?.length &&
-                  (user()?.roles?.includes('admin') ||
-                  user()?.roles?.includes('editor') ||
-                  user()?.roles?.includes('operator')) ) {
-                  <button
-                    mat-icon-button
-                    type="button"
-                    [disabled]="userLevel() < 2 || busy()"
-                    (click)="deletePart(part)"
-                    matTooltip="Delete this part"
-                  >
-                    <mat-icon class="mat-warn">delete</mat-icon>
-                  </button>
-                  }
-                  <!-- copy -->
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Copy this part ID"
-                    [cdkCopyToClipboard]="part.id"
-                  >
-                    <mat-icon>assignment</mat-icon>
-                  </button>
-                  <!-- copy into item -->
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Copy part into another item"
-                    (click)="onCopyPart(part)"
-                  >
-                    <mat-icon>open_in_new</mat-icon>
-                  </button>
-                  <!-- preview -->
-                  @if ( part | hasPreview : (previewJKeys$ | async) :
-                  (previewFKeys$ | async) ) {
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Preview this part"
-                    (click)="previewPart(part)"
-                  >
-                    <mat-icon>preview</mat-icon>
-                  </button>
-                  }
-                </td>
-                <td>
-                  <cadmus-part-badge
-                    [partTypeIds]="part"
-                    [facetDefinition]="(facet$ | async) || undefined"
-                    [badgeType]="1"
-                    [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                  />
-                </td>
-                <td>
-                  <cadmus-part-badge
-                    [partTypeIds]="part"
-                    [facetDefinition]="(facet$ | async) || undefined"
-                    [badgeType]="2"
-                    [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                  />
-                </td>
-                <td class="noif-lt-xs">
-                  {{ part.timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
-                </td>
-                <td class="noif-lt-xs">{{ part.userId }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </mat-expansion-panel>
-        }
-        <cadmus-missing-parts
-          [facetDefinition]="(facet$ | async) || undefined"
-          [partDefinitions]="(facet$ | async)?.partDefinitions"
-          [parts]="(parts$ | async) || undefined"
-          [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-          (addRequest)="addPart($event)"
-        />
-      </mat-tab>
-      } @if (id()) {
-      <mat-tab label="Layers">
-        @if (layerPartInfos$ | async; as parts) {
-        <table id="layers">
-          <thead>
-            <th></th>
-            <th>type</th>
-            <th>role</th>
-            <th>frr.</th>
-            <th>last modified</th>
-          </thead>
-          <tbody>
-            @for (part of parts; track part.typeId + ':' + (part.roleId || ''))
-            {
-            <tr>
-              <td class="fit-width">
-                @if (!part.isAbsent) {
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Edit this layer part"
-                  (click)="editPart(part)"
-                >
-                  <mat-icon class="mat-primary">edit</mat-icon>
-                </button>
-                } @if (part.isAbsent) {
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Add this layer part"
-                  [disabled]="userLevel() < 2"
-                  (click)="addLayerPart(part)"
-                >
-                  <mat-icon class="mat-primary">add_circle</mat-icon>
-                </button>
-                } @if (!part.isAbsent) {
-                <button
-                  type="button"
-                  mat-icon-button
-                  matTooltip="Delete this layer part"
-                  [disabled]="userLevel() < 2"
-                  (click)="deletePart(part)"
-                >
-                  <mat-icon class="mat-warn">delete</mat-icon>
-                </button>
-                } @if (!part.isAbsent) {
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Copy this part ID"
-                  [cdkCopyToClipboard]="part.id"
-                >
-                  <mat-icon>assignment</mat-icon>
-                </button>
+                <th>frr.</th>
+                <th>last modified</th>
+              </thead>
+              <tbody>
+                @for (
+                  part of parts;
+                  track part.typeId + ":" + (part.roleId || "")
+                ) {
+                  <tr>
+                    <td class="fit-width">
+                      @if (!part.isAbsent) {
+                        <button
+                          type="button"
+                          mat-icon-button
+                          matTooltip="Edit this layer part"
+                          (click)="editPart(part)"
+                        >
+                          <mat-icon class="mat-primary">edit</mat-icon>
+                        </button>
+                      }
+                      @if (part.isAbsent) {
+                        <button
+                          type="button"
+                          mat-icon-button
+                          matTooltip="Add this layer part"
+                          [disabled]="userLevel() < 2"
+                          (click)="addLayerPart(part)"
+                        >
+                          <mat-icon class="mat-primary">add_circle</mat-icon>
+                        </button>
+                      }
+                      @if (!part.isAbsent) {
+                        <button
+                          type="button"
+                          mat-icon-button
+                          matTooltip="Delete this layer part"
+                          [disabled]="userLevel() < 2"
+                          (click)="deletePart(part)"
+                        >
+                          <mat-icon class="mat-warn">delete</mat-icon>
+                        </button>
+                      }
+                      @if (!part.isAbsent) {
+                        <button
+                          mat-icon-button
+                          type="button"
+                          matTooltip="Copy this part ID"
+                          [cdkCopyToClipboard]="part.id"
+                        >
+                          <mat-icon>assignment</mat-icon>
+                        </button>
+                      }
+                    </td>
+                    <td>
+                      <cadmus-part-badge
+                        [partTypeIds]="part"
+                        [facetDefinition]="(facet$ | async) || undefined"
+                        [badgeType]="1"
+                        [typeThesaurus]="(typeThesaurus$ | async) || undefined"
+                      />
+                    </td>
+                    <td>
+                      <cadmus-part-badge
+                        [partTypeIds]="part"
+                        [facetDefinition]="(facet$ | async) || undefined"
+                        [badgeType]="2"
+                        [typeThesaurus]="(typeThesaurus$ | async) || undefined"
+                      />
+                    </td>
+                    <td
+                      [class.count-n]="part.fragmentCount"
+                      [class.count-z]="!part.fragmentCount"
+                    >
+                      {{ part.fragmentCount }}
+                    </td>
+                    <td>
+                      @if (!part.isAbsent) {
+                        <span>
+                          {{ part.timeModified | date: "yyyy-MM-dd HH:mm:ss" }}
+                        </span>
+                      }
+                    </td>
+                  </tr>
                 }
-              </td>
-              <td>
-                <cadmus-part-badge
-                  [partTypeIds]="part"
-                  [facetDefinition]="(facet$ | async) || undefined"
-                  [badgeType]="1"
-                  [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                />
-              </td>
-              <td>
-                <cadmus-part-badge
-                  [partTypeIds]="part"
-                  [facetDefinition]="(facet$ | async) || undefined"
-                  [badgeType]="2"
-                  [typeThesaurus]="(typeThesaurus$ | async) || undefined"
-                />
-              </td>
-              <td
-                [class.count-n]="part.fragmentCount"
-                [class.count-z]="!part.fragmentCount"
-              >
-                {{ part.fragmentCount }}
-              </td>
-              <td>
-                @if (!part.isAbsent) {
-                <span>
-                  {{ part.timeModified | date : "yyyy-MM-dd HH:mm:ss" }}
-                </span>
-                }
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-        }
-      </mat-tab>
-      } @if (parts$ | async; as parts) {
-      <mat-tab label="Th-Scopes">
-        <!-- [parts]="parts | sort: 'typeId' | sort: 'roleId'" -->
-        <cadmus-parts-scope-editor
-          [parts]="parts"
-          [readonly]="userLevel() < 2 || busy() ? true : false"
-          (setScopeRequest)="setPartsScope($event)"
-        />
-      </mat-tab>
+              </tbody>
+            </table>
+          }
+        </mat-tab>
+      }
+      @if (parts$ | async; as parts) {
+        <mat-tab label="Th-Scopes">
+          <!-- [parts]="parts | sort: 'typeId' | sort: 'roleId'" -->
+          <cadmus-parts-scope-editor
+            [parts]="parts"
+            [readonly]="userLevel() < 2 || busy() ? true : false"
+            (setScopeRequest)="setPartsScope($event)"
+          />
+        </mat-tab>
       }
     </mat-tab-group>
   </mat-card-content>

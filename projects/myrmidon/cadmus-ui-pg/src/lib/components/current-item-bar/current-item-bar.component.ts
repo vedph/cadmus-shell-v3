@@ -2,6 +2,8 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
 
+import { MatTooltip } from '@angular/material/tooltip';
+
 import { Item } from '@myrmidon/cadmus-core';
 import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
 
@@ -10,7 +12,7 @@ import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
   templateUrl: './current-item-bar.component.html',
   styleUrls: ['./current-item-bar.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AsyncPipe, DatePipe],
+  imports: [AsyncPipe, DatePipe, MatTooltip],
 })
 export class CurrentItemBarComponent {
   public item$: Observable<Item | undefined>;

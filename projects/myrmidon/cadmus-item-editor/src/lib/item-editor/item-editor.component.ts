@@ -70,6 +70,7 @@ import {
 } from '@myrmidon/cadmus-api';
 import { MESSAGE_ITEM_LIST_REPOSITORY_RESET } from '@myrmidon/cadmus-item-list';
 import { getPartIdName, PartBadgeComponent } from '@myrmidon/cadmus-ui';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
 
 import {
   PartScopeSetRequest,
@@ -125,6 +126,7 @@ import { HasPreviewPipe } from '../has-preview.pipe';
     HasPreviewPipe,
     PartsScopeEditorComponent,
     PartBadgeComponent,
+    CurrentItemBarComponent,
   ],
 })
 export class ItemEditorComponent

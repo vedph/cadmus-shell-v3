@@ -24,6 +24,9 @@ tbody tr.selected {
 td.nowrap {
   white-space: nowrap;
 }
+td.title {
+  min-width: 200px;
+}
 td.description {
   max-width: 600px;
 }

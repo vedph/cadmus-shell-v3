@@ -1,14 +1,19 @@
 @if (item$ | async; as item) {
   <div class="item-bar">
-    <h3>{{ item.title }}</h3>
-    <p class="dsc">{{ item.description }}</p>
-    <p class="ver">
-      Last saved {{ item.timeModified | date: "yyyy-MM-dd HH:mm:ss" }} by
-      {{ item.userId }}.
-    </p>
-    <p class="ver">
-      Created {{ item.timeCreated | date: "yyyy-MM-dd HH:mm:ss" }} by
-      {{ item.creatorId }}.
-    </p>
+    <span class="title">{{ item.title }}</span>
+    <span class="id">{{ item.id }}</span>
+    &#x2B24;
+    <span class="dsc">
+      {{ item.description }} &#x2B24;
+      <span matTooltip="Last saved"
+        >{{ item.timeModified | date: "yyyy-MM-dd HH:mm:ss" }}
+        {{ item.userId }}</span
+      >
+      &#x2B24;
+      <span matTooltip="Created"
+        >{{ item.timeCreated | date: "yyyy-MM-dd HH:mm:ss" }}
+        {{ item.creatorId }}</span
+      >
+    </span>
   </div>
 }

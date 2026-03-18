@@ -1,6 +1,8 @@
 # History
 
-- 2026-03-18: 🆕 migrated shell app to M3 themes and added dark theme support to components.
+- 2026-03-18:
+  - 🆕 migrated shell app to M3 themes and added dark theme support to components.
+  - item title in cadmus-item-editor, cadmus-item-list, cadmus-ui-pg.
 - 2026-03-03: fixes to Monaco and Markdown preview in note and comment parts when used in zoneless environments.
 
 ## 18.0.0
