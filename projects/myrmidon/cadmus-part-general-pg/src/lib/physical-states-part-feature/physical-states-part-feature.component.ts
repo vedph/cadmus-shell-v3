@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
 import { PhysicalStatesPartComponent } from '@myrmidon/cadmus-part-general-ui';
 import { EditPartFeatureBase, PartEditorService } from '@myrmidon/cadmus-state';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 
 @Component({
   selector: 'cadmus-physical-states-part-feature',

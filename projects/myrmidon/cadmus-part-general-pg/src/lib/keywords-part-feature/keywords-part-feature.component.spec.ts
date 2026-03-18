@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { KeywordsPartFeatureComponent } from './keywords-part-feature.component';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import {
   KeywordsPartComponent,
   KEYWORDS_PART_TYPEID,

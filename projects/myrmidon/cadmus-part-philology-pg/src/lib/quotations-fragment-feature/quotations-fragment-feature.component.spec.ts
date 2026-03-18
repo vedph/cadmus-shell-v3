@@ -8,7 +8,7 @@ import {
 } from '@myrmidon/cadmus-part-philology-ui';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 
 describe('QuotationsFragmentFeatureComponent', () => {
   let component: QuotationsFragmentFeatureComponent;

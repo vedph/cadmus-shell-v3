@@ -7,7 +7,7 @@ import {
 import { LibraryRouteService } from '@myrmidon/cadmus-core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrthographyFragmentComponent } from '@myrmidon/cadmus-part-philology-ui';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
 
 @Component({

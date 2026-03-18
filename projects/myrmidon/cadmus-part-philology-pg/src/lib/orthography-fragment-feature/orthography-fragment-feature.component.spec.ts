@@ -6,7 +6,7 @@ import {
   MspOperationComponent,
   ORTHOGRAPHY_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-philology-ui';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 ;
 import { OrthographyFragmentFeatureComponent } from './orthography-fragment-feature.component';

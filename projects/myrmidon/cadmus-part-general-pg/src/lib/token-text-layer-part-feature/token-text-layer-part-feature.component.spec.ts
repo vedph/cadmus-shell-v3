@@ -6,7 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   CurrentItemBarComponent,
   CurrentLayerPartBarComponent,
-} from '@myrmidon/cadmus-ui-pg';
+} from '@myrmidon/cadmus-item-editor';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TILED_TEXT_PART_TYPEID } from '@myrmidon/cadmus-part-general-ui';
 

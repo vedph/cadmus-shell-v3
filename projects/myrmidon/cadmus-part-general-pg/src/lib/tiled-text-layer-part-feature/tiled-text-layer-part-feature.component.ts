@@ -45,7 +45,7 @@ import { TiledTextLayerView, TextTileLayerView } from './tiled-text-layer-view';
 import {
   CurrentItemBarComponent,
   CurrentLayerPartBarComponent,
-} from '@myrmidon/cadmus-ui-pg';
+} from '@myrmidon/cadmus-item-editor';
 
 /**
  * Tiled text layer part editor.

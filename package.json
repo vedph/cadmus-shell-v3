@@ -10,7 +10,6 @@
     "build-cor": "ng build @myrmidon/cadmus-core",
     "build-api": "ng build @myrmidon/cadmus-api",
     "build-ui": "ng build @myrmidon/cadmus-state && ng build @myrmidon/cadmus-ui",
-    "build-uip": "ng build @myrmidon/cadmus-ui-pg",
     "build-ths": "ng build @myrmidon/cadmus-profile-core && ng build @myrmidon/cadmus-thesaurus-ui && ng build @myrmidon/cadmus-thesaurus-editor && ng build @myrmidon/cadmus-thesaurus-list",
     "build-gen": "ng build @myrmidon/cadmus-part-general-ui && ng build @myrmidon/cadmus-part-general-pg",
     "build-imp": "ng build @myrmidon/cadmus-profile-import",
@@ -21,7 +20,7 @@
     "build-flg": "ng build @myrmidon/cadmus-flags-ui && ng build @myrmidon/cadmus-flags-pg",
     "build-sta": "ng build @myrmidon/cadmus-statistics",
     "build-tax": "ng build @myrmidon/cadmus-part-taxo-ui && ng build @myrmidon/cadmus-part-taxo-pg",
-    "build-lib": "pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-uip && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp"
+    "build-lib": "pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp"
   },
   "overrides": {
     "d3-selection": "3.0.0"

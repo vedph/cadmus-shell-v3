@@ -6,7 +6,7 @@ import {
   FragmentEditorService,
 } from '@myrmidon/cadmus-state';
 import { LibraryRouteService } from '@myrmidon/cadmus-core';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import { QuotationsFragmentComponent } from '@myrmidon/cadmus-part-philology-ui';
 import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
 

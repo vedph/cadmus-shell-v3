@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { Item } from '@myrmidon/cadmus-core';
-import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
+import { EditedItemRepository } from '../state/edited-item.repository';
 
 @Component({
   selector: 'cadmus-current-item-bar',

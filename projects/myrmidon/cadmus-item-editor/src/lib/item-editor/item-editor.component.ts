@@ -70,13 +70,13 @@ import {
 } from '@myrmidon/cadmus-api';
 import { MESSAGE_ITEM_LIST_REPOSITORY_RESET } from '@myrmidon/cadmus-item-list';
 import { getPartIdName, PartBadgeComponent } from '@myrmidon/cadmus-ui';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
 
 import {
   PartScopeSetRequest,
   PartsScopeEditorComponent,
 } from '../parts-scope-editor/parts-scope-editor.component';
 import { EditedItemRepository } from '../state/edited-item.repository';
+import { CurrentItemBarComponent } from '../current-item-bar/current-item-bar.component';
 import { ItemLookupDialogComponent } from '../item-lookup-dialog/item-lookup-dialog.component';
 import { ItemGenerateDialogComponent } from '../item-generate-dialog/item-generate-dialog.component';
 import { MissingPartsComponent } from '../missing-parts/missing-parts.component';

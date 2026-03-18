@@ -1,6 +1,7 @@
 # History
 
 - 2026-03-18:
+  - ⚠️ `CurrentItemBarComponent` and `CurrentLayerPartBarComponent` moved into `@myrmidon/cadmus-item-editor` from library ❌ `@myrmidon/cadmus-ui-pg` which had no other code and has thus been removed. This is a breaking change which avoids potential circular references and removes the need for this tiny library. To upgrade, just update `@myrmidon/cadmus-item-editor` and remove package `@myrmidon/cadmus-ui-pg` altogether, then change the imports accordingly. Libraries affected in this project were `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-pg`, `@myrmidon/cadmus-part-taxo-ui`.
   - 🆕 migrated shell app to M3 themes and added dark theme support to components.
   - item title in cadmus-item-editor, cadmus-item-list, cadmus-ui-pg.
 - 2026-03-03: fixes to Monaco and Markdown preview in note and comment parts when used in zoneless environments.

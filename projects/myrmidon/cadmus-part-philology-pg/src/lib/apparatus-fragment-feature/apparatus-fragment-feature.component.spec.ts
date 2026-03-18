@@ -8,7 +8,7 @@ import {
   APPARATUS_FRAGMENT_TYPEID,
   ApparatusEntryComponent,
 } from '@myrmidon/cadmus-part-philology-ui';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 
 describe('ApparatusFragmentFeatureComponent', () => {
   let component: ApparatusFragmentFeatureComponent;

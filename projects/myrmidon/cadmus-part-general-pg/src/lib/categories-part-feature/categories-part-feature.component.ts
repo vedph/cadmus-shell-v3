@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import { CategoriesPartComponent } from '@myrmidon/cadmus-part-general-ui';
 
 @Component({

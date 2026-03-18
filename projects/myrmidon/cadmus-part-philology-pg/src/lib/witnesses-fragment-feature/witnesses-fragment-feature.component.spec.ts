@@ -6,7 +6,7 @@ import {
   WitnessesFragmentComponent,
   WITNESSES_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-philology-ui';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 

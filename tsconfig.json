@@ -86,9 +86,6 @@
       ],
       "@myrmidon/cadmus-ui": [
         "./dist/myrmidon/cadmus-ui"
-      ],
-      "@myrmidon/cadmus-ui-pg": [
-        "./dist/myrmidon/cadmus-ui-pg"
       ]
     },
     "outDir": "./dist/out-tsc",

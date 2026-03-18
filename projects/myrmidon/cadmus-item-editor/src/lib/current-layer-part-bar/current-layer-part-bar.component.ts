@@ -9,8 +9,9 @@ import {
 import { TextLayerPart } from '@myrmidon/cadmus-core';
 import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository, EditedLayerRepository } from '@myrmidon/cadmus-state';
-import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
 import { Subscription } from 'rxjs';
+
+import { EditedItemRepository } from '../state/edited-item.repository';
 
 @Component({
   selector: 'cadmus-current-layer-part-bar',

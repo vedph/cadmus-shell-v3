@@ -47,7 +47,8 @@ Latest versions:
 - cadmus-thesaurus-list: 16.1.1
 - cadmus-thesaurus-ui: 15.1.1
 - cadmus-ui: 16.1.1
-- cadmus-ui-pg: 16.1.1
+
+> cadmus-ui-pg has been removed!
 
 Dependencies:
 
@@ -112,7 +113,7 @@ graph LR;
   cadmus-part-general-pg --> cadmus-core
   cadmus-part-general-pg --> cadmus-state
   cadmus-part-general-pg --> cadmus-ui
-  cadmus-part-general-pg --> cadmus-ui-pg
+  cadmus-part-general-pg --> cadmus-item-editor
   cadmus-part-general-pg --> cadmus-part-general-ui
   cadmus-part-general-ui --> ngx-tools
   cadmus-part-general-ui --> ngx-mat-tools
@@ -129,7 +130,7 @@ graph LR;
   cadmus-part-philology-pg --> cadmus-core
   cadmus-part-philology-pg --> cadmus-state
   cadmus-part-philology-pg --> cadmus-ui
-  cadmus-part-philology-pg --> cadmus-ui-pg
+  cadmus-part-philology-pg --> cadmus-item-editor
   cadmus-part-philology-pg --> cadmus-part-philology-ui
   cadmus-part-philology-ui --> ngx-tools
   cadmus-part-philology-ui --> ngx-mat-tools
@@ -166,11 +167,6 @@ graph LR;
   cadmus-ui --> cadmus-refs-lookup
   cadmus-ui --> cadmus-core
   cadmus-ui --> cadmus-state
-  cadmus-ui-pg --> cadmus-core
-  cadmus-ui-pg --> cadmus-api
-  cadmus-ui-pg --> cadmus-state
-  cadmus-ui-pg --> cadmus-ui
-  cadmus-ui-pg --> cadmus-item-editor
 ```
 
 ### Parts
@@ -221,7 +217,6 @@ ng g library @myrmidon/cadmus-thesaurus-editor --prefix cadmus --force
 ng g library @myrmidon/cadmus-thesaurus-list --prefix cadmus --force
 ng g library @myrmidon/cadmus-thesaurus-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-ui --prefix cadmus --force
-ng g library @myrmidon/cadmus-ui-pg --prefix cadmus --force
 ```
 
 ## History

@@ -7,7 +7,7 @@ import {
 } from '@myrmidon/cadmus-state';
 import { LibraryRouteService } from '@myrmidon/cadmus-core';
 import { DecoratedTokenTextComponent } from '@myrmidon/cadmus-ui';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import { WitnessesFragmentComponent } from '@myrmidon/cadmus-part-philology-ui';
 
 @Component({

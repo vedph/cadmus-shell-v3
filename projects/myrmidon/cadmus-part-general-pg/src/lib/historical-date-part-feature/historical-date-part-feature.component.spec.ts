@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { HistoricalDatePartFeatureComponent } from './historical-date-part-feature.component';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import {
   HistoricalDatePartComponent,
   HISTORICAL_DATE_PART_TYPEID,

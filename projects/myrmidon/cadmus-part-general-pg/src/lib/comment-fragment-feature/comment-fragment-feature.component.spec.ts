@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { CommentFragmentFeatureComponent } from './comment-fragment-feature.component';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import {
   CommentFragmentComponent,
   CHRONOLOGY_FRAGMENT_TYPEID,

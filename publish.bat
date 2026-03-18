@@ -145,9 +145,4 @@ call npm publish --access=public
 cd ..\..\..
 pause
 
-cd .\dist\myrmidon\cadmus-ui-pg
-call npm publish --access=public
-cd ..\..\..
-pause
-
 echo ALL DONE

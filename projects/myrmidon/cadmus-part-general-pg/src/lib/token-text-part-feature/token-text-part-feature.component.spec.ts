@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgeMonacoModule } from '@cisstech/nge/monaco';
 
 import { TokenTextPartFeatureComponent } from './token-text-part-feature.component';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import {
   TokenTextPartComponent,
   TILED_TEXT_PART_TYPEID,

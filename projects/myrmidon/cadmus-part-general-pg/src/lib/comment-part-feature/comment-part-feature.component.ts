@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ItemService, ThesaurusService } from '@myrmidon/cadmus-api';
 import { CommentEditorComponent } from '@myrmidon/cadmus-part-general-ui';
-import { CurrentItemBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 
 @Component({
   selector: 'cadmus-comment-part-feature',

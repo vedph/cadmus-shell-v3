@@ -39,7 +39,7 @@ import {
   DecoratedTokenTextComponent,
   LayerHintsComponent,
 } from '@myrmidon/cadmus-ui';
-import { CurrentItemBarComponent, CurrentLayerPartBarComponent } from '@myrmidon/cadmus-ui-pg';
+import { CurrentItemBarComponent, CurrentLayerPartBarComponent } from '@myrmidon/cadmus-item-editor';
 
 /**
  * Token-based text layer part feature editor. This is a special type of editor,

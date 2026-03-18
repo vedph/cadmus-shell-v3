@@ -789,36 +789,6 @@
         }
       }
     },
-    "@myrmidon/cadmus-ui-pg": {
-      "projectType": "library",
-      "root": "projects/myrmidon/cadmus-ui-pg",
-      "sourceRoot": "projects/myrmidon/cadmus-ui-pg/src",
-      "prefix": "cadmus",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "options": {
-            "project": "projects/myrmidon/cadmus-ui-pg/ng-package.json"
-          },
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/myrmidon/cadmus-ui-pg/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/myrmidon/cadmus-ui-pg/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "tsConfig": "projects/myrmidon/cadmus-ui-pg/tsconfig.spec.json",
-            "polyfills": ["zone.js", "zone.js/testing"]
-          }
-        }
-      }
-    },
     "@myrmidon/cadmus-graph-pg-ex": {
       "projectType": "library",
       "root": "projects/myrmidon/cadmus-graph-pg-ex",
