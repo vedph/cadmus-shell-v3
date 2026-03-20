@@ -12,7 +12,7 @@ export class FacetService {
   constructor(
     private _http: HttpClient,
     private _error: ErrorService,
-    private _env: EnvService
+    private _env: EnvService,
   ) {}
 
   /**
@@ -61,7 +61,7 @@ export class FacetService {
   public getFacetParts(
     id: string,
     idIsItem: boolean,
-    noRoles = false
+    noRoles = false,
   ): Observable<PartDefinition[]> {
     let url = idIsItem
       ? this._env.get('apiUrl')! + `item-facets/${id}/parts`
@@ -96,7 +96,7 @@ export class FacetService {
   public getPartColor(
     typeId: string,
     roleId: string | undefined,
-    facet: FacetDefinition | undefined
+    facet: FacetDefinition | undefined,
   ): string {
     let def: PartDefinition | undefined;
     if (facet) {
@@ -110,5 +110,25 @@ export class FacetService {
       }
     }
     return def ? '#' + def.colorKey : '#f0f0f0';
+  }
+
+  /**
+   * Add or update the specified facet.
+   * @param facet The facet to add or update.
+   */
+  public addFacet(facet: FacetDefinition): Observable<FacetDefinition> {
+    return this._http
+      .post<FacetDefinition>(`${this._env.get('apiUrl')}facets`, facet)
+      .pipe(catchError(this._error.handleError));
+  }
+
+  /**
+   * Delete the facet with the specified ID.
+   * @param id The facet ID.
+   */
+  public deleteFacet(id: string): Observable<void> {
+    return this._http
+      .delete<void>(`${this._env.get('apiUrl')}facets/${id}`)
+      .pipe(catchError(this._error.handleError));
   }
 }

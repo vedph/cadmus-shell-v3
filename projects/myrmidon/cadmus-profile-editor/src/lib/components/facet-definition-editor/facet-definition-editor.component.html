@@ -1,0 +1,196 @@
+<form [formGroup]="form" (submit)="save()">
+  <mat-tab-group>
+    <!-- GENERAL -->
+    <mat-tab label="general">
+      <div class="form-row">
+        <!-- id -->
+        <mat-form-field>
+          <mat-label>ID</mat-label>
+          <input matInput [formControl]="id" />
+          @if ($any(id).errors?.required && (id.dirty || id.touched)) {
+            <mat-error>ID required</mat-error>
+          }
+          @if ($any(id).errors?.maxLength && (id.dirty || id.touched)) {
+            <mat-error>ID too long</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- label -->
+        <mat-form-field>
+          <mat-label>label</mat-label>
+          <input matInput [formControl]="label" />
+          @if ($any(label).errors?.required && (label.dirty || label.touched)) {
+            <mat-error>label required</mat-error>
+          }
+          @if (
+            $any(label).errors?.maxLength && (label.dirty || label.touched)
+          ) {
+            <mat-error>label too long</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- color -->
+        <mat-form-field>
+          <mat-label>color</mat-label>
+          <input matInput [formControl]="colorKey" />
+          @if (
+            $any(colorKey).errors?.pattern &&
+            (colorKey.dirty || colorKey.touched)
+          ) {
+            <mat-error>invalid color key</mat-error>
+          }
+          <!-- TODO: add mat-suffix button with color picker -->
+        </mat-form-field>
+      </div>
+
+      <!-- description -->
+      <div>
+        <mat-form-field class="long-text">
+          <mat-label>description</mat-label>
+          <textarea matInput [formControl]="description" rows="2"></textarea>
+          @if (
+            $any(description).errors?.maxLength &&
+            (description.dirty || description.touched)
+          ) {
+            <mat-error>description too long</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </mat-tab>
+
+    <!-- PARTS -->
+    <mat-tab label="parts">
+      <div>
+        <button
+          type="button"
+          mat-flat-button
+          color="primary"
+          (click)="addPartDefinition()"
+        >
+          <mat-icon>add_circle</mat-icon> part
+        </button>
+      </div>
+      @if (partDefinitions.value.length) {
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>required</th>
+              <th>type ID</th>
+              <th>role ID</th>
+              <th>name</th>
+              <th>group</th>
+              <th>color</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              entry of partDefinitions.value;
+              track entry;
+              let i = $index;
+              let first = $first;
+              let last = $last
+            ) {
+              <tr [class.selected]="i === editedIndex()">
+                <td class="fit-width">
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="primary"
+                    matTooltip="Edit this part definition"
+                    (click)="editPartDefinition(entry, i)"
+                  >
+                    <mat-icon class="mat-primary">edit</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this part definition up"
+                    [disabled]="first"
+                    (click)="movePartDefinitionUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this part definition down"
+                    [disabled]="last"
+                    (click)="movePartDefinitionDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="warn"
+                    matTooltip="Delete this part definition"
+                    (click)="deletePartDefinition(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td class="fit-width">
+                  <mat-checkbox
+                    [checked]="entry.isRequired"
+                    disabled
+                  ></mat-checkbox>
+                </td>
+                <td>{{ entry.typeId }}</td>
+                <td>{{ entry.roleId }}</td>
+                <td>{{ entry.name }}</td>
+                <td>{{ entry.groupKey }}</td>
+                <td>
+                  <span
+                    [style.background-color]="
+                      '#' + entry.colorKey | stringToColor
+                    "
+                    [style.color]="'#' + entry.colorKey | colorToContrast"
+                  >
+                    {{ entry.colorKey }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+      @if (edited()) {
+        <fieldset>
+          <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
+            <mat-expansion-panel-header>
+              <mat-panel-title>PartDefinition #</mat-panel-title>
+            </mat-expansion-panel-header>
+            <cadmus-part-definition-editor
+              [availablePartTypeIds]="availablePartTypeIds()"
+              [hideSortKey]="true"
+              [definition]="edited()"
+              (definitionChange)="savePartDefinition($event!)"
+              (editorClose)="closePartDefinition()"
+            />
+          </mat-expansion-panel>
+        </fieldset>
+      }
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- buttons -->
+  <div>
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Discard changes"
+      (click)="cancel()"
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      mat-icon-button
+      matTooltip="Accept changes"
+      [disabled]="form.invalid || form.pristine"
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon>
+    </button>
+  </div>
+</form>

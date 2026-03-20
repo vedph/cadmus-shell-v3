@@ -923,6 +923,32 @@
           }
         }
       }
+    },
+    "@myrmidon/cadmus-profile-editor": {
+      "projectType": "library",
+      "root": "projects/myrmidon/cadmus-profile-editor",
+      "sourceRoot": "projects/myrmidon/cadmus-profile-editor/src",
+      "prefix": "cadmus",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/myrmidon/cadmus-profile-editor/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/myrmidon/cadmus-profile-editor/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/myrmidon/cadmus-profile-editor/tsconfig.spec.json"
+          }
+        }
+      }
     }
   },
   "schematics": {

@@ -66,6 +66,9 @@
       "@myrmidon/cadmus-profile-core": [
         "./dist/myrmidon/cadmus-profile-core"
       ],
+      "@myrmidon/cadmus-profile-editor": [
+        "./dist/myrmidon/cadmus-profile-editor"
+      ],
       "@myrmidon/cadmus-profile-import": [
         "./dist/myrmidon/cadmus-profile-import"
       ],
@@ -108,5 +111,13 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "references": [
+    {
+      "path": "./projects/myrmidon/cadmus-profile-editor/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/myrmidon/cadmus-profile-editor/tsconfig.spec.json"
+    }
+  ]
 }

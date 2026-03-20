@@ -1,0 +1,135 @@
+<form [formGroup]="form" (submit)="save()">
+  <div class="form-row">
+    <!-- typeId (bound) -->
+    @if (availablePartTypeIds().length) {
+      <mat-form-field>
+        <mat-label>type</mat-label>
+        <mat-select [formControl]="typeId">
+          @for (id of availablePartTypeIds(); track id) {
+            <mat-option [value]="id">{{ id }}</mat-option>
+          }
+        </mat-select>
+        @if (
+          $any(typeId).errors?.required && (typeId.dirty || typeId.touched)
+        ) {
+          <mat-error>type ID required</mat-error>
+        }
+      </mat-form-field>
+    } @else {
+      <!-- typeId (free) -->
+      <mat-form-field>
+        <mat-label>type ID</mat-label>
+        <input matInput [formControl]="typeId" />
+        @if (
+          $any(typeId).errors?.required && (typeId.dirty || typeId.touched)
+        ) {
+          <mat-error>type ID required</mat-error>
+        }
+        @if (
+          $any(typeId).errors?.maxLength && (typeId.dirty || typeId.touched)
+        ) {
+          <mat-error>type ID too long</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <!-- roleId -->
+    <mat-form-field>
+      <mat-label>role ID</mat-label>
+      <input matInput [formControl]="roleId" />
+      @if ($any(roleId).errors?.required && (roleId.dirty || roleId.touched)) {
+        <mat-error>role ID required</mat-error>
+      }
+      @if ($any(roleId).errors?.maxLength && (roleId.dirty || roleId.touched)) {
+        <mat-error>role ID too long</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- required -->
+    <mat-checkbox [formControl]="required">required</mat-checkbox>
+  </div>
+
+  <div class="form-row">
+    <!-- name -->
+    <mat-form-field>
+      <mat-label>name</mat-label>
+      <input matInput [formControl]="name" />
+      @if ($any(name).errors?.required && (name.dirty || name.touched)) {
+        <mat-error>name required</mat-error>
+      }
+      @if ($any(name).errors?.maxLength && (name.dirty || name.touched)) {
+        <mat-error>name too long</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- color -->
+    <mat-form-field>
+      <mat-label>color</mat-label>
+      <input matInput [formControl]="colorKey" />
+      @if (
+        $any(colorKey).errors?.pattern && (colorKey.dirty || colorKey.touched)
+      ) {
+        <mat-error>invalid color key</mat-error>
+      }
+      <!-- TODO: add mat-suffix button with color picker -->
+    </mat-form-field>
+
+    <!-- group -->
+    <mat-form-field>
+      <mat-label>group</mat-label>
+      <input matInput [formControl]="groupKey" />
+      @if (
+        $any(groupKey).errors?.maxLength && (groupKey.dirty || groupKey.touched)
+      ) {
+        <mat-error>group key too long</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- sortKey -->
+    @if (!hideSortKey()) {
+      <mat-form-field>
+        <mat-label>sort key</mat-label>
+        <input matInput [formControl]="sortKey" />
+        @if (
+          $any(sortKey).errors?.maxLength && (sortKey.dirty || sortKey.touched)
+        ) {
+          <mat-error>sort key too long</mat-error>
+        }
+      </mat-form-field>
+    }
+  </div>
+
+  <!-- description -->
+  <div>
+    <mat-form-field class="long-text">
+      <mat-label>description</mat-label>
+      <textarea matInput [formControl]="description" rows="2"></textarea>
+      @if (
+        $any(description).errors?.maxLength &&
+        (description.dirty || description.touched)
+      ) {
+        <mat-error>description too long</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <!-- buttons -->
+  <div>
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Discard changes"
+      (click)="cancel()"
+    >
+      <mat-icon class="mat-warn">clear</mat-icon>
+    </button>
+    <button
+      type="submit"
+      mat-icon-button
+      matTooltip="Accept changes"
+      [disabled]="form.invalid || form.pristine"
+    >
+      <mat-icon class="mat-primary">check_circle</mat-icon>
+    </button>
+  </div>
+</form>

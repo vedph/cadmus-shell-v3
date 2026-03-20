@@ -19,7 +19,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 14.0.7
+- cadmus-api: 14.0.8
 - cadmus-core: 12.0.3
 - cadmus-flags-pg: 15.1.0
 - cadmus-flags-ui: 15.1.1
