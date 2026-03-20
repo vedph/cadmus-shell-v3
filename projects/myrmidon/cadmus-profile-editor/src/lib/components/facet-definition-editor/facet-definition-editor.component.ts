@@ -165,7 +165,11 @@ export class FacetDefinitionEditorComponent {
       this.label.setValue(data.label);
       this.colorKey.setValue(data.colorKey);
       this.description.setValue(data.description);
-      this.partDefinitions.setValue(data.partDefinitions);
+      // sort by sortKey so that the displayed order always matches the key order
+      const sorted = [...data.partDefinitions].sort((a, b) =>
+        (a.sortKey ?? '').localeCompare(b.sortKey ?? ''),
+      );
+      this.partDefinitions.setValue(sorted);
       this.form.markAsPristine();
     }
   }

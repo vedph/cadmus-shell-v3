@@ -16,6 +16,10 @@ import { catchError, concatMap, toArray } from 'rxjs/operators';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 import { FacetModelSettings, FacetService } from '@myrmidon/cadmus-api';
+import {
+  FacetDefinitionValidatorService,
+  FacetValidationResult,
+} from '../../services/facet-definition-validator.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
@@ -68,6 +72,10 @@ export class FacetDefinitionListEditorComponent implements OnInit {
   public readonly saveResult = signal<string | undefined>(undefined);
   /** True after at least one facet was successfully saved; prompts an app reload. */
   public readonly reloadNeeded = signal<boolean>(false);
+  /** Last validation result, set by validate() and by save(). */
+  public readonly validationResult = signal<FacetValidationResult | undefined>(
+    undefined,
+  );
 
   /**
    * The facet models settings, used to get the list of available part type IDs,
@@ -83,6 +91,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
   constructor(
     private _dialogService: DialogService,
     private _facetService: FacetService,
+    private _validator: FacetDefinitionValidatorService,
     private _snackbar: MatSnackBar,
   ) {}
 
@@ -207,11 +216,19 @@ export class FacetDefinitionListEditorComponent implements OnInit {
     this.editorClose.emit();
   }
 
-  public save(): void {
+  /**
+   * Run validation against the current facet list and update validationResult.
+   * Returns the result so callers can inspect it immediately.
+   */
+  public validate(): FacetValidationResult {
+    const result = this._validator.validate(this.facets());
+    this.validationResult.set(result);
+    return result;
+  }
+
+  /** Persist all facets to the server; called only after all gates pass. */
+  private _doSave(): void {
     const facets = this.facets();
-    if (!facets.length) {
-      return;
-    }
     this.busy.set(true);
     this.saveResult.set(undefined);
 
@@ -246,5 +263,64 @@ export class FacetDefinitionListEditorComponent implements OnInit {
         }
         this.saveResult.set(parts.join(' | '));
       });
+  }
+
+  /**
+   * Final confirmation gate before the actual write.
+   * Always shown, even when there are no warnings or errors.
+   */
+  private _confirmAndSave(): void {
+    this._dialogService
+      .confirm(
+        'Save facets',
+        'Saving replaces ALL facet definitions on the server. ' +
+          'This may affect every item in the database. Proceed?',
+      )
+      .subscribe((ok) => {
+        if (ok) {
+          this._doSave();
+        }
+      });
+  }
+
+  /**
+   * Validate the current facets, then — if there are no blocking errors —
+   * walk the user through confirmation gates before saving.
+   *
+   * Gates (in order):
+   * 1. Validation errors → block save, show results.
+   * 2. Validation warnings → ask user to confirm before continuing.
+   * 3. Final critical-operation confirmation → always shown.
+   */
+  public save(): void {
+    if (!this.facets().length) {
+      return;
+    }
+
+    const result = this.validate();
+
+    if (result.hasErrors) {
+      // validation result is already displayed; nothing more to do
+      return;
+    }
+
+    if (result.hasWarnings) {
+      const warnCount = result.issues.filter(
+        (i) => i.severity === 'warning',
+      ).length;
+      this._dialogService
+        .confirm(
+          'Warnings',
+          `There ${warnCount === 1 ? 'is 1 warning' : `are ${warnCount} warnings`}. ` +
+            'Review the validation results below. Proceed anyway?',
+        )
+        .subscribe((ok) => {
+          if (ok) {
+            this._confirmAndSave();
+          }
+        });
+    } else {
+      this._confirmAndSave();
+    }
   }
 }

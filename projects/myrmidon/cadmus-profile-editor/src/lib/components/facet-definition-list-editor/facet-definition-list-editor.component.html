@@ -3,6 +3,9 @@
     <button type="button" mat-flat-button color="primary" (click)="addFacet()">
       <mat-icon>add_circle</mat-icon> facet
     </button>
+    <button type="button" mat-flat-button (click)="validate()">
+      <mat-icon>fact_check</mat-icon> validate
+    </button>
     <button type="button" mat-flat-button color="warn" (click)="save()">
       <mat-icon>save</mat-icon> save
     </button>
@@ -12,14 +15,37 @@
       <mat-progress-bar mode="indeterminate" color="accent" />
     }
   </div>
+  @if (validationResult(); as vr) {
+    <div class="validation-result">
+      @if (!vr.issues.length) {
+        <span>No issues found.</span>
+      } @else {
+        <div class="validation-issues">
+          @for (issue of vr.issues; track $index) {
+            <div class="validation-issue {{ issue.severity }}">
+              <mat-icon>{{
+                issue.severity === "error" ? "error" : "warning"
+              }}</mat-icon>
+              <span>{{ issue.message }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
   @if (reloadNeeded()) {
     <div class="reload-notice">
       <mat-icon>info</mat-icon>
       <span
-        >Facet definitions are cached at startup. Please reload the app to
-        apply the changes.</span
+        >Facet definitions are cached at startup. Please reload the app to apply
+        the changes.</span
       >
-      <button type="button" mat-flat-button color="primary" (click)="reloadApp()">
+      <button
+        type="button"
+        mat-flat-button
+        color="primary"
+        (click)="reloadApp()"
+      >
         <mat-icon>refresh</mat-icon>
         reload app
       </button>

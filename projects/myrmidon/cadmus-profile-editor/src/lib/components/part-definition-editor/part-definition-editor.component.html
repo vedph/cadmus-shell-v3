@@ -96,7 +96,9 @@
         type="color"
         class="color-picker-input"
         #colorPicker
-        [value]="colorKey.value?.length === 6 ? '#' + colorKey.value : '#000000'"
+        [value]="
+          colorKey.value?.length === 6 ? '#' + colorKey.value : '#000000'
+        "
         (input)="onColorPick(colorPicker.value)"
       />
       <button

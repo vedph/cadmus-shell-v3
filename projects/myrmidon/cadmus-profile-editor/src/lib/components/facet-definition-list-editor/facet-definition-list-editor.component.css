@@ -26,6 +26,26 @@ fieldset {
   border-radius: 6px;
   padding: 6px;
 }
+.validation-result {
+  margin: 8px 0;
+}
+.validation-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+}
+.validation-issue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.validation-issue.error {
+  color: var(--mat-sys-error);
+}
+.validation-issue.warning {
+  color: var(--mat-sys-tertiary);
+}
 .reload-notice {
   display: flex;
   gap: 8px;
