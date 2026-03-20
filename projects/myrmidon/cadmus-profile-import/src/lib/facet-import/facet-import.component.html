@@ -95,6 +95,7 @@
   <div class="error">{{ result()!.error }}</div>
   } @if (result()!.importedIds.length) {
   <div>
+    @if (!wasDryRun()) {
     <div class="reload-notice">
       <mat-icon>info</mat-icon>
       <span
@@ -106,6 +107,7 @@
         reload app
       </button>
     </div>
+    }
     <mat-card>
       <mat-card-header>
         <mat-card-title>Imported IDs</mat-card-title>

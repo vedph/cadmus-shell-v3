@@ -109,6 +109,8 @@ export class FacetImportComponent {
   public readonly uploadProgress = signal<number>(0);
   public readonly uploading = signal<boolean>(false);
   public readonly result = signal<UploadResult | undefined>(undefined);
+  /** True when the last upload was a dry run (no actual changes were made). */
+  public readonly wasDryRun = signal<boolean>(false);
 
   constructor(
     formBuilder: FormBuilder,
@@ -146,6 +148,7 @@ export class FacetImportComponent {
       return;
     }
     this.result.set(undefined);
+    this.wasDryRun.set(this.dryRun.value);
     this.uploading.set(true);
     this.uploadStart.emit();
 

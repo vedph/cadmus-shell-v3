@@ -12,6 +12,19 @@
       <mat-progress-bar mode="indeterminate" color="accent" />
     }
   </div>
+  @if (reloadNeeded()) {
+    <div class="reload-notice">
+      <mat-icon>info</mat-icon>
+      <span
+        >Facet definitions are cached at startup. Please reload the app to
+        apply the changes.</span
+      >
+      <button type="button" mat-flat-button color="primary" (click)="reloadApp()">
+        <mat-icon>refresh</mat-icon>
+        reload app
+      </button>
+    </div>
+  }
   @if (facets().length) {
     <table>
       <thead>
@@ -96,7 +109,7 @@
           [facetModelSettings]="facetModelSettings()"
           [definition]="edited()"
           (definitionChange)="saveFacet($event!)"
-          (editorClose)="close()"
+          (cancelEdit)="closeFacet()"
         />
       </mat-expansion-panel>
     </fieldset>

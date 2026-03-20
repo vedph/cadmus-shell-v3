@@ -1,6 +1,13 @@
-import { Component, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 
 // material
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { from, of } from 'rxjs';
@@ -36,6 +43,8 @@ import { FacetDefinitionEditorComponent } from '../facet-definition-editor/facet
 @Component({
   selector: 'cadmus-facet-definition-list-editor',
   imports: [
+    MatButton,
+    MatIconButton,
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
@@ -48,14 +57,17 @@ import { FacetDefinitionEditorComponent } from '../facet-definition-editor/facet
   ],
   templateUrl: './facet-definition-list-editor.component.html',
   styleUrl: './facet-definition-list-editor.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FacetDefinitionListEditorComponent {
+export class FacetDefinitionListEditorComponent implements OnInit {
   public readonly edited = signal<FacetDefinition | undefined>(undefined);
   public readonly editedIndex = signal<number>(-1);
   public readonly dirty = signal<boolean>(false);
   public readonly facets = signal<FacetDefinition[]>([]);
   public readonly busy = signal<boolean>(false);
   public readonly saveResult = signal<string | undefined>(undefined);
+  /** True after at least one facet was successfully saved; prompts an app reload. */
+  public readonly reloadNeeded = signal<boolean>(false);
 
   /**
    * The facet models settings, used to get the list of available part type IDs,
@@ -187,6 +199,10 @@ export class FacetDefinitionListEditorComponent {
     }
   }
 
+  public reloadApp(): void {
+    window.location.href = '/';
+  }
+
   public close(): void {
     this.editorClose.emit();
   }
@@ -202,9 +218,7 @@ export class FacetDefinitionListEditorComponent {
     from(facets)
       .pipe(
         concatMap((facet) =>
-          this._facetService.addFacet(facet).pipe(
-            catchError(() => of(null)),
-          ),
+          this._facetService.addFacet(facet).pipe(catchError(() => of(null))),
         ),
         toArray(),
       )
@@ -220,6 +234,9 @@ export class FacetDefinitionListEditorComponent {
         });
         this.busy.set(false);
         this.dirty.set(failed.length > 0);
+        if (saved.length > 0) {
+          this.reloadNeeded.set(true);
+        }
         const parts: string[] = [];
         if (saved.length) {
           parts.push(`Saved: ${saved.join(', ')}`);

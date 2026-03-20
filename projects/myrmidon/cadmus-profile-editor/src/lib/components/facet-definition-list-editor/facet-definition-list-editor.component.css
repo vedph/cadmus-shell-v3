@@ -26,6 +26,17 @@ fieldset {
   border-radius: 6px;
   padding: 6px;
 }
+.reload-notice {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 16px 0;
+  padding: 12px;
+  background-color: var(--mat-sys-warning);
+  border: 1px solid var(--mat-sys-warning);
+  border-radius: 4px;
+  color: var(--mat-sys-on-warning);
+}
 .form-row {
   display: flex;
   gap: 8px;

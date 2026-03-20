@@ -1,11 +1,14 @@
 import {
+  ChangeDetectionStrategy,
   Component,
+  Signal,
   computed,
   effect,
   input,
   model,
   output,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormControl,
@@ -27,6 +30,7 @@ import { MatIcon } from '@angular/material/icon';
 
 import { PartDefinition } from '@myrmidon/cadmus-core';
 import { FacetModelSettings } from '@myrmidon/cadmus-api';
+import { MatSuffix } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 
@@ -54,10 +58,12 @@ import { MatCheckbox } from '@angular/material/checkbox';
     MatLabel,
     MatOption,
     MatSelect,
+    MatSuffix,
     MatTooltip,
   ],
   templateUrl: './part-definition-editor.component.html',
   styleUrl: './part-definition-editor.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartDefinitionEditorComponent {
   /**
@@ -100,12 +106,13 @@ export class PartDefinitionEditorComponent {
    * case, the role ID select is shown with the list of available fragment IDs
    * from the facet model settings; otherwise, a free text input is shown for
    * the role ID.
+   * Initialized in the constructor so it can reactively track typeId changes
+   * via a toSignal-wrapped valueChanges observable.
    */
-  public readonly isBaseTextPart = computed(() => {
-    const settings = this.facetModelSettings();
-    const typeId = this.typeId.value;
-    return settings?.parts?.[typeId]?.baseText === true;
-  });
+  public readonly isBaseTextPart: Signal<boolean>;
+
+  /** Signal that mirrors typeId.valueChanges so computed() can track it. */
+  private readonly _typeIdValue: Signal<string>;
 
   /**
    * True to hide the sort key field. This is used when the sort key is
@@ -135,6 +142,14 @@ export class PartDefinitionEditorComponent {
     this.typeId = formBuilder.control<string>('', {
       validators: [Validators.required, Validators.maxLength(100)],
       nonNullable: true,
+    });
+    // mirror typeId value as a signal so computed() tracks it reactively
+    this._typeIdValue = toSignal(this.typeId.valueChanges, {
+      initialValue: this.typeId.value,
+    });
+    this.isBaseTextPart = computed(() => {
+      const settings = this.facetModelSettings();
+      return settings?.parts?.[this._typeIdValue()]?.baseText === true;
     });
     this.roleId = formBuilder.control<string | null>(null);
     this.name = formBuilder.control<string>('', {
@@ -204,6 +219,12 @@ export class PartDefinitionEditorComponent {
       sortKey: this.sortKey.value?.trim() || undefined,
       settings: this.settings.value?.trim() || undefined,
     };
+  }
+
+  public onColorPick(value: string): void {
+    // native color input returns "#rrggbb" — strip the leading "#"
+    this.colorKey.setValue(value.slice(1));
+    this.colorKey.markAsDirty();
   }
 
   public cancel(): void {

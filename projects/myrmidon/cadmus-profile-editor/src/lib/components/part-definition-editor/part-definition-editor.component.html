@@ -92,7 +92,22 @@
       ) {
         <mat-error>invalid color key</mat-error>
       }
-      <!-- TODO: add mat-suffix button with color picker -->
+      <input
+        type="color"
+        class="color-picker-input"
+        #colorPicker
+        [value]="colorKey.value?.length === 6 ? '#' + colorKey.value : '#000000'"
+        (input)="onColorPick(colorPicker.value)"
+      />
+      <button
+        type="button"
+        mat-icon-button
+        matSuffix
+        matTooltip="Pick color"
+        (click)="colorPicker.click()"
+      >
+        <mat-icon>palette</mat-icon>
+      </button>
     </mat-form-field>
 
     <!-- group -->

@@ -1,3 +1,6 @@
+input[type='color'].color-picker-input {
+  display: none;
+}
 .form-row {
   display: flex;
   gap: 8px;

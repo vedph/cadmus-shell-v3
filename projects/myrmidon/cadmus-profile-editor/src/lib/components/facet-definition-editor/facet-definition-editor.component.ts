@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
@@ -18,7 +19,12 @@ import {
 // material
 import { MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import {
+  MatError,
+  MatFormField,
+  MatLabel,
+  MatSuffix,
+} from '@angular/material/form-field';
 import {
   MatExpansionPanel,
   MatExpansionPanelHeader,
@@ -38,7 +44,9 @@ import { FacetModelSettings } from '@myrmidon/cadmus-api';
 import { PartDefinitionEditorComponent } from '../part-definition-editor/part-definition-editor.component';
 
 /**
- * Editor for a facet definition and its part definitions.
+ * Editor for a single facet definition and its part definitions.
+ * This editor is used as a descendant of the facet definition list editor, and allows
+ * to edit a single facet definition and its part definitions.
  */
 @Component({
   selector: 'cadmus-facet-definition-editor',
@@ -54,6 +62,7 @@ import { PartDefinitionEditorComponent } from '../part-definition-editor/part-de
     MatIconButton,
     MatInput,
     MatLabel,
+    MatSuffix,
     MatTab,
     MatTabGroup,
     MatTooltip,
@@ -63,6 +72,7 @@ import { PartDefinitionEditorComponent } from '../part-definition-editor/part-de
   ],
   templateUrl: './facet-definition-editor.component.html',
   styleUrl: './facet-definition-editor.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FacetDefinitionEditorComponent {
   /**
@@ -160,7 +170,7 @@ export class FacetDefinitionEditorComponent {
     }
   }
 
-  private getData(): FacetDefinition {
+  private getDefinition(): FacetDefinition {
     return {
       id: this.id.value.trim(),
       label: this.label.value.trim(),
@@ -269,12 +279,18 @@ export class FacetDefinitionEditorComponent {
   }
   //#endregion
 
+  public onColorPick(value: string): void {
+    // native color input returns "#rrggbb" — strip the leading "#"
+    this.colorKey.setValue(value.slice(1));
+    this.colorKey.markAsDirty();
+  }
+
   public cancel(): void {
     this.cancelEdit.emit();
   }
 
   /**
-   * Saves the current form data by updating the `data` model signal.
+   * Saves the current form data by updating the `definition` model signal.
    * This method can be called manually (e.g., by a Save button) or
    * automatically (via auto-save).
    * @param pristine If true (default), the form is marked as pristine
@@ -288,7 +304,7 @@ export class FacetDefinitionEditorComponent {
       return;
     }
 
-    const data = this.getData();
+    const data = this.getDefinition();
     this.definition.set(data);
 
     if (pristine) {
