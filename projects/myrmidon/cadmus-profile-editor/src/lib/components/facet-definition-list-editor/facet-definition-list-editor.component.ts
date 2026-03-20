@@ -3,9 +3,12 @@ import { Component, output, signal } from '@angular/core';
 // material
 import { MatSnackBar } from '@angular/material/snack-bar';
 
+import { from, of } from 'rxjs';
+import { catchError, concatMap, toArray } from 'rxjs/operators';
+
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
-import { FacetService } from '@myrmidon/cadmus-api';
+import { FacetModelSettings, FacetService } from '@myrmidon/cadmus-api';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
@@ -13,39 +16,55 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
+import { MatProgressBar } from '@angular/material/progress-bar';
 import { ColorToContrastPipe, StringToColorPipe } from '@myrmidon/ngx-tools';
 
 import { FacetDefinitionEditorComponent } from '../facet-definition-editor/facet-definition-editor.component';
 
 /**
- * Editor for a list of facets. Cadmus facets represent the data types
- * of items, and define all the parts which can be included in an item.
- * This editor is used to edit the list of facets from the current profile.
- * As the top level editor, it loads and saves the facets list, and allows
- * to add, edit, delete and reorder facets. The actual editing of a facet
- * is delegated to the FacetDefinitionEditorComponent.
+ * Editor for a list of facet definitions. Cadmus facet definitions represent the data
+ * types of items, and define all the parts which can be included in an item. Some of
+ * them are required, others are optional. There can be multiple parts of the same type
+ * in the same item, provided that their roleId is different.
+ * This editor is used to edit the list of facet definitions from the current profile.
+ * As the top level editor, it loads and saves the facet definitions list via API
+ * services, and allows to add, edit, delete and reorder facet definitions.
+ * The actual editing of a facet definition is delegated to descendant dumb components.
+ * All edits happen in memory until the user clicks the Save button, which saves all
+ * facet definitions to the server, and shows the result of the operation.
  */
 @Component({
-  selector: 'cadmus-facet-list-editor',
+  selector: 'cadmus-facet-definition-list-editor',
   imports: [
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     MatIcon,
     MatTooltip,
+    MatProgressBar,
     ColorToContrastPipe,
     StringToColorPipe,
     FacetDefinitionEditorComponent,
   ],
-  templateUrl: './facet-list-editor.component.html',
-  styleUrl: './facet-list-editor.component.css',
+  templateUrl: './facet-definition-list-editor.component.html',
+  styleUrl: './facet-definition-list-editor.component.css',
 })
-export class FacetListEditorComponent {
+export class FacetDefinitionListEditorComponent {
   public readonly edited = signal<FacetDefinition | undefined>(undefined);
   public readonly editedIndex = signal<number>(-1);
   public readonly dirty = signal<boolean>(false);
   public readonly facets = signal<FacetDefinition[]>([]);
   public readonly busy = signal<boolean>(false);
+  public readonly saveResult = signal<string | undefined>(undefined);
+
+  /**
+   * The facet models settings, used to get the list of available part type IDs,
+   * and whether they are base text parts; in this case, the same settings also
+   * provide the list of their available role IDs from the fragments property.
+   */
+  public readonly facetModelSettings = signal<FacetModelSettings | undefined>(
+    undefined,
+  );
 
   public readonly editorClose = output<void>();
 
@@ -58,17 +77,28 @@ export class FacetListEditorComponent {
   public ngOnInit(): void {
     // load facets once at start
     this.busy.set(true);
-    this._facetService.getFacets().subscribe(
-      (facets) => {
+    this._facetService.getFacets().subscribe({
+      next: (facets) => {
         this.facets.set(facets);
         this.busy.set(false);
       },
-      (error) => {
+      error: (error) => {
         console.error(error);
         this.busy.set(false);
         this._snackbar.open('Error loading facets', 'Close');
       },
-    );
+    });
+
+    // load facet model settings once at start
+    this._facetService.getFacetModelSettings().subscribe({
+      next: (settings) => {
+        this.facetModelSettings.set(settings);
+      },
+      error: (error) => {
+        console.error(error);
+        this._snackbar.open('Error loading facet model settings', 'Close');
+      },
+    });
   }
 
   public addFacet(): void {
@@ -159,5 +189,45 @@ export class FacetListEditorComponent {
 
   public close(): void {
     this.editorClose.emit();
+  }
+
+  public save(): void {
+    const facets = this.facets();
+    if (!facets.length) {
+      return;
+    }
+    this.busy.set(true);
+    this.saveResult.set(undefined);
+
+    from(facets)
+      .pipe(
+        concatMap((facet) =>
+          this._facetService.addFacet(facet).pipe(
+            catchError(() => of(null)),
+          ),
+        ),
+        toArray(),
+      )
+      .subscribe((results) => {
+        const saved: string[] = [];
+        const failed: string[] = [];
+        results.forEach((result, i) => {
+          if (result) {
+            saved.push(facets[i].id);
+          } else {
+            failed.push(facets[i].id);
+          }
+        });
+        this.busy.set(false);
+        this.dirty.set(failed.length > 0);
+        const parts: string[] = [];
+        if (saved.length) {
+          parts.push(`Saved: ${saved.join(', ')}`);
+        }
+        if (failed.length) {
+          parts.push(`Failed: ${failed.join(', ')}`);
+        }
+        this.saveResult.set(parts.join(' | '));
+      });
   }
 }

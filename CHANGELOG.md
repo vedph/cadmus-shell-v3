@@ -1,7 +1,9 @@
 # History
 
 - 2026-03-20:
-  - `cadmus-api`: added methods to facet service for additional endpoints and increased version number (14.0.8).
+  - `cadmus-api`:
+    - added methods to facet service for additional endpoints and increased version number (14.0.8).
+    - added `getFacetModelSettings` to facet service.
   - 🆕 adding new library cadmus-profile-editor to provide facet editing UI.
 - 2026-03-18:
   - ⚠️ `CurrentItemBarComponent` and `CurrentLayerPartBarComponent` moved into `@myrmidon/cadmus-item-editor` from library ❌ `@myrmidon/cadmus-ui-pg` which had no other code and has thus been removed. This is a breaking change which avoids potential circular references and removes the need for this tiny library. To upgrade, just update `@myrmidon/cadmus-item-editor` and remove package `@myrmidon/cadmus-ui-pg` altogether, then change the imports accordingly. Libraries affected in this project were `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-pg`, `@myrmidon/cadmus-part-taxo-ui`.

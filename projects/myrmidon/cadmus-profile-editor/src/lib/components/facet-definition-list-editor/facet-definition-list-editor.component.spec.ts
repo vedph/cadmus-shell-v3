@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FacetListEditorComponent } from './facet-list-editor.component';
+import { FacetDefinitionListEditorComponent } from './facet-definition-list-editor.component';
 
 describe('FacetListEditorComponent', () => {
-  let component: FacetListEditorComponent;
-  let fixture: ComponentFixture<FacetListEditorComponent>;
+  let component: FacetDefinitionListEditorComponent;
+  let fixture: ComponentFixture<FacetDefinitionListEditorComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FacetListEditorComponent]
+      imports: [FacetDefinitionListEditorComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(FacetListEditorComponent);
+    fixture = TestBed.createComponent(FacetDefinitionListEditorComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

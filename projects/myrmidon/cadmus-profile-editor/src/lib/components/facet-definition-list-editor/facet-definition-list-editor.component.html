@@ -1,15 +1,26 @@
 <div>
-  <div>
+  <div class="form-row">
     <button type="button" mat-flat-button color="primary" (click)="addFacet()">
-      <mat-icon>add_circle</mat-icon> Facet
+      <mat-icon>add_circle</mat-icon> facet
     </button>
+    <button type="button" mat-flat-button color="warn" (click)="save()">
+      <mat-icon>save</mat-icon> save
+    </button>
+  </div>
+  <div>
+    @if (busy()) {
+      <mat-progress-bar mode="indeterminate" color="accent" />
+    }
   </div>
   @if (facets().length) {
     <table>
       <thead>
         <tr>
           <th></th>
-          TODO: add model properties
+          <th>ID</th>
+          <th>label</th>
+          <th>color</th>
+          <th>parts</th>
         </tr>
       </thead>
       <tbody>
@@ -26,7 +37,7 @@
                 type="button"
                 mat-icon-button
                 color="primary"
-                matTooltip="Edit this Facet"
+                matTooltip="Edit this facet"
                 (click)="editFacet(entry, i)"
               >
                 <mat-icon class="mat-primary">edit</mat-icon>
@@ -34,7 +45,7 @@
               <button
                 type="button"
                 mat-icon-button
-                matTooltip="Move this Facet up"
+                matTooltip="Move this facet up"
                 [disabled]="first"
                 (click)="moveFacetUp(i)"
               >
@@ -43,7 +54,7 @@
               <button
                 type="button"
                 mat-icon-button
-                matTooltip="Move this Facet down"
+                matTooltip="Move this facet down"
                 [disabled]="last"
                 (click)="moveFacetDown(i)"
               >
@@ -53,13 +64,23 @@
                 type="button"
                 mat-icon-button
                 color="warn"
-                matTooltip="Delete this Facet"
+                matTooltip="Delete this facet"
                 (click)="deleteFacet(i)"
               >
                 <mat-icon class="mat-warn">remove_circle</mat-icon>
               </button>
             </td>
-            TODO: td's for properties
+            <td>{{ entry.id }}</td>
+            <td>{{ entry.label }}</td>
+            <td>
+              <span
+                [style.background-color]="'#' + entry.colorKey | stringToColor"
+                [style.color]="'#' + entry.colorKey | colorToContrast"
+              >
+                {{ entry.colorKey }}
+              </span>
+            </td>
+            <td>{{ entry.partDefinitions.length }}</td>
           </tr>
         }
       </tbody>
@@ -71,8 +92,12 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Facet #</mat-panel-title>
         </mat-expansion-panel-header>
-        TODO: editor control with: [model]="edited()"
-        (modelChange)="saveFacet($event)" (editorClose)="closeFacet()"
+        <cadmus-facet-definition-editor
+          [facetModelSettings]="facetModelSettings()"
+          [definition]="edited()"
+          (definitionChange)="saveFacet($event!)"
+          (editorClose)="close()"
+        />
       </mat-expansion-panel>
     </fieldset>
   }

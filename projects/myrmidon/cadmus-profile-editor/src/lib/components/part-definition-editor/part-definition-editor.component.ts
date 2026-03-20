@@ -1,5 +1,11 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, effect, input, model, output } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  model,
+  output,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -9,17 +15,31 @@ import {
 } from '@angular/forms';
 
 // material
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';
+import {
+  MatError,
+  MatFormField,
+  MatInput,
+  MatLabel,
+} from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 
 import { PartDefinition } from '@myrmidon/cadmus-core';
+import { FacetModelSettings } from '@myrmidon/cadmus-api';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 /**
- * Editor for a single part definition.
+ * Editor for a single part definition. This allows users to edit the part definition
+ * properties: type ID, selected from a list if facet model settings are provided,
+ * or entered freely if not (but this should not happen, as at least part definitions
+ * should be present and these provide fallback model settings); role ID, selected
+ * from a closed list when the part type is a base text part, or entered freely otherwise;
+ * name; color; group; sort key; description; and whether the part is required or not
+ * in its facet.
+ * NOTE: part definition settings are not edited here. They are defined server-side
+ * and will later be obsoleted.
  */
 @Component({
   selector: 'cadmus-part-definition-editor',
@@ -34,7 +54,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
     MatLabel,
     MatOption,
     MatSelect,
-    MatTooltip
+    MatTooltip,
   ],
   templateUrl: './part-definition-editor.component.html',
   styleUrl: './part-definition-editor.component.css',
@@ -46,11 +66,46 @@ export class PartDefinitionEditorComponent {
   public readonly definition = model<PartDefinition | undefined>();
 
   /**
-   * The list of available part type IDs to choose from when editing the
-   * part definition. If not set, the editor will show a free text input
-   * for the part type ID.
+   * The facet models settings, used to get the list of available part type IDs,
+   * and whether they are base text parts; in this case, the same settings also
+   * provide the list of their available role IDs from the fragments property.
    */
-  public readonly availablePartTypeIds = input<string[]>([]);
+  public readonly facetModelSettings = input<FacetModelSettings | undefined>(
+    undefined,
+  );
+
+  /**
+   * The list of available part type IDs, taken from the facet model settings.
+   * If the facet model settings are not provided, or do not contain any part
+   * definition, this list is empty and the type ID must be entered freely.
+   */
+  public readonly availablePartTypeIds = computed(() => {
+    const settings = this.facetModelSettings();
+    return settings?.parts ? Object.keys(settings.parts) : [];
+  });
+
+  /**
+   * The list of available fragment IDs, taken from the facet model settings.
+   * This is used to populate the role ID select when the part type is a base
+   * text part (i.e. its baseText property in settings is true).
+   */
+  public readonly availableFragmentIds = computed(() => {
+    const settings = this.facetModelSettings();
+    return settings?.fragments ? Object.keys(settings.fragments) : [];
+  });
+
+  /**
+   * True if the part type is a base text part, i.e. if the facet model settings
+   * for the current part type ID has the baseText property set to true. In this
+   * case, the role ID select is shown with the list of available fragment IDs
+   * from the facet model settings; otherwise, a free text input is shown for
+   * the role ID.
+   */
+  public readonly isBaseTextPart = computed(() => {
+    const settings = this.facetModelSettings();
+    const typeId = this.typeId.value;
+    return settings?.parts?.[typeId]?.baseText === true;
+  });
 
   /**
    * True to hide the sort key field. This is used when the sort key is

@@ -33,17 +33,38 @@
       </mat-form-field>
     }
 
-    <!-- roleId -->
-    <mat-form-field>
-      <mat-label>role ID</mat-label>
-      <input matInput [formControl]="roleId" />
-      @if ($any(roleId).errors?.required && (roleId.dirty || roleId.touched)) {
-        <mat-error>role ID required</mat-error>
-      }
-      @if ($any(roleId).errors?.maxLength && (roleId.dirty || roleId.touched)) {
-        <mat-error>role ID too long</mat-error>
-      }
-    </mat-form-field>
+    <!-- roleId is to be selected from a list if the part is a base text part -->
+    @if (isBaseTextPart()) {
+      <mat-form-field>
+        <mat-label>role ID</mat-label>
+        <mat-select [formControl]="roleId">
+          @for (e of availableFragmentIds(); track e) {
+            <mat-option [value]="e">{{ e }}</mat-option>
+          }
+        </mat-select>
+        @if (
+          $any(roleId).errors?.required && (roleId.dirty || roleId.touched)
+        ) {
+          <mat-error>role ID required</mat-error>
+        }
+      </mat-form-field>
+    } @else {
+      <!-- else roleId is free -->
+      <mat-form-field>
+        <mat-label>role ID</mat-label>
+        <input matInput [formControl]="roleId" />
+        @if (
+          $any(roleId).errors?.required && (roleId.dirty || roleId.touched)
+        ) {
+          <mat-error>role ID required</mat-error>
+        }
+        @if (
+          $any(roleId).errors?.maxLength && (roleId.dirty || roleId.touched)
+        ) {
+          <mat-error>role ID too long</mat-error>
+        }
+      </mat-form-field>
+    }
 
     <!-- required -->
     <mat-checkbox [formControl]="required">required</mat-checkbox>

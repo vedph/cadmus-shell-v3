@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   effect,
   input,
   model,
@@ -32,6 +33,7 @@ import { ColorToContrastPipe, StringToColorPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { FacetDefinition, PartDefinition } from '@myrmidon/cadmus-core';
+import { FacetModelSettings } from '@myrmidon/cadmus-api';
 
 import { PartDefinitionEditorComponent } from '../part-definition-editor/part-definition-editor.component';
 
@@ -69,11 +71,23 @@ export class FacetDefinitionEditorComponent {
   public readonly definition = model<FacetDefinition | undefined>();
 
   /**
-   * The list of available part type IDs to choose from when editing the
-   * part definition. If not set, the editor will show a free text input
-   * for the part type ID.
+   * The facet models settings, used to get the list of available part type IDs,
+   * and whether they are base text parts; in this case, the same settings also
+   * provide the list of their available role IDs from the fragments property.
    */
-  public readonly availablePartTypeIds = input<string[]>([]);
+  public readonly facetModelSettings = input<FacetModelSettings | undefined>(
+    undefined,
+  );
+
+  /**
+   * The list of available part type IDs, taken from the facet model settings.
+   * If the facet model settings are not provided, or do not contain any part
+   * definition, this list is empty and the type ID must be entered freely.
+   */
+  public readonly availablePartTypeIds = computed(() => {
+    const settings = this.facetModelSettings();
+    return settings?.parts ? Object.keys(settings.parts) : [];
+  });
 
   /**
    * Emitted when user requests to cancel the edit and close this editor.

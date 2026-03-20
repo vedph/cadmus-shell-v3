@@ -18,7 +18,8 @@ export class EditorSettingsService {
   ) {}
 
   /**
-   * Get the setting with the specified ID.
+   * Get the setting with the specified ID. If the setting is not found,
+   * an empty object is returned.
    * @param id The setting's ID.
    */
   public getSetting<T>(id: string): Observable<T> {
