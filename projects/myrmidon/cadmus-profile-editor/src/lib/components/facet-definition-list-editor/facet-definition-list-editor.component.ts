@@ -227,7 +227,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
   }
 
   /** Persist all facets to the server; called only after all gates pass. */
-  private _doSave(): void {
+  private doSave(): void {
     const facets = this.facets();
     this.busy.set(true);
     this.saveResult.set(undefined);
@@ -269,7 +269,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
    * Final confirmation gate before the actual write.
    * Always shown, even when there are no warnings or errors.
    */
-  private _confirmAndSave(): void {
+  private confirmAndSave(): void {
     this._dialogService
       .confirm(
         'Save facets',
@@ -278,7 +278,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
       )
       .subscribe((ok) => {
         if (ok) {
-          this._doSave();
+          this.doSave();
         }
       });
   }
@@ -316,11 +316,11 @@ export class FacetDefinitionListEditorComponent implements OnInit {
         )
         .subscribe((ok) => {
           if (ok) {
-            this._confirmAndSave();
+            this.confirmAndSave();
           }
         });
     } else {
-      this._confirmAndSave();
+      this.confirmAndSave();
     }
   }
 }
