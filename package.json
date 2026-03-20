@@ -13,6 +13,7 @@
     "build-ths": "ng build @myrmidon/cadmus-profile-core && ng build @myrmidon/cadmus-thesaurus-ui && ng build @myrmidon/cadmus-thesaurus-editor && ng build @myrmidon/cadmus-thesaurus-list",
     "build-gen": "ng build @myrmidon/cadmus-part-general-ui && ng build @myrmidon/cadmus-part-general-pg",
     "build-imp": "ng build @myrmidon/cadmus-profile-import",
+    "build-prd": "ng build @myrmidon/cadmus-profile-editor",
     "build-phi": "ng build @myrmidon/cadmus-part-philology-ui && ng build @myrmidon/cadmus-part-philology-pg",
     "build-itm": "ng build @myrmidon/cadmus-item-list && ng build @myrmidon/cadmus-item-editor && ng build @myrmidon/cadmus-item-search && ng build @myrmidon/cadmus-layer-demo",
     "build-grp": "ng build @myrmidon/cadmus-graph-ui && ng build @myrmidon/cadmus-graph-ui-ex && ng build @myrmidon/cadmus-graph-pg && ng build @myrmidon/cadmus-graph-pg-ex",
@@ -20,7 +21,9 @@
     "build-flg": "ng build @myrmidon/cadmus-flags-ui && ng build @myrmidon/cadmus-flags-pg",
     "build-sta": "ng build @myrmidon/cadmus-statistics",
     "build-tax": "ng build @myrmidon/cadmus-part-taxo-ui && ng build @myrmidon/cadmus-part-taxo-pg",
-    "build-lib": "pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp"
+    "build-lib": "pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp && pnpm run build-prd",
+    "build-all": "pnpm run build-lib && ng build",
+    "test-all": "ng test --watch=false --browsers=ChromeHeadlessNoSandbox"
   },
   "overrides": {
     "d3-selection": "3.0.0"
