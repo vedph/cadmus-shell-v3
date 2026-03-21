@@ -1,4 +1,5 @@
 div.item-bar {
+  width: 100%;
   border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 4px;
   background-color: var(--mat-sys-surface-container);

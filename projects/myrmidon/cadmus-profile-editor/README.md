@@ -2,63 +2,22 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
 
-## Code scaffolding
+This library contains components for editing Cadmus item facets.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+In Cadmus, which is a general-purpose content management, data records are named items, and each item can contain any number of parts.
 
-```bash
-ng generate component component-name
-```
+Each part is a data object having any scheme, and representing a portion of the data of the item. This way the item's model is dynamically built by composing parts.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+The item's facet is a configuration abstraction which tells the editor which parts can be found inside each item type. The main data models are (from `@myrmidon/cadmus-core`):
 
-```bash
-ng generate --help
-```
+- `FacetDefinition`: the definition of a facet: id, label, color, description, and definitions of the parts it can contain.
+- `PartDefinition`: the definition of a part: type ID (a unique string identifier for the part's type, like a class name), role ID (an optional string identifier used when multiple parts of the same type are used to assign to each usage a specific role), name, description, whether it is required in its item, color, group (a string used to group parts when displaying their list), sort key (a string used to sort parts within each group when displaying their list), and settings (a POJO object for settings, which is now obsoleted).
 
-## Building
+## Components
 
-To build the library, run:
+The components in this library are:
 
-```bash
-ng build cadmus-profile-editor
-```
-
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
-
-### Publishing the Library
-
-Once the project is built, you can publish your library by following these steps:
-
-1. Navigate to the `dist` directory:
-
-   ```bash
-   cd dist/cadmus-profile-editor
-   ```
-
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `FacetDefinitionListEditorComponent`: editor for a list of facet definitions. This is the top-level component which loads and saves facets from the server. All the other components are descendant dumb components.
+- `FacetDefinitionEditorComponent`: editor for a facet definition.
+- `PartDefinitionEditorComponent`: editor for a part definition.
+- `FacetEditPage`: wrapper for the `FacetDefinitionListEditorComponent` linked to a preset route (defined in `CADMUS_PROFILE_EDIT_ROUTES`).
