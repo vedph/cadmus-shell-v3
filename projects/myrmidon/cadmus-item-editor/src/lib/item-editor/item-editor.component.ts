@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  computed,
+  effect,
   OnInit,
+  Signal,
   signal,
 } from '@angular/core';
 import {
@@ -10,23 +12,17 @@ import {
   FormGroup,
   FormBuilder,
   Validators,
-  FormArray,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, Subscription } from 'rxjs';
-import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { Observable } from 'rxjs';
+import { DatePipe } from '@angular/common';
 import { take } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-import {
-  MatCard,
-  MatCardHeader,
-  MatCardTitle,
-  MatCardSubtitle,
-  MatCardContent,
-} from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
 import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -35,7 +31,6 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
@@ -49,6 +44,7 @@ import {
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
+import { Flag, FlagSetComponent } from '@myrmidon/cadmus-ui-flag-set';
 
 import {
   Item,
@@ -94,9 +90,6 @@ import { HasPreviewPipe } from '../has-preview.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatCard,
-    MatCardHeader,
-    MatCardTitle,
-    MatCardSubtitle,
     MatCardContent,
     MatTooltip,
     CdkCopyToClipboard,
@@ -110,7 +103,6 @@ import { HasPreviewPipe } from '../has-preview.pipe';
     MatError,
     MatSelect,
     MatOption,
-    MatCheckbox,
     MatButton,
     MatIcon,
     MatDivider,
@@ -120,38 +112,43 @@ import { HasPreviewPipe } from '../has-preview.pipe';
     MatExpansionPanelDescription,
     MatIconButton,
     MissingPartsComponent,
-    NgClass,
-    AsyncPipe,
     DatePipe,
     HasPreviewPipe,
     PartsScopeEditorComponent,
     PartBadgeComponent,
     CurrentItemBarComponent,
+    FlagSetComponent,
   ],
 })
-export class ItemEditorComponent
-  implements OnInit, OnDestroy, ComponentCanDeactivate
-{
-  private _subs: Subscription[] = [];
-  private _flagsFrozen?: boolean;
-
-  public readonly flagDefinitions = signal<FlagDefinition[]>([]);
+export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
+  // signals from edited-item repository
+  public readonly item: Signal<Item | undefined>;
+  public readonly parts: Signal<Part[]>;
+  public readonly partGroups: Signal<PartGroup[]>;
+  public readonly layerPartInfos: Signal<LayerPartInfo[]>;
+  public readonly facet: Signal<FacetDefinition | undefined>;
+  public readonly newPartDefinitions: Signal<PartDefinition[]>;
+  // signals from app repository
+  public readonly facets: Signal<FacetDefinition[]>;
+  public readonly typeThesaurus: Signal<Thesaurus | undefined>;
+  public readonly previewJKeys: Signal<string[]>;
+  public readonly previewFKeys: Signal<string[]>;
+  public readonly flagDefinitions: Signal<FlagDefinition[]>;
 
   public readonly id = signal<string | undefined>(undefined);
-  public item$: Observable<Item | undefined>;
-  public parts$: Observable<Part[] | undefined>;
-  public partGroups$: Observable<PartGroup[] | undefined>;
-  public layerPartInfos$: Observable<LayerPartInfo[] | undefined>;
-  public readonly user = signal<User | undefined>(undefined);
-  public readonly userLevel = signal<number>(0);
+  private readonly _currentUser: Signal<User | null>;
+  public readonly user: Signal<User | undefined>;
+  public readonly userLevel: Signal<number>;
   public readonly busy = signal<boolean>(false);
-  // lookup data
-  public facet$: Observable<FacetDefinition | undefined>;
-  public newPartDefinitions$: Observable<PartDefinition[]>;
-  public facets$: Observable<FacetDefinition[] | undefined>;
-  public typeThesaurus$: Observable<Thesaurus | undefined>;
-  public previewJKeys$: Observable<string[]>;
-  public previewFKeys$: Observable<string[]>;
+
+  // flag-set signals
+  private readonly _flagsValue: Signal<number>;
+  /** Flags adapted for FlagSetComponent; admin flags excluded for non-admins. */
+  public readonly flagSetFlags: Signal<Flag[]>;
+  /** Admin-only flags shown read-only to non-admin users. */
+  public readonly adminFlagDefs: Signal<FlagDefinition[]>;
+  /** Currently checked flag IDs derived from the flags form control value. */
+  public readonly checkedFlagIds: Signal<string[]>;
 
   // new part form
   public newPartType: FormControl<PartDefinition | null>;
@@ -160,10 +157,9 @@ export class ItemEditorComponent
   public title: FormControl<string | null>;
   public sortKey: FormControl<string | null>;
   public description: FormControl<string | null>;
-  public facet: FormControl<string | null>;
+  public facetCtrl: FormControl<string | null>;
   public group: FormControl<string | null>;
   public flags: FormControl<number>;
-  public flagChecks: FormArray;
   public metadata: FormGroup;
 
   constructor(
@@ -180,18 +176,20 @@ export class ItemEditorComponent
     private _authService: AuthJwtService,
     private _userLevelService: UserLevelService,
     private _messaging: MessagingService,
-    private _formBuilder: FormBuilder,
+    _formBuilder: FormBuilder,
   ) {
     this.id.set(this._route.snapshot.params['id']);
     if (this.id() === 'new') {
       this.id.set(undefined);
     }
+
     // new part form
     this.newPartType = _formBuilder.control(null, Validators.required);
     this.newPart = _formBuilder.group({
       newPartType: this.newPartType,
     });
-    // item's metadata form
+
+    // item metadata form
     this.title = _formBuilder.control(null, [
       Validators.required,
       Validators.maxLength(500),
@@ -205,146 +203,133 @@ export class ItemEditorComponent
       Validators.required,
       Validators.maxLength(1000),
     ]);
-    this.facet = _formBuilder.control(null, Validators.required);
+    this.facetCtrl = _formBuilder.control(null, Validators.required);
     this.group = _formBuilder.control(null, Validators.maxLength(100));
     this.flags = _formBuilder.control(0, { nonNullable: true });
-    this.flagChecks = _formBuilder.array([]);
-
     this.metadata = _formBuilder.group({
       title: this.title,
       sortKey: this.sortKey,
       description: this.description,
-      facet: this.facet,
+      facet: this.facetCtrl,
       group: this.group,
-      flagChecks: this.flagChecks,
+      flags: this.flags,
     });
 
-    this.item$ = this._repository.item$;
-    this.parts$ = this._repository.parts$;
-    this.partGroups$ = this._repository.partGroups$;
-    this.layerPartInfos$ = this._repository.layers$;
-    this.facet$ = this._repository.facet$;
-    this.newPartDefinitions$ = this._repository.newPartDefinitions$;
-    // app
-    this.facets$ = this._appRepository.facets$;
-    this.typeThesaurus$ = this._appRepository.typeThesaurus$;
-    this.previewJKeys$ = this._appRepository.previewJKeys$;
-    this.previewFKeys$ = this._appRepository.previewFKeys$;
+    // signals from repositories
+    this.item = toSignal(this._repository.item$);
+    this.parts = toSignal(this._repository.parts$, { requireSync: true });
+    this.partGroups = toSignal(this._repository.partGroups$, {
+      requireSync: true,
+    });
+    this.layerPartInfos = toSignal(this._repository.layers$, {
+      requireSync: true,
+    });
+    this.facet = toSignal(this._repository.facet$);
+    this.newPartDefinitions = toSignal(this._repository.newPartDefinitions$, {
+      requireSync: true,
+    });
+    this.facets = toSignal(this._appRepository.facets$, {
+      requireSync: true,
+    });
+    this.typeThesaurus = toSignal(this._appRepository.typeThesaurus$);
+    this.previewJKeys = toSignal(this._appRepository.previewJKeys$, {
+      requireSync: true,
+    });
+    this.previewFKeys = toSignal(this._appRepository.previewFKeys$, {
+      requireSync: true,
+    });
+    this.flagDefinitions = toSignal(this._appRepository.flags$, {
+      requireSync: true,
+    });
+
+    // user signals
+    this._currentUser = toSignal(this._authService.currentUser$, {
+      initialValue: null,
+    });
+    this.user = computed(() => this._currentUser() ?? undefined);
+    this.userLevel = computed(() => {
+      // track user changes so userLevel is recomputed on login/logout
+      this._currentUser();
+      return this._userLevelService.getCurrentUserLevel();
+    });
+
+    // flags signal (tracks the flags form control value)
+    this._flagsValue = toSignal(this.flags.valueChanges, { initialValue: 0 });
+
+    // flags for FlagSetComponent: exclude admin flags for non-admins
+    this.flagSetFlags = computed<Flag[]>(() =>
+      this.flagDefinitions()
+        .filter((def) => this.userLevel() >= 4 || !def.isAdmin)
+        .map((def) => ({
+          id: String(def.id),
+          label: def.label,
+          color: '#' + def.colorKey,
+        })),
+    );
+
+    // admin-only flags shown read-only when user is not admin
+    this.adminFlagDefs = computed<FlagDefinition[]>(() => {
+      if (this.userLevel() >= 4) return [];
+      return this.flagDefinitions().filter((def) => def.isAdmin === true);
+    });
+
+    // checked flag IDs derived from the bitmask value
+    this.checkedFlagIds = computed<string[]>(() => {
+      const value = this._flagsValue();
+      return this.flagDefinitions()
+        .filter((def) => (value & def.id) !== 0)
+        .map((def) => String(def.id));
+    });
+
+    // update the metadata form whenever the item changes
+    effect(() => {
+      this.updateMetadataForm(this.item());
+    });
   }
 
-  public async ngOnInit() {
-    this._subs.push(
-      this._authService.currentUser$.subscribe((user: User | null) => {
-        this.user.set(user || undefined);
-        this.userLevel.set(this._userLevelService.getCurrentUserLevel());
-      }),
-    );
-
-    // rebuild the flags controls array when flags definitions change
-    this._subs.push(
-      this._appRepository.flags$.subscribe((defs) => {
-        this.flagDefinitions.set(defs);
-        this.buildFlagsControls();
-      }),
-    );
-
-    // when flags controls values change, update the flags value
-    this._subs.push(
-      this.flagChecks.valueChanges.subscribe((_) => {
-        if (!this._flagsFrozen) {
-          this.flags.setValue(this.getFlagsValue());
-        }
-      }),
-    );
-
-    // update the metadata form when item changes (e.g. saved)
-    this._subs.push(
-      this.item$.subscribe((item) => {
-        this.updateMetadataForm(item);
-      }),
-    );
-
-    // load the item (if any) and its lookup
+  public ngOnInit(): void {
     this._repository.load(this.id());
-  }
-
-  public ngOnDestroy(): void {
-    for (const sub of this._subs) {
-      sub.unsubscribe();
-    }
   }
 
   public canDeactivate(): boolean | Observable<boolean> {
     return !this.metadata.dirty;
   }
 
-  /**
-   * Builds the array of flags controls according to the current flags
-   * definitions and the current flags value.
-   */
-  private buildFlagsControls(): void {
-    this._flagsFrozen = true;
-    this.flagChecks.clear();
-
-    for (const def of this.flagDefinitions()) {
-      const flagValue = def.id;
-      // tslint:disable-next-line: no-bitwise
-      const checked = (this.flags.value & flagValue) !== 0;
-      this.flagChecks.push(this._formBuilder.control(checked));
-    }
-
-    this._flagsFrozen = false;
-  }
-
-  /**
-   * Update the flags controls from the current flags value.
-   */
-  private updateFlagControls(): void {
-    if (!this.flagDefinitions()?.length) {
-      return;
-    }
-    this._flagsFrozen = true;
-    const value = this.flags.value;
-    for (let i = 0; i < this.flagDefinitions().length; i++) {
-      const flagValue = this.flagDefinitions()[i].id;
-      // tslint:disable-next-line: no-bitwise
-      const checked = (value & flagValue) !== 0;
-      this.flagChecks.at(i).setValue(checked);
-    }
-    this._flagsFrozen = false;
-  }
-
-  /**
-   * Get the flags value from the flags controls.
-   */
-  private getFlagsValue(): number {
-    let flagsValue = 0;
-
-    for (let i = 0; i < this.flagDefinitions()?.length; i++) {
-      const flagValue = this.flagDefinitions()[i].id;
-      if (this.flagChecks.at(i)?.value) {
-        // tslint:disable-next-line: no-bitwise
-        flagsValue |= flagValue;
-      }
-    }
-    return flagsValue;
-  }
-
   private updateMetadataForm(item?: Item): void {
     if (!item) {
       this.metadata.reset();
-      this.updateFlagControls();
     } else {
       this.title.setValue(item.title);
       this.sortKey.setValue(item.sortKey);
       this.description.setValue(item.description);
-      this.facet.setValue(item.facetId);
-      this.group.setValue(item.groupId);
+      this.facetCtrl.setValue(item.facetId ?? null);
+      this.group.setValue(item.groupId ?? null);
       this.flags.setValue(item.flags);
-      this.updateFlagControls();
-
       this.metadata.markAsPristine();
     }
+  }
+
+  /**
+   * Called when the FlagSetComponent emits new checked flag IDs.
+   * Converts the string IDs back to a bitmask integer and updates
+   * the flags form control, preserving admin-flag bits for non-admins.
+   */
+  public onFlagCheckedIdsChange(ids: string[]): void {
+    let value = 0;
+    // non-admins cannot change admin flags: preserve their current bits
+    if (this.userLevel() < 4) {
+      const current = this.flags.value;
+      for (const def of this.flagDefinitions()) {
+        if (def.isAdmin && (current & def.id) !== 0) {
+          value |= def.id;
+        }
+      }
+    }
+    for (const id of ids) {
+      value |= Number(id);
+    }
+    this.flags.setValue(value);
+    this.flags.markAsDirty();
   }
 
   public getTypeIdName(typeId: string): string {
@@ -372,28 +357,24 @@ export class ItemEditorComponent
     if (this.busy() || !this.metadata.valid) {
       return;
     }
-    // build item (its ID will be empty if new)
-    const item = { ...this._repository.getItem() };
-    if (!item) {
+    const currentItem = this._repository.getItem();
+    if (!currentItem) {
       return;
     }
-    item.title = this.title.value?.trim();
-    item.sortKey = this.sortKey.value?.trim();
-    item.description = this.description.value?.trim();
-    item.facetId = this.facet.value?.trim() || undefined;
-    item.groupId = this.group.value?.trim() || undefined;
+    const item = { ...currentItem };
+    item.title = this.title.value?.trim() || '';
+    item.sortKey = this.sortKey.value?.trim() || '';
+    item.description = this.description.value?.trim() || '';
+    item.facetId = this.facetCtrl.value?.trim() || '';
+    item.groupId = this.group.value?.trim() || '';
     item.flags = this.flags.value;
 
-    // save: this will trigger a change in the store's item, reflected here
-    // by updating the metadata form
     this.busy.set(true);
     this._repository
       .save(item as Item)
       .then((saved) => {
         this._messaging.sendMessage(MESSAGE_ITEM_LIST_REPOSITORY_RESET);
-        // this._itemListRepository.reset();
-
-        // reload to force change in page URL
+        // reload to force change in page URL for new items
         if (!item.id) {
           this.id.set(saved.id);
           this._router.navigate(['/items', saved.id]);
@@ -450,21 +431,13 @@ export class ItemEditorComponent
       roleId,
     );
 
-    // navigate to the editor
     this._router.navigate(
       [route.route],
-      route.rid
-        ? {
-            queryParams: {
-              rid: route.rid,
-            },
-          }
-        : {},
+      route.rid ? { queryParams: { rid: route.rid } } : {},
     );
   }
 
   public editPart(part: Part): void {
-    // build the target route to the appropriate part editor
     const route = this._libraryRouteService.buildPartEditorRoute(
       part.itemId,
       part.id,
@@ -472,16 +445,9 @@ export class ItemEditorComponent
       part.roleId,
     );
 
-    // navigate to the editor
     this._router.navigate(
       [route.route],
-      route.rid
-        ? {
-            queryParams: {
-              rid: route.rid,
-            },
-          }
-        : {},
+      route.rid ? { queryParams: { rid: route.rid } } : {},
     );
   }
 
@@ -513,7 +479,6 @@ export class ItemEditorComponent
         if (!result) {
           return;
         }
-        // delete
         this.busy.set(true);
         this._repository.deletePart(part.id).then(
           (_) => {
@@ -536,13 +501,13 @@ export class ItemEditorComponent
     if (part.roleId) {
       name += ' for ' + this.getRoleIdName(part.roleId);
     }
-    this.busy.set(true);
     this._dialogService
       .confirm('Confirm Addition', `Add layer "${name}"?`)
       .subscribe((result) => {
         if (!result) {
           return;
         }
+        this.busy.set(true);
         this._repository
           .addNewLayerPart(part.typeId, part.roleId)
           .finally(() => this.busy.set(false));
@@ -563,37 +528,30 @@ export class ItemEditorComponent
       data: {},
     });
     dialogRef.afterClosed().subscribe((targetItem: Item) => {
-      // nope if no target item or same item
       if (!targetItem || part.itemId === targetItem.id) {
         return;
       }
-      // nope if target item has a different facet
-      if (this.facet.value !== targetItem.facetId) {
+      if (this.facetCtrl.value !== targetItem.facetId) {
         this._snackbar.open(
           'Cannot copy part to an item with a different facet',
           'OK',
         );
         return;
       }
-      // check if the part already exists in the target item
       this.busy.set(true);
       this._itemService
         .partWithTypeAndRoleExists(targetItem.id, part.typeId, part.roleId)
         .subscribe((exists: boolean) => {
-          // part already exists, nope
           if (exists) {
             this._snackbar.open('Part already exists in target item', 'OK');
             this.busy.set(false);
             return;
           }
-          // else add part as a new part to the target item
           part.id = '';
           part.itemId = targetItem.id;
           this._itemService.addPart(part).subscribe({
             next: (_) => {
-              this._snackbar.open('Part copied', 'OK', {
-                duration: 3000,
-              });
+              this._snackbar.open('Part copied', 'OK', { duration: 3000 });
             },
             error: (error) => {
               console.error(error);
@@ -629,11 +587,8 @@ export class ItemEditorComponent
           .generateItems(data.count, this.id()!, data.title, data.flags)
           .subscribe({
             next: (_) => {
-              // reset the items list
               this._messaging.sendMessage(MESSAGE_ITEM_LIST_REPOSITORY_RESET);
-              this._snackbar.open('Items generated', 'OK', {
-                duration: 3000,
-              });
+              this._snackbar.open('Items generated', 'OK', { duration: 3000 });
             },
             error: (error) => {
               console.error(error);

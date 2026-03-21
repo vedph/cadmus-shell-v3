@@ -1,6 +1,9 @@
 .full-width {
   width: 100%;
 }
+.flex-field {
+  flex: 1 0 auto;
+}
 table {
   width: 100%;
   border-collapse: collapse;
@@ -56,8 +59,11 @@ input.id {
   color: var(--mat-sys-on-surface-variant);
   min-width: 22em;
 }
-.flag {
-  margin-left: 10px;
+.admin-flags {
+  margin-bottom: 4px;
+}
+.admin-flag {
+  margin-left: 12px;
 }
 .form-row {
   display: flex;
