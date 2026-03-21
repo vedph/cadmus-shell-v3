@@ -43,7 +43,7 @@ Latest versions:
 - cadmus-profile-import: 0.0.2
 - cadmus-state: 15.0.0
 - cadmus-statistics: 1.1.0
-- cadmus-thesaurus-editor: 16.1.0
+- cadmus-thesaurus-editor: 16.1.1
 - cadmus-thesaurus-list: 16.1.1
 - cadmus-thesaurus-ui: 15.1.1
 - cadmus-ui: 16.1.1

@@ -3,48 +3,65 @@ import {
   OnInit,
   signal,
   ChangeDetectionStrategy,
+  computed,
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AsyncPipe } from '@angular/common';
-import { Observable } from 'rxjs';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { User } from '@myrmidon/auth-jwt-login';
 
-import { Thesaurus, ThesaurusFilter } from '@myrmidon/cadmus-core';
+import {
+  Thesaurus,
+  ThesaurusEntry,
+} from '@myrmidon/cadmus-core';
 import { ThesaurusService, UserLevelService } from '@myrmidon/cadmus-api';
 import {
-  EditedThesaurusRepository,
   AppRepository,
 } from '@myrmidon/cadmus-state';
-import { ThesaurusEditorComponent } from '@myrmidon/cadmus-thesaurus-ui';
+import {
+  EditableStaticThesaurusPagedTreeStoreService,
+  EditableThesaurusBrowserComponent,
+} from '@myrmidon/cadmus-thesaurus-store';
 
 @Component({
   selector: 'lib-thesaurus-editor-feature',
   templateUrl: './thesaurus-editor-feature.component.html',
   styleUrls: ['./thesaurus-editor-feature.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatProgressBar, AsyncPipe, ThesaurusEditorComponent],
+  imports: [
+    MatButtonModule,
+    MatProgressBar,
+    MatIcon,
+    EditableThesaurusBrowserComponent,
+  ],
 })
 export class ThesaurusEditorFeatureComponent implements OnInit {
   public readonly id = signal<string | undefined>(undefined);
   public readonly user = signal<User | undefined>(undefined);
   public userLevel = signal<number>(0);
 
-  public loading$: Observable<boolean>;
-  public saving$: Observable<boolean>;
   public readonly thesaurus = signal<Thesaurus | undefined>(undefined);
+  public readonly entries = signal<ThesaurusEntry[]>([]);
+  public readonly busy = signal<boolean>(false);
+
+  public readonly service = computed(
+    () => new EditableStaticThesaurusPagedTreeStoreService(this.entries()),
+  );
+
+  public readonly entry = signal<ThesaurusEntry | undefined>(undefined);
+  public readonly hasChanges = signal<boolean>(false);
 
   constructor(
     private _route: ActivatedRoute,
     private _router: Router,
-    private _repository: EditedThesaurusRepository,
     private _appRepository: AppRepository,
     userLevelService: UserLevelService,
-    public thesService: ThesaurusService,
+    private _thesService: ThesaurusService,
     private _dialogService: DialogService,
     private _snackbar: MatSnackBar,
   ) {
@@ -53,33 +70,45 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
       this.id.set(undefined);
     }
     this.userLevel.set(userLevelService.getCurrentUserLevel());
-    this.loading$ = this._repository.loading$;
-    this.saving$ = this._repository.saving$;
   }
 
   public async ngOnInit() {
     // ensure app data is loaded
     this._appRepository.load();
 
-    // update form whenever we get new data
-    this._repository.thesaurus$.subscribe(
-      (thesaurus: Thesaurus | undefined) => {
-        this.thesaurus.set(structuredClone(thesaurus));
-      },
-    );
-
-    this._repository.load(this.id());
+    // load the thesaurus to edit
+    if (this.id()) {
+      this.busy.set(true);
+      this._thesService.getThesaurus(this.id()!, true).subscribe({
+        next: (thesaurus: Thesaurus) => {
+          this.busy.set(false);
+          this.thesaurus.set(thesaurus);
+          this.entries.set(thesaurus.entries || []);
+        },
+        error: (error) => {
+          this.busy.set(false);
+          this._snackbar.open(`Error loading thesaurus: ${error}`, 'OK');
+          this._router.navigate(['/thesauri']);
+        },
+      });
+    }
   }
 
-  public wrapLookup(service: ThesaurusService) {
-    return (filter?: ThesaurusFilter): Observable<string[]> => {
-      return service.getThesaurusIds(filter);
-    };
+  public onChangesStateChange(hasChanges: boolean): void {
+    this.hasChanges.set(hasChanges);
   }
 
-  public onThesaurusChange(thesaurus: Thesaurus): void {
-    this.thesaurus.set(thesaurus);
-    this.save();
+  public onReset(): void {
+    this.entries.set([...(this.thesaurus()!.entries || [])]);
+    this.hasChanges.set(false);
+    this._snackbar.open('Reset to initial data', 'Close', { duration: 2000 });
+  }
+
+  public onClearChanges(): void {
+    const currentService = this.service();
+    currentService.clearChanges();
+    this.hasChanges.set(false);
+    this._snackbar.open('Cleared unsaved changes', 'Close', { duration: 2000 });
   }
 
   public cancel(): void {
@@ -89,51 +118,28 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
         if (!result) {
           return;
         }
+        // navigate back to list
         this._router.navigate(['/thesauri']);
       });
   }
 
-  private doSave(): void {
-    // save and reload as edited if was new
-    this._repository.save(this.thesaurus()!).then((saved: Thesaurus) => {
-      this._snackbar.open('Thesaurus saved', 'OK', {
-        duration: 1500,
-      });
-      this._appRepository.loadThesauri();
-      if (!this.id()) {
-        this.id.set(saved.id);
-        // https://stackoverflow.com/questions/40983055/how-to-reload-the-current-route-with-the-angular-2-router
-        this._router
-          .navigateByUrl('/', { skipLocationChange: true })
-          .then(() => {
-            this._router.navigate(['/thesauri', saved.id]);
-          });
-      }
-    });
-  }
-
   public save(): void {
-    if (this.userLevel() < 3) {
+    if (this.userLevel() < 3 || !this.hasChanges()) {
       return;
     }
-
-    // if the thesaurus is new, or its id has changed,
-    // ensure that a thesaurus with that id does not already exist
-    if (!this.id() || this.id() !== this.thesaurus()!.id) {
-      this.thesService
-        .thesaurusExists(this.thesaurus()!.id)
-        .then((exists: boolean) => {
-          if (exists) {
-            this._snackbar.open(
-              `A thesaurus with ID ${this.thesaurus()!.id}\nalready exists!`,
-              'OK',
-            );
-          } else {
-            this.doSave();
-          }
+    this._thesService.addThesaurus(this.thesaurus()!).subscribe({
+      next: (saved: Thesaurus) => {
+        this._snackbar.open('Thesaurus saved', 'OK', {
+          duration: 1500,
         });
-    } else {
-      this.doSave();
-    }
+        // reload thesauri in app repository
+        this._appRepository.loadThesauri();
+        // navigate back to list
+        this._router.navigate(['/thesauri']);
+      },
+      error: (error) => {
+        this._snackbar.open(`Error saving thesaurus: ${error}`, 'OK');
+      },
+    });
   }
 }

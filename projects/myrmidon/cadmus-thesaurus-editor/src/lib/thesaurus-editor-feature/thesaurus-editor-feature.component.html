@@ -1,9 +1,51 @@
-@if ((loading$ | async) || (saving$ | async)) {
-  <mat-progress-bar />
-}
-<cadmus-thesaurus-editor
-  [thesaurus]="thesaurus()"
-  [lookupFn]="wrapLookup(thesService)"
-  (thesaurusChange)="onThesaurusChange($event!)"
-  (editorClose)="cancel()"
-/>
+<div>
+  <!-- toolbar -->
+  <div class="button-row margin-top">
+    <button
+      type="button"
+      mat-flat-button
+      color="primary"
+      [disabled]="!hasChanges()"
+      (click)="save()"
+    >
+      <mat-icon>save</mat-icon>
+      save changes
+    </button>
+
+    <button
+      type="button"
+      mat-flat-button
+      color="warn"
+      [disabled]="!hasChanges()"
+      (click)="onClearChanges()"
+    >
+      <mat-icon>clear</mat-icon>
+      clear changes
+    </button>
+
+    <button type="button" mat-flat-button (click)="onReset()">
+      <mat-icon>refresh</mat-icon>
+      reset to initial
+    </button>
+
+    @if (hasChanges()) {
+      <span class="changes-indicator">
+        <mat-icon color="warn">edit</mat-icon>
+        unsaved changes
+      </span>
+    }
+  </div>
+  @if (busy()) {
+    <div>
+      <mat-progress-bar mode="indeterminate" />
+    </div>
+  }
+
+  <!-- editable tree browser -->
+  @if (service()) {
+    <cadmus-editable-thesaurus-browser
+      [service]="service()"
+      (changesStateChange)="onChangesStateChange($event)"
+    />
+  }
+</div>

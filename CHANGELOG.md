@@ -1,12 +1,13 @@
 # History
 
-- 2026-03-20:
+- 2026-03-21:
   - `cadmus-api`:
     - added methods to facet service for additional endpoints and increased version number (14.0.8).
     - added `getFacetModelSettings` to facet service.
   - `cadmus-profile-import`: do not request reload on dry run (bumped to 0.0.4).
   - 🆕 adding new library `cadmus-profile-editor` to provide facet editing UI.
   - minor style changes in `cadmus-item-editor` (bumped to 16.1.4).
+  - replaced thesaurus editor in `cadmus-thesaurus-editor` (bumped to 16.1.1).
   - adjusted profile routes and menu links in shell app.
 
 - 2026-03-18:
