@@ -27,14 +27,14 @@ export interface FacetValidationResult {
  * - duplicate facet ID             → error
  * - facet ID still set to "new"    → warning (unfilled placeholder)
  * - duplicate facet label          → error
- * - duplicate facet color          → warning
- * - duplicate facet description    → warning
+ * - duplicate facet color          → info
+ * - duplicate facet description    → info
  * - facet with no part definitions → error
  * - within a facet: two parts with same typeId AND same roleId
  *   (including both empty/null)    → error
  *   (one with a roleId and one without is valid: they serve different roles)
- * - within a facet: duplicate part color  → warning
- * - within a facet: duplicate part description → warning
+ * - within a facet: duplicate part color  → info
+ * - within a facet: duplicate part description → info
  * - (when facetModelSettings is provided) for each part/fragment entry in the
  *   settings, each thesaurus ID listed in thesauriIds is checked against the
  *   existing thesauri: missing required thesauri (prefixed with "*") → error;
@@ -130,11 +130,11 @@ export class FacetDefinitionValidatorService {
         }
       }
 
-      // duplicate color (warning)
+      // duplicate color (info)
       if (facet.colorKey) {
         if (seenColors.has(facet.colorKey)) {
           issues.push({
-            severity: 'warning',
+            severity: 'info',
             message: `Duplicate facet color "${facet.colorKey}" in ${label}.`,
           });
         } else {
@@ -142,12 +142,12 @@ export class FacetDefinitionValidatorService {
         }
       }
 
-      // duplicate description (warning)
+      // duplicate description (info)
       if (facet.description) {
         if (seenDescriptions.has(facet.description)) {
           issues.push({
-            severity: 'warning',
-            message: `Duplicate facet description in ${label}.`,
+            severity: 'info',
+            message: `Duplicate facet description "${facet.description}" in ${label}.`,
           });
         } else {
           seenDescriptions.add(facet.description);
@@ -183,11 +183,11 @@ export class FacetDefinitionValidatorService {
           seenPartKeys.add(key);
         }
 
-        // duplicate part color (warning)
+        // duplicate part color (info)
         if (part.colorKey) {
           if (seenPartColors.has(part.colorKey)) {
             issues.push({
-              severity: 'warning',
+              severity: 'info',
               message: `Duplicate part color "${part.colorKey}" in ${label}.`,
             });
           } else {
@@ -195,12 +195,12 @@ export class FacetDefinitionValidatorService {
           }
         }
 
-        // duplicate part description (warning)
+        // duplicate part description (info)
         if (part.description) {
           if (seenPartDescriptions.has(part.description)) {
             issues.push({
-              severity: 'warning',
-              message: `Duplicate part description for type "${part.typeId}" in ${label}.`,
+              severity: 'info',
+              message: `Duplicate part description "${part.description}" for type "${part.typeId}" in ${label}.`,
             });
           } else {
             seenPartDescriptions.add(part.description);

@@ -160,7 +160,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
 
   public deleteFacet(index: number): void {
     this._dialogService
-      .confirm('Confirmation', 'Delete Facet?')
+      .confirm('Confirmation', `Delete facet ${this.edited()?.label}?`)
       .subscribe((yes: boolean | undefined) => {
         if (yes) {
           if (this.editedIndex() === index) {

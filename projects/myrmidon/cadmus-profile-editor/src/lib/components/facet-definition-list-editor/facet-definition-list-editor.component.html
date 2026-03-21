@@ -34,7 +34,11 @@
             @for (issue of vr.issues; track $index) {
               <div class="validation-issue {{ issue.severity }}">
                 <mat-icon>{{
-                  issue.severity === "error" ? "error" : "warning"
+                  issue.severity === "error"
+                    ? "error"
+                    : issue.severity === "warning"
+                      ? "warning"
+                      : "info"
                 }}</mat-icon>
                 <span>{{ issue.message }}</span>
               </div>
@@ -63,7 +67,7 @@
     </div>
   }
   @if (facets().length) {
-    <table>
+    <table class="margin-top">
       <thead>
         <tr>
           <th></th>
