@@ -144,12 +144,21 @@ export const routes: Routes = [
   },
   // cadmus - profile import
   {
-    path: 'profile',
+    path: 'profile/import',
     loadChildren: () =>
       import('@myrmidon/cadmus-profile-import').then(
         (module) => module.CADMUS_PROFILE_IMPORT_ROUTES,
       ),
     canActivate: [jwtAdminGuard],
+  },
+  // cadmus - profile editor
+  {
+    path: 'profile',
+    loadChildren: () =>
+      import('@myrmidon/cadmus-profile-editor').then(
+        (module) => module.CADMUS_PROFILE_EDIT_ROUTES,
+      ),
+    canActivate: [jwtGuard],
   },
   // cadmus - flags
   {
