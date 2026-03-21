@@ -25,7 +25,7 @@ export interface FacetValidationResult {
  *
  * Rules:
  * - duplicate facet ID             → error
- * - facet ID still set to "new"    → error (unfilled placeholder)
+ * - facet ID still set to "new"    → warning (unfilled placeholder)
  * - duplicate facet label          → error
  * - duplicate facet color          → warning
  * - duplicate facet description    → warning
@@ -106,7 +106,7 @@ export class FacetDefinitionValidatorService {
         issues.push({ severity: 'error', message: 'A facet has an empty ID.' });
       } else if (facet.id === 'new') {
         issues.push({
-          severity: 'error',
+          severity: 'warning',
           message: `Facet has placeholder ID "new" — please assign a real ID.`,
         });
       } else if (seenIds.has(facet.id)) {

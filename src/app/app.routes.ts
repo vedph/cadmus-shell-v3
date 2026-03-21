@@ -158,7 +158,7 @@ export const routes: Routes = [
       import('@myrmidon/cadmus-profile-editor').then(
         (module) => module.CADMUS_PROFILE_EDIT_ROUTES,
       ),
-    canActivate: [jwtGuard],
+    canActivate: [jwtAdminGuard],
   },
   // cadmus - flags
   {
@@ -167,7 +167,7 @@ export const routes: Routes = [
       import('@myrmidon/cadmus-flags-pg').then(
         (module) => module.FlagsEditorFeatureComponent,
       ),
-    canActivate: [jwtGuard],
+    canActivate: [jwtAdminGuard],
   },
   // home
   { path: '', redirectTo: 'home', pathMatch: 'full' },

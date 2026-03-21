@@ -17,7 +17,7 @@ import {
 } from '@angular/forms';
 
 // material
-import { MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import {
   MatError,
@@ -52,6 +52,7 @@ import { PartDefinitionEditorComponent } from '../part-definition-editor/part-de
   selector: 'cadmus-facet-definition-editor',
   imports: [
     ReactiveFormsModule,
+    MatButtonModule,
     MatCheckbox,
     MatError,
     MatExpansionPanel,
@@ -59,7 +60,6 @@ import { PartDefinitionEditorComponent } from '../part-definition-editor/part-de
     MatExpansionPanelTitle,
     MatFormField,
     MatIcon,
-    MatIconButton,
     MatInput,
     MatLabel,
     MatSuffix,

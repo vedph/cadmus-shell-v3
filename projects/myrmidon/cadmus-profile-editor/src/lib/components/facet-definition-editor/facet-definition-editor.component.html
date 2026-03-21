@@ -44,7 +44,7 @@
             class="color-picker-input"
             #colorPicker
             [value]="
-              colorKey.value?.length === 6 ? '#' + colorKey.value : '#000000'
+              colorKey.value.length === 6 ? '#' + colorKey.value : '#000000'
             "
             (input)="onColorPick(colorPicker.value)"
           />
@@ -159,10 +159,13 @@
                 <td>{{ entry.groupKey }}</td>
                 <td>
                   <span
+                    class="color-swatch"
                     [style.background-color]="
                       '#' + entry.colorKey | stringToColor
                     "
-                    [style.color]="'#' + entry.colorKey | colorToContrast"
+                    [style.color]="
+                      '#' + entry.colorKey | stringToColor | colorToContrast
+                    "
                   >
                     {{ entry.colorKey }}
                   </span>
@@ -176,7 +179,7 @@
         <fieldset>
           <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
             <mat-expansion-panel-header>
-              <mat-panel-title>PartDefinition #</mat-panel-title>
+              <mat-panel-title>Part #{{ editedIndex() + 1 }}</mat-panel-title>
             </mat-expansion-panel-header>
             <cadmus-part-definition-editor
               [facetModelSettings]="facetModelSettings()"

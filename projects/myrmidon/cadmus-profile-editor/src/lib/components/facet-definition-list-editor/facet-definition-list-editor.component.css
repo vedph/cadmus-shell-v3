@@ -66,3 +66,7 @@ fieldset {
 .form-row * {
   flex: 0 0 auto;
 }
+.color-swatch {
+  padding: 2px 6px;
+  border-radius: 4px;
+}

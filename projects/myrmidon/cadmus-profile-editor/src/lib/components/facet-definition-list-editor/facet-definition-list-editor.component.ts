@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 
 // material
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { from, of } from 'rxjs';
@@ -47,8 +47,7 @@ import { FacetDefinitionEditorComponent } from '../facet-definition-editor/facet
 @Component({
   selector: 'cadmus-facet-definition-list-editor',
   imports: [
-    MatButton,
-    MatIconButton,
+    MatButtonModule,
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
