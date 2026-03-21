@@ -98,6 +98,7 @@
               <th>name</th>
               <th>group</th>
               <th>color</th>
+              <th>description</th>
             </tr>
           </thead>
           <tbody>
@@ -170,6 +171,7 @@
                     {{ entry.colorKey }}
                   </span>
                 </td>
+                <td>{{ entry.description | ellipsis: 50 }}</td>
               </tr>
             }
           </tbody>

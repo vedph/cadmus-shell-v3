@@ -5,26 +5,27 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { from, of } from 'rxjs';
+import { catchError, concatMap, take, tap, toArray } from 'rxjs/operators';
 
 // material
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-import { from, of } from 'rxjs';
-import { catchError, concatMap, take, tap, toArray } from 'rxjs/operators';
-
-import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { FacetDefinition } from '@myrmidon/cadmus-core';
-import { FacetModelSettings, FacetService } from '@myrmidon/cadmus-api';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
   MatExpansionPanel,
   MatExpansionPanelHeader,
   MatExpansionPanelTitle,
+  MatExpansionPanelDescription,
 } from '@angular/material/expansion';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { ColorToContrastPipe, StringToColorPipe } from '@myrmidon/ngx-tools';
+
+import { DialogService } from '@myrmidon/ngx-mat-tools';
+import { ColorToContrastPipe, EllipsisPipe, StringToColorPipe } from '@myrmidon/ngx-tools';
+
+import { FacetDefinition } from '@myrmidon/cadmus-core';
+import { FacetModelSettings, FacetService } from '@myrmidon/cadmus-api';
 
 import {
   FacetDefinitionValidatorService,
@@ -49,12 +50,14 @@ import { FacetDefinitionEditorComponent } from '../facet-definition-editor/facet
   imports: [
     MatButtonModule,
     MatExpansionPanel,
+    MatExpansionPanelDescription,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     MatIcon,
     MatTooltip,
     MatProgressBar,
     ColorToContrastPipe,
+    EllipsisPipe,
     StringToColorPipe,
     FacetDefinitionEditorComponent,
   ],
@@ -282,6 +285,18 @@ export class FacetDefinitionListEditorComponent implements OnInit {
           this.doSave();
         }
       });
+  }
+
+  public downloadFacets(): void {
+    const replacer = (_key: string, value: unknown) =>
+      value === null || value === false ? undefined : value;
+    const dataStr =
+      'data:text/json;charset=utf-8,' +
+      encodeURIComponent(JSON.stringify(this.facets(), replacer, 2));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute('href', dataStr);
+    dlAnchorElem.setAttribute('download', 'facets.json');
+    dlAnchorElem.click();
   }
 
   /**

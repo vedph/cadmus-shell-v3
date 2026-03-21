@@ -17,6 +17,7 @@ input[type='color'].color-picker-input {
 table {
   width: 100%;
   border-collapse: collapse;
+  color: var(--mat-sys-on-surface-variant);
 }
 tbody tr:nth-child(odd) {
   background-color: var(--mat-sys-surface-container);

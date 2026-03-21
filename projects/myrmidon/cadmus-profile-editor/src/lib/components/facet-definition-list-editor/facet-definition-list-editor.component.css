@@ -1,6 +1,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
+  color: var(--mat-sys-on-surface-variant);
 }
 tbody tr:nth-child(odd) {
   background-color: var(--mat-sys-surface-container);
@@ -33,7 +34,7 @@ fieldset {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 4px 0;
+  margin: 8px 0;
 }
 .validation-issue {
   display: flex;

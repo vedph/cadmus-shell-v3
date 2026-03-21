@@ -1,11 +1,10 @@
 div.item-bar {
-  width: 100%;
   border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 4px;
   background-color: var(--mat-sys-surface-container);
   color: var(--mat-sys-on-primary-container);
   margin: 6px;
-  padding: 4px;
+  padding: 8px;
 }
 .title {
   font-size: 1.2em;
@@ -14,7 +13,7 @@ div.item-bar {
 }
 .id {
   font-size: 0.8em;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   margin-right: 0.5em;
 }
 .dsc {

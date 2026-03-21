@@ -7,6 +7,7 @@
   - `cadmus-profile-import`: do not request reload on dry run (bumped to 0.0.4).
   - 🆕 adding new library `cadmus-profile-editor` to provide facet editing UI.
   - minor style changes in `cadmus-item-editor` (bumped to 16.1.4).
+  - adjusted profile routes and menu links in shell app.
 
 - 2026-03-18:
   - ⚠️ `CurrentItemBarComponent` and `CurrentLayerPartBarComponent` moved into `@myrmidon/cadmus-item-editor` from library ❌ `@myrmidon/cadmus-ui-pg` which had no other code and has thus been removed. This is a breaking change which avoids potential circular references and removes the need for this tiny library. To upgrade, just update `@myrmidon/cadmus-item-editor` and remove package `@myrmidon/cadmus-ui-pg` altogether, then change the imports accordingly. Libraries affected in this project were `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-pg`, `@myrmidon/cadmus-part-taxo-ui`.

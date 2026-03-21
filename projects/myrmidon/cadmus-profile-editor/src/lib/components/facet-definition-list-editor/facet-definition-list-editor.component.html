@@ -6,6 +6,9 @@
     <button type="button" mat-flat-button (click)="validate()">
       <mat-icon>fact_check</mat-icon> validate
     </button>
+    <button type="button" mat-flat-button (click)="downloadFacets()">
+      <mat-icon>download</mat-icon> download
+    </button>
     <button type="button" mat-flat-button color="warn" (click)="save()">
       <mat-icon>save</mat-icon> save
     </button>
@@ -16,22 +19,30 @@
     }
   </div>
   @if (validationResult(); as vr) {
-    <div class="validation-result">
-      @if (!vr.issues.length) {
-        <span>No issues found.</span>
-      } @else {
-        <div class="validation-issues">
-          @for (issue of vr.issues; track $index) {
-            <div class="validation-issue {{ issue.severity }}">
-              <mat-icon>{{
-                issue.severity === "error" ? "error" : "warning"
-              }}</mat-icon>
-              <span>{{ issue.message }}</span>
-            </div>
-          }
-        </div>
-      }
-    </div>
+    <mat-expansion-panel [expanded]="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Validation result</mat-panel-title>
+        <mat-panel-description>
+          {{ vr.issues.length }} issue{{ vr.issues.length !== 1 ? "s" : "" }}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <div class="validation-result">
+        @if (!vr.issues.length) {
+          <span>No issues found.</span>
+        } @else {
+          <div class="validation-issues">
+            @for (issue of vr.issues; track $index) {
+              <div class="validation-issue {{ issue.severity }}">
+                <mat-icon>{{
+                  issue.severity === "error" ? "error" : "warning"
+                }}</mat-icon>
+                <span>{{ issue.message }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </mat-expansion-panel>
   }
   @if (reloadNeeded()) {
     <div class="reload-notice">
@@ -60,6 +71,7 @@
           <th>label</th>
           <th>color</th>
           <th>parts</th>
+          <th>description</th>
         </tr>
       </thead>
       <tbody>
@@ -123,6 +135,7 @@
               </span>
             </td>
             <td>{{ entry.partDefinitions.length }}</td>
+            <td>{{ entry.description | ellipsis: 50 }}</td>
           </tr>
         }
       </tbody>
