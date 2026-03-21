@@ -1,15 +1,14 @@
 import {
   Component,
-  OnDestroy,
-  OnInit,
-  signal,
+  computed,
   ChangeDetectionStrategy,
+  Signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-import { TextLayerPart } from '@myrmidon/cadmus-core';
+import { FacetDefinition, TextLayerPart } from '@myrmidon/cadmus-core';
 import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository, EditedLayerRepository } from '@myrmidon/cadmus-state';
-import { Subscription } from 'rxjs';
 
 import { EditedItemRepository } from '../state/edited-item.repository';
 
@@ -19,19 +18,42 @@ import { EditedItemRepository } from '../state/edited-item.repository';
   styleUrls: ['./current-layer-part-bar.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
-  private _subs: Subscription[] = [];
+export class CurrentLayerPartBarComponent {
+  private readonly _facet: Signal<FacetDefinition | undefined>;
+  private readonly _part: Signal<TextLayerPart | undefined>;
+
+  public readonly typeId: Signal<string | undefined>;
+  public readonly roleId: Signal<string | undefined>;
+  public readonly color: Signal<string | undefined>;
 
   constructor(
     private _appRepository: AppRepository,
     private _editedItemRepository: EditedItemRepository,
-    private _editedLayerRepository: EditedLayerRepository,
+    editedLayerRepository: EditedLayerRepository,
     private _facetService: FacetService,
-  ) {}
+  ) {
+    this._facet = toSignal(this._editedItemRepository.facet$);
+    this._part = toSignal(editedLayerRepository.part$);
 
-  public readonly typeId = signal<string | undefined>(undefined);
-  public readonly roleId = signal<string | undefined>(undefined);
-  public readonly color = signal<string | undefined>(undefined);
+    this.typeId = computed(() => {
+      const part = this._part();
+      if (!part) return undefined;
+      return this.getTypeIdName(part.typeId);
+    });
+
+    this.roleId = computed(() => {
+      const part = this._part();
+      if (!part) return undefined;
+      return this.getRoleIdName(part.roleId);
+    });
+
+    this.color = computed(() => {
+      const part = this._part();
+      this._facet(); // declare dependency so color recomputes on facet change
+      if (!part) return undefined;
+      return this.getPartColor(part.typeId, part.roleId);
+    });
+  }
 
   private getTypeIdName(typeId: string): string {
     const typeThesaurus = this._appRepository.getTypeThesaurus();
@@ -57,39 +79,5 @@ export class CurrentLayerPartBarComponent implements OnInit, OnDestroy {
   private getPartColor(typeId: string, roleId?: string): string {
     const facet = this._editedItemRepository.getFacet();
     return this._facetService.getPartColor(typeId, roleId, facet);
-  }
-
-  private updateLabels(): void {
-    const part: TextLayerPart | undefined =
-      this._editedLayerRepository.getPart();
-    if (!part) {
-      this.typeId.set(undefined);
-      this.roleId.set(undefined);
-      this.color.set(undefined);
-      return;
-    } else {
-      this.typeId.set(this.getTypeIdName(part.typeId));
-      this.roleId.set(this.getRoleIdName(part.roleId));
-      this.color.set(this.getPartColor(part.typeId, part.roleId));
-    }
-  }
-
-  public ngOnInit(): void {
-    this._subs.push(
-      this._editedItemRepository.facet$.subscribe((_) => {
-        this.updateLabels();
-      }),
-    );
-    this._subs.push(
-      this._editedLayerRepository.part$.subscribe((_) => {
-        this.updateLabels();
-      }),
-    );
-    // ensure app data is loaded
-    this._appRepository.load();
-  }
-
-  public ngOnDestroy(): void {
-    this._subs.forEach((s) => s.unsubscribe());
   }
 }

@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
-import { Observable } from 'rxjs';
+import { Component, ChangeDetectionStrategy, Signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatTooltip } from '@angular/material/tooltip';
 
@@ -12,12 +12,12 @@ import { EditedItemRepository } from '../state/edited-item.repository';
   templateUrl: './current-item-bar.component.html',
   styleUrls: ['./current-item-bar.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AsyncPipe, DatePipe, MatTooltip],
+  imports: [DatePipe, MatTooltip],
 })
 export class CurrentItemBarComponent {
-  public item$: Observable<Item | undefined>;
+  public readonly item: Signal<Item | undefined>;
 
-  constructor(private _repository: EditedItemRepository) {
-    this.item$ = this._repository.item$;
+  constructor(repository: EditedItemRepository) {
+    this.item = toSignal(repository.item$);
   }
 }

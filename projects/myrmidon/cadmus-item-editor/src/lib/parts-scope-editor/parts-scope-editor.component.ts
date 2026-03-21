@@ -4,7 +4,6 @@ import {
   input,
   output,
   effect,
-  OnDestroy,
 } from '@angular/core';
 import {
   FormGroup,
@@ -15,7 +14,6 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { Subscription } from 'rxjs';
 
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -59,13 +57,9 @@ export interface PartScopeSetRequest {
     DatePipe,
   ],
 })
-export class PartsScopeEditorComponent implements OnDestroy {
-  private readonly _sub: Subscription;
-
+export class PartsScopeEditorComponent {
   public readonly parts = input<Part[]>();
-
   public readonly readonly = input<boolean>();
-
   public readonly setScopeRequest = output<PartScopeSetRequest>();
 
   public checks: FormArray;
@@ -81,10 +75,6 @@ export class PartsScopeEditorComponent implements OnDestroy {
     private _editedItemRepository: EditedItemRepository,
   ) {
     this.checks = _formBuilder.array([], CustomValidators.minChecked(1));
-    this._sub = this.checks.valueChanges.subscribe(() => {
-      this.form.updateValueAndValidity();
-    });
-
     this.scope = _formBuilder.control(null, [
       Validators.maxLength(50),
       Validators.pattern(/^[-a-zA-Z0-9_]+$/),
@@ -101,20 +91,14 @@ export class PartsScopeEditorComponent implements OnDestroy {
     });
   }
 
-  public ngOnDestroy(): void {
-    this._sub.unsubscribe();
-  }
-
   private updateForm(parts?: Part[]): void {
     this.checks.clear();
     if (!parts?.length) {
       return;
     }
-
     for (let i = 0; i < parts.length; i++) {
       this.checks.push(this._formBuilder.control(false));
     }
-
     this.form.updateValueAndValidity();
   }
 
