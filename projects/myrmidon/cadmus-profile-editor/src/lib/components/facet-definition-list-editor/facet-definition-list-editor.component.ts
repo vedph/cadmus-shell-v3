@@ -11,15 +11,11 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { from, of } from 'rxjs';
-import { catchError, concatMap, toArray } from 'rxjs/operators';
+import { catchError, concatMap, take, tap, toArray } from 'rxjs/operators';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 import { FacetModelSettings, FacetService } from '@myrmidon/cadmus-api';
-import {
-  FacetDefinitionValidatorService,
-  FacetValidationResult,
-} from '../../services/facet-definition-validator.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
@@ -30,6 +26,10 @@ import {
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { ColorToContrastPipe, StringToColorPipe } from '@myrmidon/ngx-tools';
 
+import {
+  FacetDefinitionValidatorService,
+  FacetValidationResult,
+} from '../../services/facet-definition-validator.service';
 import { FacetDefinitionEditorComponent } from '../facet-definition-editor/facet-definition-editor.component';
 
 /**
@@ -216,14 +216,16 @@ export class FacetDefinitionListEditorComponent implements OnInit {
     this.editorClose.emit();
   }
 
-  /**
-   * Run validation against the current facet list and update validationResult.
-   * Returns the result so callers can inspect it immediately.
-   */
-  public validate(): FacetValidationResult {
-    const result = this._validator.validate(this.facets());
-    this.validationResult.set(result);
-    return result;
+  /** Run validation and update validationResult; returns the observable. */
+  private runValidation() {
+    return this._validator
+      .validate(this.facets(), this.facetModelSettings())
+      .pipe(tap((result) => this.validationResult.set(result)));
+  }
+
+  /** Trigger validation from the template and update the displayed result. */
+  public validate(): void {
+    this.runValidation().pipe(take(1)).subscribe();
   }
 
   /** Persist all facets to the server; called only after all gates pass. */
@@ -297,30 +299,32 @@ export class FacetDefinitionListEditorComponent implements OnInit {
       return;
     }
 
-    const result = this.validate();
+    this.runValidation()
+      .pipe(take(1))
+      .subscribe((result) => {
+        if (result.hasErrors) {
+          // validation result is already displayed; nothing more to do
+          return;
+        }
 
-    if (result.hasErrors) {
-      // validation result is already displayed; nothing more to do
-      return;
-    }
-
-    if (result.hasWarnings) {
-      const warnCount = result.issues.filter(
-        (i) => i.severity === 'warning',
-      ).length;
-      this._dialogService
-        .confirm(
-          'Warnings',
-          `There ${warnCount === 1 ? 'is 1 warning' : `are ${warnCount} warnings`}. ` +
-            'Review the validation results below. Proceed anyway?',
-        )
-        .subscribe((ok) => {
-          if (ok) {
-            this.confirmAndSave();
-          }
-        });
-    } else {
-      this.confirmAndSave();
-    }
+        if (result.hasWarnings) {
+          const warnCount = result.issues.filter(
+            (i) => i.severity === 'warning',
+          ).length;
+          this._dialogService
+            .confirm(
+              'Warnings',
+              `There ${warnCount === 1 ? 'is 1 warning' : `are ${warnCount} warnings`}. ` +
+                'Review the validation results below. Proceed anyway?',
+            )
+            .subscribe((ok) => {
+              if (ok) {
+                this.confirmAndSave();
+              }
+            });
+        } else {
+          this.confirmAndSave();
+        }
+      });
   }
 }

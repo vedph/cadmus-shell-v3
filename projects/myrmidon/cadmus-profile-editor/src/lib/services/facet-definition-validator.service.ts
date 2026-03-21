@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { FacetDefinition } from '@myrmidon/cadmus-core';
+import { FacetModelSettings, ThesaurusService } from '@myrmidon/cadmus-api';
 
 /** A single validation issue produced by {@link FacetDefinitionValidatorService}. */
 export interface FacetValidationIssue {
-  severity: 'error' | 'warning';
+  severity: 'error' | 'warning' | 'info';
   /** Human-readable description of the issue. */
   message: string;
 }
@@ -14,6 +17,7 @@ export interface FacetValidationResult {
   issues: FacetValidationIssue[];
   hasErrors: boolean;
   hasWarnings: boolean;
+  hasInfos: boolean;
 }
 
 /**
@@ -31,14 +35,62 @@ export interface FacetValidationResult {
  *   (one with a roleId and one without is valid: they serve different roles)
  * - within a facet: duplicate part color  → warning
  * - within a facet: duplicate part description → warning
+ * - (when facetModelSettings is provided) for each part/fragment entry in the
+ *   settings, each thesaurus ID listed in thesauriIds is checked against the
+ *   existing thesauri: missing required thesauri (prefixed with "*") → error;
+ *   missing optional thesauri → info.
  */
 @Injectable({ providedIn: 'root' })
 export class FacetDefinitionValidatorService {
+  constructor(private _thesaurusService: ThesaurusService) {}
+
+  private buildResult(issues: FacetValidationIssue[]): FacetValidationResult {
+    return {
+      issues,
+      hasErrors: issues.some((i) => i.severity === 'error'),
+      hasWarnings: issues.some((i) => i.severity === 'warning'),
+      hasInfos: issues.some((i) => i.severity === 'info'),
+    };
+  }
+
+  private checkThesauri(
+    issues: FacetValidationIssue[],
+    existingIds: Set<string>,
+    entries: { [key: string]: { thesauriIds?: string[] } },
+    kind: 'Part' | 'Fragment',
+  ): void {
+    for (const [typeId, entry] of Object.entries(entries)) {
+      for (const rawId of entry.thesauriIds ?? []) {
+        const required = rawId.startsWith('*');
+        const bareId = required ? rawId.substring(1) : rawId;
+        if (!existingIds.has(bareId)) {
+          if (required) {
+            issues.push({
+              severity: 'error',
+              message: `${kind} "${typeId}" requires thesaurus "${bareId}" which does not exist.`,
+            });
+          } else {
+            issues.push({
+              severity: 'info',
+              message: `${kind} "${typeId}" uses optional thesaurus "${bareId}" which does not exist.`,
+            });
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Validate the given list of facet definitions and return a result
    * containing all issues found.
+   * @param facets The list of facet definitions to validate.
+   * @param facetModelSettings Optional settings; when provided the thesauri
+   * referenced by each part/fragment are checked against the server.
    */
-  public validate(facets: FacetDefinition[]): FacetValidationResult {
+  public validate(
+    facets: FacetDefinition[],
+    facetModelSettings?: FacetModelSettings,
+  ): Observable<FacetValidationResult> {
     const issues: FacetValidationIssue[] = [];
 
     const seenIds = new Set<string>();
@@ -148,8 +200,7 @@ export class FacetDefinitionValidatorService {
           if (seenPartDescriptions.has(part.description)) {
             issues.push({
               severity: 'warning',
-              message:
-                `Duplicate part description for type "${part.typeId}" in ${label}.`,
+              message: `Duplicate part description for type "${part.typeId}" in ${label}.`,
             });
           } else {
             seenPartDescriptions.add(part.description);
@@ -158,10 +209,30 @@ export class FacetDefinitionValidatorService {
       }
     }
 
-    return {
-      issues,
-      hasErrors: issues.some((i) => i.severity === 'error'),
-      hasWarnings: issues.some((i) => i.severity === 'warning'),
-    };
+    // thesaurus coverage check (only when model settings are available)
+    if (!facetModelSettings) {
+      return of(this.buildResult(issues));
+    }
+
+    return this._thesaurusService.getThesaurusIds().pipe(
+      map((ids) => {
+        const existingIds = new Set(ids);
+        this.checkThesauri(
+          issues,
+          existingIds,
+          facetModelSettings.parts,
+          'Part',
+        );
+        if (facetModelSettings.fragments) {
+          this.checkThesauri(
+            issues,
+            existingIds,
+            facetModelSettings.fragments,
+            'Fragment',
+          );
+        }
+        return this.buildResult(issues);
+      }),
+    );
   }
 }

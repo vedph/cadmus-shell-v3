@@ -38,15 +38,12 @@ export class ThesaurusService {
   }
 
   /**
-   * Get the list of thesauri IDs.
-   * @param filter The optional filter to use (page size can be 0 to get
-   * all the IDs at once).
+   * Get the list of all thesauri IDs or of the subset of them matching the filter.
+   * @param filter The optional filter to use.
    * @returns Array of IDs.
    */
   public getThesaurusIds(
     filter?: ThesaurusFilter,
-    pageNumber = 1,
-    pageSize = 20,
   ): Observable<string[]> {
     const url = `${this._env.get('apiUrl')}thesauri-ids`;
 
@@ -55,7 +52,19 @@ export class ThesaurusService {
         .get<string[]>(url)
         .pipe(retry(3), catchError(this._error.handleError));
     } else {
-      let httpParams = this.getFilterParams(pageNumber, pageSize, filter);
+      let httpParams = new HttpParams();
+      if (filter.id) {
+        httpParams = httpParams.set('id', filter.id);
+      }
+      if (filter.language) {
+        httpParams = httpParams.set('language', filter.language);
+      }
+      if (filter.isAlias === false || filter.isAlias === true) {
+        httpParams = httpParams.set(
+          'isAlias',
+          filter.isAlias === true ? 'true' : 'false',
+        );
+      }
       return this._http
         .get<string[]>(url, {
           params: httpParams,
