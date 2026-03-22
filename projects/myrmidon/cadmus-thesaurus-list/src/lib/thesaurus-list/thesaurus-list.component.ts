@@ -296,10 +296,13 @@ export class ThesaurusListComponent implements OnInit {
 
         const element = document.createElement('a');
         const file = new Blob([json], { type: 'application/json' });
-        element.href = URL.createObjectURL(file);
+        const url = URL.createObjectURL(file);
+        element.href = url;
         element.download = `${thesaurus.id}.json`;
         document.body.appendChild(element);
         element.click();
+        document.body.removeChild(element);
+        URL.revokeObjectURL(url);
       },
       error: (err) => {
         this.downloading.set(false);

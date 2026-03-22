@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
 import {
   MatCard,
@@ -7,6 +7,8 @@ import {
   MatCardTitle,
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
+
+import { ComponentCanDeactivate } from '@myrmidon/cadmus-core';
 
 import { FacetDefinitionListEditorComponent } from '../facet-definition-list-editor/facet-definition-list-editor.component';
 
@@ -24,4 +26,14 @@ import { FacetDefinitionListEditorComponent } from '../facet-definition-list-edi
   styleUrl: './facet-edit-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FacetEditPageComponent {}
+export class FacetEditPageComponent implements ComponentCanDeactivate {
+  private readonly _dirty = signal<boolean>(false);
+
+  public canDeactivate(): boolean {
+    return !this._dirty();
+  }
+
+  public onDirtyChange(dirty: boolean): void {
+    this._dirty.set(dirty);
+  }
+}

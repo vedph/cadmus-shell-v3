@@ -53,7 +53,7 @@ export class ThesaurusFilterComponent {
   ) {
     this.filter$ = _repository.filter$;
     // form
-    this.id = formBuilder.control<string>('id', { nonNullable: true });
+    this.id = formBuilder.control<string>('', { nonNullable: true });
     this.alias = formBuilder.control<boolean>(false, { nonNullable: true });
     this.language = formBuilder.control<string>('en', {
       nonNullable: true,

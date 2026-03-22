@@ -8,6 +8,7 @@
   - 🆕 adding new library `@myrmidon/cadmus-profile-editor` to provide facet editing UI.
   - `@myrmidon/cadmus-item-editor`: style changes and components review for modernization  (bumped to 16.1.4).
   - `@myrmidon/cadmus-thesaurus-editor`: replaced thesaurus editor (bumped to 16.1.1).
+  - `@myrmidon/cadmus-thesaurus-list`: reviewed for minor issues (bumped to 16.1.2).
   - shell: adjusted profile routes and menu links in shell app.
   - ⚠️ `@myrmidon/cadmus-core`: removed optional `settings` property from `PartDefinition` (bumped to 12.0.4). This was unused, and has been superseded by general server-side settings which can also differentiate part types by their roles.
 

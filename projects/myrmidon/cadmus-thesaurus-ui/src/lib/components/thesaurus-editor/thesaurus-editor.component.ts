@@ -60,6 +60,7 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
  * contains a set of thesauri nodes, which are a representation of
  * thesaurus entries used to ease facilitate the editing of hierarchical
  * thesauri, but can be equally used with normal thesauri.
+ * Obsoleted, use cadmus-thesaurus-editor-feature instead.
  */
 @Component({
   selector: 'cadmus-thesaurus-editor',

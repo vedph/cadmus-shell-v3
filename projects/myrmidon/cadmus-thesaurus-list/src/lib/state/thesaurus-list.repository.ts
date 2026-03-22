@@ -87,8 +87,14 @@ export class ThesaurusListRepository
 
   public deleteThesaurus(id: string) {
     this._loading$.next(true);
-    this._thesaurusService.deleteThesaurus(id).subscribe((_) => {
-      this._store.reset();
+    this._thesaurusService.deleteThesaurus(id).subscribe({
+      next: () => {
+        this._store.reset();
+      },
+      error: (error) => {
+        console.error(error);
+        this._loading$.next(false);
+      },
     });
   }
 }

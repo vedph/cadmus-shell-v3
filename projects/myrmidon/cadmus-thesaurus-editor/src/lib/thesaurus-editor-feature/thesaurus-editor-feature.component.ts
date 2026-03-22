@@ -4,7 +4,10 @@ import {
   signal,
   ChangeDetectionStrategy,
   computed,
+  DestroyRef,
+  inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -13,16 +16,11 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { User } from '@myrmidon/auth-jwt-login';
 
-import {
-  Thesaurus,
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { Thesaurus, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import { ComponentCanDeactivate } from '@myrmidon/cadmus-core';
 import { ThesaurusService, UserLevelService } from '@myrmidon/cadmus-api';
-import {
-  AppRepository,
-} from '@myrmidon/cadmus-state';
+import { AppRepository } from '@myrmidon/cadmus-state';
 import {
   EditableStaticThesaurusPagedTreeStoreService,
   EditableThesaurusBrowserComponent,
@@ -40,9 +38,12 @@ import {
     EditableThesaurusBrowserComponent,
   ],
 })
-export class ThesaurusEditorFeatureComponent implements OnInit {
+export class ThesaurusEditorFeatureComponent
+  implements OnInit, ComponentCanDeactivate
+{
+  private readonly _destroyRef = inject(DestroyRef);
+
   public readonly id = signal<string | undefined>(undefined);
-  public readonly user = signal<User | undefined>(undefined);
   public userLevel = signal<number>(0);
 
   public readonly thesaurus = signal<Thesaurus | undefined>(undefined);
@@ -72,25 +73,32 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     this.userLevel.set(userLevelService.getCurrentUserLevel());
   }
 
-  public async ngOnInit() {
+  public canDeactivate(): boolean {
+    return !this.hasChanges();
+  }
+
+  public ngOnInit(): void {
     // ensure app data is loaded
     this._appRepository.load();
 
     // load the thesaurus to edit
     if (this.id()) {
       this.busy.set(true);
-      this._thesService.getThesaurus(this.id()!, true).subscribe({
-        next: (thesaurus: Thesaurus) => {
-          this.busy.set(false);
-          this.thesaurus.set(thesaurus);
-          this.entries.set(thesaurus.entries || []);
-        },
-        error: (error) => {
-          this.busy.set(false);
-          this._snackbar.open(`Error loading thesaurus: ${error}`, 'OK');
-          this._router.navigate(['/thesauri']);
-        },
-      });
+      this._thesService
+        .getThesaurus(this.id()!, true)
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe({
+          next: (thesaurus: Thesaurus) => {
+            this.busy.set(false);
+            this.thesaurus.set(thesaurus);
+            this.entries.set(thesaurus.entries || []);
+          },
+          error: (error) => {
+            this.busy.set(false);
+            this._snackbar.open(`Error loading thesaurus: ${error}`, 'OK');
+            this._router.navigate(['/thesauri']);
+          },
+        });
     }
   }
 
@@ -99,7 +107,11 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
   }
 
   public onReset(): void {
-    this.entries.set([...(this.thesaurus()!.entries || [])]);
+    const thesaurus = this.thesaurus();
+    if (!thesaurus) {
+      return;
+    }
+    this.entries.set([...(thesaurus.entries || [])]);
     this.hasChanges.set(false);
     this._snackbar.open('Reset to initial data', 'Close', { duration: 2000 });
   }
@@ -114,11 +126,11 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
   public cancel(): void {
     this._dialogService
       .confirm('Close', `Close thesaurus editor?`)
+      .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((result) => {
         if (!result) {
           return;
         }
-        // navigate back to list
         this._router.navigate(['/thesauri']);
       });
   }
@@ -127,19 +139,31 @@ export class ThesaurusEditorFeatureComponent implements OnInit {
     if (this.userLevel() < 3 || !this.hasChanges()) {
       return;
     }
-    this._thesService.addThesaurus(this.thesaurus()!).subscribe({
-      next: (saved: Thesaurus) => {
-        this._snackbar.open('Thesaurus saved', 'OK', {
-          duration: 1500,
-        });
-        // reload thesauri in app repository
-        this._appRepository.loadThesauri();
-        // navigate back to list
-        this._router.navigate(['/thesauri']);
-      },
-      error: (error) => {
-        this._snackbar.open(`Error saving thesaurus: ${error}`, 'OK');
-      },
-    });
+    const thesaurus = this.thesaurus();
+    if (!thesaurus) {
+      return;
+    }
+    const updated: Thesaurus = {
+      ...thesaurus,
+      entries: this.service().getCurrentEntries(),
+    };
+    this._thesService
+      .addThesaurus(updated)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: () => {
+          this._snackbar.open('Thesaurus saved', 'OK', {
+            duration: 1500,
+          });
+          this.hasChanges.set(false);
+          // reload thesauri in app repository
+          this._appRepository.loadThesauri();
+          // navigate back to list
+          this._router.navigate(['/thesauri']);
+        },
+        error: (error) => {
+          this._snackbar.open(`Error saving thesaurus: ${error}`, 'OK');
+        },
+      });
   }
 }

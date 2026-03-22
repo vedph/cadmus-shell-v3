@@ -90,6 +90,7 @@ export const routes: Routes = [
         (module) => module.ThesaurusEditorFeatureComponent,
       ),
     canActivate: [editorGuard],
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'thesauri',

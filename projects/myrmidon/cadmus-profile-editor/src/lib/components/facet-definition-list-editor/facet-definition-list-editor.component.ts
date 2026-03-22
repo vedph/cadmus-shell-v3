@@ -88,6 +88,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
     undefined,
   );
 
+  public readonly dirtyChange = output<boolean>();
   public readonly editorClose = output<void>();
 
   constructor(
@@ -156,6 +157,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
     this.facets.set(entries);
     this.closeFacet();
     this.dirty.set(true);
+    this.dirtyChange.emit(true);
   }
 
   public deleteFacet(index: number): void {
@@ -170,6 +172,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
           entries.splice(index, 1);
           this.facets.set(entries);
           this.dirty.set(true);
+          this.dirtyChange.emit(true);
         }
       });
   }
@@ -184,6 +187,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
     facets.splice(index - 1, 0, facet);
     this.facets.set(facets);
     this.dirty.set(true);
+    this.dirtyChange.emit(true);
     // keep editedIndex in sync
     if (this.editedIndex() === index) {
       this.editedIndex.set(index - 1);
@@ -202,6 +206,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
     facets.splice(index + 1, 0, facet);
     this.facets.set(facets);
     this.dirty.set(true);
+    this.dirtyChange.emit(true);
     // keep editedIndex in sync
     if (this.editedIndex() === index) {
       this.editedIndex.set(index + 1);
@@ -255,6 +260,7 @@ export class FacetDefinitionListEditorComponent implements OnInit {
         });
         this.busy.set(false);
         this.dirty.set(failed.length > 0);
+        this.dirtyChange.emit(failed.length > 0);
         if (saved.length > 0) {
           this.reloadNeeded.set(true);
         }

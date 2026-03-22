@@ -38,6 +38,9 @@ legend {
 .form-row * {
   flex: 0 0 auto;
 }
+.margin-top {
+  margin-top: 1rem;
+}
 
 div#container {
   display: grid;
