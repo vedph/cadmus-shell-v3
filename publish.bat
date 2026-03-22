@@ -110,6 +110,11 @@ call npm publish --access=public
 cd ..\..\..
 pause
 
+cd .\dist\myrmidon\cadmus-profile-editor
+call npm publish --access=public
+cd ..\..\..
+pause
+
 cd .\dist\myrmidon\cadmus-profile-import
 call npm publish --access=public
 cd ..\..\..
