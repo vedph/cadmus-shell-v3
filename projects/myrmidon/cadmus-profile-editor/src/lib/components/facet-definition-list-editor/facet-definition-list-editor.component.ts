@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   OnInit,
   output,
   signal,
@@ -22,11 +23,7 @@ import {
 import { MatProgressBar } from '@angular/material/progress-bar';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import {
-  ColorToContrastPipe,
-  EllipsisPipe,
-  StringToColorPipe,
-} from '@myrmidon/ngx-tools';
+import { ColorToContrastPipe, EllipsisPipe } from '@myrmidon/ngx-tools';
 
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 import { FacetModelSettings, FacetService } from '@myrmidon/cadmus-api';
@@ -62,7 +59,6 @@ import { FacetDefinitionEditorComponent } from '../facet-definition-editor/facet
     MatProgressBar,
     ColorToContrastPipe,
     EllipsisPipe,
-    StringToColorPipe,
     FacetDefinitionEditorComponent,
   ],
   templateUrl: './facet-definition-list-editor.component.html',
@@ -82,6 +78,10 @@ export class FacetDefinitionListEditorComponent implements OnInit {
   public readonly validationResult = signal<FacetValidationResult | undefined>(
     undefined,
   );
+  public readonly validationResultHasIssues = computed(() => {
+    const vr = this.validationResult();
+    return vr ? vr.hasErrors || vr.hasWarnings : false;
+  })
 
   /**
    * The facet models settings, used to get the list of available part type IDs,

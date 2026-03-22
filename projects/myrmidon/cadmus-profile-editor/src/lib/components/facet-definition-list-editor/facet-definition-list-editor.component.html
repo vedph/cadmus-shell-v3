@@ -22,8 +22,10 @@
     <mat-expansion-panel [expanded]="true">
       <mat-expansion-panel-header>
         <mat-panel-title>Validation result</mat-panel-title>
-        <mat-panel-description>
-          {{ vr.issues.length }} issue{{ vr.issues.length !== 1 ? "s" : "" }}
+        <mat-panel-description
+          [style.color]="validationResultHasIssues() ? 'warn' : 'primary'"
+        >
+          {{ vr.issues.length }} result{{ vr.issues.length !== 1 ? "s" : "" }}
         </mat-panel-description>
       </mat-expansion-panel-header>
       <div class="validation-result">
@@ -131,7 +133,7 @@
               <span
                 class="color-swatch"
                 [style.background-color]="'#' + entry.colorKey"
-                [style.color]="('#' + entry.colorKey) | colorToContrast"
+                [style.color]="'#' + entry.colorKey | colorToContrast"
               >
                 {{ entry.colorKey }}
               </span>

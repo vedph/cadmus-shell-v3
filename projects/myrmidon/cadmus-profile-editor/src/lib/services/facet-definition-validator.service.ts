@@ -216,7 +216,9 @@ export class FacetDefinitionValidatorService {
 
     return this._thesaurusService.getThesaurusIds().pipe(
       map((ids) => {
-        const existingIds = new Set(ids);
+        // remove final @language from IDs for comparison, as facet model settings
+        // do not include the language suffix
+        const existingIds = new Set(ids.map((id) => id.replace(/\@[a-z]+$/g, '')));
         this.checkThesauri(
           issues,
           existingIds,

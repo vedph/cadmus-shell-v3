@@ -40,6 +40,7 @@ Latest versions:
 - cadmus-preview-pg: 17.1.0
 - cadmus-preview-ui: 17.1.1
 - cadmus-profile-core: 12.0.1
+- cadmus-profile-editor: 0.0.2
 - cadmus-profile-import: 0.0.2
 - cadmus-state: 15.0.0
 - cadmus-statistics: 1.1.0

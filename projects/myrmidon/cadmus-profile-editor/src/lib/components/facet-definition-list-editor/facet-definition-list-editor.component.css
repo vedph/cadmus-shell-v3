@@ -29,12 +29,15 @@ fieldset {
 }
 .validation-result {
   margin: 8px 0;
+  max-height: 800px;
+  overflow: auto;
 }
 .validation-issues {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin: 8px 0;
+  font-size: 0.9em;
 }
 .validation-issue {
   display: flex;
