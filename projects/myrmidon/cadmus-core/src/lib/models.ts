@@ -221,7 +221,6 @@ export interface PartDefinition extends PartTypeIds {
   colorKey?: string;
   groupKey?: string;
   sortKey?: string;
-  settings?: string;
 }
 
 /**

@@ -130,10 +130,8 @@
             <td>
               <span
                 class="color-swatch"
-                [style.background-color]="'#' + entry.colorKey | stringToColor"
-                [style.color]="
-                  '#' + entry.colorKey | stringToColor | colorToContrast
-                "
+                [style.background-color]="'#' + entry.colorKey"
+                [style.color]="('#' + entry.colorKey) | colorToContrast"
               >
                 {{ entry.colorKey }}
               </span>

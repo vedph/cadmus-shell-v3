@@ -134,7 +134,6 @@ export class PartDefinitionEditorComponent {
   public colorKey: FormControl<string | null>;
   public groupKey: FormControl<string | null>;
   public sortKey: FormControl<string | null>;
-  public settings: FormControl<string | null>;
   public form: FormGroup;
 
   constructor(formBuilder: FormBuilder) {
@@ -169,7 +168,6 @@ export class PartDefinitionEditorComponent {
     });
     this.groupKey = formBuilder.control<string | null>(null);
     this.sortKey = formBuilder.control<string | null>(null);
-    this.settings = formBuilder.control<string | null>(null);
 
     this.form = formBuilder.group({
       typeId: this.typeId,
@@ -180,7 +178,6 @@ export class PartDefinitionEditorComponent {
       colorKey: this.colorKey,
       groupKey: this.groupKey,
       sortKey: this.sortKey,
-      settings: this.settings,
     });
 
     // when model changes, update form
@@ -202,7 +199,6 @@ export class PartDefinitionEditorComponent {
       this.colorKey.setValue(data.colorKey || null);
       this.groupKey.setValue(data.groupKey || null);
       this.sortKey.setValue(data.sortKey || null);
-      this.settings.setValue(data.settings || null);
       this.form.markAsPristine();
     }
   }
@@ -217,7 +213,6 @@ export class PartDefinitionEditorComponent {
       colorKey: this.colorKey.value?.trim() || undefined,
       groupKey: this.groupKey.value?.trim() || undefined,
       sortKey: this.sortKey.value?.trim() || undefined,
-      settings: this.settings.value?.trim() || undefined,
     };
   }
 

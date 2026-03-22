@@ -14,3 +14,13 @@ input[type='color'].color-picker-input {
   width: 100%;
   max-width: 800px;
 }
+.color-input {
+  width: 9em;
+}
+.color-sample {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--swatch-color);
+  margin-top: -16px;
+}

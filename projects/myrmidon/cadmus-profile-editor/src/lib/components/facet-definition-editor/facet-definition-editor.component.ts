@@ -35,7 +35,11 @@ import { MatInput } from '@angular/material/input';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { ColorToContrastPipe, EllipsisPipe, StringToColorPipe } from '@myrmidon/ngx-tools';
+import {
+  ColorToContrastPipe,
+  EllipsisPipe,
+  StringToColorPipe,
+} from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { FacetDefinition, PartDefinition } from '@myrmidon/cadmus-core';
@@ -227,21 +231,27 @@ export class FacetDefinitionEditorComponent {
       entries.splice(this.editedIndex(), 1, entry);
     }
     this.partDefinitions.setValue(entries);
+    this.partDefinitions.markAsDirty();
+    this.partDefinitions.updateValueAndValidity();
+
     this.updatePartDefinitionSortKeys();
     this.closePartDefinition();
   }
 
   public deletePartDefinition(index: number): void {
+    const definition = this.partDefinitions.value[index];
     this._dialogService
-      .confirm('Confirmation', 'Delete PartDefinition?')
+      .confirm('Confirmation', `Delete part "${definition.name}"?`)
       .subscribe((yes: boolean | undefined) => {
         if (yes) {
           if (this.editedIndex() === index) {
             this.closePartDefinition();
           }
-          const entries = [...this.partDefinitions.value];
-          entries.splice(index, 1);
-          this.partDefinitions.setValue(entries);
+          const definitions = [...this.partDefinitions.value];
+          definitions.splice(index, 1);
+          this.partDefinitions.setValue(definitions);
+          this.partDefinitions.markAsDirty();
+          this.partDefinitions.updateValueAndValidity();
           this.updatePartDefinitionSortKeys();
         }
       });
@@ -251,11 +261,13 @@ export class FacetDefinitionEditorComponent {
     if (index < 1) {
       return;
     }
-    const entry = this.partDefinitions.value[index];
-    const entries = [...this.partDefinitions.value];
-    entries.splice(index, 1);
-    entries.splice(index - 1, 0, entry);
-    this.partDefinitions.setValue(entries);
+    const definition = this.partDefinitions.value[index];
+    const definitions = [...this.partDefinitions.value];
+    definitions.splice(index, 1);
+    definitions.splice(index - 1, 0, definition);
+    this.partDefinitions.setValue(definitions);
+    this.partDefinitions.markAsDirty();
+    this.partDefinitions.updateValueAndValidity();
     // keep editedIndex in sync
     if (this.editedIndex() === index) {
       this.editedIndex.set(index - 1);
@@ -269,11 +281,13 @@ export class FacetDefinitionEditorComponent {
     if (index + 1 >= this.partDefinitions.value.length) {
       return;
     }
-    const entry = this.partDefinitions.value[index];
-    const entries = [...this.partDefinitions.value];
-    entries.splice(index, 1);
-    entries.splice(index + 1, 0, entry);
-    this.partDefinitions.setValue(entries);
+    const definition = this.partDefinitions.value[index];
+    const definitions = [...this.partDefinitions.value];
+    definitions.splice(index, 1);
+    definitions.splice(index + 1, 0, definition);
+    this.partDefinitions.setValue(definitions);
+    this.partDefinitions.markAsDirty();
+    this.partDefinitions.updateValueAndValidity();
     // keep editedIndex in sync
     if (this.editedIndex() === index) {
       this.editedIndex.set(index + 1);

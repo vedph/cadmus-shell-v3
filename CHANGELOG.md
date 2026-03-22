@@ -1,14 +1,15 @@
 # History
 
 - 2026-03-21:
-  - `cadmus-api`:
+  - `@myrmidon/cadmus-api`:
     - added methods to facet service for additional endpoints and increased version number (14.0.8).
     - added `getFacetModelSettings` to facet service.
-  - `cadmus-profile-import`: do not request reload on dry run (bumped to 0.0.4).
-  - 🆕 adding new library `cadmus-profile-editor` to provide facet editing UI.
-  - minor style changes in `cadmus-item-editor` (bumped to 16.1.4).
-  - replaced thesaurus editor in `cadmus-thesaurus-editor` (bumped to 16.1.1).
-  - adjusted profile routes and menu links in shell app.
+  - `@myrmidon/cadmus-profile-import`: do not request reload on dry run (bumped to 0.0.4).
+  - 🆕 adding new library `@myrmidon/cadmus-profile-editor` to provide facet editing UI.
+  - `@myrmidon/cadmus-item-editor`: style changes and components review for modernization  (bumped to 16.1.4).
+  - `@myrmidon/cadmus-thesaurus-editor`: replaced thesaurus editor (bumped to 16.1.1).
+  - shell: adjusted profile routes and menu links in shell app.
+  - ⚠️ `@myrmidon/cadmus-core`: removed optional `settings` property from `PartDefinition` (bumped to 12.0.4). This was unused, and has been superseded by general server-side settings which can also differentiate part types by their roles.
 
 - 2026-03-18:
   - ⚠️ `CurrentItemBarComponent` and `CurrentLayerPartBarComponent` moved into `@myrmidon/cadmus-item-editor` from library ❌ `@myrmidon/cadmus-ui-pg` which had no other code and has thus been removed. This is a breaking change which avoids potential circular references and removes the need for this tiny library. To upgrade, just update `@myrmidon/cadmus-item-editor` and remove package `@myrmidon/cadmus-ui-pg` altogether, then change the imports accordingly. Libraries affected in this project were `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-pg`, `@myrmidon/cadmus-part-taxo-ui`.

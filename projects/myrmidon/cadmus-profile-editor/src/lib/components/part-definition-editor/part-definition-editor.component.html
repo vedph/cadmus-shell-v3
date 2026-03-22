@@ -84,7 +84,7 @@
     </mat-form-field>
 
     <!-- color -->
-    <mat-form-field>
+    <mat-form-field class="color-input">
       <mat-label>color</mat-label>
       <input matInput [formControl]="colorKey" />
       @if (
@@ -111,6 +111,7 @@
         <mat-icon>palette</mat-icon>
       </button>
     </mat-form-field>
+    <div class="color-sample" [style.--swatch-color]="'#' + colorKey.value"></div>
 
     <!-- group -->
     <mat-form-field>
