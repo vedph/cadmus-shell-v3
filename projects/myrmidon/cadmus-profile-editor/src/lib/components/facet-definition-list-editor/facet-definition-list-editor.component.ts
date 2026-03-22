@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { from, of } from 'rxjs';
-import { catchError, concatMap, take, tap, toArray } from 'rxjs/operators';
+import { catchError, concatMap, map, take, tap, toArray } from 'rxjs/operators';
 
 // material
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +22,11 @@ import {
 import { MatProgressBar } from '@angular/material/progress-bar';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { ColorToContrastPipe, EllipsisPipe, StringToColorPipe } from '@myrmidon/ngx-tools';
+import {
+  ColorToContrastPipe,
+  EllipsisPipe,
+  StringToColorPipe,
+} from '@myrmidon/ngx-tools';
 
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 import { FacetModelSettings, FacetService } from '@myrmidon/cadmus-api';
@@ -244,15 +248,18 @@ export class FacetDefinitionListEditorComponent implements OnInit {
     from(facets)
       .pipe(
         concatMap((facet) =>
-          this._facetService.addFacet(facet).pipe(catchError(() => of(null))),
+          this._facetService.addFacet(facet).pipe(
+            map(() => true),
+            catchError(() => of(false)),
+          ),
         ),
         toArray(),
       )
       .subscribe((results) => {
         const saved: string[] = [];
         const failed: string[] = [];
-        results.forEach((result, i) => {
-          if (result) {
+        results.forEach((ok, i) => {
+          if (ok) {
             saved.push(facets[i].id);
           } else {
             failed.push(facets[i].id);

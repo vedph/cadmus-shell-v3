@@ -87,11 +87,17 @@
         <mat-menu #adminMenu>
           <a mat-menu-item routerLink="/manage-users">Manage users</a>
           <a mat-menu-item routerLink="/register-user">Register user</a>
+          <mat-divider/>
           <a mat-menu-item routerLink="/flags"> Flags </a>
           <a mat-menu-item routerLink="/thesauri"> Thesauri </a>
-          <a mat-menu-item routerLink="/profile/facets"> Edit facets </a>
-          <a mat-menu-item routerLink="/profile/import/facets"> Import facets </a>
-          <a mat-menu-item routerLink="/profile/import/settings"> Import settings </a>
+          <a mat-menu-item routerLink="/profile/facets"> Facets </a>
+          <mat-divider/>
+          <a mat-menu-item routerLink="/profile/import/facets">
+            Import facets
+          </a>
+          <a mat-menu-item routerLink="/profile/import/settings">
+            Import settings
+          </a>
         </mat-menu>
       </div>
     }
@@ -123,7 +129,7 @@
 </main>
 
 <footer>
-  <div layout="row" layout-align="center center">
+  <div>
     <p>
       Cadmus by
       <a rel="noopener" href="https://myrmex.github.io/overview" target="_blank"

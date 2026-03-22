@@ -8,9 +8,16 @@
 }
 
 footer {
-  color: #808080;
+  color: var(--mat-sys-on-surface-variant);
   padding: 4px;
   text-align: center;
+}
+footer a {
+  color: var(--mat-sys-on-surface-variant);
+  text-decoration: none;
+}
+footer a:hover {
+  text-decoration: underline;
 }
 
 #logo {

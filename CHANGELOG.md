@@ -1,6 +1,7 @@
 # History
 
-- 2026-03-21:
+- 2026-03-22:
+  - updated Angular and packages.
   - `@myrmidon/cadmus-api`:
     - added methods to facet service for additional endpoints and increased version number (14.0.8).
     - added `getFacetModelSettings` to facet service.

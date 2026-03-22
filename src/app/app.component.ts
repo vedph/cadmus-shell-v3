@@ -38,6 +38,7 @@ import {
 import { AppRepository } from '@myrmidon/cadmus-state';
 
 import { DC_SCHEME, OD_SCHEME } from './cit-schemes';
+import { MatDivider } from '@angular/material/divider';
 
 @Component({
   selector: 'app-root',
@@ -46,6 +47,7 @@ import { DC_SCHEME, OD_SCHEME } from './cit-schemes';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    MatDivider,
     MatToolbarModule,
     MatTooltipModule,
     GravatarPipe,
