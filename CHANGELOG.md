@@ -4,6 +4,7 @@
   - updated Angular and packages.
   - refactored index keywords.
   - refactored metadata template.
+  - ⚠️ migrated shell app to zoneless.
 - 2026-03-22:
   - updated Angular and packages.
   - `@myrmidon/cadmus-api`:

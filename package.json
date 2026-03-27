@@ -83,8 +83,7 @@
     "rxjs": "~7.8.0",
     "three": "^0.183.2",
     "ts-md5": "^2.0.1",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.16.1"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/build": "^21.2.3",
