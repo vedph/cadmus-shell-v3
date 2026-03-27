@@ -1,20 +1,27 @@
-.form-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  color: var(--mat-sys-on-surface-variant);
 }
-.form-row * {
-  flex: 1 0 auto;
+tbody tr:nth-child(odd) {
+  background-color: var(--mat-sys-surface-container);
 }
-.form-row .type-col {
-  width: 8em !important;
-  flex: 0 0 8em !important;
+th, td {
+  padding: 0 6px;
 }
-.nr {
-  color: white;
-  background-color: #c0c0c0;
-  border: 1px solid #c0c0c0;
-  border-radius: 4px;
-  padding: 0 2px;
+th {
+  text-align: left;
+  font-weight: normal;
+  color: var(--mat-sys-on-surface-variant);
+}
+tbody tr:hover {
+  background-color: var(--mat-sys-surface-container-high);
+}
+td.fit-width {
+  width: 1px;
+  white-space: nowrap;
+}
+tbody tr.selected {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
 }

@@ -18,7 +18,7 @@
           type="button"
           mat-flat-button
           class="mat-primary"
-          (click)="addNewKeyword()"
+          (click)="addKeyword()"
         >
           <mat-icon>add_circle</mat-icon> keyword
         </button>
@@ -32,26 +32,52 @@
                 <th></th>
                 <th>index</th>
                 <th>lang.</th>
+                <th>tag</th>
                 <th>keyword</th>
               </tr>
             </thead>
             <tbody>
-              @for (k of keywords.value; track k) {
+              @for (
+                k of keywords.value;
+                let i = $index;
+                let first = $first;
+                let last = $last;
+                track k
+              ) {
                 <tr [class.selected]="editedKeyword() === k">
                   <td class="fit-width">
                     <button
                       mat-icon-button
                       type="button"
                       matTooltip="Edit this keyword"
-                      (click)="editKeyword(k)"
+                      (click)="editKeyword(k, i)"
                     >
                       <mat-icon class="mat-primary">edit</mat-icon>
                     </button>
                     <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Move this keyword up"
+                      [disabled]="first"
+                      (click)="moveKeywordUp(i)"
+                    >
+                      <mat-icon>arrow_upward</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Move this keyword down"
+                      [disabled]="last"
+                      (click)="moveKeywordDown(i)"
+                    >
+                      <mat-icon>arrow_downward</mat-icon>
+                    </button>
+
+                    <button
                       mat-icon-button
                       type="button"
                       matTooltip="Delete this keyword"
-                      (click)="deleteKeyword(k)"
+                      (click)="deleteKeyword(i)"
                     >
                       <mat-icon class="mat-warn">remove_circle</mat-icon>
                     </button>
@@ -61,6 +87,9 @@
                     {{
                       k.language | flatLookup: langEntries() : "id" : "value"
                     }}
+                  </td>
+                  <td>
+                    {{ k.tag | flatLookup: tagEntries() : "id" : "value" }}
                   </td>
                   <td>{{ k.value }}</td>
                 </tr>
@@ -76,15 +105,21 @@
             [expanded]="editedKeyword()"
           >
             <mat-expansion-panel-header>
-              <mat-panel-title> keyword </mat-panel-title>
+              <mat-panel-title>
+                <span
+                  >keyword&nbsp;<strong>{{
+                    editedKeyword()?.value
+                  }}</strong></span
+                >
+              </mat-panel-title>
             </mat-expansion-panel-header>
             <cadmus-index-keyword
               [keyword]="editedKeyword()"
               [idxEntries]="idxEntries()"
               [langEntries]="langEntries()"
               [tagEntries]="tagEntries()"
-              (editorClose)="onKeywordClose()"
-              (keywordChange)="onKeywordChange($event!)"
+              (editorClose)="closeKeyword()"
+              (keywordChange)="saveKeyword($event!)"
             />
           </mat-expansion-panel>
         </fieldset>

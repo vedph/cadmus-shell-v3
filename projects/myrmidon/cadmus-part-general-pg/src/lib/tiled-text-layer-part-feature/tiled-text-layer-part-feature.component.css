@@ -2,6 +2,6 @@ div.tile-row {
   margin-bottom: 6px;
 }
 span.row-nr {
-  color: #c0c0c0;
+  color: var(--mat-sys-on-surface-variant);
   font-weight: bold;
 }

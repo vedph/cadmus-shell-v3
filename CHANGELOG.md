@@ -1,5 +1,9 @@
 # History
 
+- 2026-03-27:
+  - updated Angular and packages.
+  - refactored index keywords.
+  - refactored metadata template.
 - 2026-03-22:
   - updated Angular and packages.
   - `@myrmidon/cadmus-api`:
