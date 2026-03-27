@@ -52,6 +52,10 @@ import {
 } from '../index-keywords-part';
 import { IndexKeywordComponent } from '../index-keyword/index-keyword.component';
 
+interface IndexKeywordsPartSetting {
+  noIndexId?: boolean;
+}
+
 /**
  * Index keywords part editor.
  * Thesauri: languages, keyword-indexes, keyword-tags.
@@ -96,6 +100,8 @@ export class IndexKeywordsPartComponent
   public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
   public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
+  public readonly noIndexId = signal<boolean>(false);
+
   public keywords: FormControl<IndexKeyword[]>;
 
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
@@ -105,6 +111,15 @@ export class IndexKeywordsPartComponent
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
+
+    // get setting for noIndexId (global, not role-specific)
+    this._appRepository
+      ?.getSettingFor<IndexKeywordsPartSetting>(INDEX_KEYWORDS_PART_TYPEID)
+      .then((setting) => {
+        if (setting && setting.noIndexId === true) {
+          this.noIndexId.set(true);
+        }
+      });
   }
 
   public override ngOnInit(): void {

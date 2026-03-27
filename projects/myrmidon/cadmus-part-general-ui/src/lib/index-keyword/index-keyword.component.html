@@ -1,35 +1,38 @@
 <form [formGroup]="form" (submit)="submit()">
   <div class="form-row">
-    <!-- index ID -->
-    @if (idxEntries()?.length) {
-      <div>
-        <mat-form-field>
-          <mat-label>index ID</mat-label>
-          <mat-select [formControl]="indexId">
-            <mat-option [value]="''">(default)</mat-option>
-            @for (e of idxEntries(); track e.id) {
-              <mat-option [value]="e.id">{{ e.value }}</mat-option>
+    @if (!noIndexId()) {
+      <!-- index ID -->
+      @if (idxEntries()?.length) {
+        <div>
+          <mat-form-field>
+            <mat-label>index ID</mat-label>
+            <mat-select [formControl]="indexId">
+              <mat-option [value]="''">(default)</mat-option>
+              @for (e of idxEntries(); track e.id) {
+                <mat-option [value]="e.id">{{ e.value }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      } @else {
+        <div>
+          <mat-form-field>
+            <mat-label>index ID</mat-label>
+            <input matInput type="text" [formControl]="indexId" />
+            @if (
+              indexId.hasError("maxLength") &&
+              (indexId.dirty || indexId.touched)
+            ) {
+              <mat-error>index ID too long</mat-error>
             }
-          </mat-select>
-        </mat-form-field>
-      </div>
-    } @else {
-      <div>
-        <mat-form-field>
-          <mat-label>index ID</mat-label>
-          <input matInput type="text" [formControl]="indexId" />
-          @if (
-            indexId.hasError("maxLength") && (indexId.dirty || indexId.touched)
-          ) {
-            <mat-error>index ID too long</mat-error>
-          }
-          @if (
-            indexId.hasError("pattern") && (indexId.dirty || indexId.touched)
-          ) {
-            <mat-error>invalid index ID</mat-error>
-          }
-        </mat-form-field>
-      </div>
+            @if (
+              indexId.hasError("pattern") && (indexId.dirty || indexId.touched)
+            ) {
+              <mat-error>invalid index ID</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      }
     }
 
     <!-- language -->

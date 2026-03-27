@@ -24,7 +24,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-
 import { IndexKeyword } from '../index-keywords-part';
 
 /**
@@ -61,6 +60,8 @@ export class IndexKeywordComponent {
   // languages
   public readonly langEntries = input<ThesaurusEntry[]>();
 
+  public readonly noIndexId = input<boolean>();
+
   public readonly editorClose = output();
 
   public indexId: FormControl<string | null>;
@@ -75,9 +76,7 @@ export class IndexKeywordComponent {
       Validators.maxLength(50),
       Validators.pattern(/^[-.a-zA-Z0-9_]{0,50}$/),
     ]);
-    this.language = formBuilder.control(null, [
-      Validators.pattern(/^[a-z]{3}$/),
-    ]);
+    this.language = formBuilder.control(null);
     this.value = formBuilder.control(null, [
       Validators.required,
       Validators.maxLength(100),
