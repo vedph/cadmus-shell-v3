@@ -1,5 +1,6 @@
 # History
 
+- 2026-03-30: fix to pending changes triggered on new item in item editor.
 - 2026-03-27:
   - updated Angular and packages.
   - refactored index keywords.

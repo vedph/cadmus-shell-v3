@@ -27,7 +27,7 @@ Latest versions:
 - cadmus-graph-pg-ex: 16.1.0
 - cadmus-graph-ui: 15.1.1
 - cadmus-graph-ui-ex: 16.1.1
-- cadmus-item-editor: 16.1.4
+- cadmus-item-editor: 16.1.5
 - cadmus-item-list: 16.1.1
 - cadmus-item-search: 16.1.1
 - cadmus-layer-demo: 15.1.1

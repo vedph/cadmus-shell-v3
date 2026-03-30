@@ -374,6 +374,12 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       .save(item as Item)
       .then((saved) => {
         this._messaging.sendMessage(MESSAGE_ITEM_LIST_REPOSITORY_RESET);
+        // mark form pristine immediately: in a zoneless app the effect that
+        // calls updateMetadataForm (and thus markAsPristine) is scheduled
+        // asynchronously, so without this explicit call the pending-changes
+        // guard would still see a dirty form and prompt the user even though
+        // the item was just saved successfully.
+        this.metadata.markAsPristine();
         // reload to force change in page URL for new items
         if (!item.id) {
           this.id.set(saved.id);
