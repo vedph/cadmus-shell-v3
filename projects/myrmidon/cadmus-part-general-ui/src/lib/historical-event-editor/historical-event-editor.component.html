@@ -46,7 +46,11 @@
           <div>
             <mat-form-field class="long-text">
               <mat-label>description</mat-label>
-              <textarea matInput [formControl]="description" rows="3"></textarea>
+              <textarea
+                matInput
+                [formControl]="description"
+                rows="3"
+              ></textarea>
               @if (
                 $any(description).errors?.maxLength &&
                 (description.dirty || description.touched)
@@ -80,13 +84,14 @@
                   {{
                     type.value | flatLookup: eventTypeEntries() : "id" : "value"
                   }}
+                  <span class="muted"> ({{ type.value }})</span>
                 </div>
               } @else {
                 <mat-error>no type</mat-error>
               }
               <cadmus-thesaurus-tree
-                [entries]="eventTypeEntries()"
                 rootLabel="types"
+                [entries]="eventTypeEntries()"
                 [renderLabel]="renderLabel"
                 (entryChange)="onTypeEntryChange($event)"
               />
@@ -118,7 +123,9 @@
 
       <!-- chronotopes -->
       <mat-expansion-panel>
-        <mat-expansion-panel-header>&#x231b; chronotopes</mat-expansion-panel-header>
+        <mat-expansion-panel-header
+          >&#x231b; chronotopes</mat-expansion-panel-header
+        >
         <fieldset>
           <legend>chronotopes</legend>
           <cadmus-asserted-chronotope-set

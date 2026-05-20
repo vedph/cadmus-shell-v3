@@ -53,6 +53,9 @@ legend {
   align-items: center;
   flex-wrap: wrap;
 }
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
 
 div#container {
   display: grid;
