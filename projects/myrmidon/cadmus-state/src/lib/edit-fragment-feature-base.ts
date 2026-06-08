@@ -10,7 +10,7 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditedObject, FragmentIdentity } from '@myrmidon/cadmus-core';
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { FragmentEditorService } from './fragment-editor.service';
 
@@ -20,6 +20,7 @@ import { FragmentEditorService } from './fragment-editor.service';
  */
 @Component({
   template: '',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export abstract class EditFragmentFeatureBase

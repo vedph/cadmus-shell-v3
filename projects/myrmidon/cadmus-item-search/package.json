@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-item-search",
-  "version": "16.1.1",
+  "version": "17.0.0",
   "description": "Cadmus - items search.",
   "keywords": [
     "Cadmus"
@@ -14,15 +14,15 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^20.0.0 || ^21.0.0",
-    "@angular/core": "^20.0.0 || ^21.0.0",
-    "@angular/material": "^20.0.0 || ^21.0.0",
-    "@myrmidon/ngx-tools": "^2.0.2",
-    "@myrmidon/ngx-mat-tools": "^1.0.2",
-    "@myrmidon/paged-data-browsers": "^5.2.0",
-    "@myrmidon/cadmus-api": "^14.0.7",
-    "@myrmidon/cadmus-state": "^15.0.0",
-    "@myrmidon/cadmus-ui": "^16.1.0"
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/material": "^22.0.0",
+    "@myrmidon/ngx-tools": "^3.0.0",
+    "@myrmidon/ngx-mat-tools": "^2.0.0",
+    "@myrmidon/paged-data-browsers": "^6.0.0",
+    "@myrmidon/cadmus-api": "^15.0.0",
+    "@myrmidon/cadmus-state": "^16.0.0",
+    "@myrmidon/cadmus-ui": "^17.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

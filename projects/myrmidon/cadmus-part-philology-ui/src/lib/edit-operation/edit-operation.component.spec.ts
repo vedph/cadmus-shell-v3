@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { EditOperationComponent } from './edit-operation.component';
 
@@ -8,6 +8,7 @@ import { EditOperationComponent } from './edit-operation.component';
 @Component({
   standalone: true,
   template: `<cadmus-edit-operation inputText="abcde" />`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [EditOperationComponent],
 })
 class TestHostComponent {}

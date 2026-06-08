@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { AssertedHistoricalDateComponent } from './asserted-historical-date.component';
@@ -12,7 +12,7 @@ describe('AssertedHistoricalDateComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AssertedHistoricalDateComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting()
       ],
     })

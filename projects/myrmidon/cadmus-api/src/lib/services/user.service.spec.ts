@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { UserService } from './user.service';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 
 xdescribe('Service: User', () => {
   beforeEach(() => {
@@ -10,7 +10,7 @@ xdescribe('Service: User', () => {
         HttpClient,
         { provide: 'apiEndpoint', useValue: 'none' },
         { provide: 'databaseId', useValue: 'cadmus' },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
     ]
 });
   });

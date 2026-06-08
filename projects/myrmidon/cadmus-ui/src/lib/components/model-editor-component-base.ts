@@ -10,6 +10,7 @@ import {
   computed,
   inject,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   FormBuilder,
@@ -41,6 +42,7 @@ import { getPartIdName } from './part-badge/part-badge.component';
  */
 @Component({
   template: '',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export abstract class ModelEditorComponentBase<T extends Part | Fragment>

@@ -3,6 +3,7 @@ import {
   HttpClient,
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr
 } from '@angular/common/http';
 
 import { ItemService } from './item.service';
@@ -11,7 +12,7 @@ describe('ItemService', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
       imports: [],
-      providers: [HttpClient, provideHttpClient(withInterceptorsFromDi())],
+      providers: [HttpClient, provideHttpClient(withXhr(), withInterceptorsFromDi())],
     })
   );
 

@@ -1,5 +1,5 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { BibliographyPartComponent } from './bibliography-part.component';
@@ -20,7 +20,7 @@ describe('BibliographyPartComponent', () => {
         BibliographyEntryComponent,
         BibliographyPartComponent,
       ],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
   }));
 

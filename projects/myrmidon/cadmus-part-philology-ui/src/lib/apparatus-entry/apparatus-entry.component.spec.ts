@@ -23,7 +23,7 @@ import { MatIcon } from '@angular/material/icon';
 
 // Standalone component
 import { ThesaurusTreeComponent } from '@myrmidon/cadmus-ui';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 
 class MockClipboard {
   copy = jasmine.createSpy('copy');
@@ -57,7 +57,7 @@ describe('ApparatusEntryComponent', () => {
         ThesaurusTreeComponent,
       ],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         FormBuilder,
         { provide: Clipboard, useClass: MockClipboard },

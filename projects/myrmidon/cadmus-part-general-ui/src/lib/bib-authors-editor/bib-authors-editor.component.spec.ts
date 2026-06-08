@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { BibAuthorsEditorComponent } from './bib-authors-editor.component';
@@ -11,7 +11,7 @@ describe('BibAuthorsEditorComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BibAuthorsEditorComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BibAuthorsEditorComponent);

@@ -13,8 +13,8 @@
         [references]="references.value"
         [typeEntries]="typeEntries()"
         [tagEntries]="tagEntries()"
-        [noLookup]="settings()?.noLookup"
-        [noCitation]="settings()?.noCitation"
+        [noLookup]="$safeNavigationMigration(settings()?.noLookup)"
+        [noCitation]="$safeNavigationMigration(settings()?.noCitation)"
         [defaultPicker]="settings()?.defaultPicker || 'lookup'"
         (referencesChange)="onReferencesChange($event)"
       />

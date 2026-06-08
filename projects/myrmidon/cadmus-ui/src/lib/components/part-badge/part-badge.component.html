@@ -3,7 +3,7 @@
   class="part-badge"
   [style.background-color]="color()"
   [style.color]="color() | colorToContrast"
-  [matTooltip]="partDefinition()?.description"
+  [matTooltip]="$safeNavigationMigration(partDefinition()?.description)"
 >
   {{ typeName() }}
 </span>

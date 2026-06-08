@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-general-pg",
-  "version": "16.1.1",
+  "version": "17.0.0",
   "description": "Cadmus - general parts wrappers.",
   "keywords": [
     "Cadmus"
@@ -14,16 +14,16 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^20.0.0 || ^21.0.0",
-    "@angular/core": "^20.0.0 || ^21.0.0",
-    "@angular/material": "^20.0.0 || ^21.0.0",
-    "@myrmidon/ngx-tools": "^2.0.2",
-    "@myrmidon/ngx-mat-tools": "^1.0.1",
-    "@myrmidon/cadmus-core": "^12.0.3",
-    "@myrmidon/cadmus-state": "^14.0.4",
-    "@myrmidon/cadmus-ui": "^16.0.2",
-    "@myrmidon/cadmus-item-editor": "^16.1.2",
-    "@myrmidon/cadmus-part-general-ui": "^16.0.5"
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/material": "^22.0.0",
+    "@myrmidon/ngx-tools": "^3.0.0",
+    "@myrmidon/ngx-mat-tools": "^2.0.0",
+    "@myrmidon/cadmus-core": "^13.0.0",
+    "@myrmidon/cadmus-state": "^16.0.0",
+    "@myrmidon/cadmus-ui": "^17.0.0",
+    "@myrmidon/cadmus-item-editor": "^17.0.0",
+    "@myrmidon/cadmus-part-general-ui": "^17.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

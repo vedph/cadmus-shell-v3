@@ -1,5 +1,6 @@
 # History
 
+- 2026-06-08: ⚠️ upgraded to Angular 22 bumping all libraries major version.
 - 2026-05-20:
   - added ID display to event type.
   - updated Angular and packages.

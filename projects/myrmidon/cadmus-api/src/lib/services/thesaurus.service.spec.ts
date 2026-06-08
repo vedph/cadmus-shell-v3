@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ThesaurusService } from './thesaurus.service';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 
 xdescribe('TagService', () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ xdescribe('TagService', () => {
         HttpClient,
         { provide: 'apiEndpoint', useValue: 'none' },
         { provide: 'databaseId', useValue: 'cadmus' },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
     ]
 });
   });

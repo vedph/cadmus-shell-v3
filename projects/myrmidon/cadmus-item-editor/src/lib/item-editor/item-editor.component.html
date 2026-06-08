@@ -308,7 +308,7 @@
           }
           <cadmus-missing-parts
             [facetDefinition]="facet()"
-            [partDefinitions]="facet()?.partDefinitions"
+            [partDefinitions]="$safeNavigationMigration(facet()?.partDefinitions)"
             [parts]="parts()"
             [typeThesaurus]="typeThesaurus()"
             (addRequest)="addPart($event)"

@@ -7,7 +7,7 @@ import { NgeMonacoModule } from '@cisstech/nge/monaco';
 import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 import { WitnessesFragmentComponent } from './witnesses-fragment.component';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 
 xdescribe('WitnessesFragmentComponent', () => {
   let component: WitnessesFragmentComponent;
@@ -23,7 +23,7 @@ xdescribe('WitnessesFragmentComponent', () => {
         NgeMarkdownModule,
         WitnessesFragmentComponent,
       ],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
   }));
 

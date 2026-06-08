@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { RelatedEntityComponent } from './related-entity.component';
@@ -11,7 +11,7 @@ describe('RelatedEntityComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RelatedEntityComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     fixture = TestBed.createComponent(RelatedEntityComponent);
     component = fixture.componentInstance;
