@@ -44,3 +44,7 @@ minimumReleaseAgeExclude:
   - '@myrmidon/taxo-store-api@1.0.0'
   - '@myrmidon/taxo-store-editor@1.0.0'
   - '@myrmidon/taxo-store-picker@1.0.0'
+  - '@myrmidon/cadmus-text-ed-md@12.0.0'
+  - '@myrmidon/cadmus-text-ed-txt@11.0.0'
+  - '@myrmidon/cadmus-text-ed@11.0.0'
+  - '@myrmidon/cadmus-ui-note-set@12.0.0'

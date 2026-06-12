@@ -1,5 +1,6 @@
 # History
 
+- 2026-06-12: updated Angular and packages.
 - 2026-06-08: ⚠️ upgraded to Angular 22 bumping all libraries major version.
 - 2026-05-20:
   - added ID display to event type.
@@ -23,13 +24,11 @@
   - `@myrmidon/cadmus-thesaurus-list`: reviewed for minor issues (bumped to 16.1.2).
   - shell: adjusted profile routes and menu links in shell app.
   - ⚠️ `@myrmidon/cadmus-core`: removed optional `settings` property from `PartDefinition` (bumped to 12.0.4). This was unused, and has been superseded by general server-side settings which can also differentiate part types by their roles.
-
 - 2026-03-18:
   - ⚠️ `CurrentItemBarComponent` and `CurrentLayerPartBarComponent` moved into `@myrmidon/cadmus-item-editor` from library ❌ `@myrmidon/cadmus-ui-pg` which had no other code and has thus been removed. This is a breaking change which avoids potential circular references and removes the need for this tiny library. To upgrade, just update `@myrmidon/cadmus-item-editor` and remove package `@myrmidon/cadmus-ui-pg` altogether, then change the imports accordingly. Libraries affected in this project were `@myrmidon/cadmus-part-general-pg`, `@myrmidon/cadmus-part-philology-pg`, `@myrmidon/cadmus-part-taxo-ui`.
   - 🆕 migrated shell app to M3 themes and added dark theme support to components.
   - item title in cadmus-item-editor, cadmus-item-list, cadmus-ui-pg.
   - published libraries.
-
 - 2026-03-03: fixes to Monaco and Markdown preview in note and comment parts when used in zoneless environments.
 
 ## 18.0.0
