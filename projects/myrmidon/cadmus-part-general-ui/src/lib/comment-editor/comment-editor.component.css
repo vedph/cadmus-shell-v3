@@ -33,6 +33,14 @@ div#pvw {
   padding: 6px;
   margin: 16px 0;
 }
+div#editor {
+  height: 800px;
+}
+div#editor ngx-monaco-editor {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 div#picker {
   grid-area: picker;
 }

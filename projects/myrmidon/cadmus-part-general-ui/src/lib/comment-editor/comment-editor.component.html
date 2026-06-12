@@ -33,10 +33,12 @@
             }
           </div>
           <!-- text -->
-          <div>
-            <nge-monaco-editor
-              style="--editor-height: 800px"
-              (ready)="onCreateEditor($event)"
+          <div id="editor">
+            <ngx-monaco-editor
+              [formControl]="text"
+              [language]="'markdown'"
+              [options]="editorOptions"
+              (editorInitialized)="onEditorInit($event)"
             />
             @if (text.hasError("required") && (text.touched || text.dirty)) {
               <mat-error>text required</mat-error>
@@ -45,7 +47,7 @@
           <div id="pvw">
             <mat-expansion-panel>
               <mat-expansion-panel-header>preview</mat-expansion-panel-header>
-              <nge-markdown [data]="text.value || undefined" />
+              <div class="preview" [innerHTML]="previewHtml()"></div>
             </mat-expansion-panel>
           </div>
         </mat-tab>

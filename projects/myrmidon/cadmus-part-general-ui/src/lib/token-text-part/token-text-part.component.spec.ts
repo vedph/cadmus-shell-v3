@@ -5,8 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-
 import { TokenTextPartComponent } from './token-text-part.component';
 
 describe('TokenTextPartComponent', () => {
@@ -19,7 +17,6 @@ describe('TokenTextPartComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgeMonacoModule,
         TokenTextPartComponent,
       ],
       providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],

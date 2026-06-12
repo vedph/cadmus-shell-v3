@@ -1,6 +1,5 @@
 ﻿import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -8,6 +7,7 @@
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
   FormBuilder,
   FormControl,
@@ -17,6 +17,9 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import { marked } from 'marked';
 
 import {
   MatCard,
@@ -35,8 +38,10 @@ import { MatInput } from '@angular/material/input';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+import {
+  NgxMonacoEditorComponent,
+  StandaloneEditorConstructionOptions,
+} from '@jean-merelis/ngx-monaco-editor';
 
 import {
   TextLayerService,
@@ -72,8 +77,7 @@ import { WitnessesFragment, Witness } from '../witnesses-fragment';
     MatLabel,
     MatInput,
     MatError,
-    NgeMonacoModule,
-    NgeMarkdownModule,
+    NgxMonacoEditorComponent,
     MatCardActions,
     TitleCasePipe,
     CloseSaveButtonsComponent,
@@ -83,28 +87,21 @@ export class WitnessesFragmentComponent
   extends ModelEditorComponentBase<WitnessesFragment>
   implements OnInit, OnDestroy
 {
-  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _sanitizer = inject(DomSanitizer);
+  private _textSub?: Subscription;
+  private _noteSub?: Subscription;
 
-  // Monaco
-  private readonly _disposables: monaco.IDisposable[] = [];
-  private _txtEditorModel?: monaco.editor.ITextModel;
-  private _noteEditorModel?: monaco.editor.ITextModel;
-  // Guards: the editors live inside @if(currentWitnessOpen()), so their
-  // (ready) events fire again on every re-open. Subscribe once per model.
-  private _txtEditorSubscribed = false;
-  private _noteEditorSubscribed = false;
-
-  public readonly editorOptions = {
-    theme: 'vs-light',
-    language: 'markdown',
+  public readonly editorOptions: StandaloneEditorConstructionOptions = {
+    minimap: { side: 'left' },
     wordWrap: 'on',
-    // https://github.com/atularen/ngx-monaco-editor/issues/19
     automaticLayout: true,
   };
 
   public readonly currentWitnessOpen = signal<boolean>(false);
   public readonly currentWitnessId = signal<string | undefined>(undefined);
   public readonly frText = signal<string | undefined>(undefined);
+  public readonly textPreviewHtml = signal<SafeHtml>('');
+  public readonly notePreviewHtml = signal<SafeHtml>('');
 
   public witnesses: FormControl;
   // single witness form
@@ -144,68 +141,28 @@ export class WitnessesFragmentComponent
 
   public override ngOnInit(): void {
     super.ngOnInit();
+    this._textSub = this.text.valueChanges
+      .pipe(debounceTime(50))
+      .subscribe(() => this.updateTextPreview());
+    this._noteSub = this.note.valueChanges
+      .pipe(debounceTime(50))
+      .subscribe(() => this.updateNotePreview());
   }
 
   public override ngOnDestroy() {
     super.ngOnDestroy();
-    this._disposables.forEach((d) => d.dispose());
+    this._textSub?.unsubscribe();
+    this._noteSub?.unsubscribe();
   }
 
-  public onCreateTextEditor(editor: monaco.editor.IEditor) {
-    editor.updateOptions({
-      minimap: {
-        side: 'right',
-      },
-      wordWrap: 'on',
-      automaticLayout: true,
-    });
-    this._txtEditorModel =
-      this._txtEditorModel ||
-      monaco.editor.createModel(this.text?.value || '', 'markdown');
-    editor.setModel(this._txtEditorModel);
-
-    // Subscribe only once: the model is reused across panel re-opens, but
-    // this callback fires again each time the @if block re-renders the editor.
-    // Without the guard, every re-open adds another duplicate listener.
-    // markForCheck() is required for zoneless apps: Monaco events fire outside
-    // Angular's change detection, so the view must be explicitly scheduled.
-    if (!this._txtEditorSubscribed) {
-      this._txtEditorSubscribed = true;
-      this._disposables.push(
-        this._txtEditorModel.onDidChangeContent(() => {
-          this.text.setValue(this._txtEditorModel!.getValue());
-          this.text.markAsDirty();
-          this.text.updateValueAndValidity();
-          this._cdr.markForCheck();
-        }),
-      );
-    }
+  private updateTextPreview(): void {
+    const html = marked.parse(this.text.value || '', { async: false }) as string;
+    this.textPreviewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
-  public onCreateNoteEditor(editor: monaco.editor.IEditor) {
-    editor.updateOptions({
-      minimap: {
-        side: 'right',
-      },
-      wordWrap: 'on',
-      automaticLayout: true,
-    });
-    this._noteEditorModel =
-      this._noteEditorModel ||
-      monaco.editor.createModel(this.note?.value || '', 'markdown');
-    editor.setModel(this._noteEditorModel);
-
-    if (!this._noteEditorSubscribed) {
-      this._noteEditorSubscribed = true;
-      this._disposables.push(
-        this._noteEditorModel.onDidChangeContent(() => {
-          this.note.setValue(this._noteEditorModel!.getValue());
-          this.note.markAsDirty();
-          this.note.updateValueAndValidity();
-          this._cdr.markForCheck();
-        }),
-      );
-    }
+  private updateNotePreview(): void {
+    const html = marked.parse(this.note.value || '', { async: false }) as string;
+    this.notePreviewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
@@ -251,9 +208,7 @@ export class WitnessesFragmentComponent
       this.id.setValue(witness.id);
       this.citation.setValue(witness.citation);
       this.text.setValue(witness.text);
-      this._txtEditorModel?.setValue(witness.text || '');
       this.note.setValue(witness.note || null);
-      this._noteEditorModel?.setValue(witness.note || '');
       this.witness.markAsPristine();
     }
     this.currentWitnessOpen.set(true);

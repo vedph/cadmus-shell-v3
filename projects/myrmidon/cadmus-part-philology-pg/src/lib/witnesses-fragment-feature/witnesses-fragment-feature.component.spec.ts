@@ -7,8 +7,6 @@ import {
   WITNESSES_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-philology-ui';
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 describe('WitnessesFragmentFeatureComponent', () => {
   let component: WitnessesFragmentFeatureComponent;
@@ -20,8 +18,6 @@ describe('WitnessesFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgeMonacoModule,
-        NgeMarkdownModule,
         WitnessesFragmentFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668

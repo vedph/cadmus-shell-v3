@@ -1,0 +1,10 @@
+#txtEditor,
+#noteEditor {
+  height: 400px;
+}
+#txtEditor ngx-monaco-editor,
+#noteEditor ngx-monaco-editor {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

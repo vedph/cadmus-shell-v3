@@ -3,9 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
-
 import { WitnessesFragmentComponent } from './witnesses-fragment.component';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 
@@ -19,8 +16,6 @@ xdescribe('WitnessesFragmentComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgeMonacoModule,
-        NgeMarkdownModule,
         WitnessesFragmentComponent,
       ],
       providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],

@@ -1,6 +1,5 @@
 ﻿import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   Inject,
   OnDestroy,
@@ -10,6 +9,7 @@
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
   FormControl,
   FormBuilder,
@@ -19,6 +19,8 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 import {
   MatCard,
@@ -34,8 +36,11 @@ import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+import {
+  EditorInitializedEvent,
+  NgxMonacoEditorComponent,
+  StandaloneEditorConstructionOptions,
+} from '@jean-merelis/ngx-monaco-editor';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
@@ -56,6 +61,7 @@ import {
 
 import { NotePart, NOTE_PART_TYPEID } from '../note-part';
 import { MonacoEditorHelper } from '../monaco-editor-helper';
+import { marked } from 'marked';
 
 /**
  * Note part editor component.
@@ -82,8 +88,7 @@ import { MonacoEditorHelper } from '../monaco-editor-helper';
     MatSelect,
     MatOption,
     TitleCasePipe,
-    NgeMonacoModule,
-    NgeMarkdownModule,
+    NgxMonacoEditorComponent,
     MatCardActions,
     CloseSaveButtonsComponent,
   ],
@@ -93,7 +98,16 @@ export class NotePartComponent
   extends ModelEditorComponentBase<NotePart>
   implements OnInit, OnDestroy
 {
-  private _textHelper!: MonacoEditorHelper;
+  private readonly _sanitizer = inject(DomSanitizer);
+  private readonly _textHelper = new MonacoEditorHelper();
+  private _textSub?: Subscription;
+
+  public readonly editorOptions: StandaloneEditorConstructionOptions = {
+    minimap: { side: 'left' },
+    wordWrap: 'on',
+    automaticLayout: true,
+  };
+  public readonly previewHtml = signal<SafeHtml>('');
 
   public tag: FormControl<string | null>;
   public text: FormControl<string | null>;
@@ -112,21 +126,23 @@ export class NotePartComponent
     // form
     this.tag = formBuilder.control(null, Validators.maxLength(100));
     this.text = formBuilder.control(null, Validators.required);
-    // Monaco helper
-    this._textHelper = new MonacoEditorHelper(
-      this.text,
-      'markdown',
-      inject(ChangeDetectorRef),
-    );
   }
 
   public override ngOnInit(): void {
     super.ngOnInit();
+    this._textSub = this.text.valueChanges
+      .pipe(debounceTime(50))
+      .subscribe(() => this.updatePreview());
   }
 
   public override ngOnDestroy() {
     super.ngOnDestroy();
-    this._textHelper.dispose();
+    this._textSub?.unsubscribe();
+  }
+
+  private updatePreview(): void {
+    const html = marked.parse(this.text.value || '', { async: false }) as string;
+    this.previewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
   private async applyEdit(selector: string) {
@@ -151,8 +167,8 @@ export class NotePartComponent
     ]);
   }
 
-  public onCreateEditor(editor: monaco.editor.IEditor) {
-    this._textHelper.initEditor(editor);
+  public onEditorInit(event: EditorInitializedEvent): void {
+    this._textHelper.initEditor(event);
 
     // plugins
     if (this._editorBindings) {
@@ -185,7 +201,6 @@ export class NotePartComponent
     }
     this.tag.setValue(part.tag || null);
     this.text.setValue(part.text);
-    this._textHelper.setValue(part.text || '');
     this.form.markAsPristine();
   }
 

@@ -1,10 +1,7 @@
 ﻿import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
-  OnDestroy,
   OnInit,
-  inject,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import {
@@ -34,7 +31,10 @@ import { MatOption } from '@angular/material/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
+import {
+  NgxMonacoEditorComponent,
+  StandaloneEditorConstructionOptions,
+} from '@jean-merelis/ngx-monaco-editor';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
@@ -50,7 +50,6 @@ import {
   TokenTextLine,
 } from '../token-text-part';
 import { EditedObject } from '@myrmidon/cadmus-core';
-import { MonacoEditorHelper } from '../monaco-editor-helper';
 
 /**
  * Editor component for base text, as referenced by token-based layers.
@@ -77,7 +76,7 @@ import { MonacoEditorHelper } from '../monaco-editor-helper';
     MatOption,
     MatIconButton,
     MatTooltip,
-    NgeMonacoModule,
+    NgxMonacoEditorComponent,
     MatError,
     MatCardActions,
     TitleCasePipe,
@@ -86,9 +85,13 @@ import { MonacoEditorHelper } from '../monaco-editor-helper';
 })
 export class TokenTextPartComponent
   extends ModelEditorComponentBase<TokenTextPart>
-  implements OnInit, OnDestroy
+  implements OnInit
 {
-  private _textHelper!: MonacoEditorHelper;
+  public readonly editorOptions: StandaloneEditorConstructionOptions = {
+    minimap: { side: 'left' },
+    wordWrap: 'on',
+    automaticLayout: true,
+  };
 
   public citation: FormControl<string | null>;
   public text: FormControl<string | null>;
@@ -105,25 +108,10 @@ export class TokenTextPartComponent
     this.citation = formBuilder.control(null);
     this.text = formBuilder.control(null, Validators.required);
     this.transform = formBuilder.control('ws');
-    // Monaco helper (using 'txt' for plain text)
-    this._textHelper = new MonacoEditorHelper(
-      this.text,
-      'txt',
-      inject(ChangeDetectorRef),
-    );
   }
 
   public override ngOnInit(): void {
     super.ngOnInit();
-  }
-
-  public override ngOnDestroy() {
-    super.ngOnDestroy();
-    this._textHelper.dispose();
-  }
-
-  public onCreateEditor(editor: monaco.editor.IEditor) {
-    this._textHelper.initEditor(editor);
   }
 
   protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
@@ -167,7 +155,6 @@ export class TokenTextPartComponent
     }
     this.citation.setValue(part.citation || null);
     this.text.setValue(this.getTextFromModel(part));
-    this._textHelper.setValue(this.text.value || '');
     this.form.markAsPristine();
   }
 
@@ -241,7 +228,6 @@ export class TokenTextPartComponent
               break;
           }
           this.text.setValue(text);
-          this._textHelper.setValue(text);
           this.text.updateValueAndValidity();
           this.text.markAsDirty();
         }

@@ -23,6 +23,12 @@ div#editor {
   height: 100%;
 }
 
+div#editor ngx-monaco-editor {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 div#pvw {
   border: 1px solid var(--mat-sys-on-surface-variant);
   border-radius: 6px;

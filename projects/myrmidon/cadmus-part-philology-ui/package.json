@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-philology-ui",
-  "version": "18.0.0",
+  "version": "19.0.0",
   "description": "Cadmus - philologic parts.",
   "keywords": [
     "Cadmus"
@@ -17,13 +17,14 @@
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
     "@angular/material": "^22.0.0",
-    "@cisstech/nge": "^18.3.0",
+    "@jean-merelis/ngx-monaco-editor": "^21.0.0",
     "@myrmidon/ngx-tools": "^3.0.0",
     "@myrmidon/ngx-mat-tools": "^2.0.0",
     "@myrmidon/cadmus-core": "^13.0.0",
     "@myrmidon/cadmus-ui": "^17.0.0"
   },
   "dependencies": {
+    "marked": "^18.0.5",
     "tslib": "^2.3.0"
   }
 }

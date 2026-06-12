@@ -4,6 +4,10 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import {
+  DefaultMonacoLoader,
+  NGX_MONACO_LOADER_PROVIDER,
+} from '@jean-merelis/ngx-monaco-editor';
+import {
   provideHttpClient,
   withFetch,
   withInterceptors,
@@ -12,10 +16,6 @@ import { provideRouter, withViewTransitions } from '@angular/router';
 
 // material
 import { provideNativeDateAdapter } from '@angular/material/core';
-
-// vendors
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 // myrmidon
 import {
@@ -48,8 +48,10 @@ export const appConfig: ApplicationConfig = {
     provideNativeDateAdapter(),
     provideHttpClient(withInterceptors([jwtInterceptor]), withFetch()),
     // vendor
-    importProvidersFrom(NgeMonacoModule.forRoot({})),
-    importProvidersFrom(NgeMarkdownModule),
+    {
+      provide: NGX_MONACO_LOADER_PROVIDER,
+      useFactory: () => new DefaultMonacoLoader(),
+    },
     importProvidersFrom(
       NgxEchartsModule.forRoot({
         echarts: () => import('echarts'),

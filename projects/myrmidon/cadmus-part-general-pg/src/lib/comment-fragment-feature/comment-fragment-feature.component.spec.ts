@@ -9,8 +9,6 @@ import {
   CHRONOLOGY_FRAGMENT_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
 import { ActivatedRoute } from '@angular/router';
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 describe('CommentFragmentFeatureComponent', () => {
   let component: CommentFragmentFeatureComponent;
@@ -22,8 +20,6 @@ describe('CommentFragmentFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgeMonacoModule,
-        NgeMarkdownModule,
         CommentFragmentComponent,
         CommentFragmentFeatureComponent,
       ],

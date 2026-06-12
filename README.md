@@ -31,10 +31,10 @@ Latest versions:
 - cadmus-item-list: 17.0.0
 - cadmus-item-search: 17.0.0
 - cadmus-layer-demo: 16.0.0
-- cadmus-part-general-pg: 17.0.0
-- cadmus-part-general-ui: 17.0.0
-- cadmus-part-philology-pg: 17.0.0
-- cadmus-part-philology-ui: 18.0.0
+- cadmus-part-general-pg: 18.0.0
+- cadmus-part-general-ui: 18.0.0
+- cadmus-part-philology-pg: 18.0.0
+- cadmus-part-philology-ui: 19.0.0
 - cadmus-part-taxo-pg: 1.0.0
 - cadmus-part-taxo-ui: 1.0.0
 - cadmus-preview-pg: 18.0.0

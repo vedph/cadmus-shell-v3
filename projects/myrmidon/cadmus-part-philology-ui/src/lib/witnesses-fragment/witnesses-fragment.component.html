@@ -149,28 +149,34 @@
             <!-- text -->
             <div>
               <h3>Text</h3>
-              <nge-monaco-editor
-                style="--editor-height: 400px"
-                (ready)="onCreateTextEditor($event)"
-              />
+              <div id="txtEditor">
+                <ngx-monaco-editor
+                  [formControl]="text"
+                  [language]="'markdown'"
+                  [options]="editorOptions"
+                />
+              </div>
               @if (text.hasError("required") && (text.touched || text.dirty)) {
                 <mat-error>please enter some text</mat-error>
               }
               <hr />
               @if (text.value) {
-                <nge-markdown [data]="text.value || undefined" />
+                <div class="preview" [innerHTML]="textPreviewHtml()"></div>
               }
             </div>
             <!-- note -->
             <div>
               <h3>Note</h3>
-              <nge-monaco-editor
-                style="--editor-height: 400px"
-                (ready)="onCreateNoteEditor($event)"
-              />
+              <div id="noteEditor">
+                <ngx-monaco-editor
+                  [formControl]="note"
+                  [language]="'markdown'"
+                  [options]="editorOptions"
+                />
+              </div>
               <hr />
               @if (note.value) {
-                <nge-markdown [data]="note.value || undefined" />
+                <div class="preview" [innerHTML]="notePreviewHtml()"></div>
               }
             </div>
             <button

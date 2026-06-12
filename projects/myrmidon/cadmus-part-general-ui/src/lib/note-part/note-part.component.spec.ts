@@ -4,9 +4,6 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-
 import { NotePartComponent } from './note-part.component';
 
 describe('NotePartComponent', () => {
@@ -19,8 +16,6 @@ describe('NotePartComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgeMonacoModule,
-        NgeMarkdownModule,
         NotePartComponent,
       ],
       providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-philology-pg",
-  "version": "17.0.0",
+  "version": "18.0.0",
   "description": "Cadmus - philologic parts wrappers.",
   "keywords": [
     "Cadmus"
@@ -23,7 +23,7 @@
     "@myrmidon/cadmus-state": "^16.0.0",
     "@myrmidon/cadmus-ui": "^17.0.0",
     "@myrmidon/cadmus-item-editor": "^17.0.0",
-    "@myrmidon/cadmus-part-philology-ui": "^17.0.0"
+    "@myrmidon/cadmus-part-philology-ui": "^19.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

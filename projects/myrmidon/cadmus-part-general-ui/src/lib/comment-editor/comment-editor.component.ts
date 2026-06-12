@@ -1,6 +1,5 @@
 ﻿import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   Inject,
   OnDestroy,
@@ -9,6 +8,7 @@
   inject,
   signal,
 } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
   FormControl,
   FormBuilder,
@@ -19,6 +19,9 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import { marked } from 'marked';
 
 import {
   MatCard,
@@ -41,8 +44,11 @@ import {
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
+import {
+  EditorInitializedEvent,
+  NgxMonacoEditorComponent,
+  StandaloneEditorConstructionOptions,
+} from '@jean-merelis/ngx-monaco-editor';
 
 import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
@@ -113,10 +119,9 @@ interface CommentPartSettings {
     MatOption,
     MatInput,
     MatError,
-    NgeMonacoModule,
+    NgxMonacoEditorComponent,
     MatExpansionPanel,
     MatExpansionPanelHeader,
-    NgeMarkdownModule,
     DocReferencesComponent,
     AssertedCompositeIdsComponent,
     MatIconButton,
@@ -132,7 +137,16 @@ export class CommentEditorComponent
   extends ModelEditorComponentBase<CommentPart | CommentFragment>
   implements OnInit, OnDestroy
 {
-  private _textHelper!: MonacoEditorHelper;
+  private readonly _sanitizer = inject(DomSanitizer);
+  private readonly _textHelper = new MonacoEditorHelper();
+  private _textSub?: Subscription;
+
+  public readonly editorOptions: StandaloneEditorConstructionOptions = {
+    minimap: { side: 'left' },
+    wordWrap: 'on',
+    automaticLayout: true,
+  };
+  public readonly previewHtml = signal<SafeHtml>('');
 
   // thesauri:
   // comment-tags
@@ -205,12 +219,6 @@ export class CommentEditorComponent
     this.links = formBuilder.control([], { nonNullable: true });
     this.categories = formBuilder.control([], { nonNullable: true });
     this.keywords = formBuilder.array([]);
-    // Monaco helper
-    this._textHelper = new MonacoEditorHelper(
-      this.text,
-      'markdown',
-      inject(ChangeDetectorRef),
-    );
     // settings
     this.initSettings<CommentPartSettings>(COMMENT_PART_TYPEID, (settings) => {
       this.lookupProviderOptions.set(
@@ -221,11 +229,19 @@ export class CommentEditorComponent
 
   public override ngOnInit(): void {
     super.ngOnInit();
+    this._textSub = this.text.valueChanges
+      .pipe(debounceTime(50))
+      .subscribe(() => this.updatePreview());
   }
 
   public override ngOnDestroy() {
     super.ngOnDestroy();
-    this._textHelper.dispose();
+    this._textSub?.unsubscribe();
+  }
+
+  private updatePreview(): void {
+    const html = marked.parse(this.text.value || '', { async: false }) as string;
+    this.previewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
   private async applyEdit(selector: string) {
@@ -250,8 +266,8 @@ export class CommentEditorComponent
     ]);
   }
 
-  public onCreateEditor(editor: monaco.editor.IEditor) {
-    this._textHelper.initEditor(editor);
+  public onEditorInit(event: EditorInitializedEvent): void {
+    this._textHelper.initEditor(event);
 
     // plugins
     if (this._editorBindings) {
@@ -356,7 +372,6 @@ export class CommentEditorComponent
     }
     this.tag.setValue(part.tag || null);
     this.text.setValue(part.text);
-    this._textHelper.setValue(part.text || '');
     this.references.setValue(part.references || []);
     this.links.setValue(part.links || []);
     // keywords

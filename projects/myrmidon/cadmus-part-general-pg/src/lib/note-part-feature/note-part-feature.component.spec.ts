@@ -2,15 +2,11 @@ import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { NgeMonacoModule } from '@cisstech/nge/monaco';
-
 import { CurrentItemBarComponent } from '@myrmidon/cadmus-item-editor';
 import {
   NotePartComponent,
   NOTE_PART_TYPEID,
 } from '@myrmidon/cadmus-part-general-ui';
-
-import { NgeMarkdownModule } from '@cisstech/nge/markdown';
 
 import { NotePartFeatureComponent } from './note-part-feature.component';
 
@@ -24,8 +20,6 @@ describe('NotePartFeatureComponent', () => {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgeMonacoModule,
-        NgeMarkdownModule,
         NotePartFeatureComponent,
       ],
       // https://github.com/angular/components/issues/14668
