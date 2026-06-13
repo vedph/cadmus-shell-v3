@@ -88,7 +88,7 @@ export class TokenTextPartComponent
   implements OnInit
 {
   public readonly editorOptions: StandaloneEditorConstructionOptions = {
-    minimap: { side: 'left' },
+    minimap: { side: 'right' },
     wordWrap: 'on',
     automaticLayout: true,
   };

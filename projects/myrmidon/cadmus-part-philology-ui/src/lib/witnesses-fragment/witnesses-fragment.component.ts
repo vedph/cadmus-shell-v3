@@ -92,7 +92,7 @@ export class WitnessesFragmentComponent
   private _noteSub?: Subscription;
 
   public readonly editorOptions: StandaloneEditorConstructionOptions = {
-    minimap: { side: 'left' },
+    minimap: { side: 'right' },
     wordWrap: 'on',
     automaticLayout: true,
   };
