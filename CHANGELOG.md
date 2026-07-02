@@ -1,5 +1,8 @@
 # History
 
+- 2026-07-02:
+  - display facet label instead of its ID in items list.
+  - updated Angular and packages.
 - 2026-06-12:
   - updated Angular and packages.
   - ⚠️ migrated from Monaco editor wrapper `@cisstech/nge` to a new wrapper `@jean-merelis/ngx-monaco-editor` + `marked` for Markdown rendering, so to get rid of `@cisstech/nge` altogether.

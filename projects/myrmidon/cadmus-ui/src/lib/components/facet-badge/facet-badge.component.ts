@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
 
 import { MatTooltip } from '@angular/material/tooltip';
@@ -18,13 +18,6 @@ export interface FacetBadgeData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FacetBadgeComponent {
-  private _facetColors: { [key: string]: string };
-  private _facetTips: { [key: string]: string };
-
-  public readonly color = signal<string>('transparent');
-  public readonly contrastColor = signal<string>('black');
-  public readonly tip = signal<string | undefined>(undefined);
-
   /**
    * The facet data.
    */
@@ -32,69 +25,46 @@ export class FacetBadgeComponent {
     definitions: [],
   });
 
-  constructor(private _colorService: ColorService) {
-    this._facetColors = {};
-    this._facetTips = {};
+  private readonly _facet = computed<FacetDefinition | undefined>(() => {
+    const facetId = this.data().facetId;
+    return facetId
+      ? this.data().definitions?.find((f) => f.id === facetId)
+      : undefined;
+  });
 
-    effect(() => {
-      this.updateBadge(this.data());
-    });
-  }
+  public readonly label = computed(
+    () => this._facet()?.label || this.data().facetId || '',
+  );
 
-  private getFacetColor(facetId: string): string {
-    if (this._facetColors[facetId]) {
-      return this._facetColors[facetId];
-    }
+  public readonly color = computed(() => {
+    const colorKey = this._facet()?.colorKey;
+    return colorKey ? '#' + colorKey : 'transparent';
+  });
+
+  public readonly contrastColor = computed(() =>
+    this._colorService.getContrastColor(this.color()),
+  );
+
+  public readonly tip = computed<string | undefined>(() => {
     if (!this.data().definitions?.length) {
-      return 'transparent';
+      return undefined;
     }
-
-    const facet = this.data().definitions.find((f) => {
-      return f.id === facetId;
-    });
-    if (facet?.colorKey) {
-      this._facetColors[facetId] = '#' + facet.colorKey;
-    } else {
-      this._facetColors[facetId] = 'transparent';
-    }
-    return this._facetColors[facetId];
-  }
-
-  private getFacetTip(facetId: string): string | null {
-    if (this._facetTips[facetId]) {
-      return this._facetTips[facetId];
-    }
-
-    if (!this.data().definitions?.length) {
-      return null;
-    }
-
-    const facet = this.data().definitions.find((f) => {
-      return f.id === facetId;
-    });
+    const facet = this._facet();
     if (!facet) {
-      this._facetTips[facetId] = facetId;
-    } else {
-      const sb: string[] = [];
-      for (let i = 0; i < facet.partDefinitions.length; i++) {
-        if (i > 0) {
-          sb.push(', ');
-        }
-        sb.push(facet.partDefinitions[i].name);
-        if (facet.partDefinitions[i].isRequired) {
-          sb.push('*');
-        }
-      }
-      this._facetTips[facetId] = sb.join('');
+      return this.data().facetId;
     }
-    return this._facetTips[facetId];
-  }
+    const sb: string[] = [];
+    for (let i = 0; i < facet.partDefinitions.length; i++) {
+      if (i > 0) {
+        sb.push(', ');
+      }
+      sb.push(facet.partDefinitions[i].name);
+      if (facet.partDefinitions[i].isRequired) {
+        sb.push('*');
+      }
+    }
+    return sb.join('');
+  });
 
-  private updateBadge(data?: FacetBadgeData) {
-    this._facetColors = {};
-    this._facetTips = {};
-    this.color.set(this.getFacetColor(data?.facetId || ''));
-    this.contrastColor.set(this._colorService.getContrastColor(this.color()));
-    this.tip.set(this.getFacetTip(data?.facetId || '') ?? undefined);
-  }
+  constructor(private _colorService: ColorService) {}
 }

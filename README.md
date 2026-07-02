@@ -28,7 +28,7 @@ Latest versions:
 - cadmus-graph-ui: 16.0.0
 - cadmus-graph-ui-ex: 17.0.0
 - cadmus-item-editor: 17.0.0
-- cadmus-item-list: 17.0.0
+- cadmus-item-list: 17.0.1
 - cadmus-item-search: 17.0.0
 - cadmus-layer-demo: 16.0.0
 - cadmus-part-general-pg: 18.0.0
@@ -47,7 +47,7 @@ Latest versions:
 - cadmus-thesaurus-editor: 17.0.0
 - cadmus-thesaurus-list: 17.0.0
 - cadmus-thesaurus-ui: 16.0.0
-- cadmus-ui: 17.0.0
+- cadmus-ui: 17.0.1
 
 > cadmus-ui-pg has been removed!
 

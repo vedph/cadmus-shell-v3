@@ -111,13 +111,5 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  },
-  "references": [
-    {
-      "path": "./projects/myrmidon/cadmus-profile-editor/tsconfig.lib.json"
-    },
-    {
-      "path": "./projects/myrmidon/cadmus-profile-editor/tsconfig.spec.json"
-    }
-  ]
+  }
 }

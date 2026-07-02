@@ -29,7 +29,7 @@
     "d3-selection": "3.0.0"
   },
   "private": true,
-  "packageManager": "pnpm@11.6.0",
+  "packageManager": "pnpm@11.9.0",
   "dependencies": {
     "3d-force-graph": "^1.80.0",
     "@angular/animations": "^22.0.1",
@@ -44,8 +44,8 @@
     "@angular/router": "^22.0.1",
     "@auth0/angular-jwt": "^5.2.0",
     "@jean-merelis/ngx-monaco-editor": "^21.0.0",
-    "@myrmidon/auth-jwt-admin": "9.0.0",
-    "@myrmidon/auth-jwt-login": "9.0.0",
+    "@myrmidon/auth-jwt-admin": "10.0.0",
+    "@myrmidon/auth-jwt-login": "10.0.0",
     "@myrmidon/cadmus-api": "link:./dist/myrmidon/cadmus-api",
     "@myrmidon/cadmus-mat-physical-size": "^10.0.0",
     "@myrmidon/cadmus-mat-physical-state": "^10.0.0",
@@ -81,7 +81,7 @@
     "monaco-editor": "^0.47.0",
     "ngx-echarts": "^22.0.0",
     "rxjs": "~7.8.0",
-    "three": "^0.184.0",
+    "three": "^0.185.1",
     "ts-md5": "^2.0.1",
     "tslib": "^2.3.0"
   },
@@ -92,7 +92,7 @@
     "@angular/localize": "^22.0.1",
     "@types/d3-force": "^3.0.10",
     "@types/jasmine": "~6.0.0",
-    "@types/three": "^0.184.1",
+    "@types/three": "^0.185.0",
     "istanbul-lib-instrument": "^6.0.3",
     "jasmine-core": "~6.3.0",
     "jsdom": "^29.1.1",
@@ -101,12 +101,12 @@
     "karma-coverage": "~2.2.1",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.2.0",
-    "ng-packagr": "^22.0.0",
+    "ng-packagr": "^22.0.1",
     "typescript": "~6.0.3",
     "vitest": "^4.1.8"
   },
   "optionalDependencies": {
-    "@rollup/rollup-win32-arm64-msvc": "^4.61.1"
+    "@rollup/rollup-win32-arm64-msvc": "^4.62.2"
   },
   "pnpm": {
     "overrides": {

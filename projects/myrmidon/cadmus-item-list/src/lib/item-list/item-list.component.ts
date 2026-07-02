@@ -3,8 +3,10 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  Signal,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
@@ -66,8 +68,8 @@ export class ItemListComponent implements OnInit, OnDestroy {
   private _sub?: Subscription;
   public loading$: Observable<boolean | undefined>;
   public page$: Observable<DataPage<ItemInfo>>;
-  public readonly facets = signal<FacetDefinition[]>([]);
-  public readonly flags = signal<FlagDefinition[]>([]);
+  public readonly facets: Signal<FacetDefinition[]>;
+  public readonly flags: Signal<FlagDefinition[]>;
 
   public readonly user = signal<User | undefined>(undefined);
   public readonly userLevel = signal<number>(0);
@@ -82,13 +84,17 @@ export class ItemListComponent implements OnInit, OnDestroy {
   ) {
     this.loading$ = _repository.loading$;
     this.page$ = _repository.page$;
+    this.facets = toSignal(this._appRepository.facets$, {
+      initialValue: [] as FacetDefinition[],
+    });
+    this.flags = toSignal(this._appRepository.flags$, {
+      initialValue: [] as FlagDefinition[],
+    });
   }
 
   public async ngOnInit() {
     // ensure app data is loaded
     await this._appRepository.load();
-    this.facets.set(this._appRepository.getFacets());
-    this.flags.set(this._appRepository.getFlags());
 
     this._sub = this._authService.currentUser$.subscribe(
       (user: User | null) => {
