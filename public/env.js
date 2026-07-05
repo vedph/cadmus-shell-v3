@@ -7,4 +7,6 @@
   window.__env.version = '18.0.0';
   // enable thesaurus import in thesaurus list for admins
   window.__env.thesImportEnabled = true;
+  // enable item metadata builders in item editor
+  window.__env.hasMetadataBuilders = true;
 })(this);

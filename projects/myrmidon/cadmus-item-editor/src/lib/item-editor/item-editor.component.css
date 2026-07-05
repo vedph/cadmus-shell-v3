@@ -95,3 +95,18 @@ fieldset {
     display: none;
   }
 }
+.flex-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+.flex-row .item {
+  box-sizing: border-box;
+}
+/* items that must fit their content */
+.flex-row .item.fit {
+  flex: 0 0 auto;  /* no grow, no shrink, width = content */
+}
+/* items that take remaining horizontal space */
+.flex-row .item:not(.fit) {
+  flex: 1 1 auto;  /* grow to fill, shrink if needed */
+}

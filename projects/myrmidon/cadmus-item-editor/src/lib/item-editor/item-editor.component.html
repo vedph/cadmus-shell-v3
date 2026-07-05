@@ -29,6 +29,18 @@
               }
             </mat-form-field>
 
+            @if (hasMetadataBuilders()) {
+              <!-- auto title -->
+              <button
+                type="button"
+                mat-icon-button
+                [disabled]="busy()"
+                (click)="generateTitle()"
+              >
+                <mat-icon matTooltip="Generate title">auto_awesome</mat-icon>
+              </button>
+            }
+
             <!-- sortKey -->
             <mat-form-field class="flex-field">
               <mat-label>sort key</mat-label>
@@ -54,8 +66,8 @@
           </div>
 
           <!-- description -->
-          <div>
-            <mat-form-field class="full-width">
+          <div class="flex-row">
+            <mat-form-field class="item">
               <mat-label>description</mat-label>
               <textarea
                 rows="2"
@@ -76,6 +88,21 @@
                 <mat-error>description too long</mat-error>
               }
             </mat-form-field>
+
+            @if (hasMetadataBuilders()) {
+              <!-- auto description -->
+              <button
+                class="item fit"
+                type="button"
+                mat-icon-button
+                [disabled]="busy()"
+                (click)="generateDescription()"
+              >
+                <mat-icon matTooltip="Generate description"
+                  >auto_awesome</mat-icon
+                >
+              </button>
+            }
           </div>
 
           <!-- facet -->
@@ -308,7 +335,9 @@
           }
           <cadmus-missing-parts
             [facetDefinition]="facet()"
-            [partDefinitions]="$safeNavigationMigration(facet()?.partDefinitions)"
+            [partDefinitions]="
+              $safeNavigationMigration(facet()?.partDefinitions)
+            "
             [parts]="parts()"
             [typeThesaurus]="typeThesaurus()"
             (addRequest)="addPart($event)"

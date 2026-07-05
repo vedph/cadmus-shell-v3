@@ -34,7 +34,7 @@ export class ItemService {
   constructor(
     private _http: HttpClient,
     private _error: ErrorService,
-    private _env: EnvService
+    private _env: EnvService,
   ) {}
 
   /**
@@ -46,7 +46,7 @@ export class ItemService {
   public getItems(
     filter: ItemFilter,
     pageNumber = 1,
-    pageSize = 20
+    pageSize = 20,
   ): Observable<DataPage<ItemInfo>> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
@@ -66,11 +66,11 @@ export class ItemService {
     if (filter.flagMatching !== undefined && +filter.flagMatching > -1) {
       httpParams = httpParams.set(
         'flags',
-        filter.flags ? filter.flags.toString() : '0'
+        filter.flags ? filter.flags.toString() : '0',
       );
       httpParams = httpParams.set(
         'flagMatching',
-        filter.flagMatching ? filter.flagMatching.toString() : '0'
+        filter.flagMatching ? filter.flagMatching.toString() : '0',
       );
     }
     if (filter.userId) {
@@ -79,13 +79,13 @@ export class ItemService {
     if (filter.minModified) {
       httpParams = httpParams.set(
         'minModified',
-        filter.minModified.toISOString()
+        filter.minModified.toISOString(),
       );
     }
     if (filter.maxModified) {
       httpParams = httpParams.set(
         'maxModified',
-        filter.maxModified.toISOString()
+        filter.maxModified.toISOString(),
       );
     }
 
@@ -106,7 +106,7 @@ export class ItemService {
   public searchItems(
     query: string,
     pageNumber: number,
-    pageSize: number
+    pageSize: number,
   ): Observable<ErrorWrapper<DataPage<ItemInfo>>> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
@@ -122,7 +122,7 @@ export class ItemService {
         },
         {
           params: httpParams,
-        }
+        },
       )
       .pipe(retry(3), catchError(this._error.handleError));
   }
@@ -137,7 +137,7 @@ export class ItemService {
   public searchPins(
     query: string,
     pageNumber: number,
-    pageSize: number
+    pageSize: number,
   ): Observable<ErrorWrapper<DataPage<DataPinInfo>>> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
@@ -153,7 +153,7 @@ export class ItemService {
         },
         {
           params: httpParams,
-        }
+        },
       )
       .pipe(retry(3), catchError(this._error.handleError));
   }
@@ -168,7 +168,7 @@ export class ItemService {
   public getItem(
     id: string,
     parts: boolean,
-    noErrIfNotFound = false
+    noErrIfNotFound = false,
   ): Observable<Item | null> {
     let url = `${this._env.get('apiUrl')}items/${id}`;
     if (parts) {
@@ -181,7 +181,7 @@ export class ItemService {
           return of(null);
         }
         return this._error.handleError(error);
-      })
+      }),
     );
   }
 
@@ -221,7 +221,7 @@ export class ItemService {
     count: number,
     itemId: string,
     title: string,
-    flags = 0
+    flags = 0,
   ): Observable<any> {
     return this._http
       .post<any>(`${this._env.get('apiUrl')}items/generate`, {
@@ -262,7 +262,7 @@ export class ItemService {
     id: string,
     type: string,
     role = 'default',
-    noErrIfNotFound = false
+    noErrIfNotFound = false,
   ): Observable<Part | null> {
     if (!type) {
       type = 'any';
@@ -279,7 +279,7 @@ export class ItemService {
             return of(null);
           }
           return this._error.handleError(error);
-        })
+        }),
       );
   }
 
@@ -294,7 +294,7 @@ export class ItemService {
   public partWithTypeAndRoleExists(
     id: string,
     type: string,
-    role = 'default'
+    role = 'default',
   ): Observable<boolean> {
     if (!type) {
       type = 'any';
@@ -303,13 +303,13 @@ export class ItemService {
       role = 'default';
     }
     return this._http
-      .get<{ exists: boolean }>(
-        `${this._env.get('apiUrl')}items/${id}/parts/${type}/${role}/exists`
-      )
+      .get<{
+        exists: boolean;
+      }>(`${this._env.get('apiUrl')}items/${id}/parts/${type}/${role}/exists`)
       .pipe(
         retry(3),
         catchError(this._error.handleError),
-        map((r) => r.exists)
+        map((r) => r.exists),
       );
   }
 
@@ -320,9 +320,10 @@ export class ItemService {
    */
   public getBaseTextPart(id: string): Observable<{ part: Part; text: string }> {
     return this._http
-      .get<{ part: Part; text: string }>(
-        `${this._env.get('apiUrl')}items/${id}/base-text`
-      )
+      .get<{
+        part: Part;
+        text: string;
+      }>(`${this._env.get('apiUrl')}items/${id}/base-text`)
       .pipe(retry(3), catchError(this._error.handleError));
   }
 
@@ -350,7 +351,7 @@ export class ItemService {
    */
   public getItemLayerInfo(
     id: string,
-    absent: boolean
+    absent: boolean,
   ): Observable<LayerPartInfo[]> {
     let url = `${this._env.get('apiUrl')}items/${id}/layers`;
     if (absent) {
@@ -380,7 +381,7 @@ export class ItemService {
    * @returns Observable with array of definitions.
    */
   public getDataPinDefinitions(
-    typeId: string
+    typeId: string,
   ): Observable<DataPinDefinition[]> {
     return this._http
       .get<DataPinDefinition[]>(`${this._env.get('apiUrl')}pin-defs/${typeId}`)
@@ -397,9 +398,9 @@ export class ItemService {
    */
   public getLayerPartBreakChance(id: string): Observable<{ chance: number }> {
     return this._http
-      .get<{ chance: number }>(
-        `${this._env.get('apiUrl')}parts/${id}/break-chance`
-      )
+      .get<{
+        chance: number;
+      }>(`${this._env.get('apiUrl')}parts/${id}/break-chance`)
       .pipe(retry(3), catchError(this._error.handleError));
   }
 
@@ -475,7 +476,7 @@ export class ItemService {
   public getItemGroupIds(
     pageNumber: number,
     pageSize: number,
-    filter?: string
+    filter?: string,
   ): Observable<DataPage<string>> {
     let httpParams = new HttpParams();
     httpParams = httpParams.set('pageNumber', pageNumber.toString());
@@ -530,7 +531,7 @@ export class ItemService {
       partDefs.slice().sort((a, b) => {
         return (a.sortKey || '').localeCompare(b.sortKey || '');
       }),
-      'groupKey'
+      'groupKey',
     );
 
     const groups: PartGroup[] = [];
@@ -601,5 +602,31 @@ export class ItemService {
       // return the object to the next item in the loop
       return obj;
     }, {});
+  }
+
+  /**
+   * Let the server build metadata for the target item looking at its parts
+   * and return it. This is used when users request to autogenerate the title
+   * and/or description of an item.
+   *
+   * @param id The item's ID.
+   * @param targets The target metadata in item: T=title, D=description.
+   * @returns Object with requested target keys when found, else empty.
+   */
+  public getItemMetadata(
+    id: string,
+    targets = 'TD',
+  ): Observable<{ [key: string]: string }> {
+    let httpParams = new HttpParams();
+    httpParams = httpParams.set('targets', targets);
+
+    return this._http
+      .get<{ [key: string]: string }>(
+        `${this._env.get('apiUrl')}items/${id}/metadata`,
+        {
+          params: httpParams,
+        },
+      )
+      .pipe(retry(3), catchError(this._error.handleError));
   }
 }

@@ -103,7 +103,7 @@
     "karma-jasmine-html-reporter": "~2.2.0",
     "ng-packagr": "^22.0.1",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   },
   "optionalDependencies": {
     "@rollup/rollup-win32-arm64-msvc": "^4.62.2"

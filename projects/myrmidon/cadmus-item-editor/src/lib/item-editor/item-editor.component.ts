@@ -77,6 +77,7 @@ import { ItemLookupDialogComponent } from '../item-lookup-dialog/item-lookup-dia
 import { ItemGenerateDialogComponent } from '../item-generate-dialog/item-generate-dialog.component';
 import { MissingPartsComponent } from '../missing-parts/missing-parts.component';
 import { HasPreviewPipe } from '../has-preview.pipe';
+import { EnvService } from '@myrmidon/ngx-tools';
 
 /**
  * Item editor. This can edit a new or existing item's metadata and parts.
@@ -140,6 +141,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   public readonly user: Signal<User | undefined>;
   public readonly userLevel: Signal<number>;
   public readonly busy = signal<boolean>(false);
+  public readonly hasMetadataBuilders = signal<boolean>(false);
 
   // flag-set signals
   private readonly _flagsValue: Signal<number>;
@@ -176,12 +178,17 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     private _authService: AuthJwtService,
     private _userLevelService: UserLevelService,
     private _messaging: MessagingService,
+    private _envService: EnvService,
     _formBuilder: FormBuilder,
   ) {
     this.id.set(this._route.snapshot.params['id']);
     if (this.id() === 'new') {
       this.id.set(undefined);
     }
+
+    this.hasMetadataBuilders.set(
+      this._envService.get('hasMetadataBuilders') === 'true',
+    );
 
     // new part form
     this.newPartType = _formBuilder.control(null, Validators.required);
@@ -605,5 +612,59 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
             },
           });
       });
+  }
+
+  public generateTitle(): void {
+    if (this.busy()) {
+      return;
+    }
+    this.busy.set(true);
+    this._itemService.getItemMetadata(this.id()!, 'T').subscribe({
+      next: (title) => {
+        const result = title['T'];
+        if (result) {
+          this.title.setValue(result);
+          this.title.markAsDirty();
+          this.title.updateValueAndValidity();
+        } else {
+          this._snackbar.open('No title generated', 'OK', { duration: 3000 });
+        }
+      },
+      error: (error) => {
+        console.error(error);
+        this._snackbar.open('Error generating title', 'OK');
+      },
+      complete: () => {
+        this.busy.set(false);
+      },
+    });
+  }
+
+  public generateDescription(): void {
+    if (this.busy()) {
+      return;
+    }
+    this.busy.set(true);
+    this._itemService.getItemMetadata(this.id()!, 'D').subscribe({
+      next: (description) => {
+        const result = description['D'];
+        if (result) {
+          this.description.setValue(result);
+          this.description.markAsDirty();
+          this.description.updateValueAndValidity();
+        } else {
+          this._snackbar.open('No description generated', 'OK', {
+            duration: 3000,
+          });
+        }
+      },
+      error: (error) => {
+        console.error(error);
+        this._snackbar.open('Error generating description', 'OK');
+      },
+      complete: () => {
+        this.busy.set(false);
+      },
+    });
   }
 }

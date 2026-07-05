@@ -19,7 +19,7 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 15.0.0
+- cadmus-api: 15.0.1
 - cadmus-core: 13.0.0
 - cadmus-flags-pg: 16.0.0
 - cadmus-flags-ui: 16.0.0
@@ -27,7 +27,7 @@ Latest versions:
 - cadmus-graph-pg-ex: 17.0.0
 - cadmus-graph-ui: 16.0.0
 - cadmus-graph-ui-ex: 17.0.0
-- cadmus-item-editor: 17.0.0
+- cadmus-item-editor: 17.0.1
 - cadmus-item-list: 17.0.1
 - cadmus-item-search: 17.0.0
 - cadmus-layer-demo: 16.0.0
