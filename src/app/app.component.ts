@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit, Inject, OnDestroy, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  Inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
 import { Thesaurus, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { Router, RouterModule } from '@angular/router';
 import { take } from 'rxjs/operators';
@@ -33,6 +40,10 @@ import {
   BiblissimaCandidate,
   BiblissimaRefLookupService,
 } from '@myrmidon/cadmus-refs-biblissima-lookup';
+import {
+  LOOKUP_TAXOSTORE_CONFIGS_KEY,
+  TaxoStoreLookupConfig,
+} from '@myrmidon/cadmus-refs-asserted-ids';
 
 // cadmus
 import { AppRepository } from '@myrmidon/cadmus-state';
@@ -114,6 +125,27 @@ export class AppComponent implements OnInit, OnDestroy {
         itemLabelGetter: (item: any) => item?.name,
       },
     ] as RefLookupConfig[]);
+    this.configureTaxoLookup(storage);
+  }
+
+  private configureTaxoLookup(storage: RamStorageService): void {
+    storage.store(LOOKUP_TAXOSTORE_CONFIGS_KEY, [
+      // TODO: configure trees as desired
+      {
+        treeId: 'animals',
+        treeName: 'animals',
+        canEdit: false,
+        canAdd: false,
+        canDelete: false,
+      },
+      {
+        treeId: 'food',
+        treeName: 'food',
+        canEdit: false,
+        canAdd: false,
+        canDelete: false,
+      },
+    ] as TaxoStoreLookupConfig[]);
   }
 
   private configureCitationService(storage: RamStorageService): void {
