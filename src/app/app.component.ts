@@ -5,6 +5,7 @@ import {
   Inject,
   OnDestroy,
   signal,
+  inject,
 } from '@angular/core';
 import { Thesaurus, ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { Router, RouterModule } from '@angular/router';
@@ -12,6 +13,7 @@ import { take } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 // material
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -70,6 +72,9 @@ import { MatDivider } from '@angular/material/divider';
 })
 export class AppComponent implements OnInit, OnDestroy {
   private readonly _subs: Subscription[] = [];
+  private readonly _bo = inject(BreakpointObserver);
+
+  public readonly isMobile = signal<boolean>(false);
 
   public readonly user = signal<User | undefined>(undefined);
   public readonly logged = signal<boolean>(false);
@@ -91,6 +96,9 @@ export class AppComponent implements OnInit, OnDestroy {
     biblissima: BiblissimaRefLookupService,
   ) {
     this.version.set(env.get('version') || '');
+
+    this._bo.observe([Breakpoints.Small, Breakpoints.XSmall])
+      .subscribe(res => this.isMobile.set(res.matches));
 
     // configure citation schemes
     this.configureCitationService(storage);

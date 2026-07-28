@@ -1,5 +1,6 @@
 # History
 
+- 2026-07-28: 🆕 responsive menu layout in `app.component`.
 - 2026-07-04:
   - 🆕 added `getItemMetadata` to API item service and buttons to generate item's title and description when environment `hasMetadataBuilders` is set to true (`env.js`): `@myrmidon/cadmus-api`, `@myrmidon/cadmus-item-editor`.
 - 2026-07-02:
