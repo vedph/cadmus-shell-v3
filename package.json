@@ -7,6 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "check-libs": "node scripts/check-local-libs.js",
     "build-cor": "ng build @myrmidon/cadmus-core",
     "build-api": "ng build @myrmidon/cadmus-api",
     "build-ui": "ng build @myrmidon/cadmus-state && ng build @myrmidon/cadmus-ui",
@@ -21,9 +22,23 @@
     "build-flg": "ng build @myrmidon/cadmus-flags-ui && ng build @myrmidon/cadmus-flags-pg",
     "build-sta": "ng build @myrmidon/cadmus-statistics",
     "build-tax": "ng build @myrmidon/cadmus-part-taxo-ui && ng build @myrmidon/cadmus-part-taxo-pg",
-    "build-lib": "pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp && pnpm run build-prd",
+    "build-lib": "pnpm run check-libs && pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp && pnpm run build-prd",
     "build-all": "pnpm run build-lib && ng build",
-    "test-all": "ng test --watch=false --browsers=ChromeHeadlessNoSandbox"
+    "test-cor": "ng test @myrmidon/cadmus-core --watch=false",
+    "test-api": "ng test @myrmidon/cadmus-api --watch=false",
+    "test-ui": "ng test @myrmidon/cadmus-state --watch=false && ng test @myrmidon/cadmus-ui --watch=false",
+    "test-ths": "ng test @myrmidon/cadmus-profile-core --watch=false && ng test @myrmidon/cadmus-thesaurus-ui --watch=false && ng test @myrmidon/cadmus-thesaurus-editor --watch=false && ng test @myrmidon/cadmus-thesaurus-list --watch=false",
+    "test-gen": "ng test @myrmidon/cadmus-part-general-ui --watch=false && ng test @myrmidon/cadmus-part-general-pg --watch=false",
+    "test-imp": "ng test @myrmidon/cadmus-profile-import --watch=false",
+    "test-prd": "ng test @myrmidon/cadmus-profile-editor --watch=false",
+    "test-phi": "ng test @myrmidon/cadmus-part-philology-ui --watch=false && ng test @myrmidon/cadmus-part-philology-pg --watch=false",
+    "test-itm": "ng test @myrmidon/cadmus-item-list --watch=false && ng test @myrmidon/cadmus-item-editor --watch=false && ng test @myrmidon/cadmus-item-search --watch=false && ng test @myrmidon/cadmus-layer-demo --watch=false",
+    "test-grp": "ng test @myrmidon/cadmus-graph-ui --watch=false && ng test @myrmidon/cadmus-graph-ui-ex --watch=false && ng test @myrmidon/cadmus-graph-pg --watch=false && ng test @myrmidon/cadmus-graph-pg-ex --watch=false",
+    "test-pre": "ng test @myrmidon/cadmus-preview-ui --watch=false && ng test @myrmidon/cadmus-preview-pg --watch=false",
+    "test-flg": "ng test @myrmidon/cadmus-flags-ui --watch=false && ng test @myrmidon/cadmus-flags-pg --watch=false",
+    "test-sta": "ng test @myrmidon/cadmus-statistics --watch=false",
+    "test-tax": "ng test @myrmidon/cadmus-part-taxo-ui --watch=false && ng test @myrmidon/cadmus-part-taxo-pg --watch=false",
+    "test-all": "pnpm run check-libs && pnpm run test-cor && pnpm run test-api && pnpm run test-ui && pnpm run test-itm && pnpm run test-ths && pnpm run test-gen && pnpm run test-phi && pnpm run test-grp && pnpm run test-pre && pnpm run test-flg && pnpm run test-sta && pnpm run test-tax && pnpm run test-imp && pnpm run test-prd"
   },
   "overrides": {
     "d3-selection": "3.0.0"
@@ -91,19 +106,12 @@
     "@angular/compiler-cli": "^22.0.1",
     "@angular/localize": "^22.0.1",
     "@types/d3-force": "^3.0.10",
-    "@types/jasmine": "~6.0.0",
     "@types/three": "^0.185.1",
-    "istanbul-lib-instrument": "^6.0.3",
-    "jasmine-core": "~6.3.0",
     "jsdom": "^29.1.1",
-    "karma": "~6.4.4",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.1",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.2.0",
     "ng-packagr": "^22.0.1",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "zone.js": "~0.16.0"
   },
   "optionalDependencies": {
     "@rollup/rollup-win32-arm64-msvc": "^4.62.2"
