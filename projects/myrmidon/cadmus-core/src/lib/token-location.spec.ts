@@ -24,6 +24,16 @@ describe('TokenLocation', () => {
       expect(TokenLocation.parse('')).toBeNull();
     });
 
+    it('should return null (not a zombie object) for a malformed non-empty string', () => {
+      // regression test: 'not-a-location'.split('-', 2) yields ['not', 'a'],
+      // a 2-element pair, so the old code went on to construct
+      // `new TokenLocation(TokenPoint.parse('not')!, ...)` - TokenPoint.parse
+      // returns null for non-numeric input, producing a TokenLocation with
+      // primary=null instead of returning null for the whole parse.
+      expect(TokenLocation.parse('not-a-location')).toBeNull();
+      expect(TokenLocation.parse('garbage')).toBeNull();
+    });
+
     it('should parse a single point location', () => {
       const loc = TokenLocation.parse('1.2')!;
       expect(loc.primary.y).toBe(1);

@@ -20,8 +20,17 @@ export class TokenLocation {
       return null;
     }
 
+    // if the primary point cannot be parsed, the whole location is invalid;
+    // returning a TokenLocation with a null primary here would violate the
+    // non-nullable TokenPoint type and crash later on any method that
+    // touches primary (toString, compareTo, overlaps...)
+    const primary = TokenPoint.parse(pair[0]);
+    if (!primary) {
+      return null;
+    }
+
     return new TokenLocation(
-      TokenPoint.parse(pair[0])!,
+      primary,
       pair.length > 1 ? TokenPoint.parse(pair[1]) || undefined : undefined
     );
   }
