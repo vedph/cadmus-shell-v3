@@ -73,6 +73,38 @@ describe('CsvThesarusReader', () => {
     }
     expect(thesaurus.id).toBe('biblio-languages@en');
     expect(thesaurus.targetId).toBe('languages');
-    expect(thesaurus.entries!.length).toBe(0);
+    // an alias thesaurus (targetId set) has no entries of its own by
+    // design (see getThesaurus()'s `entries: targetId ? undefined : ...`),
+    // not an empty array - the original assertion here (`.entries!.length`)
+    // was itself buggy and threw on the undefined value
+    expect(thesaurus.entries).toBeUndefined();
+  });
+
+  it('should return null once all thesauri have been read', () => {
+    const reader = new CsvThesaurusReader('languages@en,\n' + 'eng,English\n');
+    expect(reader.read()).toBeTruthy();
+    expect(reader.read()).toBeNull();
+    // and stays null on further calls
+    expect(reader.read()).toBeNull();
+  });
+
+  it('should return null for empty text', () => {
+    expect(new CsvThesaurusReader('').read()).toBeNull();
+  });
+
+  it('should default the language to "en" when the ID has no @ suffix', () => {
+    const reader = new CsvThesaurusReader('colors,\n' + 'r,red\n');
+    const thesaurus = reader.read();
+    expect(thesaurus!.language).toBe('en');
+  });
+
+  it('should parse a thesaurus with a quoted value containing a comma', () => {
+    // regression: this only works now that CsvReader's quote handling is
+    // fixed - it used to throw on any quoted field
+    const reader = new CsvThesaurusReader(
+      'labels@en,\n' + 'a,"one, two"\n'
+    );
+    const thesaurus = reader.read();
+    expect(thesaurus!.entries![0]).toEqual({ id: 'a', value: 'one, two' });
   });
 });

@@ -102,7 +102,15 @@ export class CsvReader {
 
   private handleQuote() {
     if (this._current === this._options.quote) {
-      if (this._index && this._previous !== '\\') {
+      // a quote is "escaped" (a literal quote character inside a quoted
+      // field) only when preceded by a backslash. _previous starts as ''
+      // (never '\\'), so this already correctly treats a quote at index 0
+      // as unescaped without needing an extra `this._index &&` guard - that
+      // guard used to force EVERY quote at index 0 down the "escaped"
+      // branch instead, since 0 is falsy, which broke parsing of any row
+      // whose first field is quoted (e.g. `"a",b`) with a spurious
+      // ParseError.
+      if (this._previous !== '\\') {
         this.handleQuoteNotEscaped();
       } else {
         this.handleQuoteEscaped();
