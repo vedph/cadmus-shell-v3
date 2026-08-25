@@ -256,7 +256,9 @@ export class ApparatusFragmentComponent
   }
 
   public saveEntry(entry: ApparatusEntry): void {
-    if (!this.editedEntry) {
+    // BUG FIX: was checking the signal reference itself (always truthy),
+    // not its value, so this guard never triggered. Must invoke the signal.
+    if (!this.editedEntry()) {
       return;
     }
     const entries = [...this.entries.value];
@@ -274,7 +276,8 @@ export class ApparatusFragmentComponent
   }
 
   public closeEntry(): void {
-    if (!this.editedEntry) {
+    // BUG FIX: same unwrapped-signal guard issue as saveEntry() above.
+    if (!this.editedEntry()) {
       return;
     }
     this.editedEntryIndex.set(-1);

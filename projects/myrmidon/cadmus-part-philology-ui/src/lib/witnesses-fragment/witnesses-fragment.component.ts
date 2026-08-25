@@ -180,6 +180,14 @@ export class WitnessesFragmentComponent
   }
 
   public moveWitnessUp(index: number): void {
+    // guard against index 0: without this, witnesses.splice(index - 1, ...)
+    // receives -1, which Array.splice interprets as "insert before the last
+    // element" rather than a no-op, silently corrupting the order. The
+    // template already disables the button for the first row, but the
+    // sibling moveEntryUp (quotations-fragment) guards this defensively too.
+    if (index < 1) {
+      return;
+    }
     const witnesses = [...(this.witnesses.value || [])];
     const w = witnesses[index];
     witnesses.splice(index, 1);
@@ -222,7 +230,9 @@ export class WitnessesFragmentComponent
   }
 
   public saveCurrentWitness(): void {
-    if (!this.currentWitnessOpen || this.witness.invalid) {
+    // currentWitnessOpen is a signal: without invoking it (), this checked
+    // the always-truthy function reference and never short-circuited.
+    if (!this.currentWitnessOpen() || this.witness.invalid) {
       return;
     }
     const newWitness: Witness = {

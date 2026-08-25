@@ -152,6 +152,8 @@ export class ApparatusEntryComponent {
 
   private updateForm(entry?: ApparatusEntry): void {
     if (!entry) {
+      this.witnesses.clear();
+      this.authors.clear();
       this.form.reset();
       return;
     }

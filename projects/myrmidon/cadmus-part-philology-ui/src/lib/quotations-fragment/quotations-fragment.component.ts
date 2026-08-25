@@ -191,7 +191,9 @@ export class QuotationsFragmentComponent
   }
 
   public saveEntry(entry: QuotationEntry): void {
-    if (!this.editedEntry) {
+    // editedEntry is a signal: without invoking it (), this checked the
+    // always-truthy function reference and never short-circuited.
+    if (!this.editedEntry()) {
       return;
     }
     const entries = [...this.entries.value];
@@ -208,7 +210,9 @@ export class QuotationsFragmentComponent
   }
 
   public closeEntry(): void {
-    if (!this.editedEntry) {
+    // editedEntry is a signal: without invoking it (), this checked the
+    // always-truthy function reference and never short-circuited.
+    if (!this.editedEntry()) {
       return;
     }
     this.editedEntryIndex.set(-1);

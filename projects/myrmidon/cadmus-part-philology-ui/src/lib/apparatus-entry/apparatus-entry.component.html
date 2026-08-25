@@ -26,7 +26,7 @@
     <mat-form-field>
       <mat-label>value</mat-label>
       <input matInput type="text" formControlName="value" />
-      @if (value.hasError("maxLength") && (value.dirty || value.touched)) {
+      @if (value.hasError("maxlength") && (value.dirty || value.touched)) {
         <mat-error>too long</mat-error>
       }
     </mat-form-field>
@@ -36,7 +36,7 @@
       <mat-label>normalized value</mat-label>
       <input matInput type="text" formControlName="normValue" />
       @if (
-        normValue.hasError("maxLength") &&
+        normValue.hasError("maxlength") &&
         (normValue.dirty || normValue.touched)
       ) {
         <mat-error>too long</mat-error>
@@ -78,7 +78,7 @@
       <mat-form-field>
         <mat-label>tag</mat-label>
         <input matInput type="text" formControlName="tag" />
-        @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+        @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
           <mat-error>too long</mat-error>
         }
       </mat-form-field>
@@ -88,7 +88,7 @@
         <mat-label>group ID</mat-label>
         <input matInput type="text" formControlName="groupId" />
         @if (
-          groupId.hasError("maxLength") && (groupId.dirty || groupId.touched)
+          groupId.hasError("maxlength") && (groupId.dirty || groupId.touched)
         ) {
           <mat-error>too long</mat-error>
         }
@@ -101,7 +101,7 @@
     <mat-form-field class="long-text">
       <mat-label>note</mat-label>
       <textarea matInput formControlName="note" spellcheck="false"></textarea>
-      @if (note.hasError("maxLength") && (note.dirty || note.touched)) {
+      @if (note.hasError("maxlength") && (note.dirty || note.touched)) {
         <mat-error>too long</mat-error>
       }
     </mat-form-field>
@@ -186,7 +186,7 @@
                   <mat-error>value required</mat-error>
                 }
                 @if (
-                  $any(item)["controls"].value.errors?.maxLength &&
+                  $any(item)["controls"].value.errors?.maxlength &&
                   ($any(item)["controls"].value.dirty ||
                     $any(item)["controls"].value.touched)
                 ) {
@@ -199,7 +199,7 @@
               <mat-label>note</mat-label>
               <input matInput formControlName="note" />
               @if (
-                $any(item)["controls"].note.errors?.maxLength &&
+                $any(item)["controls"].note.errors?.maxlength &&
                 ($any(item)["controls"].note.dirty ||
                   $any(item)["controls"].note.touched)
               ) {
@@ -298,7 +298,7 @@
                 <mat-error>value required</mat-error>
               }
               @if (
-                $any(item)["controls"].value.errors?.maxLength &&
+                $any(item)["controls"].value.errors?.maxlength &&
                 ($any(item)["controls"].value.dirty ||
                   $any(item)["controls"].value.touched)
               ) {
@@ -311,7 +311,7 @@
             <mat-label>location</mat-label>
             <input matInput formControlName="location" />
             @if (
-              $any(item)["controls"].location.errors?.maxLength &&
+              $any(item)["controls"].location.errors?.maxlength &&
               ($any(item)["controls"].location.dirty ||
                 $any(item)["controls"].location.touched)
             ) {
@@ -335,7 +335,7 @@
               <mat-label>tag</mat-label>
               <input matInput formControlName="tag" />
               @if (
-                $any(item)["controls"].tag.errors?.maxLength &&
+                $any(item)["controls"].tag.errors?.maxlength &&
                 ($any(item)["controls"].tag.dirty ||
                   $any(item)["controls"].tag.touched)
               ) {
@@ -348,7 +348,7 @@
             <mat-label>note</mat-label>
             <input matInput formControlName="note" />
             @if (
-              $any(item)["controls"].note.errors?.maxLength &&
+              $any(item)["controls"].note.errors?.maxlength &&
               ($any(item)["controls"].note.dirty ||
                 $any(item)["controls"].note.touched)
             ) {

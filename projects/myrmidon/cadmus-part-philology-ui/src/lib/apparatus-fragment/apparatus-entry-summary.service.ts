@@ -16,7 +16,10 @@ export class ApparatusEntrySummaryService {
    * an array of grouped items.
    */
   private groupBy<T, K extends keyof any>(list: T[], getKey: (item: T) => K) {
-    list.reduce((previous, currentItem) => {
+    // BUG FIX: this was missing `return`, so groupBy always returned
+    // undefined, silently dropping all entries whenever fr.entries.some
+    // (e => e.groupId) was true (the grouped-by-groupId branch in build()).
+    return list.reduce((previous, currentItem) => {
       const group = getKey(currentItem);
       if (!previous[group]) previous[group] = [];
       previous[group].push(currentItem);
@@ -145,7 +148,9 @@ export class ApparatusEntrySummaryService {
       }
     }
 
-    sb.push('</article');
+    // BUG FIX: closing tag was missing its '>', producing invalid HTML
+    // ("</article" with no closing angle bracket).
+    sb.push('</article>');
     return sb.join('');
   }
 }

@@ -56,7 +56,6 @@ import {
 
 import { OrthographyFragment } from '../orthography-fragment';
 import { EditOperation } from '../services/edit-operation';
-import { EditOperationComponent } from '../edit-operation/edit-operation.component';
 import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-set.component';
 
 /**
@@ -89,8 +88,10 @@ import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-
     TitleCasePipe,
     ThesaurusEntriesPickerComponent,
     CloseSaveButtonsComponent,
+    // NB: only cadmus-edit-operation-set is used in the template; it embeds
+    // cadmus-edit-operation itself. Importing EditOperationComponent here too
+    // was dead code (NG8113 unused-import warning), removed.
     EditOperationSetComponent,
-    EditOperationComponent,
   ],
 })
 export class OrthographyFragmentComponent

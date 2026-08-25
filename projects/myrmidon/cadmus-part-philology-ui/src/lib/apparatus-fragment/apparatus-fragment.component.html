@@ -33,7 +33,7 @@
             <mat-form-field>
               <mat-label>tag</mat-label>
               <input matInput type="text" formControlName="tag" />
-              @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+              @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
                 <mat-error>too long</mat-error>
               }
             </mat-form-field>

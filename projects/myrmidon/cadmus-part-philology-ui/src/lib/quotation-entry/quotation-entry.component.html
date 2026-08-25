@@ -23,7 +23,7 @@
             spellcheck="false"
             formControlName="tag"
           />
-          @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+          @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
             <mat-error>tag too long</mat-error>
           }
         </mat-form-field>
@@ -47,7 +47,7 @@
             <mat-error>author required</mat-error>
           }
           @if (
-            author.hasError("max-length") && (author.dirty || author.touched)
+            author.hasError("maxlength") && (author.dirty || author.touched)
           ) {
             <mat-error>author too long</mat-error>
           }
@@ -83,7 +83,7 @@
         @if (work.hasError("required") && (work.dirty || work.touched)) {
           <mat-error>work required</mat-error>
         }
-        @if (work.hasError("max-length") && (work.dirty || work.touched)) {
+        @if (work.hasError("maxlength") && (work.dirty || work.touched)) {
           <mat-error>work too long</mat-error>
         }
       </mat-form-field>
@@ -102,7 +102,7 @@
         @if (work.hasError("required") && (work.dirty || work.touched)) {
           <mat-error>work required</mat-error>
         }
-        @if (work.hasError("max-length") && (work.dirty || work.touched)) {
+        @if (work.hasError("maxlength") && (work.dirty || work.touched)) {
           <mat-error>work too long</mat-error>
         }
       </mat-form-field>
@@ -126,7 +126,7 @@
           <mat-error>citation required</mat-error>
         }
         @if (
-          citation.hasError("maxLength") && (citation.dirty || citation.touched)
+          citation.hasError("maxlength") && (citation.dirty || citation.touched)
         ) {
           <mat-error>citation too long</mat-error>
         }
@@ -144,7 +144,7 @@
           formControlName="citationUri"
         />
         @if (
-          citationUri.hasError("maxLength") &&
+          citationUri.hasError("maxlength") &&
           (citationUri.dirty || citationUri.touched)
         ) {
           <mat-error>URI too long</mat-error>
@@ -164,7 +164,7 @@
         formControlName="variant"
       ></textarea>
       @if (
-        variant.hasError("maxLength") && (variant.dirty || variant.touched)
+        variant.hasError("maxlength") && (variant.dirty || variant.touched)
       ) {
         <mat-error>variant too long</mat-error>
       }
@@ -181,7 +181,7 @@
         spellcheck="false"
         formControlName="note"
       ></textarea>
-      @if (note.hasError("maxLength") && (note.dirty || note.touched)) {
+      @if (note.hasError("maxlength") && (note.dirty || note.touched)) {
         <mat-error>note too long</mat-error>
       }
     </mat-form-field>

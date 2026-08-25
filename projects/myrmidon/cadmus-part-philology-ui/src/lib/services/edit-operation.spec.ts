@@ -21,7 +21,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('', 'abc');
     expect(ops.length).toBe(1);
     const op = ops[0] as InsertAfterEditOperation;
-    expect(op instanceof InsertAfterEditOperation).toBeTrue();
+    expect(op instanceof InsertAfterEditOperation).toBe(true);
     expect(op.at).toBe(0);
     expect(op.text).toBe('abc');
   });
@@ -30,7 +30,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', '');
     expect(ops.length).toBe(1);
     const op = ops[0] as DeleteEditOperation;
-    expect(op instanceof DeleteEditOperation).toBeTrue();
+    expect(op instanceof DeleteEditOperation).toBe(true);
     expect(op.at).toBe(1);
     expect(op.run).toBe(3);
     expect(op.inputText).toBe('abc');
@@ -45,7 +45,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', 'adc');
     expect(ops.length).toBe(1);
     const op = ops[0] as ReplaceEditOperation;
-    expect(op instanceof ReplaceEditOperation).toBeTrue();
+    expect(op instanceof ReplaceEditOperation).toBe(true);
     expect(op.at).toBe(2);
     expect(op.run).toBe(1);
     expect(op.text).toBe('d');
@@ -56,7 +56,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('ac', 'abc');
     expect(ops.length).toBe(1);
     const op = ops[0] as InsertBeforeEditOperation;
-    expect(op instanceof InsertBeforeEditOperation).toBeTrue();
+    expect(op instanceof InsertBeforeEditOperation).toBe(true);
     expect(op.at).toBe(2);
     expect(op.text).toBe('b');
   });
@@ -65,7 +65,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', 'ac');
     expect(ops.length).toBe(1);
     const op = ops[0] as DeleteEditOperation;
-    expect(op instanceof DeleteEditOperation).toBeTrue();
+    expect(op instanceof DeleteEditOperation).toBe(true);
     expect(op.at).toBe(2);
     expect(op.run).toBe(1);
     expect(op.inputText).toBe('b');
@@ -76,20 +76,20 @@ describe('EditOperation.diff', () => {
     expect(ops.length).toBe(3);
 
     // 1. replace 'b' with 'z' at position 2
-    expect(ops[0] instanceof ReplaceEditOperation).toBeTrue();
+    expect(ops[0] instanceof ReplaceEditOperation).toBe(true);
     const rep1 = ops[0] as ReplaceEditOperation;
     expect(rep1.at).toBe(2);
     expect(rep1.inputText).toBe('b');
     expect(rep1.text).toBe('z');
 
     // 2. delete 'd' at position 4
-    expect(ops[1] instanceof DeleteEditOperation).toBeTrue();
+    expect(ops[1] instanceof DeleteEditOperation).toBe(true);
     const del = ops[1] as DeleteEditOperation;
     expect(del.at).toBe(4);
     expect(del.inputText).toBe('d');
 
     // 3. replace 'f' with 'd' at position 5
-    expect(ops[2] instanceof ReplaceEditOperation).toBeTrue();
+    expect(ops[2] instanceof ReplaceEditOperation).toBe(true);
     const rep2 = ops[2] as ReplaceEditOperation;
     expect(rep2.at).toBe(5);
     expect(rep2.inputText).toBe('f');
@@ -101,14 +101,14 @@ describe('EditOperation.diff', () => {
     expect(ops.length).toBe(2);
 
     // 1. replace 'b' with 'z' at position 2
-    expect(ops[0] instanceof ReplaceEditOperation).toBeTrue();
+    expect(ops[0] instanceof ReplaceEditOperation).toBe(true);
     const rep = ops[0] as ReplaceEditOperation;
     expect(rep.at).toBe(2);
     expect(rep.inputText).toBe('b');
     expect(rep.text).toBe('z');
 
     // 2. move 'd' from position 4 to position 6 (replacing 'f')
-    expect(ops[1] instanceof MoveBeforeEditOperation).toBeTrue();
+    expect(ops[1] instanceof MoveBeforeEditOperation).toBe(true);
     const move = ops[1] as MoveBeforeEditOperation;
     expect(move.at).toBe(4);
     expect(move.run).toBe(1);
@@ -120,7 +120,7 @@ describe('EditOperation.diff', () => {
     it('Diff_IncludeInputText_RespectsFlag ' + includeInputText, () => {
       const ops = EditOperation.diff('abc', 'adc', includeInputText);
       const op = ops[0] as ReplaceEditOperation;
-      expect(op instanceof ReplaceEditOperation).toBeTrue();
+      expect(op instanceof ReplaceEditOperation).toBe(true);
       if (includeInputText) {
         expect(op.inputText).toBe('b');
       } else {
@@ -133,7 +133,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('bc', 'abc');
     expect(ops.length).toBe(1);
     const op = ops[0] as InsertBeforeEditOperation;
-    expect(op instanceof InsertBeforeEditOperation).toBeTrue();
+    expect(op instanceof InsertBeforeEditOperation).toBe(true);
     expect(op.at).toBe(1);
     expect(op.text).toBe('a');
   });
@@ -142,7 +142,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('ab', 'abc');
     expect(ops.length).toBe(1);
     const op = ops[0] as InsertAfterEditOperation;
-    expect(op instanceof InsertAfterEditOperation).toBeTrue();
+    expect(op instanceof InsertAfterEditOperation).toBe(true);
     expect(op.at).toBe(2);
     expect(op.text).toBe('c');
   });
@@ -151,7 +151,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', 'bc');
     expect(ops.length).toBe(1);
     const op = ops[0] as DeleteEditOperation;
-    expect(op instanceof DeleteEditOperation).toBeTrue();
+    expect(op instanceof DeleteEditOperation).toBe(true);
     expect(op.at).toBe(1);
     expect(op.run).toBe(1);
     expect(op.inputText).toBe('a');
@@ -161,7 +161,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', 'ab');
     expect(ops.length).toBe(1);
     const op = ops[0] as DeleteEditOperation;
-    expect(op instanceof DeleteEditOperation).toBeTrue();
+    expect(op instanceof DeleteEditOperation).toBe(true);
     expect(op.at).toBe(3);
     expect(op.run).toBe(1);
     expect(op.inputText).toBe('c');
@@ -171,7 +171,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', 'xbc');
     expect(ops.length).toBe(1);
     const op = ops[0] as ReplaceEditOperation;
-    expect(op instanceof ReplaceEditOperation).toBeTrue();
+    expect(op instanceof ReplaceEditOperation).toBe(true);
     expect(op.at).toBe(1);
     expect(op.text).toBe('x');
     expect(op.inputText).toBe('a');
@@ -181,7 +181,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', 'abx');
     expect(ops.length).toBe(1);
     const op = ops[0] as ReplaceEditOperation;
-    expect(op instanceof ReplaceEditOperation).toBeTrue();
+    expect(op instanceof ReplaceEditOperation).toBe(true);
     expect(op.at).toBe(3);
     expect(op.text).toBe('x');
     expect(op.inputText).toBe('c');
@@ -192,7 +192,7 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abc', 'bac');
     expect(ops.length).toBe(1);
     const move = ops[0] as MoveBeforeEditOperation;
-    expect(move instanceof MoveBeforeEditOperation).toBeTrue();
+    expect(move instanceof MoveBeforeEditOperation).toBe(true);
     expect(move.at).toBe(1);
     expect(move.to).toBe(3);
     expect(move.inputText).toBe('a');
@@ -202,7 +202,7 @@ describe('EditOperation.diff', () => {
     // "abc" -> "acb" (move 'b' after 'c')
     const ops = EditOperation.diff('abc', 'acb');
     expect(ops.length).toBeLessThanOrEqual(2);
-    expect(ops.some((op) => op instanceof MoveBeforeEditOperation)).toBeTrue();
+    expect(ops.some((op) => op instanceof MoveBeforeEditOperation)).toBe(true);
   });
 
   it('Diff_AdjustInsertOnlyMode', () => {
@@ -210,23 +210,23 @@ describe('EditOperation.diff', () => {
     const ops = EditOperation.diff('abcdef', 'azced', true, true, true);
     expect(ops.length).toBe(3);
     for (const op of ops) {
-      expect(op instanceof MoveBeforeEditOperation).toBeFalse();
-      expect(op instanceof MoveAfterEditOperation).toBeFalse();
+      expect(op instanceof MoveBeforeEditOperation).toBe(false);
+      expect(op instanceof MoveAfterEditOperation).toBe(false);
     }
   });
 
   it('Diff_AdjustInsertOnlyModeWithInsert', () => {
     // "abcd" -> "acdb"
     const ops = EditOperation.diff('abcd', 'acdb');
-    expect(ops.some((op) => op instanceof MoveBeforeEditOperation)).toBeTrue();
+    expect(ops.some((op) => op instanceof MoveBeforeEditOperation)).toBe(true);
   });
 
   it('Diff_NoAdjustmentWhenTextNotUnique', () => {
     // "aabbcc" -> "abcabc"
     const ops = EditOperation.diff('aabbcc', 'abcabc', true, true);
     for (const op of ops) {
-      expect(op instanceof MoveBeforeEditOperation).toBeFalse();
-      expect(op instanceof MoveAfterEditOperation).toBeFalse();
+      expect(op instanceof MoveBeforeEditOperation).toBe(false);
+      expect(op instanceof MoveAfterEditOperation).toBe(false);
     }
   });
 
@@ -262,8 +262,8 @@ describe('EditOperation.diff', () => {
         expect(ops.length).toBeGreaterThan(0);
         if (!adjust) {
           for (const op of ops) {
-            expect(op instanceof MoveBeforeEditOperation).toBeFalse();
-            expect(op instanceof MoveAfterEditOperation).toBeFalse();
+            expect(op instanceof MoveBeforeEditOperation).toBe(false);
+            expect(op instanceof MoveAfterEditOperation).toBe(false);
           }
         }
       }
@@ -274,7 +274,7 @@ describe('EditOperation.diff', () => {
     // "abcdefg" -> "acbdefg" (move 'c' before 'b')
     const ops = EditOperation.diff('abcdefg', 'acbdefg');
     expect(ops.length).toBeLessThanOrEqual(3);
-    expect(ops.some((op) => op instanceof MoveBeforeEditOperation)).toBeTrue();
+    expect(ops.some((op) => op instanceof MoveBeforeEditOperation)).toBe(true);
   });
 });
 
@@ -1263,37 +1263,37 @@ describe('SwapEditOperation', () => {
 describe('EditOperation.parseOperation', () => {
   it('should parse delete operation', () => {
     const op = EditOperation.parseOperation('@1!');
-    expect(op instanceof DeleteEditOperation).toBeTrue();
+    expect(op instanceof DeleteEditOperation).toBe(true);
   });
 
   it('should parse replace operation', () => {
     const op = EditOperation.parseOperation('@1="V"');
-    expect(op instanceof ReplaceEditOperation).toBeTrue();
+    expect(op instanceof ReplaceEditOperation).toBe(true);
   });
 
   it('should parse insert-before operation', () => {
     const op = EditOperation.parseOperation('@1+="X"');
-    expect(op instanceof InsertBeforeEditOperation).toBeTrue();
+    expect(op instanceof InsertBeforeEditOperation).toBe(true);
   });
 
   it('should parse insert-after operation', () => {
     const op = EditOperation.parseOperation('@1=+"X"');
-    expect(op instanceof InsertAfterEditOperation).toBeTrue();
+    expect(op instanceof InsertAfterEditOperation).toBe(true);
   });
 
   it('should parse move-before operation', () => {
     const op = EditOperation.parseOperation('@1>@3');
-    expect(op instanceof MoveBeforeEditOperation).toBeTrue();
+    expect(op instanceof MoveBeforeEditOperation).toBe(true);
   });
 
   it('should parse move-after operation', () => {
     const op = EditOperation.parseOperation('@1->@3');
-    expect(op instanceof MoveAfterEditOperation).toBeTrue();
+    expect(op instanceof MoveAfterEditOperation).toBe(true);
   });
 
   it('should parse swap operation', () => {
     const op = EditOperation.parseOperation('@1<>@3');
-    expect(op instanceof SwapEditOperation).toBeTrue();
+    expect(op instanceof SwapEditOperation).toBe(true);
   });
 
   it('should throw ParseException for empty text', () => {
@@ -1308,14 +1308,14 @@ describe('EditOperation.parseOperation', () => {
 
   it('should prioritize -> over >', () => {
     const op = EditOperation.parseOperation('@1->@3');
-    expect(op instanceof MoveAfterEditOperation).toBeTrue();
+    expect(op instanceof MoveAfterEditOperation).toBe(true);
   });
 
   it('should handle complex operation with all features', () => {
     const op = EditOperation.parseOperation(
       '"B"@1="V" [correction] {b/v confusion}'
     );
-    expect(op instanceof ReplaceEditOperation).toBeTrue();
+    expect(op instanceof ReplaceEditOperation).toBe(true);
     const replaceOp = op as ReplaceEditOperation;
     expect(replaceOp.inputText).toBe('B');
     expect(replaceOp.at).toBe(1);
@@ -1328,37 +1328,37 @@ describe('EditOperation.parseOperation', () => {
 describe('EditOperation.createOperation', () => {
   it('should create DeleteEditOperation', () => {
     const op = EditOperation.createOperation(OperationType.Delete);
-    expect(op instanceof DeleteEditOperation).toBeTrue();
+    expect(op instanceof DeleteEditOperation).toBe(true);
   });
 
   it('should create ReplaceEditOperation', () => {
     const op = EditOperation.createOperation(OperationType.Replace);
-    expect(op instanceof ReplaceEditOperation).toBeTrue();
+    expect(op instanceof ReplaceEditOperation).toBe(true);
   });
 
   it('should create InsertBeforeEditOperation', () => {
     const op = EditOperation.createOperation(OperationType.InsertBefore);
-    expect(op instanceof InsertBeforeEditOperation).toBeTrue();
+    expect(op instanceof InsertBeforeEditOperation).toBe(true);
   });
 
   it('should create InsertAfterEditOperation', () => {
     const op = EditOperation.createOperation(OperationType.InsertAfter);
-    expect(op instanceof InsertAfterEditOperation).toBeTrue();
+    expect(op instanceof InsertAfterEditOperation).toBe(true);
   });
 
   it('should create MoveBeforeEditOperation', () => {
     const op = EditOperation.createOperation(OperationType.MoveBefore);
-    expect(op instanceof MoveBeforeEditOperation).toBeTrue();
+    expect(op instanceof MoveBeforeEditOperation).toBe(true);
   });
 
   it('should create MoveAfterEditOperation', () => {
     const op = EditOperation.createOperation(OperationType.MoveAfter);
-    expect(op instanceof MoveAfterEditOperation).toBeTrue();
+    expect(op instanceof MoveAfterEditOperation).toBe(true);
   });
 
   it('should create SwapEditOperation', () => {
     const op = EditOperation.createOperation(OperationType.Swap);
-    expect(op instanceof SwapEditOperation).toBeTrue();
+    expect(op instanceof SwapEditOperation).toBe(true);
   });
 
   it('should throw error for unsupported operation type', () => {

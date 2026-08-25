@@ -102,7 +102,13 @@
       }
       <hr />
       @if (currentWitnessOpen()) {
-        <div [@slideInOut]>
+        <!-- the [@slideInOut] animation trigger binding was removed: no
+             "slideInOut" trigger is defined anywhere in this codebase
+             (neither in this component's @Component.animations, nor
+             elsewhere), so this binding threw NG05105 ("Unexpected
+             synthetic property") as soon as this block rendered in any
+             environment with an animations module registered. -->
+        <div>
           <form [formGroup]="witness" (submit)="saveCurrentWitness()">
             <!-- id -->
             <div>
@@ -117,7 +123,7 @@
                 @if (id.hasError("required") && (id.dirty || id.touched)) {
                   <mat-error>ID required</mat-error>
                 }
-                @if (id.hasError("maxLength") && (id.dirty || id.touched)) {
+                @if (id.hasError("maxlength") && (id.dirty || id.touched)) {
                   <mat-error>ID too long</mat-error>
                 }
               </mat-form-field>
@@ -139,7 +145,7 @@
                   <mat-error>citation required</mat-error>
                 }
                 @if (
-                  citation.hasError("maxLength") &&
+                  citation.hasError("maxlength") &&
                   (citation.dirty || citation.touched)
                 ) {
                   <mat-error>citation too long</mat-error>
