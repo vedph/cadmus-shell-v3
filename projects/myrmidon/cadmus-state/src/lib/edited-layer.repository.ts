@@ -69,6 +69,9 @@ export class EditedLayerRepository {
   public get layerHints$(): Observable<LayerHint[]> {
     return this._layerHints$.asObservable();
   }
+  public get thesauriSet$(): Observable<ThesauriSet | undefined> {
+    return this._thesauriSet.asObservable();
+  }
 
   constructor(
     private _itemService: ItemService,

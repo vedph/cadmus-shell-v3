@@ -51,6 +51,7 @@ export class FragmentEditorService {
     const unscopedIds = thesauriIds.map((id) => {
       return this._thesaurusService.getScopedId(id);
     });
+    this._loading$.next(true);
     return new Promise<EditedObject<Fragment> | null>((resolve, reject) => {
       // load part and thesauri
       forkJoin({

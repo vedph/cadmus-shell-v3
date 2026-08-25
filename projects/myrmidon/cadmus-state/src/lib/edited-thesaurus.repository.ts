@@ -49,6 +49,7 @@ export class EditedThesaurusRepository {
         },
       });
     } else {
+      this._loading$.next(false);
       this._thesaurus$.next({
         id: '',
         language: 'en',

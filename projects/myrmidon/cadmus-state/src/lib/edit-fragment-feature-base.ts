@@ -11,6 +11,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditedObject, FragmentIdentity } from '@myrmidon/cadmus-core';
 import { Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { deepCopy } from '@myrmidon/ngx-tools';
 
 import { FragmentEditorService } from './fragment-editor.service';
 
@@ -161,8 +162,11 @@ export abstract class EditFragmentFeatureBase
    * @param fragment The fragment to be saved.
    */
   public save(fragment: Fragment): void {
-    // update a copy of the edited part with new fragment
-    const part = { ...this.data()!.layerPart } as TextLayerPart;
+    // update a copy of the edited part with new fragment; a shallow spread
+    // would leave part.fragments pointing at the same array as
+    // data().layerPart.fragments, so the splice/push below would mutate
+    // state still referenced by the data signal.
+    const part = deepCopy(this.data()!.layerPart) as TextLayerPart;
     const frIndex = part.fragments.findIndex(
       (f: { location: string }) => f.location === this.identity().loc
     );
