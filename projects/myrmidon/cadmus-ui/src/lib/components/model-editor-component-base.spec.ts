@@ -216,6 +216,33 @@ describe('ModelEditorComponentBase', () => {
 
       expect(fixture.componentInstance.data()!.value!.id).toBe('already-set');
     });
+
+    it('should not stamp an id onto a fragment value from a FragmentIdentity', () => {
+      // Fragment has no id field; a FragmentIdentity's partId refers to the
+      // *containing part*, not the fragment itself, so onIdentitySet must
+      // not treat it like a PartIdentity's own partId.
+      const fixture = createComponent();
+      const fragmentValue = { location: '1.1' };
+      fixture.componentRef.setInput('data', {
+        value: fragmentValue,
+        thesauri: {},
+      } as unknown as EditedObject<Part>);
+      fixture.detectChanges();
+
+      fixture.componentRef.setInput('identity', {
+        itemId: 'item1',
+        typeId: 'x',
+        partId: 'part1',
+        roleId: null,
+        frTypeId: 'fr.it.vedph.comment',
+        frRoleId: null,
+        loc: '1.1',
+      });
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.data()!.value).toEqual(fragmentValue);
+      expect((fixture.componentInstance.data()!.value as any).id).toBeUndefined();
+    });
   });
 
   describe('modelName', () => {

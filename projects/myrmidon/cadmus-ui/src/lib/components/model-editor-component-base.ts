@@ -164,7 +164,11 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   }
 
   private onIdentitySet(identity?: PartIdentity | FragmentIdentity) {
-    if (identity?.partId) {
+    // fragments have no id field (see the Fragment interface); a
+    // FragmentIdentity's partId refers to the *containing part*, not the
+    // fragment itself, so stamping it here would silently add a spurious
+    // id to the fragment value (and to whatever gets saved from it).
+    if (identity?.partId && !('loc' in identity)) {
       const part = this.data()?.value as Part;
       if (part && !part.id) {
         console.log('part identity set', identity.partId);
