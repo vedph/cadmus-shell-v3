@@ -258,9 +258,207 @@ describe('TextLayerService', () => {
     }
   ));
 
+  it('getSelectedLocationForEdit with commonAncestorContainer=span should return its location', () => {
+    const service = new TextLayerService();
+    const html = service.render('alpha beta gamma', [
+      TokenLocation.parse('1.2')!,
+    ]);
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const span = div.querySelector('span')!;
+
+    // select the span's single child node as a whole, so that
+    // commonAncestorContainer is the span element itself
+    const range = document.createRange();
+    range.setStart(span, 0);
+    range.setEnd(span, 1);
+
+    const selRange: SelectedRange = {
+      commonAncestorContainer: range.commonAncestorContainer,
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset,
+    };
+
+    const loc = service.getSelectedLocationForEdit(selRange);
+    expect(loc!.toString()).toEqual('1.2');
+  });
+
+  it('getSelectedLocationForEdit with a text selection outside any span should return null', () => {
+    const service = new TextLayerService();
+    const html = service.render('alpha beta gamma');
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const p = div.querySelector('p')!;
+    const textNode = p.firstChild!;
+
+    const range = document.createRange();
+    range.setStart(textNode, 0);
+    range.setEnd(textNode, 5);
+
+    const selRange: SelectedRange = {
+      commonAncestorContainer: range.commonAncestorContainer,
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset,
+    };
+
+    expect(service.getSelectedLocationForEdit(selRange)).toBeNull();
+  });
+
+  it('getSelectedLocationForEdit with a falsy range should return null', () => {
+    const service = new TextLayerService();
+    expect(
+      service.getSelectedLocationForEdit(undefined as unknown as SelectedRange)
+    ).toBeNull();
+  });
+
   /*
    * getSelectedLocationForNew method
    */
+  function selectedRangeFrom(
+    startContainer: Node,
+    startOffset: number,
+    endContainer: Node,
+    endOffset: number
+  ): SelectedRange {
+    const range = document.createRange();
+    range.setStart(startContainer, startOffset);
+    range.setEnd(endContainer, endOffset);
+    return {
+      commonAncestorContainer: range.commonAncestorContainer,
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset,
+    };
+  }
+
+  it('getSelectedLocationForNew with a falsy range should return null', () => {
+    const service = new TextLayerService();
+    expect(
+      service.getSelectedLocationForNew(
+        undefined as unknown as SelectedRange,
+        'alpha'
+      )
+    ).toBeNull();
+  });
+
+  it('getSelectedLocationForNew selecting a whole token "[beta]" should return 1.2', () => {
+    const service = new TextLayerService();
+    const text = 'alpha beta gamma';
+    const html = service.render(text);
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const textNode = div.querySelector('p')!.firstChild!;
+
+    // "beta" spans indices 6..10 in "alpha beta gamma"
+    const selRange = selectedRangeFrom(textNode, 6, textNode, 10);
+
+    const loc = service.getSelectedLocationForNew(selRange, text);
+    expect(loc!.toString()).toEqual('1.2');
+  });
+
+  it('getSelectedLocationForNew selecting a token portion "al[ph]a" should return 1.1@3x2', () => {
+    const service = new TextLayerService();
+    const text = 'alpha beta gamma';
+    const html = service.render(text);
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const textNode = div.querySelector('p')!.firstChild!;
+
+    // "ph" spans indices 2..4 in "alpha beta gamma"
+    const selRange = selectedRangeFrom(textNode, 2, textNode, 4);
+
+    const loc = service.getSelectedLocationForNew(selRange, text);
+    expect(loc!.toString()).toEqual('1.1@3x2');
+  });
+
+  it('getSelectedLocationForNew selecting multiple tokens "[beta gamma]" should return 1.2-1.3', () => {
+    const service = new TextLayerService();
+    const text = 'alpha beta gamma';
+    const html = service.render(text);
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const textNode = div.querySelector('p')!.firstChild!;
+
+    // "beta gamma" spans indices 6..16 (end of text) in "alpha beta gamma"
+    const selRange = selectedRangeFrom(textNode, 6, textNode, text.length);
+
+    const loc = service.getSelectedLocationForNew(selRange, text);
+    expect(loc!.toString()).toEqual('1.2-1.3');
+  });
+
+  it('getSelectedLocationForNew selecting across lines "[beta/gamma]" should return 1.2-2.1', () => {
+    const service = new TextLayerService();
+    const text = 'alpha beta\ngamma delta';
+    const html = service.render(text);
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const ps = div.querySelectorAll('p');
+    const line1Text = ps[0].firstChild!;
+    const line2Text = ps[1].firstChild!;
+
+    // start at "beta" (offset 6 in "alpha beta"), end at end of "gamma"
+    // (offset 5 in "gamma delta")
+    const selRange = selectedRangeFrom(line1Text, 6, line2Text, 5);
+
+    const loc = service.getSelectedLocationForNew(selRange, text);
+    expect(loc!.toString()).toEqual('1.2-2.1');
+  });
+
+  it('getSelectedLocationForNew selecting across an existing fragment span should return null', () => {
+    const service = new TextLayerService();
+    const text = 'alpha beta gamma';
+    // "beta" (1.2) is already an existing fragment, rendered as a span
+    const html = service.render(text, [TokenLocation.parse('1.2')!]);
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const p = div.querySelector('p')!;
+    // children: text "alpha ", span "beta", text " gamma"
+    const beforeSpanText = p.childNodes[0];
+    const spanText = p.querySelector('span')!.firstChild!;
+
+    // select from inside "alpha " into the existing "beta" span
+    const selRange = selectedRangeFrom(beforeSpanText, 2, spanText, 2);
+
+    expect(service.getSelectedLocationForNew(selRange, text)).toBeNull();
+  });
+
+  /*
+   * getSelectedRange method
+   */
+  it('getSelectedRange with no active selection should return null', () => {
+    const service = new TextLayerService();
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    expect(service.getSelectedRange()).toBeNull();
+  });
+
+  it('getSelectedRange with an active selection should return its range', () => {
+    const service = new TextLayerService();
+    const div = document.createElement('div');
+    div.textContent = 'hello';
+    document.body.appendChild(div);
+    try {
+      const range = document.createRange();
+      range.setStart(div.firstChild!, 0);
+      range.setEnd(div.firstChild!, 3);
+      const sel = window.getSelection()!;
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      const result = service.getSelectedRange();
+      expect(result).not.toBeNull();
+      expect(result!.toString()).toEqual('hel');
+
+      sel.removeAllRanges();
+    } finally {
+      document.body.removeChild(div);
+    }
+  });
 
   /*
    * getTextFragment method

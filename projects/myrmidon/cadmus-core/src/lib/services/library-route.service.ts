@@ -136,7 +136,8 @@ export class LibraryRouteService {
       const reqRoleId = this.stripFragmentRoleId(roleId);
       return {
         partKey: partGroupKey.part,
-        frKey: partGroupKey.fragments![reqRoleId],
+        // fragments may be undefined for part types with no fragments
+        frKey: partGroupKey.fragments?.[reqRoleId],
       };
     }
     return {
@@ -226,9 +227,16 @@ export class LibraryRouteService {
   ): { route: string; rid?: string } {
     let route: string;
     const editorKey = this.getEditorKeyFromPartType(typeId, roleId);
-    const { frTypeId, frRoleId } = this.getFragmentTypeAndRole(roleId)!;
+    // roleId may be undefined or not start with "fr." (e.g. a layer part
+    // with no specific role); fall back to typeId rather than crashing.
+    const frInfo = this.getFragmentTypeAndRole(roleId);
+    const frTypeId = frInfo?.frTypeId ?? typeId;
+    const frRoleId = frInfo?.frRoleId;
+    // frKey may be undefined when roleId is missing or has no matching
+    // fragment mapping; fall back to the part's own group key.
+    const frKey = editorKey.frKey ?? editorKey.partKey;
 
-    route = `/items/${itemId}/${editorKey.frKey}/fragment/${partId}/${frTypeId}/${loc}`;
+    route = `/items/${itemId}/${frKey}/fragment/${partId}/${frTypeId}/${loc}`;
     return {
       route: route,
       rid: frRoleId,
