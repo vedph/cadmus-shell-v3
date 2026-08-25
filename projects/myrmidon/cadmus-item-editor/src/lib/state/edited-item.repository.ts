@@ -266,6 +266,7 @@ export class EditedItemRepository {
         reject({
           message: 'Cannot delete part of unsaved item',
         });
+        return;
       }
       this._itemService.deletePart(id).subscribe({
         next: (_) => {
@@ -297,6 +298,7 @@ export class EditedItemRepository {
         reject({
           message: 'Cannot add part to unsaved item',
         });
+        return;
       }
       const part: Part = {
         itemId: itemId!,
@@ -341,6 +343,7 @@ export class EditedItemRepository {
         reject({
           message: 'Cannot set scope for unsaved item',
         });
+        return;
       }
       this._itemService.setPartThesaurusScope(ids, scope).subscribe({
         next: (_) => {
