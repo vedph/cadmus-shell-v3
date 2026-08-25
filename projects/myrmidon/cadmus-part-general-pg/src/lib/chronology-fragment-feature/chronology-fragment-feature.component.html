@@ -6,7 +6,10 @@
     [locations]="loc ? [loc] : []"
   />
 </div>
+<!-- identity was missing here: ModelEditorComponentBase's modelName() falls
+     back to the layer part's own name (wrong title) without it -->
 <cadmus-chronology-fragment
+  [identity]="identity()"
   [data]="$any(data())"
   (dataChange)="save($event!.value!)"
   (editorClose)="close()"

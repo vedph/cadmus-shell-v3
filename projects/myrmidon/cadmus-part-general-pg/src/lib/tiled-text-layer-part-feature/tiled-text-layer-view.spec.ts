@@ -18,7 +18,7 @@ describe('TiledTextLayerView', () => {
   beforeEach(() => {
     rows = [];
     for (let y = 1; y <= 3; y++) {
-      const row = {
+      const row: TextTileRow = {
         y,
         tiles: [],
       };
@@ -88,8 +88,8 @@ describe('TiledTextLayerView', () => {
   it('setFragmentLocations (points) sets frIndex', () => {
     const view = new TiledTextLayerView(rows);
     const locations: TokenLocation[] = [];
-    locations.push(TokenLocation.parse('2.1'));
-    locations.push(TokenLocation.parse('3.3'));
+    locations.push(TokenLocation.parse('2.1')!);
+    locations.push(TokenLocation.parse('3.3')!);
 
     view.setFragmentLocations(locations);
 
@@ -108,8 +108,8 @@ describe('TiledTextLayerView', () => {
   it('setFragmentLocations (ranges) sets frIndex', () => {
     const view = new TiledTextLayerView(rows);
     const locations: TokenLocation[] = [];
-    locations.push(TokenLocation.parse('2.1-3.1'));
-    locations.push(TokenLocation.parse('3.2-3.3'));
+    locations.push(TokenLocation.parse('2.1-3.1')!);
+    locations.push(TokenLocation.parse('3.2-3.3')!);
 
     view.setFragmentLocations(locations);
 
@@ -134,7 +134,7 @@ describe('TiledTextLayerView', () => {
   it('findFirstCheckedCoords for unchecked with none checked rets coords', () => {
     const view = new TiledTextLayerView(rows);
 
-    const yx = view.findFirstCheckedCoords(1, 1, false);
+    const yx = view.findFirstCheckedCoords(1, 1, false)!;
 
     expect(yx.y).toBe(1);
     expect(yx.x).toBe(1);
@@ -143,7 +143,7 @@ describe('TiledTextLayerView', () => {
   it('findFirstCheckedCoords (reverse) for unchecked with none checked rets coords', () => {
     const view = new TiledTextLayerView(rows);
 
-    const yx = view.findFirstCheckedCoords(3, 3, false, true);
+    const yx = view.findFirstCheckedCoords(3, 3, false, true)!;
 
     expect(yx.y).toBe(3);
     expect(yx.x).toBe(3);
@@ -159,7 +159,7 @@ describe('TiledTextLayerView', () => {
     const view = new TiledTextLayerView(rows);
     view.linearSetCheck(3, 2, 3, 2, true);
 
-    const yx = view.findFirstCheckedCoords(1, 1, true);
+    const yx = view.findFirstCheckedCoords(1, 1, true)!;
 
     expect(yx.y).toBe(3);
     expect(yx.x).toBe(2);
@@ -169,7 +169,7 @@ describe('TiledTextLayerView', () => {
     const view = new TiledTextLayerView(rows);
     view.linearSetCheck(2, 1, 2, 1, true);
 
-    const yx = view.findFirstCheckedCoords(3, 3, true, true);
+    const yx = view.findFirstCheckedCoords(3, 3, true, true)!;
 
     expect(yx.y).toBe(2);
     expect(yx.x).toBe(1);
@@ -247,7 +247,7 @@ describe('TiledTextLayerView', () => {
   it('getNextTileCoords from non-last tile in row rets its right sibling', () => {
     const view = new TiledTextLayerView(rows);
 
-    const yx = view.getNextTileCoords(2, 1);
+    const yx = view.getNextTileCoords(2, 1)!;
 
     expect(yx.y).toBe(2);
     expect(yx.x).toBe(2);
@@ -256,7 +256,7 @@ describe('TiledTextLayerView', () => {
   it('getNextTileCoords from last tile in row rets 1st tile in next row', () => {
     const view = new TiledTextLayerView(rows);
 
-    const yx = view.getNextTileCoords(1, 1);
+    const yx = view.getNextTileCoords(1, 1)!;
 
     expect(yx.y).toBe(2);
     expect(yx.x).toBe(1);
@@ -273,7 +273,7 @@ describe('TiledTextLayerView', () => {
   it('getPrevTileCoords from non-first tile in row rets its left sibling', () => {
     const view = new TiledTextLayerView(rows);
 
-    const yx = view.getPrevTileCoords(2, 2);
+    const yx = view.getPrevTileCoords(2, 2)!;
 
     expect(yx.y).toBe(2);
     expect(yx.x).toBe(1);
@@ -282,7 +282,7 @@ describe('TiledTextLayerView', () => {
   it('getPrevTileCoords from first tile in row rets last tile in prev row', () => {
     const view = new TiledTextLayerView(rows);
 
-    const yx = view.getPrevTileCoords(3, 1);
+    const yx = view.getPrevTileCoords(3, 1)!;
 
     expect(yx.y).toBe(2);
     expect(yx.x).toBe(2);
@@ -306,7 +306,7 @@ describe('TiledTextLayerView', () => {
     const view = new TiledTextLayerView(rows);
     view.linearSetCheck(3, 2, 3, 2, true);
 
-    const loc = view.getCheckedLocation();
+    const loc = view.getCheckedLocation()!;
 
     expect(loc.toString()).toBe('3.2');
   });
@@ -315,7 +315,7 @@ describe('TiledTextLayerView', () => {
     const view = new TiledTextLayerView(rows);
     view.linearSetCheck(2, 2, 3, 2, true);
 
-    const loc = view.getCheckedLocation();
+    const loc = view.getCheckedLocation()!;
 
     expect(loc.toString()).toBe('2.2-3.2');
   });
@@ -332,7 +332,7 @@ describe('TiledTextLayerView', () => {
     const view = new TiledTextLayerView(rows);
     view.linearSetCheck(2, 2, 3, 2, true);
 
-    const fl = view.getCheckedLocationAndFragment();
+    const fl = view.getCheckedLocationAndFragment()!;
 
     expect(fl.fragment).toBe(-1);
     expect(fl.location).toBeTruthy();
@@ -342,9 +342,9 @@ describe('TiledTextLayerView', () => {
   it('getCheckedLocationAndFragment checked outside fragment rets location', () => {
     const view = new TiledTextLayerView(rows);
     view.linearSetCheck(2, 2, 3, 2, true);
-    view.setFragmentLocations([TokenLocation.parse('3.3')]);
+    view.setFragmentLocations([TokenLocation.parse('3.3')!]);
 
-    const fl = view.getCheckedLocationAndFragment();
+    const fl = view.getCheckedLocationAndFragment()!;
 
     expect(fl.fragment).toBe(-1);
     expect(fl.location).toBeTruthy();
@@ -354,9 +354,9 @@ describe('TiledTextLayerView', () => {
   it('getCheckedLocationAndFragment checked inside fragment rets location and fragment', () => {
     const view = new TiledTextLayerView(rows);
     view.linearSetCheck(2, 2, 3, 2, true);
-    view.setFragmentLocations([TokenLocation.parse('3.2')]);
+    view.setFragmentLocations([TokenLocation.parse('3.2')!]);
 
-    const fl = view.getCheckedLocationAndFragment();
+    const fl = view.getCheckedLocationAndFragment()!;
 
     expect(fl.fragment).toBe(0);
     expect(fl.location).toBeTruthy();

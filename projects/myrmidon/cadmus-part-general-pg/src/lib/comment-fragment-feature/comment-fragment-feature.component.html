@@ -6,7 +6,11 @@
     [locations]="loc ? [loc] : []"
   />
 </div>
+<!-- identity was missing here: CommentEditorComponent's initSettings() call
+     needs it to load lookupProviderOptions settings (else lookups never
+     get configured) -->
 <cadmus-comment-editor
+  [identity]="identity()"
   [data]="$any(data())"
   (dataChange)="save($any($event!.value!))"
   (editorClose)="close()"
