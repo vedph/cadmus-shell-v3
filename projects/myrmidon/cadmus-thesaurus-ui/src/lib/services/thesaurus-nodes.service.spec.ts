@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { ThesaurusNodesService } from './thesaurus-nodes.service';
@@ -94,7 +95,7 @@ describe('ThesaurusNodesService', () => {
     expect(node.parentId).toBeFalsy();
     expect(node.hasChildren).toBeFalsy();
     expect(node.ordinal).toBe(3);
-    expect(node.lastSibling).toBeTrue();
+    expect(node.lastSibling).toBe(true);
   });
 
   it('should have getParentIds empty for flat set', () => {
@@ -130,7 +131,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[1].ordinal).toBe(2);
     expect(nodes[2].id).toBe('b');
     expect(nodes[2].ordinal).toBe(3);
-    expect(nodes[2].lastSibling).toBeTrue();
+    expect(nodes[2].lastSibling).toBe(true);
   });
 
   it('should move 2nd entry down in flat set', () => {
@@ -143,7 +144,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[1].ordinal).toBe(2);
     expect(nodes[2].id).toBe('g');
     expect(nodes[2].ordinal).toBe(3);
-    expect(nodes[2].lastSibling).toBeTrue();
+    expect(nodes[2].lastSibling).toBe(true);
   });
 
   it('should delete 1st entry in flat set', () => {
@@ -155,7 +156,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[0].ordinal).toBe(1);
     expect(nodes[1].id).toBe('b');
     expect(nodes[1].ordinal).toBe(2);
-    expect(nodes[1].lastSibling).toBeTrue();
+    expect(nodes[1].lastSibling).toBe(true);
   });
 
   it('should delete 2nd entry in flat set', () => {
@@ -167,7 +168,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[0].ordinal).toBe(1);
     expect(nodes[1].id).toBe('b');
     expect(nodes[1].ordinal).toBe(2);
-    expect(nodes[1].lastSibling).toBeTrue();
+    expect(nodes[1].lastSibling).toBe(true);
   });
 
   it('should delete last entry in flat set', () => {
@@ -179,7 +180,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[0].ordinal).toBe(1);
     expect(nodes[1].id).toBe('g');
     expect(nodes[1].ordinal).toBe(2);
-    expect(nodes[1].lastSibling).toBeTrue();
+    expect(nodes[1].lastSibling).toBe(true);
   });
 
   it('should replace 1st entry in flat set', () => {
@@ -199,7 +200,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[1].ordinal).toBe(2);
     expect(nodes[2].id).toBe('b');
     expect(nodes[2].ordinal).toBe(3);
-    expect(nodes[2].lastSibling).toBeTrue();
+    expect(nodes[2].lastSibling).toBe(true);
   });
 
   it('should replace mid entry in flat set', () => {
@@ -219,7 +220,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[1].ordinal).toBe(2);
     expect(nodes[2].id).toBe('b');
     expect(nodes[2].ordinal).toBe(3);
-    expect(nodes[2].lastSibling).toBeTrue();
+    expect(nodes[2].lastSibling).toBe(true);
   });
 
   it('should replace last entry in flat set', () => {
@@ -239,7 +240,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[2].id).toBe('b');
     expect(nodes[2].value).toBe('BLUE');
     expect(nodes[2].ordinal).toBe(3);
-    expect(nodes[2].lastSibling).toBeTrue();
+    expect(nodes[2].lastSibling).toBe(true);
   });
 
   it('should add as 1st entry in flat set', () => {
@@ -260,7 +261,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[2].ordinal).toBe(3);
     expect(nodes[3].id).toBe('b');
     expect(nodes[3].ordinal).toBe(4);
-    expect(nodes[3].lastSibling).toBeTrue();
+    expect(nodes[3].lastSibling).toBe(true);
   });
 
   it('should add as 2nd entry in flat set', () => {
@@ -281,7 +282,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[2].ordinal).toBe(3);
     expect(nodes[3].id).toBe('b');
     expect(nodes[3].ordinal).toBe(4);
-    expect(nodes[3].lastSibling).toBeTrue();
+    expect(nodes[3].lastSibling).toBe(true);
   });
 
   it('should add as penultimate entry in flat set', () => {
@@ -302,7 +303,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[2].ordinal).toBe(3);
     expect(nodes[3].id).toBe('b');
     expect(nodes[3].ordinal).toBe(4);
-    expect(nodes[3].lastSibling).toBeTrue();
+    expect(nodes[3].lastSibling).toBe(true);
   });
 
   it('should add as last entry in flat set', () => {
@@ -323,7 +324,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[2].ordinal).toBe(3);
     expect(nodes[3].id).toBe('w');
     expect(nodes[3].ordinal).toBe(4);
-    expect(nodes[3].lastSibling).toBeTrue();
+    expect(nodes[3].lastSibling).toBe(true);
   });
   //#endregion
 
@@ -336,7 +337,7 @@ describe('ThesaurusNodesService', () => {
     let node = nodes[0];
     expect(node.id).toBe('size');
     expect(node.parentId).toBeFalsy();
-    expect(node.hasChildren).toBeTrue();
+    expect(node.hasChildren).toBe(true);
     expect(node.ordinal).toBe(1);
     expect(node.lastSibling).toBeFalsy();
     // size.s
@@ -359,14 +360,14 @@ describe('ThesaurusNodesService', () => {
     expect(node.parentId).toBe('size');
     expect(node.hasChildren).toBeFalsy();
     expect(node.ordinal).toBe(3);
-    expect(node.lastSibling).toBeTrue();
+    expect(node.lastSibling).toBe(true);
     // color
     node = nodes[4];
     expect(node.id).toBe('color');
     expect(node.parentId).toBeFalsy();
-    expect(node.hasChildren).toBeTrue();
+    expect(node.hasChildren).toBe(true);
     expect(node.ordinal).toBe(2);
-    expect(node.lastSibling).toBeTrue();
+    expect(node.lastSibling).toBe(true);
     // color.r
     node = nodes[5];
     expect(node.id).toBe('color.r');
@@ -387,7 +388,7 @@ describe('ThesaurusNodesService', () => {
     expect(node.parentId).toBe('color');
     expect(node.hasChildren).toBeFalsy();
     expect(node.ordinal).toBe(3);
-    expect(node.lastSibling).toBeTrue();
+    expect(node.lastSibling).toBe(true);
   });
 
   it('should have getParentIds for tree set', () => {
@@ -405,7 +406,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[5].id).toBe('color.r');
     expect(nodes[6].id).toBe('color.g');
     expect(nodes[7].id).toBe('color.b');
-    expect(nodes[7].lastSibling).toBeTrue();
+    expect(nodes[7].lastSibling).toBe(true);
   });
 
   it('should not move last entry down in tree set', () => {
@@ -415,7 +416,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[1].id).toBe('size.s');
     expect(nodes[2].id).toBe('size.m');
     expect(nodes[3].id).toBe('size.l');
-    expect(nodes[3].lastSibling).toBeTrue();
+    expect(nodes[3].lastSibling).toBe(true);
   });
 
   it('should move 2nd entry up in tree set', () => {
@@ -428,7 +429,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[6].ordinal).toBe(2);
     expect(nodes[7].id).toBe('color.b');
     expect(nodes[7].ordinal).toBe(3);
-    expect(nodes[7].lastSibling).toBeTrue();
+    expect(nodes[7].lastSibling).toBe(true);
   });
 
   it('should move 2nd entry down in tree set', () => {
@@ -441,7 +442,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[6].ordinal).toBe(2);
     expect(nodes[7].id).toBe('color.g');
     expect(nodes[7].ordinal).toBe(3);
-    expect(nodes[7].lastSibling).toBeTrue();
+    expect(nodes[7].lastSibling).toBe(true);
   });
 
   it('should delete 1st entry in tree set', () => {
@@ -453,7 +454,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[5].ordinal).toBe(1);
     expect(nodes[6].id).toBe('color.b');
     expect(nodes[6].ordinal).toBe(2);
-    expect(nodes[6].lastSibling).toBeTrue();
+    expect(nodes[6].lastSibling).toBe(true);
   });
 
   it('should delete 2nd entry in tree set', () => {
@@ -465,7 +466,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[5].ordinal).toBe(1);
     expect(nodes[6].id).toBe('color.b');
     expect(nodes[6].ordinal).toBe(2);
-    expect(nodes[6].lastSibling).toBeTrue();
+    expect(nodes[6].lastSibling).toBe(true);
   });
 
   it('should delete last entry in tree set', () => {
@@ -477,7 +478,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[5].ordinal).toBe(1);
     expect(nodes[6].id).toBe('color.g');
     expect(nodes[6].ordinal).toBe(2);
-    expect(nodes[6].lastSibling).toBeTrue();
+    expect(nodes[6].lastSibling).toBe(true);
   });
 
   it('should replace 1st entry in tree set', () => {
@@ -497,7 +498,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[6].ordinal).toBe(2);
     expect(nodes[7].id).toBe('color.b');
     expect(nodes[7].ordinal).toBe(3);
-    expect(nodes[7].lastSibling).toBeTrue();
+    expect(nodes[7].lastSibling).toBe(true);
   });
 
   it('should replace mid entry in tree set', () => {
@@ -517,7 +518,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[6].ordinal).toBe(2);
     expect(nodes[7].id).toBe('color.b');
     expect(nodes[7].ordinal).toBe(3);
-    expect(nodes[7].lastSibling).toBeTrue();
+    expect(nodes[7].lastSibling).toBe(true);
   });
 
   it('should replace last entry in tree set', () => {
@@ -537,7 +538,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[7].id).toBe('color.b');
     expect(nodes[7].value).toBe('BLUE');
     expect(nodes[7].ordinal).toBe(3);
-    expect(nodes[7].lastSibling).toBeTrue();
+    expect(nodes[7].lastSibling).toBe(true);
   });
 
   it('should add as 1st child entry in tree set', () => {
@@ -559,7 +560,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[7].ordinal).toBe(3);
     expect(nodes[8].id).toBe('color.b');
     expect(nodes[8].ordinal).toBe(4);
-    expect(nodes[8].lastSibling).toBeTrue();
+    expect(nodes[8].lastSibling).toBe(true);
   });
 
   it('should add as 2nd child entry in tree set', () => {
@@ -581,7 +582,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[7].ordinal).toBe(3);
     expect(nodes[8].id).toBe('color.b');
     expect(nodes[8].ordinal).toBe(4);
-    expect(nodes[8].lastSibling).toBeTrue();
+    expect(nodes[8].lastSibling).toBe(true);
   });
 
   it('should add as penultimate child entry in tree set', () => {
@@ -604,7 +605,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[7].lastSibling).toBeFalsy();
     expect(nodes[8].id).toBe('color.b');
     expect(nodes[8].ordinal).toBe(4);
-    expect(nodes[8].lastSibling).toBeTrue();
+    expect(nodes[8].lastSibling).toBe(true);
   });
 
   it('should add as last child entry in tree set', () => {
@@ -627,7 +628,7 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[7].lastSibling).toBeFalsy();
     expect(nodes[8].id).toBe('color.w');
     expect(nodes[8].ordinal).toBe(4);
-    expect(nodes[8].lastSibling).toBeTrue();
+    expect(nodes[8].lastSibling).toBe(true);
   });
 
   it('should add as 1st top sibling in tree set', () => {
@@ -664,6 +665,117 @@ describe('ThesaurusNodesService', () => {
     expect(nodes[4].ordinal).toBe(2);
     expect(nodes[5].id).toBe('color');
     expect(nodes[5].ordinal).toBe(3);
+  });
+  //#endregion
+
+  // #region 3-level tree
+  it('should assign levels 1/2/3 down a 3-level chain', () => {
+    service.importEntries([
+      { id: 'a', value: 'A' },
+      { id: 'a.b', value: 'AB' },
+      { id: 'a.b.c', value: 'ABC' },
+    ]);
+    const nodes = service.getNodes();
+    expect(nodes[0].level).toBe(1);
+    expect(nodes[1].level).toBe(2);
+    expect(nodes[2].level).toBe(3);
+    expect(nodes[1].parentId).toBe('a');
+    expect(nodes[2].parentId).toBe('a.b');
+  });
+  //#endregion
+
+  // #region add empty-id placeholder replacement
+  it('should remove a previously added empty-id placeholder when a real node is added', () => {
+    service.importEntries([]);
+    service.add({ id: '', value: '', ordinal: 0, level: 1 });
+    expect(service.length).toBe(1);
+    expect(service.getNodes()[0].id).toBe('');
+
+    service.add({ id: 'new1', value: 'New', ordinal: 1, level: 1 });
+
+    expect(service.length).toBe(1);
+    expect(service.getNodes()[0].id).toBe('new1');
+  });
+  //#endregion
+
+  // #region delete edge cases
+  it('should do nothing when deleting a non-existent ID', () => {
+    service.importEntries(getFlatEntries());
+    service.delete('does-not-exist');
+    expect(service.length).toBe(3);
+  });
+  //#endregion
+
+  // #region getPage
+  describe('getPage', () => {
+    it('should return all nodes with no filter', async () => {
+      service.importEntries(getTreeEntries());
+      const page = await firstValueFrom(service.getPage({}));
+      expect(page.total).toBe(8);
+      expect(page.items.length).toBe(8);
+    });
+
+    it('should filter by idOrValue against both id and value, case-insensitively', async () => {
+      service.importEntries(getTreeEntries());
+      const page = await firstValueFrom(service.getPage({ idOrValue: 'RED' }));
+      expect(page.total).toBe(1);
+      expect(page.items[0].id).toBe('color.r');
+    });
+
+    it('should filter by parentId', async () => {
+      service.importEntries(getTreeEntries());
+      const page = await firstValueFrom(
+        service.getPage({ parentId: 'color' })
+      );
+      expect(page.total).toBe(3);
+      expect(page.items.map((n) => n.id)).toEqual([
+        'color.r',
+        'color.g',
+        'color.b',
+      ]);
+    });
+
+    it('should exclude (from both items and total) the children of a collapsed node', async () => {
+      service.importEntries(getTreeEntries());
+      const sizeNode = service.getNodes()[0];
+      service.add({ ...sizeNode, collapsed: true });
+
+      const page = await firstValueFrom(service.getPage({}));
+
+      expect(page.total).toBe(5);
+      expect(page.items.map((n) => n.id)).toEqual([
+        'size',
+        'color',
+        'color.r',
+        'color.g',
+        'color.b',
+      ]);
+    });
+
+    it('should paginate using pageNumber/pageSize while total still counts all matches', async () => {
+      service.importEntries(getTreeEntries());
+      const page = await firstValueFrom(service.getPage({}, 2, 2));
+      expect(page.total).toBe(8);
+      expect(page.pageCount).toBe(4);
+      expect(page.items.map((n) => n.id)).toEqual(['size.m', 'size.l']);
+    });
+  });
+  //#endregion
+
+  // #region toggleAll
+  describe('toggleAll', () => {
+    it('should set the collapsed state on every node', () => {
+      service.importEntries(getTreeEntries());
+      service.toggleAll(true);
+      expect(service.getNodes().every((n) => n.collapsed === true)).toBe(
+        true
+      );
+
+      service.toggleAll(false);
+      expect(service.getNodes().every((n) => n.collapsed === false)).toBe(
+        true
+      );
+    });
   });
   //#endregion
 });

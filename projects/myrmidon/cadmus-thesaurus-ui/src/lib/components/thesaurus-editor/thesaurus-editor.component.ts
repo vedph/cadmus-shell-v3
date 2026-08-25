@@ -34,7 +34,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
-import { DataPage, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { DataPage } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import {
@@ -146,8 +146,13 @@ export class ThesaurusEditorComponent implements OnInit {
     ]);
     this.alias = formBuilder.control(false, { nonNullable: true });
     this.targetId = formBuilder.control(null);
+    // entryCount holds the pre-computed entries *count* (a number), not
+    // the entries array itself; strictMinLengthValidator checks a
+    // `.length` property, which numbers don't have, so it silently never
+    // fired for any value including 0. Validators.min is the numeric
+    // equivalent of "at least 1 entry required".
     this.entryCount = formBuilder.control(0, {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
+      validators: Validators.min(1),
       nonNullable: true,
     });
     this.form = formBuilder.group({
@@ -188,9 +193,7 @@ export class ThesaurusEditorComponent implements OnInit {
       ]);
     } else {
       // not an alias: entries required, no target ID
-      this.entryCount.setValidators(
-        NgxToolsValidators.strictMinLengthValidator(1),
-      );
+      this.entryCount.setValidators(Validators.min(1));
       this.targetId.setValidators(null);
     }
 

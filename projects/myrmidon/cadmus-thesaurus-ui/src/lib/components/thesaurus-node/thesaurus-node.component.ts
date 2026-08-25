@@ -121,7 +121,7 @@ export class ThesaurusNodeComponent {
   }
 
   public save(): void {
-    if (!this.editing || this.form.invalid) {
+    if (!this.editing() || this.form.invalid) {
       return;
     }
     this.form.markAsPristine();
