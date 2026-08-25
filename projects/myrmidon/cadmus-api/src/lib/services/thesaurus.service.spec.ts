@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ThesaurusService } from './thesaurus.service';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 
-xdescribe('TagService', () => {
+describe('TagService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [],

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { UserService } from './user.service';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 
-xdescribe('Service: User', () => {
+describe('Service: User', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [],
