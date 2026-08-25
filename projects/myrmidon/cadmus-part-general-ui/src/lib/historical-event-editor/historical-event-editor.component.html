@@ -12,7 +12,7 @@
               @if ($any(eid).errors?.required && (eid.dirty || eid.touched)) {
                 <mat-error>EID required</mat-error>
               }
-              @if ($any(eid).errors?.maxLength && (eid.dirty || eid.touched)) {
+              @if ($any(eid).errors?.maxlength && (eid.dirty || eid.touched)) {
                 <mat-error>EID too long</mat-error>
               }
             </mat-form-field>
@@ -34,7 +34,7 @@
                 <mat-label>tag</mat-label>
                 <input matInput [formControl]="tag" />
                 @if (
-                  $any(tag).errors?.maxLength && (tag.dirty || tag.touched)
+                  $any(tag).errors?.maxlength && (tag.dirty || tag.touched)
                 ) {
                   <mat-error>tag too long</mat-error>
                 }
@@ -52,7 +52,7 @@
                 rows="3"
               ></textarea>
               @if (
-                $any(description).errors?.maxLength &&
+                $any(description).errors?.maxlength &&
                 (description.dirty || description.touched)
               ) {
                 <mat-error>description too long</mat-error>
@@ -66,7 +66,7 @@
               <mat-label>note</mat-label>
               <textarea matInput [formControl]="note"></textarea>
               @if (
-                $any(note).errors?.maxLength && (note.dirty || note.touched)
+                $any(note).errors?.maxlength && (note.dirty || note.touched)
               ) {
                 <mat-error>note too long</mat-error>
               }
@@ -112,7 +112,7 @@
                 <mat-error>type required</mat-error>
               }
               @if (
-                $any(type).errors?.maxLength && (type.dirty || type.touched)
+                $any(type).errors?.maxlength && (type.dirty || type.touched)
               ) {
                 <mat-error>type too long</mat-error>
               }

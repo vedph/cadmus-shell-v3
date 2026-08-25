@@ -21,7 +21,7 @@
               <mat-label>citation</mat-label>
               <input matInput formControlName="citation" />
               @if (
-                citation.hasError("maxLength") &&
+                citation.hasError("maxlength") &&
                 (citation.dirty || citation.touched)
               ) {
                 <mat-error></mat-error>

@@ -469,7 +469,10 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "projects/myrmidon/cadmus-part-general-ui/tsconfig.spec.json"
+            "tsConfig": "projects/myrmidon/cadmus-part-general-ui/tsconfig.spec.json",
+            "setupFiles": [
+              "projects/myrmidon/cadmus-part-general-ui/src/test-setup.ts"
+            ]
           }
         }
       }

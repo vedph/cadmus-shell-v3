@@ -197,7 +197,8 @@ export class BibliographyPartComponent
   }
 
   public saveEntry(entry: BibEntry): void {
-    if (!this.edited) {
+    // signal must be invoked, not just referenced, to read its value
+    if (!this.edited()) {
       return;
     }
     if (this.editedIndex() === -1) {

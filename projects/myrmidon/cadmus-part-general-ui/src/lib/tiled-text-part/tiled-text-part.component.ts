@@ -99,6 +99,11 @@ export class TiledTextPartComponent
 {
   private _editedDataTile?: TextTile;
   private _editedDataRow?: TextTileRow;
+  // the ORIGINAL (non-cloned) tile object currently being edited, kept
+  // alongside _editedDataTile (a structuredClone used only for display/
+  // editing) so that saveEditedData() can find the exact tile to replace
+  // by reference. See saveEditedData() for why this is required.
+  private _editedTileRef?: TextTile;
 
   public citation: FormControl<string | null>;
   public rows: FormControl<TextTileRow[]>;
@@ -163,9 +168,7 @@ export class TiledTextPartComponent
     this.adjustCoords();
 
     let part = this.getEditedPart(TILED_TEXT_PART_TYPEID) as TiledTextPart;
-    part.citation = this.citation.value
-      ? this.citation.value.trim()
-      : undefined;
+    part.citation = this.citation.value?.trim() || undefined;
     part.rows = this.rows.value;
     return part;
   }
@@ -309,12 +312,14 @@ export class TiledTextPartComponent
   public editRowData(row: TextTileRow): void {
     this._editedDataRow = structuredClone(row);
     this._editedDataTile = undefined;
+    this._editedTileRef = undefined;
     this.editedDataTitle.set(`Row ${row.y}`);
     this.editedData.set(this._editedDataRow?.data);
     this.currentTabIndex.set(1);
   }
 
   public editTileData(tile: TextTile): void {
+    this._editedTileRef = tile;
     this._editedDataTile = structuredClone(tile);
     this._editedDataRow = undefined;
     this.editedDataTitle.set(`Tile ${this.getTileCoords(tile)}`);
@@ -325,27 +330,28 @@ export class TiledTextPartComponent
   public closeDataEditor(): void {
     this.currentTabIndex.set(0);
     this._editedDataRow = undefined;
+    this._editedDataTile = undefined;
+    this._editedTileRef = undefined;
     this.editedDataTitle.set(undefined);
     this.editedData.set(undefined);
   }
 
   public saveEditedData(data: Data): void {
-    if (this._editedDataTile) {
-      // find and replace the tile in the rows array immutably
+    if (this._editedDataTile && this._editedTileRef) {
+      // Find and replace the tile in the rows array immutably.
+      // We must match by reference to the ORIGINAL (non-cloned) tile
+      // object (_editedTileRef), NOT by comparing t.data to
+      // this._editedDataTile.data: the latter was deep-cloned in
+      // editTileData() via structuredClone(), so its `data` object can
+      // never be === to the `data` object still referenced by the tile
+      // inside this.rows.value. The previous comparison meant the
+      // .some()/.map() predicates always evaluated to false, so edited
+      // tile data was silently discarded and never written back to the
+      // part.
       const rows = this.rows.value.map((row) => {
-        if (
-          row.tiles &&
-          row.tiles.some(
-            (t) =>
-              t.x === this._editedDataTile!.x &&
-              t.data === this._editedDataTile!.data,
-          )
-        ) {
+        if (row.tiles && row.tiles.includes(this._editedTileRef!)) {
           const tiles = row.tiles.map((t) =>
-            t.x === this._editedDataTile!.x &&
-            t.data === this._editedDataTile!.data
-              ? { ...this._editedDataTile!, data }
-              : t,
+            t === this._editedTileRef ? { ...t, data } : t,
           );
           return { ...row, tiles };
         }

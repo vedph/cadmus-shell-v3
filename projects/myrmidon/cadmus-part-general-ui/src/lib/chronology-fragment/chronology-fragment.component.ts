@@ -156,7 +156,7 @@ export class ChronologyFragmentComponent
     // label and tag
     fr.label = this.label.value?.trim();
     fr.eventId = this.eventId.value?.trim();
-    fr.tag = this.tag.value || undefined;
+    fr.tag = this.tag.value?.trim() || undefined;
     return fr;
   }
 }

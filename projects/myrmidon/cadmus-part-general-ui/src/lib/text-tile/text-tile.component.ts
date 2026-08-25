@@ -104,7 +104,11 @@ export class TextTileComponent implements OnInit, OnDestroy {
     this._sub = this.checker.valueChanges
       .pipe(distinctUntilChanged())
       .subscribe((_) => {
-        if (this._checkedChangeFrozen || !this.checkable) {
+        // BUG FIX: `this.checkable` (without the call parens) is the input
+        // signal *function* itself, which is always truthy, so `!this.checkable`
+        // was always false and this guard never blocked updates even when
+        // checkable() was false. Call the signal to read its actual value.
+        if (this._checkedChangeFrozen || !this.checkable()) {
           return;
         }
         if (this.tile()) {
@@ -131,13 +135,22 @@ export class TextTileComponent implements OnInit, OnDestroy {
   }
 
   public requestDataEdit(): void {
-    if (!this.readonly) {
+    // BUG FIX: same pattern as above -- `this.readonly` (without the call
+    // parens) is the input signal function itself, always truthy, so
+    // `!this.readonly` was always false and this method could never emit,
+    // regardless of the actual readonly() value. Call the signal.
+    if (!this.readonly()) {
       this.editData.emit(this.tile()!);
     }
   }
 
   public toggleCheckedNonEdit(): void {
-    if (!this.editing && this.checkable()) {
+    // BUG FIX: `this.editing` (without the call parens) is the signal
+    // *function* itself, which is always truthy, so `!this.editing` was
+    // always false and this method never toggled the checked state (e.g.
+    // the space-bar keyboard shortcut in the template was a no-op). Call
+    // the signal to read its actual value.
+    if (!this.editing() && this.checkable()) {
       this.checked.set(!this.checked());
     }
   }

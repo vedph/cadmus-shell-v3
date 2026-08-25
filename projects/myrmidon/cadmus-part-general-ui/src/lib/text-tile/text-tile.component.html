@@ -1,7 +1,7 @@
 @if (tile()) {
   <div
     class="tile"
-    [class.checked]="checked"
+    [class.checked]="checked()"
     [class.selected]="selected()"
     [style.background-color]="color() || 'transparent'"
     tabindex="1"
@@ -27,7 +27,7 @@
             <mat-error>enter a text</mat-error>
           }
           @if (
-            editedText.hasError("maxLength") &&
+            editedText.hasError("maxlength") &&
             (editedText.dirty || editedText.touched)
           ) {
             <mat-error>text too long</mat-error>

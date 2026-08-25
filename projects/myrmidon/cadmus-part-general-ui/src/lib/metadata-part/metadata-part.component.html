@@ -105,7 +105,7 @@
                           <mat-error>type required</mat-error>
                         }
                         @if (
-                          $any(g)["controls"].type.errors?.maxLength &&
+                          $any(g)["controls"].type.errors?.maxlength &&
                           ($any(g)["controls"].type.dirty ||
                             $any(g)["controls"].type.touched)
                         ) {
@@ -147,7 +147,7 @@
                         <mat-error>name required</mat-error>
                       }
                       @if (
-                        $any(g)["controls"].name.errors?.maxLength &&
+                        $any(g)["controls"].name.errors?.maxlength &&
                         ($any(g)["controls"].name.dirty ||
                           $any(g)["controls"].name.touched)
                       ) {
@@ -169,7 +169,7 @@
                       <mat-error>value required</mat-error>
                     }
                     @if (
-                      $any(g)["controls"].value.errors?.maxLength &&
+                      $any(g)["controls"].value.errors?.maxlength &&
                       ($any(g)["controls"].value.dirty ||
                         $any(g)["controls"].value.touched)
                     ) {

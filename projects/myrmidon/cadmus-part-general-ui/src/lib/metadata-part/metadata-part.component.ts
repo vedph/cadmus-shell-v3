@@ -173,6 +173,8 @@ export class MetadataPartComponent
 
   private updateForm(part?: MetadataPart | null): void {
     if (!part) {
+      this.metadata.clear();
+      this.unsubscribe();
       this.form.reset();
       return;
     }

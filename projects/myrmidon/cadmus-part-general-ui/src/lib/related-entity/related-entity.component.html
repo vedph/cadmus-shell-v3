@@ -26,7 +26,7 @@
         <mat-error>relation required</mat-error>
       }
       @if (
-        $any(relation).errors?.maxLength && (relation.dirty || relation.touched)
+        $any(relation).errors?.maxlength && (relation.dirty || relation.touched)
       ) {
         <mat-error>relation too long</mat-error>
       }

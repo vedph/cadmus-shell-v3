@@ -132,8 +132,14 @@ export class TokenTextPartComponent
     if (!text) {
       return [];
     }
-    // ensure that we just have LF rather than CRLF
-    text = text.replace('\r\n', '\n');
+    // ensure that we just have LF rather than CRLF.
+    // NOTE: String.replace() with a plain string pattern (no /g flag) only
+    // replaces the FIRST occurrence. With multi-line CRLF text this left a
+    // stray '\r' at the end of every line after the first one (e.g.
+    // "a\r\nb\r\nc" became "a\nb\r\nc", so splitting on '\n' produced lines
+    // "a", "b\r", "c" instead of "a", "b", "c"). Using a global regex fixes
+    // this by normalizing every CRLF occurrence.
+    text = text.replace(/\r\n/g, '\n');
 
     const lines: TokenTextLine[] = [];
     const textLines = text.split('\n');
@@ -164,9 +170,7 @@ export class TokenTextPartComponent
 
   protected getValue(): TokenTextPart {
     let part = this.getEditedPart(TOKEN_TEXT_PART_TYPEID) as TokenTextPart;
-    part.citation = this.citation.value
-      ? this.citation.value.trim()
-      : undefined;
+    part.citation = this.citation.value?.trim() || undefined;
     part.lines = this.getLinesFromText(this.text.value);
     return part;
   }

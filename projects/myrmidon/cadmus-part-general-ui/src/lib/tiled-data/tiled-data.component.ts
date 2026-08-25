@@ -164,7 +164,13 @@ export class TiledDataComponent implements OnInit, OnDestroy {
         this._hiddenData[key] = data[key];
       }
     });
-    cache.sort();
+    // BUG FIX: Array.prototype.sort() with no comparator converts each
+    // element to a string; since cache holds DataKey *objects*, every
+    // element stringifies to "[object Object]" and the sort is a silent
+    // no-op, leaving keys in property-insertion order instead of the
+    // alphabetical order the surrounding comment/intent describes. Sorting
+    // explicitly by the key's own `value` string restores that intent.
+    cache.sort((a, b) => a.value.localeCompare(b.value));
 
     // add a control for each collected key
     for (let i = 0; i < cache.length; i++) {

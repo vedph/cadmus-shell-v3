@@ -26,7 +26,7 @@
               <mat-form-field>
                 <mat-label>tag</mat-label>
                 <input matInput [formControl]="tag" />
-                @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+                @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
                   <mat-error>tag too long</mat-error>
                 }
               </mat-form-field>
@@ -206,7 +206,7 @@
                       <mat-label>index</mat-label>
                       <input matInput formControlName="indexId" />
                       @if (
-                        $any(item)["controls"].indexId.errors?.maxLength &&
+                        $any(item)["controls"].indexId.errors?.maxlength &&
                         ($any(item)["controls"].indexId.dirty ||
                           $any(item)["controls"].indexId.touched)
                       ) {
@@ -231,7 +231,7 @@
                       <mat-label>tag</mat-label>
                       <input matInput formControlName="tag" />
                       @if (
-                        $any(item)["controls"].tag.errors?.maxLength &&
+                        $any(item)["controls"].tag.errors?.maxlength &&
                         ($any(item)["controls"].tag.dirty ||
                           $any(item)["controls"].tag.touched)
                       ) {
@@ -270,7 +270,7 @@
                         <mat-error>language required</mat-error>
                       }
                       @if (
-                        $any(item)["controls"].language.errors?.maxLength &&
+                        $any(item)["controls"].language.errors?.maxlength &&
                         ($any(item)["controls"].language.dirty ||
                           $any(item)["controls"].language.touched)
                       ) {
@@ -290,7 +290,7 @@
                       <mat-error>value required</mat-error>
                     }
                     @if (
-                      $any(item)["controls"].value.errors?.maxLength &&
+                      $any(item)["controls"].value.errors?.maxlength &&
                       ($any(item)["controls"].value.dirty ||
                         $any(item)["controls"].value.touched)
                     ) {
@@ -302,7 +302,7 @@
                     <mat-label>note</mat-label>
                     <input matInput formControlName="note" />
                     @if (
-                      $any(item)["controls"].note.errors?.maxLength &&
+                      $any(item)["controls"].note.errors?.maxlength &&
                       ($any(item)["controls"].note.dirty ||
                         $any(item)["controls"].note.touched)
                     ) {

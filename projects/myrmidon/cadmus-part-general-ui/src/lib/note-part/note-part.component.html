@@ -22,7 +22,7 @@
                 [formControl]="tag"
                 spellcheck="false"
               />
-              @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+              @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
                 <mat-error>tag too long</mat-error>
               }
             </mat-form-field>

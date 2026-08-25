@@ -10,7 +10,7 @@
         <mat-error>last name required</mat-error>
       }
       @if (
-        $any(lastName).errors?.maxLength && (lastName.dirty || lastName.touched)
+        $any(lastName).errors?.maxlength && (lastName.dirty || lastName.touched)
       ) {
         <mat-error>last name too long</mat-error>
       }
@@ -21,7 +21,7 @@
       <mat-label>first name</mat-label>
       <input matInput [formControl]="firstName" />
       @if (
-        $any(firstName).errors?.maxLength &&
+        $any(firstName).errors?.maxlength &&
         (firstName.dirty || firstName.touched)
       ) {
         <mat-error>first name too long</mat-error>
@@ -44,7 +44,7 @@
       <mat-form-field>
         <mat-label>role</mat-label>
         <input matInput [formControl]="role" />
-        @if ($any(role).errors?.maxLength && (role.dirty || role.touched)) {
+        @if ($any(role).errors?.maxlength && (role.dirty || role.touched)) {
           <mat-error>role too long</mat-error>
         }
       </mat-form-field>

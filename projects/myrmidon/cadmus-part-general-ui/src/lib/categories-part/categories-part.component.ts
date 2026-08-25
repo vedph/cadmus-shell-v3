@@ -139,6 +139,8 @@ export class CategoriesPartComponent
     const key = 'categories';
     if (this.hasThesaurus(key)) {
       this.entries.set(data?.thesauri[key].entries || []);
+    } else {
+      this.entries.set(undefined);
     }
     // tree
     this.updateForm(data?.value);

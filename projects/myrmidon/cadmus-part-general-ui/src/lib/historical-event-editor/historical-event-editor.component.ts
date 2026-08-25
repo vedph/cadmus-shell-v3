@@ -332,10 +332,13 @@ export class HistoricalEventEditorComponent {
   }
 
   public onEntityChange(entity: RelatedEntity): void {
-    // nope if already present
+    // nope if already present (id is a nested object handed back as a new
+    // instance by the child editor, so it must be compared by value)
     if (
       this.relatedEntities.value.find(
-        (e) => e.id === entity.id && e.relation === entity.relation,
+        (e) =>
+          JSON.stringify(e.id) === JSON.stringify(entity.id) &&
+          e.relation === entity.relation,
       )
     ) {
       this.closeEntity();

@@ -20,7 +20,7 @@
             <mat-label>index ID</mat-label>
             <input matInput type="text" [formControl]="indexId" />
             @if (
-              indexId.hasError("maxLength") &&
+              indexId.hasError("maxlength") &&
               (indexId.dirty || indexId.touched)
             ) {
               <mat-error>index ID too long</mat-error>
@@ -67,7 +67,7 @@
       <mat-form-field>
         <mat-label>value</mat-label>
         <input matInput type="text" [formControl]="value" autofocus />
-        @if (value.hasError("maxLength") && (value.dirty || value.touched)) {
+        @if (value.hasError("maxlength") && (value.dirty || value.touched)) {
           <mat-error>value too long</mat-error>
         }
       </mat-form-field>
@@ -91,7 +91,7 @@
         <mat-form-field>
           <mat-label>tag</mat-label>
           <input matInput [formControl]="tag" />
-          @if (tag.hasError("maxLength") && (tag.dirty || tag.touched)) {
+          @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
             <mat-error>tag too long</mat-error>
           }
         </mat-form-field>
@@ -103,7 +103,7 @@
       <mat-form-field>
         <mat-label>note</mat-label>
         <input matInput type="text" [formControl]="note" />
-        @if (note.hasError("maxLength") && (note.dirty || note.touched)) {
+        @if (note.hasError("maxlength") && (note.dirty || note.touched)) {
           <mat-error>note too long</mat-error>
         }
       </mat-form-field>
