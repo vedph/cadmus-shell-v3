@@ -159,7 +159,10 @@ export class ItemFilterComponent implements OnInit, OnDestroy {
     this.facet.setValue(filter.facetId || null);
     this.group.setValue(filter.groupId || null);
     this.flags.setValue(this.flagsToArray(filter.flags));
-    this.flagMatching.setValue(filter.flagMatching || FlagMatching.none);
+    // note: FlagMatching.bitsAllSet is 0, a falsy value, so this must use
+    // ?? rather than || or a selected "bitsAllSet" filter would silently
+    // revert to "none" whenever the form re-syncs from filter$
+    this.flagMatching.setValue(filter.flagMatching ?? FlagMatching.none);
     this.minModified.setValue(filter.minModified || null);
     this.maxModified.setValue(filter.maxModified || null);
     this.form.markAsPristine();
