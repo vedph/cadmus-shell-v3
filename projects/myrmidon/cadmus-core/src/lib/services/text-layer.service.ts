@@ -179,7 +179,7 @@ export class TextLayerService {
   ): void {
     sb.push(
       `<span id="f${loc.toString()}_${locPortion}" class="fr${
-        isSelected ? 'fr-sel' : ''
+        isSelected ? ' fr-sel' : ''
       }">`
     );
   }

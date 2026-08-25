@@ -189,6 +189,17 @@ describe('TextLayerService', () => {
     }
   ));
 
+  it('render should mark a selected fragment with a separate "fr-sel" class', inject(
+    [TextLayerService],
+    (service: TextLayerService) => {
+      const loc = TokenLocation.parse('1.2')!;
+      const html = service.render('alpha beta gamma', [loc], loc);
+      // regression test: this used to render class="frfr-sel" (no space),
+      // which never matched the ".fr-sel" CSS selector consumers rely on
+      expect(html).toContain('<span id="f1.2_0" class="fr fr-sel">');
+    }
+  ));
+
   it('render 1 line "al[pha beta]" should return div/p/span', inject(
     [TextLayerService],
     (service: TextLayerService) => {
