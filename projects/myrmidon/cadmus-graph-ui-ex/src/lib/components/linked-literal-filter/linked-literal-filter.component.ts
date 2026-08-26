@@ -127,9 +127,13 @@ export class LinkedLiteralFilterComponent {
       s: filter.subjectId
         ? this._graphService.getNode(filter.subjectId)
         : from([null]),
+      // from([]) emits no value at all, which would make forkJoin never
+      // emit (and so never update subj/pred nor mark the form pristine)
+      // even when subjectId IS set; from([null]) emits a single value,
+      // matching the placeholder used by the s branch above.
       p: filter.predicateId
         ? this._graphService.getNode(filter.predicateId)
-        : from([]),
+        : from([null]),
     }).subscribe((result) => {
       this.subj.setValue(result.s);
       this.pred.setValue(result.p);

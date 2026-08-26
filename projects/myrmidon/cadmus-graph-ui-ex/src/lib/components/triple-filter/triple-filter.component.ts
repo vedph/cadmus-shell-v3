@@ -163,9 +163,14 @@ export class TripleFilterComponent {
       s: filter.subjectId
         ? this._graphService.getNode(filter.subjectId)
         : from([null]),
+      // from([]) emits no value at all, which would make forkJoin never
+      // emit (and so never update subj/obj/preds nor mark the form
+      // pristine) even when subjectId/objectId ARE set; from([[]]) emits
+      // a single empty array, matching the from([null]) placeholder used
+      // by the s/o branches above.
       p: filter.predicateIds?.length
         ? this._graphService.getNodeSet(filter.predicateIds)
-        : from([]),
+        : from([[]]),
       o: filter.objectId
         ? this._graphService.getNode(filter.objectId)
         : from([null]),

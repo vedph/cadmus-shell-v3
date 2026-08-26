@@ -14,7 +14,7 @@ export class GraphNodeLabelPipe implements PipeTransform {
     if (!node?.id || !node?.label) {
       return value;
     }
-    if (node.id.startsWith('P') && node.data.uri) {
+    if (node.id.startsWith('P') && node.data?.uri) {
       return `${node.data.uri}=${node.label}`;
     }
     return node.label;

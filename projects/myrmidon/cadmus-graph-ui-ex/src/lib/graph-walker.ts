@@ -421,10 +421,17 @@ export class GraphWalker {
 
           this._edges$.next([]);
           this._nodes$.next(nodes);
+          // clear any selection/filters left over from the previous graph:
+          // otherwise selectedNode$ (and the derived filter observables)
+          // would keep referencing a node no longer present in this new one.
+          this.selectNode(null);
           this.expandNode(n);
         },
         error: (error) => {
           this.setError(error);
+          // complete never fires after error in RxJS, so loading must also
+          // be reset here or the loading indicator would stay stuck forever.
+          this.toggleLoading(false);
         },
         complete: () => {
           this.toggleLoading(false);
@@ -690,6 +697,9 @@ export class GraphWalker {
         node.data.error = 'Error loading properties';
         this._nodes$.next(nodes);
         this.setError(error);
+        // complete never fires after error in RxJS, so loading must also
+        // be reset here or the loading indicator would stay stuck forever.
+        this.toggleLoading(false);
       },
       complete: () => {
         this.toggleLoading(false);
@@ -906,6 +916,9 @@ export class GraphWalker {
         node.data.error = 'Error loading nodes';
         this._nodes$.next(nodes);
         this.setError(error);
+        // complete never fires after error in RxJS, so loading must also
+        // be reset here or the loading indicator would stay stuck forever.
+        this.toggleLoading(false);
       },
       complete: () => {
         this.toggleLoading(false);
