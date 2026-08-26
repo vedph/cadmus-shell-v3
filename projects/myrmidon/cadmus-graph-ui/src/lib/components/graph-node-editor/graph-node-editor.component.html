@@ -7,7 +7,7 @@
       <input matInput [formControl]="uri" />
       @if ($any(uri).errors?.required && (uri.dirty || uri.touched)) {
       <mat-error>uri required</mat-error>
-      } @if ($any(uri).errors?.maxLength && (uri.dirty || uri.touched)) {
+      } @if ($any(uri).errors?.maxlength && (uri.dirty || uri.touched)) {
       <mat-error>uri too long</mat-error>
       }
     </mat-form-field>
@@ -21,7 +21,7 @@
       <input matInput [formControl]="label" />
       @if ($any(label).errors?.required && (label.dirty || label.touched)) {
       <mat-error>label required</mat-error>
-      } @if ($any(label).errors?.maxLength && (label.dirty || label.touched)) {
+      } @if ($any(label).errors?.maxlength && (label.dirty || label.touched)) {
       <mat-error>label too long</mat-error>
       }
     </mat-form-field>
@@ -44,7 +44,7 @@
     <mat-form-field>
       <mat-label>tag</mat-label>
       <input matInput [formControl]="tag" />
-      @if ($any(tag).errors?.maxLength && (tag.dirty || tag.touched)) {
+      @if ($any(tag).errors?.maxlength && (tag.dirty || tag.touched)) {
       <mat-error>tag too long</mat-error>
       }
     </mat-form-field>

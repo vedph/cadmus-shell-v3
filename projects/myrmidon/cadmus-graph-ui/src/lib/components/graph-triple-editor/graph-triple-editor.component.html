@@ -47,7 +47,7 @@
         @if ( $any(literal).errors?.required && (literal.dirty ||
         literal.touched) ) {
         <mat-error>literal required</mat-error>
-        } @if ( $any(literal).errors?.maxLength && (literal.dirty ||
+        } @if ( $any(literal).errors?.maxlength && (literal.dirty ||
         literal.touched) ) {
         <mat-error>literal too long</mat-error>
         }
@@ -60,7 +60,7 @@
           <mat-label>language</mat-label>
           <input matInput [formControl]="literalLang" />
           <mat-hint>ISO-639 etc.</mat-hint>
-          @if ( $any(literalLang).errors?.maxLength && (literalLang.dirty ||
+          @if ( $any(literalLang).errors?.maxlength && (literalLang.dirty ||
           literalLang.touched) ) {
           <mat-error>language too long</mat-error>
           }
@@ -71,7 +71,7 @@
           <mat-label>type</mat-label>
           <input matInput [formControl]="literalType" />
           <mat-hint>XML data type (xs:...)</mat-hint>
-          @if ( $any(literalType).errors?.maxLength && (literalType.dirty ||
+          @if ( $any(literalType).errors?.maxlength && (literalType.dirty ||
           literalType.touched) ) {
           <mat-error>type too long</mat-error>
           }

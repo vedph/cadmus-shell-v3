@@ -154,6 +154,12 @@ export class GraphTripleFilterComponent implements OnInit, OnDestroy {
 
   public reset(): void {
     this.form.reset();
+    // form.reset() only clears the scalar controls; the subject/predicate/
+    // object node terms live in the repository and must be cleared too, or
+    // a previously picked node would survive a "reset filters" action.
+    this._repository.setTerm(null, 'S');
+    this._repository.setTerm(null, 'P');
+    this._repository.setTerm(null, 'O');
     this.apply();
   }
 
