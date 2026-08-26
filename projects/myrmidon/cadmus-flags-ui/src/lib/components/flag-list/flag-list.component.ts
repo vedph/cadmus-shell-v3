@@ -8,12 +8,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import {
-  MatCard,
-  MatCardHeader,
-  MatCardTitle,
-  MatCardContent,
-} from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
   MatExpansionPanel,
@@ -35,10 +29,6 @@ import { FlagListRepository } from './flag-list.repository';
     MatProgressBar,
     MatIconButton,
     MatIcon,
-    MatCard,
-    MatCardHeader,
-    MatCardTitle,
-    MatCardContent,
     FlagDefinitionEditorComponent,
     MatTooltip,
     MatButton,

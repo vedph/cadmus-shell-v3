@@ -19,7 +19,7 @@
       <input matInput [formControl]="label" />
       @if ($any(label.errors)?.required && (label.dirty || label.touched)) {
       <mat-error>label required</mat-error>
-      } @if ($any(label.errors)?.maxLength && (label.dirty || label.touched)) {
+      } @if ($any(label.errors)?.maxlength && (label.dirty || label.touched)) {
       <mat-error>label too long</mat-error>
       }
     </mat-form-field>
@@ -41,7 +41,7 @@
       @if ( $any(description.errors)?.required && (description.dirty ||
       description.touched) ) {
       <mat-error>description required</mat-error>
-      } @if ( $any(description.errors)?.maxLength && (description.dirty ||
+      } @if ( $any(description.errors)?.maxlength && (description.dirty ||
       description.touched) ) {
       <mat-error>description too long</mat-error>
       }
