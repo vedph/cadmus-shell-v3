@@ -250,7 +250,16 @@ export class EditFrameStatsComponent implements OnDestroy {
     ])
       .pipe(
         debounceTime(300),
-        distinctUntilChanged(),
+        // combineLatest emits a new array instance each time, so the
+        // default reference-equality distinctUntilChanged() never
+        // actually filters anything out; compare the tuple's own values
+        // instead to skip redundant reloads.
+        distinctUntilChanged(
+          (a, b) =>
+            a[0]?.getTime() === b[0]?.getTime() &&
+            a[1]?.getTime() === b[1]?.getTime() &&
+            a[2] === b[2],
+        ),
         takeUntil(this._destroy$),
       )
       .subscribe(() => {
