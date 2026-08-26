@@ -135,16 +135,27 @@ export class SettingsImportComponent {
       .uploadFile(this.file.value!, url, {
         reportProgress: true,
       })
-      .subscribe((event) => {
-        if (event.type === HttpEventType.UploadProgress) {
-          this.uploadProgress.set(
-            Math.round((event.loaded / event.total!) * 100)
-          );
-        } else if (event.type === HttpEventType.Response) {
+      .subscribe({
+        next: (event) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            this.uploadProgress.set(
+              Math.round((event.loaded / event.total!) * 100)
+            );
+          } else if (event.type === HttpEventType.Response) {
+            this.uploading.set(false);
+            this.result.set(event.body as UploadResult);
+            this.uploadEnd.emit(true);
+          }
+        },
+        // without an error handler, a failed upload left uploading() stuck
+        // true forever (the form/button stay disabled with no feedback);
+        // mirror the sibling ThesaurusImportComponent's error handling.
+        error: (error) => {
+          console.error(error);
           this.uploading.set(false);
-          this.result.set(event.body as UploadResult);
-          this.uploadEnd.emit(true);
-        }
+          this.uploadProgress.set(0);
+          this.uploadEnd.emit(false);
+        },
       });
 
     this._destroyRef.onDestroy(() => this._sub?.unsubscribe());
