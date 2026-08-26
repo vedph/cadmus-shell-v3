@@ -1,5 +1,6 @@
 # History
 
+- 2026-08-26: ⚠️ migrated from Karma to Vitest and implemented tests, fixing bugs found and bumping all libraries release versions by 1.
 - 2026-07-28: 🆕 responsive menu layout in `app.component`.
 - 2026-07-04:
   - 🆕 added `getItemMetadata` to API item service and buttons to generate item's title and description when environment `hasMetadataBuilders` is set to true (`env.js`): `@myrmidon/cadmus-api`, `@myrmidon/cadmus-item-editor`.
