@@ -35,11 +35,7 @@ import { MatInput } from '@angular/material/input';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import {
-  ColorToContrastPipe,
-  EllipsisPipe,
-  StringToColorPipe,
-} from '@myrmidon/ngx-tools';
+import { ColorToContrastPipe, EllipsisPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { FacetDefinition, PartDefinition } from '@myrmidon/cadmus-core';
@@ -72,7 +68,6 @@ import { PartDefinitionEditorComponent } from '../part-definition-editor/part-de
     MatTooltip,
     ColorToContrastPipe,
     EllipsisPipe,
-    StringToColorPipe,
     PartDefinitionEditorComponent,
   ],
   templateUrl: './facet-definition-editor.component.html',

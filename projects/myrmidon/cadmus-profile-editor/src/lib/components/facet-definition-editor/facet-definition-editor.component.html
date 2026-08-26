@@ -10,7 +10,7 @@
           @if ($any(id).errors?.required && (id.dirty || id.touched)) {
             <mat-error>ID required</mat-error>
           }
-          @if ($any(id).errors?.maxLength && (id.dirty || id.touched)) {
+          @if ($any(id).errors?.maxlength && (id.dirty || id.touched)) {
             <mat-error>ID too long</mat-error>
           }
         </mat-form-field>
@@ -23,7 +23,7 @@
             <mat-error>label required</mat-error>
           }
           @if (
-            $any(label).errors?.maxLength && (label.dirty || label.touched)
+            $any(label).errors?.maxlength && (label.dirty || label.touched)
           ) {
             <mat-error>label too long</mat-error>
           }
@@ -67,7 +67,7 @@
           <mat-label>description</mat-label>
           <textarea matInput [formControl]="description" rows="2"></textarea>
           @if (
-            $any(description).errors?.maxLength &&
+            $any(description).errors?.maxlength &&
             (description.dirty || description.touched)
           ) {
             <mat-error>description too long</mat-error>

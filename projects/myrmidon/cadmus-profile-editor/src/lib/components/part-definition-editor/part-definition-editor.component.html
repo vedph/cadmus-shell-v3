@@ -26,7 +26,7 @@
           <mat-error>type ID required</mat-error>
         }
         @if (
-          $any(typeId).errors?.maxLength && (typeId.dirty || typeId.touched)
+          $any(typeId).errors?.maxlength && (typeId.dirty || typeId.touched)
         ) {
           <mat-error>type ID too long</mat-error>
         }
@@ -59,7 +59,7 @@
           <mat-error>role ID required</mat-error>
         }
         @if (
-          $any(roleId).errors?.maxLength && (roleId.dirty || roleId.touched)
+          $any(roleId).errors?.maxlength && (roleId.dirty || roleId.touched)
         ) {
           <mat-error>role ID too long</mat-error>
         }
@@ -78,7 +78,7 @@
       @if ($any(name).errors?.required && (name.dirty || name.touched)) {
         <mat-error>name required</mat-error>
       }
-      @if ($any(name).errors?.maxLength && (name.dirty || name.touched)) {
+      @if ($any(name).errors?.maxlength && (name.dirty || name.touched)) {
         <mat-error>name too long</mat-error>
       }
     </mat-form-field>
@@ -118,7 +118,7 @@
       <mat-label>group</mat-label>
       <input matInput [formControl]="groupKey" />
       @if (
-        $any(groupKey).errors?.maxLength && (groupKey.dirty || groupKey.touched)
+        $any(groupKey).errors?.maxlength && (groupKey.dirty || groupKey.touched)
       ) {
         <mat-error>group key too long</mat-error>
       }
@@ -130,7 +130,7 @@
         <mat-label>sort key</mat-label>
         <input matInput [formControl]="sortKey" />
         @if (
-          $any(sortKey).errors?.maxLength && (sortKey.dirty || sortKey.touched)
+          $any(sortKey).errors?.maxlength && (sortKey.dirty || sortKey.touched)
         ) {
           <mat-error>sort key too long</mat-error>
         }
@@ -144,7 +144,7 @@
       <mat-label>description</mat-label>
       <textarea matInput [formControl]="description" rows="2"></textarea>
       @if (
-        $any(description).errors?.maxLength &&
+        $any(description).errors?.maxlength &&
         (description.dirty || description.touched)
       ) {
         <mat-error>description too long</mat-error>
