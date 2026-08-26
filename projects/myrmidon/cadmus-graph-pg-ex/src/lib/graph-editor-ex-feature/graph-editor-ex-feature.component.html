@@ -21,6 +21,7 @@
       <mat-tab label="&#x25c6; walker">
         <cadmus-graph-walker
           [nodeId]="walkerNodeId"
+          [graphService]="graphService"
           [canPick]="true"
           [canMoveToSource]="true"
           (nodePick)="onWalkerNodePick($event)"

@@ -16,7 +16,12 @@ import {
   ThesauriSet,
   ThesaurusEntry,
 } from '@myrmidon/cadmus-core';
-import { UriNode, ThesaurusService, ItemService } from '@myrmidon/cadmus-api';
+import {
+  UriNode,
+  ThesaurusService,
+  ItemService,
+  GraphService,
+} from '@myrmidon/cadmus-api';
 import {
   GraphWalkerComponent,
   WalkerNodeData,
@@ -61,6 +66,7 @@ export class GraphEditorExFeatureComponent implements OnInit {
     private _itemService: ItemService,
     private _libraryRouteService: LibraryRouteService,
     private _snackbar: MatSnackBar,
+    public readonly graphService: GraphService,
   ) {
     this.tabIndex = 0;
     this.walkerNodeId = 0;
