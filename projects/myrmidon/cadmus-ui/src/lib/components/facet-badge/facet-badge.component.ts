@@ -3,7 +3,7 @@ import { FacetDefinition } from '@myrmidon/cadmus-core';
 
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { ColorService } from '../../services/color.service';
+import { ColorService } from '@myrmidon/ngx-tools';
 
 export interface FacetBadgeData {
   definitions: FacetDefinition[];

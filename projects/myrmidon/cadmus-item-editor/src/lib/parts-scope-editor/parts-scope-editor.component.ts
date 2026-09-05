@@ -21,10 +21,11 @@ import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
+import { ColorService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { Part } from '@myrmidon/cadmus-core';
-import { ColorService, CustomValidators } from '@myrmidon/cadmus-ui';
+import { CustomValidators } from '@myrmidon/cadmus-ui';
 import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 

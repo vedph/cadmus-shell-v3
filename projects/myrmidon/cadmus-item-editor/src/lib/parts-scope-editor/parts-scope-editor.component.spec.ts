@@ -1,13 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { PartsScopeEditorComponent, PartScopeSetRequest } from './parts-scope-editor.component';
+import { ColorService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { EditedItemRepository } from '../state/edited-item.repository';
-import { ColorService } from '@myrmidon/cadmus-ui';
 import { FacetDefinition, Part } from '@myrmidon/cadmus-core';
+
+import { EditedItemRepository } from '../state/edited-item.repository';
+import {
+  PartsScopeEditorComponent,
+  PartScopeSetRequest,
+} from './parts-scope-editor.component';
 
 function makePart(overrides?: Partial<Part>): Part {
   return {
@@ -26,7 +30,10 @@ describe('PartsScopeEditorComponent', () => {
   let component: PartsScopeEditorComponent;
   let fixture: ComponentFixture<PartsScopeEditorComponent>;
   let dialogService: { confirm: ReturnType<typeof vi.fn> };
-  let appRepository: { load: ReturnType<typeof vi.fn>; getTypeThesaurus: ReturnType<typeof vi.fn> };
+  let appRepository: {
+    load: ReturnType<typeof vi.fn>;
+    getTypeThesaurus: ReturnType<typeof vi.fn>;
+  };
   let facetService: { getPartColor: ReturnType<typeof vi.fn> };
   let editedItemRepository: { getFacet: ReturnType<typeof vi.fn> };
   let colorService: { getContrastColor: ReturnType<typeof vi.fn> };
@@ -63,7 +70,10 @@ describe('PartsScopeEditorComponent', () => {
   });
 
   it('should build one check control per part', () => {
-    fixture.componentRef.setInput('parts', [makePart(), makePart({ id: 'p2' })]);
+    fixture.componentRef.setInput('parts', [
+      makePart(),
+      makePart({ id: 'p2' }),
+    ]);
     fixture.detectChanges();
     expect(component.checks.length).toBe(2);
   });
@@ -101,7 +111,10 @@ describe('PartsScopeEditorComponent', () => {
       component.submit();
 
       expect(dialogService.confirm).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith({ ids: ['p1'], scope: 'myscope' } as PartScopeSetRequest);
+      expect(spy).toHaveBeenCalledWith({
+        ids: ['p1'],
+        scope: 'myscope',
+      } as PartScopeSetRequest);
     });
 
     it('should not emit when the user cancels the confirmation', () => {
@@ -128,7 +141,7 @@ describe('PartsScopeEditorComponent', () => {
       expect(facetService.getPartColor).toHaveBeenCalledWith(
         'it.vedph.note',
         'r1',
-        facet
+        facet,
       );
 
       const contrast = component.getContrastColor('it.vedph.note', 'r1');

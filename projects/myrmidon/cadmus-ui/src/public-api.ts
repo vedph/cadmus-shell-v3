@@ -13,8 +13,6 @@ export * from './lib/components/part-badge/part-badge.component';
 
 export * from './lib/components/model-editor-component-base';
 
-export * from './lib/services/color.service';
-
 export * from './lib/validators/custom-validators';
 export * from './lib/validators/json-validators';
 

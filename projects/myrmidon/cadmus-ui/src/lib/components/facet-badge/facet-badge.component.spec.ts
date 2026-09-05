@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FacetBadgeComponent, FacetBadgeData } from './facet-badge.component';
-import { ColorService } from '../../services/color.service';
+import { ColorService } from '@myrmidon/ngx-tools';
 import { FacetDefinition } from '@myrmidon/cadmus-core';
+
+import { FacetBadgeComponent, FacetBadgeData } from './facet-badge.component';
 
 function makeFacet(overrides?: Partial<FacetDefinition>): FacetDefinition {
   return {
