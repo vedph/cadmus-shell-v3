@@ -20,15 +20,15 @@ minimumReleaseAgeExclude:
   - '@myrmidon/cadmus-mat-physical-size@10.0.0'
   - '@myrmidon/cadmus-mat-physical-state@10.0.0'
   - '@myrmidon/cadmus-refs-asserted-chronotope@12.0.0'
-  - '@myrmidon/cadmus-refs-asserted-ids@11.0.0 || 11.0.1'
-  - '@myrmidon/cadmus-refs-assertion@11.0.0'
+  - '@myrmidon/cadmus-refs-asserted-ids@11.0.0 || 11.0.1 || 11.0.4 || 11.0.5'
+  - '@myrmidon/cadmus-refs-assertion@11.0.0 || 11.0.4 || 11.0.5'
   - '@myrmidon/cadmus-refs-biblissima-lookup@11.0.0'
   - '@myrmidon/cadmus-refs-citation@2.0.0'
   - '@myrmidon/cadmus-refs-decorated-counts@10.0.0'
   - '@myrmidon/cadmus-refs-doc-references@11.0.0'
   - '@myrmidon/cadmus-refs-geonames-lookup@11.0.0'
   - '@myrmidon/cadmus-refs-historical-date@10.0.0'
-  - '@myrmidon/cadmus-refs-lookup@11.0.0'
+  - '@myrmidon/cadmus-refs-lookup@11.0.0 || 11.0.3 || 11.0.4'
   - '@myrmidon/cadmus-refs-proper-name@11.0.0'
   - '@myrmidon/cadmus-refs-viaf-lookup@11.0.0'
   - '@myrmidon/cadmus-text-block-view@10.0.0'
@@ -43,3 +43,4 @@ minimumReleaseAgeExclude:
   - '@myrmidon/taxo-store-editor@1.0.0'
   - '@myrmidon/taxo-store-picker@1.0.0'
   - three@0.185.1
+  - marked@18.0.13

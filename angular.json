@@ -74,6 +74,43 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "prebundle": {
+              "exclude": [
+                "@myrmidon/auth-jwt-admin",
+                "@myrmidon/auth-jwt-login",
+                "@myrmidon/cadmus-api",
+                "@myrmidon/cadmus-mat-physical-size",
+                "@myrmidon/cadmus-mat-physical-state",
+                "@myrmidon/cadmus-refs-asserted-chronotope",
+                "@myrmidon/cadmus-refs-asserted-ids",
+                "@myrmidon/cadmus-refs-assertion",
+                "@myrmidon/cadmus-refs-biblissima-lookup",
+                "@myrmidon/cadmus-refs-citation",
+                "@myrmidon/cadmus-refs-decorated-counts",
+                "@myrmidon/cadmus-refs-doc-references",
+                "@myrmidon/cadmus-refs-geonames-lookup",
+                "@myrmidon/cadmus-refs-historical-date",
+                "@myrmidon/cadmus-refs-lookup",
+                "@myrmidon/cadmus-refs-proper-name",
+                "@myrmidon/cadmus-refs-viaf-lookup",
+                "@myrmidon/cadmus-text-block-view",
+                "@myrmidon/cadmus-text-ed",
+                "@myrmidon/cadmus-text-ed-md",
+                "@myrmidon/cadmus-text-ed-txt",
+                "@myrmidon/cadmus-thesaurus-store",
+                "@myrmidon/cadmus-ui-flag-set",
+                "@myrmidon/cadmus-ui-note-set",
+                "@myrmidon/cadmus-ui-object-view",
+                "@myrmidon/ngx-mat-tools",
+                "@myrmidon/ngx-tools",
+                "@myrmidon/paged-data-browsers",
+                "@myrmidon/taxo-store-api",
+                "@myrmidon/taxo-store-editor",
+                "@myrmidon/taxo-store-picker"
+              ]
+            }
+          },
           "configurations": {
             "production": {
               "buildTarget": "cadmus-shell-v3:build:production"
