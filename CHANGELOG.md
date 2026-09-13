@@ -1,5 +1,6 @@
 # History
 
+- 2026-09-13: updated packages.
 - 2026-09-05: ⚠️ moved (and improved) `ColorService` from `@myrmidon/cadmus-ui` to `@myrmidon/ngx-tools`, updating also `@myrmidon/cadmus-editor` which imported this service. Major version of both libraries has been bumped.
 - 2026-08-26: ⚠️ migrated from Karma to Vitest and implemented tests, fixing bugs found and bumping all libraries release versions by 1.
 - 2026-07-28: 🆕 responsive menu layout in `app.component`.
