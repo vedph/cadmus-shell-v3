@@ -66,6 +66,7 @@ export * from './lib/note-part/note-part.component';
 
 export * from './lib/physical-measurements-part';
 export * from './lib/physical-measurements-part/physical-measurements-part.component';
+export * from './lib/physical-measurements-part/physical-measurements-formula.service';
 
 export * from './lib/physical-states-part';
 export * from './lib/physical-states-part/physical-states-part.component';

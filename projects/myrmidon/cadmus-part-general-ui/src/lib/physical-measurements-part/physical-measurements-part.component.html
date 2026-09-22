@@ -16,6 +16,28 @@
         [measurements]="measurements.value"
         (measurementsChange)="onMeasurementsChange($event!)"
       />
+
+      @if (formulaResults().length) {
+        <table class="formula-results">
+          <caption>Computed values</caption>
+          <tbody>
+            @for (result of formulaResults(); track result.key) {
+              <tr
+                [class.ambiguous]="result.ambiguous"
+                [title]="
+                  result.ambiguous
+                    ? 'This value uses the first of several measurements sharing the same name'
+                    : ''
+                "
+              >
+                <th scope="row">{{ result.key }}</th>
+                <td>{{ result.formatted }}</td>
+                <td>{{ result.intervalName }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     </mat-card-content>
     <mat-card-actions>
       <cadmus-close-save-buttons

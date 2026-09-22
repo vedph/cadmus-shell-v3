@@ -2,6 +2,8 @@
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
+  inject,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
@@ -45,6 +47,11 @@ import {
   PHYSICAL_MEASUREMENTS_PART_TYPEID,
   PhysicalMeasurementsPart,
 } from '../physical-measurements-part';
+import {
+  FormulaResult,
+  PhysicalMeasurementsFormulaService,
+  PhysicalMeasurementsSettings,
+} from './physical-measurements-formula.service';
 
 /**
  * PhysicalMeasurements part editor component.
@@ -85,6 +92,27 @@ export class PhysicalMeasurementsPartComponent
   // physical-size-set-names
   public readonly nameEntries = signal<ThesaurusEntry[] | undefined>(undefined);
 
+  // settings loaded for this part's type/role ID (formulas), if any
+  private readonly _settings = signal<PhysicalMeasurementsSettings | undefined>(
+    undefined,
+  );
+  // mirrors measurements' value as a signal, so formula results can be
+  // recomputed whenever it changes
+  private readonly _measurements = signal<PhysicalMeasurement[]>([]);
+
+  private readonly _formulaService = inject(PhysicalMeasurementsFormulaService);
+
+  /**
+   * The formula results computed from settings and the current
+   * measurements, sorted alphabetically by their key, ready for display.
+   */
+  public readonly formulaResults = computed<FormulaResult[]>(() =>
+    this._formulaService.computeResults(
+      this._settings(),
+      this._measurements(),
+    ),
+  );
+
   constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
     super(authService, formBuilder);
     // form
@@ -92,6 +120,11 @@ export class PhysicalMeasurementsPartComponent
       validators: NgxToolsValidators.strictMinLengthValidator(1),
       nonNullable: true,
     });
+    // settings (formulas), looked up by this part's type ID and role ID
+    this.initSettings<PhysicalMeasurementsSettings>(
+      PHYSICAL_MEASUREMENTS_PART_TYPEID,
+      (settings) => this._settings.set(settings),
+    );
   }
 
   public override ngOnInit(): void {
@@ -128,9 +161,11 @@ export class PhysicalMeasurementsPartComponent
   private updateForm(part?: PhysicalMeasurementsPart | null): void {
     if (!part) {
       this.form.reset();
+      this._measurements.set([]);
       return;
     }
     this.measurements.setValue(part.measurements || []);
+    this._measurements.set(part.measurements || []);
     this.form.markAsPristine();
   }
 
@@ -158,5 +193,6 @@ export class PhysicalMeasurementsPartComponent
     this.measurements.setValue(measurements || []);
     this.measurements.markAsDirty();
     this.measurements.updateValueAndValidity();
+    this._measurements.set(measurements || []);
   }
 }

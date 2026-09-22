@@ -1,0 +1,32 @@
+.formula-results {
+  margin-top: 1rem;
+  border-collapse: collapse;
+
+  caption {
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0.7;
+    padding-bottom: 0.25rem;
+  }
+
+  th,
+  td {
+    padding: 0.25rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  th {
+    font-weight: 500;
+  }
+
+  tr.ambiguous {
+    color: #b71c1c;
+
+    td,
+    th {
+      color: inherit;
+    }
+  }
+}

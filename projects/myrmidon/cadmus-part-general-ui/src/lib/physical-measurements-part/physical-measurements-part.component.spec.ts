@@ -10,7 +10,10 @@ import { EditedObject, ThesauriSet } from '@myrmidon/cadmus-core';
 import { PhysicalMeasurement } from '@myrmidon/cadmus-mat-physical-size';
 
 import { PhysicalMeasurementsPartComponent } from './physical-measurements-part.component';
-import { PhysicalMeasurementsPart } from '../physical-measurements-part';
+import {
+  PHYSICAL_MEASUREMENTS_PART_TYPEID,
+  PhysicalMeasurementsPart,
+} from '../physical-measurements-part';
 
 function buildPart(measurements: PhysicalMeasurement[]): PhysicalMeasurementsPart {
   return {
@@ -168,4 +171,93 @@ describe('PhysicalMeasurementsPartComponent', () => {
     component.onMeasurementsChange(undefined as any);
     expect(component.measurements.value).toEqual([]);
   });
+
+  //#region settings (initSettings) -> formulaResults
+  // the formula parsing/evaluation logic itself is unit tested in
+  // PhysicalMeasurementsFormulaService's own spec; here we just verify that
+  // this component wires initSettings and measurement changes into
+  // formulaResults correctly.
+  describe('settings (initSettings) -> formulaResults', () => {
+    const identity = {
+      itemId: 'item1',
+      typeId: PHYSICAL_MEASUREMENTS_PART_TYPEID,
+      partId: 'part1',
+      roleId: null,
+    };
+
+    // mirrors the actual backend settings shape for
+    // it.vedph.physical-measurements
+    const sizeSettings = {
+      formulas: {
+        proportion: {
+          expression: '$height / $width',
+          minIntDigits: 1,
+          maxDecDigits: 2,
+        },
+        size: {
+          expression: '$height + $width',
+          intervals: [{ min: 491, max: 670, name: 'medium-large' }],
+        },
+      },
+    };
+
+    it('should have no formula results when there are no settings', async () => {
+      component.onMeasurementsChange([
+        { name: 'width', value: 210, unit: 'mm' },
+        { name: 'height', value: 297, unit: 'mm' },
+      ]);
+      fixture.componentRef.setInput('identity', identity);
+      fixture.detectChanges();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(component.formulaResults()).toEqual([]);
+    });
+
+    it('should look up settings using this part type ID and the identity role ID', async () => {
+      appRepository.getSettingFor.mockResolvedValue(sizeSettings);
+      fixture.componentRef.setInput('identity', {
+        ...identity,
+        roleId: 'fascicle',
+      });
+      fixture.detectChanges();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(appRepository.getSettingFor).toHaveBeenCalledWith(
+        PHYSICAL_MEASUREMENTS_PART_TYPEID,
+        'fascicle',
+      );
+    });
+
+    it('should recompute formulaResults as measurements are progressively added', async () => {
+      appRepository.getSettingFor.mockResolvedValue(sizeSettings);
+      fixture.componentRef.setInput('identity', identity);
+      fixture.detectChanges();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // only width: both formulas need height too, so nothing is computed
+      component.onMeasurementsChange([{ name: 'width', value: 210, unit: 'mm' }]);
+      fixture.detectChanges();
+      expect(component.formulaResults()).toEqual([]);
+
+      // adding height makes both formulas resolvable
+      component.onMeasurementsChange([
+        { name: 'width', value: 210, unit: 'mm' },
+        { name: 'height', value: 297, unit: 'mm' },
+      ]);
+      fixture.detectChanges();
+
+      const results = component.formulaResults();
+      expect(results).toHaveLength(2);
+      // alphabetical order: proportion, size
+      expect(results[0].key).toBe('proportion');
+      expect(results[0].formatted).toBe('1.41');
+      expect(results[1].key).toBe('size');
+      expect(results[1].value).toBe(507);
+      expect(results[1].intervalName).toBe('medium-large');
+    });
+  });
+  //#endregion
 });

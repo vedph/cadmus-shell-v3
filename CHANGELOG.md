@@ -1,5 +1,51 @@
 # History
 
+- 2026-09-22: 🆕 added formulas from settings in measurements part (`@myrmidon/cadmus-part-general-ui`). If there are settings for that part, whenever measurements are changed the component must compute all the formulas defined in settings, showing properly formatted results in a table at the bottom of the component, with the label and value of each result. Each formula contains only basic math operators (`+-*/`) and brackets for precedence; plus variables prefixed by `$`. Variables refer to measurements name. If there is a measurement named "width" and another named "height" and there is a formula in settings involving any of these variables, it will be evaluated and displayed. All the variables for a formula must be present for the formula to be evaluated. If more than a single measurement have the same name and a formula uses it, we just pick the first one.
+
+For instance, for these settings:
+
+```json
+"it.vedph.physical-measurements": {
+  "formulas": {
+    "proportion": {
+      "expression": "$height / $width",
+      "minIntDigits": 1,
+      "maxDecDigits": 2
+    },
+    "size": {
+      "expression": "$height + $width",
+      "intervals": [
+        {
+          "max": 321,
+          "name": "small"
+        },
+        {
+          "min": 322,
+          "max": 490,
+          "name": "medium-small"
+        },
+        {
+          "min": 491,
+          "max": 670,
+          "name": "medium-large"
+        },
+        {
+          "min": 671,
+          "name": "large"
+        }
+      ]
+    }
+  }
+},
+```
+
+when starting blank and a user adds width=210, nothing happens because both formulas require both width and height. Later, if the user adds height=297, both formulas are evaluated and expected results are like (displayed in alphabetical order):
+
+|            |      |              |
+| ---------- | ---- | ------------ |
+| proportion | 1.41 |              |
+| size       | 507  | medio-grande |
+
 - 2026-09-13: updated packages.
 - 2026-09-05: ⚠️ moved (and improved) `ColorService` from `@myrmidon/cadmus-ui` to `@myrmidon/ngx-tools`, updating also `@myrmidon/cadmus-editor` which imported this service. Major version of both libraries has been bumped.
 - 2026-08-26: ⚠️ migrated from Karma to Vitest and implemented tests, fixing bugs found and bumping all libraries release versions by 1.
@@ -30,7 +76,7 @@
     - added `getFacetModelSettings` to facet service.
   - `@myrmidon/cadmus-profile-import`: do not request reload on dry run (bumped to 0.0.4).
   - 🆕 adding new library `@myrmidon/cadmus-profile-editor` to provide facet editing UI.
-  - `@myrmidon/cadmus-item-editor`: style changes and components review for modernization  (bumped to 16.1.4).
+  - `@myrmidon/cadmus-item-editor`: style changes and components review for modernization (bumped to 16.1.4).
   - `@myrmidon/cadmus-thesaurus-editor`: replaced thesaurus editor (bumped to 16.1.1).
   - `@myrmidon/cadmus-thesaurus-list`: reviewed for minor issues (bumped to 16.1.2).
   - shell: adjusted profile routes and menu links in shell app.
@@ -54,7 +100,7 @@
     - `cadmus-ui`: `ModelEditorComponentBase` `isDirty$: BehaviorSubject<boolean>` has been replaced by `isDirty: Signal<boolean>` (zoneless-safe). Migration steps for client code: 1. Search for `\.isDirty\$` across your project. 2. For every **read** (`isDirty$.value` or `.subscribe`): replace with a signal read `isDirty()` or wrap in `effect()`/`toObservable()`. There should be no external **writes** (`isDirty$.next()`) — that was always an internal call.
     - `cadmus-state`: `EditPartFeatureBase` and `EditFragmentFeatureBase`: `dirty: Signal<boolean | undefined>` is now `dirty: Signal<boolean>` (initialized to `false` instead of `undefined`). Functionally equivalent — `!undefined === !false === true` — but removes the need for null-checks. Migration steps for client code: 1. Search for `dirty()` calls in your feature components or templates where you check for `undefined`, e.g. `dirty() === undefined` or `dirty() == null`. 2. Remove those undefined checks; `dirty()` is always a `boolean` now.
   - updated Angular and packages.
-  
+
 The dirty state check approach implemented in this workspace has been refactored. The workspace contains many part/fragment editors. Each is a component implementing `ModelEditorComponentBase<T>` where `T` is the model type, which can be a part or a fragment.
 
 These part/fragment editors are generic components which do not know about their context because we need a fully modular design. So, in turn they get wrapped into so-called "feature" components, which are thin wrapper components which become the target of a navigation route. This allows building a dynamic system where you add new parts/fragments with their editors and routes, defined in -pg libraries.
@@ -63,7 +109,7 @@ As these are web editors, when the user navigates away from an editor we need to
 
 So this requires a guard, which checks for the dirty state of each editor component. This is `pendingChangesGuard` from cadmus-core; it is used to decide when the prompt is issued before navigating away. This guard assumes that the component under check implements interface `ComponentCanDeactivate` and invokes this method to check for its dirty state.
 
-In turn, the model editor base implements the interface with `canDeactivate`, which relies on the `dirty` signal; this is set by `onDirtyChange`. 
+In turn, the model editor base implements the interface with `canDeactivate`, which relies on the `dirty` signal; this is set by `onDirtyChange`.
 
 The feature wrapper components derive from `EditPartFeatureBase` or `EditFragmentFeatureBase` according to whether they wrap a part or fragment editor. Both these base classes do implement `ComponentCanDeactivate`. So, in turn the wrapper needs to be notified by the wrapped child component when something changes in its root form state.
 
@@ -74,11 +120,11 @@ To this end, the wrapper has an `onDirtyChange` event which handles the `dirtyCh
 this._mebSubs.push(
   this.form.events.subscribe((e) => {
     if (e instanceof PristineChangeEvent) {
-      console.log('dirty change: ', !e.pristine);
+      console.log("dirty change: ", !e.pristine);
       this.isDirty$.next(!e.pristine);
       this.dirtyChange.emit(this.isDirty$.value);
     }
-  })
+  }),
 );
 ```
 
@@ -90,7 +136,7 @@ So, the idea is that:
 
 - 2026-02-28:
   - ⚠️ migrate all components to `OnPush`, adjusting them where required. This prepares them for Zone-less apps. In practice, look for `[identity]=` and `[data]=` in your part editors and ensure they have `()` to call the signal.
- Libraries changed:
+    Libraries changed:
     - `cadmus-flags-pg`
     - `cadmus-flags-ui`
     - `cadmus-graph-pg`
@@ -127,33 +173,18 @@ So, the idea is that:
 👉 So, in **part templates** ensure to use `identity()` and `data()`:
 
 ```html
-<cadmus-current-item-bar />
-<cadmus-decorated-counts-part
-  [identity]="identity()"
-  [data]="$any(data())"
-  (dataChange)="save($event!.value!)"
-  (editorClose)="close()"
-  (dirtyChange)="onDirtyChange($event)"
-/>
+<cadmus-current-item-bar /> <cadmus-decorated-counts-part [identity]="identity()" [data]="$any(data())" (dataChange)="save($event!.value!)" (editorClose)="close()" (dirtyChange)="onDirtyChange($event)" />
 ```
 
 👉 Similarly, in **fragment templates** ensure to use `data()` and capture `frLoc()` with `@let` to avoid double-calling the signal:
 
 ```html
-<cadmus-current-item-bar/>
+<cadmus-current-item-bar />
 @let loc = frLoc();
 <div class="base-text">
-  <cadmus-decorated-token-text
-    [baseText]="data()?.baseText || ''"
-    [locations]="loc ? [loc] : []"
-  />
+  <cadmus-decorated-token-text [baseText]="data()?.baseText || ''" [locations]="loc ? [loc] : []" />
 </div>
-<cadmus-chronology-fragment
-  [data]="$any(data())"
-  (dataChange)="save($event!.value!)"
-  (editorClose)="close()"
-  (dirtyChange)="onDirtyChange($event)"
-/>
+<cadmus-chronology-fragment [data]="$any(data())" (dataChange)="save($event!.value!)" (editorClose)="close()" (dirtyChange)="onDirtyChange($event)" />
 ```
 
 - 2026-02-16: 🆕 added `@myrmidon/cadmus-profile-import` with import pages for facets and settings, while also improving a bit the thesaurus importer in `@myrmidon/cadmus-thesaurus-list`. To integrate them in your app:
@@ -161,29 +192,29 @@ So, the idea is that:
 1. `pnpm i @myrmidon/cadmus-profile-import`.
 2. add to your app routes:
 
-    ```ts
-      // cadmus - profile import
-      {
-        path: 'profile',
-        loadChildren: () =>
-          import('@myrmidon/cadmus-profile-import').then(
-            (module) => module.CADMUS_PROFILE_IMPORT_ROUTES,
-          ),
-        canActivate: [jwtAdminGuard],
-      },
-    ```
+   ```ts
+     // cadmus - profile import
+     {
+       path: 'profile',
+       loadChildren: () =>
+         import('@myrmidon/cadmus-profile-import').then(
+           (module) => module.CADMUS_PROFILE_IMPORT_ROUTES,
+         ),
+       canActivate: [jwtAdminGuard],
+     },
+   ```
 
 3. add new entries to your app template admin menu:
 
-    ```html
-    <mat-menu #adminMenu>
-      <!-- ... -->
-      <a mat-menu-item routerLink="/profile/facets"> Import facets </a>
-      <a mat-menu-item routerLink="/profile/settings"> Import settings </a>
-    </mat-menu>
-    ```
+   ```html
+   <mat-menu #adminMenu>
+     <!-- ... -->
+     <a mat-menu-item routerLink="/profile/facets"> Import facets </a>
+     <a mat-menu-item routerLink="/profile/settings"> Import settings </a>
+   </mat-menu>
+   ```
 
->⚠️ Ensure to update your backend API to get the new controllers with their additional endpoints to import facets and settings.
+> ⚠️ Ensure to update your backend API to get the new controllers with their additional endpoints to import facets and settings.
 
 - 2026-02-08:
   - added `initSettings<S>` to `ModelEditorComponentBase`. All the part/fragment editors using settings should call this from their constructor to opt into settings loading. When `identity` becomes available, settings are fetched using the specified type ID and the role ID from identity. Hint: to update editors, look for those calling `getSettingFor`.
@@ -284,7 +315,7 @@ this._appRepository
 - 2025-04-18:
   - updated Angular and packages.
   - added new general part `AssertedHistoricalDatesPart`.
-  - made _appRepository protected in `ModelEditorComponentBase`.
+  - made \_appRepository protected in `ModelEditorComponentBase`.
 - 2025-03-26:
   - updated Angular and packages.
   - ➕ improved part badge in `@myrmidon/cadmus-ui`: now you can use suffixed part IDs in the `model-types` thesaurus to have customized names for parts with roles. For instance, you can add a thesaurus entry with ID `it.vedph.token-text-layer:fr.it.vedph.comment` and a value of `comment layer` to display `comment layer` for the comment layers, rather than the generic `text layer` (corresponding to the part's ID) plus the role name. The part badge exposes this logic via an exported function named `getPartIdName` which is then used elsewhere (like in item editor and model editor base).
@@ -293,9 +324,7 @@ this._appRepository
   - ➕ added to `ModelEditorComponentBase` a computed `modelName` property of type `string | undefined` which is automatically populated with the human-friendly model name for the edited model, as per the `getPartIdName` function. To take advantage of this property, you should change your part's template like in this example, taken from the generic categories part (note that this implies you should add `TitleCasePipe` to the corresponding code imports. This way, when a human-friendly model name is available, it will replace the default fixed title "Categories Part"):
 
 ```html
-<mat-card-title>
-  {{ (modelName() | titlecase) || "Categories Part" }}
-</mat-card-title>
+<mat-card-title> {{ (modelName() | titlecase) || "Categories Part" }} </mat-card-title>
 ```
 
 - 2025-03-09:
@@ -509,9 +538,7 @@ Currently the libraries listed above except bricks were fully migrated (points 1
 ```html
 <!-- profile menu -->
 <ng-container *ngIf="user && (user.roles.includes('admin') || user.roles.includes('editor'))">
-  <button type="button" mat-button [matMenuTriggerFor]="profileMenu">
-    Profile
-  </button>
+  <button type="button" mat-button [matMenuTriggerFor]="profileMenu">Profile</button>
   <mat-menu #profileMenu>
     <a mat-menu-item routerLink="/flags"> Flags </a>
     <a mat-menu-item routerLink="/thesauri"> Thesauri </a>
