@@ -1,5 +1,6 @@
 # History
 
+- 2026-09-25: updated Angular and packages.
 - 2026-09-22: 🆕 added formulas from settings in measurements part (`@myrmidon/cadmus-part-general-ui`). If there are settings for that part, whenever measurements are changed the component must compute all the formulas defined in settings, showing properly formatted results in a table at the bottom of the component, with the label and value of each result. Each formula contains only basic math operators (`+-*/`) and brackets for precedence; plus variables prefixed by `$`. Variables refer to measurements name. If there is a measurement named "width" and another named "height" and there is a formula in settings involving any of these variables, it will be evaluated and displayed. All the variables for a formula must be present for the formula to be evaluated. If more than a single measurement have the same name and a formula uses it, we just pick the first one.
 
 For instance, for these settings:
