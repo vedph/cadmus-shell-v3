@@ -1,25 +1,26 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { render, screen } from '@testing-library/angular';
 
 import { ManageUsersPageComponent } from './manage-users-page.component';
 
-describe('ManageUsersPageComponent', () => {
-  let component: ManageUsersPageComponent;
-  let fixture: ComponentFixture<ManageUsersPageComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-    imports: [ManageUsersPageComponent]
+/**
+ * Stub for the users list, which requires the users administration API.
+ */
+@Component({
+  selector: 'auth-jwt-user-list',
+  template: `<p>users list</p>`,
 })
-    .compileComponents();
-  });
+class UserListStubComponent {}
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ManageUsersPageComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+describe('ManageUsersPageComponent', () => {
+  it('should show the users list', async () => {
+    await render(ManageUsersPageComponent, {
+      // replace the real users list with a stub
+      componentImports: [MatCardModule, UserListStubComponent],
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(screen.getByText('Manage Users')).toBeInTheDocument();
+    expect(screen.getByText('users list')).toBeInTheDocument();
   });
 });
