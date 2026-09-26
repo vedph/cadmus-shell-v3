@@ -23,6 +23,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { DataPage } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
@@ -31,9 +32,10 @@ import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import {
   FacetDefinition,
   FlagDefinition,
+  Item,
   ItemInfo,
 } from '@myrmidon/cadmus-core';
-import { UserLevelService } from '@myrmidon/cadmus-api';
+import { ItemService, UserLevelService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { FacetBadgeComponent, FlagsBadgeComponent } from '@myrmidon/cadmus-ui';
 
@@ -73,6 +75,7 @@ export class ItemListComponent implements OnInit, OnDestroy {
 
   public readonly user = signal<User | undefined>(undefined);
   public readonly userLevel = signal<number>(0);
+  public readonly busy = signal<boolean>(false);
 
   constructor(
     private _repository: ItemListRepository,
@@ -81,6 +84,8 @@ export class ItemListComponent implements OnInit, OnDestroy {
     private _authService: AuthJwtService,
     private _userLevelService: UserLevelService,
     private _appRepository: AppRepository,
+    private _itemService: ItemService,
+    private _snackbar: MatSnackBar,
   ) {
     this.loading$ = _repository.loading$;
     this.page$ = _repository.page$;
@@ -132,6 +137,53 @@ export class ItemListComponent implements OnInit, OnDestroy {
           this._repository.deleteItem(item.id);
         }
       });
+  }
+
+  public downloadItem(item: ItemInfo): void {
+    this.busy.set(true);
+    this._itemService.downloadItem(item.id).subscribe({
+      next: (blob: Blob) => {
+        this.busy.set(false);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${item.id}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      },
+      error: (message: string) => {
+        this.busy.set(false);
+        this._snackbar.open(`Error downloading item: ${message}`, 'OK');
+      },
+    });
+  }
+
+  public onUploadFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    // clear the input so that the same file can be picked again
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    this.busy.set(true);
+    this._itemService.uploadItem(file).subscribe({
+      next: (item: Item) => {
+        this.busy.set(false);
+        this._repository.reset();
+        this._snackbar
+          .open(`Item "${item.title}" uploaded`, 'Open', { duration: 5000 })
+          .onAction()
+          .subscribe(() => this._router.navigate(['/items', item.id]));
+      },
+      error: (message: string) => {
+        this.busy.set(false);
+        this._snackbar.open(`Error uploading item: ${message}`, 'OK');
+      },
+    });
   }
 
   public reset(): void {

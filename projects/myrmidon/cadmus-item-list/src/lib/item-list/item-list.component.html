@@ -12,7 +12,7 @@
       <!-- list -->
       @if (page$ | async; as page) {
       <div id="list">
-        @if (loading$ | async) {
+        @if ((loading$ | async) || busy()) {
         <div>
           <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </div>
@@ -51,6 +51,15 @@
                   <mat-icon class="mat-warn">delete</mat-icon>
                 </button>
                 }
+                <button
+                  mat-icon-button
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="downloadItem(item)"
+                  matTooltip="Download this item as a JSON file"
+                >
+                  <mat-icon class="mat-primary">download</mat-icon>
+                </button>
               </td>
               <td class="fit-width">
                 <cadmus-facet-badge
@@ -99,6 +108,23 @@
   </mat-card-content>
   <mat-card-actions>
     @if (userLevel() > 1) {
+    <input
+      #uploadInput
+      type="file"
+      accept=".json,application/json"
+      hidden
+      (change)="onUploadFileChange($event)"
+    />
+    <button
+      type="button"
+      mat-stroked-button
+      [disabled]="busy()"
+      (click)="uploadInput.click()"
+      matTooltip="Upload a new item from a JSON file"
+    >
+      <mat-icon>upload</mat-icon>
+      upload
+    </button>
     <button
       type="button"
       class="mat-primary"

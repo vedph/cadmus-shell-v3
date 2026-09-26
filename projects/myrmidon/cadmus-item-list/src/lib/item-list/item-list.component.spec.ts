@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ItemListComponent } from './item-list.component';
 import { ItemListRepository } from '../state/item-list.repository';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
-import { UserLevelService } from '@myrmidon/cadmus-api';
+import { ItemService, UserLevelService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { UserRefLookupService } from '@myrmidon/cadmus-ui';
 import { ItemInfo } from '@myrmidon/cadmus-core';
@@ -57,6 +58,11 @@ describe('ItemListComponent', () => {
     facets$: Subject<any>;
     flags$: Subject<any>;
   };
+  let itemService: {
+    downloadItem: ReturnType<typeof vi.fn>;
+    uploadItem: ReturnType<typeof vi.fn>;
+  };
+  let snackbar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     repository = {
@@ -77,6 +83,10 @@ describe('ItemListComponent', () => {
       facets$: new Subject(),
       flags$: new Subject(),
     };
+    itemService = { downloadItem: vi.fn(), uploadItem: vi.fn() };
+    snackbar = {
+      open: vi.fn().mockReturnValue({ onAction: () => of(undefined) }),
+    };
 
     await TestBed.configureTestingModule({
       imports: [ItemListComponent],
@@ -89,6 +99,8 @@ describe('ItemListComponent', () => {
         { provide: UserLevelService, useValue: userLevelService },
         { provide: AppRepository, useValue: appRepository },
         { provide: UserRefLookupService, useValue: {} },
+        { provide: ItemService, useValue: itemService },
+        { provide: MatSnackBar, useValue: snackbar },
       ],
     }).compileComponents();
 
@@ -175,6 +187,96 @@ describe('ItemListComponent', () => {
       // is undefined, which is falsy, so the guard does not return early
       component.deleteItem(makeItem());
       expect(dialogService.confirm).toHaveBeenCalled();
+    });
+  });
+
+  describe('downloadItem', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it('should save the downloaded file named after the item ID', () => {
+      const blob = new Blob(['{}'], { type: 'application/json' });
+      itemService.downloadItem.mockReturnValue(of(blob));
+      const createUrl = vi.fn().mockReturnValue('blob:x');
+      const revokeUrl = vi.fn();
+      Object.assign(URL, {
+        createObjectURL: createUrl,
+        revokeObjectURL: revokeUrl,
+      });
+      let downloadName: string | undefined;
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        function (this: HTMLAnchorElement) {
+          downloadName = this.download;
+        },
+      );
+
+      component.downloadItem(makeItem({ id: 'x1' }));
+
+      expect(itemService.downloadItem).toHaveBeenCalledWith('x1');
+      expect(createUrl).toHaveBeenCalledWith(blob);
+      expect(downloadName).toBe('x1.json');
+      expect(revokeUrl).toHaveBeenCalledWith('blob:x');
+      expect(component.busy()).toBe(false);
+    });
+
+    it('should notify errors', () => {
+      itemService.downloadItem.mockReturnValue(throwError(() => 'boom'));
+
+      component.downloadItem(makeItem());
+
+      expect(snackbar.open).toHaveBeenCalledWith(
+        'Error downloading item: boom',
+        'OK',
+      );
+      expect(component.busy()).toBe(false);
+    });
+  });
+
+  describe('onUploadFileChange', () => {
+    function makeEvent(file?: File): Event {
+      const input = { files: file ? [file] : [], value: 'x' };
+      return { target: input } as unknown as Event;
+    }
+
+    it('should do nothing when no file was picked', () => {
+      component.onUploadFileChange(makeEvent());
+      expect(itemService.uploadItem).not.toHaveBeenCalled();
+    });
+
+    it('should upload the file, refresh the list, and notify', () => {
+      const file = new File(['{}'], 'item.json');
+      itemService.uploadItem.mockReturnValue(
+        of({ id: 'new1', title: 'New' }),
+      );
+      const event = makeEvent(file);
+
+      component.onUploadFileChange(event);
+
+      expect(itemService.uploadItem).toHaveBeenCalledWith(file);
+      expect((event.target as HTMLInputElement).value).toBe('');
+      expect(repository.reset).toHaveBeenCalled();
+      expect(snackbar.open).toHaveBeenCalledWith(
+        'Item "New" uploaded',
+        'Open',
+        { duration: 5000 },
+      );
+      // the mocked snackbar action fires at once, opening the new item
+      expect(router.navigate).toHaveBeenCalledWith(['/items', 'new1']);
+      expect(component.busy()).toBe(false);
+    });
+
+    it('should notify errors', () => {
+      itemService.uploadItem.mockReturnValue(
+        throwError(() => 'Item x already exists'),
+      );
+
+      component.onUploadFileChange(makeEvent(new File(['{}'], 'item.json')));
+
+      expect(repository.reset).not.toHaveBeenCalled();
+      expect(snackbar.open).toHaveBeenCalledWith(
+        'Error uploading item: Item x already exists',
+        'OK',
+      );
+      expect(component.busy()).toBe(false);
     });
   });
 });
