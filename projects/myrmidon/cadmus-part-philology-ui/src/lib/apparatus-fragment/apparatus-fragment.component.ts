@@ -40,6 +40,7 @@ import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import {
   TextLayerService,
@@ -69,6 +70,7 @@ import { ApparatusEntrySummaryService } from './apparatus-entry-summary.service'
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

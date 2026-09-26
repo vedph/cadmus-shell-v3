@@ -33,6 +33,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import { AssertedHistoricalDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
 
@@ -54,6 +55,7 @@ import { AssertedHistoricalDateComponent } from '../asserted-historical-date/ass
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    HelpLinkComponent,
     MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,

@@ -27,7 +27,10 @@ import type { StandaloneCodeEditor } from '@jean-merelis/ngx-monaco-editor';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { EditedObject, ThesauriSet } from '@myrmidon/cadmus-core';
-import { CloseSaveButtonsComponent } from '@myrmidon/cadmus-ui';
+import {
+  CloseSaveButtonsComponent,
+  HelpLinkComponent,
+} from '@myrmidon/cadmus-ui';
 import { CADMUS_TEXT_ED_BINDINGS_TOKEN } from '@myrmidon/cadmus-text-ed';
 
 import { NotePartComponent } from './note-part.component';
@@ -125,6 +128,7 @@ describe('NotePartComponent', () => {
             NgxMonacoEditorFakeComponent,
             MatCardActions,
             CloseSaveButtonsComponent,
+            HelpLinkComponent,
           ],
         },
       })

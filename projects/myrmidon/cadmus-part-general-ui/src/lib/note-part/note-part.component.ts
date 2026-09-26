@@ -52,6 +52,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import {
   CadmusTextEdService,
@@ -77,6 +78,7 @@ import { marked } from 'marked';
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

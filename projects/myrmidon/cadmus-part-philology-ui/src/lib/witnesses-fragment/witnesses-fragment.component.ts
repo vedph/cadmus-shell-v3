@@ -51,6 +51,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 
 import { WitnessesFragment, Witness } from '../witnesses-fragment';
@@ -65,6 +66,7 @@ import { WitnessesFragment, Witness } from '../witnesses-fragment';
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

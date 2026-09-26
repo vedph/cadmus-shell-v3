@@ -187,7 +187,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     }
 
     this.hasMetadataBuilders.set(
-      this._envService.get('hasMetadataBuilders') === 'true',
+      String(this._envService.get('hasMetadataBuilders')) === 'true',
     );
 
     // new part form

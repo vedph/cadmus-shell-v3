@@ -34,6 +34,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 
@@ -60,6 +61,7 @@ function entryToFlag(entry: ThesaurusEntry): Flag {
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    HelpLinkComponent,
     MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,

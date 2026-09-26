@@ -36,6 +36,7 @@ import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import {
   TextLayerService,
@@ -63,6 +64,7 @@ import { QuotationWorksService } from './quotation-works.service';
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

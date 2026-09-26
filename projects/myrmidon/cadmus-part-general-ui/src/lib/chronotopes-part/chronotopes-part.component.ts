@@ -45,6 +45,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import { MatExpansionModule } from '@angular/material/expansion';
 import {
@@ -81,6 +82,7 @@ interface ChronotopesPartSettings {
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

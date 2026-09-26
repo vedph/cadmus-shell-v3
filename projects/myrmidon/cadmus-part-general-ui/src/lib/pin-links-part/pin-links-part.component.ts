@@ -39,6 +39,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 
 import { PinLinksPart, PIN_LINKS_PART_TYPEID } from '../pin-links-part';
@@ -64,6 +65,7 @@ interface PinLinksPartSettings {
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

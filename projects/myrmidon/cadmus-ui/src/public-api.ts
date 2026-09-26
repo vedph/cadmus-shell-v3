@@ -7,6 +7,7 @@ export * from './lib/components/decorated-token-text/decorated-token-text.compon
 export * from './lib/components/error-list/error-list.component';
 export * from './lib/components/facet-badge/facet-badge.component';
 export * from './lib/components/flags-badge/flags-badge.component';
+export * from './lib/components/help-link/help-link.component';
 export * from './lib/components/layer-hints/layer-hints.component';
 export * from './lib/components/lookup-pin/lookup-pin.component';
 export * from './lib/components/part-badge/part-badge.component';
@@ -17,5 +18,6 @@ export * from './lib/validators/custom-validators';
 export * from './lib/validators/json-validators';
 
 export * from './lib/services/user-ref-lookup.service';
+export * from './lib/services/editor-help.service';
 
 export * from './lib/utils';

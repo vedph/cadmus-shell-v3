@@ -8,6 +8,7 @@ import { AppRepository } from '@myrmidon/cadmus-state';
 import { EditedObject, Part, PartIdentity, Thesaurus } from '@myrmidon/cadmus-core';
 
 import { ModelEditorComponentBase } from './model-editor-component-base';
+import { EditorHelpService } from '../services/editor-help.service';
 
 @Component({
   template: '',
@@ -84,6 +85,7 @@ describe('ModelEditorComponentBase', () => {
     getTypeThesaurus: ReturnType<typeof vi.fn>;
     getSettingFor: ReturnType<typeof vi.fn>;
   };
+  let helpService: { resolveUrl: ReturnType<typeof vi.fn> };
 
   function createComponent(): ComponentFixture<TestEditorComponent> {
     authUser$ = new BehaviorSubject<User | null>(null);
@@ -97,12 +99,14 @@ describe('ModelEditorComponentBase', () => {
       getTypeThesaurus: vi.fn().mockReturnValue(undefined),
       getSettingFor: vi.fn().mockResolvedValue(undefined),
     };
+    helpService = { resolveUrl: vi.fn().mockResolvedValue(undefined) };
 
     TestBed.configureTestingModule({
       imports: [TestEditorComponent],
       providers: [
         { provide: AuthJwtService, useValue: authService },
         { provide: AppRepository, useValue: appRepository },
+        { provide: EditorHelpService, useValue: helpService },
       ],
     });
     const fixture = TestBed.createComponent(TestEditorComponent);
@@ -284,6 +288,68 @@ describe('ModelEditorComponentBase', () => {
       } as PartIdentity);
       fixture.detectChanges();
       expect(fixture.componentInstance.modelName()).toBe('Note');
+    });
+  });
+
+  describe('helpUrl / hasHelp', () => {
+    const identity: PartIdentity = {
+      itemId: 'item1',
+      typeId: 'it.vedph.note',
+      partId: 'part1',
+      roleId: 'history',
+    };
+
+    it('should have no help without identity', () => {
+      const fixture = createComponent();
+      expect(fixture.componentInstance.helpUrl()).toBeUndefined();
+      expect(fixture.componentInstance.hasHelp()).toBe(false);
+      expect(helpService.resolveUrl).not.toHaveBeenCalled();
+    });
+
+    it('should set helpUrl when resolved from identity', async () => {
+      const fixture = createComponent();
+      helpService.resolveUrl.mockResolvedValue('https://x.org/note.html');
+      fixture.componentRef.setInput('identity', identity);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(helpService.resolveUrl).toHaveBeenCalledWith(identity);
+      expect(fixture.componentInstance.helpUrl()).toBe(
+        'https://x.org/note.html'
+      );
+      expect(fixture.componentInstance.hasHelp()).toBe(true);
+    });
+
+    it('should have no help when not resolved', async () => {
+      const fixture = createComponent();
+      fixture.componentRef.setInput('identity', identity);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(fixture.componentInstance.hasHelp()).toBe(false);
+    });
+
+    it('should ignore a stale resolution after identity changes', async () => {
+      const fixture = createComponent();
+      let resolveFirst!: (url: string) => void;
+      helpService.resolveUrl
+        .mockReturnValueOnce(new Promise((r) => (resolveFirst = r)))
+        .mockResolvedValueOnce('https://x.org/second.html');
+
+      fixture.componentRef.setInput('identity', identity);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('identity', {
+        ...identity,
+        roleId: null,
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      resolveFirst('https://x.org/first.html');
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(fixture.componentInstance.helpUrl()).toBe(
+        'https://x.org/second.html'
+      );
     });
   });
 

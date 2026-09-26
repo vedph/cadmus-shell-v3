@@ -73,6 +73,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 
 import { Comment, CommentPart, COMMENT_PART_TYPEID } from '../comment-part';
@@ -107,6 +108,7 @@ interface CommentPartSettings {
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

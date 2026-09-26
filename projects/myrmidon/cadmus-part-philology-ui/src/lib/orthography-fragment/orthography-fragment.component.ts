@@ -40,6 +40,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import {
   renderLabelFromLastColon,
@@ -72,6 +73,7 @@ import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

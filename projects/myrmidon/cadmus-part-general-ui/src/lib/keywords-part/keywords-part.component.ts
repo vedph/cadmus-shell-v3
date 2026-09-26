@@ -37,6 +37,7 @@ import { NgxToolsValidators } from '@myrmidon/ngx-tools';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import {
   ThesauriSet,
@@ -61,6 +62,7 @@ import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

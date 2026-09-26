@@ -1,5 +1,50 @@
 # History
 
+- 2026-09-26:
+  - 🆕 added context help to part and fragment editors (`@myrmidon/cadmus-ui`, `@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-philology-ui`). `ModelEditorComponentBase` now exposes `helpUrl()` (the URL of the help page for the edited model, or undefined when not available) and `hasHelp()`. The new `HelpLinkComponent` (`<cadmus-help-link [url]="helpUrl()" />`) shows a help button opening that page in a new tab, or nothing when no page is available. It has been added to the right edge of the card header of all the part/fragment editors in the general and philology libraries; to add it to your own editors, import `HelpLinkComponent` from `@myrmidon/cadmus-ui` and place it as the last child of `mat-card-header`. See below for configuring it.
+  - 🐛 fixed `hasMetadataBuilders` in item editor (`@myrmidon/cadmus-item-editor`) always being false when set to `true` (boolean) in `env.js`.
+
+## Context Help Configuration
+
+Help is configured in the app's `env.js`. When no template is set, no help button is shown:
+
+```js
+// URL template for help pages
+window.__env.helpUrlTemplate =
+  "https://www.mysite.com/help/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html";
+// value of {separator} (optional, default: __)
+window.__env.helpUrlSeparator = "__";
+// false to skip checking page availability (optional, default: true)
+window.__env.helpUrlCheck = true;
+```
+
+The template can include these **placeholders**. Their values are URL-encoded; an empty value is replaced by nothing:
+
+| placeholder   | part editor   | fragment editor                               |
+| ------------- | ------------- | --------------------------------------------- |
+| `{typeId}`    | part type ID  | fragment type ID (e.g. `fr.it.vedph.comment`) |
+| `{roleId}`    | part role ID  | always empty                                  |
+| `{frRoleId}`  | always empty  | fragment role ID                              |
+| `{separator}` | the separator | the separator                                 |
+
+**Optional groups** in square brackets are output (without brackets) only when all the placeholders inside them have a value; otherwise, the whole group is dropped. `{separator}` immediately followed by a placeholder is a shortcut for such a group, so `{separator}{roleId}` is the same as `[{separator}{roleId}]`. Groups cannot be nested.
+
+**Fallback**: when `helpUrlCheck` is not false, candidate URLs are tried from the most specific to the least specific: first with all the values, then without `{frRoleId}`, then without `{roleId}`. The first available page is used. So you can write a single page for a type ID, and add role-specific pages only where needed. When no page is found, the URLs tried are logged in the browser console (as info), so you can see which topics are missing. Checks use `fetch` (so no credentials are sent) and their results are cached for the session. The help site must allow cross-origin requests (CORS); GitHub Pages does. If your site does not, set `helpUrlCheck` to false: the most specific URL is then always used, without any check.
+
+**Examples** using template `https://www.mysite.com/help/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html`:
+
+- note part with no role: `.../topics/it.vedph.note.html`.
+- note part with role `history`: `.../topics/it.vedph.note__history.html`, falling back to `.../topics/it.vedph.note.html`.
+- comment fragment with role `sch`: `.../topics/fr.it.vedph.comment__sch.html`, falling back to `.../topics/fr.it.vedph.comment.html`.
+
+**Other template styles**:
+
+- one page per type, with a bookmark per role: `https://www.mysite.com/help/{typeId}.html[#{roleId}][#{frRoleId}]`. Bookmarks do not affect the availability check, so the check is done on the type page only.
+- query string: `https://www.mysite.com/help?type={typeId}[&role={roleId}][&frRole={frRoleId}]`.
+- Jekyll with pretty permalinks: `https://www.mysite.com/help/{typeId}[-{roleId}][-{frRoleId}]/`.
+
+**Topic naming with Jekyll** (e.g. GitHub Pages): with the first template above, create one Markdown file for each part/fragment type, named after its type ID (e.g. `topics/it.vedph.note.md`, `topics/fr.it.vedph.comment.md`). For role-specific help, add a file named after type ID, separator and role ID (e.g. `topics/it.vedph.note__history.md`, `topics/fr.it.vedph.comment__sch.md`). Avoid characters in role IDs which are not valid in file names; when needed, pick a different separator or template.
+
 - 2026-09-25: 🆕 added download button for each item and an upload button at the bottom in the items list (`@myrmidon/cadmus-item-list`). The corresponding API client methods have been added to the item service in `@myrmidon/cadmus-api`. This allows to export/import a single item within the editor. Note that import is allowed only if the target item does not exist (=there is no item with the same ID). If that item was deleted, the imported item (and its parts) will get new IDs to avoid confusing it with the existing history. This is exactly what would happen if you manually deleted an item and then recreated it with the same data: you get a new record, with new IDs, even though its data are just a clone of the deleted one.
 - 2026-09-25: updated Angular and packages.
 - 2026-09-22: 🆕 added formulas from settings in measurements part (`@myrmidon/cadmus-part-general-ui`). If there are settings for that part, whenever measurements are changed the component must compute all the formulas defined in settings, showing properly formatted results in a table at the bottom of the component, with the label and value of each result. Each formula contains only basic math operators (`+-*/`) and brackets for precedence; plus variables prefixed by `$`. Variables refer to measurements name. If there is a measurement named "width" and another named "height" and there is a formula in settings involving any of these variables, it will be evaluated and displayed. All the variables for a formula must be present for the formula to be evaluated. If more than a single measurement have the same name and a formula uses it, we just pick the first one.

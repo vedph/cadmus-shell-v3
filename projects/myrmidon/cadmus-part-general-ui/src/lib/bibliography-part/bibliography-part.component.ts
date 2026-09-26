@@ -38,6 +38,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import { MatExpansionModule } from '@angular/material/expansion';
 
@@ -64,6 +65,7 @@ import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-e
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

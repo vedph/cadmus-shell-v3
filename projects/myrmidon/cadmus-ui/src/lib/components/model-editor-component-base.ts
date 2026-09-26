@@ -32,6 +32,7 @@ import {
   PartIdentity,
 } from '@myrmidon/cadmus-core';
 import { getPartIdName } from './part-badge/part-badge.component';
+import { EditorHelpService } from '../services/editor-help.service';
 
 /**
  * Base class for part/fragment editors dumb components.
@@ -50,6 +51,9 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
 {
   private readonly _mebSubs: Subscription[] = [];
   private readonly _injector = inject(Injector);
+  private readonly _helpService = inject(EditorHelpService);
+  private readonly _helpUrl = signal<string | undefined>(undefined);
+  private _helpRequest = 0;
   protected readonly _appRepository?: AppRepository;
 
   /**
@@ -131,6 +135,20 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   });
 
   /**
+   * The URL of the help page for this editor, or undefined if not available.
+   * This is resolved asynchronously from identity, using the URL template
+   * configured in the environment (see EditorHelpService), and falling back
+   * from the most specific URL to the least specific one until an available
+   * page is found. Bind it to the url input of the help link component.
+   */
+  public readonly helpUrl = this._helpUrl.asReadonly();
+
+  /**
+   * True if a help page is available for this editor.
+   */
+  public readonly hasHelp = computed<boolean>(() => !!this._helpUrl());
+
+  /**
    * Create a new instance of the editor.
    *
    * @param authService The authentication service.
@@ -153,6 +171,26 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
     effect(() => {
       this.onIdentitySet(this.identity());
     });
+    effect(() => {
+      this.updateHelpUrl(this.identity());
+    });
+  }
+
+  private updateHelpUrl(identity?: PartIdentity | FragmentIdentity): void {
+    // discard results of stale requests when identity changes meanwhile
+    const request = ++this._helpRequest;
+    this._helpUrl.set(undefined);
+    if (!identity) {
+      return;
+    }
+    this._helpService
+      .resolveUrl(identity)
+      .then((url) => {
+        if (request === this._helpRequest) {
+          this._helpUrl.set(url);
+        }
+      })
+      .catch(() => {});
   }
 
   private disableForm(disabled?: boolean) {

@@ -102,7 +102,10 @@ describe('ItemEditorComponent', () => {
   let snackbar: { open: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
 
-  function createComponent(routeId = 'new') {
+  function createComponent(
+    routeId = 'new',
+    env: Record<string, unknown> = {}
+  ) {
     repository = {
       item$: new Subject(),
       parts$: new BehaviorSubject<Part[]>([]),
@@ -140,7 +143,7 @@ describe('ItemEditorComponent', () => {
     authService = { currentUser$: new BehaviorSubject<User | null>(null) };
     userLevelService = { getCurrentUserLevel: vi.fn().mockReturnValue(0) };
     messaging = { sendMessage: vi.fn() };
-    envService = { get: vi.fn().mockReturnValue(undefined) };
+    envService = { get: vi.fn((key: string) => env[key]) };
     router = { navigate: vi.fn() };
     snackbar = { open: vi.fn() };
     dialog = { open: vi.fn() };
@@ -187,6 +190,28 @@ describe('ItemEditorComponent', () => {
   it('should load the repository with the parsed id on ngOnInit', () => {
     createComponent('item1');
     expect(repository.load).toHaveBeenCalledWith('item1');
+  });
+
+  describe('hasMetadataBuilders', () => {
+    it('should be false when not set in env', () => {
+      createComponent();
+      expect(component.hasMetadataBuilders()).toBe(false);
+    });
+
+    it('should be true when set to boolean true in env', () => {
+      createComponent('new', { hasMetadataBuilders: true });
+      expect(component.hasMetadataBuilders()).toBe(true);
+    });
+
+    it('should be true when set to string "true" in env', () => {
+      createComponent('new', { hasMetadataBuilders: 'true' });
+      expect(component.hasMetadataBuilders()).toBe(true);
+    });
+
+    it('should be false when set to false in env', () => {
+      createComponent('new', { hasMetadataBuilders: false });
+      expect(component.hasMetadataBuilders()).toBe(false);
+    });
   });
 
   describe('metadata form sync', () => {

@@ -1,0 +1,12 @@
+@if (url()) {
+  <a
+    mat-icon-button
+    [href]="url()"
+    target="_blank"
+    rel="noopener noreferrer"
+    [matTooltip]="tip()"
+    [attr.aria-label]="tip()"
+  >
+    <mat-icon class="mat-primary">help_outline</mat-icon>
+  </a>
+}

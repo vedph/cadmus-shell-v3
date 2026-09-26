@@ -34,6 +34,7 @@ import { ThesaurusEntry, EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 import {
   renderLabelFromLastColon,
@@ -56,6 +57,7 @@ import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,

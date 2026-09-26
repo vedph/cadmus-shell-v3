@@ -45,6 +45,7 @@ import {
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
+  HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 
 import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
@@ -64,6 +65,7 @@ import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
     ReactiveFormsModule,
     MatCard,
     MatCardHeader,
+    HelpLinkComponent,
     MatCardAvatar,
     MatIcon,
     MatCardTitle,
