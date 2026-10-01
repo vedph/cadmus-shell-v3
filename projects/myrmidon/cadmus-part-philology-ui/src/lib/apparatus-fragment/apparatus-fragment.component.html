@@ -1,165 +1,164 @@
-<form [formGroup]="form!" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>textsms</mat-icon>
-      </div>
-      <mat-card-title
-        >{{ (modelName() | titlecase) || "Apparatus Fragment" }}
-        {{ data()?.value?.location }}</mat-card-title
-      >
-      <mat-card-subtitle>
-        {{ frText() }}
-      </mat-card-subtitle>
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>textsms</mat-icon>
+    </div>
+    <mat-card-title
+      >{{ (modelName() | titlecase) || "Apparatus Fragment" }}
+      {{ data()?.value?.location }}</mat-card-title
+    >
+    <mat-card-subtitle>
+      {{ frText() }}
+    </mat-card-subtitle>
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
 
-    <mat-card-content>
-      <div class="form-row">
-        <!-- tag -->
-        @if (tagEntries()?.length) {
-          <div>
-            <mat-form-field>
-              <mat-label>tag</mat-label>
-              <mat-select formControlName="tag">
-                <mat-option [value]="null">(none)</mat-option>
-                @for (e of tagEntries(); track e.id) {
-                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        } @else {
-          <div>
-            <mat-form-field>
-              <mat-label>tag</mat-label>
-              <input matInput type="text" formControlName="tag" />
-              @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
-                <mat-error>too long</mat-error>
+  <mat-card-content>
+    <div class="form-row">
+      <!-- tag -->
+      @if (tagEntries()?.length) {
+        <div>
+          <mat-form-field>
+            <mat-label>tag</mat-label>
+            <mat-select [formField]="form.tag">
+              <mat-option [value]="null">(none)</mat-option>
+              @for (e of tagEntries(); track e.id) {
+                <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
-            </mat-form-field>
-          </div>
-        }
-        <!-- add button -->
-        <button
-          type="button"
-          class="mat-primary"
-          (click)="addEntry()"
-          mat-flat-button
-        >
-          <mat-icon>add_circle</mat-icon> entry
-        </button>
-      </div>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      } @else {
+        <div>
+          <mat-form-field>
+            <mat-label>tag</mat-label>
+            <input matInput type="text" [formField]="form.tag" />
+            @if (form.tag().getError("maxLength") && (form.tag().dirty() || form.tag().touched())) {
+              <mat-error>too long</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      }
+      <!-- add button -->
+      <button
+        type="button"
+        class="mat-primary"
+        (click)="addEntry()"
+        mat-flat-button
+      >
+        <mat-icon>add_circle</mat-icon> entry
+      </button>
+    </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>type</th>
-            <th>value/note</th>
-            <th>group</th>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>type</th>
+          <th>value/note</th>
+          <th>group</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (
+          entry of form.entries().value();
+          track entry;
+          let i = $index;
+          let first = $first;
+          let last = $last
+        ) {
+          <tr [class.selected]="i === editedEntryIndex()">
+            <td class="fit-width">
+              <span class="nr">{{ i + 1 }}.</span>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Edit entry"
+                (click)="editEntry(entry, i)"
+              >
+                <mat-icon class="mat-primary">edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Move entry up"
+                [disabled]="first"
+                (click)="moveEntryUp(i)"
+              >
+                <mat-icon>arrow_upward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Move entry down"
+                [disabled]="last"
+                (click)="moveEntryDown(i)"
+              >
+                <mat-icon>arrow_downward</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Remove this entry"
+                (click)="removeEntry(i)"
+              >
+                <mat-icon class="mat-warn">remove_circle</mat-icon>
+              </button>
+            </td>
+            <td [matTooltip]="getEntryTypeDsc(entry.type)">
+              <mat-icon>{{ getEntryTypeIcon(entry.type) }}</mat-icon>
+            </td>
+            <td>
+              @if (entry.type === 3) {
+                <span>{{ entry.note }}</span>
+              }
+              @if (entry.type !== 3) {
+                <span [class.lem]="entry.isAccepted">{{ entry.value }}</span>
+              }
+            </td>
+            <td>{{ entry.groupId }}</td>
           </tr>
-        </thead>
-        <tbody>
-          @for (
-            entry of entries.value;
-            track entry;
-            let i = $index;
-            let first = $first;
-            let last = $last
-          ) {
-            <tr [class.selected]="i === editedEntryIndex()">
-              <td class="fit-width">
-                <span class="nr">{{ i + 1 }}.</span>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Edit entry"
-                  (click)="editEntry(entry, i)"
-                >
-                  <mat-icon class="mat-primary">edit</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move entry up"
-                  [disabled]="first"
-                  (click)="moveEntryUp(i)"
-                >
-                  <mat-icon>arrow_upward</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Move entry down"
-                  [disabled]="last"
-                  (click)="moveEntryDown(i)"
-                >
-                  <mat-icon>arrow_downward</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="Remove this entry"
-                  (click)="removeEntry(i)"
-                >
-                  <mat-icon class="mat-warn">remove_circle</mat-icon>
-                </button>
-              </td>
-              <td [matTooltip]="getEntryTypeDsc(entry.type)">
-                <mat-icon>{{ getEntryTypeIcon(entry.type) }}</mat-icon>
-              </td>
-              <td>
-                @if (entry.type === 3) {
-                  <span>{{ entry.note }}</span>
-                }
-                @if (entry.type !== 3) {
-                  <span [class.lem]="entry.isAccepted">{{ entry.value }}</span>
-                }
-              </td>
-              <td>{{ entry.groupId }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-      @if (summary()) {
-        <div [innerHtml]="summary() | safeHtml: 'html'"></div>
-      }
+        }
+      </tbody>
+    </table>
+    @if (summary()) {
+      <div [innerHtml]="summary() | safeHtml: 'html'"></div>
+    }
 
-      <!-- entry editor -->
-      @if (editedEntry()) {
-        <fieldset>
-          <mat-expansion-panel
-            [expanded]="editedEntry()"
-            [disabled]="!editedEntry()"
-          >
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <span class="entry-title">entry</span>
-                <span class="nr">{{ editedEntryIndex() + 1 }}</span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <cadmus-apparatus-entry
-              [entry]="editedEntry()"
-              [tagEntries]="tagEntries()"
-              [witEntries]="witEntries()"
-              [authEntries]="authEntries()"
-              [authTagEntries]="authTagEntries()"
-              [workEntries]="workEntries()"
-              (entryChange)="saveEntry($event!)"
-              (editorClose)="closeEntry()"
-            />
-          </mat-expansion-panel>
-        </fieldset>
-      }
-    </mat-card-content>
+    <!-- entry editor -->
+    @if (editedEntry()) {
+      <fieldset>
+        <mat-expansion-panel
+          [expanded]="editedEntry()"
+          [disabled]="!editedEntry()"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="entry-title">entry</span>
+              <span class="nr">{{ editedEntryIndex() + 1 }}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <cadmus-apparatus-entry
+            [entry]="editedEntry()"
+            [tagEntries]="tagEntries()"
+            [witEntries]="witEntries()"
+            [authEntries]="authEntries()"
+            [authTagEntries]="authTagEntries()"
+            [workEntries]="workEntries()"
+            (entryChange)="saveEntry($event!)"
+            (editorClose)="closeEntry()"
+          />
+        </mat-expansion-panel>
+      </fieldset>
+    }
+  </mat-card-content>
 
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

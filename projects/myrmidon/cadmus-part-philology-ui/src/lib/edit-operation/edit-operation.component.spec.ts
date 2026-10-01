@@ -10,6 +10,12 @@ import {
 } from '../services/edit-operation';
 import { NumberedChar } from '../char-text-view/char-text-view.component';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('EditOperationComponent', () => {
   let component: EditOperationComponent;
   let fixture: ComponentFixture<EditOperationComponent>;
@@ -43,15 +49,15 @@ describe('EditOperationComponent', () => {
   });
 
   it('should build a form with default values', () => {
-    expect(component.dsl.value).toBeNull();
-    expect(component.type.value).toBe(OperationType.Replace);
-    expect(component.at.value).toBe(1);
-    expect(component.run.value).toBe(1);
-    expect(component.text.value).toBeNull();
-    expect(component.to.value).toBe(0);
-    expect(component.toRun.value).toBe(0);
-    expect(component.tags.value).toEqual([]);
-    expect(component.note.value).toBeNull();
+    expect(component.form.dsl().value()).toBe('');
+    expect(plain(component.form.type().value())).toBe(OperationType.Replace);
+    expect(plain(component.form.at().value())).toBe(1);
+    expect(plain(component.form.run().value())).toBe(1);
+    expect(component.form.text().value()).toBe('');
+    expect(plain(component.form.to().value())).toBe(0);
+    expect(plain(component.form.toRun().value())).toBe(0);
+    expect(plain(component.form.tags().value())).toEqual([]);
+    expect(component.form.note().value()).toBe('');
   });
 
   //#region operation model -> form (updateForm via effect)
@@ -66,13 +72,13 @@ describe('EditOperationComponent', () => {
     fixture.componentRef.setInput('operation', op);
     fixture.detectChanges();
 
-    expect(component.type.value).toBe(OperationType.Replace);
-    expect(component.at.value).toBe(3);
-    expect(component.run.value).toBe(2);
-    expect(component.text.value).toBe('XY');
-    expect(component.tags.value).toEqual([{ id: 't1', value: 't1' }]);
-    expect(component.note.value).toBe('a note');
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.type().value())).toBe(OperationType.Replace);
+    expect(plain(component.form.at().value())).toBe(3);
+    expect(plain(component.form.run().value())).toBe(2);
+    expect(plain(component.form.text().value())).toBe('XY');
+    expect(plain(component.form.tags().value())).toEqual([{ id: 't1', value: 't1' }]);
+    expect(plain(component.form.note().value())).toBe('a note');
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should map operation tag ids to thesaurus entries when available', () => {
@@ -86,7 +92,7 @@ describe('EditOperationComponent', () => {
     fixture.detectChanges();
 
     // t1 resolves to its thesaurus entry, t2 falls back to {id, value: id}
-    expect(component.tags.value).toEqual([
+    expect(plain(component.form.tags().value())).toEqual([
       { id: 't1', value: 'Tag One' },
       { id: 't2', value: 't2' },
     ]);
@@ -98,39 +104,37 @@ describe('EditOperationComponent', () => {
     op.note = 'a note';
     fixture.componentRef.setInput('operation', op);
     fixture.detectChanges();
-    expect(component.at.value).toBe(5);
-    expect(component.note.value).toBe('a note');
+    expect(plain(component.form.at().value())).toBe(5);
+    expect(plain(component.form.note().value())).toBe('a note');
 
     // must first be a real value, then undefined: two identical `undefined`
     // signal writes in a row would not re-trigger the effect.
     fixture.componentRef.setInput('operation', undefined);
     fixture.detectChanges();
 
-    // FormControls created with { nonNullable: true } (type/at/run/to/
-    // toRun/tags) reset to their original constructor value rather than
-    // null; plain FormControls (dsl/text/note) reset to null.
-    expect(component.at.value).toBe(1);
-    expect(component.type.value).toBe(OperationType.Replace);
-    expect(component.note.value).toBeNull();
+    // no operation: the form gets its defaults
+    expect(plain(component.form.at().value())).toBe(1);
+    expect(plain(component.form.type().value())).toBe(OperationType.Replace);
+    expect(component.form.note().value()).toBe('');
   });
   //#endregion
 
   //#region 'to' validators toggle with type
   it('should add a min(1) validator to "to" only for Move/Swap types', () => {
     // Replace (default): no extra validator on 'to'.
-    component.to.setValue(0);
-    expect(component.to.valid).toBe(true);
+    component.form.to().value.set(0);
+    expect(component.form.to().valid()).toBe(true);
 
-    component.type.setValue(OperationType.MoveBefore);
-    component.to.setValue(0);
-    expect(component.to.invalid).toBe(true);
-    component.to.setValue(1);
-    expect(component.to.valid).toBe(true);
+    component.form.type().value.set(OperationType.MoveBefore);
+    component.form.to().value.set(0);
+    expect(component.form.to().invalid()).toBe(true);
+    component.form.to().value.set(1);
+    expect(component.form.to().valid()).toBe(true);
 
     // switching back to Replace clears the validator again.
-    component.type.setValue(OperationType.Replace);
-    component.to.setValue(0);
-    expect(component.to.valid).toBe(true);
+    component.form.type().value.set(OperationType.Replace);
+    component.form.to().value.set(0);
+    expect(component.form.to().valid()).toBe(true);
   });
   //#endregion
 
@@ -142,7 +146,7 @@ describe('EditOperationComponent', () => {
   });
 
   it('parseOperation should parse a valid DSL and set the operation model', () => {
-    component.dsl.setValue('@1x2="XY"');
+    component.form.dsl().value.set('@1x2="XY"');
     component.parseOperation();
 
     const op = component.operation();
@@ -156,7 +160,7 @@ describe('EditOperationComponent', () => {
   });
 
   it('parseOperation should set parseError on invalid DSL', () => {
-    component.dsl.setValue('this is not valid dsl');
+    component.form.dsl().value.set('this is not valid dsl');
     component.parseOperation();
 
     expect(component.parseError()).toBeTruthy();
@@ -165,14 +169,14 @@ describe('EditOperationComponent', () => {
 
   //#region updateDsl
   it('updateDsl should set the dsl field from the current form-built operation', () => {
-    component.type.setValue(OperationType.Replace);
-    component.at.setValue(1);
-    component.run.setValue(1);
-    component.text.setValue('Z');
+    component.form.type().value.set(OperationType.Replace);
+    component.form.at().value.set(1);
+    component.form.run().value.set(1);
+    component.form.text().value.set('Z');
 
     component.updateDsl();
 
-    expect(component.dsl.value).toContain('Z');
+    expect(plain(component.form.dsl().value())).toContain('Z');
   });
   //#endregion
 
@@ -183,25 +187,29 @@ describe('EditOperationComponent', () => {
     expect(component.outputText()).toBe('bcde');
   });
 
-  it('should recompute outputText after form changes are debounced', () => {
-    // fake timers must be enabled *before* the component (and its first
-    // detectChanges) is created: the constructor's effect resets the form
-    // on first run, which emits an initial valueChanges under real timers
-    // and lets rxjs's AsyncScheduler recycle that real interval handle for
-    // later emissions -- vi.advanceTimersByTime would then never reach it.
-    vi.useFakeTimers();
-    const freshFixture = TestBed.createComponent(EditOperationComponent);
-    const freshComponent = freshFixture.componentInstance;
-    freshFixture.componentRef.setInput('inputText', 'abcde');
-    freshFixture.detectChanges();
+  it('should recompute outputText when the form changes', () => {
+    component.form.at().value.set(1);
+    component.form.run().value.set(1);
+    component.form.text().value.set('X');
 
-    freshComponent.at.setValue(1);
-    freshComponent.run.setValue(1);
-    freshComponent.text.setValue('X');
-    vi.advanceTimersByTime(310);
+    expect(component.outputText()).toBe('Xbcde');
+  });
 
-    expect(freshComponent.outputText()).toBe('Xbcde');
-    vi.useRealTimers();
+  it('should keep the typed DSL when the operation parsed from it is bound', () => {
+    component.form.dsl().value.set('@2x1="Z"');
+    component.parseOperation();
+    fixture.detectChanges();
+
+    expect(component.form.dsl().value()).toBe('@2x1="Z"');
+    expect(component.form.at().value()).toBe(2);
+    expect(component.form.text().value()).toBe('Z');
+  });
+
+  it('should not render static min attributes, and validate them in the schema', () => {
+    component.form.at().value.set(0);
+    expect(component.form.at().getError('min')).toBeTruthy();
+    component.form.run().value.set(0);
+    expect(component.form.run().getError('min')).toBeTruthy();
   });
   //#endregion
 
@@ -235,17 +243,17 @@ describe('EditOperationComponent', () => {
     ]);
     component.setAtRunFromPickedCoords();
 
-    expect(component.at.value).toBe(2);
-    expect(component.run.value).toBe(2);
+    expect(plain(component.form.at().value())).toBe(2);
+    expect(plain(component.form.run().value())).toBe(2);
     expect(component.expanded()).toBe(true);
   });
 
   it('setAtRunFromPickedCoords should ignore unparseable coords', () => {
     component.pickedCoords.set('not-coords');
-    component.at.setValue(9);
+    component.form.at().value.set(9);
     component.setAtRunFromPickedCoords();
     // at is left untouched since parsing failed
-    expect(component.at.value).toBe(9);
+    expect(plain(component.form.at().value())).toBe(9);
     expect(component.expanded()).toBe(false);
   });
 
@@ -253,7 +261,7 @@ describe('EditOperationComponent', () => {
     component.onCharPick({ n: 4, value: 'd' });
     component.setToFromPickedCoords();
 
-    expect(component.to.value).toBe(4);
+    expect(plain(component.form.to().value())).toBe(4);
     expect(component.expanded()).toBe(true);
   });
   //#endregion
@@ -267,22 +275,22 @@ describe('EditOperationComponent', () => {
   });
 
   it('save should mark all as touched and not update the model when the form is invalid', () => {
-    component.type.setValue(OperationType.MoveBefore);
-    component.to.setValue(0); // invalid: min(1) required for MoveBefore
+    component.form.type().value.set(OperationType.MoveBefore);
+    component.form.to().value.set(0); // invalid: min(1) required for MoveBefore
     const before = component.operation();
 
     component.save();
 
     expect(component.operation()).toBe(before);
-    expect(component.to.touched).toBe(true);
+    expect(component.form.to().touched()).toBe(true);
   });
 
   it('save should update the operation model and mark the form pristine when valid', () => {
-    component.type.setValue(OperationType.Replace);
-    component.at.setValue(2);
-    component.run.setValue(1);
-    component.text.setValue('Q');
-    component.form.markAsDirty();
+    component.form.type().value.set(OperationType.Replace);
+    component.form.at().value.set(2);
+    component.form.run().value.set(1);
+    component.form.text().value.set('Q');
+    component.form().markAsDirty();
 
     component.save();
 
@@ -290,7 +298,7 @@ describe('EditOperationComponent', () => {
     expect(op).toBeTruthy();
     expect(op!.at).toBe(2);
     expect(op!.text).toBe('Q');
-    expect(component.form.pristine).toBe(true);
+    expect(component.form().dirty()).toBe(false);
   });
   //#endregion
 
@@ -298,8 +306,8 @@ describe('EditOperationComponent', () => {
   it('onOpTagEntriesChange should update and dirty the tags control', () => {
     const entries = [{ id: 't1', value: 'Tag 1' }];
     component.onOpTagEntriesChange(entries);
-    expect(component.tags.value).toEqual(entries);
-    expect(component.tags.dirty).toBe(true);
+    expect(plain(component.form.tags().value())).toEqual(entries);
+    expect(component.form.tags().dirty()).toBe(true);
   });
 
   it('renderLabel should delegate to renderLabelFromLastColon', () => {
@@ -313,4 +321,19 @@ describe('EditOperationComponent', () => {
     expect(snackBar.open).toHaveBeenCalled();
   });
   //#endregion
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
+  });
 });

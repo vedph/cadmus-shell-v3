@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -7,17 +7,15 @@
   model,
   output,
   signal,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+  FormField,
+  form,
+  maxLength,
+  min,
+} from '@angular/forms/signals';
 
 // material
 import { MatButtonModule } from '@angular/material/button';
@@ -47,6 +45,36 @@ import {
   CharTextViewComponent,
   NumberedChar,
 } from '../char-text-view/char-text-view.component';
+import { isImplicitSubmission } from '../signal-form-utils';
+
+interface EditOperationControls {
+  dsl: string;
+  type: OperationType;
+  at: number;
+  run: number;
+  text: string;
+  to: number;
+  toRun: number;
+  tags: ThesaurusEntry[];
+  note: string;
+}
+
+// the operation types having a target position (to/toRun)
+const MOVE_TYPES: string[] = [
+  OperationType.MoveBefore,
+  OperationType.MoveAfter,
+  OperationType.Swap,
+];
+
+function mapIdsToEntries(
+  ids: string[],
+  entries: ThesaurusEntry[] | undefined,
+): ThesaurusEntry[] {
+  return ids.map((id) => {
+    const entry = entries?.find((e) => e.id === id);
+    return entry ? { id: entry.id, value: entry.value } : { id, value: id };
+  });
+}
 
 /**
  * Editor for a single edit operation. This component can either parse an
@@ -56,7 +84,7 @@ import {
 @Component({
   selector: 'cadmus-edit-operation',
   imports: [
-    ReactiveFormsModule,
+    FormField,
     MatButtonModule,
     MatCheckboxModule,
     MatExpansionModule,
@@ -73,7 +101,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditOperationComponent {
-  private _outputDirty = signal<number>(0);
 
   /**
    * The edit operation being edited (model).
@@ -89,7 +116,6 @@ export class EditOperationComponent {
    * The output text after applying the operation.
    */
   public readonly outputText = computed<string | undefined>(() => {
-    const dirty = this._outputDirty(); // force recompute when dirty changes
     const operation = this.getOperation();
     const input = this.inputText();
     if (!operation || !input) return undefined;
@@ -127,128 +153,69 @@ export class EditOperationComponent {
    */
   public readonly cancelEdit = output();
 
-  public dsl: FormControl<string | null>;
-  public type: FormControl<OperationType>;
-  public at: FormControl<number>;
-  public run: FormControl<number>;
-  public text: FormControl<string | null>;
-  public to: FormControl<number>;
-  public toRun: FormControl<number>;
-  public tags: FormControl<ThesaurusEntry[]>;
-  public note: FormControl<string | null>;
-  public form: FormGroup;
+  // form
+  private readonly _draft = linkedSignal<
+    EditOperation | undefined,
+    EditOperationControls
+  >({
+    source: () => this.operation(),
+    computation: (operation, previous) => ({
+      // the DSL is not derived from the operation: keep what was typed,
+      // unless there is no operation
+      dsl: operation ? previous?.value.dsl || '' : '',
+      type: operation?.type || OperationType.Replace,
+      at: operation?.at ?? 1,
+      run: operation?.run ?? 1,
+      text: operation?.text || '',
+      to: operation?.to || 0,
+      toRun: operation?.toRun || 0,
+      tags: operation?.tags
+        ? mapIdsToEntries(operation.tags, untracked(this.opTagEntries))
+        : [],
+      note: operation?.note || '',
+    }),
+  });
+  public readonly form = form(this._draft, (p) => {
+    maxLength(p.dsl, 1000);
+    min(p.at, 1);
+    min(p.run, 1);
+    maxLength(p.text, 500);
+    min(p.to, 1, {
+      when: ({ valueOf }) => MOVE_TYPES.includes(valueOf(p.type)),
+    });
+    min(p.toRun, 0, {
+      when: ({ valueOf }) => MOVE_TYPES.includes(valueOf(p.type)),
+    });
+    maxLength(p.note, 5000);
+  });
 
   constructor(
-    formBuilder: FormBuilder,
     private _clipboard: Clipboard,
     private _snackbar: MatSnackBar,
   ) {
-    // form
-    this.dsl = new FormControl<string | null>(null, {
-      validators: Validators.maxLength(1000),
-    });
-    this.type = new FormControl<OperationType>(OperationType.Replace, {
-      nonNullable: true,
-    });
-    this.at = new FormControl<number>(1, {
-      nonNullable: true,
-    });
-    this.run = new FormControl<number>(1, {
-      nonNullable: true,
-    });
-    this.text = new FormControl<string | null>(null, {
-      validators: Validators.maxLength(500),
-    });
-    this.to = new FormControl<number>(0, {
-      nonNullable: true,
-    });
-    this.toRun = new FormControl<number>(0, { nonNullable: true });
-    this.tags = new FormControl<ThesaurusEntry[]>([], {
-      nonNullable: true,
-    });
-    this.note = new FormControl<string | null>(null, {
-      validators: Validators.maxLength(5000),
-    });
-    this.form = formBuilder.group({
-      dsl: this.dsl,
-      type: this.type,
-      at: this.at,
-      run: this.run,
-      text: this.text,
-      to: this.to,
-      toRun: this.toRun,
-      tags: this.tags,
-      note: this.note,
-    });
-
-    // when model changes, update form
+    // a new operation was bound: no unsaved edits (keyed on the bound
+    // model: the draft also changes with each user edit)
     effect(() => {
-      const operation = this.operation();
-      this.updateForm(operation);
+      this.operation();
+      untracked(() => this.form().reset());
     });
-
-    // when type changes, update validators for 'to' field
-    this.type.valueChanges.pipe(takeUntilDestroyed()).subscribe((type) => {
-      if (type === 'MoveBefore' || type === 'MoveAfter' || type === 'Swap') {
-        this.to.setValidators(Validators.min(1));
-      } else {
-        this.to.clearValidators();
-      }
-      this.to.updateValueAndValidity();
-    });
-
-    // whenever type, at, run, to, toRun, text change, set output dirty
-    merge(
-      this.type.valueChanges,
-      this.at.valueChanges,
-      this.run.valueChanges,
-      this.to.valueChanges,
-      this.toRun.valueChanges,
-      this.text.valueChanges,
-    )
-      .pipe(debounceTime(300), takeUntilDestroyed())
-      .subscribe(() => {
-        this._outputDirty.set(this._outputDirty() + 1);
-      });
   }
 
-  private mapIdsToEntries(
-    ids: string[],
-    entries: ThesaurusEntry[] | undefined,
-  ): ThesaurusEntry[] {
-    if (!entries) return ids.map((id) => ({ id, value: id }));
-    return ids.map(
-      (id) => entries.find((e) => e.id === id) || { id, value: id },
-    );
-  }
-
-  private updateForm(operation: EditOperation | undefined | null): void {
-    if (!operation) {
-      this.form.reset();
-    } else {
-      this.type.setValue(operation.type);
-      this.at.setValue(operation.at);
-      this.run.setValue(operation.run);
-      this.text.setValue(operation.text || null);
-      this.to.setValue(operation.to || 0);
-      this.toRun.setValue(operation.toRun || 0);
-      this.tags.setValue(
-        operation.tags
-          ? this.mapIdsToEntries(operation.tags, this.opTagEntries())
-          : [],
-      );
-      this.note.setValue(operation.note || null);
-      this.form.markAsPristine();
-    }
+  /**
+   * True if the current operation type has a target position (to/toRun).
+   */
+  public isMoveType(): boolean {
+    return MOVE_TYPES.includes(this.form.type().value());
   }
 
   public parseOperation(): void {
-    if (!this.dsl.value) {
+    const dsl = this.form.dsl().value();
+    if (!dsl) {
       return;
     }
     this.parseError.set(undefined);
     try {
-      const op = EditOperation.parseOperation(this.dsl.value);
+      const op = EditOperation.parseOperation(dsl);
       // override input text
       op.inputText = this.inputText();
       this.operation.set(op);
@@ -266,13 +233,14 @@ export class EditOperationComponent {
     const op = this.getOperation();
     if (!op) return;
 
-    this.dsl.setValue(op.toString());
+    this.form.dsl().value.set(op.toString());
   }
 
   public onOpTagEntriesChange(entries: ThesaurusEntry[]) {
-    this.tags.setValue(entries);
-    this.tags.markAsDirty();
-    this.tags.updateValueAndValidity();
+    this.form
+      .tags()
+      .value.set(entries.map((e) => ({ id: e.id, value: e.value })));
+    this.form.tags().markAsDirty();
   }
 
   private setInputTexts(op: EditOperation): void {
@@ -301,37 +269,36 @@ export class EditOperationComponent {
   }
 
   private getOperation(): EditOperation | undefined {
+    const draft = this._draft();
     // create operation and set its properties
-    const op = EditOperation.createOperation(this.type.value);
-    op.at = this.at.value;
-    op.run = this.run.value;
+    const op = EditOperation.createOperation(draft.type);
+    op.at = draft.at;
+    op.run = draft.run;
 
     if (
-      this.type.value === OperationType.Replace ||
-      this.type.value === OperationType.InsertBefore ||
-      this.type.value === OperationType.InsertAfter
+      draft.type === OperationType.Replace ||
+      draft.type === OperationType.InsertBefore ||
+      draft.type === OperationType.InsertAfter
     ) {
-      op.text = this.text.value?.trim() || undefined;
+      op.text = draft.text.trim() || undefined;
     } else {
       op.text = undefined;
     }
 
     if (
-      this.type.value === OperationType.MoveBefore ||
-      this.type.value === OperationType.MoveAfter ||
-      this.type.value === OperationType.Swap
+      draft.type === OperationType.MoveBefore ||
+      draft.type === OperationType.MoveAfter ||
+      draft.type === OperationType.Swap
     ) {
-      op.to = this.to.value ? this.to.value : undefined;
-      op.toRun = this.toRun.value ? this.toRun.value : undefined;
+      op.to = draft.to ? draft.to : undefined;
+      op.toRun = draft.toRun ? draft.toRun : undefined;
     } else {
       op.to = undefined;
       op.toRun = undefined;
     }
 
-    op.tags = this.tags.value.length
-      ? this.tags.value.map((t) => t.id)
-      : undefined;
-    op.note = this.note.value?.trim() || undefined;
+    op.tags = draft.tags.length ? draft.tags.map((t) => t.id) : undefined;
+    op.note = draft.note.trim() || undefined;
     // calculate input texts
     this.setInputTexts(op);
 
@@ -384,8 +351,9 @@ export class EditOperationComponent {
     if (!coords) return;
     const parsed = this.parsePickedCoords();
     if (!parsed) return;
-    this.at.setValue(parsed.at);
-    this.run.setValue(parsed.run);
+    this.form.at().value.set(parsed.at);
+    this.form.run().value.set(parsed.run);
+    this.form.at().markAsDirty();
     this.expanded.set(true);
   }
 
@@ -394,8 +362,27 @@ export class EditOperationComponent {
     if (!coords) return;
     const parsed = this.parsePickedCoords();
     if (!parsed) return;
-    this.to.setValue(parsed.at);
+    this.form.to().value.set(parsed.at);
+    this.form.to().markAsDirty();
     this.expanded.set(true);
+  }
+
+  /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (
+      !isImplicitSubmission(event) ||
+      this.form().invalid() ||
+      !this.form().dirty()
+    ) {
+      return;
+    }
+    event.preventDefault();
+    this.save();
   }
 
   public cancel(): void {
@@ -406,14 +393,14 @@ export class EditOperationComponent {
    * Saves the current form data by updating the `data` model signal.
    * This method can be called manually (e.g., by a Save button) or
    * automatically (via auto-save).
-   * @param pristine If true (default), the form is marked as pristine
-   * after saving.
+   * @param pristine If true (default), the form's interaction state is
+   * reset after saving.
    * Set to false for auto-save if you want the form to remain dirty.
    */
   public save(pristine = true): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       // show validation errors
-      this.form.markAllAsTouched();
+      this.form().markAsTouched();
       return;
     }
 
@@ -421,7 +408,7 @@ export class EditOperationComponent {
     this.operation.set(operation);
 
     if (pristine) {
-      this.form.markAsPristine();
+      this.form().reset();
     }
   }
 }

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BehaviorSubject, of } from 'rxjs';
@@ -17,6 +17,12 @@ import {
   ApparatusEntryType,
   ApparatusFragment,
 } from '../apparatus-fragment';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 function buildEntry(partial?: Partial<ApparatusEntry>): ApparatusEntry {
   return {
@@ -60,8 +66,7 @@ describe('ApparatusFragmentComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
+        FormField,
         ApparatusFragmentComponent,
       ],
       providers: [
@@ -95,15 +100,15 @@ describe('ApparatusFragmentComponent', () => {
 
   //#region buildForm
   it('should build a form with entries requiring at least 1 item', () => {
-    expect(component.entries.value).toEqual([]);
-    expect(component.entries.hasError('minlength')).toBe(true);
-    component.entries.setValue([buildEntry()]);
-    expect(component.entries.valid).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual([]);
+    expect(!!component.form.entries().getError('strictMinLength')).toBe(true);
+    component.form.entries().value.set([buildEntry()]);
+    expect(component.form.entries().valid()).toBe(true);
   });
 
   it('tag control should reject values over 50 characters', () => {
-    component.tag.setValue('a'.repeat(51));
-    expect(component.tag.hasError('maxlength')).toBe(true);
+    component.form.tag().value.set('a'.repeat(51));
+    expect(!!component.form.tag().getError('maxLength')).toBe(true);
   });
   //#endregion
 
@@ -115,12 +120,12 @@ describe('ApparatusFragmentComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    expect(component.entries.value.length).toBe(1);
+    expect(component.form.entries().value().length).toBe(1);
 
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.entries.value).toEqual([]);
+    expect(plain(component.form.entries().value())).toEqual([]);
     expect(component.summary()).toBeUndefined();
   });
 
@@ -132,9 +137,9 @@ describe('ApparatusFragmentComponent', () => {
     fixture.componentRef.setInput('data', { value: fragment, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.tag.value).toBe('crux');
-    expect(component.entries.value).toEqual(fragment.entries);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.tag().value())).toBe('crux');
+    expect(plain(component.form.entries().value())).toEqual(fragment.entries);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should build and set the summary from the fragment', () => {
@@ -230,8 +235,8 @@ describe('ApparatusFragmentComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    component.tag.setValue('  crux  ');
-    component.entries.setValue([buildEntry({ value: 'a' })]);
+    component.form.tag().value.set('  crux  ');
+    component.form.entries().value.set([buildEntry({ value: 'a' })]);
 
     const value = (component as any).getValue() as ApparatusFragment;
     expect(value.location).toBe(identity.loc);
@@ -324,8 +329,8 @@ describe('ApparatusFragmentComponent', () => {
     const newEntry = buildEntry({ value: 'new' });
     component.saveEntry(newEntry);
 
-    expect(component.entries.value).toEqual([newEntry]);
-    expect(component.entries.dirty).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual([newEntry]);
+    expect(component.form.entries().dirty()).toBe(true);
   });
 
   it('saveEntry should replace the entry at editedEntryIndex when editing an existing one', () => {
@@ -341,7 +346,7 @@ describe('ApparatusFragmentComponent', () => {
     const edited = buildEntry({ value: 'b-edited' });
     component.saveEntry(edited);
 
-    expect(component.entries.value).toEqual([original[0], edited]);
+    expect(plain(component.form.entries().value())).toEqual([original[0], edited]);
   });
 
   it('saveEntry should update the summary and close the entry editor', () => {
@@ -371,7 +376,7 @@ describe('ApparatusFragmentComponent', () => {
     // no addEntry()/editEntry() call: editedEntry() is undefined
     component.saveEntry(buildEntry({ value: 'should-not-be-saved' }));
 
-    expect(component.entries.value).toEqual([buildEntry({ value: 'kept' })]);
+    expect(plain(component.form.entries().value())).toEqual([buildEntry({ value: 'kept' })]);
   });
   //#endregion
 
@@ -388,8 +393,8 @@ describe('ApparatusFragmentComponent', () => {
     component.removeEntry(0);
 
     expect(dialogService.confirm).toHaveBeenCalled();
-    expect(component.entries.value).toEqual([entries[1]]);
-    expect(component.entries.dirty).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual([entries[1]]);
+    expect(component.form.entries().dirty()).toBe(true);
   });
 
   it('removeEntry should do nothing when the user cancels the confirmation', () => {
@@ -404,7 +409,7 @@ describe('ApparatusFragmentComponent', () => {
 
     component.removeEntry(0);
 
-    expect(component.entries.value).toEqual(entries);
+    expect(plain(component.form.entries().value())).toEqual(entries);
   });
   //#endregion
 
@@ -419,13 +424,13 @@ describe('ApparatusFragmentComponent', () => {
     fixture.detectChanges();
 
     component.moveEntryUp(0);
-    expect(component.entries.value.map((e: ApparatusEntry) => e.value)).toEqual([
+    expect(component.form.entries().value().map((e: ApparatusEntry) => e.value)).toEqual([
       'a',
       'b',
     ]);
 
     component.moveEntryUp(1);
-    expect(component.entries.value.map((e: ApparatusEntry) => e.value)).toEqual([
+    expect(component.form.entries().value().map((e: ApparatusEntry) => e.value)).toEqual([
       'b',
       'a',
     ]);
@@ -441,16 +446,24 @@ describe('ApparatusFragmentComponent', () => {
     fixture.detectChanges();
 
     component.moveEntryDown(1);
-    expect(component.entries.value.map((e: ApparatusEntry) => e.value)).toEqual([
+    expect(component.form.entries().value().map((e: ApparatusEntry) => e.value)).toEqual([
       'a',
       'b',
     ]);
 
     component.moveEntryDown(0);
-    expect(component.entries.value.map((e: ApparatusEntry) => e.value)).toEqual([
+    expect(component.form.entries().value().map((e: ApparatusEntry) => e.value)).toEqual([
       'b',
       'a',
     ]);
   });
   //#endregion
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
 });

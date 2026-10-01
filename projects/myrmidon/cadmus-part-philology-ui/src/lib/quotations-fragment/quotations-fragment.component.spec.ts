@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BehaviorSubject, of } from 'rxjs';
@@ -12,6 +12,12 @@ import { EditedObject, FragmentIdentity, ThesaurusEntry } from '@myrmidon/cadmus
 
 import { QuotationsFragmentComponent } from './quotations-fragment.component';
 import { QuotationsFragment, QuotationEntry } from '../quotations-fragment';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 function buildFragment(entries: QuotationEntry[]): QuotationsFragment {
   return {
@@ -62,7 +68,7 @@ describe('QuotationsFragmentComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, QuotationsFragmentComponent],
+      imports: [QuotationsFragmentComponent],
       providers: [
         provideHttpClient(withXhr()),
         provideHttpClientTesting(),
@@ -83,23 +89,23 @@ describe('QuotationsFragmentComponent', () => {
 
   //#region buildForm
   it('should build an initially invalid form (entries array empty)', () => {
-    expect(component.entries.value).toEqual([]);
-    expect(component.entries.hasError('minlength')).toBe(true);
-    expect(component.form.invalid).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual([]);
+    expect(!!component.form.entries().getError('strictMinLength')).toBe(true);
+    expect(component.form().invalid()).toBe(true);
   });
 
   it('should become valid once at least one entry is present', () => {
-    component.entries.setValue([ENTRY_A]);
-    expect(component.entries.valid).toBe(true);
+    component.form.entries().value.set(plain([ENTRY_A]));
+    expect(component.form.entries().valid()).toBe(true);
   });
   //#endregion
 
   //#region onDataSet / updateForm
   it('should reset entries when the data has no value', () => {
-    component.entries.setValue([ENTRY_A]);
+    component.form.entries().value.set(plain([ENTRY_A]));
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
-    expect(component.entries.value).toEqual([]);
+    expect(plain(component.form.entries().value())).toEqual([]);
   });
 
   it('should populate entries from the fragment and mark the form pristine', () => {
@@ -110,8 +116,8 @@ describe('QuotationsFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.entries.value).toEqual([ENTRY_A, ENTRY_B]);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_A, ENTRY_B]));
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should compute frText from baseText and the fragment location', () => {
@@ -193,10 +199,10 @@ describe('QuotationsFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
 
     const value = (component as any).getValue() as QuotationsFragment;
-    expect(value.entries).toEqual([ENTRY_A, ENTRY_B]);
+    expect(value.entries).toEqual(plain([ENTRY_A, ENTRY_B]));
     expect(value.location).toBe('1.1');
   });
   //#endregion
@@ -211,31 +217,31 @@ describe('QuotationsFragmentComponent', () => {
   it('editEntry should open the editor with a deep copy of the given entry', () => {
     component.editEntry(ENTRY_A, 0);
     expect(component.editedEntryIndex()).toBe(0);
-    expect(component.editedEntry()).toEqual(ENTRY_A);
+    expect(component.editedEntry()).toEqual(plain(ENTRY_A));
     expect(component.editedEntry()).not.toBe(ENTRY_A); // structuredClone: distinct reference
   });
 
   it('saveEntry should append a new entry when editedEntryIndex is -1', () => {
-    component.entries.setValue([ENTRY_A]);
+    component.form.entries().value.set(plain([ENTRY_A]));
     component.addEntry();
 
     component.saveEntry(ENTRY_B);
 
-    expect(component.entries.value).toEqual([ENTRY_A, ENTRY_B]);
-    expect(component.entries.dirty).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_A, ENTRY_B]));
+    expect(component.form.entries().dirty()).toBe(true);
     // the editor closes after saving
     expect(component.editedEntryIndex()).toBe(-1);
     expect(component.editedEntry()).toBeUndefined();
   });
 
   it('saveEntry should replace the entry at editedEntryIndex when editing an existing one', () => {
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
     component.editEntry(ENTRY_A, 0);
 
     const updated: QuotationEntry = { ...ENTRY_A, citation: '2.2' };
     component.saveEntry(updated);
 
-    expect(component.entries.value).toEqual([updated, ENTRY_B]);
+    expect(plain(component.form.entries().value())).toEqual(plain([updated, ENTRY_B]));
   });
 
   it('closeEntry should clear the edited entry state', () => {
@@ -248,48 +254,56 @@ describe('QuotationsFragmentComponent', () => {
 
   //#region removeEntry
   it('removeEntry should remove the entry at the given index when confirmed', () => {
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
     dialogService.confirm.mockReturnValue(of(true));
 
     component.removeEntry(0);
 
-    expect(component.entries.value).toEqual([ENTRY_B]);
-    expect(component.entries.dirty).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_B]));
+    expect(component.form.entries().dirty()).toBe(true);
   });
 
   it('removeEntry should not remove the entry when the user cancels', () => {
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
     dialogService.confirm.mockReturnValue(of(false));
 
     component.removeEntry(0);
 
-    expect(component.entries.value).toEqual([ENTRY_A, ENTRY_B]);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_A, ENTRY_B]));
   });
   //#endregion
 
   //#region moveEntryUp / moveEntryDown
   it('moveEntryUp should swap the entry with its predecessor', () => {
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
     component.moveEntryUp(1);
-    expect(component.entries.value).toEqual([ENTRY_B, ENTRY_A]);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_B, ENTRY_A]));
   });
 
   it('moveEntryUp should do nothing for the first entry', () => {
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
     component.moveEntryUp(0);
-    expect(component.entries.value).toEqual([ENTRY_A, ENTRY_B]);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_A, ENTRY_B]));
   });
 
   it('moveEntryDown should swap the entry with its successor', () => {
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
     component.moveEntryDown(0);
-    expect(component.entries.value).toEqual([ENTRY_B, ENTRY_A]);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_B, ENTRY_A]));
   });
 
   it('moveEntryDown should do nothing for the last entry', () => {
-    component.entries.setValue([ENTRY_A, ENTRY_B]);
+    component.form.entries().value.set(plain([ENTRY_A, ENTRY_B]));
     component.moveEntryDown(1);
-    expect(component.entries.value).toEqual([ENTRY_A, ENTRY_B]);
+    expect(plain(component.form.entries().value())).toEqual(plain([ENTRY_A, ENTRY_B]));
   });
   //#endregion
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
 });

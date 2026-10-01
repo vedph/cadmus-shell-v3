@@ -1,45 +1,42 @@
-import { FormControl } from '@angular/forms';
+import { Injector, runInInjectionContext, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { form } from '@angular/forms/signals';
 
 import { MspValidators } from './msp-validators';
 
 describe('MspValidators', () => {
   describe('msp', () => {
-    it('should return null for an empty control value', () => {
-      const control = new FormControl(null);
-      expect(MspValidators.msp(control)).toBeNull();
+    function makeForm(text: string | null) {
+      return runInInjectionContext(TestBed.inject(Injector), () =>
+        form(signal({ text }), (p) => {
+          MspValidators.msp(p.text);
+        }),
+      );
+    }
+
+    it('should accept an empty value', () => {
+      expect(makeForm(null).text().valid()).toBe(true);
+      expect(makeForm('').text().valid()).toBe(true);
     });
 
-    it('should return null for an undefined control value', () => {
-      const control = new FormControl(undefined);
-      expect(MspValidators.msp(control)).toBeNull();
-    });
-
-    it('should return null for a falsy (empty string) control value', () => {
-      const control = new FormControl('');
-      expect(MspValidators.msp(control)).toBeNull();
-    });
-
-    it('should return null for a valid, well-formed msp operation (delete)', () => {
+    it('should accept a valid, well-formed msp operation (delete)', () => {
       // @1x2= is a valid delete: rangeA spans 2 chars, no B-value.
-      const control = new FormControl('@1x2=');
-      expect(MspValidators.msp(control)).toBeNull();
+      expect(makeForm('@1x2=').text().valid()).toBe(true);
     });
 
-    it('should return null for a valid, well-formed msp operation (replace)', () => {
-      const control = new FormControl('@1x2="ab"');
-      expect(MspValidators.msp(control)).toBeNull();
+    it('should accept a valid, well-formed msp operation (replace)', () => {
+      expect(makeForm('@1x2="ab"').text().valid()).toBe(true);
     });
 
-    it('should return { msp: true } for unparseable text', () => {
-      const control = new FormControl('not a valid operation');
-      expect(MspValidators.msp(control)).toEqual({ msp: true });
+    it('should return an msp error for unparseable text', () => {
+      const f = makeForm('not a valid operation');
+      expect(f.text().getError('msp')).toBeTruthy();
     });
 
-    it('should return { msp: true } when the text parses but the operation fails validate()', () => {
+    it('should return an msp error when the text parses but the operation fails validate()', () => {
       // @1x0= parses as a delete operation (no B-value), but a delete
       // operation must span at least 1 character (length 0 is invalid).
-      const control = new FormControl('@1x0=');
-      expect(MspValidators.msp(control)).toEqual({ msp: true });
+      expect(makeForm('@1x0=').text().getError('msp')).toBeTruthy();
     });
   });
 });

@@ -14,6 +14,12 @@ import { OrthographyFragmentComponent } from './orthography-fragment.component';
 import { OrthographyFragment } from '../orthography-fragment';
 import { EditOperation, OperationType } from '../services/edit-operation';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function buildFragment(
   overrides: Partial<OrthographyFragment> = {},
 ): OrthographyFragment {
@@ -72,25 +78,25 @@ describe('OrthographyFragmentComponent', () => {
   });
 
   it('should build a form with default values', () => {
-    expect(component.reference.value).toBe('');
-    expect(component.language.value).toBeNull();
-    expect(component.tags.value).toEqual([]);
-    expect(component.note.value).toBeNull();
-    expect(component.operations.value).toEqual([]);
-    expect(component.textTarget.value).toBe(false);
+    expect(plain(component.form.reference().value())).toBe('');
+    expect(component.form.language().value()).toBe('');
+    expect(plain(component.form.tags().value())).toEqual([]);
+    expect(component.form.note().value()).toBe('');
+    expect(plain(component.form.operations().value())).toEqual([]);
+    expect(plain(component.form.textTarget().value())).toBe(false);
   });
 
   //#region onDataSet / updateForm
   it('should reset the form when data has no value', () => {
-    component.reference.setValue('abc');
-    component.tags.setValue([{ id: 't1', value: 'T1' }]);
+    component.form.reference().value.set('abc');
+    component.form.tags().value.set([{ id: 't1', value: 'T1' }]);
 
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.reference.value).toBe('');
-    expect(component.tags.value).toEqual([]);
-    expect(component.operations.value).toEqual([]);
+    expect(plain(component.form.reference().value())).toBe('');
+    expect(plain(component.form.tags().value())).toEqual([]);
+    expect(plain(component.form.operations().value())).toEqual([]);
   });
 
   it('should populate thesauri signals from data and clear missing ones', () => {
@@ -123,7 +129,7 @@ describe('OrthographyFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.tags.value).toEqual([
+    expect(plain(component.form.tags().value())).toEqual([
       { id: 'tag1', value: 'Tag 1' },
       { id: 'unknown', value: 'unknown' },
     ]);
@@ -142,11 +148,11 @@ describe('OrthographyFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.reference.value).toBe('stdform');
-    expect(component.language.value).toBe('lat');
-    expect(component.note.value).toBe('a note');
-    expect(component.textTarget.value).toBe(true);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.reference().value())).toBe('stdform');
+    expect(plain(component.form.language().value())).toBe('lat');
+    expect(plain(component.form.note().value())).toBe('a note');
+    expect(plain(component.form.textTarget().value())).toBe(true);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should parse fragment.operations DSL strings into EditOperation instances and disable reference', () => {
@@ -157,10 +163,10 @@ describe('OrthographyFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.operations.value.length).toBe(1);
-    expect(component.operations.value[0].type).toBe(OperationType.Replace);
-    expect(component.operations.value[0].at).toBe(1);
-    expect(component.reference.disabled).toBe(true);
+    expect(component.form.operations().value().length).toBe(1);
+    expect(component.form.operations().value()[0].type).toBe(OperationType.Replace);
+    expect(component.form.operations().value()[0].at).toBe(1);
+    expect(component.form.reference().disabled()).toBe(true);
   });
 
   it('should enable reference when the fragment has no operations', () => {
@@ -171,8 +177,8 @@ describe('OrthographyFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.operations.value).toEqual([]);
-    expect(component.reference.disabled).toBe(false);
+    expect(plain(component.form.operations().value())).toEqual([]);
+    expect(component.form.reference().disabled()).toBe(false);
   });
 
   it('should recover from an unparseable operations DSL string by clearing operations', () => {
@@ -184,7 +190,7 @@ describe('OrthographyFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.operations.value).toEqual([]);
+    expect(plain(component.form.operations().value())).toEqual([]);
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
@@ -204,16 +210,16 @@ describe('OrthographyFragmentComponent', () => {
 
   //#region reference auto disable effect (independent of updateForm)
   it('should disable the reference control whenever operations become non-empty, and re-enable it when cleared', () => {
-    expect(component.reference.disabled).toBe(false);
+    expect(component.form.reference().disabled()).toBe(false);
 
     const op = EditOperation.createOperation(OperationType.Replace);
-    component.operations.setValue([op]);
+    component.form.operations().value.set([op]);
     fixture.detectChanges();
-    expect(component.reference.disabled).toBe(true);
+    expect(component.form.reference().disabled()).toBe(true);
 
-    component.operations.setValue([]);
+    component.form.operations().value.set([]);
     fixture.detectChanges();
-    expect(component.reference.disabled).toBe(false);
+    expect(component.form.reference().disabled()).toBe(false);
   });
   //#endregion
 
@@ -258,10 +264,10 @@ describe('OrthographyFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    component.reference.setValue('newref');
-    component.language.setValue(' lat ');
-    component.note.setValue(' a note ');
-    component.tags.setValue([{ id: 't1', value: 'T1' }]);
+    component.form.reference().value.set('newref');
+    component.form.language().value.set(' lat ');
+    component.form.note().value.set(' a note ');
+    component.form.tags().value.set([{ id: 't1', value: 'T1' }]);
 
     const value = (component as any).getValue() as OrthographyFragment;
 
@@ -289,15 +295,15 @@ describe('OrthographyFragmentComponent', () => {
   it('onOperationsChange should update and dirty the operations control', () => {
     const op = EditOperation.createOperation(OperationType.Replace);
     component.onOperationsChange([op]);
-    expect(component.operations.value).toEqual([op]);
-    expect(component.operations.dirty).toBe(true);
+    expect(plain(component.form.operations().value())).toEqual([op]);
+    expect(component.form.operations().dirty()).toBe(true);
   });
 
   it('onTagEntriesChange should update and dirty the tags control', () => {
     const entries: ThesaurusEntry[] = [{ id: 't1', value: 'T1' }];
     component.onTagEntriesChange(entries);
-    expect(component.tags.value).toEqual(entries);
-    expect(component.tags.dirty).toBe(true);
+    expect(plain(component.form.tags().value())).toEqual(entries);
+    expect(component.form.tags().dirty()).toBe(true);
   });
   //#endregion
 
@@ -310,5 +316,38 @@ describe('OrthographyFragmentComponent', () => {
     component.onTagChange({ id: 'tag-x', value: 'Tag X' });
     expect(clipboard.copy).toHaveBeenCalledWith('tag-x');
     expect(snackBar.open).toHaveBeenCalled();
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
+
+  it('should save the text target flag', () => {
+    fixture.componentRef.setInput('data', {
+      value: buildFragment({ isTextTarget: false }),
+      thesauri: {},
+    });
+    fixture.detectChanges();
+    const box: HTMLInputElement = fixture.nativeElement.querySelector(
+      'mat-checkbox input',
+    );
+    box.click();
+    fixture.detectChanges();
+    expect(component.form.textTarget().value()).toBe(true);
+
+    component.save();
+
+    expect(component.data()!.value!.isTextTarget).toBe(true);
+  });
+
+  it('should show the reference length error', () => {
+    component.form.reference().value.set('x'.repeat(101));
+    component.form.reference().markAsTouched();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('reference too long');
   });
 });

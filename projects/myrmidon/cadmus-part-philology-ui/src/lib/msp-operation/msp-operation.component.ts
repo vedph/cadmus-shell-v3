@@ -1,21 +1,23 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   output,
   model,
   effect,
   signal,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+  FormField,
+  disabled,
+  form,
+  maxLength,
+  pattern,
+  required,
+} from '@angular/forms/signals';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { MspOperation, MspOperator } from '../msp-operation';
 import {
@@ -45,6 +47,47 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TextRange } from '@myrmidon/cadmus-core';
 
 import { MspValidators } from '../msp-validators';
+import { isImplicitSubmission } from '../signal-form-utils';
+
+interface MspVisualControls {
+  operator: MspOperator;
+  rangeA: string;
+  valueA: string;
+  rangeB: string;
+  valueB: string;
+  tag: string;
+  note: string;
+}
+
+interface MspOperationControls {
+  text: string;
+  visual: MspVisualControls;
+}
+
+const RANGE_REGEXP = /^\@?\d+(?:[x×]\d+)?$/;
+
+function toVisual(operation?: MspOperation | null): MspVisualControls {
+  return {
+    operator: operation?.operator ?? MspOperator.delete,
+    rangeA: operation?.rangeA ? operation.rangeA.toString() : '',
+    valueA: operation?.valueA || '',
+    rangeB: operation?.rangeB ? operation.rangeB.toString() : '',
+    valueB: operation?.valueB || '',
+    tag: operation?.tag || '',
+    note: operation?.note || '',
+  };
+}
+
+function toDraft(operation?: MspOperation): MspOperationControls {
+  return {
+    text: operation ? operation.toString() : '',
+    visual: toVisual(operation),
+  };
+}
+
+function sameVisual(a: MspVisualControls, b: MspVisualControls): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
 
 /**
  * Single misspelling operation editor.
@@ -56,8 +99,7 @@ import { MspValidators } from '../msp-validators';
   styleUrls: ['./msp-operation.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardContent,
     MatFormField,
@@ -77,10 +119,7 @@ import { MspValidators } from '../msp-validators';
     MatTooltip,
   ],
 })
-export class MspOperationComponent implements OnInit {
-  private _ignoreTextUpdate?: boolean;
-  private _ignoreVisualUpdate?: boolean;
-
+export class MspOperationComponent {
   /**
    * The operation being edited.
    */
@@ -91,239 +130,115 @@ export class MspOperationComponent implements OnInit {
   public readonly visualExpanded = signal<boolean>(false);
 
   // form
-  public form: FormGroup;
-  public visual: FormGroup;
-  public text: FormControl<string | null>;
-  public operator: FormControl<MspOperator>;
-  public rangeA: FormControl<string | null>;
-  public valueA: FormControl<string | null>;
-  public rangeB: FormControl<string | null>;
-  public valueB: FormControl<string | null>;
-  public tag: FormControl<string | null>;
-  public note: FormControl<string | null>;
+  private readonly _draft = linkedSignal(() => toDraft(this.operation()));
+  public readonly form = form(this._draft, (p) => {
+    required(p.text);
+    MspValidators.msp(p.text);
 
-  constructor(formBuilder: FormBuilder) {
-    const rangeRegExp = /^\@?\d+(?:[x×]\d+)?$/;
-    this.text = formBuilder.control(null, [
-      Validators.required,
-      MspValidators.msp,
-    ]);
+    const v = p.visual;
+    required(v.operator);
+    required(v.rangeA);
+    pattern(v.rangeA, RANGE_REGEXP);
+    maxLength(v.valueA, 100);
+    pattern(v.rangeB, RANGE_REGEXP);
+    maxLength(v.valueB, 100);
+    maxLength(v.tag, 50);
+    pattern(v.tag, /^[0-9a-zA-Z_\.\-]+$/);
+    maxLength(v.note, 100);
+    pattern(v.note, /^[^{}]+$/);
 
-    this.operator = formBuilder.control(MspOperator.delete, {
-      validators: Validators.required,
-      nonNullable: true,
-    });
-
-    this.rangeA = formBuilder.control(null, [
-      Validators.required,
-      Validators.pattern(rangeRegExp),
-    ]);
-    this.valueA = formBuilder.control(null, Validators.maxLength(100));
-
-    this.rangeB = formBuilder.control(null, [Validators.pattern(rangeRegExp)]);
-    this.valueB = formBuilder.control(null, Validators.maxLength(100));
-
-    this.tag = formBuilder.control(null, [
-      Validators.maxLength(50),
-      Validators.pattern(/^[0-9a-zA-Z_\.\-]+$/),
-    ]);
-
-    this.note = formBuilder.control(null, [
-      Validators.maxLength(100),
-      Validators.pattern(/^[^{}]+$/),
-    ]);
-
-    this.visual = formBuilder.group({
-      operator: this.operator,
-      rangeA: this.rangeA,
-      valueA: this.valueA,
-      rangeB: this.rangeB,
-      valueB: this.valueB,
-      tag: this.tag,
-      note: this.note,
-    });
-
-    this.form = formBuilder.group({
-      text: this.text,
-      visual: this.visual,
-    });
-
-    effect(() => {
-      this.updateFormControls(this.operation(), true);
-    });
-  }
-
-  public ngOnInit(): void {
-    // whenever text changes, parse the operation
-    // (unless instructed to ignore the change)
-    this.text.valueChanges
-      .pipe(
-        filter((_) => !this._ignoreTextUpdate),
-        debounceTime(300),
-        distinctUntilChanged(),
-      )
-      .subscribe((_) => {
-        try {
-          this._ignoreTextUpdate = true;
-          this.updateVisual();
-        } finally {
-          this._ignoreTextUpdate = false;
-        }
-      });
-
-    // whenever visual editor changes, update the text
-    // (unless instructed to ignore the change)
-    this.visual.valueChanges
-      .pipe(
-        filter((_) => !this._ignoreVisualUpdate),
-        debounceTime(300),
-        distinctUntilChanged(),
-      )
-      .subscribe((_) => {
-        try {
-          this._ignoreVisualUpdate = true;
-          this.updateText();
-        } finally {
-          this._ignoreVisualUpdate = false;
-        }
-      });
-
-    // adjust visual UI for current operator
-    this.operator.valueChanges
-      .pipe(
-        filter((_) => !this._ignoreVisualUpdate),
-        debounceTime(300),
-        distinctUntilChanged(),
-      )
-      .subscribe((_) => {
-        this.adjustVisualForOperator();
-      });
-
-    this.adjustVisualForOperator();
-  }
-
-  private updateFormControls(
-    operation?: MspOperation,
-    updateText?: boolean,
-  ): void {
-    if (!operation) {
-      this.form.reset();
-      return;
-    }
-
-    const noEvent = { emitEvent: false };
-
-    this.visual.patchValue(
-      {
-        operator: operation.operator,
-        rangeA: operation.rangeA ? operation.rangeA.toString() : null,
-        valueA: operation.valueA,
-        rangeB: operation.rangeB ? operation.rangeB.toString() : null,
-        valueB: operation.valueB,
-        tag: operation.tag,
-        note: operation.note,
-      },
-      noEvent,
+    // the fields used by each operator
+    const op = ({ valueOf }: { valueOf: (path: typeof v.operator) => MspOperator }) =>
+      valueOf(v.operator);
+    const noOperator = (ctx: any) => op(ctx) === undefined || op(ctx) === null;
+    disabled(v.rangeA, noOperator);
+    disabled(v.valueA, noOperator);
+    disabled(v.tag, noOperator);
+    disabled(v.note, noOperator);
+    disabled(
+      v.rangeB,
+      (ctx) => op(ctx) !== MspOperator.move && op(ctx) !== MspOperator.swap,
     );
+    disabled(
+      v.valueB,
+      (ctx) =>
+        op(ctx) !== MspOperator.replace &&
+        op(ctx) !== MspOperator.insert &&
+        op(ctx) !== MspOperator.swap,
+    );
+  });
 
-    if (updateText) {
-      this.text.setValue(operation.toString(), noEvent);
-    }
-    this.form.markAsPristine();
+  constructor() {
+    // a new operation was bound: no unsaved edits (keyed on the bound
+    // model: the draft also changes with each user edit)
+    effect(() => {
+      this.operation();
+      untracked(() => this.form().reset());
+    });
+
+    // text -> visual: when the text parses to an operation different from
+    // the visual one, update the visual editor
+    toObservable(this.form.text().value)
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe((text) => this.updateVisual(text));
+
+    // visual -> text: when the valid visual operation differs from the
+    // text, update the text
+    toObservable(this.form.visual().value)
+      .pipe(debounceTime(300), takeUntilDestroyed())
+      .subscribe(() => this.updateText());
   }
 
   /**
    * Update the visual editor from the text editor, if valid.
    */
-  private updateVisual(): void {
-    if (this._ignoreVisualUpdate) {
-      return;
-    }
-    const operation = MspOperation.parse(this.text.value);
+  private updateVisual(text: string): void {
+    const operation = MspOperation.parse(text);
     if (!operation) {
       return;
     }
-    this.updateFormControls(operation, false);
+    const visual = toVisual(operation);
+    if (!sameVisual(visual, this.form.visual().value())) {
+      this.form.visual().value.set(visual);
+    }
   }
 
   /**
    * Update the text editor from the visual editor, if valid.
    */
   private updateText(): void {
-    if (this._ignoreTextUpdate || this.visual.invalid) {
+    if (this.form.visual().invalid()) {
       return;
     }
-    this.text.setValue(this.getOperation().toString(), { emitEvent: false });
-    this.text.updateValueAndValidity();
-    this.text.markAsDirty();
-  }
-
-  private adjustVisualForOperator(): void {
-    const noEvent = { emitEvent: false };
-
-    switch (this.operator.value) {
-      case MspOperator.delete:
-        this.rangeA.enable(noEvent);
-        this.valueA.enable(noEvent);
-        this.rangeB.disable(noEvent);
-        this.valueB.disable(noEvent);
-        this.tag.enable(noEvent);
-        this.note.enable(noEvent);
-        break;
-      case MspOperator.replace:
-      case MspOperator.insert:
-        this.rangeA.enable(noEvent);
-        this.valueA.enable(noEvent);
-        this.rangeB.disable(noEvent);
-        this.valueB.enable(noEvent);
-        this.tag.enable(noEvent);
-        this.note.enable(noEvent);
-        break;
-      case MspOperator.move:
-        this.rangeA.enable(noEvent);
-        this.valueA.enable(noEvent);
-        this.rangeB.enable(noEvent);
-        this.valueB.disable(noEvent);
-        this.tag.enable(noEvent);
-        this.note.enable(noEvent);
-        break;
-      case MspOperator.swap:
-        this.rangeA.enable(noEvent);
-        this.valueA.enable(noEvent);
-        this.rangeB.enable(noEvent);
-        this.valueB.enable(noEvent);
-        this.tag.enable(noEvent);
-        this.note.enable(noEvent);
-        break;
-      default:
-        this.rangeA.disable(noEvent);
-        this.valueA.disable(noEvent);
-        this.rangeB.disable(noEvent);
-        this.valueB.disable(noEvent);
-        this.tag.disable(noEvent);
-        this.note.disable(noEvent);
-        break;
+    const text = this.getOperation().toString();
+    // skip when the text already represents the same operation
+    const current = MspOperation.parse(this.form.text().value());
+    if (current?.toString() === text) {
+      return;
     }
+    this.form.text().value.set(text);
+    this.form.text().markAsDirty();
   }
 
   /**
    * Get a new MspOperation object from the visual editor.
    */
   private getOperation(): MspOperation {
+    const v = this.form.visual().value();
     const op = new MspOperation();
-    op.operator = this.operator.value;
-    op.rangeA = TextRange.parse(this.rangeA.value || '')!;
-    op.valueA = this.valueA.value || undefined;
-    op.rangeB = TextRange.parse(this.rangeB.value || '')!;
-    op.valueB = this.valueB.value || undefined;
-    op.tag = this.tag.value || undefined;
-    op.note = this.note.value || undefined;
-
+    op.operator = v.operator;
+    op.rangeA = TextRange.parse(v.rangeA || '')!;
+    op.valueA = v.valueA || undefined;
+    op.rangeB = TextRange.parse(v.rangeB || '')!;
+    op.valueB = v.valueB || undefined;
+    op.tag = v.tag || undefined;
+    op.note = v.note || undefined;
     return op;
   }
 
   public resetText(): void {
-    this.form.reset();
+    this._draft.set(toDraft());
+    this.form().reset();
   }
 
   /**
@@ -334,10 +249,29 @@ export class MspOperationComponent implements OnInit {
   }
 
   /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (
+      !isImplicitSubmission(event) ||
+      this.form().invalid() ||
+      !this.form().dirty()
+    ) {
+      return;
+    }
+    event.preventDefault();
+    this.save();
+  }
+
+  /**
    * Save the current operation.
    */
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
     this.operation.set(this.getOperation());

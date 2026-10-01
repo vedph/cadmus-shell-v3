@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -20,6 +20,12 @@ import {
 
 import { WitnessesFragmentComponent } from './witnesses-fragment.component';
 import { WitnessesFragment, Witness } from '../witnesses-fragment';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 function buildFragment(witnesses: Witness[]): WitnessesFragment {
   return {
@@ -58,7 +64,7 @@ describe('WitnessesFragmentComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, WitnessesFragmentComponent],
+      imports: [WitnessesFragmentComponent],
       providers: [
         provideHttpClient(withXhr()),
         provideHttpClientTesting(),
@@ -96,18 +102,18 @@ describe('WitnessesFragmentComponent', () => {
 
   //#region buildForm
   it('should build an initially invalid form (witnesses required)', () => {
-    expect(component.witnesses.value).toBeNull();
-    expect(component.witnesses.hasError('required')).toBe(true);
-    expect(component.form.invalid).toBe(true);
+    expect(plain(component.form.witnesses().value())).toEqual([]);
+    expect(!!component.form.witnesses().getError('strictMinLength')).toBe(true);
+    expect(component.form().invalid()).toBe(true);
   });
   //#endregion
 
   //#region onDataSet / updateForm
   it('should reset the form when the data has no value', () => {
-    component.witnesses.setValue([WITNESS_A]);
+    component.form.witnesses().value.set(plain([WITNESS_A]));
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
-    expect(component.witnesses.value).toBeNull();
+    expect(plain(component.form.witnesses().value())).toEqual([]);
   });
 
   it('should populate witnesses from the fragment', () => {
@@ -118,7 +124,7 @@ describe('WitnessesFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.witnesses.value).toEqual([WITNESS_A, WITNESS_B]);
+    expect(plain(component.form.witnesses().value())).toEqual(plain([WITNESS_A, WITNESS_B]));
   });
 
   it('should compute frText from baseText and the fragment location', () => {
@@ -143,12 +149,12 @@ describe('WitnessesFragmentComponent', () => {
     };
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
-    expect(component.witnesses.value).toEqual([WITNESS_A]);
+    expect(plain(component.form.witnesses().value())).toEqual(plain([WITNESS_A]));
 
     fixture.componentRef.setInput('data', undefined);
     fixture.detectChanges();
 
-    expect(component.witnesses.value).toBeNull();
+    expect(plain(component.form.witnesses().value())).toEqual([]);
   });
   //#endregion
 
@@ -162,10 +168,10 @@ describe('WitnessesFragmentComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    component.witnesses.setValue([WITNESS_A, WITNESS_B]);
+    component.form.witnesses().value.set(plain([WITNESS_A, WITNESS_B]));
 
     const value = (component as any).getValue() as WitnessesFragment;
-    expect(value.witnesses).toEqual([WITNESS_A, WITNESS_B]);
+    expect(value.witnesses).toEqual(plain([WITNESS_A, WITNESS_B]));
     expect(value.location).toBe('1.1');
   });
   //#endregion
@@ -175,26 +181,24 @@ describe('WitnessesFragmentComponent', () => {
     component.openCurrentWitness();
     expect(component.currentWitnessOpen()).toBe(true);
     expect(component.currentWitnessId()).toBeUndefined();
-    expect(component.id.value).toBeNull();
-    expect(component.witness.enabled).toBe(true);
+    expect(component.witness.id().value()).toBe('');
   });
 
   it('openCurrentWitness(witness) should populate the witness form and mark it pristine', () => {
     component.openCurrentWitness(WITNESS_A);
     expect(component.currentWitnessOpen()).toBe(true);
     expect(component.currentWitnessId()).toBe('A');
-    expect(component.id.value).toBe('A');
-    expect(component.citation.value).toBe('cod. A');
-    expect(component.text.value).toBe('lorem');
-    expect(component.witness.pristine).toBe(true);
+    expect(plain(component.witness.id().value())).toBe('A');
+    expect(plain(component.witness.citation().value())).toBe('cod. A');
+    expect(plain(component.witness.text().value())).toBe('lorem');
+    expect(component.witness().dirty()).toBe(false);
   });
 
-  it('closeCurrentWitness should close and disable the witness form', () => {
+  it('closeCurrentWitness should close the witness form', () => {
     component.openCurrentWitness(WITNESS_A);
     component.closeCurrentWitness();
     expect(component.currentWitnessOpen()).toBe(false);
     expect(component.currentWitnessId()).toBeUndefined();
-    expect(component.witness.disabled).toBe(true);
   });
   //#endregion
 
@@ -203,50 +207,50 @@ describe('WitnessesFragmentComponent', () => {
     component.openCurrentWitness();
     // id/citation/text required and left empty => invalid
     component.saveCurrentWitness();
-    expect(component.witnesses.value).toBeNull();
+    expect(plain(component.form.witnesses().value())).toEqual([]);
   });
 
   it('saveCurrentWitness should append a new witness and close the editor', () => {
-    component.witnesses.setValue([WITNESS_A]);
+    component.form.witnesses().value.set(plain([WITNESS_A]));
     component.openCurrentWitness();
-    component.id.setValue('C');
-    component.citation.setValue('cod. C');
-    component.text.setValue('dolor');
+    component.witness.id().value.set('C');
+    component.witness.citation().value.set('cod. C');
+    component.witness.text().value.set('dolor');
 
     component.saveCurrentWitness();
 
-    expect(component.witnesses.value).toEqual([
+    expect(plain(component.form.witnesses().value())).toEqual([
       WITNESS_A,
       { id: 'C', citation: 'cod. C', text: 'dolor', note: undefined },
     ]);
-    expect(component.witnesses.dirty).toBe(true);
+    expect(component.form.witnesses().dirty()).toBe(true);
     expect(component.currentWitnessOpen()).toBe(false);
   });
 
   it('saveCurrentWitness should replace an existing witness with the same id and citation', () => {
-    component.witnesses.setValue([WITNESS_A, WITNESS_B]);
+    component.form.witnesses().value.set(plain([WITNESS_A, WITNESS_B]));
     component.openCurrentWitness(WITNESS_A);
-    component.text.setValue('updated text');
+    component.witness.text().value.set('updated text');
 
     component.saveCurrentWitness();
 
-    expect(component.witnesses.value).toEqual([
+    expect(plain(component.form.witnesses().value())).toEqual([
       { id: 'A', citation: 'cod. A', text: 'updated text', note: undefined },
       WITNESS_B,
     ]);
   });
 
   it('saveCurrentWitness should trim the saved field values', () => {
-    component.witnesses.setValue([]);
+    component.form.witnesses().value.set(plain([]));
     component.openCurrentWitness();
-    component.id.setValue('  D  ');
-    component.citation.setValue('  cod. D  ');
-    component.text.setValue('  text  ');
-    component.note.setValue('  note  ');
+    component.witness.id().value.set('  D  ');
+    component.witness.citation().value.set('  cod. D  ');
+    component.witness.text().value.set('  text  ');
+    component.witness.note().value.set('  note  ');
 
     component.saveCurrentWitness();
 
-    expect(component.witnesses.value).toEqual([
+    expect(plain(component.form.witnesses().value())).toEqual([
       { id: 'D', citation: 'cod. D', text: 'text', note: 'note' },
     ]);
   });
@@ -254,18 +258,18 @@ describe('WitnessesFragmentComponent', () => {
 
   //#region deleteWitness
   it('deleteWitness should remove the witness at the given index and dirty the control', () => {
-    component.witnesses.setValue([WITNESS_A, WITNESS_B]);
+    component.form.witnesses().value.set(plain([WITNESS_A, WITNESS_B]));
     component.deleteWitness(0);
-    expect(component.witnesses.value).toEqual([WITNESS_B]);
-    expect(component.witnesses.dirty).toBe(true);
+    expect(plain(component.form.witnesses().value())).toEqual(plain([WITNESS_B]));
+    expect(component.form.witnesses().dirty()).toBe(true);
   });
   //#endregion
 
   //#region moveWitnessUp / moveWitnessDown
   it('moveWitnessUp should swap the witness with its predecessor', () => {
-    component.witnesses.setValue([WITNESS_A, WITNESS_B]);
+    component.form.witnesses().value.set(plain([WITNESS_A, WITNESS_B]));
     component.moveWitnessUp(1);
-    expect(component.witnesses.value).toEqual([WITNESS_B, WITNESS_A]);
+    expect(plain(component.form.witnesses().value())).toEqual(plain([WITNESS_B, WITNESS_A]));
   });
 
   it('moveWitnessUp should do nothing for the first witness (bug fix regression check)', () => {
@@ -275,9 +279,9 @@ describe('WitnessesFragmentComponent', () => {
     // reordering [A, B, C] into [B, A, C]. It is now guarded like the
     // sibling moveEntryUp in quotations-fragment.component.ts.
     const WITNESS_C: Witness = { id: 'C', citation: 'cod. C', text: 'x' };
-    component.witnesses.setValue([WITNESS_A, WITNESS_B, WITNESS_C]);
+    component.form.witnesses().value.set(plain([WITNESS_A, WITNESS_B, WITNESS_C]));
     component.moveWitnessUp(0);
-    expect(component.witnesses.value).toEqual([
+    expect(plain(component.form.witnesses().value())).toEqual([
       WITNESS_A,
       WITNESS_B,
       WITNESS_C,
@@ -285,22 +289,24 @@ describe('WitnessesFragmentComponent', () => {
   });
 
   it('moveWitnessDown should swap the witness with its successor', () => {
-    component.witnesses.setValue([WITNESS_A, WITNESS_B]);
+    component.form.witnesses().value.set(plain([WITNESS_A, WITNESS_B]));
     component.moveWitnessDown(0);
-    expect(component.witnesses.value).toEqual([WITNESS_B, WITNESS_A]);
+    expect(plain(component.form.witnesses().value())).toEqual(plain([WITNESS_B, WITNESS_A]));
   });
 
   it('moveWitnessDown should be a no-op for the last witness', () => {
-    component.witnesses.setValue([WITNESS_A, WITNESS_B]);
+    component.form.witnesses().value.set(plain([WITNESS_A, WITNESS_B]));
     component.moveWitnessDown(1);
-    expect(component.witnesses.value).toEqual([WITNESS_A, WITNESS_B]);
+    expect(plain(component.form.witnesses().value())).toEqual(plain([WITNESS_A, WITNESS_B]));
   });
   //#endregion
 
-  //#region markdown preview (debounced text/note valueChanges)
+  //#region markdown preview (debounced text/note values)
   it('should render sanitized markdown from the text control into textPreviewHtml', async () => {
     component.openCurrentWitness();
-    component.text.setValue('**bold**');
+    component.witness.text().value.set('**bold**');
+    // toObservable emits only when change detection runs
+    fixture.detectChanges();
     // wait out the 50ms debounce with real timers: rxjs's asyncScheduler
     // does not reliably observe fake timers installed after the debounced
     // subscription was already set up in ngOnInit
@@ -313,7 +319,9 @@ describe('WitnessesFragmentComponent', () => {
 
   it('should render sanitized markdown from the note control into notePreviewHtml', async () => {
     component.openCurrentWitness();
-    component.note.setValue('*em*');
+    component.witness.note().value.set('*em*');
+    // toObservable emits only when change detection runs
+    fixture.detectChanges();
     await new Promise((resolve) => setTimeout(resolve, 80));
 
     const html = component.notePreviewHtml() as unknown as string;
@@ -321,4 +329,36 @@ describe('WitnessesFragmentComponent', () => {
     expect(html).toContain('<em>em</em>');
   });
   //#endregion
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
+
+  it('should save the witness on Enter in its ID input', () => {
+    component.openCurrentWitness();
+    component.witness.citation().value.set('cod. E');
+    component.witness.text().value.set('text');
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input[spellcheck="false"]',
+    );
+    input.value = 'E';
+    input.dispatchEvent(new Event('input'));
+    const enter = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      cancelable: true,
+      bubbles: true,
+    });
+    input.dispatchEvent(enter);
+
+    expect(plain(component.form.witnesses().value())).toEqual([
+      { id: 'E', citation: 'cod. E', text: 'text', note: undefined },
+    ]);
+    expect(component.currentWitnessOpen()).toBe(false);
+    expect(enter.defaultPrevented).toBe(true);
+  });
 });

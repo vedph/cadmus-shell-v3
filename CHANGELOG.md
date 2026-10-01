@@ -24,6 +24,15 @@
     - tiled data: adding or deleting a datum immediately saved the data, which closed the data editor and discarded the unsaved changes to the other data. Now these changes are saved with the save button, like any other change.
     - token text part: removed debug console output.
     - asserted historical date: removed a "tag too long" message which could never appear.
+  - ⚠️ migrated to signal forms all the fragment editors of `@myrmidon/cadmus-part-philology-ui` and their sub-editors (apparatus entry, quotation entry, edit operation, MSP operation). Breaking for code that reached into their internals, as above. Also:
+    - `QuotationEntryComponent`: `authors$` and `authorWorks$` are now the computed signals `authors` and `authorWorks`.
+    - `WitnessesFragmentComponent`: `witness` is now a separate signal form for the witness being edited; Enter in its ID or citation input saves the witness, as before.
+    - `OrthographyFragmentComponent`, `QuotationsFragmentComponent`, `ApparatusFragmentComponent`, `WitnessesFragmentComponent`: `frText` is now a computed signal.
+    - `MspValidators.msp` (internal) is now a signal forms rule.
+  - 🐛 fixed in `@myrmidon/cadmus-part-philology-ui`:
+    - orthography fragment: the "ref. → text" option was never saved; the "too long" errors of the reference and language could never appear.
+    - edit operation: the "too long" errors of the DSL, text and note could never appear; the "required" errors of fields which were never required were removed, and the minimum value errors of at, run, to and to-run now appear.
+    - MSP operation: the "too long" errors could never appear.
 - 2026-09-30:
   - ⚠️ migrated from reactive forms to Angular signal forms (`@angular/forms/signals`) the components of `@myrmidon/cadmus-ui` (layer hints, lookup pin), `cadmus-flags-ui`, `cadmus-graph-ui`, `cadmus-graph-ui-ex`, `cadmus-item-list`, `cadmus-item-editor`, `cadmus-item-search`, `cadmus-layer-demo`, `cadmus-preview-ui`, `cadmus-profile-editor`, `cadmus-profile-import`, `cadmus-statistics`, `cadmus-thesaurus-ui` and `cadmus-thesaurus-list`. Inputs, models and outputs are unchanged. Breaking for code that reached into these components' internals:
     - each component now exposes its form as a signal form field tree (usually `form`; `metadata` and `newPart` in the item editor, `rendition` in the layer demo, `filterForm` and `newThesaurusForm` in the thesaurus editor/list), replacing the former public `FormControl`/`FormGroup` fields (e.g. `ItemEditorComponent.title` is now `metadata.title`, `facetCtrl` is `metadata.facet`; `TextPreviewComponent.selectedLayer`/`selectedLayerValue` are now `form.selectedLayer`; `LayerHintsComponent.checks` is now `form.checks`);

@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { FormBuilder } from '@angular/forms';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { vi } from 'vitest';
 
@@ -14,6 +13,12 @@ import {
   AnnotatedValue,
   LocAnnotatedValue,
 } from '../apparatus-fragment';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 class MockClipboard {
   copy = vi.fn();
@@ -46,7 +51,6 @@ describe('ApparatusEntryComponent', () => {
       providers: [
         provideHttpClient(withXhr()),
         provideHttpClientTesting(),
-        FormBuilder,
         { provide: Clipboard, useClass: MockClipboard },
       ],
     }).compileComponents();
@@ -65,46 +69,46 @@ describe('ApparatusEntryComponent', () => {
 
   //#region initial form state
   it('should build the form with the expected default control values', () => {
-    expect(component.type.value).toBe(0);
-    expect(component.value.value).toBeNull();
-    expect(component.normValue.value).toBeNull();
-    expect(component.accepted.value).toBe(false);
-    expect(component.subrange.value).toBeNull();
-    expect(component.tag.value).toBeNull();
-    expect(component.groupId.value).toBeNull();
-    expect(component.note.value).toBeNull();
-    expect(component.witnesses.length).toBe(0);
-    expect(component.authors.length).toBe(0);
+    expect(plain(component.form.type().value())).toBe(0);
+    expect(component.form.value().value()).toBe('');
+    expect(component.form.normValue().value()).toBe('');
+    expect(plain(component.form.accepted().value())).toBe(false);
+    expect(component.form.subrange().value()).toBe('');
+    expect(component.form.tag().value()).toBe('');
+    expect(component.form.groupId().value()).toBe('');
+    expect(component.form.note().value()).toBe('');
+    expect(component.form.witnesses().value().length).toBe(0);
+    expect(component.form.authors().value().length).toBe(0);
   });
 
-  it('type control should be required', () => {
-    component.type.setValue(null as unknown as number);
-    expect(component.type.hasError('required')).toBe(true);
+  it('type field should be required', () => {
+    component.form.type().value.set(null as unknown as number);
+    expect(component.form.type().getError('required')).toBeTruthy();
   });
 
   it('value/normValue/note controls should reject values over their max length', () => {
-    component.value.setValue('a'.repeat(1001));
-    expect(component.value.hasError('maxlength')).toBe(true);
-    component.normValue.setValue('a'.repeat(1001));
-    expect(component.normValue.hasError('maxlength')).toBe(true);
-    component.note.setValue('a'.repeat(5001));
-    expect(component.note.hasError('maxlength')).toBe(true);
+    component.form.value().value.set('a'.repeat(1001));
+    expect(!!component.form.value().getError('maxLength')).toBe(true);
+    component.form.normValue().value.set('a'.repeat(1001));
+    expect(!!component.form.normValue().getError('maxLength')).toBe(true);
+    component.form.note().value.set('a'.repeat(5001));
+    expect(!!component.form.note().getError('maxLength')).toBe(true);
   });
 
   it('tag/groupId controls should reject values over 50 characters', () => {
-    component.tag.setValue('a'.repeat(51));
-    expect(component.tag.hasError('maxlength')).toBe(true);
-    component.groupId.setValue('a'.repeat(51));
-    expect(component.groupId.hasError('maxlength')).toBe(true);
+    component.form.tag().value.set('a'.repeat(51));
+    expect(!!component.form.tag().getError('maxLength')).toBe(true);
+    component.form.groupId().value.set('a'.repeat(51));
+    expect(!!component.form.groupId().getError('maxLength')).toBe(true);
   });
 
   it('subrange control should validate against the numeric range pattern', () => {
-    component.subrange.setValue('abc');
-    expect(component.subrange.hasError('pattern')).toBe(true);
-    component.subrange.setValue('5');
-    expect(component.subrange.valid).toBe(true);
-    component.subrange.setValue('5-10');
-    expect(component.subrange.valid).toBe(true);
+    component.form.subrange().value.set('abc');
+    expect(!!component.form.subrange().getError('pattern')).toBe(true);
+    component.form.subrange().value.set('5');
+    expect(component.form.subrange().valid()).toBe(true);
+    component.form.subrange().value.set('5-10');
+    expect(component.form.subrange().valid()).toBe(true);
   });
   //#endregion
 
@@ -114,34 +118,34 @@ describe('ApparatusEntryComponent', () => {
     fixture.componentRef.setInput('entry', entry);
     fixture.detectChanges();
 
-    expect(component.type.value).toBe(entry.type);
-    expect(component.value.value).toBe('lectio');
-    expect(component.normValue.value).toBe('norm');
-    expect(component.accepted.value).toBe(true);
-    expect(component.subrange.value).toBe('1-5');
-    expect(component.tag.value).toBe('tag1');
-    expect(component.groupId.value).toBe('g1');
-    expect(component.note.value).toBe('a note');
-    expect(component.witnesses.length).toBe(1);
-    expect(component.witnesses.value).toEqual([{ value: 'w1', note: 'wn1' }]);
-    expect(component.authors.length).toBe(1);
-    expect(component.authors.value).toEqual([
+    expect(plain(component.form.type().value())).toBe(entry.type);
+    expect(plain(component.form.value().value())).toBe('lectio');
+    expect(plain(component.form.normValue().value())).toBe('norm');
+    expect(plain(component.form.accepted().value())).toBe(true);
+    expect(plain(component.form.subrange().value())).toBe('1-5');
+    expect(plain(component.form.tag().value())).toBe('tag1');
+    expect(plain(component.form.groupId().value())).toBe('g1');
+    expect(plain(component.form.note().value())).toBe('a note');
+    expect(component.form.witnesses().value().length).toBe(1);
+    expect(plain(component.form.witnesses().value())).toEqual([{ value: 'w1', note: 'wn1' }]);
+    expect(component.form.authors().value().length).toBe(1);
+    expect(plain(component.form.authors().value())).toEqual([
       { tag: 'at1', value: 'a1', location: 'loc1', note: 'an1' },
     ]);
-    expect(component.form.pristine).toBe(true);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should treat isAccepted as false unless it is exactly true', () => {
     const entry = buildEntry({ isAccepted: undefined });
     fixture.componentRef.setInput('entry', entry);
     fixture.detectChanges();
-    expect(component.accepted.value).toBe(false);
+    expect(plain(component.form.accepted().value())).toBe(false);
   });
 
   it('should clear witnesses/authors arrays before repopulating them', () => {
     fixture.componentRef.setInput('entry', buildEntry());
     fixture.detectChanges();
-    expect(component.witnesses.length).toBe(1);
+    expect(component.form.witnesses().value().length).toBe(1);
 
     // a second entry with no witnesses/authors at all
     fixture.componentRef.setInput(
@@ -149,8 +153,8 @@ describe('ApparatusEntryComponent', () => {
       buildEntry({ witnesses: undefined, authors: undefined }),
     );
     fixture.detectChanges();
-    expect(component.witnesses.length).toBe(0);
-    expect(component.authors.length).toBe(0);
+    expect(component.form.witnesses().value().length).toBe(0);
+    expect(component.form.authors().value().length).toBe(0);
   });
 
   it('should reset the form when entry becomes undefined', () => {
@@ -159,68 +163,64 @@ describe('ApparatusEntryComponent', () => {
     // re-trigger the effect.
     fixture.componentRef.setInput('entry', buildEntry());
     fixture.detectChanges();
-    expect(component.value.value).toBe('lectio');
+    expect(plain(component.form.value().value())).toBe('lectio');
 
     fixture.componentRef.setInput('entry', undefined);
     fixture.detectChanges();
 
-    // reset() reverts scalar controls to their construction-time default.
-    expect(component.type.value).toBe(0);
-    expect(component.value.value).toBeNull();
-    expect(component.accepted.value).toBe(false);
+    // no entry: the form gets its defaults
+    expect(plain(component.form.type().value())).toBe(0);
+    expect(component.form.value().value()).toBe('');
+    expect(plain(component.form.accepted().value())).toBe(false);
 
-    // FormGroup/FormArray.reset() only resets the VALUE of each existing
-    // child control; it does not remove array items, so witnesses/authors
-    // must be cleared explicitly before reset() or stale, blanked-out rows
-    // would remain.
-    expect(component.witnesses.length).toBe(0);
-    expect(component.authors.length).toBe(0);
+    expect(component.form.witnesses().value().length).toBe(0);
+    expect(component.form.authors().value().length).toBe(0);
   });
   //#endregion
 
   //#region witnesses array editing
   it('addWitness should append a control and mark the form dirty', () => {
-    expect(component.form.pristine).toBe(true);
+    expect(component.form().dirty()).toBe(false);
     component.addWitness({ value: 'w1', note: 'n1' });
-    expect(component.witnesses.length).toBe(1);
-    expect(component.witnesses.at(0).value).toEqual({
+    expect(component.form.witnesses().value().length).toBe(1);
+    expect(plain(component.form.witnesses().value()[0])).toEqual({
       value: 'w1',
       note: 'n1',
     });
-    expect(component.form.dirty).toBe(true);
+    expect(component.form().dirty()).toBe(true);
   });
 
   it('addWitness without arguments should append an empty control', () => {
     component.addWitness();
-    expect(component.witnesses.length).toBe(1);
-    // FormControl normalizes an undefined initial value to null.
-    expect(component.witnesses.at(0).value).toEqual({
-      value: null,
-      note: null,
+    expect(component.form.witnesses().value().length).toBe(1);
+    // missing values become empty strings
+    expect(plain(component.form.witnesses().value()[0])).toEqual({
+      value: '',
+      note: '',
     });
   });
 
   it('witness value control should be required and max 50 chars', () => {
     component.addWitness();
-    const valueCtrl = component.witnesses.at(0).get('value')!;
-    expect(valueCtrl.hasError('required')).toBe(true);
-    valueCtrl.setValue('a'.repeat(51));
-    expect(valueCtrl.hasError('maxlength')).toBe(true);
+    const valueCtrl = component.form.witnesses[0]!.value();
+    expect(!!valueCtrl.getError('required')).toBe(true);
+    valueCtrl.value.set('a'.repeat(51));
+    expect(!!valueCtrl.getError('maxLength')).toBe(true);
   });
 
   it('removeWitness should remove the control at the given index and dirty the form', () => {
     component.addWitness({ value: 'w1' } as AnnotatedValue);
     component.addWitness({ value: 'w2' } as AnnotatedValue);
     component.removeWitness(0);
-    expect(component.witnesses.length).toBe(1);
-    expect(component.witnesses.at(0).value.value).toBe('w2');
+    expect(component.form.witnesses().value().length).toBe(1);
+    expect(component.form.witnesses().value()[0].value).toBe('w2');
   });
 
   it('moveWitnessUp should swap with the previous item', () => {
     component.addWitness({ value: 'w1' } as AnnotatedValue);
     component.addWitness({ value: 'w2' } as AnnotatedValue);
     component.moveWitnessUp(1);
-    expect(component.witnesses.value.map((w: AnnotatedValue) => w.value)).toEqual([
+    expect(component.form.witnesses().value().map((w: AnnotatedValue) => w.value)).toEqual([
       'w2',
       'w1',
     ]);
@@ -230,7 +230,7 @@ describe('ApparatusEntryComponent', () => {
     component.addWitness({ value: 'w1' } as AnnotatedValue);
     component.addWitness({ value: 'w2' } as AnnotatedValue);
     component.moveWitnessUp(0);
-    expect(component.witnesses.value.map((w: AnnotatedValue) => w.value)).toEqual([
+    expect(component.form.witnesses().value().map((w: AnnotatedValue) => w.value)).toEqual([
       'w1',
       'w2',
     ]);
@@ -240,7 +240,7 @@ describe('ApparatusEntryComponent', () => {
     component.addWitness({ value: 'w1' } as AnnotatedValue);
     component.addWitness({ value: 'w2' } as AnnotatedValue);
     component.moveWitnessDown(0);
-    expect(component.witnesses.value.map((w: AnnotatedValue) => w.value)).toEqual([
+    expect(component.form.witnesses().value().map((w: AnnotatedValue) => w.value)).toEqual([
       'w2',
       'w1',
     ]);
@@ -250,7 +250,7 @@ describe('ApparatusEntryComponent', () => {
     component.addWitness({ value: 'w1' } as AnnotatedValue);
     component.addWitness({ value: 'w2' } as AnnotatedValue);
     component.moveWitnessDown(1);
-    expect(component.witnesses.value.map((w: AnnotatedValue) => w.value)).toEqual([
+    expect(component.form.witnesses().value().map((w: AnnotatedValue) => w.value)).toEqual([
       'w1',
       'w2',
     ]);
@@ -265,42 +265,42 @@ describe('ApparatusEntryComponent', () => {
       location: 'l1',
       note: 'n1',
     });
-    expect(component.authors.length).toBe(1);
-    expect(component.authors.at(0).value).toEqual({
+    expect(component.form.authors().value().length).toBe(1);
+    expect(plain(component.form.authors().value()[0])).toEqual({
       tag: 't1',
       value: 'a1',
       location: 'l1',
       note: 'n1',
     });
-    expect(component.form.dirty).toBe(true);
+    expect(component.form().dirty()).toBe(true);
   });
 
   it('author value control should be required and max 50 chars', () => {
     component.addAuthor();
-    const valueCtrl = component.authors.at(0).get('value')!;
-    expect(valueCtrl.hasError('required')).toBe(true);
-    valueCtrl.setValue('a'.repeat(51));
-    expect(valueCtrl.hasError('maxlength')).toBe(true);
+    const valueCtrl = component.form.authors[0]!.value();
+    expect(!!valueCtrl.getError('required')).toBe(true);
+    valueCtrl.value.set('a'.repeat(51));
+    expect(!!valueCtrl.getError('maxLength')).toBe(true);
   });
 
   it('removeAuthor should remove the control at the given index', () => {
     component.addAuthor({ value: 'a1' } as LocAnnotatedValue);
     component.addAuthor({ value: 'a2' } as LocAnnotatedValue);
     component.removeAuthor(0);
-    expect(component.authors.length).toBe(1);
-    expect(component.authors.at(0).value.value).toBe('a2');
+    expect(component.form.authors().value().length).toBe(1);
+    expect(component.form.authors().value()[0].value).toBe('a2');
   });
 
   it('moveAuthorUp should swap with the previous item, and no-op at index 0', () => {
     component.addAuthor({ value: 'a1' } as LocAnnotatedValue);
     component.addAuthor({ value: 'a2' } as LocAnnotatedValue);
     component.moveAuthorUp(0);
-    expect(component.authors.value.map((a: LocAnnotatedValue) => a.value)).toEqual([
+    expect(component.form.authors().value().map((a: LocAnnotatedValue) => a.value)).toEqual([
       'a1',
       'a2',
     ]);
     component.moveAuthorUp(1);
-    expect(component.authors.value.map((a: LocAnnotatedValue) => a.value)).toEqual([
+    expect(component.form.authors().value().map((a: LocAnnotatedValue) => a.value)).toEqual([
       'a2',
       'a1',
     ]);
@@ -310,12 +310,12 @@ describe('ApparatusEntryComponent', () => {
     component.addAuthor({ value: 'a1' } as LocAnnotatedValue);
     component.addAuthor({ value: 'a2' } as LocAnnotatedValue);
     component.moveAuthorDown(1);
-    expect(component.authors.value.map((a: LocAnnotatedValue) => a.value)).toEqual([
+    expect(component.form.authors().value().map((a: LocAnnotatedValue) => a.value)).toEqual([
       'a1',
       'a2',
     ]);
     component.moveAuthorDown(0);
-    expect(component.authors.value.map((a: LocAnnotatedValue) => a.value)).toEqual([
+    expect(component.form.authors().value().map((a: LocAnnotatedValue) => a.value)).toEqual([
       'a2',
       'a1',
     ]);
@@ -352,7 +352,7 @@ describe('ApparatusEntryComponent', () => {
     // type control alone is not enough: witnesses/authors are empty so the
     // form as a whole is otherwise valid; force an invalid state via a bad
     // subrange pattern.
-    component.subrange.setValue('not-a-range');
+    component.form.subrange().value.set('not-a-range');
     let emitted = false;
     component.entry.subscribe(() => (emitted = true));
 
@@ -362,14 +362,14 @@ describe('ApparatusEntryComponent', () => {
   });
 
   it('submit should emit a trimmed entry built from the form when valid', () => {
-    component.type.setValue(ApparatusEntryType.additionBefore);
-    component.value.setValue('  lectio  ');
-    component.normValue.setValue('  norm  ');
-    component.accepted.setValue(true);
-    component.subrange.setValue('1-5');
-    component.tag.setValue('  tag1  ');
-    component.groupId.setValue('  g1  ');
-    component.note.setValue('  a note  ');
+    component.form.type().value.set(ApparatusEntryType.additionBefore);
+    component.form.value().value.set('  lectio  ');
+    component.form.normValue().value.set('  norm  ');
+    component.form.accepted().value.set(true);
+    component.form.subrange().value.set('1-5');
+    component.form.tag().value.set('  tag1  ');
+    component.form.groupId().value.set('  g1  ');
+    component.form.note().value.set('  a note  ');
     component.addWitness({ value: '  w1  ', note: '  wn1  ' });
     component.addAuthor({
       tag: '  at1  ',
@@ -399,8 +399,8 @@ describe('ApparatusEntryComponent', () => {
   });
 
   it('submit should set isAccepted to false when the checkbox is unchecked', () => {
-    component.value.setValue('x');
-    component.accepted.setValue(false);
+    component.form.value().value.set('x');
+    component.form.accepted().value.set(false);
 
     let emitted: ApparatusEntry | undefined;
     component.entry.subscribe((e) => (emitted = e));
@@ -432,4 +432,21 @@ describe('ApparatusEntryComponent', () => {
     expect(component.workEntries()).toEqual(workEntries);
   });
   //#endregion
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input[type="text"]',
+    );
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
+  });
 });

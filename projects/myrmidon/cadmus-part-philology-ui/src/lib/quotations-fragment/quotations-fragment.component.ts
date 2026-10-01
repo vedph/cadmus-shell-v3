@@ -1,19 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  OnInit,
   signal,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import {
   MatCard,
@@ -29,9 +21,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
   CloseSaveButtonsComponent,
@@ -40,15 +31,22 @@ import {
 } from '@myrmidon/cadmus-ui';
 import {
   TextLayerService,
-  ThesauriSet,
   ThesaurusEntry,
   TokenLocation,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 
 import { QuotationEntryComponent } from '../quotation-entry/quotation-entry.component';
 import { QuotationsFragment, QuotationEntry } from '../quotations-fragment';
 import { QuotationWorksService } from './quotation-works.service';
+import { copyFormValue } from '../signal-form-utils';
+
+interface QuotationsFragmentControls {
+  entries: QuotationEntry[];
+}
+
+function toDraft(fragment?: QuotationsFragment | null): QuotationsFragmentControls {
+  return { entries: copyFormValue(fragment?.entries || []) };
+}
 
 /**
  * Quotations fragment editor.
@@ -60,8 +58,6 @@ import { QuotationWorksService } from './quotation-works.service';
   styleUrls: ['./quotations-fragment.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -80,95 +76,47 @@ import { QuotationWorksService } from './quotation-works.service';
     CloseSaveButtonsComponent,
   ],
 })
-export class QuotationsFragmentComponent
-  extends ModelEditorComponentBase<QuotationsFragment>
-  implements OnInit
-{
+export class QuotationsFragmentComponent extends ModelEditorComponentBase<QuotationsFragment> {
   public readonly editedEntryIndex = signal<number>(-1);
   public readonly editedEntry = signal<QuotationEntry | undefined>(undefined);
-  public readonly frText = signal<string | undefined>(undefined);
+  // the fragment's base text
+  public readonly frText = computed<string | undefined>(() => {
+    const data = this.data();
+    return data?.baseText && data.value
+      ? this._layerService.getTextFragment(
+          data.baseText,
+          TokenLocation.parse(data.value.location)!,
+        )
+      : undefined;
+  });
 
-  public readonly workEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly workEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['quotation-works']?.entries,
+  );
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['quotation-tags']?.entries,
+  );
   public readonly workDictionary = computed(() =>
     this._worksService.buildDictionary(this.workEntries() || []),
   );
 
-  public entries: FormControl<QuotationEntry[]>;
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.entries, 1);
+  });
 
   constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
     private _layerService: TextLayerService,
     private _dialogService: DialogService,
     private _worksService: QuotationWorksService,
   ) {
-    super(authService, formBuilder);
-    // form
-    this.entries = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      entries: this.entries,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'quotation-works';
-    if (this.hasThesaurus(key)) {
-      this.workEntries.set(thesauri[key].entries);
-    } else {
-      this.workEntries.set(undefined);
-    }
-
-    key = 'quotation-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-  }
-
-  private updateForm(fragment?: QuotationsFragment | null): void {
-    if (!fragment) {
-      this.form!.reset();
-      return;
-    }
-    this.entries.setValue(fragment.entries);
-    this.form!.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<QuotationsFragment>): void {
-    // fragment's text
-    if (data?.baseText && data.value) {
-      this.frText.set(
-        this._layerService.getTextFragment(
-          data.baseText,
-          TokenLocation.parse(data.value.location)!,
-        ),
-      );
-    }
-
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
+    super();
   }
 
   protected getValue(): QuotationsFragment {
     const fr = this.getEditedFragment() as QuotationsFragment;
-    fr.entries = this.entries.value;
+    fr.entries = copyFormValue(this._draft().entries);
     return fr;
   }
 
@@ -198,15 +146,14 @@ export class QuotationsFragmentComponent
     if (!this.editedEntry()) {
       return;
     }
-    const entries = [...this.entries.value];
+    const entries = [...this.form.entries().value()];
     if (this.editedEntryIndex() === -1) {
       entries.push(entry);
     } else {
       entries.splice(this.editedEntryIndex(), 1, entry);
     }
-    this.entries.setValue(entries);
-    this.entries.updateValueAndValidity();
-    this.entries.markAsDirty();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
 
     this.closeEntry();
   }
@@ -228,11 +175,10 @@ export class QuotationsFragmentComponent
         if (!result) {
           return;
         }
-        const entries = [...this.entries.value];
+        const entries = [...this.form.entries().value()];
         entries.splice(index, 1);
-        this.entries.setValue(entries);
-        this.entries.updateValueAndValidity();
-        this.entries.markAsDirty();
+        this.form.entries().value.set(entries);
+        this.form.entries().markAsDirty();
       });
   }
 
@@ -240,25 +186,23 @@ export class QuotationsFragmentComponent
     if (index < 1) {
       return;
     }
-    const entry = this.entries.value[index];
-    const entries = [...this.entries.value];
+    const entry = this.form.entries().value()[index];
+    const entries = [...this.form.entries().value()];
     entries.splice(index, 1);
     entries.splice(index - 1, 0, entry);
-    this.entries.setValue(entries);
-    this.entries.updateValueAndValidity();
-    this.entries.markAsDirty();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
   }
 
   public moveEntryDown(index: number): void {
-    if (index + 1 >= this.entries.value.length) {
+    if (index + 1 >= this.form.entries().value().length) {
       return;
     }
-    const entry = this.entries.value[index];
-    const entries = [...this.entries.value];
+    const entry = this.form.entries().value()[index];
+    const entries = [...this.form.entries().value()];
     entries.splice(index, 1);
     entries.splice(index + 1, 0, entry);
-    this.entries.setValue(entries);
-    this.entries.updateValueAndValidity();
-    this.entries.markAsDirty();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
   }
 }

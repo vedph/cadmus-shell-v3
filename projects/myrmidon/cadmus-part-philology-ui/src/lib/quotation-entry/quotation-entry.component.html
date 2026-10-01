@@ -1,11 +1,11 @@
-<form [formGroup]="form" (submit)="save()">
+<div (keydown.enter)="onEnterKey($event)">
   <div class="form-row">
     <!-- tag -->
     @if (tagEntries()?.length) {
       <div>
         <mat-form-field>
           <mat-label>tag</mat-label>
-          <mat-select formControlName="tag">
+          <mat-select [formField]="form.tag">
             <mat-option [value]="null">(none)</mat-option>
             @for (e of tagEntries(); track e.id) {
               <mat-option [value]="e.id">{{ e.value }}</mat-option>
@@ -21,9 +21,9 @@
             type="text"
             matInput
             spellcheck="false"
-            formControlName="tag"
+            [formField]="form.tag"
           />
-          @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
+          @if (form.tag().getError("maxLength") && (form.tag().dirty() || form.tag().touched())) {
             <mat-error>tag too long</mat-error>
           }
         </mat-form-field>
@@ -39,15 +39,15 @@
             matInput
             type="text"
             spellcheck="false"
-            formControlName="author"
+            [formField]="form.author"
           />
           @if (
-            author.hasError("required") && (author.dirty || author.touched)
+            form.author().getError("required") && (form.author().dirty() || form.author().touched())
           ) {
             <mat-error>author required</mat-error>
           }
           @if (
-            author.hasError("maxlength") && (author.dirty || author.touched)
+            form.author().getError("maxLength") && (form.author().dirty() || form.author().touched())
           ) {
             <mat-error>author too long</mat-error>
           }
@@ -57,15 +57,15 @@
       <div>
         <mat-form-field>
           <mat-label>author</mat-label>
-          <mat-select formControlName="author">
-            @for (e of authors$ | async; track e) {
+          <mat-select [formField]="form.author">
+            @for (e of authors(); track e) {
               <mat-option [value]="e.id">
                 {{ e.value }} ({{ e.id }})</mat-option
               >
             }
           </mat-select>
           @if (
-            author.hasError("required") && (author.dirty || author.touched)
+            form.author().getError("required") && (form.author().dirty() || form.author().touched())
           ) {
             <mat-error>author required</mat-error>
           }
@@ -79,11 +79,11 @@
     <div>
       <mat-form-field class="full-width">
         <mat-label>work</mat-label>
-        <input matInput type="text" spellcheck="false" formControlName="work" />
-        @if (work.hasError("required") && (work.dirty || work.touched)) {
+        <input matInput type="text" spellcheck="false" [formField]="form.work" />
+        @if (form.work().getError("required") && (form.work().dirty() || form.work().touched())) {
           <mat-error>work required</mat-error>
         }
-        @if (work.hasError("maxlength") && (work.dirty || work.touched)) {
+        @if (form.work().getError("maxLength") && (form.work().dirty() || form.work().touched())) {
           <mat-error>work too long</mat-error>
         }
       </mat-form-field>
@@ -92,17 +92,17 @@
     <div>
       <mat-form-field class="full-width">
         <mat-label>work</mat-label>
-        <mat-select formControlName="work">
-          @for (e of authorWorks$ | async; track e) {
+        <mat-select [formField]="form.work">
+          @for (e of authorWorks(); track e) {
             <mat-option [value]="e.id">
               {{ e.value }}
             </mat-option>
           }
         </mat-select>
-        @if (work.hasError("required") && (work.dirty || work.touched)) {
+        @if (form.work().getError("required") && (form.work().dirty() || form.work().touched())) {
           <mat-error>work required</mat-error>
         }
-        @if (work.hasError("maxlength") && (work.dirty || work.touched)) {
+        @if (form.work().getError("maxLength") && (form.work().dirty() || form.work().touched())) {
           <mat-error>work too long</mat-error>
         }
       </mat-form-field>
@@ -118,15 +118,15 @@
           type="text"
           matInput
           spellcheck="false"
-          formControlName="citation"
+          [formField]="form.citation"
         />
         @if (
-          citation.hasError("required") && (citation.dirty || citation.touched)
+          form.citation().getError("required") && (form.citation().dirty() || form.citation().touched())
         ) {
           <mat-error>citation required</mat-error>
         }
         @if (
-          citation.hasError("maxlength") && (citation.dirty || citation.touched)
+          form.citation().getError("maxLength") && (form.citation().dirty() || form.citation().touched())
         ) {
           <mat-error>citation too long</mat-error>
         }
@@ -141,11 +141,11 @@
           type="text"
           matInput
           spellcheck="false"
-          formControlName="citationUri"
+          [formField]="form.citationUri"
         />
         @if (
-          citationUri.hasError("maxlength") &&
-          (citationUri.dirty || citationUri.touched)
+          form.citationUri().getError("maxLength") &&
+          (form.citationUri().dirty() || form.citationUri().touched())
         ) {
           <mat-error>URI too long</mat-error>
         }
@@ -161,10 +161,10 @@
         rows="2"
         matInput
         spellcheck="false"
-        formControlName="variant"
+        [formField]="form.variant"
       ></textarea>
       @if (
-        variant.hasError("maxlength") && (variant.dirty || variant.touched)
+        form.variant().getError("maxLength") && (form.variant().dirty() || form.variant().touched())
       ) {
         <mat-error>variant too long</mat-error>
       }
@@ -179,9 +179,9 @@
         rows="2"
         matInput
         spellcheck="false"
-        formControlName="note"
+        [formField]="form.note"
       ></textarea>
-      @if (note.hasError("maxlength") && (note.dirty || note.touched)) {
+      @if (form.note().getError("maxLength") && (form.note().dirty() || form.note().touched())) {
         <mat-error>note too long</mat-error>
       }
     </mat-form-field>
@@ -199,12 +199,13 @@
       <mat-icon class="mat-warn">cancel</mat-icon>
     </button>
     <button
-      type="submit"
-      [disabled]="form.invalid || form.pristine"
+      type="button"
+      [disabled]="form().invalid() || !form().dirty()"
       mat-icon-button
       matTooltip="Save entry"
+      (click)="save()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

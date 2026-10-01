@@ -1,24 +1,16 @@
-﻿import {
+import {
   Component,
   computed,
-  OnInit,
-  signal,
-  DestroyRef,
-  inject,
-  effect,
   ChangeDetectionStrategy,
+  linkedSignal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
 import {
-  FormControl,
-  FormGroup,
-  FormBuilder,
-  Validators,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FormField,
+  disabled,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -46,10 +38,8 @@ import {
   renderLabelFromLastColon,
   ThesaurusEntriesPickerComponent,
 } from '@myrmidon/cadmus-thesaurus-store';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   TextLayerService,
-  ThesauriSet,
   ThesaurusEntry,
   EditedObject,
   TokenLocation,
@@ -58,6 +48,69 @@ import {
 import { OrthographyFragment } from '../orthography-fragment';
 import { EditOperation } from '../services/edit-operation';
 import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-set.component';
+
+interface OrthographyFragmentControls {
+  reference: string;
+  language: string;
+  tags: ThesaurusEntry[];
+  note: string;
+  operations: EditOperation[];
+  textTarget: boolean;
+}
+
+function mapIdsToEntries(
+  ids: string[],
+  entries: ThesaurusEntry[] | undefined,
+): ThesaurusEntry[] {
+  return ids.map((id) => {
+    const entry = entries?.find((e) => e.id === id);
+    return entry ? { id: entry.id, value: entry.value } : { id, value: id };
+  });
+}
+
+function parseOperations(fragment: OrthographyFragment): EditOperation[] {
+  try {
+    return (
+      fragment.operations?.map((text) => EditOperation.parseOperation(text)) ||
+      []
+    );
+  } catch (error) {
+    console.error('Error parsing operations', error, fragment.operations);
+    return [];
+  }
+}
+
+/**
+ * Bound data -> editable draft. The tag IDs are mapped to the entries of
+ * the orthography-tags thesaurus, when present.
+ */
+function toDraft(
+  data?: EditedObject<OrthographyFragment>,
+): OrthographyFragmentControls {
+  const fragment = data?.value;
+  if (!fragment) {
+    return {
+      reference: '',
+      language: '',
+      tags: [],
+      note: '',
+      operations: [],
+      textTarget: false,
+    };
+  }
+  return {
+    reference: fragment.reference || '',
+    language: fragment.language || '',
+    tags: mapIdsToEntries(
+      fragment.tags || [],
+      data?.thesauri?.['orthography-tags']?.entries,
+    ),
+    note: fragment.note || '',
+    // operations are class instances: they are not deep-copied
+    operations: parseOperations(fragment),
+    textTarget: fragment.isTextTarget || false,
+  };
+}
 
 /**
  * Orthography fragment.
@@ -69,8 +122,7 @@ import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-
   styleUrls: ['./orthography-fragment.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -96,232 +148,93 @@ import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-
     EditOperationSetComponent,
   ],
 })
-export class OrthographyFragmentComponent
-  extends ModelEditorComponentBase<OrthographyFragment>
-  implements OnInit
-{
-  private _destroyRef = inject(DestroyRef);
-  private readonly _reference = signal<string>('');
-  private readonly _textTarget = signal<boolean>(false);
-  private readonly _operations = signal<EditOperation[]>([]);
-
+export class OrthographyFragmentComponent extends ModelEditorComponentBase<OrthographyFragment> {
   /**
    * The fragment text.
    */
-  public readonly frText = signal<string | undefined>(undefined);
+  public readonly frText = computed<string | undefined>(() => {
+    const data = this.data();
+    return data?.baseText && data.value
+      ? this._layerService.getTextFragment(
+          data.baseText,
+          TokenLocation.parse(data.value.location)!,
+        )
+      : undefined;
+  });
+
+  public readonly langEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['orthography-languages']?.entries,
+  );
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['orthography-tags']?.entries,
+  );
+  public readonly opTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['orthography-op-tags']?.entries,
+  );
+
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.data()));
+  public readonly form = this.createForm(this._draft, (p) => {
+    required(p.reference);
+    maxLength(p.reference, 100);
+    // the reference cannot change once there are operations
+    disabled(p.reference, () => this._draft().operations.length > 0);
+    maxLength(p.language, 50);
+    maxLength(p.note, 200);
+  });
 
   /**
    * The source text: either the reference (if textTarget is true) or
    * the fragment text.
    */
-  public readonly sourceText = computed<string | undefined>(() => {
-    const text = this.frText();
-    const reference = this._reference();
-    return this._textTarget() ? reference : text;
-  });
+  public readonly sourceText = computed<string | undefined>(() =>
+    this.form.textTarget().value()
+      ? this.form.reference().value()
+      : this.frText(),
+  );
 
   /**
    * The target text: either the fragment text (if textTarget is true) or
    * the reference.
    */
-  public readonly targetText = computed<string | undefined>(() => {
-    const text = this.frText();
-    const reference = this._reference();
-    return this._textTarget() ? text : reference;
-  });
-
-  // orthography-languages
-  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  // orthography-tags
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  // orthography-op-tags
-  public readonly opTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly targetText = computed<string | undefined>(() =>
+    this.form.textTarget().value()
+      ? this.frText()
+      : this.form.reference().value(),
   );
 
-  public reference: FormControl<string>;
-  public language: FormControl<string | null>;
-  public tags: FormControl<ThesaurusEntry[]>;
-  public note: FormControl<string | null>;
-  public operations: FormControl<EditOperation[]>;
-  public textTarget: FormControl<boolean>;
-
   constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
     private _layerService: TextLayerService,
     private _clipboard: Clipboard,
     private _snackbar: MatSnackBar,
   ) {
-    super(authService, formBuilder);
-    // form
-    this.reference = formBuilder.control('', {
-      validators: [Validators.required, Validators.maxLength(100)],
-      nonNullable: true,
-    });
-    this.language = formBuilder.control(null, {
-      validators: Validators.maxLength(50),
-    });
-    this.tags = formBuilder.control([], { nonNullable: true });
-    this.note = formBuilder.control(null, {
-      validators: Validators.maxLength(200),
-    });
-    this.operations = formBuilder.control([], {
-      nonNullable: true,
-    });
-    this.textTarget = formBuilder.control(false, { nonNullable: true });
-
-    // subscribe to form control changes to update signals
-    this.reference.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => {
-        this._reference.set(value);
-      });
-    this.textTarget.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => {
-        this._textTarget.set(value);
-      });
-    this.operations.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((value) => {
-        this._operations.set(value);
-      });
-
-    // disable reference if operations exist
-    effect(() => {
-      const disabled = this._operations()?.length > 0;
-      if (disabled) {
-        this.reference.disable();
-      } else {
-        this.reference.enable();
-      }
-      return disabled;
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      standard: this.reference,
-      language: this.language,
-      tag: this.tags,
-      note: this.note,
-      operations: this.operations,
-      textTarget: this.textTarget,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'orthography-languages';
-    if (this.hasThesaurus(key)) {
-      this.langEntries.set(thesauri[key].entries);
-    } else {
-      this.langEntries.set(undefined);
-    }
-    key = 'orthography-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-    key = 'orthography-op-tags';
-    if (this.hasThesaurus(key)) {
-      this.opTagEntries.set(thesauri[key].entries);
-    } else {
-      this.opTagEntries.set(undefined);
-    }
-  }
-
-  private mapIdsToEntries(
-    ids: string[],
-    entries: ThesaurusEntry[] | undefined,
-  ): ThesaurusEntry[] {
-    if (!entries) return ids.map((id) => ({ id, value: id }));
-    return ids.map(
-      (id) => entries.find((e) => e.id === id) || { id, value: id },
-    );
-  }
-
-  private updateForm(fragment?: OrthographyFragment | null): void {
-    if (!fragment) {
-      this.form.reset();
-      this._reference.set('');
-      this._textTarget.set(false);
-    } else {
-      this.reference.setValue(fragment.reference);
-      this._reference.set(fragment.reference);
-      this.language.setValue(fragment.language || null);
-      this.tags.setValue(
-        this.mapIdsToEntries(fragment.tags || [], this.tagEntries()) || [],
-      );
-      this.note.setValue(fragment.note || null);
-      const textTargetValue = fragment.isTextTarget || false;
-      this.textTarget.setValue(textTargetValue);
-      this._textTarget.set(textTargetValue);
-      try {
-        this.operations.setValue(
-          fragment.operations?.map((text) =>
-            EditOperation.parseOperation(text),
-          ) || [],
-        );
-        if (this.operations.value?.length) {
-          this.reference.disable();
-        } else {
-          this.reference.enable();
-        }
-      } catch (error) {
-        console.error('Error parsing operations', error, fragment.operations);
-        this.operations.setValue([]);
-      }
-      this.form.markAsPristine();
-    }
-  }
-
-  protected override onDataSet(data?: EditedObject<OrthographyFragment>): void {
-    // fragment's text
-    if (data?.baseText && data.value) {
-      this.frText.set(
-        this._layerService.getTextFragment(
-          data.baseText,
-          TokenLocation.parse(data.value.location)!,
-        ),
-      );
-    }
-
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-    // form
-    this.updateForm(data?.value);
+    super();
   }
 
   public onTagEntriesChange(entries: ThesaurusEntry[]): void {
-    this.tags.setValue(entries);
-    this.tags.markAsDirty();
-    this.tags.updateValueAndValidity();
+    this.form
+      .tags()
+      .value.set(entries.map((e) => ({ id: e.id, value: e.value })));
+    this.form.tags().markAsDirty();
   }
 
   protected override getValue(): OrthographyFragment {
     const fragment = this.getEditedFragment() as OrthographyFragment;
-    fragment.reference = this.reference.value;
-    fragment.language = this.language.value?.trim() || undefined;
-    fragment.tags = this.tags.value.length
-      ? this.tags.value.map((entry) => entry.id)
+    const draft = this._draft();
+    fragment.reference = draft.reference;
+    fragment.language = draft.language.trim() || undefined;
+    fragment.tags = draft.tags.length
+      ? draft.tags.map((entry) => entry.id)
       : undefined;
-    fragment.note = this.note.value?.trim() || undefined;
-    fragment.operations = this.operations.value.map((op) => op.toString());
+    fragment.note = draft.note.trim() || undefined;
+    fragment.operations = draft.operations.map((op) => op.toString());
+    fragment.isTextTarget = draft.textTarget || undefined;
     return fragment;
   }
 
   public onOperationsChange(operations: EditOperation[]): void {
-    this.operations.setValue(operations);
-    this.operations.markAsDirty();
-    this.operations.updateValueAndValidity();
+    this.form.operations().value.set(operations);
+    this.form.operations().markAsDirty();
   }
 
   public renderLabel(label: string): string {

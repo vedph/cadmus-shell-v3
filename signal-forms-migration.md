@@ -1168,3 +1168,69 @@ Behaviour changes, deliberate:
 Not changed, reported: `cadmus-thesaurus-store`'s tree filter renders a
 `<form [formRoot]>`. That is fine for it, as a submission root, and it
 is now never nested.
+
+### `cadmus-part-philology-ui`
+
+All 12 form components: 4 fragment editors on the base class and 4
+sub-editors (apparatus entry, quotation entry, edit operation, MSP
+operation), plus the internal `MspValidators`. Same patterns as
+`cadmus-part-general-ui`. `signal-form-utils.ts` (and its spec) is
+copied into this library, which does not depend on the general one.
+
+Measured: 517 of 517 tests pass (16 spec files; 1 more file,
+`differ-result-to-msp-adapter.spec.ts`, is skipped in its source and was
+not touched). The library builds with no warnings, and
+`cadmus-part-philology-pg` builds and passes 32 of 32 tests unchanged.
+
+Notes:
+
+- **Measured, resolving a "believed" item of iteration 1:** object spread
+  copies FieldTree's identity Symbol. In the quotations spec,
+  `{ ...ENTRY_A }` built from a constant the form had tagged carried the
+  tag. So copies must go through `structuredClone` (`copyFormValue`) or
+  explicit fields, never through spread.
+- Specs that set a field from shared constants now set copies. The form
+  tags whatever it adopts, which leaked between tests.
+- `EditOperation` values are class instances (with `toString()`), so the
+  orthography fragment does not deep-copy its operations. They stay as
+  they are in the draft.
+- Edit operation:
+  - The DSL is not derived from the operation. The `linkedSignal` keeps
+    the typed DSL across operation changes, through `previous`, as the old
+    `updateForm()` did by never touching it. A spec parses a DSL and
+    checks that the DSL stays while the fields update.
+  - The old static `min` attributes were real validators: Angular's
+    `MinValidator` directive matches `input[type=number][min][formControl]`.
+    They are not allowed on `[formField]` nodes (`NG8022`), so they are
+    now schema rules. `to`/`toRun` use `when` on the operation type,
+    because their inputs only existed (and so only validated) for
+    move/swap.
+  - `outputText` is computed directly from the form. The old 300 ms
+    debounce of its recomputation was dropped, since computing it is
+    cheap.
+- MSP operation (obsolete, still exported):
+  - The text and visual editors sync both ways, debounced.
+  - The old synchronous `_ignore*` flags cannot work with signals, whose
+    writes propagate later. The sync now compares values instead: visual
+    → text only when the text does not already parse to the same
+    operation; text → visual only when the parsed visual differs.
+  - Specs cover both directions and check that a text being typed (`@1x2=`
+    vs the canonical `@1×2=`) is not rewritten.
+  - The per-operator enable/disable became `disabled()` rules, with a
+    spec per operator.
+- Orthography: the reference's disabling while there are operations is a
+  `disabled()` rule.
+
+Bugs fixed (each has a spec):
+
+- Orthography fragment: `getValue()` never set `isTextTarget`, though
+  `updateForm()` read it, so the "ref. → text" check box was not saved.
+  Read in the old source.
+- Wrong error keys, so the messages never appeared: orthography
+  (`errors?.maxLength` on reference and language), edit operation (DSL,
+  text, note), MSP operation (`hasError("maxLength")`). Reactive forms'
+  key is `maxlength`.
+- Edit operation: the "required" messages of type, at, run, to and to-run
+  referred to validators that never existed. They were replaced by the
+  `min` messages for the rules that did exist.
+

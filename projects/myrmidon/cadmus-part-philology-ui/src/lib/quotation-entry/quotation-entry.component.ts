@@ -1,4 +1,3 @@
-﻿import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,18 +5,17 @@ import {
   effect,
   output,
   input,
-  OnDestroy,
+  computed,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { BehaviorSubject, Subscription } from 'rxjs';
+  FormField,
+  form,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
@@ -31,6 +29,29 @@ import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { QuotationWorksService } from '../quotations-fragment/quotation-works.service';
 import { QuotationEntry } from '../quotations-fragment';
+import { isImplicitSubmission } from '../signal-form-utils';
+
+interface QuotationEntryControls {
+  author: string;
+  work: string;
+  citation: string;
+  citationUri: string;
+  variant: string;
+  tag: string;
+  note: string;
+}
+
+function toDraft(entry?: QuotationEntry): QuotationEntryControls {
+  return {
+    author: entry?.author || '',
+    work: entry?.work || '',
+    citation: entry?.citation || '',
+    citationUri: entry?.citationUri || '',
+    variant: entry?.variant || '',
+    tag: entry?.tag || '',
+    note: entry?.note || '',
+  };
+}
 
 @Component({
   selector: 'cadmus-quotation-entry',
@@ -38,8 +59,7 @@ import { QuotationEntry } from '../quotations-fragment';
   styleUrls: ['./quotation-entry.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatSelect,
@@ -49,143 +69,77 @@ import { QuotationEntry } from '../quotations-fragment';
     MatIconButton,
     MatTooltip,
     MatIcon,
-    AsyncPipe,
   ],
 })
-export class QuotationEntryComponent implements OnDestroy {
-  private _workDct: Record<string, ThesaurusEntry[]> | undefined;
-  private _authorSub?: Subscription;
-
-  // list of authors, collected from _workDct
-  public authors$: BehaviorSubject<ThesaurusEntry[]>;
-  // list of selected author's works
-  public authorWorks$: BehaviorSubject<ThesaurusEntry[]>;
-
+export class QuotationEntryComponent {
   public readonly entry = model<QuotationEntry>();
   public readonly workDictionary = input<Record<string, ThesaurusEntry[]>>();
   public readonly tagEntries = input<ThesaurusEntry[]>();
   public readonly editorClose = output();
 
-  public author: FormControl<string | null>;
-  public work: FormControl<string | null>;
-  public citation: FormControl<string | null>;
-  public citationUri: FormControl<string | null>;
-  public variant: FormControl<string | null>;
-  public tag: FormControl<string | null>;
-  public note: FormControl<string | null>;
-  public form: FormGroup;
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.entry()));
+  public readonly form = form(this._draft, (p) => {
+    required(p.author);
+    maxLength(p.author, 50);
+    required(p.work);
+    maxLength(p.work, 100);
+    required(p.citation);
+    maxLength(p.citation, 50);
+    maxLength(p.citationUri, 200);
+    maxLength(p.variant, 1000);
+    maxLength(p.tag, 50);
+    maxLength(p.note, 1000);
+  });
+
+  /**
+   * The authors, collected from the works dictionary, if any.
+   */
+  public readonly authors = computed<ThesaurusEntry[]>(
+    () => this._worksService.collectAuthors(this.workDictionary()) || [],
+  );
+
+  /**
+   * The works of the selected author, from the works dictionary, if any.
+   * In the dictionary the key is the author ID and the value is an array
+   * where the 1st entry is the author, and all the others his works.
+   */
+  public readonly authorWorks = computed<ThesaurusEntry[]>(() => {
+    const dct = this.workDictionary();
+    const authorId = this.form.author().value();
+    if (!dct || !authorId || !(dct[authorId]?.length > 1)) {
+      return [];
+    }
+    return dct[authorId].slice(1);
+  });
 
   constructor(
-    formBuilder: FormBuilder,
     private _dialogService: DialogService,
     private _worksService: QuotationWorksService,
   ) {
-    this.authors$ = new BehaviorSubject<ThesaurusEntry[]>([]);
-    this.authorWorks$ = new BehaviorSubject<ThesaurusEntry[]>([]);
-
-    // form
-    this.author = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(50),
-    ]);
-    this.work = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(100),
-    ]);
-    this.citation = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(50),
-    ]);
-    this.citationUri = formBuilder.control(null, Validators.maxLength(200));
-    this.variant = formBuilder.control(null, Validators.maxLength(1000));
-    this.tag = formBuilder.control(null, Validators.maxLength(50));
-    this.note = formBuilder.control(null, Validators.maxLength(1000));
-    this.form = formBuilder.group({
-      author: this.author,
-      work: this.work,
-      citation: this.citation,
-      citationUri: this.citationUri,
-      variant: this.variant,
-      tag: this.tag,
-      note: this.note,
-    });
-    // when author changes and we're using thesauri, get its works
-    this._authorSub = this.author.valueChanges.subscribe((id) => {
-      if (this._workDct && id) {
-        this.loadAuthorWorks(id);
-      }
-    });
-
+    // a new entry was bound: no unsaved edits (keyed on the bound model:
+    // the draft also changes with each user edit)
     effect(() => {
-      this.updateForm(this.entry());
+      this.entry();
+      untracked(() => this.form().reset());
     });
-
-    effect(() => {
-      this.updateAuthorWorks(this.workDictionary());
-    });
-  }
-
-  public ngOnDestroy(): void {
-    this._authorSub?.unsubscribe();
-  }
-
-  private updateAuthorWorks(dct?: Record<string, ThesaurusEntry[]>): void {
-    this._workDct = dct;
-    this.authors$.next(this._worksService.collectAuthors(dct) || []);
-    // load works for current author if set
-    if (this.author.value) {
-      this.loadAuthorWorks(this.author.value);
-    }
-  }
-
-  private loadAuthorWorks(authorId: string): void {
-    if (!this._workDct) {
-      return;
-    }
-    // const oldWorkId = this.work.value;
-    const works: ThesaurusEntry[] = [];
-    // in each dictionary the key is the author ID and the value is
-    // an array where the 1st entry is the author, and all the others
-    // his works. So here we skip the 1st entry.
-    if (this._workDct[authorId]?.length > 1) {
-      for (let i = 1; i < this._workDct[authorId].length; i++) {
-        works.push(this._workDct[authorId][i]);
-      }
-    }
-    this.authorWorks$.next(works);
-  }
-
-  private updateForm(entry?: QuotationEntry): void {
-    if (!entry) {
-      this.form.reset();
-      return;
-    }
-
-    this.work.setValue(entry.work);
-    this.author.setValue(entry.author);
-    this.citation.setValue(entry.citation);
-    this.citationUri.setValue(entry.citationUri || null);
-    this.variant.setValue(entry.variant || null);
-    this.tag.setValue(entry.tag || null);
-    this.note.setValue(entry.note || null);
-
-    this.form.markAsPristine();
   }
 
   private getEntry(): QuotationEntry {
+    const draft = this._draft();
     return {
-      author: this.author.value?.trim() || '',
-      work: this.work.value?.trim() || '',
-      citation: this.citation.value?.trim() || '',
-      citationUri: this.citationUri.value?.trim(),
-      variant: this.variant.value?.trim(),
-      tag: this.tag.value?.trim(),
-      note: this.note.value?.trim(),
+      author: draft.author.trim(),
+      work: draft.work.trim(),
+      citation: draft.citation.trim(),
+      citationUri: draft.citationUri.trim() || undefined,
+      variant: draft.variant.trim() || undefined,
+      tag: draft.tag.trim() || undefined,
+      note: draft.note.trim() || undefined,
     };
   }
 
   public cancel(): void {
-    if (this.form.pristine) {
+    if (!this.form().dirty()) {
       this.editorClose.emit();
       return;
     }
@@ -199,8 +153,27 @@ export class QuotationEntryComponent implements OnDestroy {
       });
   }
 
+  /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (
+      !isImplicitSubmission(event) ||
+      this.form().invalid() ||
+      !this.form().dirty()
+    ) {
+      return;
+    }
+    event.preventDefault();
+    this.save();
+  }
+
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
     this.entry.set(this.getEntry());

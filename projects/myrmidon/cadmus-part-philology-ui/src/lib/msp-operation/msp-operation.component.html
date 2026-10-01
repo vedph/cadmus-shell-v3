@@ -1,12 +1,12 @@
-<form [formGroup]="form" (submit)="save()">
+<div (keydown.enter)="onEnterKey($event)">
   <mat-card appearance="outlined">
     <mat-card-content>
       <!-- text -->
       <mat-form-field class="full-width">
         <mat-label>operation</mat-label>
-        <input matInput type="text" [formControl]="text" />
+        <input matInput type="text" [formField]="form.text" />
         <mat-hint>"a"&#64;AxR="b" [tag] &#123;note&#125;</mat-hint>
-        @if (text.value) {
+        @if (form.text().value()) {
           <button
             type="button"
             matSuffix
@@ -17,7 +17,7 @@
             <mat-icon>close</mat-icon>
           </button>
         }
-        @if (text.hasError("required") && (text.touched || text.dirty)) {
+        @if (form.text().getError("required") && (form.text().touched() || form.text().dirty())) {
           <mat-error>please enter an operation</mat-error>
         }
       </mat-form-field>
@@ -31,11 +31,11 @@
           <mat-panel-title> Visual </mat-panel-title>
         </mat-expansion-panel-header>
 
-        <form [formGroup]="visual">
+        <div>
           <!-- operator -->
           <div>
             <mat-form-field>
-              <mat-select [formControl]="operator">
+              <mat-select [formField]="form.visual.operator">
                 <mat-option [value]="0">delete</mat-option>
                 <mat-option [value]="1">replace</mat-option>
                 <mat-option [value]="2">insert</mat-option>
@@ -49,14 +49,14 @@
           <div class="form-row">
             <mat-form-field>
               <mat-label>A-range</mat-label>
-              <input matInput type="text" [formControl]="rangeA" />
+              <input matInput type="text" [formField]="form.visual.rangeA" />
               @if (
-                rangeA.hasError("required") && (rangeA.touched || rangeA.dirty)
+                form.visual.rangeA().getError("required") && (form.visual.rangeA().touched() || form.visual.rangeA().dirty())
               ) {
                 <mat-error>please enter a range</mat-error>
               }
               @if (
-                rangeA.hasError("pattern") && (rangeA.touched || rangeA.dirty)
+                form.visual.rangeA().getError("pattern") && (form.visual.rangeA().touched() || form.visual.rangeA().dirty())
               ) {
                 <mat-error>invalid range (NxM)</mat-error>
               }
@@ -65,9 +65,9 @@
             <!-- value A -->
             <mat-form-field>
               <mat-label>A-value</mat-label>
-              <input matInput type="text" [formControl]="valueA" />
+              <input matInput type="text" [formField]="form.visual.valueA" />
               @if (
-                valueA.hasError("maxLength") && (valueA.touched || valueA.dirty)
+                form.visual.valueA().getError("maxLength") && (form.visual.valueA().touched() || form.visual.valueA().dirty())
               ) {
                 <mat-error>too long</mat-error>
               }
@@ -78,9 +78,9 @@
           <div class="form-row">
             <mat-form-field>
               <mat-label>B-range</mat-label>
-              <input matInput type="text" [formControl]="rangeB" />
+              <input matInput type="text" [formField]="form.visual.rangeB" />
               @if (
-                rangeB.hasError("pattern") && (rangeB.touched || rangeB.dirty)
+                form.visual.rangeB().getError("pattern") && (form.visual.rangeB().touched() || form.visual.rangeB().dirty())
               ) {
                 <mat-error>invalid range (NxM)</mat-error>
               }
@@ -89,9 +89,9 @@
             <!-- value B -->
             <mat-form-field>
               <mat-label>B-value</mat-label>
-              <input matInput type="text" [formControl]="valueB" />
+              <input matInput type="text" [formField]="form.visual.valueB" />
               @if (
-                valueB.hasError("maxLength") && (valueB.touched || valueB.dirty)
+                form.visual.valueB().getError("maxLength") && (form.visual.valueB().touched() || form.visual.valueB().dirty())
               ) {
                 <mat-error>too long</mat-error>
               }
@@ -102,11 +102,11 @@
             <!-- tag -->
             <mat-form-field>
               <mat-label>tag</mat-label>
-              <input matInput type="text" [formControl]="tag" />
-              @if (tag.hasError("maxLength") && (tag.touched || tag.dirty)) {
+              <input matInput type="text" [formField]="form.visual.tag" />
+              @if (form.visual.tag().getError("maxLength") && (form.visual.tag().touched() || form.visual.tag().dirty())) {
                 <mat-error>too long</mat-error>
               }
-              @if (tag.hasError("pattern") && (tag.touched || tag.dirty)) {
+              @if (form.visual.tag().getError("pattern") && (form.visual.tag().touched() || form.visual.tag().dirty())) {
                 <mat-error>invalid tag</mat-error>
               }
             </mat-form-field>
@@ -114,16 +114,16 @@
             <!-- note -->
             <mat-form-field>
               <mat-label>note</mat-label>
-              <input matInput type="text" [formControl]="note" />
-              @if (note.hasError("maxLength") && (note.touched || note.dirty)) {
+              <input matInput type="text" [formField]="form.visual.note" />
+              @if (form.visual.note().getError("maxLength") && (form.visual.note().touched() || form.visual.note().dirty())) {
                 <mat-error>too long</mat-error>
               }
-              @if (note.hasError("pattern") && (note.touched || note.dirty)) {
+              @if (form.visual.note().getError("pattern") && (form.visual.note().touched() || form.visual.note().dirty())) {
                 <mat-error>invalid note</mat-error>
               }
             </mat-form-field>
           </div>
-        </form>
+        </div>
       </mat-expansion-panel>
     </mat-card-content>
     <mat-card-actions>
@@ -137,12 +137,13 @@
       </button>
       <button
         mat-icon-button
-        type="submit"
-        [disabled]="form.invalid || form.pristine"
+        type="button"
+        [disabled]="form().invalid() || !form().dirty()"
+        (click)="save()"
         matTooltip="Save operation"
       >
         <mat-icon class="mat-primary">check_circle</mat-icon>
       </button>
     </mat-card-actions>
   </mat-card>
-</form>
+</div>

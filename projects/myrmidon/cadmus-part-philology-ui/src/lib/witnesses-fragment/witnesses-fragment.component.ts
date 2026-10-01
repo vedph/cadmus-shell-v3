@@ -1,23 +1,20 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  OnInit,
   inject,
   signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
-  FormBuilder,
-  FormControl,
-  Validators,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { Subscription } from 'rxjs';
+  FormField,
+  form,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 import { debounceTime } from 'rxjs/operators';
 import { marked } from 'marked';
 
@@ -36,7 +33,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
   NgxMonacoEditorComponent,
@@ -44,17 +40,39 @@ import {
 } from '@jean-merelis/ngx-monaco-editor';
 
 import {
-  TextLayerService,
-  TokenLocation,
-  EditedObject,
-} from '@myrmidon/cadmus-core';
-import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
 
 import { WitnessesFragment, Witness } from '../witnesses-fragment';
+import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
+import { copyFormValue, isImplicitSubmission } from '../signal-form-utils';
+
+interface WitnessesFragmentControls {
+  witnesses: Witness[];
+}
+
+interface WitnessControls {
+  id: string;
+  citation: string;
+  text: string;
+  note: string;
+}
+
+function toDraft(fr?: WitnessesFragment | null): WitnessesFragmentControls {
+  return { witnesses: copyFormValue(fr?.witnesses || []) };
+}
+
+function toWitnessDraft(witness?: Witness): WitnessControls {
+  return {
+    id: witness?.id || '',
+    citation: witness?.citation || '',
+    text: witness?.text || '',
+    note: witness?.note || '',
+  };
+}
 
 @Component({
   selector: 'cadmus-witnesses-fragment',
@@ -62,8 +80,7 @@ import { WitnessesFragment, Witness } from '../witnesses-fragment';
   styleUrls: ['./witnesses-fragment.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -85,13 +102,8 @@ import { WitnessesFragment, Witness } from '../witnesses-fragment';
     CloseSaveButtonsComponent,
   ],
 })
-export class WitnessesFragmentComponent
-  extends ModelEditorComponentBase<WitnessesFragment>
-  implements OnInit, OnDestroy
-{
+export class WitnessesFragmentComponent extends ModelEditorComponentBase<WitnessesFragment> {
   private readonly _sanitizer = inject(DomSanitizer);
-  private _textSub?: Subscription;
-  private _noteSub?: Subscription;
 
   public readonly editorOptions: StandaloneEditorConstructionOptions = {
     minimap: { side: 'right' },
@@ -101,149 +113,139 @@ export class WitnessesFragmentComponent
 
   public readonly currentWitnessOpen = signal<boolean>(false);
   public readonly currentWitnessId = signal<string | undefined>(undefined);
-  public readonly frText = signal<string | undefined>(undefined);
   public readonly textPreviewHtml = signal<SafeHtml>('');
   public readonly notePreviewHtml = signal<SafeHtml>('');
 
-  public witnesses: FormControl;
+  // the fragment's base text
+  public readonly frText = computed<string | undefined>(() => {
+    const data = this.data();
+    return data?.baseText && data.value
+      ? this._layerService.getTextFragment(
+          data.baseText,
+          TokenLocation.parse(data.value.location)!,
+        )
+      : undefined;
+  });
+
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.witnesses, 1);
+  });
+
   // single witness form
-  public id: FormControl<string | null>;
-  public citation: FormControl<string | null>;
-  public text: FormControl<string | null>;
-  public note: FormControl<string | null>;
-  public witness: FormGroup;
+  private readonly _witnessDraft = signal<WitnessControls>(toWitnessDraft());
+  public readonly witness = form(this._witnessDraft, (p) => {
+    required(p.id);
+    maxLength(p.id, 50);
+    required(p.citation);
+    maxLength(p.citation, 50);
+    required(p.text);
+  });
 
-  constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
-    private _layerService: TextLayerService,
-  ) {
-    super(authService, formBuilder);
-    // form
-    this.witnesses = formBuilder.control(null, Validators.required);
-
-    // single witness form
-    this.id = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(50),
-    ]);
-    this.citation = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(50),
-    ]);
-    this.text = formBuilder.control(null, Validators.required);
-    this.note = formBuilder.control(null);
-    this.witness = formBuilder.group({
-      id: this.id,
-      citation: this.citation,
-      text: this.text,
-      note: this.note,
-    });
+  constructor(private _layerService: TextLayerService) {
+    super();
+    toObservable(this.witness.text().value)
+      .pipe(debounceTime(50), takeUntilDestroyed())
+      .subscribe((text) => this.updateTextPreview(text));
+    toObservable(this.witness.note().value)
+      .pipe(debounceTime(50), takeUntilDestroyed())
+      .subscribe((note) => this.updateNotePreview(note));
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-    this._textSub = this.text.valueChanges
-      .pipe(debounceTime(50))
-      .subscribe(() => this.updateTextPreview());
-    this._noteSub = this.note.valueChanges
-      .pipe(debounceTime(50))
-      .subscribe(() => this.updateNotePreview());
-  }
-
-  public override ngOnDestroy() {
-    super.ngOnDestroy();
-    this._textSub?.unsubscribe();
-    this._noteSub?.unsubscribe();
-  }
-
-  private updateTextPreview(): void {
-    const html = marked.parse(this.text.value || '', { async: false }) as string;
+  private updateTextPreview(text: string): void {
+    const html = marked.parse(text || '', { async: false }) as string;
     this.textPreviewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
-  private updateNotePreview(): void {
-    const html = marked.parse(this.note.value || '', { async: false }) as string;
+  private updateNotePreview(note: string): void {
+    const html = marked.parse(note || '', { async: false }) as string;
     this.notePreviewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      witnesses: this.witnesses,
-    });
+  protected override onDataSet(): void {
+    // new data: close the witness being edited, if any
+    this.closeCurrentWitness();
+  }
+
+  private setWitnesses(witnesses: Witness[]): void {
+    this.form.witnesses().value.set(witnesses);
+    this.form.witnesses().markAsDirty();
   }
 
   public deleteWitness(index: number): void {
-    const witnesses = [...(this.witnesses.value || [])];
+    const witnesses = [...this.form.witnesses().value()];
     witnesses.splice(index, 1);
-    this.witnesses.setValue(witnesses);
-    this.witnesses.updateValueAndValidity();
-    this.witnesses.markAsDirty();
+    this.setWitnesses(witnesses);
   }
 
   public moveWitnessUp(index: number): void {
     // guard against index 0: without this, witnesses.splice(index - 1, ...)
     // receives -1, which Array.splice interprets as "insert before the last
-    // element" rather than a no-op, silently corrupting the order. The
-    // template already disables the button for the first row, but the
-    // sibling moveEntryUp (quotations-fragment) guards this defensively too.
+    // element" rather than a no-op, silently corrupting the order.
     if (index < 1) {
       return;
     }
-    const witnesses = [...(this.witnesses.value || [])];
+    const witnesses = [...this.form.witnesses().value()];
     const w = witnesses[index];
     witnesses.splice(index, 1);
     witnesses.splice(index - 1, 0, w);
-    this.witnesses.setValue(witnesses);
-    this.witnesses.updateValueAndValidity();
-    this.witnesses.markAsDirty();
+    this.setWitnesses(witnesses);
   }
 
   public moveWitnessDown(index: number): void {
-    const witnesses = [...(this.witnesses.value || [])];
+    const witnesses = [...this.form.witnesses().value()];
+    if (index + 1 >= witnesses.length) {
+      return;
+    }
     const w = witnesses[index];
     witnesses.splice(index, 1);
     witnesses.splice(index + 1, 0, w);
-    this.witnesses.setValue(witnesses);
-    this.witnesses.updateValueAndValidity();
-    this.witnesses.markAsDirty();
+    this.setWitnesses(witnesses);
   }
 
   public openCurrentWitness(witness?: Witness): void {
-    if (!witness) {
-      this.currentWitnessId.set(undefined);
-      this.witness.reset();
-    } else {
-      this.currentWitnessId.set(witness.id);
-      this.id.setValue(witness.id);
-      this.citation.setValue(witness.citation);
-      this.text.setValue(witness.text);
-      this.note.setValue(witness.note || null);
-      this.witness.markAsPristine();
-    }
+    this.currentWitnessId.set(witness?.id);
+    this._witnessDraft.set(toWitnessDraft(witness));
+    this.witness().reset();
     this.currentWitnessOpen.set(true);
-    this.witness.enable();
   }
 
   public closeCurrentWitness(): void {
     this.currentWitnessOpen.set(false);
     this.currentWitnessId.set(undefined);
-    this.witness.disable();
+  }
+
+  /**
+   * Handle Enter in the witness editor: in a text input, save the witness
+   * as its save button would. This replaces the implicit submission of the
+   * form the witness editor used to render.
+   * @param event The keydown event.
+   */
+  public onWitnessEnterKey(event: Event): void {
+    if (!isImplicitSubmission(event)) {
+      return;
+    }
+    event.preventDefault();
+    this.saveCurrentWitness();
   }
 
   public saveCurrentWitness(): void {
-    // currentWitnessOpen is a signal: without invoking it (), this checked
-    // the always-truthy function reference and never short-circuited.
-    if (!this.currentWitnessOpen() || this.witness.invalid) {
+    if (!this.currentWitnessOpen()) {
       return;
     }
+    if (this.witness().invalid()) {
+      this.witness().markAsTouched();
+      return;
+    }
+    const draft = this._witnessDraft();
     const newWitness: Witness = {
-      id: this.id.value?.trim() || '',
-      citation: this.citation.value?.trim() || '',
-      text: this.text.value?.trim() || '',
-      note: this.note.value?.trim(),
+      id: draft.id.trim(),
+      citation: draft.citation.trim(),
+      text: draft.text.trim(),
+      note: draft.note.trim() || undefined,
     };
-    const witnesses: Witness[] = [...(this.witnesses.value || [])];
+    const witnesses: Witness[] = [...this.form.witnesses().value()];
     const i = witnesses.findIndex((w) => {
       return w.id === newWitness.id && w.citation === newWitness.citation;
     });
@@ -252,41 +254,14 @@ export class WitnessesFragmentComponent
     } else {
       witnesses.splice(i, 1, newWitness);
     }
-    this.witnesses.setValue(witnesses);
-    this.witnesses.updateValueAndValidity();
-    this.witnesses.markAsDirty();
+    this.setWitnesses(witnesses);
 
     this.closeCurrentWitness();
   }
 
-  private updateForm(fragment?: WitnessesFragment | null): void {
-    if (!fragment) {
-      this.form.reset();
-      return;
-    }
-    this.witnesses.setValue(fragment.witnesses || []);
-    this.witnesses.updateValueAndValidity();
-    this.witnesses.markAsDirty();
-    this.witness.reset();
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<WitnessesFragment>): void {
-    // fragment's text
-    if (data?.baseText && data.value) {
-      this.frText.set(
-        this._layerService.getTextFragment(
-          data.baseText,
-          TokenLocation.parse(data.value.location)!,
-        ),
-      );
-    }
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): WitnessesFragment {
     const fr = this.getEditedFragment() as WitnessesFragment;
-    fr.witnesses = this.witnesses.value;
+    fr.witnesses = copyFormValue(this._draft().witnesses);
     return fr;
   }
 }

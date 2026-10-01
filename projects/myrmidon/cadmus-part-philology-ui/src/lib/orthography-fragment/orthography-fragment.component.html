@@ -1,104 +1,103 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>textsms</mat-icon>
-      </div>
-      <mat-card-title
-        >{{ (modelName() | titlecase) || "Orthography Fragment" }}
-        {{ data()?.value?.location }}</mat-card-title
-      >
-      <mat-card-subtitle>
-        {{ frText() }}
-      </mat-card-subtitle>
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
-    <mat-card-content>
-      <!-- EDITOR -->
-      <div>
-        <div class="form-row">
-          <!-- reference -->
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>textsms</mat-icon>
+    </div>
+    <mat-card-title
+      >{{ (modelName() | titlecase) || "Orthography Fragment" }}
+      {{ data()?.value?.location }}</mat-card-title
+    >
+    <mat-card-subtitle>
+      {{ frText() }}
+    </mat-card-subtitle>
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
+  <mat-card-content>
+    <!-- EDITOR -->
+    <div>
+      <div class="form-row">
+        <!-- reference -->
+        <mat-form-field>
+          <mat-label>reference</mat-label>
+          <input matInput [formField]="form.reference" />
+          @if (
+            form.reference().getError("required") &&
+            (form.reference().dirty() || form.reference().touched())
+          ) {
+            <mat-error>reference required</mat-error>
+          }
+          @if (
+            form.reference().getError("maxLength") &&
+            (form.reference().dirty() || form.reference().touched())
+          ) {
+            <mat-error>reference too long</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- language (bound) -->
+        @if (langEntries()?.length) {
           <mat-form-field>
-            <mat-label>reference</mat-label>
-            <input matInput [formControl]="reference" />
+            <mat-label>language</mat-label>
+            <mat-select [formField]="form.language">
+              @for (e of langEntries(); track e.id) {
+                <mat-option [value]="e.id">{{ e.value }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <!-- language (free) -->
+          <mat-form-field>
+            <mat-label>language</mat-label>
+            <input matInput [formField]="form.language" />
             @if (
-              $any(reference).errors?.required &&
-              (reference.dirty || reference.touched)
+              form.language().getError("maxLength") &&
+              (form.language().dirty() || form.language().touched())
             ) {
-              <mat-error>reference required</mat-error>
-            }
-            @if (
-              $any(reference).errors?.maxLength &&
-              (reference.dirty || reference.touched)
-            ) {
-              <mat-error>reference too long</mat-error>
+              <mat-error>language too long</mat-error>
             }
           </mat-form-field>
+        }
 
-          <!-- language (bound) -->
-          @if (langEntries()?.length) {
-            <mat-form-field>
-              <mat-label>language</mat-label>
-              <mat-select [formControl]="language">
-                @for (e of langEntries(); track e.id) {
-                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          } @else {
-            <!-- language (free) -->
-            <mat-form-field>
-              <mat-label>language</mat-label>
-              <input matInput [formControl]="language" />
-              @if (
-                $any(language).errors?.maxLength &&
-                (language.dirty || language.touched)
-              ) {
-                <mat-error>language too long</mat-error>
-              }
-            </mat-form-field>
-          }
+        <!-- text target -->
+        <mat-checkbox [formField]="form.textTarget">ref. → text</mat-checkbox>
 
-          <!-- text target -->
-          <mat-checkbox [formControl]="textTarget">ref. → text</mat-checkbox>
-
-          <!-- tag -->
-          @if (tagEntries()?.length) {
-            <div>
-              <fieldset>
-                <legend>tags</legend>
-                <cadmus-thesaurus-entries-picker
-                  [availableEntries]="tagEntries()!"
-                  [entries]="tags.value"
-                  (entriesChange)="onTagEntriesChange($event!)"
-                />
-              </fieldset>
-            </div>
-          }
-        </div>
-
-        <!-- operations -->
-        <div>
-          <fieldset>
-            <legend>operations</legend>
-            <cadmus-edit-operation-set
-              [baseText]="sourceText() || ''"
-              [targetText]="targetText() || ''"
-              [tagEntries]="tagEntries()"
-              [opTagEntries]="opTagEntries()"
-              [operations]="operations.value"
-              (operationsChange)="onOperationsChange($event!)"
-            />
-          </fieldset>
-        </div>
+        <!-- tag -->
+        @if (tagEntries()?.length) {
+          <div>
+            <fieldset>
+              <legend>tags</legend>
+              <cadmus-thesaurus-entries-picker
+                [availableEntries]="tagEntries()!"
+                [entries]="form.tags().value()"
+                (entriesChange)="onTagEntriesChange($event!)"
+              />
+            </fieldset>
+          </div>
+        }
       </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+
+      <!-- operations -->
+      <div>
+        <fieldset>
+          <legend>operations</legend>
+          <cadmus-edit-operation-set
+            [baseText]="sourceText() || ''"
+            [targetText]="targetText() || ''"
+            [tagEntries]="tagEntries()"
+            [opTagEntries]="opTagEntries()"
+            [operations]="form.operations().value()"
+            (operationsChange)="onOperationsChange($event!)"
+          />
+        </fieldset>
+      </div>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

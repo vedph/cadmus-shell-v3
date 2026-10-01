@@ -1,20 +1,21 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   model,
   effect,
   output,
   input,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import {
-  FormGroup,
-  FormControl,
-  FormArray,
-  FormBuilder,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FormField,
+  applyEach,
+  form,
+  maxLength,
+  pattern,
+  required,
+} from '@angular/forms/signals';
 import { Clipboard } from '@angular/cdk/clipboard';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -43,6 +44,60 @@ import {
   AnnotatedValue,
   LocAnnotatedValue,
 } from '../apparatus-fragment';
+import { isImplicitSubmission } from '../signal-form-utils';
+
+interface WitnessRow {
+  value: string;
+  note: string;
+}
+
+interface AuthorRow {
+  tag: string;
+  value: string;
+  location: string;
+  note: string;
+}
+
+interface ApparatusEntryControls {
+  type: number;
+  value: string;
+  normValue: string;
+  accepted: boolean;
+  subrange: string;
+  tag: string;
+  groupId: string;
+  note: string;
+  witnesses: WitnessRow[];
+  authors: AuthorRow[];
+}
+
+function toWitnessRow(witness?: AnnotatedValue): WitnessRow {
+  return { value: witness?.value || '', note: witness?.note || '' };
+}
+
+function toAuthorRow(author?: LocAnnotatedValue): AuthorRow {
+  return {
+    tag: author?.tag || '',
+    value: author?.value || '',
+    location: author?.location || '',
+    note: author?.note || '',
+  };
+}
+
+function toDraft(entry?: ApparatusEntry): ApparatusEntryControls {
+  return {
+    type: entry?.type ?? 0,
+    value: entry?.value || '',
+    normValue: entry?.normValue || '',
+    accepted: entry?.isAccepted === true,
+    subrange: entry?.subrange || '',
+    tag: entry?.tag || '',
+    groupId: entry?.groupId || '',
+    note: entry?.note || '',
+    witnesses: (entry?.witnesses || []).map((w) => toWitnessRow(w)),
+    authors: (entry?.authors || []).map((a) => toAuthorRow(a)),
+  };
+}
 
 /**
  * Single apparatus entry editor dumb component.
@@ -53,8 +108,7 @@ import {
   styleUrls: ['./apparatus-entry.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatSelect,
@@ -99,212 +153,151 @@ export class ApparatusEntryComponent {
   public readonly workEntries = input<ThesaurusEntry[]>();
 
   // form
-  public type: FormControl<number>;
-  public value: FormControl<string | null>;
-  public normValue: FormControl<string | null>;
-  public accepted: FormControl<boolean>;
-  public subrange: FormControl<string | null>;
-  public tag: FormControl<string | null>;
-  public groupId: FormControl<string | null>;
-  public note: FormControl<string | null>;
-  public witnesses: FormArray;
-  public authors: FormArray;
-  public form: FormGroup;
-
-  constructor(
-    private _formBuilder: FormBuilder,
-    private _clipboard: Clipboard,
-  ) {
-    this.type = _formBuilder.control(0, {
-      validators: Validators.required,
-      nonNullable: true,
-    });
+  private readonly _draft = linkedSignal(() => toDraft(this.entry()));
+  public readonly form = form(this._draft, (p) => {
+    required(p.type);
     // TODO: add conditional validation according to type
-    this.value = _formBuilder.control(null, Validators.maxLength(1000));
-    this.normValue = _formBuilder.control(null, Validators.maxLength(1000));
-    this.accepted = _formBuilder.control(false, { nonNullable: true });
-    this.subrange = _formBuilder.control(
-      null,
-      Validators.pattern('^[0-9]+(?:-[0-9]+)?$'),
-    );
-    this.tag = _formBuilder.control(null, Validators.maxLength(50));
-    this.groupId = _formBuilder.control(null, Validators.maxLength(50));
-    this.note = _formBuilder.control(null, Validators.maxLength(5000));
-    this.witnesses = _formBuilder.array([]);
-    this.authors = _formBuilder.array([]);
-    this.form = _formBuilder.group({
-      type: this.type,
-      value: this.value,
-      normValue: this.normValue,
-      accepted: this.accepted,
-      subrange: this.subrange,
-      tag: this.tag,
-      groupId: this.groupId,
-      note: this.note,
-      witnesses: this.witnesses,
-      authors: this.authors,
+    maxLength(p.value, 1000);
+    maxLength(p.normValue, 1000);
+    pattern(p.subrange, /^[0-9]+(?:-[0-9]+)?$/);
+    maxLength(p.tag, 50);
+    maxLength(p.groupId, 50);
+    maxLength(p.note, 5000);
+    applyEach(p.witnesses, (w) => {
+      required(w.value);
+      maxLength(w.value, 50);
+      maxLength(w.note, 1000);
     });
+    applyEach(p.authors, (a) => {
+      maxLength(a.tag, 50);
+      required(a.value);
+      maxLength(a.value, 50);
+      maxLength(a.location, 50);
+      maxLength(a.note, 1000);
+    });
+  });
 
+  constructor(private _clipboard: Clipboard) {
+    // a new entry was bound: no unsaved edits (keyed on the bound model:
+    // the draft also changes with each user edit)
     effect(() => {
-      this.updateForm(this.entry());
+      this.entry();
+      untracked(() => this.form().reset());
     });
-  }
-
-  private updateForm(entry?: ApparatusEntry): void {
-    if (!entry) {
-      this.witnesses.clear();
-      this.authors.clear();
-      this.form.reset();
-      return;
-    }
-    this.type.setValue(entry.type);
-    this.value.setValue(entry.value || null);
-    this.normValue.setValue(entry.normValue || null);
-    this.accepted.setValue(entry.isAccepted === true);
-    this.subrange.setValue(entry.subrange || null);
-    this.tag.setValue(entry.tag || null);
-    this.groupId.setValue(entry.groupId || null);
-    this.note.setValue(entry.note || null);
-
-    this.witnesses.clear();
-    if (entry.witnesses) {
-      for (const wit of entry.witnesses) {
-        this.addWitness(wit);
-      }
-    }
-
-    this.authors.clear();
-    if (entry.authors) {
-      for (const auth of entry.authors) {
-        this.addAuthor(auth);
-      }
-    }
-    this.form.markAsPristine();
   }
 
   private getEntry(): ApparatusEntry {
+    const draft = this._draft();
     const entry: ApparatusEntry = {
-      type: this.type.value,
-      value: this.value.value?.trim(),
-      normValue: this.normValue.value?.trim(),
-      isAccepted: this.accepted.value === true,
-      subrange: this.subrange.value?.trim(),
-      tag: this.tag.value?.trim(),
-      groupId: this.groupId.value?.trim(),
-      note: this.note.value?.trim(),
+      type: draft.type,
+      value: draft.value.trim() || undefined,
+      normValue: draft.normValue.trim() || undefined,
+      isAccepted: draft.accepted === true,
+      subrange: draft.subrange.trim() || undefined,
+      tag: draft.tag.trim() || undefined,
+      groupId: draft.groupId.trim() || undefined,
+      note: draft.note.trim() || undefined,
     };
 
     // witnesses
-    for (let i = 0; i < this.witnesses.length; i++) {
-      if (!entry.witnesses) {
-        entry.witnesses = [];
-      }
-      entry.witnesses.push({
-        value: this.witnesses.value[i].value?.trim(),
-        note: this.witnesses.value[i].note?.trim(),
-      });
+    if (draft.witnesses.length) {
+      entry.witnesses = draft.witnesses.map((w) => ({
+        value: w.value.trim(),
+        note: w.note.trim() || undefined,
+      }));
     }
 
     // authors
-    for (let i = 0; i < this.authors.length; i++) {
-      if (!entry.authors) {
-        entry.authors = [];
-      }
-      entry.authors.push({
-        tag: this.authors.value[i].tag?.trim(),
-        value: this.authors.value[i].value?.trim(),
-        location: this.authors.value[i].location?.trim(),
-        note: this.authors.value[i].note?.trim(),
-      });
+    if (draft.authors.length) {
+      entry.authors = draft.authors.map((a) => ({
+        tag: a.tag.trim() || undefined,
+        value: a.value.trim(),
+        location: a.location.trim() || undefined,
+        note: a.note.trim() || undefined,
+      }));
     }
 
     return entry;
   }
 
+  private setWitnesses(rows: WitnessRow[]): void {
+    this.form.witnesses().value.set(rows);
+    this.form.witnesses().markAsDirty();
+  }
+
+  private setAuthors(rows: AuthorRow[]): void {
+    this.form.authors().value.set(rows);
+    this.form.authors().markAsDirty();
+  }
+
+  private static move<T>(items: T[], index: number, delta: number): T[] {
+    const moved = [...items];
+    const item = moved[index];
+    moved.splice(index, 1);
+    moved.splice(index + delta, 0, item);
+    return moved;
+  }
+
   public addWitness(witness?: AnnotatedValue): void {
-    this.witnesses.push(
-      this._formBuilder.group({
-        value: this._formBuilder.control(witness?.value, [
-          Validators.required,
-          Validators.maxLength(50),
-        ]),
-        note: this._formBuilder.control(
-          witness?.note,
-          Validators.maxLength(1000),
-        ),
-      }),
-    );
-    this.form.markAsDirty();
+    this.setWitnesses([...this.form.witnesses().value(), toWitnessRow(witness)]);
   }
 
   public addAuthor(author?: LocAnnotatedValue): void {
-    this.authors.push(
-      this._formBuilder.group({
-        tag: this._formBuilder.control(author?.tag, [Validators.maxLength(50)]),
-        value: this._formBuilder.control(author?.value, [
-          Validators.required,
-          Validators.maxLength(50),
-        ]),
-        location: this._formBuilder.control(author?.location, [
-          Validators.maxLength(50),
-        ]),
-        note: this._formBuilder.control(
-          author?.note,
-          Validators.maxLength(1000),
-        ),
-      }),
-    );
-    this.form.markAsDirty();
+    this.setAuthors([...this.form.authors().value(), toAuthorRow(author)]);
   }
 
   public removeWitness(index: number): void {
-    this.witnesses.removeAt(index);
-    this.form.markAsDirty();
+    this.setWitnesses(
+      this.form
+        .witnesses()
+        .value()
+        .filter((_, i) => i !== index),
+    );
   }
 
   public removeAuthor(index: number): void {
-    this.authors.removeAt(index);
-    this.form.markAsDirty();
+    this.setAuthors(
+      this.form
+        .authors()
+        .value()
+        .filter((_, i) => i !== index),
+    );
   }
 
   public moveWitnessUp(index: number): void {
     if (index < 1) {
       return;
     }
-    const grp = this.witnesses.controls[index];
-    this.witnesses.removeAt(index);
-    this.witnesses.insert(index - 1, grp);
-    this.form.markAsDirty();
+    this.setWitnesses(
+      ApparatusEntryComponent.move(this.form.witnesses().value(), index, -1),
+    );
   }
 
   public moveAuthorUp(index: number): void {
     if (index < 1) {
       return;
     }
-    const grp = this.authors.controls[index];
-    this.authors.removeAt(index);
-    this.authors.insert(index - 1, grp);
-    this.form.markAsDirty();
+    this.setAuthors(
+      ApparatusEntryComponent.move(this.form.authors().value(), index, -1),
+    );
   }
 
   public moveWitnessDown(index: number): void {
-    if (index + 1 >= this.witnesses.length) {
+    if (index + 1 >= this.form.witnesses().value().length) {
       return;
     }
-    const item = this.witnesses.controls[index];
-    this.witnesses.removeAt(index);
-    this.witnesses.insert(index + 1, item);
-    this.form.markAsDirty();
+    this.setWitnesses(
+      ApparatusEntryComponent.move(this.form.witnesses().value(), index, 1),
+    );
   }
 
   public moveAuthorDown(index: number): void {
-    if (index + 1 >= this.authors.length) {
+    if (index + 1 >= this.form.authors().value().length) {
       return;
     }
-    const item = this.authors.controls[index];
-    this.authors.removeAt(index);
-    this.authors.insert(index + 1, item);
-    this.form.markAsDirty();
+    this.setAuthors(
+      ApparatusEntryComponent.move(this.form.authors().value(), index, 1),
+    );
   }
 
   public onEntryChange(entry: ThesaurusEntry): void {
@@ -321,8 +314,27 @@ export class ApparatusEntryComponent {
     this.editorClose.emit();
   }
 
+  /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (
+      !isImplicitSubmission(event) ||
+      this.form().invalid() ||
+      !this.form().dirty()
+    ) {
+      return;
+    }
+    event.preventDefault();
+    this.submit();
+  }
+
   public submit(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
     this.entry.set(this.getEntry());
