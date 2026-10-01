@@ -48,7 +48,7 @@ import {
 import { WitnessesFragment, Witness } from '../witnesses-fragment';
 import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
 import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
-import { copyFormValue, isImplicitSubmission } from '../signal-form-utils';
+import { copyFormValue, isImplicitSubmission, setFieldFromEditor } from '../signal-form-utils';
 
 interface WitnessesFragmentControls {
   witnesses: Witness[];
@@ -142,6 +142,11 @@ export class WitnessesFragmentComponent extends ModelEditorComponentBase<Witness
     maxLength(p.citation, 50);
     required(p.text);
   });
+
+  /**
+   * Set a text field from its editor. See setFieldFromEditor.
+   */
+  public setFieldFromEditor = setFieldFromEditor;
 
   constructor(private _layerService: TextLayerService) {
     super();

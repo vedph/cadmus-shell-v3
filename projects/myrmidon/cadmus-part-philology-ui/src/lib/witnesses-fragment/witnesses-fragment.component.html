@@ -157,7 +157,9 @@
             <h3>Text</h3>
             <div id="txtEditor">
               <ngx-monaco-editor
-                [formField]="witness.text"
+                [value]="witness.text().value()"
+                (valueChange)="setFieldFromEditor(witness.text, $event)"
+                (blur)="witness.text().markAsTouched()"
                 [language]="'markdown'"
                 [options]="editorOptions"
               />
@@ -175,7 +177,9 @@
             <h3>Note</h3>
             <div id="noteEditor">
               <ngx-monaco-editor
-                [formField]="witness.note"
+                [value]="witness.note().value()"
+                (valueChange)="setFieldFromEditor(witness.note, $event)"
+                (blur)="witness.note().markAsTouched()"
                 [language]="'markdown'"
                 [options]="editorOptions"
               />

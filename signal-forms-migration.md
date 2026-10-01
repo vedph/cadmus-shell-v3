@@ -1234,3 +1234,68 @@ Bugs fixed (each has a spec):
   referred to validators that never existed. They were replaced by the
   `min` messages for the rules that did exist.
 
+## Browser verification of iteration 2 (2026-10-01)
+
+Setup:
+
+- `node scripts/build-libs.mjs` built all 29 libraries (exit 0).
+- Every library's `ng test`: 2,979 tests in 28 libraries, all green
+  (`cadmus-part-taxo-pg` has no specs).
+- `.angular/cache` was deleted and `ng serve` run on 4200, with headless
+  Chrome over CDP, a real login and the real local API (mock data).
+- Script: `cdp-parts.mjs` (session scratchpad), on item `ec58c63f…`.
+
+Before the browser could be trusted, it was checked that it served the
+new code: the probe reads `typeof component.setFieldFromEditor`. One run
+was against a stale Vite cache; see below for why that run was still
+useful.
+
+Note part (real Monaco editor):
+
+- After load: the form has the part text, Monaco shows it, there is no
+  `<form>`, and the editor is pristine.
+- Typing in Monaco updates the form, makes the editor dirty and updates
+  the preview.
+- Enter in the tag input does not save the part: no write request.
+- Save writes the edited text (`POST parts`, read back through the API),
+  and the editor is pristine again afterwards.
+- The original text and tag were then restored, and verified through the
+  API.
+- A second load, with Monaco already cached, is pristine.
+
+Bibliography part (nested sub-editors):
+
+- An entry editor opens, and typing makes it dirty and keeps it dirty.
+- Enter in its title input saves the entry into the part and closes the
+  entry editor. The part becomes dirty, and is not saved (no write).
+- There is no `<form>` in the part editor.
+
+No console errors or warnings in either flow.
+
+**Bug found in the browser and fixed: Monaco echo.** The first run
+failed "pristine again after save".
+
+- Measured with a probe: after a save that changed the text, the text
+  field became dirty again. A save with no change did not.
+- Read in `@jean-merelis/ngx-monaco-editor`'s source: `writeValue()` sets
+  the `value` model; an effect then calls `editor.setValue()`; Monaco's
+  content-change event calls `propagateChange()`. So every programmatic
+  write comes back as a user change, asynchronously, after the form was
+  reset.
+- The stale-cache run measured the other case. With the old
+  `[formField]` binding and Monaco already cached (created before the
+  data arrived), the note was dirty right after loading.
+- **Believed, not measured:** the reactive-forms code had the same
+  problem, since `setValue()` + `markAsPristine()` were followed by the
+  same asynchronous `onChange()`. To check, run the commit before
+  `1990a74`, open a note twice, and read `isDirty`.
+- Fix: the Monaco editors (note, comment, token text, and the
+  witnesses' text and note) are bound with `[value]` +
+  `(valueChange)="setFieldFromEditor(field, $event)"` +
+  `(blur)="field().markAsTouched()"`. `setFieldFromEditor()`, in
+  `signal-form-utils.ts`, ignores values equal to the field's.
+- A spec checks that an echoed value leaves the note pristine and a new
+  one dirties it. The browser checks above pass with the fix, including
+  the cached second load.
+- Measured: 649 + 517 tests pass in the two libraries after the fix.
+

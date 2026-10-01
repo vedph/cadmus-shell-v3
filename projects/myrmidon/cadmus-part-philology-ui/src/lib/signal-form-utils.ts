@@ -46,3 +46,35 @@ export function isImplicitSubmission(event: Event): boolean {
     SUBMITTING_INPUT_TYPES.has(target.type)
   );
 }
+
+/**
+ * A field whose value can be set from an editor component.
+ */
+interface EditableTextField {
+  (): {
+    value: { (): string; set(value: string): void };
+    markAsDirty(): void;
+  };
+}
+
+/**
+ * Set a text field from the value emitted by an editor component, when it
+ * differs from the field's value, marking the field as dirty. Use this
+ * instead of binding the field with `[formField]` to editors which emit
+ * their value also when it is set programmatically, like the Monaco
+ * editor: binding them with `[formField]` makes any programmatic change
+ * (e.g. new data bound after save) look like a user edit, so the form
+ * gets dirty. Bind such editors with `[value]="field().value()"` and
+ * `(valueChange)="setFieldFromEditor(field, $event)"`.
+ *
+ * @param field The field to set.
+ * @param value The value emitted by the editor.
+ */
+export function setFieldFromEditor(field: EditableTextField, value: string): void {
+  const state = field();
+  if (state.value() === (value ?? '')) {
+    return;
+  }
+  state.value.set(value ?? '');
+  state.markAsDirty();
+}
