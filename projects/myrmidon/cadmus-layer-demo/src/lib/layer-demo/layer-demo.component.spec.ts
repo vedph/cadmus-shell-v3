@@ -20,8 +20,8 @@ describe('LayerDemoComponent', () => {
 
   it('should create with default form values', () => {
     expect(component).toBeTruthy();
-    expect(component.text.value).toBe('alpha beta\ngamma\ndelta epsilon waw\nzeta');
-    expect(component.location.value).toBe('1.2@2x2');
+    expect(component.rendition.text().value()).toBe('alpha beta\ngamma\ndelta epsilon waw\nzeta');
+    expect(component.rendition.location().value()).toBe('1.2@2x2');
     expect(component.locations()).toEqual([]);
     expect(component.textSize()).toBe(14);
   });
@@ -44,29 +44,29 @@ describe('LayerDemoComponent', () => {
 
   describe('addLocation', () => {
     it('should do nothing for an empty location value', () => {
-      component.location.setValue('');
+      component.rendition.location().value.set('');
       component.addLocation();
       expect(component.locations()).toEqual([]);
     });
 
     it('should do nothing for an unparsable location value', () => {
-      component.location.setValue('not-a-location');
+      component.rendition.location().value.set('not-a-location');
       component.addLocation();
       expect(component.locations()).toEqual([]);
     });
 
     it('should insert the first location', () => {
-      component.location.setValue('1.2');
+      component.rendition.location().value.set('1.2');
       component.addLocation();
       expect(component.locations().map((l) => l.toString())).toEqual(['1.2']);
     });
 
     it('should keep locations sorted on insertion', () => {
-      component.location.setValue('1.5');
+      component.rendition.location().value.set('1.5');
       component.addLocation();
-      component.location.setValue('1.1');
+      component.rendition.location().value.set('1.1');
       component.addLocation();
-      component.location.setValue('1.3');
+      component.rendition.location().value.set('1.3');
       component.addLocation();
 
       expect(component.locations().map((l) => l.toString())).toEqual([
@@ -77,22 +77,22 @@ describe('LayerDemoComponent', () => {
     });
 
     it('should not add a duplicate (equal) location', () => {
-      component.location.setValue('1.2');
+      component.rendition.location().value.set('1.2');
       component.addLocation();
-      component.location.setValue('1.2');
+      component.rendition.location().value.set('1.2');
       component.addLocation();
       expect(component.locations().length).toBe(1);
     });
 
     it('should remove existing locations overlapping the new one', () => {
-      component.location.setValue('1.1-1.3');
+      component.rendition.location().value.set('1.1-1.3');
       component.addLocation();
-      component.location.setValue('1.5');
+      component.rendition.location().value.set('1.5');
       component.addLocation();
       expect(component.locations().length).toBe(2);
 
       // this new range overlaps both the previous ones
-      component.location.setValue('1.2-1.6');
+      component.rendition.location().value.set('1.2-1.6');
       component.addLocation();
 
       expect(component.locations().map((l) => l.toString())).toEqual([
@@ -103,9 +103,9 @@ describe('LayerDemoComponent', () => {
 
   describe('removeLocation', () => {
     it('should remove the given location instance', () => {
-      component.location.setValue('1.1');
+      component.rendition.location().value.set('1.1');
       component.addLocation();
-      component.location.setValue('1.2');
+      component.rendition.location().value.set('1.2');
       component.addLocation();
       const toRemove = component.locations()[0];
 
@@ -116,7 +116,7 @@ describe('LayerDemoComponent', () => {
     });
 
     it('should do nothing when the location is not found', () => {
-      component.location.setValue('1.1');
+      component.rendition.location().value.set('1.1');
       component.addLocation();
       component.removeLocation(TokenLocation.parse('9.9')!);
       expect(component.locations().length).toBe(1);
@@ -125,7 +125,7 @@ describe('LayerDemoComponent', () => {
 
   describe('clearLocations', () => {
     it('should empty the locations list', () => {
-      component.location.setValue('1.1');
+      component.rendition.location().value.set('1.1');
       component.addLocation();
       component.clearLocations();
       expect(component.locations()).toEqual([]);
@@ -134,14 +134,14 @@ describe('LayerDemoComponent', () => {
 
   describe('render', () => {
     it('should do nothing when the text is empty', () => {
-      component.text.setValue('');
+      component.rendition.text().value.set('');
       component.render();
       expect(component.result()).toBe('');
     });
 
     it('should render the text with its locations', () => {
-      component.text.setValue('alpha beta gamma');
-      component.location.setValue('1.2');
+      component.rendition.text().value.set('alpha beta gamma');
+      component.rendition.location().value.set('1.2');
       component.addLocation();
 
       component.render();
@@ -152,13 +152,13 @@ describe('LayerDemoComponent', () => {
 
   describe('getLocationForNew / getLocationForEdit', () => {
     it('getLocationForNew should do nothing when the text is empty', () => {
-      component.text.setValue('');
+      component.rendition.text().value.set('');
       component.getLocationForNew();
       expect(component.userLocation()).toBeUndefined();
     });
 
     it('getLocationForNew should set userLocation to undefined when getSelectedRange is null', () => {
-      component.text.setValue('alpha beta');
+      component.rendition.text().value.set('alpha beta');
       // jsdom has no active selection by default, so getSelectedRange() is null
       component.getLocationForNew();
       expect(component.userLocation()).toBeUndefined();
@@ -167,6 +167,62 @@ describe('LayerDemoComponent', () => {
     it('getLocationForEdit should set userLocation to undefined when getSelectedRange is null', () => {
       component.getLocationForEdit();
       expect(component.userLocation()).toBeUndefined();
+    });
+  });
+
+  describe('submission root', () => {
+    function submit(): Event {
+      const event = new Event('submit', { cancelable: true });
+      fixture.nativeElement.querySelector('form').dispatchEvent(event);
+      return event;
+    }
+
+    it('renders on submit, preventing the native submission', async () => {
+      component.rendition.text().value.set('alpha beta gamma');
+      fixture.detectChanges();
+      const event = submit();
+      await Promise.resolve();
+      expect(event.defaultPrevented).toBe(true);
+      expect(component.result()).toContain('alpha');
+    });
+
+    it('renders on submit even when the location is empty (invalid)', async () => {
+      component.rendition.text().value.set('alpha beta gamma');
+      component.rendition.location().value.set('');
+      fixture.detectChanges();
+      expect(component.rendition().invalid()).toBe(true);
+      submit();
+      await Promise.resolve();
+      expect(component.result()).toContain('alpha');
+    });
+
+    it('renders the text limit as a maxlength attribute', () => {
+      const textarea: HTMLTextAreaElement =
+        fixture.nativeElement.querySelector('#text');
+      expect(textarea.maxLength).toBe(1000);
+      const location: HTMLInputElement =
+        fixture.nativeElement.querySelector('#location');
+      expect(location.required).toBe(true);
+    });
+  });
+
+  describe('remove location button', () => {
+    it('removes the location without submitting (re-rendering)', async () => {
+      component.rendition.text().value.set('alpha beta gamma');
+      component.rendition.location().value.set('1.2');
+      component.addLocation();
+      fixture.detectChanges();
+      const renderSpy = vi.spyOn(component, 'render');
+
+      const remove: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'table button'
+      );
+      expect(remove.type).toBe('button');
+      remove.click();
+      await Promise.resolve();
+
+      expect(component.locations().length).toBe(0);
+      expect(renderSpy).not.toHaveBeenCalled();
     });
   });
 });

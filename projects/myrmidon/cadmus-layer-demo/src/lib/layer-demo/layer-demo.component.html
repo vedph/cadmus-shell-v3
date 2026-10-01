@@ -29,7 +29,7 @@
     </article>
     <hr />
 
-    <form [formGroup]="rendition" (ngSubmit)="render()">
+    <form [formRoot]="rendition">
       <div>
         <mat-form-field>
           <mat-label>base text</mat-label>
@@ -37,9 +37,8 @@
             matInput
             type="text"
             id="text"
-            maxlength="1000"
             spellcheck="false"
-            formControlName="text"
+            [formField]="rendition.text"
           ></textarea>
         </mat-form-field>
       </div>
@@ -51,9 +50,8 @@
             matInput
             type="text"
             id="location"
-            required
             spellcheck="false"
-            formControlName="location"
+            [formField]="rendition.location"
           />
           <mat-hint>Y.X&#64;AxR</mat-hint>
         </mat-form-field>
@@ -130,7 +128,7 @@
           @for (loc of locations(); track loc) {
             <tr>
               <td>
-                <button mat-icon-button (click)="removeLocation(loc)">
+                <button type="button" mat-icon-button (click)="removeLocation(loc)">
                   <mat-icon class="mat-warn">remove_circle</mat-icon>
                 </button>
               </td>

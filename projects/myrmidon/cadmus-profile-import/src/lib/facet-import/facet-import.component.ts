@@ -8,17 +8,11 @@ import {
 } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import {
-  AbstractControl,
-  FormsModule,
-  ReactiveFormsModule,
-  ValidationErrors,
-} from '@angular/forms';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+  FormField,
+  form,
+  required,
+  validate,
+} from '@angular/forms/signals';
 import { Subscription } from 'rxjs';
 
 import { MatButton } from '@angular/material/button';
@@ -44,19 +38,22 @@ import { EnvService } from '@myrmidon/ngx-tools';
 
 import { UploadService } from '@myrmidon/cadmus-api';
 
-class FileExtensionValidator {
-  constructor(private allowedExtensions: string[]) {}
+/**
+ * True if the file has one of the allowed extensions.
+ */
+function hasAllowedExtension(file: File, allowedExtensions: string[]): boolean {
+  const extension = file.name.split('.').pop();
+  return allowedExtensions.includes(extension!);
+}
 
-  validate(control: AbstractControl): ValidationErrors | null {
-    const file = control.value as File | null;
-    if (file) {
-      const extension = file.name.split('.').pop();
-      if (!this.allowedExtensions.includes(extension!)) {
-        return { invalidExtension: true };
-      }
-    }
-    return null;
-  }
+/**
+ * The editable shape behind the form.
+ */
+interface UploadControls {
+  file: File | null;
+  /** R=replace, S=synch. */
+  mode: string;
+  dryRun: boolean;
 }
 
 interface UploadResult {
@@ -76,8 +73,7 @@ interface UploadResult {
   styleUrls: ['./facet-import.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatButton,
     MatFormField,
     MatLabel,
@@ -101,10 +97,23 @@ export class FacetImportComponent {
   public readonly uploadStart = output();
   public readonly uploadEnd = output<boolean>();
 
-  public file: FormControl<File | null>;
-  public mode: FormControl<string>;
-  public dryRun: FormControl<boolean>;
-  public form: FormGroup;
+  public readonly form = form(
+    signal<UploadControls>({
+      file: null,
+      mode: 'R',
+      dryRun: false,
+    }),
+    (path) => {
+      required(path.file);
+      validate(path.file, ({ value }) => {
+        const file = value();
+        return file && !hasAllowedExtension(file, ['json'])
+          ? { kind: 'invalidExtension' }
+          : null;
+      });
+      required(path.mode);
+    },
+  );
 
   public readonly uploadProgress = signal<number>(0);
   public readonly uploading = signal<boolean>(false);
@@ -113,51 +122,32 @@ export class FacetImportComponent {
   public readonly wasDryRun = signal<boolean>(false);
 
   constructor(
-    formBuilder: FormBuilder,
     private _env: EnvService,
-    private _uploadService: UploadService
-  ) {
-    const fileExtensionValidator = new FileExtensionValidator(['json']);
-    this.file = formBuilder.control(null, [
-      Validators.required,
-      (control) => fileExtensionValidator.validate(control),
-    ]);
-    this.mode = formBuilder.control('R', {
-      validators: Validators.required,
-      nonNullable: true,
-    });
-    this.dryRun = formBuilder.control(false, {
-      nonNullable: true,
-    });
-    this.form = formBuilder.group({
-      file: this.file,
-      mode: this.mode,
-      dryRun: this.dryRun,
-    });
-  }
+    private _uploadService: UploadService,
+  ) {}
 
   public onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
-      this.file.setValue(input.files[0]);
+      this.form.file().value.set(input.files[0]);
     }
   }
 
   public upload() {
-    if (!this.form.valid) {
+    if (!this.form().valid()) {
       return;
     }
     this.result.set(undefined);
-    this.wasDryRun.set(this.dryRun.value);
+    this.wasDryRun.set(this.form.dryRun().value());
     this.uploading.set(true);
     this.uploadStart.emit();
 
     // build URL with proper query string
     const params: string[] = [];
-    if (this.mode.value !== 'R') {
-      params.push(`mode=${this.mode.value}`);
+    if (this.form.mode().value() !== 'R') {
+      params.push(`mode=${this.form.mode().value()}`);
     }
-    if (this.dryRun.value) {
+    if (this.form.dryRun().value()) {
       params.push('dryRun=true');
     }
 
@@ -167,7 +157,7 @@ export class FacetImportComponent {
     }
 
     this._sub = this._uploadService
-      .uploadFile(this.file.value!, url, {
+      .uploadFile(this.form.file().value()!, url, {
         reportProgress: true,
       })
       .subscribe({

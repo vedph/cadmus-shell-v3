@@ -1,19 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  OnInit,
+  linkedSignal,
   signal,
+  WritableSignal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
-  FormControl,
-  FormGroup,
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FieldTree,
+  FormField,
+  form,
+  maxLength,
+} from '@angular/forms/signals';
 import { AsyncPipe } from '@angular/common';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import {
   MatFormField,
@@ -33,11 +33,98 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
-import { FlagMatching, ItemFilter, UserInfo } from '@myrmidon/cadmus-core';
-import { UserRefLookupService } from '@myrmidon/cadmus-ui';
+import { FlagMatching, ItemFilter } from '@myrmidon/cadmus-core';
+import { UserRefLookupService, UserWithRoles } from '@myrmidon/cadmus-ui';
 import { AppRepository } from '@myrmidon/cadmus-state';
 
 import { ItemListRepository } from '../state/item-list.repository';
+
+/**
+ * The editable shape behind the filter form. Text fields use '' as their
+ * empty value, as they are bound to native inputs.
+ */
+interface ItemFilterControls {
+  title: string;
+  description: string;
+  facet: string | null;
+  group: string;
+  flagMatching: FlagMatching;
+  flags: number[] | null;
+  minModified: Date | null;
+  maxModified: Date | null;
+  /** The picked user name: set via the user lookup, not from the filter. */
+  user: string | null;
+}
+
+/**
+ * The values of a cleared filter form.
+ */
+function makeEmptyDraft(): ItemFilterControls {
+  return {
+    title: '',
+    description: '',
+    facet: null,
+    group: '',
+    flagMatching: FlagMatching.none,
+    flags: null,
+    minModified: null,
+    maxModified: null,
+    user: null,
+  };
+}
+
+function flagsToArray(flags: number | undefined): number[] {
+  if (!flags) {
+    return [];
+  }
+  const a = [];
+  let n = 1;
+  for (let i = 0; i < 32; i++) {
+    if ((flags & n) === n) {
+      a.push(n);
+    }
+    n <<= 1;
+  }
+  return a;
+}
+
+function arrayToFlags(ids?: number[] | null): number | undefined {
+  if (!ids) {
+    return undefined;
+  }
+  let flags = 0;
+  for (let i = 0; i < ids.length; i++) {
+    flags |= ids[i];
+  }
+  return flags;
+}
+
+/**
+ * Filter -> draft. The picked user is not synced from the filter: it is
+ * kept from the current draft.
+ */
+function toDraft(
+  filter: ItemFilter | undefined,
+  user: string | null
+): ItemFilterControls {
+  if (!filter) {
+    return { ...makeEmptyDraft(), user };
+  }
+  return {
+    title: filter.title || '',
+    description: filter.description || '',
+    facet: filter.facetId || null,
+    group: filter.groupId || '',
+    flags: flagsToArray(filter.flags),
+    // note: FlagMatching.bitsAllSet is 0, a falsy value, so this must use
+    // ?? rather than || or a selected "bitsAllSet" filter would silently
+    // revert to "none" whenever the form re-syncs from filter$
+    flagMatching: filter.flagMatching ?? FlagMatching.none,
+    minModified: filter.minModified || null,
+    maxModified: filter.maxModified || null,
+    user,
+  };
+}
 
 /**
  * Items filter.
@@ -48,8 +135,7 @@ import { ItemListRepository } from '../state/item-list.repository';
   styleUrls: ['./item-filter.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatInput,
@@ -66,141 +152,80 @@ import { ItemListRepository } from '../state/item-list.repository';
     AsyncPipe,
   ],
 })
-export class ItemFilterComponent implements OnInit, OnDestroy {
-  private _sub?: Subscription;
+export class ItemFilterComponent {
   public filter$: Observable<ItemFilter>;
 
-  public title: FormControl<string | null>;
-  public description: FormControl<string | null>;
-  public facet: FormControl<string | null>;
-  public group: FormControl<string | null>;
-  public flagMatching: FormControl<FlagMatching>;
-  public flags: FormControl<number[] | null>;
-  public minModified: FormControl<Date | null>;
-  public maxModified: FormControl<Date | null>;
-  public user: FormControl<string | null>;
-  public form: FormGroup;
+  /**
+   * The editable draft: rebuilt from the repository filter whenever it
+   * changes (including after apply), and locally edited in between.
+   */
+  private readonly _draft: WritableSignal<ItemFilterControls>;
 
-  public readonly currentUser = signal<UserInfo | undefined>(undefined);
+  public readonly form: FieldTree<ItemFilterControls>;
+
+  /**
+   * The user picked in the user lookup, as provided by the lookup service.
+   * It is bound back to the lookup, so it must keep the service's own
+   * shape: the lookup displays it via the service's getName().
+   */
+  public readonly currentUser = signal<UserWithRoles | undefined>(undefined);
 
   constructor(
     private _repository: ItemListRepository,
     public userLookupService: UserRefLookupService,
     public app: AppRepository,
-    formBuilder: FormBuilder,
   ) {
     this.filter$ = _repository.filter$;
-    this.title = formBuilder.control(null);
-    this.description = formBuilder.control(null);
-    this.facet = formBuilder.control(null);
-    this.group = formBuilder.control(null);
-    this.flags = formBuilder.control(null);
-    this.flagMatching = formBuilder.control(FlagMatching.none, {
-      nonNullable: true,
-    });
-    this.minModified = formBuilder.control(null);
-    this.maxModified = formBuilder.control(null);
-    this.user = formBuilder.control(null);
 
-    this.form = formBuilder.group({
-      title: this.title,
-      description: this.description,
-      facet: this.facet,
-      group: this.group,
-      flags: this.flags,
-      flagMatching: this.flagMatching,
-      minModified: this.minModified,
-      maxModified: this.maxModified,
-      user: this.user,
+    const filter = toSignal(_repository.filter$);
+    this._draft = linkedSignal<ItemFilter | undefined, ItemFilterControls>({
+      source: filter,
+      computation: (f, previous) => toDraft(f, previous?.value.user ?? null),
     });
+    this.form = form(this._draft, (path) => {
+      // [formField] renders these as the inputs' maxlength attributes
+      maxLength(path.title, 500);
+      maxLength(path.description, 500);
+    });
+
     // ensure app data is loaded
     this.app.load();
   }
 
-  public ngOnInit() {
-    this._sub = this.filter$.subscribe((f) => {
-      this.updateForm(f);
-    });
-  }
-
-  public ngOnDestroy() {
-    this._sub?.unsubscribe();
-  }
-
-  private flagsToArray(flags: number | undefined): number[] {
-    if (!flags) {
-      return [];
-    }
-    const a = [];
-    let n = 1;
-    for (let i = 0; i < 32; i++) {
-      if ((flags & n) === n) {
-        a.push(n);
-      }
-      n <<= 1;
-    }
-    return a;
-  }
-
-  private arrayToFlags(ids?: number[] | null): number | undefined {
-    if (!ids) {
-      return undefined;
-    }
-    let flags = 0;
-    for (let i = 0; i < ids.length; i++) {
-      flags |= ids[i];
-    }
-    return flags;
-  }
-
-  private updateForm(filter: ItemFilter) {
-    this.title.setValue(filter.title || null);
-    this.description.setValue(filter.description || null);
-    this.facet.setValue(filter.facetId || null);
-    this.group.setValue(filter.groupId || null);
-    this.flags.setValue(this.flagsToArray(filter.flags));
-    // note: FlagMatching.bitsAllSet is 0, a falsy value, so this must use
-    // ?? rather than || or a selected "bitsAllSet" filter would silently
-    // revert to "none" whenever the form re-syncs from filter$
-    this.flagMatching.setValue(filter.flagMatching ?? FlagMatching.none);
-    this.minModified.setValue(filter.minModified || null);
-    this.maxModified.setValue(filter.maxModified || null);
-    this.form.markAsPristine();
-  }
-
   private getFilter(): ItemFilter {
+    const v = this._draft();
     return {
-      title: this.title.value || undefined,
-      description: this.description.value || undefined,
-      facetId: this.facet.value || undefined,
-      groupId: this.group.value || undefined,
-      flags: this.arrayToFlags(this.flags.value),
-      flagMatching: this.flagMatching.value,
-      userId: this.user.value ? this.user.value : undefined,
-      minModified: this.minModified.value ? this.minModified.value : undefined,
-      maxModified: this.maxModified.value ? this.maxModified.value : undefined,
+      title: v.title || undefined,
+      description: v.description || undefined,
+      facetId: v.facet || undefined,
+      groupId: v.group || undefined,
+      flags: arrayToFlags(v.flags),
+      flagMatching: v.flagMatching,
+      userId: v.user ? v.user : undefined,
+      minModified: v.minModified ? v.minModified : undefined,
+      maxModified: v.maxModified ? v.maxModified : undefined,
     };
   }
 
-  public onUserChange(user?: any): void {
-    const u = user?.user as UserInfo | undefined;
-    if (u) {
-      this.user.setValue(u.userName);
-      this.currentUser.set(u);
+  public onUserChange(item?: unknown): void {
+    const picked = item as UserWithRoles | undefined;
+    if (picked?.user) {
+      this.form.user().value.set(picked.user.userName);
+      this.currentUser.set(picked);
     } else {
-      this.user.setValue(null);
+      this.form.user().value.set(null);
       this.currentUser.set(undefined);
     }
   }
 
   public reset() {
-    this.form.reset();
+    this._draft.set(makeEmptyDraft());
     this.currentUser.set(undefined);
     this.apply();
   }
 
   public apply() {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       return;
     }
     const filter = this.getFilter();

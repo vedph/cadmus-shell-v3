@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, effect, input, model } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  linkedSignal,
+  model,
+  untracked,
+} from '@angular/core';
+import { FormField, form } from '@angular/forms/signals';
 import { forkJoin, from } from 'rxjs';
 
 import { MatFormField } from '@angular/material/form-field';
@@ -23,6 +25,63 @@ import { GraphService, UriNode } from '@myrmidon/cadmus-api';
 import { PagedLinkedLiteralFilter } from '../../graph-walker';
 
 /**
+ * The editable shape behind the filter form. Text fields use '' as their
+ * empty value, as they are bound to native inputs; the subject and
+ * predicate nodes are picked via lookups.
+ */
+interface LinkedLiteralFilterControls {
+  pageNumber: number;
+  pageSize: number;
+  litPattern: string;
+  litType: string;
+  litLanguage: string;
+  minLitNumber: number | null;
+  maxLitNumber: number | null;
+  subj: UriNode | null;
+  pred: UriNode | null;
+}
+
+/**
+ * Bound filter -> draft. Nodes are not part of the filter (only their IDs
+ * are), so they start as null and get loaded afterwards.
+ */
+function toDraft(filter: PagedLinkedLiteralFilter): LinkedLiteralFilterControls {
+  return {
+    pageNumber: filter.pageNumber,
+    pageSize: filter.pageSize,
+    litPattern: filter.literalPattern || '',
+    litType: filter.literalType || '',
+    litLanguage: filter.literalLanguage || '',
+    minLitNumber: filter.minLiteralNumber ?? null,
+    maxLitNumber: filter.maxLiteralNumber ?? null,
+    subj: null,
+    pred: null,
+  };
+}
+
+function toFilter(v: LinkedLiteralFilterControls): PagedLinkedLiteralFilter {
+  return {
+    pageNumber: +v.pageNumber,
+    pageSize: +v.pageSize,
+    literalPattern: v.litPattern || undefined,
+    literalType: v.litType || undefined,
+    literalLanguage: v.litLanguage || undefined,
+    minLiteralNumber: v.minLitNumber ?? undefined,
+    maxLiteralNumber: v.maxLitNumber ?? undefined,
+
+    subjectId: v.subj?.id,
+    predicateId: v.pred?.id,
+  };
+}
+
+function isSameFilter(
+  filter: PagedLinkedLiteralFilter,
+  v: LinkedLiteralFilterControls
+): boolean {
+  return JSON.stringify(filter) === JSON.stringify(toFilter(v));
+}
+
+/**
  * Linked literal filter.
  */
 @Component({
@@ -30,8 +89,7 @@ import { PagedLinkedLiteralFilter } from '../../graph-walker';
   templateUrl: './linked-literal-filter.component.html',
   styleUrls: ['./linked-literal-filter.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatPaginator,
     RefLookupComponent,
     MatFormField,
@@ -67,118 +125,90 @@ export class LinkedLiteralFilterComponent {
     pageSize: 10,
   });
 
-  public pageNumber: FormControl<number>;
-  public pageSize: FormControl<number>;
-  public litPattern: FormControl<string | null>;
-  public litType: FormControl<string | null>;
-  public litLanguage: FormControl<string | null>;
-  public minLitNumber: FormControl<number | null>;
-  public maxLitNumber: FormControl<number | null>;
+  /**
+   * The editable draft, derived from filter. On the echo of our own apply
+   * the live draft is kept (with its already loaded nodes).
+   */
+  private readonly _draft = linkedSignal<
+    PagedLinkedLiteralFilter,
+    LinkedLiteralFilterControls
+  >({
+    source: () => this.filter(),
+    computation: (filter, previous) =>
+      previous && isSameFilter(filter, previous.value)
+        ? previous.value
+        : toDraft(filter),
+  });
 
-  public subj: FormControl<UriNode | null>;
-  public pred: FormControl<UriNode | null>;
-
-  public form: FormGroup;
+  public readonly form = form(this._draft);
 
   constructor(
-    formBuilder: FormBuilder,
     public lookupService: GraphNodeLookupService,
     private _graphService: GraphService
   ) {
-    this.pageNumber = formBuilder.control(1, { nonNullable: true });
-    this.pageSize = formBuilder.control(10, { nonNullable: true });
-    this.litPattern = formBuilder.control(null);
-    this.litType = formBuilder.control(null);
-    this.litLanguage = formBuilder.control(null);
-    this.minLitNumber = formBuilder.control(null);
-    this.maxLitNumber = formBuilder.control(null);
-
-    this.subj = formBuilder.control(null);
-    this.pred = formBuilder.control(null);
-
-    this.form = formBuilder.group({
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      litPattern: this.litPattern,
-      litType: this.litType,
-      litLanguage: this.litLanguage,
-      minLitNumber: this.minLitNumber,
-      maxLitNumber: this.maxLitNumber,
-      subj: this.subj,
-      pred: this.pred,
-    });
-
+    // a new filter was bound: clear interaction state and load its nodes.
+    // Nothing to do on the echo of our own apply, as the draft already has
+    // those nodes.
     effect(() => {
-      this.updateForm(this.filter());
+      const filter = this.filter();
+      untracked(() => {
+        if (!isSameFilter(filter, this._draft())) {
+          this.form().reset();
+          this.loadNodes(filter);
+        }
+      });
     });
   }
 
-  private updateForm(filter: PagedLinkedLiteralFilter): void {
-    this.pageNumber.setValue(filter.pageNumber);
-    this.pageSize.setValue(filter.pageSize);
-    this.litPattern.setValue(filter.literalPattern || null);
-    this.litType.setValue(filter.literalType || null);
-    this.litLanguage.setValue(filter.literalLanguage || null);
-    this.minLitNumber.setValue(filter.minLiteralNumber || null);
-    this.maxLitNumber.setValue(filter.maxLiteralNumber || null);
-
-    // load the referenced triples so we can show them by label
+  /**
+   * Load the referenced nodes so we can show them by label.
+   */
+  private loadNodes(filter: PagedLinkedLiteralFilter): void {
     forkJoin({
       s: filter.subjectId
         ? this._graphService.getNode(filter.subjectId)
         : from([null]),
       // from([]) emits no value at all, which would make forkJoin never
-      // emit (and so never update subj/pred nor mark the form pristine)
-      // even when subjectId IS set; from([null]) emits a single value,
-      // matching the placeholder used by the s branch above.
+      // emit (and so never update subj/pred) even when subjectId IS set;
+      // from([null]) emits a single value, matching the placeholder used
+      // by the s branch above.
       p: filter.predicateId
         ? this._graphService.getNode(filter.predicateId)
         : from([null]),
     }).subscribe((result) => {
-      this.subj.setValue(result.s);
-      this.pred.setValue(result.p);
-      this.form.markAsPristine();
+      // ignore a late response for a filter no longer bound
+      const current = this.filter();
+      if (
+        current.subjectId !== filter.subjectId ||
+        current.predicateId !== filter.predicateId
+      ) {
+        return;
+      }
+      this.form.subj().value.set(result.s);
+      this.form.pred().value.set(result.p);
     });
   }
 
-  private getFilter(): PagedLinkedLiteralFilter {
-    return {
-      pageNumber: +this.pageNumber.value,
-      pageSize: +this.pageSize.value,
-      literalPattern: this.litPattern.value || undefined,
-      literalType: this.litType.value || undefined,
-      literalLanguage: this.litLanguage.value || undefined,
-      minLiteralNumber: this.minLitNumber.value || undefined,
-      maxLiteralNumber: this.maxLitNumber.value || undefined,
-
-      subjectId: this.subj.value?.id,
-      predicateId: this.pred.value?.id,
-    };
-  }
-
   public onSubjectNodeChange(node: unknown): void {
-    this.subj.setValue(node as UriNode);
+    this.form.subj().value.set(node as UriNode);
   }
 
   public onPredicateNodeChange(node: unknown): void {
-    this.pred.setValue(node as UriNode);
+    this.form.pred().value.set(node as UriNode);
   }
 
   public onPageChange(page: PageEvent): void {
-    this.pageNumber.setValue(page.pageIndex + 1);
-    this.filter.set(this.getFilter());
+    this.form.pageNumber().value.set(page.pageIndex + 1);
+    this.filter.set(toFilter(this._draft()));
   }
 
   public reset(): void {
-    this.form.reset();
-    this.filter.set(this.getFilter());
+    this._draft.set(toDraft({ pageNumber: 1, pageSize: 10 }));
+    this.filter.set(toFilter(this._draft()));
   }
 
   public apply(): void {
-    if (this.form.invalid) {
-      return;
-    }
-    this.filter.set(this.getFilter());
-    this.form.markAsPristine();
+    this.filter.set(toFilter(this._draft()));
+    this.form().reset();
   }
 }

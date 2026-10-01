@@ -5,7 +5,6 @@ import {
   input,
   output,
 } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { ColorToContrastPipe } from '@myrmidon/ngx-tools';
 
@@ -33,8 +32,6 @@ const F_EOL_TAIL = 'eol-tail';
 @Component({
   selector: 'cadmus-text-segments-view',
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     ColorToContrastPipe,
     MiniBarChartComponent,
   ],

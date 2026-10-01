@@ -1,13 +1,12 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
 import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { Observable } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+  ChangeDetectionStrategy,
+  Component,
+  linkedSignal,
+  WritableSignal,
+} from '@angular/core';
+import { FieldTree, FormField, form, maxLength } from '@angular/forms/signals';
+import { Observable, of } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -21,14 +20,41 @@ import { ThesaurusFilter } from '@myrmidon/cadmus-core';
 
 import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
 
+/**
+ * The editable shape behind the filter form. Text fields use '' as their
+ * empty value, as they are bound to native inputs.
+ */
+interface ThesaurusFilterControls {
+  id: string;
+  /** null for "any" (see the alias select). */
+  alias: boolean | null;
+  language: string;
+}
+
+/**
+ * The values of a cleared filter form.
+ */
+function makeEmptyDraft(): ThesaurusFilterControls {
+  return { id: '', alias: null, language: 'en' };
+}
+
+function toDraft(filter: ThesaurusFilter | undefined): ThesaurusFilterControls {
+  return !filter
+    ? makeEmptyDraft()
+    : {
+        id: filter.id || '',
+        alias: filter.isAlias ?? null,
+        language: filter.language || 'en',
+      };
+}
+
 @Component({
   selector: 'cadmus-thesaurus-filter',
   templateUrl: './thesaurus-filter.component.html',
   styleUrls: ['./thesaurus-filter.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatInput,
@@ -42,55 +68,42 @@ import { ThesaurusListRepository } from '../state/thesaurus-list.repository';
 export class ThesaurusFilterComponent {
   public filter$: Observable<ThesaurusFilter>;
 
-  public id: FormControl<string>;
-  public alias: FormControl<boolean>;
-  public language: FormControl<string>;
-  public form: FormGroup;
+  /**
+   * The editable draft: rebuilt from the repository filter whenever it
+   * changes (including after apply), and locally edited in between.
+   */
+  private readonly _draft: WritableSignal<ThesaurusFilterControls>;
 
-  constructor(
-    formBuilder: FormBuilder,
-    private _repository: ThesaurusListRepository,
-  ) {
+  public readonly form: FieldTree<ThesaurusFilterControls>;
+
+  constructor(private _repository: ThesaurusListRepository) {
     this.filter$ = _repository.filter$;
-    // form
-    this.id = formBuilder.control<string>('', { nonNullable: true });
-    this.alias = formBuilder.control<boolean>(false, { nonNullable: true });
-    this.language = formBuilder.control<string>('en', {
-      nonNullable: true,
+    // like the old filter$?.pipe(...), tolerate a missing filter$
+    const filter = toSignal(_repository.filter$ ?? of(undefined));
+    this._draft = linkedSignal(() => toDraft(filter()));
+    this.form = form(this._draft, (path) => {
+      // [formField] renders these as the inputs' maxlength attributes
+      maxLength(path.id, 100);
+      maxLength(path.language, 2);
     });
-    this.form = formBuilder.group({
-      id: this.id,
-      alias: this.alias,
-      language: this.language,
-    });
-    // update form when filter changes
-    this.filter$?.pipe(takeUntilDestroyed()).subscribe((f) => {
-      this.updateForm(f);
-    });
-  }
-
-  private updateForm(filter: ThesaurusFilter): void {
-    this.id.setValue(filter.id || '');
-    this.alias.setValue(filter.isAlias || false);
-    this.language.setValue(filter.language || 'en');
-    this.form.markAsPristine();
   }
 
   private getFilter(): ThesaurusFilter {
+    const v = this._draft();
     return {
-      id: this.id.value,
-      isAlias: this.alias.value || false,
-      language: this.language.value,
+      id: v.id,
+      isAlias: v.alias ?? undefined,
+      language: v.language,
     };
   }
 
   public reset(): void {
-    this.form.reset();
+    this._draft.set(makeEmptyDraft());
     this.apply();
   }
 
   public apply(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       return;
     }
     const filter = this.getFilter();

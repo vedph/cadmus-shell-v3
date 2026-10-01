@@ -1,5 +1,5 @@
 <!-- form -->
-<form [formGroup]="form" (submit)="upload()">
+<div>
   <fieldset>
     <legend>source</legend>
 
@@ -20,10 +20,10 @@
       >
         select file
       </button>
-      <span class="file-name">{{ file.value?.name }}</span>
-      @if ($any(file).errors?.required) {
+      <span class="file-name">{{ form.file().value()?.name }}</span>
+      @if (form.file().getError('required')) {
       <span class="error">file required</span>
-      } @if ($any(file).errors?.invalidExtension) {
+      } @if (form.file().getError('invalidExtension')) {
       <span class="error">invalid file type</span>
       }
     </div>
@@ -33,42 +33,42 @@
     <div class="form-row">
       <mat-form-field>
         <mat-label>mode</mat-label>
-        <mat-select [formControl]="mode">
+        <mat-select [formField]="form.mode">
           <mat-option value="R">replace</mat-option>
           <mat-option value="P">patch</mat-option>
           <mat-option value="S">synch</mat-option>
         </mat-select>
         <mat-hint>
-          @if (mode.value === 'R') {
+          @if (form.mode().value() === 'R') {
           <span
             >if the imported thesaurus already exists, it is fully replaced by
             the new one.</span
           >
-          } @if (mode.value === 'P') {
+          } @if (form.mode().value() === 'P') {
           <span
             >the existing thesaurus is patched with the imported one: any
             existing entry has its value overwritten; any non existing entry is
             just added.</span
           >
-          } @if (mode.value === 'S') {
+          } @if (form.mode().value() === 'S') {
           <span
             >equal to patch, with the addition that any existing entry not found
             in the imported thesaurus is removed.</span
           >
           }
         </mat-hint>
-        @if ($any(mode).errors?.required && (mode.dirty || mode.touched)) {
+        @if (form.mode().getError('required') && (form.mode().dirty() || form.mode().touched())) {
         <mat-error>mode required</mat-error>
         }
       </mat-form-field>
 
       <!-- dry -->
-      <mat-checkbox [formControl]="dryRun">dry run</mat-checkbox>
+      <mat-checkbox [formField]="form.dryRun">dry run</mat-checkbox>
     </div>
 
     <!-- Excel -->
-    @if ( file.value?.name?.endsWith('.xlsx') ||
-    file.value?.name?.endsWith('.xls') ) {
+    @if ( form.file().value()?.name?.endsWith('.xlsx') ||
+    form.file().value()?.name?.endsWith('.xls') ) {
     <div>
       <fieldset>
         <legend>Excel</legend>
@@ -76,17 +76,32 @@
           <!-- excelSheet -->
           <mat-form-field class="nr-input">
             <mat-label>sheet</mat-label>
-            <input matInput type="number" min="1" [formControl]="excelSheet" />
+            <input
+              matInput
+              type="number"
+              [formField]="form.excelSheet"
+              (keydown.enter)="!uploading() && upload()"
+            />
           </mat-form-field>
           <!-- excelRow -->
           <mat-form-field class="nr-input">
             <mat-label>1st row</mat-label>
-            <input matInput type="number" min="1" [formControl]="excelRow" />
+            <input
+              matInput
+              type="number"
+              [formField]="form.excelRow"
+              (keydown.enter)="!uploading() && upload()"
+            />
           </mat-form-field>
           <!-- excelColumn -->
           <mat-form-field class="nr-input">
             <mat-label>1st column</mat-label>
-            <input matInput type="number" min="1" [formControl]="excelColumn" />
+            <input
+              matInput
+              type="number"
+              [formField]="form.excelColumn"
+              (keydown.enter)="!uploading() && upload()"
+            />
           </mat-form-field>
         </div>
       </fieldset>
@@ -96,16 +111,17 @@
     <!-- submit -->
     <div style="margin-top: 16px">
       <button
-        type="submit"
+        type="button"
         mat-flat-button
         class="mat-warn"
-        [disabled]="uploading() || form.invalid"
+        [disabled]="uploading() || form().invalid()"
+        (click)="upload()"
       >
         upload
       </button>
     </div>
   </fieldset>
-</form>
+</div>
 
 <!-- uploading -->
 @if (uploading()) {

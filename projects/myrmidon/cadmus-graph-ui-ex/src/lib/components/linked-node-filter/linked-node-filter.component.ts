@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, effect, input, model } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  linkedSignal,
+  model,
+  untracked,
+} from '@angular/core';
+import { FormField, form } from '@angular/forms/signals';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { take } from 'rxjs/operators';
 
@@ -31,6 +33,76 @@ import { GraphService, UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
 import { PagedLinkedNodeFilter } from '../../graph-walker';
 
 /**
+ * The editable shape behind the filter form. Text fields use '' as their
+ * empty value, as they are bound to native inputs; class nodes are picked
+ * via a lookup.
+ */
+interface LinkedNodeFilterControls {
+  pageNumber: number;
+  pageSize: number;
+  uid: string;
+  isClass: boolean | null;
+  tag: string;
+  label: string;
+  sourceType: NodeSourceType | null;
+  sid: string;
+  isSidPrefix: boolean;
+  classes: UriNode[];
+}
+
+/**
+ * Bound filter -> draft. Class nodes are not part of the filter (only
+ * their IDs are), so they start empty and get loaded afterwards.
+ */
+function toDraft(filter: PagedLinkedNodeFilter): LinkedNodeFilterControls {
+  return {
+    pageNumber: filter.pageNumber,
+    pageSize: filter.pageSize,
+    uid: filter.uid || '',
+    isClass: filter.isClass ?? null,
+    tag: filter.tag || '',
+    label: filter.label || '',
+    sourceType: filter.sourceType ?? null,
+    sid: filter.sid || '',
+    isSidPrefix: filter.isSidPrefix || false,
+    classes: [],
+  };
+}
+
+/**
+ * Draft -> filter. The context node, predicate and direction are not
+ * user-editable filter criteria: they are carried over from the bound
+ * filter.
+ */
+function toFilter(
+  v: LinkedNodeFilterControls,
+  filter: PagedLinkedNodeFilter
+): PagedLinkedNodeFilter {
+  return {
+    pageNumber: +v.pageNumber,
+    pageSize: +v.pageSize,
+    uid: v.uid || undefined,
+    isClass: v.isClass ?? undefined,
+    tag: v.tag || undefined,
+    label: v.label || undefined,
+    sourceType: v.sourceType ?? undefined,
+    sid: v.sid || undefined,
+    isSidPrefix: v.isSidPrefix ? true : undefined,
+    classIds: v.classes.length ? v.classes.map((n) => n.id) : undefined,
+    otherNodeId: filter.otherNodeId,
+    predicateId: filter.predicateId,
+    isObject: filter.isObject || false,
+  };
+}
+
+function isSameFilter(
+  filter: PagedLinkedNodeFilter,
+  v: LinkedNodeFilterControls
+): boolean {
+  return JSON.stringify(filter) === JSON.stringify(toFilter(v, filter));
+}
+
+/**
  * Linked non-literal node filter.
  */
 @Component({
@@ -38,8 +110,7 @@ import { PagedLinkedNodeFilter } from '../../graph-walker';
   templateUrl: './linked-node-filter.component.html',
   styleUrls: ['./linked-node-filter.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatPaginator,
     MatFormField,
     MatInput,
@@ -83,148 +154,126 @@ export class LinkedNodeFilterComponent {
     predicateId: 0,
   });
 
-  public otherNodeId: number;
-  public predicateId: number;
-  public isObject: boolean;
+  /**
+   * The ID of the context node of the bound filter.
+   */
+  public get otherNodeId(): number {
+    return this.filter().otherNodeId;
+  }
 
-  public pageNumber: FormControl<number>;
-  public pageSize: FormControl<number>;
-  public uid: FormControl<string | null>;
-  public isClass: FormControl<boolean | null>;
-  public tag: FormControl<string | null>;
-  public label: FormControl<string | null>;
-  public sourceType: FormControl<NodeSourceType | null>;
-  public sid: FormControl<string | null>;
-  public isSidPrefix: FormControl<boolean>;
-  public classes: FormControl<UriNode[]>;
+  /**
+   * The ID of the predicate of the bound filter.
+   */
+  public get predicateId(): number {
+    return this.filter().predicateId;
+  }
 
-  public form: FormGroup;
+  /**
+   * True if the bound filter is for the object direction.
+   */
+  public get isObject(): boolean {
+    return this.filter().isObject || false;
+  }
+
+  /**
+   * The editable draft, derived from filter. On the echo of our own apply
+   * the live draft is kept (with its already loaded class nodes).
+   */
+  private readonly _draft = linkedSignal<
+    PagedLinkedNodeFilter,
+    LinkedNodeFilterControls
+  >({
+    source: () => this.filter(),
+    computation: (filter, previous) =>
+      previous && isSameFilter(filter, previous.value)
+        ? previous.value
+        : toDraft(filter),
+  });
+
+  public readonly form = form(this._draft);
 
   constructor(
-    formBuilder: FormBuilder,
     public lookupService: GraphNodeLookupService,
     private _graphService: GraphService
   ) {
-    this.otherNodeId = 0;
-    this.predicateId = 0;
-    this.isObject = false;
-    // form
-    this.pageNumber = formBuilder.control(1, { nonNullable: true });
-    this.pageSize = formBuilder.control(10, { nonNullable: true });
-    this.uid = formBuilder.control(null);
-    this.isClass = formBuilder.control(null);
-    this.tag = formBuilder.control(null);
-    this.label = formBuilder.control(null);
-    this.sourceType = formBuilder.control(null);
-    this.sid = formBuilder.control(null);
-    this.isSidPrefix = formBuilder.control(false, { nonNullable: true });
-    this.classes = formBuilder.control([], { nonNullable: true });
-
-    this.form = formBuilder.group({
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      uid: this.uid,
-      isClass: this.isClass,
-      tag: this.tag,
-      label: this.label,
-      sourceType: this.sourceType,
-      sid: this.sid,
-      isSidPrefix: this.isSidPrefix,
-      classes: this.classes,
-    });
-
+    // a new filter was bound: clear interaction state and load its class
+    // nodes. Nothing to do on the echo of our own apply, as the draft
+    // already has those nodes.
     effect(() => {
-      this.updateForm(this.filter());
+      const filter = this.filter();
+      untracked(() => {
+        if (!isSameFilter(filter, this._draft())) {
+          this.form().reset();
+          this.loadClasses(filter);
+        }
+      });
     });
   }
 
-  private updateForm(filter: PagedLinkedNodeFilter): void {
-    this.otherNodeId = filter.otherNodeId;
-    this.predicateId = filter.predicateId;
-    this.isObject = filter.isObject || false;
-
-    this.pageNumber.setValue(filter.pageNumber);
-    this.pageSize.setValue(filter.pageSize);
-    this.uid.setValue(filter.uid || null);
-    this.isClass.setValue(filter.isClass || null);
-    this.tag.setValue(filter.tag || null);
-    this.label.setValue(filter.label || null);
-    this.sourceType.setValue(filter.sourceType || null);
-    this.sid.setValue(filter.sid || null);
-    this.isSidPrefix.setValue(filter.isSidPrefix || false);
-
-    // load the referenced class nodes so we can show them by label
-    if (filter.classIds?.length) {
-      this._graphService
-        .getNodeSet(filter.classIds)
-        .pipe(take(1))
-        .subscribe((nodes) => {
-          this.classes.setValue(nodes.filter((n) => n) as UriNode[]);
-          this.form.markAsPristine();
-        });
-    } else {
-      this.classes.setValue([]);
-      this.form.markAsPristine();
+  /**
+   * Load the referenced class nodes so we can show them by label.
+   */
+  private loadClasses(filter: PagedLinkedNodeFilter): void {
+    if (!filter.classIds?.length) {
+      return;
     }
-  }
-
-  private getFilter(): PagedLinkedNodeFilter {
-    return {
-      pageNumber: +this.pageNumber.value,
-      pageSize: +this.pageSize.value,
-      uid: this.uid.value || undefined,
-      isClass: this.isClass.value || undefined,
-      tag: this.tag.value || undefined,
-      label: this.label.value || undefined,
-      sourceType: this.sourceType.value || undefined,
-      sid: this.sid.value || undefined,
-      isSidPrefix: this.isSidPrefix.value ? true : undefined,
-      classIds: this.classes.value.length
-        ? this.classes.value.map((n) => n.id)
-        : undefined,
-      otherNodeId: this.otherNodeId,
-      predicateId: this.predicateId,
-      isObject: this.isObject,
-    };
+    this._graphService
+      .getNodeSet(filter.classIds)
+      .pipe(take(1))
+      .subscribe((nodes) => {
+        // ignore a late response for a filter no longer bound
+        if (
+          JSON.stringify(this.filter().classIds) !==
+          JSON.stringify(filter.classIds)
+        ) {
+          return;
+        }
+        // fresh objects, not the service's own
+        this.form
+          .classes()
+          .value.set(nodes.filter((n) => n).map((n) => ({ ...n! })));
+      });
   }
 
   public onPageChange(page: PageEvent): void {
-    this.pageNumber.setValue(page.pageIndex + 1);
-    this.filter.set(this.getFilter());
+    this.form.pageNumber().value.set(page.pageIndex + 1);
+    this.filter.set(toFilter(this._draft(), this.filter()));
   }
 
   public onClassAdd(node: unknown): void {
     if (!node) {
       return;
     }
-    const nodes = [...this.classes.value];
-    nodes.push(node as UriNode);
-    this.classes.setValue(nodes);
-    this.classes.updateValueAndValidity();
-    this.classes.markAsDirty();
+    // a fresh object, not the lookup's own
+    this.form
+      .classes()
+      .value.update((nodes) => [...nodes, { ...(node as UriNode) }]);
+    this.form.classes().markAsDirty();
   }
 
   public onClassRemove(node: UriNode): void {
-    const nodes = [...this.classes.value];
-    const i = nodes.indexOf(node);
-    if (i > -1) {
-      nodes.splice(i, 1);
-      this.classes.setValue(nodes);
-      this.classes.updateValueAndValidity();
-      this.classes.markAsDirty();
+    const nodes = this.form.classes().value();
+    if (nodes.includes(node)) {
+      this.form.classes().value.set(nodes.filter((n) => n !== node));
+      this.form.classes().markAsDirty();
     }
   }
 
   public reset(): void {
-    this.form.reset();
-    this.filter.set(this.getFilter());
+    const filter = this.filter();
+    this._draft.set(
+      toDraft({
+        pageNumber: 1,
+        pageSize: 10,
+        otherNodeId: filter.otherNodeId,
+        predicateId: filter.predicateId,
+      })
+    );
+    this.filter.set(toFilter(this._draft(), filter));
   }
 
   public apply(): void {
-    if (this.form.invalid) {
-      return;
-    }
-    this.filter.set(this.getFilter());
-    this.form.markAsPristine();
+    this.filter.set(toFilter(this._draft(), this.filter()));
+    this.form().reset();
   }
 }

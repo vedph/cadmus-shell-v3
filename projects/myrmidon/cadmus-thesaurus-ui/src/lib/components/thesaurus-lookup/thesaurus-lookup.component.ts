@@ -4,17 +4,12 @@ import {
   Component,
   effect,
   input,
-  OnInit,
   output,
   signal,
+  untracked,
 } from '@angular/core';
-import {
-  UntypedFormBuilder,
-  UntypedFormControl,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { FormField, form } from '@angular/forms/signals';
 import { ThesaurusFilter } from '@myrmidon/cadmus-core';
 import { Observable, of } from 'rxjs';
 import {
@@ -44,8 +39,7 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./thesaurus-lookup.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatAutocomplete,
     MatOption,
     MatFormField,
@@ -57,7 +51,7 @@ import { MatIcon } from '@angular/material/icon';
     AsyncPipe,
   ],
 })
-export class ThesaurusLookupComponent implements OnInit {
+export class ThesaurusLookupComponent {
   /**
    * The entry value initially set when the component loads.
    */
@@ -90,23 +84,41 @@ export class ThesaurusLookupComponent implements OnInit {
 
   public readonly entryChange = output<string | null>();
 
-  public form: UntypedFormGroup;
-  public lookup: UntypedFormControl;
-  public ids$: Observable<string[]> | undefined;
+  /**
+   * The lookup text box: a filter string while the user is typing, or the
+   * picked ID. Its empty value is null, never undefined: an undefined leaf
+   * value unmaps its field.
+   */
+  public readonly form = form(signal<{ lookup: string | null }>({ lookup: null }));
+
+  public readonly ids$: Observable<string[]>;
   public readonly id = signal<string | undefined>(undefined);
 
-  constructor(formBuilder: UntypedFormBuilder) {
-    // form
-    this.lookup = formBuilder.control(null);
-    this.form = formBuilder.group({
-      lookup: this.lookup,
-    });
+  constructor() {
+    this.ids$ = toObservable(this.form.lookup().value).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        // if it's a string it's a filter; else it's the entry got
+        if (typeof value === 'string') {
+          return this.lookupEntries(value, this.limit() || 10);
+        } else {
+          // unlike valueChanges, toObservable also emits the initial
+          // null: map it to no entries rather than to an empty option
+          return of(value ? [value] : []);
+        }
+      }),
+    );
 
+    // reset when initialValue changes, or when lookupFn changes while there
+    // is an initial value to resolve (an empty one needs no lookup): these
+    // are the only dependencies, as the reset itself (which reads other
+    // signals and writes the form) is untracked
     effect(() => {
-      console.log('thesaurus lookup initial', this.initialValue());
-      if (this.lookup) {
-        this.resetToInitial();
+      if (this.initialValue()) {
+        this.lookupFn();
       }
+      untracked(() => this.resetToInitial());
     });
   }
 
@@ -127,33 +139,21 @@ export class ThesaurusLookupComponent implements OnInit {
     this.lookupEntries(this.initialValue() || '', 1)
       .pipe(take(1))
       .subscribe((entries) => {
-        this.lookup.setValue(entries.length ? entries[0] : undefined);
+        this.form.lookup().value.set(entries.length ? entries[0] : null);
       });
-  }
-
-  public ngOnInit(): void {
-    this.ids$ = this.lookup.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap((value: string | string) => {
-        // if it's a string it's a filter; else it's the entry got
-        if (typeof value === 'string') {
-          return this.lookupEntries(value, this.limit() || 10);
-        } else {
-          return of([value]);
-        }
-      }),
-    );
   }
 
   public clear(): void {
     this.id.set(undefined);
-    this.lookup.setValue(null);
+    this.form.lookup().value.set(null);
     this.entryChange.emit(null);
   }
 
   public pickId(id: string): void {
     this.id.set(id);
     this.entryChange.emit(id);
+    if (this.resetOnPick()) {
+      this.clear();
+    }
   }
 }

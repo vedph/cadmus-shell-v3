@@ -1,10 +1,10 @@
-<form role="form" [formGroup]="form" (submit)="apply()">
+<div role="form">
   <div class="form-row">
     <!-- title -->
     <div>
       <mat-form-field>
         <mat-label>title</mat-label>
-        <input matInput [formControl]="title" maxlength="500" />
+        <input matInput [formField]="form.title" (keydown.enter)="apply()" />
       </mat-form-field>
     </div>
 
@@ -12,7 +12,7 @@
     <div>
       <mat-form-field>
         <mat-label>description</mat-label>
-        <input matInput [formControl]="description" maxlength="500" />
+        <input matInput [formField]="form.description" (keydown.enter)="apply()" />
       </mat-form-field>
     </div>
 
@@ -21,7 +21,7 @@
     <div>
       <mat-form-field>
         <mat-label>facet</mat-label>
-        <mat-select [formControl]="facet">
+        <mat-select [formField]="form.facet">
           <mat-option [value]="null">(any)</mat-option>
           @for (f of facets; track f.id) {
           <mat-option [value]="f.id">
@@ -34,7 +34,7 @@
     <div>
       <mat-form-field>
         <mat-label>group ID</mat-label>
-        <input type="text" matInput [formControl]="group" />
+        <input type="text" matInput [formField]="form.group" (keydown.enter)="apply()" />
       </mat-form-field>
     </div>
     <!-- flags -->
@@ -43,20 +43,20 @@
       <div>
         <mat-form-field>
           <mat-label>flags</mat-label>
-          <mat-select [formControl]="flagMatching">
-            <mat-option value="-1">(flags ignored)</mat-option>
-            <mat-option value="0">all set</mat-option>
-            <mat-option value="1">any set</mat-option>
-            <mat-option value="2">all clear</mat-option>
-            <mat-option value="3">any clear</mat-option>
+          <mat-select [formField]="form.flagMatching">
+            <mat-option [value]="-1">(flags ignored)</mat-option>
+            <mat-option [value]="0">all set</mat-option>
+            <mat-option [value]="1">any set</mat-option>
+            <mat-option [value]="2">all clear</mat-option>
+            <mat-option [value]="3">any clear</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
-      @if (flagMatching.value > -1) {
+      @if (form.flagMatching().value() > -1) {
       <div>
         <mat-form-field>
           <mat-label>flags value</mat-label>
-          <mat-select multiple="true" formControlName="flags">
+          <mat-select multiple="true" [formField]="form.flags">
             @for (f of flags; track f.id) {
             <mat-option [value]="f.id">
               {{ f.label }}
@@ -87,7 +87,8 @@
         <input
           matInput
           [matDatepicker]="minPicker"
-          [formControl]="minModified"
+          [formField]="form.minModified"
+          (keydown.enter)="apply()"
         />
         <mat-datepicker-toggle
           matSuffix
@@ -104,7 +105,8 @@
         <input
           matInput
           [matDatepicker]="maxPicker"
-          [formControl]="maxModified"
+          [formField]="form.maxModified"
+          (keydown.enter)="apply()"
         />
         <mat-datepicker-toggle
           matSuffix
@@ -126,13 +128,14 @@
         <mat-icon class="mat-warn">clear</mat-icon>
       </button>
       <button
-        type="submit"
+        type="button"
         mat-icon-button
-        [disabled]="form.invalid"
+        [disabled]="form().invalid()"
         matTooltip="Apply filters"
+        (click)="apply()"
       >
         <mat-icon class="mat-primary">check_circle</mat-icon>
       </button>
     </div>
   </div>
-</form>
+</div>

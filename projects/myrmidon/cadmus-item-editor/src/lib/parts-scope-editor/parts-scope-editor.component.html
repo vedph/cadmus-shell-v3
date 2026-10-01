@@ -1,5 +1,5 @@
-<form [formGroup]="form" (submit)="submit()">
-  <table id="parts" formArrayName="checks">
+<div>
+  <table id="parts">
     <thead>
       <tr>
         <th aria-label="select"></th>
@@ -18,7 +18,7 @@
       ) {
         <tr>
           <td class="fit-width">
-            <mat-checkbox [formControlName]="i" (change)="onCheckChanged()" />
+            <mat-checkbox [formField]="form.checks[i]" />
           </td>
           <td>
             <span
@@ -39,22 +39,33 @@
   <div class="form-row">
     <mat-form-field>
       <mat-label>scope</mat-label>
-      <input matInput formControlName="scope" />
-      @if (scope.hasError("maxLength") && (scope.dirty || scope.touched)) {
+      <input
+        matInput
+        [formField]="form.scope"
+        (keydown.enter)="!readonly() && submit()"
+      />
+      @if (
+        form.scope().getError("maxLength") &&
+        (form.scope().dirty() || form.scope().touched())
+      ) {
         <mat-error>too long</mat-error>
       }
-      @if (scope.hasError("pattern") && (scope.dirty || scope.touched)) {
+      @if (
+        form.scope().getError("pattern") &&
+        (form.scope().dirty() || form.scope().touched())
+      ) {
         <mat-error>invalid scope</mat-error>
       }
     </mat-form-field>
     <button
       mat-flat-button
       class="mat-primary"
-      type="submit"
-      [disabled]="form.invalid || readonly()"
+      type="button"
+      [disabled]="form().invalid() || readonly()"
+      (click)="submit()"
       matTooltip="Assign the scope to the checked parts"
     >
       assign
     </button>
   </div>
-</form>
+</div>

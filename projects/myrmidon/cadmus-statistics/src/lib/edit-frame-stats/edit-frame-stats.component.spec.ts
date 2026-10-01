@@ -47,7 +47,14 @@ describe('EditFrameStatsComponent', () => {
         // pulling in the real echarts bundle for a unit test.
         {
           provide: NGX_ECHARTS_CONFIG,
-          useValue: { echarts: () => Promise.resolve({}) },
+          // init returns a chart whose every method is a no-op: tests that
+          // wait for real timers let the directive initialize it
+          useValue: {
+            echarts: () =>
+              Promise.resolve({
+                init: () => new Proxy({}, { get: () => () => {} }),
+              }),
+          },
         },
       ],
     }).compileComponents();
@@ -66,9 +73,9 @@ describe('EditFrameStatsComponent', () => {
   });
 
   it('should default created/updated/deleted checkboxes to true', () => {
-    expect(component.created.value).toBe(true);
-    expect(component.updated.value).toBe(true);
-    expect(component.deleted.value).toBe(true);
+    expect(component.form.created().value()).toBe(true);
+    expect(component.form.updated().value()).toBe(true);
+    expect(component.form.deleted().value()).toBe(true);
   });
 
   describe('initial* inputs', () => {
@@ -82,7 +89,14 @@ describe('EditFrameStatsComponent', () => {
           { provide: StatsService, useValue: statsService },
           {
             provide: NGX_ECHARTS_CONFIG,
-            useValue: { echarts: () => Promise.resolve({}) },
+            // init returns a chart whose every method is a no-op: tests that
+          // wait for real timers let the directive initialize it
+          useValue: {
+            echarts: () =>
+              Promise.resolve({
+                init: () => new Proxy({}, { get: () => () => {} }),
+              }),
+          },
           },
         ],
       }).compileComponents();
@@ -96,25 +110,25 @@ describe('EditFrameStatsComponent', () => {
       fixture.componentRef.setInput('initialInterval', '1w');
       fixture.detectChanges();
 
-      expect(component.start.value).toEqual(start);
-      expect(component.end.value).toEqual(end);
-      expect(component.interval.value).toBe('1w');
+      expect(component.form.start().value()).toEqual(start);
+      expect(component.form.end().value()).toEqual(end);
+      expect(component.form.interval().value()).toBe('1w');
     });
   });
 
   describe('loadData', () => {
     it('should not call the service when start/end/interval are incomplete', () => {
       statsService.getEditFrameStats.mockClear();
-      component.start.setValue(null);
-      component.end.setValue(null);
+      component.form.start().value.set(null);
+      component.form.end().value.set(null);
       component.loadData();
       expect(statsService.getEditFrameStats).not.toHaveBeenCalled();
     });
 
     it('should set an error and not call the service when start >= end', () => {
-      component.start.setValue(new Date(2024, 0, 2));
-      component.end.setValue(new Date(2024, 0, 1));
-      component.interval.setValue('1d');
+      component.form.start().value.set(new Date(2024, 0, 2));
+      component.form.end().value.set(new Date(2024, 0, 1));
+      component.form.interval().value.set('1d');
       statsService.getEditFrameStats.mockClear();
 
       component.loadData();
@@ -126,9 +140,9 @@ describe('EditFrameStatsComponent', () => {
     it('should load stats and populate data on success', () => {
       const stats = [makeStat()];
       statsService.getEditFrameStats.mockReturnValue(of(stats));
-      component.start.setValue(new Date(2024, 0, 1));
-      component.end.setValue(new Date(2024, 0, 31));
-      component.interval.setValue('1d');
+      component.form.start().value.set(new Date(2024, 0, 1));
+      component.form.end().value.set(new Date(2024, 0, 31));
+      component.form.interval().value.set('1d');
 
       component.loadData();
 
@@ -140,9 +154,9 @@ describe('EditFrameStatsComponent', () => {
     it('should set loading true while the request is pending', () => {
       const subject = new Subject<ItemEditFrameStats[]>();
       statsService.getEditFrameStats.mockReturnValue(subject);
-      component.start.setValue(new Date(2024, 0, 1));
-      component.end.setValue(new Date(2024, 0, 31));
-      component.interval.setValue('1d');
+      component.form.start().value.set(new Date(2024, 0, 1));
+      component.form.end().value.set(new Date(2024, 0, 31));
+      component.form.interval().value.set('1d');
 
       component.loadData();
       expect(component.loading()).toBe(true);
@@ -155,9 +169,9 @@ describe('EditFrameStatsComponent', () => {
       statsService.getEditFrameStats.mockReturnValue(
         throwError(() => new Error('boom')),
       );
-      component.start.setValue(new Date(2024, 0, 1));
-      component.end.setValue(new Date(2024, 0, 31));
-      component.interval.setValue('1d');
+      component.form.start().value.set(new Date(2024, 0, 1));
+      component.form.end().value.set(new Date(2024, 0, 31));
+      component.form.interval().value.set('1d');
 
       component.loadData();
 
@@ -175,49 +189,58 @@ describe('EditFrameStatsComponent', () => {
   });
 
   describe('auto-refresh on form changes', () => {
+    // the auto-refresh pipeline starts from toObservable, which emits from
+    // an effect: flush it with change detection, then wait past the debounce
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
     it('should debounce and reload when start/end/interval change', async () => {
-      vi.useFakeTimers();
-      try {
-        statsService.getEditFrameStats.mockClear();
-        component.start.setValue(new Date(2024, 0, 1));
-        component.end.setValue(new Date(2024, 0, 31));
-        component.interval.setValue('1w');
+      statsService.getEditFrameStats.mockClear();
+      component.form.start().value.set(new Date(2024, 0, 1));
+      component.form.end().value.set(new Date(2024, 0, 31));
+      component.form.interval().value.set('1w');
+      fixture.detectChanges();
+      expect(statsService.getEditFrameStats).not.toHaveBeenCalled();
 
-        vi.advanceTimersByTime(300);
+      await wait(350);
 
-        expect(statsService.getEditFrameStats).toHaveBeenCalledWith(
-          new Date(2024, 0, 1),
-          new Date(2024, 0, 31),
-          '1w',
-          100,
-        );
-      } finally {
-        vi.useRealTimers();
-      }
+      expect(statsService.getEditFrameStats).toHaveBeenCalledTimes(1);
+      expect(statsService.getEditFrameStats).toHaveBeenCalledWith(
+        new Date(2024, 0, 1),
+        new Date(2024, 0, 31),
+        '1w',
+        100,
+      );
     });
 
     it('should not reload when the same start/end/interval values are re-set', async () => {
-      vi.useFakeTimers();
-      try {
-        const start = new Date(2024, 0, 1);
-        const end = new Date(2024, 0, 31);
-        component.start.setValue(start);
-        component.end.setValue(end);
-        component.interval.setValue('1d');
-        vi.advanceTimersByTime(300);
-        statsService.getEditFrameStats.mockClear();
+      const start = new Date(2024, 0, 1);
+      const end = new Date(2024, 0, 31);
+      component.form.start().value.set(start);
+      component.form.end().value.set(end);
+      component.form.interval().value.set('1d');
+      fixture.detectChanges();
+      await wait(350);
+      expect(statsService.getEditFrameStats).toHaveBeenCalled();
+      statsService.getEditFrameStats.mockClear();
 
-        // re-setting equal (but distinct Date instances / same string)
-        // values must not trigger a redundant reload
-        component.start.setValue(new Date(start.getTime()));
-        component.end.setValue(new Date(end.getTime()));
-        component.interval.setValue('1d');
-        vi.advanceTimersByTime(300);
+      // re-setting equal (but distinct Date instances / same string)
+      // values must not trigger a redundant reload
+      component.form.start().value.set(new Date(start.getTime()));
+      component.form.end().value.set(new Date(end.getTime()));
+      component.form.interval().value.set('1d');
+      fixture.detectChanges();
+      await wait(350);
 
-        expect(statsService.getEditFrameStats).not.toHaveBeenCalled();
-      } finally {
-        vi.useRealTimers();
-      }
+      expect(statsService.getEditFrameStats).not.toHaveBeenCalled();
+    });
+
+    it('should auto-load once from the initial* inputs', async () => {
+      statsService.getEditFrameStats.mockClear();
+      fixture.componentRef.setInput('initialStart', new Date(2024, 0, 1));
+      fixture.componentRef.setInput('initialEnd', new Date(2024, 0, 31));
+      fixture.detectChanges();
+      await wait(350);
+      expect(statsService.getEditFrameStats).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -228,9 +251,9 @@ describe('EditFrameStatsComponent', () => {
 
     it('should build series only for the checked categories', () => {
       component.data.set([makeStat()]);
-      component.created.setValue(true);
-      component.updated.setValue(false);
-      component.deleted.setValue(false);
+      component.form.created().value.set(true);
+      component.form.updated().value.set(false);
+      component.form.deleted().value.set(false);
 
       const options = component.chartOptions() as any;
 
@@ -240,9 +263,9 @@ describe('EditFrameStatsComponent', () => {
 
     it('should include all three series when all checkboxes are checked', () => {
       component.data.set([makeStat()]);
-      component.created.setValue(true);
-      component.updated.setValue(true);
-      component.deleted.setValue(true);
+      component.form.created().value.set(true);
+      component.form.updated().value.set(true);
+      component.form.deleted().value.set(true);
 
       const options = component.chartOptions() as any;
 
@@ -255,9 +278,9 @@ describe('EditFrameStatsComponent', () => {
 
     it('should build an empty series list when all checkboxes are unchecked', () => {
       component.data.set([makeStat()]);
-      component.created.setValue(false);
-      component.updated.setValue(false);
-      component.deleted.setValue(false);
+      component.form.created().value.set(false);
+      component.form.updated().value.set(false);
+      component.form.deleted().value.set(false);
 
       const options = component.chartOptions() as any;
 
@@ -271,6 +294,39 @@ describe('EditFrameStatsComponent', () => {
         { dataIndex: 0, seriesName: 'Created', value: 1 },
       ]);
       expect(tooltip).toContain('Created: 1');
+    });
+  });
+
+  describe('signal form', () => {
+    it('should not stomp a user-edited date when another initial* input changes', () => {
+      fixture.componentRef.setInput('initialStart', new Date(2024, 0, 1));
+      fixture.detectChanges();
+      const picked = new Date(2024, 5, 1);
+      component.form.start().value.set(picked);
+
+      fixture.componentRef.setInput('initialEnd', new Date(2024, 11, 31));
+      fixture.detectChanges();
+
+      expect(component.form.start().value()).toBe(picked);
+      expect(component.form.end().value()).toEqual(new Date(2024, 11, 31));
+    });
+
+    it('should not clear a date when its initial* input becomes null', () => {
+      fixture.componentRef.setInput('initialStart', new Date(2024, 0, 1));
+      fixture.detectChanges();
+      fixture.componentRef.setInput('initialStart', null);
+      fixture.detectChanges();
+      expect(component.form.start().value()).toEqual(new Date(2024, 0, 1));
+    });
+
+    it('should hide a series when its checkbox is unchecked in the DOM', () => {
+      const box: HTMLInputElement = fixture.nativeElement.querySelector(
+        'mat-checkbox.created input'
+      );
+      box.click();
+      fixture.detectChanges();
+      expect(component.createdSignal()).toBe(false);
+      expect(component.form.created().value()).toBe(false);
     });
   });
 });

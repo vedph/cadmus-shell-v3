@@ -51,6 +51,7 @@ describe('LookupPinComponent', () => {
     it('should not call the search service when there is no filter text', async () => {
       itemService.searchPins.mockClear();
       fixture.componentRef.setInput('lookupKey', 'colors');
+      fixture.detectChanges();
       await fixture.whenStable();
       expect(itemService.searchPins).not.toHaveBeenCalled();
     });
@@ -58,6 +59,7 @@ describe('LookupPinComponent', () => {
     it('should search using the type/role/name from the matching lookup definition', async () => {
       fixture.componentRef.setInput('lookupKey', 'scoped');
       fixture.componentRef.setInput('initialValue', 'green');
+      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(itemService.searchPins).toHaveBeenCalledWith(
@@ -70,6 +72,7 @@ describe('LookupPinComponent', () => {
     it('should omit the roleId clause when the definition has none', async () => {
       fixture.componentRef.setInput('lookupKey', 'colors');
       fixture.componentRef.setInput('initialValue', 'green');
+      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(itemService.searchPins).toHaveBeenCalledWith(
@@ -83,10 +86,11 @@ describe('LookupPinComponent', () => {
       itemService.searchPins.mockClear();
       fixture.componentRef.setInput('lookupKey', 'missing');
       fixture.componentRef.setInput('initialValue', 'green');
+      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(itemService.searchPins).not.toHaveBeenCalled();
-      expect(component.lookup.value).toBeUndefined();
+      expect(component.form.lookup().value()).toBeNull();
     });
 
     it('should set the lookup control to the first found entry', async () => {
@@ -94,18 +98,20 @@ describe('LookupPinComponent', () => {
       itemService.searchPins.mockReturnValue(of({ value: { items: [pin] } }));
       fixture.componentRef.setInput('lookupKey', 'colors');
       fixture.componentRef.setInput('initialValue', 'green');
+      fixture.detectChanges();
       await fixture.whenStable();
 
-      expect(component.lookup.value).toEqual(pin);
+      expect(component.form.lookup().value()).toEqual(pin);
     });
 
     it('should treat a wrapper error result as no entries found', async () => {
       itemService.searchPins.mockReturnValue(of({ error: 'boom' }));
       fixture.componentRef.setInput('lookupKey', 'colors');
       fixture.componentRef.setInput('initialValue', 'green');
+      fixture.detectChanges();
       await fixture.whenStable();
 
-      expect(component.lookup.value).toBeUndefined();
+      expect(component.form.lookup().value()).toBeNull();
     });
   });
 
@@ -114,12 +120,12 @@ describe('LookupPinComponent', () => {
       const spy = vi.fn();
       component.entryChange.subscribe(spy);
       component.entry.set(makePin());
-      component.lookup.setValue(makePin());
+      component.form.lookup().value.set(makePin());
 
       component.clear();
 
       expect(component.entry()).toBeUndefined();
-      expect(component.lookup.value).toBeNull();
+      expect(component.form.lookup().value()).toBeNull();
       expect(spy).toHaveBeenCalledWith(null);
     });
   });
@@ -165,16 +171,85 @@ describe('LookupPinComponent', () => {
     });
   });
 
-  describe('ngOnInit entries$ pipeline', () => {
+  describe('entries$ pipeline', () => {
     it('should pass through a non-string value emitted on the lookup control', async () => {
       const pin = makePin();
       const values: DataPinInfo[][] = [];
-      component.entries$!.subscribe((v) => values.push(v));
+      component.entries$.subscribe((v) => values.push(v));
 
-      component.lookup.setValue(pin);
+      component.form.lookup().value.set(pin);
+      fixture.detectChanges();
       await new Promise((resolve) => setTimeout(resolve, 350));
 
       expect(values.at(-1)).toEqual([pin]);
+    });
+
+    it('should not offer an empty entry for the initial empty value', async () => {
+      const values: DataPinInfo[][] = [];
+      component.entries$.subscribe((v) => values.push(v));
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 350));
+
+      expect(values.every((v) => v.length === 0)).toBe(true);
+    });
+
+    it('should look up typed text through the service', async () => {
+      fixture.componentRef.setInput('lookupKey', 'colors');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const pin = makePin();
+      itemService.searchPins.mockReturnValue(of({ value: { items: [pin] } }));
+      const values: DataPinInfo[][] = [];
+      component.entries$.subscribe((v) => values.push(v));
+
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input');
+      input.value = 'gr';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 350));
+
+      expect(component.form.lookup().value()).toBe('gr');
+      expect(itemService.searchPins).toHaveBeenLastCalledWith(
+        '[partTypeId=it.vedph.note] AND [name=color] AND [value^=gr]',
+        1,
+        10
+      );
+      expect(values.at(-1)).toEqual([pin]);
+    });
+  });
+
+  describe('initial value effect', () => {
+    it('should reset again when only the lookupKey changes', async () => {
+      fixture.componentRef.setInput('initialValue', 'green');
+      fixture.componentRef.setInput('lookupKey', 'colors');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      itemService.searchPins.mockClear();
+
+      fixture.componentRef.setInput('lookupKey', 'scoped');
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(itemService.searchPins).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not reset while the user types', async () => {
+      fixture.componentRef.setInput('initialValue', 'green');
+      fixture.componentRef.setInput('lookupKey', 'colors');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      itemService.searchPins.mockClear();
+
+      component.form.lookup().value.set('gre');
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.form.lookup().value()).toBe('gre');
+    });
+
+    it('renders no <form> element', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
     });
   });
 });

@@ -84,8 +84,8 @@ describe('GraphNodeFilterComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  //#region updateForm (via filter$)
-  describe('updateForm (via filter$)', () => {
+  //#region draft (via filter$)
+  describe('draft (via filter$)', () => {
     it('should populate the form controls from the repository filter', () => {
       filter$.next({
         label: 'lbl',
@@ -97,37 +97,37 @@ describe('GraphNodeFilterComponent', () => {
         linkedNodeRole: 'O',
       });
 
-      expect(component.label.value).toBe('lbl');
-      expect(component.uid.value).toBe('u1');
-      expect(component.tag.value).toBe('t1');
-      expect(component.sourceType.value).toBe(NodeSourceType.Item);
-      expect(component.sid.value).toBe('s1');
-      expect(component.sidPrefix.value).toBe(true);
-      expect(component.linkedNodeRole.value).toBe('O');
-      expect(component.form.pristine).toBe(true);
+      expect(component.form.label().value()).toBe('lbl');
+      expect(component.form.uid().value()).toBe('u1');
+      expect(component.form.tag().value()).toBe('t1');
+      expect(component.form.sourceType().value()).toBe(NodeSourceType.Item);
+      expect(component.form.sid().value()).toBe('s1');
+      expect(component.form.sidPrefix().value()).toBe(true);
+      expect(component.form.linkedNodeRole().value()).toBe('O');
+      expect(component.form().dirty()).toBe(false);
     });
 
-    it('should default missing fields to null/false', () => {
+    it('should default missing fields to empty/null/false', () => {
       filter$.next({});
-      expect(component.label.value).toBeNull();
-      expect(component.uid.value).toBeNull();
-      expect(component.tag.value).toBeNull();
-      expect(component.sourceType.value).toBeNull();
-      expect(component.sid.value).toBeNull();
-      expect(component.sidPrefix.value).toBe(false);
+      expect(component.form.label().value()).toBe('');
+      expect(component.form.uid().value()).toBe('');
+      expect(component.form.tag().value()).toBe('');
+      expect(component.form.sourceType().value()).toBeNull();
+      expect(component.form.sid().value()).toBe('');
+      expect(component.form.sidPrefix().value()).toBe(false);
       // linkedNodeRole defaults to 'S' when unset in the filter
-      expect(component.linkedNodeRole.value).toBe('S');
+      expect(component.form.linkedNodeRole().value()).toBe('S');
     });
 
     it('should map isClass=true to 1 and isClass=false to 2, and unset to 0', () => {
       filter$.next({ isClass: true });
-      expect(component.isClass.value).toBe(1);
+      expect(component.form.isClass().value()).toBe(1);
 
       filter$.next({ isClass: false });
-      expect(component.isClass.value).toBe(2);
+      expect(component.form.isClass().value()).toBe(2);
 
       filter$.next({});
-      expect(component.isClass.value).toBe(0);
+      expect(component.form.isClass().value()).toBe(0);
     });
 
     it('should forward linkedNodeId and classIds to the repository', () => {
@@ -140,21 +140,15 @@ describe('GraphNodeFilterComponent', () => {
 
   //#region apply / getFilter
   describe('apply', () => {
-    it('should not call setFilter when the form is invalid', () => {
-      component.form.setErrors({ invalid: true });
-      component.apply();
-      expect(repository.setFilter).not.toHaveBeenCalled();
-    });
-
     it('should build the filter from the form, trimming strings', () => {
-      component.label.setValue('  lbl  ');
-      component.uid.setValue('  u1  ');
-      component.tag.setValue('  t1  ');
-      component.sid.setValue('  s1  ');
-      component.sidPrefix.setValue(true);
-      component.isClass.setValue(1);
-      component.sourceType.setValue(NodeSourceType.Part);
-      component.linkedNodeRole.setValue('O');
+      component.form.label().value.set('  lbl  ');
+      component.form.uid().value.set('  u1  ');
+      component.form.tag().value.set('  t1  ');
+      component.form.sid().value.set('  s1  ');
+      component.form.sidPrefix().value.set(true);
+      component.form.isClass().value.set(1);
+      component.form.sourceType().value.set(NodeSourceType.Part);
+      component.form.linkedNodeRole().value.set('O');
       repository.getLinkedNode.mockReturnValue(buildUriNode({ id: 9 }));
       repository.getClassNodes.mockReturnValue([
         buildUriNode({ id: 10 }),
@@ -178,13 +172,13 @@ describe('GraphNodeFilterComponent', () => {
     });
 
     it('should map isClass=2 to false and isClass=0 to undefined', () => {
-      component.isClass.setValue(2);
+      component.form.isClass().value.set(2);
       component.apply();
       expect(repository.setFilter).toHaveBeenCalledWith(
         expect.objectContaining({ isClass: false })
       );
 
-      component.isClass.setValue(0);
+      component.form.isClass().value.set(0);
       component.apply();
       expect(repository.setFilter).toHaveBeenCalledWith(
         expect.objectContaining({ isClass: undefined })
@@ -192,7 +186,7 @@ describe('GraphNodeFilterComponent', () => {
     });
 
     it('should map a null sourceType to undefined', () => {
-      component.sourceType.setValue(null);
+      component.form.sourceType().value.set(null);
       component.apply();
       expect(repository.setFilter).toHaveBeenCalledWith(
         expect.objectContaining({ sourceType: undefined })
@@ -201,12 +195,26 @@ describe('GraphNodeFilterComponent', () => {
   });
 
   describe('reset', () => {
-    it('should reset the form and apply', () => {
-      component.label.setValue('hello');
+    it('should clear the form values and apply an empty filter', () => {
+      component.form.label().value.set('hello');
+      component.form.isClass().value.set(1);
+      component.form.sourceType().value.set(NodeSourceType.Item);
+      component.form.sidPrefix().value.set(true);
       component.reset();
 
-      expect(component.label.value).toBeNull();
-      expect(repository.setFilter).toHaveBeenCalled();
+      expect(component.form.label().value()).toBe('');
+      expect(repository.setFilter).toHaveBeenCalledWith({
+        label: undefined,
+        isClass: undefined,
+        uid: undefined,
+        tag: undefined,
+        sourceType: undefined,
+        sid: undefined,
+        isSidPrefix: false,
+        linkedNodeId: undefined,
+        linkedNodeRole: undefined,
+        classIds: [],
+      });
     });
   });
   //#endregion
@@ -245,9 +253,63 @@ describe('GraphNodeFilterComponent', () => {
   //#endregion
 
   it('should unsubscribe from filter$ on destroy', () => {
-    const labelControl = component.label;
+    const label = component.form.label;
     fixture.destroy();
-    filter$.next({ label: 'after-destroy' });
-    expect(labelControl.value).not.toBe('after-destroy');
+    repository.setLinkedNodeId.mockClear();
+    filter$.next({ label: 'after-destroy', linkedNodeId: 3 });
+    expect(label().value()).not.toBe('after-destroy');
+    expect(repository.setLinkedNodeId).not.toHaveBeenCalled();
+  });
+
+  describe('template', () => {
+    function button(tooltip: string): HTMLButtonElement {
+      return fixture.nativeElement.querySelector(
+        `button[mattooltip="${tooltip}"]`
+      );
+    }
+
+    it('renders no <form> element; apply is a type=button click', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const apply = button('Apply filters');
+      expect(apply.type).toBe('button');
+      component.form.label().value.set('x');
+      apply.click();
+      expect(repository.setFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ label: 'x' })
+      );
+    });
+
+    it('applies when Enter is pressed in a text input, unless disabled', () => {
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input[matinput]');
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(repository.setFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ label: 'typed' })
+      );
+
+      repository.setFilter.mockClear();
+      fixture.componentRef.setInput('disabled', true);
+      fixture.detectChanges();
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(repository.setFilter).not.toHaveBeenCalled();
+    });
+
+    it('rebuilds the draft from the filter after applying', () => {
+      component.form.label().value.set('  lbl  ');
+      component.apply();
+      const applied = repository.setFilter.mock.calls[0][0];
+      filter$.next(applied);
+      expect(component.form.label().value()).toBe('lbl');
+    });
+  });
+
+  describe('reset of repository-held filters', () => {
+    it('also clears the linked node and the class nodes', () => {
+      component.reset();
+      expect(repository.setLinkedNode).toHaveBeenCalledWith();
+      expect(repository.setClassNodeIds).toHaveBeenCalledWith();
+    });
   });
 });

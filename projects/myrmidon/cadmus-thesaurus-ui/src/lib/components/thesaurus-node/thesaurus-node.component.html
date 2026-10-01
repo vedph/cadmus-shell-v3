@@ -104,35 +104,39 @@
     <!-- edit -->
     @else {
       <div>
-        <form
-          [formGroup]="form"
-          (submit)="save()"
-          (keydown.esc)="toggleEdit(false)"
-          class="form-row"
-        >
+        <div (keydown.esc)="toggleEdit(false)" class="form-row">
           <!-- id -->
           <mat-form-field>
             <mat-label>ID</mat-label>
-            <input matInput [formControl]="id" />
-            @if (id.hasError("required") && (id.dirty || id.touched)) {
+            <input
+              matInput
+              [formField]="form.id"
+              (keydown.enter)="form().dirty() && save()"
+            />
+            @if (form.id().getError("required") && (form.id().dirty() || form.id().touched())) {
               <mat-error>ID required</mat-error>
             }
-            @if (id.hasError("maxLength") && (id.dirty || id.touched)) {
+            @if (form.id().getError("maxLength") && (form.id().dirty() || form.id().touched())) {
               <mat-error>ID too long</mat-error>
             }
-            @if (id.hasError("pattern") && (id.dirty || id.touched)) {
+            @if (form.id().getError("pattern") && (form.id().dirty() || form.id().touched())) {
               <mat-error>invalid ID</mat-error>
             }
           </mat-form-field>
           <!-- value -->
           <mat-form-field style="min-width: 300px">
             <mat-label>value</mat-label>
-            <input matInput [formControl]="value" #nodeVal />
-            @if (value.hasError("required") && (value.dirty || value.touched)) {
+            <input
+              matInput
+              [formField]="form.value"
+              #nodeVal
+              (keydown.enter)="form().dirty() && save()"
+            />
+            @if (form.value().getError("required") && (form.value().dirty() || form.value().touched())) {
               <mat-error>value required</mat-error>
             }
             @if (
-              value.hasError("maxLength") && (value.dirty || value.touched)
+              form.value().getError("maxLength") && (form.value().dirty() || form.value().touched())
             ) {
               <mat-error>value too long</mat-error>
             }
@@ -146,14 +150,15 @@
             <mat-icon class="mat-warn">clear</mat-icon>
           </button>
           <button
-            type="submit"
+            type="button"
             mat-icon-button
-            [disabled]="form.pristine || form.invalid"
+            [disabled]="!form().dirty() || form().invalid()"
             matTooltip="Save changes"
+            (click)="save()"
           >
             <mat-icon class="mat-primary">check_circle</mat-icon>
           </button>
-        </form>
+        </div>
       </div>
     }
   </div>

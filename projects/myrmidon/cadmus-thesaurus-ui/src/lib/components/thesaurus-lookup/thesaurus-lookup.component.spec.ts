@@ -27,27 +27,30 @@ describe('ThesaurusLookupComponent', () => {
   describe('resetToInitial (triggered by the initialValue effect)', () => {
     it('should not call lookupFn when there is no lookupFn provided', async () => {
       fixture.componentRef.setInput('initialValue', 'foo');
+      fixture.detectChanges();
       await fixture.whenStable();
-      expect(component.lookup.value).toBeUndefined();
+      expect(component.form.lookup().value()).toBeNull();
     });
 
     it('should set the lookup control to the first found entry', async () => {
       const lookupFn = vi.fn().mockReturnValue(of(['found-id']));
       fixture.componentRef.setInput('lookupFn', lookupFn);
       fixture.componentRef.setInput('initialValue', 'foo');
+      fixture.detectChanges();
       await fixture.whenStable();
 
       expect(lookupFn).toHaveBeenCalledWith({ id: 'foo' }, 1);
-      expect(component.lookup.value).toBe('found-id');
+      expect(component.form.lookup().value()).toBe('found-id');
     });
 
-    it('should set the lookup control to undefined when nothing is found', async () => {
+    it('should set the lookup control to null when nothing is found', async () => {
       const lookupFn = vi.fn().mockReturnValue(of([]));
       fixture.componentRef.setInput('lookupFn', lookupFn);
       fixture.componentRef.setInput('initialValue', 'foo');
+      fixture.detectChanges();
       await fixture.whenStable();
 
-      expect(component.lookup.value).toBeUndefined();
+      expect(component.form.lookup().value()).toBeNull();
     });
   });
 
@@ -56,7 +59,9 @@ describe('ThesaurusLookupComponent', () => {
       const values: string[][] = [];
       component.ids$!.subscribe((v) => values.push(v));
 
-      component.lookup.setValue({ some: 'entry' } as any);
+      component.form.lookup().value.set({ some: 'entry' } as any);
+      // toObservable emits from an effect, flushed by change detection
+      fixture.detectChanges();
       await new Promise((resolve) => setTimeout(resolve, 350));
 
       expect(values.at(-1)).toEqual([{ some: 'entry' }]);
@@ -70,7 +75,8 @@ describe('ThesaurusLookupComponent', () => {
       const values: string[][] = [];
       component.ids$!.subscribe((v) => values.push(v));
 
-      component.lookup.setValue('query');
+      component.form.lookup().value.set('query');
+      fixture.detectChanges();
       await new Promise((resolve) => setTimeout(resolve, 350));
 
       expect(lookupFn).toHaveBeenCalledWith({ id: 'query' }, 5);
@@ -87,7 +93,7 @@ describe('ThesaurusLookupComponent', () => {
       component.clear();
 
       expect(component.id()).toBeUndefined();
-      expect(component.lookup.value).toBeNull();
+      expect(component.form.lookup().value()).toBeNull();
       expect(spy).toHaveBeenCalledWith(null);
     });
   });
@@ -99,6 +105,75 @@ describe('ThesaurusLookupComponent', () => {
       component.pickId('picked-id');
       expect(component.id()).toBe('picked-id');
       expect(spy).toHaveBeenCalledWith('picked-id');
+    });
+  });
+
+  describe('signal form', () => {
+    it('should reset again when only the lookupFn changes', async () => {
+      fixture.componentRef.setInput('initialValue', 'foo');
+      fixture.componentRef.setInput('lookupFn', vi.fn().mockReturnValue(of([])));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const lookupFn = vi.fn().mockReturnValue(of(['x']));
+      fixture.componentRef.setInput('lookupFn', lookupFn);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(lookupFn).toHaveBeenCalledWith({ id: 'foo' }, 1);
+      expect(component.form.lookup().value()).toBe('x');
+    });
+
+    it('should not reset while the user types', async () => {
+      fixture.componentRef.setInput('initialValue', 'foo');
+      fixture.componentRef.setInput('lookupFn', vi.fn().mockReturnValue(of(['foo'])));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      component.form.lookup().value.set('fo');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.form.lookup().value()).toBe('fo');
+    });
+
+    it('should not offer an empty entry for the initial empty value', async () => {
+      const values: string[][] = [];
+      component.ids$.subscribe((v) => values.push(v));
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      expect(values.every((v) => v.length === 0)).toBe(true);
+    });
+
+    it('should not reset when lookupFn changes with no initial value', async () => {
+      component.form.lookup().value.set('typed');
+      fixture.componentRef.setInput('lookupFn', vi.fn().mockReturnValue(of([])));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.form.lookup().value()).toBe('typed');
+    });
+
+    it('renders no <form> element', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    });
+  });
+
+  describe('resetOnPick', () => {
+    it('clears the picked ID again when true', () => {
+      fixture.componentRef.setInput('resetOnPick', true);
+      fixture.detectChanges();
+      const events: (string | null)[] = [];
+      component.entryChange.subscribe((e) => events.push(e));
+
+      component.pickId('picked-id');
+
+      expect(events).toEqual(['picked-id', null]);
+      expect(component.id()).toBeUndefined();
+      expect(component.form.lookup().value()).toBeNull();
+    });
+
+    it('keeps the picked ID when false (the default)', () => {
+      const events: (string | null)[] = [];
+      component.entryChange.subscribe((e) => events.push(e));
+      component.pickId('picked-id');
+      expect(events).toEqual(['picked-id']);
+      expect(component.id()).toBe('picked-id');
     });
   });
 });

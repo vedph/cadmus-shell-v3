@@ -1,14 +1,15 @@
-<form [formGroup]="form" (submit)="save()">
+<div>
   <div class="form-row">
     <!-- id -->
     <mat-form-field class="input-nr">
       <mat-label>ID</mat-label>
-      <mat-select [formControl]="id">
+      <mat-select [formField]="form.id">
         @for (n of flagNumbers; track n) {
         <mat-option [value]="n">{{ n }}</mat-option>
         }
       </mat-select>
-      @if ($any(id.errors)?.required && (id.dirty || id.touched)) {
+      @if (form.id().getError('required') && (form.id().dirty() ||
+      form.id().touched())) {
       <mat-error>ID required</mat-error>
       }
     </mat-form-field>
@@ -16,10 +17,12 @@
     <!-- label -->
     <mat-form-field>
       <mat-label>label</mat-label>
-      <input matInput [formControl]="label" />
-      @if ($any(label.errors)?.required && (label.dirty || label.touched)) {
+      <input matInput [formField]="form.label" />
+      @if (form.label().getError('required') && (form.label().dirty() ||
+      form.label().touched())) {
       <mat-error>label required</mat-error>
-      } @if ($any(label.errors)?.maxlength && (label.dirty || label.touched)) {
+      } @if (form.label().getError('maxLength') && (form.label().dirty() ||
+      form.label().touched())) {
       <mat-error>label too long</mat-error>
       }
     </mat-form-field>
@@ -27,22 +30,22 @@
     <!-- colorKey -->
     <mat-form-field class="input-color">
       <mat-label>color</mat-label>
-      <input matInput type="color" [formControl]="colorKey" />
+      <input matInput type="color" [formField]="form.colorKey" />
     </mat-form-field>
 
     <!-- isAdmin -->
-    <mat-checkbox [formControl]="isAdmin">admin</mat-checkbox>
+    <mat-checkbox [formField]="form.isAdmin">admin</mat-checkbox>
   </div>
   <div>
     <!-- description -->
     <mat-form-field class="dsc">
       <mat-label>description</mat-label>
-      <textarea matInput rows="2" [formControl]="description"></textarea>
-      @if ( $any(description.errors)?.required && (description.dirty ||
-      description.touched) ) {
+      <textarea matInput rows="2" [formField]="form.description"></textarea>
+      @if (form.description().getError('required') &&
+      (form.description().dirty() || form.description().touched())) {
       <mat-error>description required</mat-error>
-      } @if ( $any(description.errors)?.maxlength && (description.dirty ||
-      description.touched) ) {
+      } @if (form.description().getError('maxLength') &&
+      (form.description().dirty() || form.description().touched())) {
       <mat-error>description too long</mat-error>
       }
     </mat-form-field>
@@ -58,12 +61,13 @@
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
-      type="submit"
+      type="button"
       mat-icon-button
       matTooltip="Accept changes"
-      [disabled]="form.invalid || form.pristine"
+      [disabled]="form().invalid() || !form().dirty()"
+      (click)="save()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

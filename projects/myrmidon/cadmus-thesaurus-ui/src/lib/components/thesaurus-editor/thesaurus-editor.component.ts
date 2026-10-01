@@ -2,22 +2,26 @@ import {
   ChangeDetectionStrategy,
   Component,
   effect,
+  inject,
   input,
+  linkedSignal,
   model,
-  OnInit,
   output,
+  signal,
+  untracked,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FormField,
+  form,
+  maxLength,
+  pattern,
+  required,
+  validate,
+} from '@angular/forms/signals';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { AsyncPipe } from '@angular/common';
-import { Observable } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, Observable } from 'rxjs';
 
 import {
   MatCard,
@@ -62,6 +66,24 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
  * thesauri, but can be equally used with normal thesauri.
  * Obsoleted, use cadmus-thesaurus-editor-feature instead.
  */
+/**
+ * The editable shape behind the thesaurus form. Text fields use '' as
+ * their empty value, as they are bound to native inputs.
+ */
+interface ThesaurusControls {
+  id: string;
+  alias: boolean;
+  targetId: string;
+}
+
+function toDraft(thesaurus: Thesaurus | undefined): ThesaurusControls {
+  return {
+    id: thesaurus?.id || '',
+    alias: !!thesaurus?.targetId,
+    targetId: thesaurus?.targetId || '',
+  };
+}
+
 @Component({
   selector: 'cadmus-thesaurus-editor',
   templateUrl: './thesaurus-editor.component.html',
@@ -72,8 +94,7 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
     MatCardHeader,
     MatCardTitle,
     MatCardContent,
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatInput,
@@ -91,7 +112,7 @@ const THES_ID_PATTERN = '^[a-zA-Z0-9][.\\-_a-zA-Z0-9]*@[a-z]{2,3}$';
     AsyncPipe,
   ],
 })
-export class ThesaurusEditorComponent implements OnInit {
+export class ThesaurusEditorComponent {
   /**
    * The thesaurus being edited.
    */
@@ -112,17 +133,50 @@ export class ThesaurusEditorComponent implements OnInit {
   public page$: Observable<DataPage<ThesaurusNode>>;
   public filter$: Observable<ThesaurusNodeFilter>;
 
-  // thesaurus form
-  public id: FormControl<string | null>;
-  public alias: FormControl<boolean>;
-  public targetId: FormControl<string | null>;
-  public entryCount: FormControl<number>;
-  public form: FormGroup;
+  /**
+   * The count of the edited nodes (i.e. of the thesaurus entries).
+   */
+  private readonly _nodeCount = toSignal(
+    inject(ThesaurusNodesService)
+      .selectNodes()
+      .pipe(map((nodes) => nodes.length)),
+    { initialValue: 0 },
+  );
+
+  /**
+   * The thesaurus form, rebuilt from the bound thesaurus whenever it
+   * changes (as the old form was, including after save).
+   */
+  private readonly _draft = linkedSignal(() => toDraft(this.thesaurus()));
+
+  public readonly form = form(this._draft, (path) => {
+    required(path.id);
+    maxLength(path.id, 50);
+    pattern(path.id, new RegExp(THES_ID_PATTERN));
+    // alias: target ID required and valid, no entries
+    required(path.targetId, { when: ({ valueOf }) => valueOf(path.alias) });
+    maxLength(path.targetId, 50, {
+      when: ({ valueOf }) => valueOf(path.alias),
+    });
+    pattern(path.targetId, new RegExp(THES_ID_PATTERN), {
+      when: ({ valueOf }) => valueOf(path.alias),
+    });
+    // not an alias: entries required, no target ID. Entries are the nodes
+    // being edited, so their count is live
+    validate(path, ({ valueOf }) =>
+      !valueOf(path.alias) && this._nodeCount() < 1
+        ? { kind: 'noEntries' }
+        : null,
+    );
+  });
 
   // filter
-  public parentId: FormControl<string | null>;
-  public idOrValue: FormControl<string | null>;
-  public filterForm: FormGroup;
+  public readonly filterForm = form(
+    signal<{ idOrValue: string; parentId: string | null }>({
+      idOrValue: '',
+      parentId: null,
+    }),
+  );
 
   public parentIds$: Observable<ThesaurusEntry[]>;
 
@@ -130,7 +184,6 @@ export class ThesaurusEditorComponent implements OnInit {
     private _nodesService: ThesaurusNodesService,
     private _dialogService: DialogService,
     private _repository: ThesaurusNodeListRepository,
-    formBuilder: FormBuilder,
   ) {
     this.loading$ = _repository.loading$;
     this.filter$ = _repository.filter$;
@@ -138,39 +191,16 @@ export class ThesaurusEditorComponent implements OnInit {
 
     // the list of all the parent nodes IDs in the edited thesaurus
     this.parentIds$ = this._nodesService.selectParentIds();
-    // thesaurus form
-    this.id = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(50),
-      Validators.pattern(new RegExp(THES_ID_PATTERN)),
-    ]);
-    this.alias = formBuilder.control(false, { nonNullable: true });
-    this.targetId = formBuilder.control(null);
-    // entryCount holds the pre-computed entries *count* (a number), not
-    // the entries array itself; strictMinLengthValidator checks a
-    // `.length` property, which numbers don't have, so it silently never
-    // fired for any value including 0. Validators.min is the numeric
-    // equivalent of "at least 1 entry required".
-    this.entryCount = formBuilder.control(0, {
-      validators: Validators.min(1),
-      nonNullable: true,
-    });
-    this.form = formBuilder.group({
-      id: this.id,
-      alias: this.alias,
-      targetId: this.targetId,
-      entryCount: this.entryCount,
-    });
-    // filter form
-    this.idOrValue = formBuilder.control(null);
-    this.parentId = formBuilder.control(null);
-    this.filterForm = formBuilder.group({
-      idOrValue: this.idOrValue,
-      parentId: this.parentId,
-    });
-
+    // a thesaurus was bound (including the echo of our own save): clear
+    // interaction state and load its entries as nodes
     effect(() => {
-      this.updateForm(this.thesaurus());
+      const thesaurus = this.thesaurus();
+      untracked(() => {
+        this.form().reset();
+        if (thesaurus) {
+          this.importNodes(thesaurus);
+        }
+      });
     });
   }
 
@@ -178,38 +208,8 @@ export class ThesaurusEditorComponent implements OnInit {
     this._repository.reset();
   }
 
-  /**
-   * Update the form's validators according to whether the edited
-   * thesaurus is just an alias or a full thesaurus.
-   */
-  private updateValidators(): void {
-    if (this.alias.value) {
-      // alias: target ID required and valid, no entries
-      this.entryCount.setValidators(null);
-      this.targetId.setValidators([
-        Validators.required,
-        Validators.maxLength(50),
-        Validators.pattern(new RegExp(THES_ID_PATTERN)),
-      ]);
-    } else {
-      // not an alias: entries required, no target ID
-      this.entryCount.setValidators(Validators.min(1));
-      this.targetId.setValidators(null);
-    }
-
-    this.entryCount.updateValueAndValidity();
-    this.targetId.updateValueAndValidity();
-  }
-
-  ngOnInit(): void {
-    // change validation according to whether this is an alias
-    this.alias.valueChanges.subscribe((_) => {
-      this.updateValidators();
-    });
-  }
-
   public onTargetIdChange(id: string | null): void {
-    this.targetId.setValue(id);
+    this.form.targetId().value.set(id || '');
   }
 
   public onPageChange(event: PageEvent): void {
@@ -218,8 +218,8 @@ export class ThesaurusEditorComponent implements OnInit {
 
   public applyFilter(): void {
     this._repository.setFilter({
-      idOrValue: this.idOrValue.value || undefined,
-      parentId: this.parentId.value || undefined,
+      idOrValue: this.filterForm.idOrValue().value() || undefined,
+      parentId: this.filterForm.parentId().value() || undefined,
     });
   }
 
@@ -311,18 +311,7 @@ export class ThesaurusEditorComponent implements OnInit {
     this.reset();
   }
 
-  private updateForm(thesaurus?: Thesaurus): void {
-    if (!thesaurus) {
-      this.form.reset();
-      return;
-    }
-    this.id.setValue(thesaurus.id);
-    this.targetId.setValue(thesaurus.targetId || null);
-    this.entryCount.setValue(thesaurus.entries?.length || 0);
-    this.alias.setValue(thesaurus.targetId ? true : false);
-    this.form.markAsPristine();
-
-    // nodes
+  private importNodes(thesaurus: Thesaurus): void {
     const entries: ThesaurusEntry[] = [];
     thesaurus.entries?.forEach((e: ThesaurusEntry) => {
       entries.push({ ...e });
@@ -335,14 +324,15 @@ export class ThesaurusEditorComponent implements OnInit {
   }
 
   private getThesaurus(): Thesaurus {
+    const v = this._draft();
     const thesaurus: Thesaurus = {
-      id: this.id.value!,
+      id: v.id,
       language: 'en',
       entries: [],
     };
 
-    if (this.alias.value) {
-      thesaurus.targetId = this.targetId.value!;
+    if (v.alias) {
+      thesaurus.targetId = v.targetId;
     } else {
       thesaurus.entries = this._nodesService.getNodes().map((n) => {
         return {
@@ -360,7 +350,7 @@ export class ThesaurusEditorComponent implements OnInit {
   }
 
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       return;
     }
     this.thesaurus.set(this.getThesaurus());

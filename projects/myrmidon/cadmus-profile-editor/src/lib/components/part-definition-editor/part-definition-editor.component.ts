@@ -1,21 +1,21 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Signal,
   computed,
   effect,
   input,
+  linkedSignal,
   model,
   output,
+  untracked,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+  FormField,
+  form,
+  maxLength,
+  pattern,
+  required,
+} from '@angular/forms/signals';
 
 // material
 import { MatIconButton } from '@angular/material/button';
@@ -35,6 +35,51 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 /**
+ * The editable shape behind the form. Text fields use '' as their empty
+ * value, as they are bound to native inputs.
+ */
+interface PartDefinitionControls {
+  typeId: string;
+  roleId: string;
+  name: string;
+  required: boolean;
+  description: string;
+  colorKey: string;
+  groupKey: string;
+  sortKey: string;
+}
+
+function toDraft(data: PartDefinition | undefined): PartDefinitionControls {
+  return {
+    typeId: data?.typeId || '',
+    roleId: data?.roleId || '',
+    name: data?.name || '',
+    required: data?.isRequired || false,
+    description: data?.description || '',
+    colorKey: data?.colorKey || '',
+    groupKey: data?.groupKey || '',
+    sortKey: data?.sortKey || '',
+  };
+}
+
+/**
+ * Draft -> definition. Normalizes values (trimming, '' to undefined), so
+ * the definition saved from a draft may differ from the draft itself.
+ */
+function toData(v: PartDefinitionControls): PartDefinition {
+  return {
+    typeId: v.typeId.trim(),
+    roleId: v.roleId.trim() || undefined,
+    name: v.name.trim(),
+    isRequired: v.required,
+    description: v.description.trim() || undefined,
+    colorKey: v.colorKey.trim() || undefined,
+    groupKey: v.groupKey.trim() || undefined,
+    sortKey: v.sortKey.trim() || undefined,
+  };
+}
+
+/**
  * Editor for a single part definition. This allows users to edit the part definition
  * properties: type ID, selected from a list if facet model settings are provided,
  * or entered freely if not (but this should not happen, as at least part definitions
@@ -48,7 +93,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 @Component({
   selector: 'cadmus-part-definition-editor',
   imports: [
-    ReactiveFormsModule,
+    FormField,
     MatCheckbox,
     MatError,
     MatFormField,
@@ -100,19 +145,6 @@ export class PartDefinitionEditorComponent {
     return settings?.fragments ? Object.keys(settings.fragments) : [];
   });
 
-  /**
-   * True if the part type is a base text part, i.e. if the facet model settings
-   * for the current part type ID has the baseText property set to true. In this
-   * case, the role ID select is shown with the list of available fragment IDs
-   * from the facet model settings; otherwise, a free text input is shown for
-   * the role ID.
-   * Initialized in the constructor so it can reactively track typeId changes
-   * via a toSignal-wrapped valueChanges observable.
-   */
-  public readonly isBaseTextPart: Signal<boolean>;
-
-  /** Signal that mirrors typeId.valueChanges so computed() can track it. */
-  private readonly _typeIdValue: Signal<string>;
 
   /**
    * True to hide the sort key field. This is used when the sort key is
@@ -126,100 +158,64 @@ export class PartDefinitionEditorComponent {
    */
   public readonly cancelEdit = output();
 
-  public typeId: FormControl<string>;
-  public roleId: FormControl<string | null>;
-  public name: FormControl<string>;
-  public required: FormControl<boolean>;
-  public description: FormControl<string | null>;
-  public colorKey: FormControl<string | null>;
-  public groupKey: FormControl<string | null>;
-  public sortKey: FormControl<string | null>;
-  public form: FormGroup;
+  /**
+   * The editable draft, derived from definition. On the echo of our own
+   * save the live draft is kept, as toData() normalizes its values.
+   */
+  private readonly _draft = linkedSignal<
+    PartDefinition | undefined,
+    PartDefinitionControls
+  >({
+    source: () => this.definition(),
+    computation: (data, previous) =>
+      previous &&
+      JSON.stringify(data) === JSON.stringify(toData(previous.value))
+        ? previous.value
+        : toDraft(data),
+  });
 
-  constructor(formBuilder: FormBuilder) {
-    // form
-    this.typeId = formBuilder.control<string>('', {
-      validators: [Validators.required, Validators.maxLength(100)],
-      nonNullable: true,
-    });
-    // mirror typeId value as a signal so computed() tracks it reactively
-    this._typeIdValue = toSignal(this.typeId.valueChanges, {
-      initialValue: this.typeId.value,
-    });
-    this.isBaseTextPart = computed(() => {
-      const settings = this.facetModelSettings();
-      return settings?.parts?.[this._typeIdValue()]?.baseText === true;
-    });
-    this.roleId = formBuilder.control<string | null>(null);
-    this.name = formBuilder.control<string>('', {
-      validators: [Validators.required, Validators.maxLength(100)],
-      nonNullable: true,
-    });
-    this.required = formBuilder.control<boolean>(false, {
-      nonNullable: true,
-    });
-    this.description = formBuilder.control<string | null>(null, {
-      validators: Validators.maxLength(1000),
-    });
+  public readonly form = form(this._draft, (path) => {
+    required(path.typeId);
+    maxLength(path.typeId, 100);
+    required(path.name);
+    maxLength(path.name, 100);
+    maxLength(path.description, 1000);
     // color key has form RRGGBB, where RR, GG and BB are hex values
     // for red, green and blue
-    this.colorKey = formBuilder.control<string | null>(null, {
-      validators: Validators.pattern('^[0-9a-fA-F]{6}$'),
-    });
-    this.groupKey = formBuilder.control<string | null>(null);
-    this.sortKey = formBuilder.control<string | null>(null);
+    pattern(path.colorKey, /^[0-9a-fA-F]{6}$/);
+  });
 
-    this.form = formBuilder.group({
-      typeId: this.typeId,
-      roleId: this.roleId,
-      name: this.name,
-      required: this.required,
-      description: this.description,
-      colorKey: this.colorKey,
-      groupKey: this.groupKey,
-      sortKey: this.sortKey,
-    });
+  /**
+   * True if the part type is a base text part, i.e. if the facet model settings
+   * for the current part type ID has the baseText property set to true. In this
+   * case, the role ID select is shown with the list of available fragment IDs
+   * from the facet model settings; otherwise, a free text input is shown for
+   * the role ID.
+   */
+  public readonly isBaseTextPart = computed<boolean>(() => {
+    const settings = this.facetModelSettings();
+    return settings?.parts?.[this.form.typeId().value()]?.baseText === true;
+  });
 
-    // when model changes, update form
+  constructor() {
+    // once the draft mirrors the bound definition again, clear interaction
+    // state
     effect(() => {
-      const data = this.definition();
-      this.updateForm(data);
+      const draft = this._draft();
+      untracked(() => {
+        if (
+          JSON.stringify(draft) === JSON.stringify(toDraft(this.definition()))
+        ) {
+          this.form().reset();
+        }
+      });
     });
-  }
-
-  private updateForm(data: PartDefinition | undefined | null): void {
-    if (!data) {
-      this.form.reset();
-    } else {
-      this.typeId.setValue(data.typeId);
-      this.roleId.setValue(data.roleId || null);
-      this.name.setValue(data.name || '');
-      this.required.setValue(data.isRequired || false);
-      this.description.setValue(data.description || null);
-      this.colorKey.setValue(data.colorKey || null);
-      this.groupKey.setValue(data.groupKey || null);
-      this.sortKey.setValue(data.sortKey || null);
-      this.form.markAsPristine();
-    }
-  }
-
-  private getData(): PartDefinition {
-    return {
-      typeId: this.typeId.value.trim(),
-      roleId: this.roleId.value?.trim() || undefined,
-      name: this.name.value.trim(),
-      isRequired: this.required.value,
-      description: this.description.value?.trim() || undefined,
-      colorKey: this.colorKey.value?.trim() || undefined,
-      groupKey: this.groupKey.value?.trim() || undefined,
-      sortKey: this.sortKey.value?.trim() || undefined,
-    };
   }
 
   public onColorPick(value: string): void {
     // native color input returns "#rrggbb" — strip the leading "#"
-    this.colorKey.setValue(value.slice(1));
-    this.colorKey.markAsDirty();
+    this.form.colorKey().value.set(value.slice(1));
+    this.form.colorKey().markAsDirty();
   }
 
   public cancel(): void {
@@ -235,17 +231,16 @@ export class PartDefinitionEditorComponent {
    * Set to false for auto-save if you want the form to remain dirty.
    */
   public save(pristine = true): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       // show validation errors
-      this.form.markAllAsTouched();
+      this.form().markAsTouched();
       return;
     }
 
-    const data = this.getData();
-    this.definition.set(data);
+    this.definition.set(toData(this._draft()));
 
     if (pristine) {
-      this.form.markAsPristine();
+      this.form().reset();
     }
   }
 }

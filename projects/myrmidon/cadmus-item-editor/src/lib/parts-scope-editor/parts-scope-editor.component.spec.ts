@@ -75,7 +75,7 @@ describe('PartsScopeEditorComponent', () => {
       makePart({ id: 'p2' }),
     ]);
     fixture.detectChanges();
-    expect(component.checks.length).toBe(2);
+    expect(component.form.checks().value()).toEqual([false, false]);
   });
 
   it('should clear the checks when parts becomes empty', () => {
@@ -83,7 +83,7 @@ describe('PartsScopeEditorComponent', () => {
     fixture.detectChanges();
     fixture.componentRef.setInput('parts', []);
     fixture.detectChanges();
-    expect(component.checks.length).toBe(0);
+    expect(component.form.checks().value()).toEqual([]);
   });
 
   describe('submit', () => {
@@ -103,8 +103,8 @@ describe('PartsScopeEditorComponent', () => {
       const parts = [makePart({ id: 'p1' }), makePart({ id: 'p2' })];
       fixture.componentRef.setInput('parts', parts);
       fixture.detectChanges();
-      component.checks.at(0).setValue(true);
-      component.scope.setValue('myscope');
+      component.form.checks[0]().value.set(true);
+      component.form.scope().value.set('myscope');
 
       const spy = vi.fn();
       component.setScopeRequest.subscribe(spy);
@@ -121,13 +121,69 @@ describe('PartsScopeEditorComponent', () => {
       dialogService.confirm.mockReturnValue(of(false));
       fixture.componentRef.setInput('parts', [makePart()]);
       fixture.detectChanges();
-      component.checks.at(0).setValue(true);
+      component.form.checks[0]().value.set(true);
 
       const spy = vi.fn();
       component.setScopeRequest.subscribe(spy);
       component.submit();
 
       expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('signal form', () => {
+    it('should send an empty scope as null (removing it)', () => {
+      fixture.componentRef.setInput('parts', [makePart({ id: 'p1' })]);
+      fixture.detectChanges();
+      component.form.checks[0]().value.set(true);
+      expect(component.form().valid()).toBe(true);
+
+      const spy = vi.fn();
+      component.setScopeRequest.subscribe(spy);
+      component.submit();
+
+      expect(spy).toHaveBeenCalledWith({ ids: ['p1'], scope: null });
+    });
+
+    it('should reject an invalid scope', () => {
+      fixture.componentRef.setInput('parts', [makePart()]);
+      fixture.detectChanges();
+      component.form.checks[0]().value.set(true);
+      component.form.scope().value.set('bad scope!');
+      expect(component.form.scope().getError('pattern')).toBeTruthy();
+      expect(component.form().invalid()).toBe(true);
+    });
+
+    it('should keep the scope when parts change, resetting the checks', () => {
+      fixture.componentRef.setInput('parts', [makePart()]);
+      fixture.detectChanges();
+      component.form.checks[0]().value.set(true);
+      component.form.scope().value.set('s1');
+
+      fixture.componentRef.setInput('parts', [makePart({ id: 'p9' })]);
+      fixture.detectChanges();
+
+      expect(component.form.checks().value()).toEqual([false]);
+      expect(component.form.scope().value()).toBe('s1');
+    });
+
+    it('renders no <form>; checking a box enables assign, which submits', () => {
+      fixture.componentRef.setInput('parts', [makePart({ id: 'p1' })]);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const button: HTMLButtonElement =
+        fixture.nativeElement.querySelector('button[mat-flat-button]');
+      expect(button.type).toBe('button');
+      expect(button.disabled).toBe(true);
+
+      const box: HTMLInputElement =
+        fixture.nativeElement.querySelector('mat-checkbox input');
+      box.click();
+      fixture.detectChanges();
+      expect(button.disabled).toBe(false);
+
+      button.click();
+      expect(dialogService.confirm).toHaveBeenCalled();
     });
   });
 

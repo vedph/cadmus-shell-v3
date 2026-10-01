@@ -34,24 +34,24 @@ describe('ThesaurusImportComponent', () => {
 
   it('should create with default form values', () => {
     expect(component).toBeTruthy();
-    expect(component.mode.value).toBe('R');
-    expect(component.excelSheet.value).toBe(1);
-    expect(component.dryRun.value).toBe(false);
+    expect(component.form.mode().value()).toBe('R');
+    expect(component.form.excelSheet().value()).toBe(1);
+    expect(component.form.dryRun().value()).toBe(false);
   });
 
   describe('file validator', () => {
     it('should reject a file with a disallowed extension', () => {
-      component.file.setValue(makeFile('data.txt'));
-      expect(component.file.hasError('invalidExtension')).toBe(true);
+      component.form.file().value.set(makeFile('data.txt'));
+      expect(component.form.file().getError('invalidExtension')).toBeTruthy();
     });
 
     it('should accept an allowed extension', () => {
-      component.file.setValue(makeFile('data.csv'));
-      expect(component.file.valid).toBe(true);
+      component.form.file().value.set(makeFile('data.csv'));
+      expect(component.form.file().valid()).toBe(true);
     });
 
     it('should require a file', () => {
-      expect(component.file.hasError('required')).toBe(true);
+      expect(component.form.file().getError('required')).toBeTruthy();
     });
   });
 
@@ -59,7 +59,7 @@ describe('ThesaurusImportComponent', () => {
     it('should set the file control from the input event', () => {
       const file = makeFile('data.json');
       component.onFileSelected({ target: { files: [file] } });
-      expect(component.file.value).toBe(file);
+      expect(component.form.file().value()).toBe(file);
     });
   });
 
@@ -70,10 +70,10 @@ describe('ThesaurusImportComponent', () => {
     });
 
     it('should emit uploadStart and call uploadFile with the built URL', () => {
-      component.file.setValue(makeFile('data.csv'));
-      component.mode.setValue('M');
-      component.excelSheet.setValue(2);
-      component.dryRun.setValue(true);
+      component.form.file().value.set(makeFile('data.csv'));
+      component.form.mode().value.set('M');
+      component.form.excelSheet().value.set(2);
+      component.form.dryRun().value.set(true);
       const startSpy = vi.fn();
       component.uploadStart.subscribe(startSpy);
 
@@ -82,24 +82,24 @@ describe('ThesaurusImportComponent', () => {
       expect(startSpy).toHaveBeenCalled();
       expect(component.uploading()).toBe(true);
       expect(uploadService.uploadFile).toHaveBeenCalledWith(
-        component.file.value,
+        component.form.file().value(),
         'http://api/thesauri/import?mode=M&excelSheet=2&dryRun=true',
         { reportProgress: true }
       );
     });
 
     it('should omit query params that are at their default value', () => {
-      component.file.setValue(makeFile('data.csv'));
+      component.form.file().value.set(makeFile('data.csv'));
       component.upload();
       expect(uploadService.uploadFile).toHaveBeenCalledWith(
-        component.file.value,
+        component.form.file().value(),
         'http://api/thesauri/import',
         { reportProgress: true }
       );
     });
 
     it('should update progress on UploadProgress events', () => {
-      component.file.setValue(makeFile('data.csv'));
+      component.form.file().value.set(makeFile('data.csv'));
       component.upload();
 
       upload$.next({ type: HttpEventType.UploadProgress, loaded: 50, total: 200 });
@@ -108,7 +108,7 @@ describe('ThesaurusImportComponent', () => {
     });
 
     it('should set the result and emit uploadEnd(true) on a Response event', () => {
-      component.file.setValue(makeFile('data.csv'));
+      component.form.file().value.set(makeFile('data.csv'));
       const endSpy = vi.fn();
       component.uploadEnd.subscribe(endSpy);
       component.upload();
@@ -124,7 +124,7 @@ describe('ThesaurusImportComponent', () => {
     });
 
     it('should reset state and emit uploadEnd(false) on error', () => {
-      component.file.setValue(makeFile('data.csv'));
+      component.form.file().value.set(makeFile('data.csv'));
       const endSpy = vi.fn();
       component.uploadEnd.subscribe(endSpy);
       component.upload();
@@ -139,7 +139,7 @@ describe('ThesaurusImportComponent', () => {
 
   describe('onCancel', () => {
     it('should unsubscribe, reset state and emit uploadEnd(false)', () => {
-      component.file.setValue(makeFile('data.csv'));
+      component.form.file().value.set(makeFile('data.csv'));
       component.upload();
       const endSpy = vi.fn();
       component.uploadEnd.subscribe(endSpy);
@@ -153,6 +153,43 @@ describe('ThesaurusImportComponent', () => {
       // further progress events must be ignored since we unsubscribed
       upload$.next({ type: HttpEventType.UploadProgress, loaded: 1, total: 2 });
       expect(component.uploadProgress()).toBe(0);
+    });
+  });
+
+  describe('template', () => {
+    it('renders no <form>; upload is a type=button click, enabled once valid', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const button: HTMLButtonElement = Array.from<HTMLButtonElement>(
+        fixture.nativeElement.querySelectorAll('button')
+      ).find((b) => b.textContent?.includes('upload'))!;
+      expect(button.type).toBe('button');
+      expect(button.disabled).toBe(true);
+
+      component.form.file().value.set(makeFile('data.json'));
+      fixture.detectChanges();
+      expect(button.disabled).toBe(false);
+      button.click();
+      expect(uploadService.uploadFile).toHaveBeenCalled();
+    });
+
+    it('renders min=1 on the Excel inputs, and uploads on Enter in them', () => {
+      component.form.file().value.set(makeFile('data.xlsx'));
+      fixture.detectChanges();
+      const inputs: HTMLInputElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('input[type="number"]')
+      );
+      expect(inputs.length).toBe(3);
+      expect(inputs.every((i) => i.min === '1')).toBe(true);
+
+      inputs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(uploadService.uploadFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the field mapped when the file dialog is cancelled', () => {
+      component.onFileSelected({ target: { files: [] } });
+      expect(component.form.file().value()).toBeNull();
+      component.form.file().value.set(makeFile('data.json'));
+      expect(component.form.file().value()?.name).toBe('data.json');
     });
   });
 });

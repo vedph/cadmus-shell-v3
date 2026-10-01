@@ -1,6 +1,6 @@
 <mat-card appearance="outlined">
   <mat-card-content>
-    <form [formGroup]="form" (submit)="submitQuery()">
+    <div>
       <div>
         <!-- query -->
         <mat-form-field appearance="fill" class="full-width">
@@ -9,7 +9,7 @@
             #queryta
             matInput
             rows="3"
-            [formControl]="queryCtl"
+            [formField]="form.queryCtl"
             spellcheck="false"
             cdkTextareaAutosize
             cdkAutosizeMinRows="2"
@@ -17,8 +17,8 @@
             (keydown.enter)="submitQuery(); (false)"
           ></textarea>
           @if (
-            queryCtl.hasError("required") &&
-            (queryCtl.dirty || queryCtl.touched)
+            form.queryCtl().getError("required") &&
+            (form.queryCtl().dirty() || form.queryCtl().touched())
           ) {
             <mat-error>enter a query</mat-error>
           }
@@ -27,16 +27,17 @@
           type="button"
           mat-icon-button
           matTooltip="Clear query"
-          (click)="queryCtl.reset()"
+          (click)="clearQuery()"
         >
           <mat-icon class="mat-warn">clear</mat-icon>
         </button>
         <button
-          type="submit"
+          type="button"
           class="mat-primary"
           mat-button
           matTooltip="Search items"
-          [disabled]="disabled() || form.invalid"
+          [disabled]="disabled() || form().invalid()"
+          (click)="submitQuery()"
         >
           <mat-icon>search</mat-icon>
           search
@@ -48,7 +49,7 @@
         <div>
           <mat-form-field class="full-width">
             <mat-label>history</mat-label>
-            <mat-select [formControl]="history">
+            <mat-select [formField]="form.history">
               @for (q of lastQueries(); track q) {
                 <mat-option [value]="q">
                   {{ q }}
@@ -60,8 +61,8 @@
               type="button"
               mat-icon-button
               matTooltip="Copy to query"
-              [disabled]="!history.value"
-              (click)="setQuery(history.value)"
+              [disabled]="!form.history().value()"
+              (click)="setQuery(form.history().value())"
             >
               <mat-icon>check_circle</mat-icon>
             </button>
@@ -79,7 +80,7 @@
           <div>
             <mat-form-field>
               <mat-label>part/fr.</mat-label>
-              <mat-select [formControl]="partDef">
+              <mat-select [formField]="form.partDef">
                 @for (def of partDefs(); track def) {
                   <mat-option
                     [value]="def.typeId"
@@ -208,6 +209,6 @@
           </p>
         </div>
       </mat-expansion-panel>
-    </form>
+    </div>
   </mat-card-content>
 </mat-card>

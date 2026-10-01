@@ -1,4 +1,4 @@
-<form [formGroup]="form" (submit)="save()">
+<div>
   <div id="row">
     <!-- S -->
     <fieldset id="s">
@@ -7,7 +7,7 @@
       <cadmus-refs-lookup
         [service]="lookupService"
         [required]="true"
-        [item]="subjectNode.value"
+        [item]="form.subjectNode().value()"
         label="subject"
         (itemChange)="onSubjectChange($event)"
       />
@@ -19,7 +19,7 @@
       <cadmus-refs-lookup
         [service]="lookupService"
         [required]="true"
-        [item]="predicateNode.value"
+        [item]="form.predicateNode().value()"
         label="predicate"
         [baseFilter]="{ tag: 'property' }"
         (itemChange)="onPredicateChange($event)"
@@ -28,40 +28,40 @@
     <!-- O -->
     <fieldset id="o">
       <legend>object</legend>
-      <mat-checkbox [formControl]="isLiteral">literal</mat-checkbox>
+      <mat-checkbox [formField]="form.isLiteral">literal</mat-checkbox>
       <!-- object -->
-      @if (!isLiteral.value) {
+      @if (!form.isLiteral().value()) {
       <cadmus-refs-lookup
         [required]="true"
         [service]="lookupService"
-        [item]="objectNode.value"
+        [item]="form.objectNode().value()"
         label="object"
         (itemChange)="onObjectChange($event)"
       />
       }
       <!-- literal value -->
-      @if (isLiteral.value) {
+      @if (form.isLiteral().value()) {
       <mat-form-field style="width: 100%">
         <mat-label>object</mat-label>
-        <textarea matInput [formControl]="literal"></textarea>
-        @if ( $any(literal).errors?.required && (literal.dirty ||
-        literal.touched) ) {
+        <textarea matInput [formField]="form.literal"></textarea>
+        @if (form.literal().getError('required') && (form.literal().dirty() ||
+        form.literal().touched())) {
         <mat-error>literal required</mat-error>
-        } @if ( $any(literal).errors?.maxlength && (literal.dirty ||
-        literal.touched) ) {
+        } @if (form.literal().getError('maxLength') &&
+        (form.literal().dirty() || form.literal().touched())) {
         <mat-error>literal too long</mat-error>
         }
       </mat-form-field>
       }
       <div class="form-row">
         <!-- literal language -->
-        @if (isLiteral.value) {
+        @if (form.isLiteral().value()) {
         <mat-form-field>
           <mat-label>language</mat-label>
-          <input matInput [formControl]="literalLang" />
+          <input matInput [formField]="form.literalLang" />
           <mat-hint>ISO-639 etc.</mat-hint>
-          @if ( $any(literalLang).errors?.maxlength && (literalLang.dirty ||
-          literalLang.touched) ) {
+          @if (form.literalLang().getError('maxLength') &&
+          (form.literalLang().dirty() || form.literalLang().touched())) {
           <mat-error>language too long</mat-error>
           }
         </mat-form-field>
@@ -69,10 +69,10 @@
         <!-- literal type -->
         <mat-form-field>
           <mat-label>type</mat-label>
-          <input matInput [formControl]="literalType" />
+          <input matInput [formField]="form.literalType" />
           <mat-hint>XML data type (xs:...)</mat-hint>
-          @if ( $any(literalType).errors?.maxlength && (literalType.dirty ||
-          literalType.touched) ) {
+          @if (form.literalType().getError('maxLength') &&
+          (form.literalType().dirty() || form.literalType().touched())) {
           <mat-error>type too long</mat-error>
           }
         </mat-form-field>
@@ -86,8 +86,13 @@
     <button mat-icon-button type="button" (click)="cancel()">
       <mat-icon class="mat-warn">cancel</mat-icon>
     </button>
-    <button mat-icon-button type="submit" [disabled]="form.invalid">
+    <button
+      mat-icon-button
+      type="button"
+      [disabled]="form().invalid()"
+      (click)="save()"
+    >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

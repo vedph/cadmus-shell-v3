@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError, Subject } from 'rxjs';
 import { vi } from 'vitest';
@@ -147,7 +149,7 @@ describe('TextPreviewComponent', () => {
       );
       expect(component.item()?.id).toBe('item1');
       expect(component.layers()).toEqual([layer]);
-      expect(component.selectedLayer.value?.id).toBe('all');
+      expect(component.form.selectedLayer().value()?.id).toBe('all');
       // "all" resolves to every loaded layer's id
       expect(previewService.getTextSegments).toHaveBeenCalledWith('part1', [
         'layer1',
@@ -188,7 +190,7 @@ describe('TextPreviewComponent', () => {
       } as PartPreviewSource);
       fixture.detectChanges();
 
-      expect(component.selectedLayer.value?.id).toBe('layerB');
+      expect(component.form.selectedLayer().value()?.id).toBe('layerB');
       expect(previewService.getTextSegments).toHaveBeenCalledWith('part1', [
         'layerB',
       ]);
@@ -284,12 +286,45 @@ describe('TextPreviewComponent', () => {
       fixture.detectChanges();
       previewService.getTextSegments.mockClear();
 
-      component.selectedLayer.setValue(layerB as DecoratedLayerPartInfo);
+      component.form
+        .selectedLayer()
+        .value.set(layerB as DecoratedLayerPartInfo);
+      component.onLayerChange();
       fixture.detectChanges();
 
       expect(previewService.getTextSegments).toHaveBeenCalledWith('part1', [
         'layerB',
       ]);
+    });
+
+    it('should reload segments when the user picks a layer in the select', async () => {
+      const layerA = buildLayer({ id: 'layerA', roleId: 'role-a' });
+      const layerB = buildLayer({ id: 'layerB', roleId: 'role-b' });
+      itemService.getItemLayerInfo.mockReturnValue(of([layerA, layerB]));
+      fixture.componentRef.setInput('source', {
+        itemId: 'item1',
+        partId: 'part1',
+      } as PartPreviewSource);
+      fixture.detectChanges();
+      previewService.getTextSegments.mockClear();
+
+      const loader = TestbedHarnessEnvironment.loader(fixture);
+      const select = await loader.getHarness(MatSelectHarness);
+      await select.open();
+      const options = await select.getOptions();
+      // all, layerA, layerB
+      expect(options.length).toBe(3);
+      await options[2].click();
+
+      expect(component.form.selectedLayer().value()?.id).toBe('layerB');
+      expect(previewService.getTextSegments).toHaveBeenCalledTimes(1);
+      expect(previewService.getTextSegments).toHaveBeenCalledWith('part1', [
+        'layerB',
+      ]);
+    });
+
+    it('should not load segments before a source is set', () => {
+      expect(previewService.getTextSegments).not.toHaveBeenCalled();
     });
 
     it('should show a snackbar and reset busy when loading segments fails', () => {
@@ -378,6 +413,22 @@ describe('TextPreviewComponent', () => {
       expect(snackbar.open).toHaveBeenCalledWith(
         'Error previewing text part part1',
       );
+    });
+  });
+
+  describe('"all" layer option', () => {
+    it('is shown as selected when all the layers are selected', async () => {
+      itemService.getItemLayerInfo.mockReturnValue(of([buildLayer()]));
+      fixture.componentRef.setInput('source', {
+        itemId: 'item1',
+        partId: 'part1',
+      } as PartPreviewSource);
+      fixture.detectChanges();
+      expect(component.form.selectedLayer().value()?.id).toBe('all');
+
+      const loader = TestbedHarnessEnvironment.loader(fixture);
+      const select = await loader.getHarness(MatSelectHarness);
+      expect(await select.getValueText()).toBe('all');
     });
   });
 });

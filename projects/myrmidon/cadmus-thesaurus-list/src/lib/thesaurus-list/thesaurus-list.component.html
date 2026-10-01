@@ -77,24 +77,22 @@
           <div>
             <fieldset>
               <legend>add thesaurus</legend>
-              <form
-                [formGroup]="newThesaurusForm"
-                (submit)="addThesaurus()"
-                class="form-row"
-              >
+              <form [formRoot]="newThesaurusForm" class="form-row">
                 <!-- id -->
                 <mat-form-field>
                   <mat-label>ID</mat-label>
-                  <input matInput [formControl]="newThesaurusId" />
+                  <input matInput [formField]="newThesaurusForm.newThesaurusId" />
                   @if (
-                    $any(newThesaurusId).errors?.required &&
-                    (newThesaurusId.dirty || newThesaurusId.touched)
+                    newThesaurusForm.newThesaurusId().getError('required') &&
+                    (newThesaurusForm.newThesaurusId().dirty() ||
+                    newThesaurusForm.newThesaurusId().touched())
                   ) {
                     <mat-error>ID required</mat-error>
                   }
                   @if (
-                    $any(newThesaurusId).errors?.maxLength &&
-                    (newThesaurusId.dirty || newThesaurusId.touched)
+                    newThesaurusForm.newThesaurusId().getError('maxLength') &&
+                    (newThesaurusForm.newThesaurusId().dirty() ||
+                    newThesaurusForm.newThesaurusId().touched())
                   ) {
                     <mat-error>ID too long</mat-error>
                   }
@@ -102,14 +100,15 @@
                 <!-- target ID (for alias) -->
                 <mat-form-field>
                   <mat-label>target ID</mat-label>
-                  <input matInput [formControl]="newThesaurusTargetId" />
+                  <input matInput [formField]="newThesaurusForm.newThesaurusTargetId" />
                   @if (
-                    $any(newThesaurusTargetId).errors?.maxLength &&
-                    (newThesaurusTargetId.dirty || newThesaurusTargetId.touched)
+                    newThesaurusForm.newThesaurusTargetId().getError('maxLength') &&
+                    (newThesaurusForm.newThesaurusTargetId().dirty() ||
+                    newThesaurusForm.newThesaurusTargetId().touched())
                   ) {
                     <mat-error>ID too long</mat-error>
                   }
-                  @if (newThesaurusForm.errors?.["sameTargetId"]) {
+                  @if (newThesaurusForm.newThesaurusTargetId().getError("sameTargetId")) {
                     <mat-error>Target ID must differ from ID</mat-error>
                   }
                 </mat-form-field>
@@ -119,7 +118,7 @@
                   mat-flat-button
                   color="primary"
                   matTooltip="Add a new thesaurus (or alias if target ID is set)"
-                  [disabled]="newThesaurusForm.invalid || adding()"
+                  [disabled]="newThesaurusForm().invalid() || adding()"
                 >
                   add
                 </button>

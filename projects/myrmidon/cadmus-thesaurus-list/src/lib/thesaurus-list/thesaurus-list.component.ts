@@ -6,18 +6,18 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import {
+  FormField,
+  FormRoot,
+  form,
+  maxLength,
+  required,
+  validate,
+} from '@angular/forms/signals';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { AsyncPipe } from '@angular/common';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
 import {
   Observable,
   catchError,
@@ -71,7 +71,8 @@ import { ThesaurusImportComponent } from '../thesaurus-import/thesaurus-import.c
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
-    ReactiveFormsModule,
+    FormField,
+    FormRoot,
     MatButton,
     MatCard,
     MatCardHeader,
@@ -104,9 +105,34 @@ export class ThesaurusListComponent implements OnInit {
   public readonly importEnabled = signal<boolean>(false);
   public readonly adding = signal<boolean>(false);
 
-  public newThesaurusId: FormControl<string>;
-  public newThesaurusTargetId: FormControl<string | null>;
-  public newThesaurusForm: FormGroup;
+  /**
+   * The new thesaurus form. This is a submission root: submitting it (the
+   * add button, or Enter in its inputs) adds the thesaurus when valid.
+   */
+  public readonly newThesaurusForm = form(
+    signal({ newThesaurusId: '', newThesaurusTargetId: '' }),
+    (path) => {
+      required(path.newThesaurusId);
+      maxLength(path.newThesaurusId, 100);
+      maxLength(path.newThesaurusTargetId, 100);
+      // the target ID (when specified) must differ from the thesaurus ID
+      validate(path.newThesaurusTargetId, ({ value, valueOf }) => {
+        const id = valueOf(path.newThesaurusId).trim();
+        const targetId = value().trim();
+        return targetId && id && targetId === id
+          ? { kind: 'sameTargetId' }
+          : null;
+      });
+    },
+    {
+      submission: {
+        action: async () => {
+          this.addThesaurus();
+          return undefined;
+        },
+      },
+    },
+  );
 
   constructor(
     private _repository: ThesaurusListRepository,
@@ -125,37 +151,6 @@ export class ThesaurusListComponent implements OnInit {
         ? true
         : false,
     );
-
-    // create form with cross-field validator
-    this.newThesaurusId = new FormControl<string>('', {
-      validators: [Validators.required, Validators.maxLength(100)],
-      nonNullable: true,
-    });
-    this.newThesaurusTargetId = new FormControl<string | null>(null, {
-      validators: Validators.maxLength(100),
-    });
-    this.newThesaurusForm = new FormGroup(
-      {
-        newThesaurusId: this.newThesaurusId,
-        newThesaurusTargetId: this.newThesaurusTargetId,
-      },
-      { validators: this.validateTargetIdDifferent },
-    );
-  }
-
-  /**
-   * Cross-field validator: ensures that targetId (when specified)
-   * is different from the thesaurus ID.
-   */
-  private validateTargetIdDifferent(
-    group: AbstractControl,
-  ): ValidationErrors | null {
-    const id = group.get('newThesaurusId')?.value?.trim();
-    const targetId = group.get('newThesaurusTargetId')?.value?.trim();
-    if (targetId && id && targetId === id) {
-      return { sameTargetId: true };
-    }
-    return null;
   }
 
   ngOnInit(): void {
@@ -176,12 +171,13 @@ export class ThesaurusListComponent implements OnInit {
    * 2. If it's an alias, the target thesaurus must exist
    */
   public addThesaurus(): void {
-    if (this.newThesaurusForm.invalid) {
+    if (this.newThesaurusForm().invalid()) {
       return;
     }
 
-    const id = this.newThesaurusId.value.trim();
-    const targetId = this.newThesaurusTargetId.value?.trim() || undefined;
+    const id = this.newThesaurusForm.newThesaurusId().value().trim();
+    const targetId =
+      this.newThesaurusForm.newThesaurusTargetId().value().trim() || undefined;
 
     this.adding.set(true);
 

@@ -37,22 +37,22 @@ describe('SettingsImportComponent', () => {
 
   it('should create with default form values', () => {
     expect(component).toBeTruthy();
-    expect(component.dryRun.value).toBe(false);
+    expect(component.form.dryRun().value()).toBe(false);
   });
 
   describe('file validator', () => {
     it('should reject a file with a disallowed extension', () => {
-      component.file.setValue(makeFile('data.txt'));
-      expect(component.file.hasError('invalidExtension')).toBe(true);
+      component.form.file().value.set(makeFile('data.txt'));
+      expect(component.form.file().getError('invalidExtension')).toBeTruthy();
     });
 
     it('should accept an allowed extension', () => {
-      component.file.setValue(makeFile('data.json'));
-      expect(component.file.valid).toBe(true);
+      component.form.file().value.set(makeFile('data.json'));
+      expect(component.form.file().valid()).toBe(true);
     });
 
     it('should require a file', () => {
-      expect(component.file.hasError('required')).toBe(true);
+      expect(component.form.file().getError('required')).toBeTruthy();
     });
   });
 
@@ -61,13 +61,13 @@ describe('SettingsImportComponent', () => {
       const file = makeFile('data.json');
       const event = { target: { files: [file] } } as unknown as Event;
       component.onFileSelected(event);
-      expect(component.file.value).toBe(file);
+      expect(component.form.file().value()).toBe(file);
     });
 
     it('should do nothing when no file was selected', () => {
       const event = { target: { files: [] } } as unknown as Event;
       component.onFileSelected(event);
-      expect(component.file.value).toBeNull();
+      expect(component.form.file().value()).toBeNull();
     });
   });
 
@@ -78,8 +78,8 @@ describe('SettingsImportComponent', () => {
     });
 
     it('should emit uploadStart and call uploadFile with the built URL', () => {
-      component.file.setValue(makeFile('data.json'));
-      component.dryRun.setValue(true);
+      component.form.file().value.set(makeFile('data.json'));
+      component.form.dryRun().value.set(true);
       const startSpy = vi.fn();
       component.uploadStart.subscribe(startSpy);
 
@@ -88,24 +88,24 @@ describe('SettingsImportComponent', () => {
       expect(startSpy).toHaveBeenCalled();
       expect(component.uploading()).toBe(true);
       expect(uploadService.uploadFile).toHaveBeenCalledWith(
-        component.file.value,
+        component.form.file().value(),
         'http://api/settings/import?dryRun=true',
         { reportProgress: true }
       );
     });
 
     it('should omit the dryRun query param when unchecked', () => {
-      component.file.setValue(makeFile('data.json'));
+      component.form.file().value.set(makeFile('data.json'));
       component.upload();
       expect(uploadService.uploadFile).toHaveBeenCalledWith(
-        component.file.value,
+        component.form.file().value(),
         'http://api/settings/import',
         { reportProgress: true }
       );
     });
 
     it('should update progress on UploadProgress events', () => {
-      component.file.setValue(makeFile('data.json'));
+      component.form.file().value.set(makeFile('data.json'));
       component.upload();
 
       upload$.next({
@@ -118,7 +118,7 @@ describe('SettingsImportComponent', () => {
     });
 
     it('should set the result and emit uploadEnd(true) on a Response event', () => {
-      component.file.setValue(makeFile('data.json'));
+      component.form.file().value.set(makeFile('data.json'));
       const endSpy = vi.fn();
       component.uploadEnd.subscribe(endSpy);
       component.upload();
@@ -137,7 +137,7 @@ describe('SettingsImportComponent', () => {
     // (next-only) observer form, so a failed request left uploading() stuck
     // true forever with no error feedback; see SettingsImportComponent.upload().
     it('should reset state and emit uploadEnd(false) on error', () => {
-      component.file.setValue(makeFile('data.json'));
+      component.form.file().value.set(makeFile('data.json'));
       const endSpy = vi.fn();
       component.uploadEnd.subscribe(endSpy);
       component.upload();
@@ -152,7 +152,7 @@ describe('SettingsImportComponent', () => {
 
   describe('onCancel', () => {
     it('should unsubscribe, reset state and emit uploadEnd(false)', () => {
-      component.file.setValue(makeFile('data.json'));
+      component.form.file().value.set(makeFile('data.json'));
       component.upload();
       const endSpy = vi.fn();
       component.uploadEnd.subscribe(endSpy);
@@ -166,6 +166,29 @@ describe('SettingsImportComponent', () => {
       // further progress events must be ignored since we unsubscribed
       upload$.next({ type: HttpEventType.UploadProgress, loaded: 1, total: 2 });
       expect(component.uploadProgress()).toBe(0);
+    });
+  });
+
+  describe('template', () => {
+    it('renders no <form>; upload is a type=button click, enabled once valid', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const button: HTMLButtonElement = Array.from<HTMLButtonElement>(
+        fixture.nativeElement.querySelectorAll('button')
+      ).find((b) => b.textContent?.includes('upload'))!;
+      expect(button.type).toBe('button');
+      expect(button.disabled).toBe(true);
+      expect(fixture.nativeElement.textContent).toContain('file required');
+
+      component.form.file().value.set(makeFile('data.txt'));
+      fixture.detectChanges();
+      expect(button.disabled).toBe(true);
+      expect(fixture.nativeElement.textContent).toContain('invalid file type');
+
+      component.form.file().value.set(makeFile('data.json'));
+      fixture.detectChanges();
+      expect(button.disabled).toBe(false);
+      button.click();
+      expect(uploadService.uploadFile).toHaveBeenCalled();
     });
   });
 });

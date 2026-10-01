@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { GraphService, NodeSourceType, UriNode, UriTriple } from '@myrmidon/cadmus-api';
@@ -57,16 +57,16 @@ describe('GraphTripleEditorComponent', () => {
   describe('initial form state', () => {
     it('should default to a new literal triple with an invalid form', () => {
       expect(component.isNew()).toBe(true);
-      expect(component.isLiteral.value).toBe(true);
-      expect(component.subjectNode.value).toBeNull();
-      expect(component.predicateNode.value).toBeNull();
+      expect(component.form.isLiteral().value()).toBe(true);
+      expect(component.form.subjectNode().value()).toBeNull();
+      expect(component.form.predicateNode().value()).toBeNull();
       // subject, predicate and literal (required by default) are all unset
-      expect(component.form.invalid).toBe(true);
+      expect(component.form().invalid()).toBe(true);
     });
 
     it('should not require objectNode while isLiteral is true', () => {
-      // isLiteral true => conditionalValidator predicate is false => valid
-      expect(component.objectNode.valid).toBe(true);
+      // isLiteral true => the objectNode required rule does not apply
+      expect(component.form.objectNode().valid()).toBe(true);
     });
   });
 
@@ -93,10 +93,10 @@ describe('GraphTripleEditorComponent', () => {
       await flush();
       fixture.detectChanges();
 
-      expect(component.subjectNode.value).toEqual(subject);
-      expect(component.predicateNode.value).toEqual(predicate);
-      expect(component.isLiteral.value).toBe(true);
-      expect(component.literal.value).toBe('hello');
+      expect(component.form.subjectNode().value()).toEqual(subject);
+      expect(component.form.predicateNode().value()).toEqual(predicate);
+      expect(component.form.isLiteral().value()).toBe(true);
+      expect(component.form.literal().value()).toBe('hello');
       expect(component.isNew()).toBe(false);
     });
 
@@ -118,8 +118,8 @@ describe('GraphTripleEditorComponent', () => {
       await flush();
       fixture.detectChanges();
 
-      expect(component.isLiteral.value).toBe(false);
-      expect(component.objectNode.value).toEqual(obj);
+      expect(component.form.isLiteral().value()).toBe(false);
+      expect(component.form.objectNode().value()).toEqual(obj);
     });
 
     it('should reset the form and mark as new when the triple input becomes undefined', () => {
@@ -134,14 +134,14 @@ describe('GraphTripleEditorComponent', () => {
         objectLiteral: 'x',
       } as UriTriple);
       fixture.detectChanges();
-      component.subjectNode.setValue(makeNode(1));
+      component.form.subjectNode().value.set(makeNode(1));
 
       fixture.componentRef.setInput('triple', undefined);
       fixture.detectChanges();
 
       expect(component.isNew()).toBe(true);
-      expect(component.isLiteral.value).toBe(true);
-      expect(component.subjectNode.value).toBeNull();
+      expect(component.form.isLiteral().value()).toBe(true);
+      expect(component.form.subjectNode().value()).toBeNull();
     });
   });
 
@@ -149,57 +149,53 @@ describe('GraphTripleEditorComponent', () => {
     it('onSubjectChange should set and dirty subjectNode', () => {
       const node = makeNode(1);
       component.onSubjectChange(node);
-      expect(component.subjectNode.value).toEqual(node);
-      expect(component.subjectNode.dirty).toBe(true);
+      expect(component.form.subjectNode().value()).toEqual(node);
+      expect(component.form.subjectNode().dirty()).toBe(true);
     });
 
     it('onSubjectChange with no node should clear subjectNode', () => {
       component.onSubjectChange(makeNode(1));
       component.onSubjectChange(undefined);
-      expect(component.subjectNode.value).toBeNull();
+      expect(component.form.subjectNode().value()).toBeNull();
     });
 
     it('onPredicateChange should set and dirty predicateNode', () => {
       const node = makeNode(2);
       component.onPredicateChange(node);
-      expect(component.predicateNode.value).toEqual(node);
-      expect(component.predicateNode.dirty).toBe(true);
+      expect(component.form.predicateNode().value()).toEqual(node);
+      expect(component.form.predicateNode().dirty()).toBe(true);
     });
 
     it('onObjectChange should set objectNode and switch off literal mode', () => {
       const node = makeNode(3);
       component.onObjectChange(node);
-      expect(component.objectNode.value).toEqual(node);
-      expect(component.isLiteral.value).toBe(false);
-      expect(component.isLiteral.dirty).toBe(true);
+      expect(component.form.objectNode().value()).toEqual(node);
+      expect(component.form.isLiteral().value()).toBe(false);
+      expect(component.form.isLiteral().dirty()).toBe(true);
     });
 
     it('onObjectChange with no node should clear objectNode without touching isLiteral', () => {
-      component.isLiteral.setValue(false);
+      component.form.isLiteral().value.set(false);
       component.onObjectChange(undefined);
-      expect(component.objectNode.value).toBeNull();
-      expect(component.isLiteral.value).toBe(false);
+      expect(component.form.objectNode().value()).toBeNull();
+      expect(component.form.isLiteral().value()).toBe(false);
     });
   });
 
-  describe('isLiteral toggling (ngOnInit subscription)', () => {
+  describe('isLiteral toggling (conditional validators)', () => {
     it('should require objectNode and drop literal validators when switched to non-literal', () => {
-      component.isLiteral.setValue(false);
-      component.objectNode.updateValueAndValidity();
-      component.literal.updateValueAndValidity();
+      component.form.isLiteral().value.set(false);
 
-      expect(component.objectNode.hasError('required')).toBe(true);
-      expect(component.literal.valid).toBe(true);
+      expect(component.form.objectNode().getError('required')).toBeTruthy();
+      expect(component.form.literal().valid()).toBe(true);
     });
 
     it('should require literal and drop objectNode validators when switched back to literal', () => {
-      component.isLiteral.setValue(false);
-      component.isLiteral.setValue(true);
-      component.objectNode.updateValueAndValidity();
-      component.literal.updateValueAndValidity();
+      component.form.isLiteral().value.set(false);
+      component.form.isLiteral().value.set(true);
 
-      expect(component.objectNode.valid).toBe(true);
-      expect(component.literal.hasError('required')).toBe(true);
+      expect(component.form.objectNode().valid()).toBe(true);
+      expect(component.form.literal().getError('required')).toBeTruthy();
     });
   });
 
@@ -211,9 +207,9 @@ describe('GraphTripleEditorComponent', () => {
     });
 
     it('should build and set the triple from form values when literal', () => {
-      component.subjectNode.setValue(makeNode(1));
-      component.predicateNode.setValue(makeNode(2));
-      component.literal.setValue('some text');
+      component.form.subjectNode().value.set(makeNode(1));
+      component.form.predicateNode().value.set(makeNode(2));
+      component.form.literal().value.set('some text');
 
       component.save();
 
@@ -227,10 +223,10 @@ describe('GraphTripleEditorComponent', () => {
     });
 
     it('should build and set the triple from form values when not literal', () => {
-      component.subjectNode.setValue(makeNode(1));
-      component.predicateNode.setValue(makeNode(2));
-      component.isLiteral.setValue(false);
-      component.objectNode.setValue(makeNode(3));
+      component.form.subjectNode().value.set(makeNode(1));
+      component.form.predicateNode().value.set(makeNode(2));
+      component.form.isLiteral().value.set(false);
+      component.form.objectNode().value.set(makeNode(3));
 
       component.save();
 
@@ -250,18 +246,138 @@ describe('GraphTripleEditorComponent', () => {
     });
   });
 
-  describe('literal maxlength validation', () => {
-    it('should flag a "maxlength" error (not "maxLength") when literal exceeds 15000 chars', () => {
-      // Validators.maxLength sets the lowercase 'maxlength' error key; the
-      // template used to check the (non-existent) 'maxLength' key, so the
-      // error message never showed up. Verified here at the control level,
-      // and fixed in graph-triple-editor.component.html.
-      component.literal.setValue('a'.repeat(15001));
-      component.literal.markAsDirty();
+  describe('literal maxLength validation', () => {
+    it('should flag a "maxLength" error when literal exceeds 15000 chars', () => {
+      component.form.literal().value.set('a'.repeat(15001));
+      component.form.literal().markAsDirty();
+      fixture.detectChanges();
+      expect(component.form.literal().getError('maxLength')).toBeTruthy();
+
+      // Material shows mat-error only once its control's errorState is
+      // true, which (default ErrorStateMatcher) requires touched
+      component.form.literal().markAsTouched();
+      fixture.detectChanges();
+      expect(
+        fixture.nativeElement.querySelector('mat-error')?.textContent
+      ).toContain('literal too long');
+    });
+
+    it('should not flag a too long literal while not in literal mode', () => {
+      component.form.literal().value.set('a'.repeat(15001));
+      component.form.isLiteral().value.set(false);
+      expect(component.form.literal().valid()).toBe(true);
+    });
+  });
+
+  describe('template and draft sync', () => {
+    function flushAll(): Promise<void> {
+      fixture.detectChanges();
+      return flush().then(() => {
+        fixture.detectChanges();
+      });
+    }
+
+    it('renders no <form> element, and saves via a type=button click', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      component.form.subjectNode().value.set(makeNode(1));
+      component.form.predicateNode().value.set(makeNode(2));
+      component.form.literal().value.set('lit');
       fixture.detectChanges();
 
-      expect(component.literal.hasError('maxlength')).toBe(true);
-      expect(component.literal.hasError('maxLength' as any)).toBe(false);
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button')
+      );
+      const save = buttons[buttons.length - 1];
+      expect(save.type).toBe('button');
+      expect(save.disabled).toBe(false);
+      save.click();
+
+      expect(component.triple()?.objectLiteral).toBe('lit');
+    });
+
+    it('does not reload nodes nor reset the draft on the echo of its own save', async () => {
+      graphService.getNode.mockImplementation((id: number) => of(makeNode(id)));
+      fixture.componentRef.setInput('triple', {
+        id: 9,
+        subjectId: 1,
+        predicateId: 2,
+        objectLiteral: 'old',
+        subjectUri: 'x:node1',
+        predicateUri: 'x:node2',
+      } as UriTriple);
+      await flushAll();
+      expect(graphService.getNode).toHaveBeenCalledTimes(2);
+      expect(component.form.subjectNode().value()?.id).toBe(1);
+
+      component.form.literal().value.set('new');
+      component.save();
+      await flushAll();
+
+      expect(component.triple()?.objectLiteral).toBe('new');
+      expect(component.triple()?.id).toBe(9);
+      expect(graphService.getNode).toHaveBeenCalledTimes(2);
+      expect(component.form.subjectNode().value()?.id).toBe(1);
+      expect(component.form.literal().value()).toBe('new');
+    });
+
+    it('rebuilds the draft and reloads nodes when another triple is bound', async () => {
+      graphService.getNode.mockImplementation((id: number) => of(makeNode(id)));
+      fixture.componentRef.setInput('triple', {
+        id: 9,
+        subjectId: 1,
+        predicateId: 2,
+        objectLiteral: 'old',
+        subjectUri: 'x:node1',
+        predicateUri: 'x:node2',
+      } as UriTriple);
+      await flushAll();
+      component.form.literal().value.set('edited');
+      component.form.literal().markAsDirty();
+
+      fixture.componentRef.setInput('triple', {
+        id: 10,
+        subjectId: 3,
+        predicateId: 2,
+        objectLiteral: 'other',
+        subjectUri: 'x:node3',
+        predicateUri: 'x:node2',
+      } as UriTriple);
+      await flushAll();
+
+      expect(component.form.literal().value()).toBe('other');
+      expect(component.form.subjectNode().value()?.id).toBe(3);
+      expect(graphService.getNode).toHaveBeenCalledTimes(4);
+      expect(component.form.literal().dirty()).toBe(false);
+    });
+  });
+
+  describe('stale node responses', () => {
+    it('ignores a node loaded for a triple no longer bound', async () => {
+      const late = new Subject<UriNode>();
+      graphService.getNode.mockImplementation((id: number) =>
+        id === 1 ? late : of(makeNode(id))
+      );
+      fixture.componentRef.setInput('triple', {
+        id: 1, subjectId: 1, predicateId: 2, objectLiteral: 'a',
+        subjectUri: 'x:node1', predicateUri: 'x:node2',
+      } as UriTriple);
+      fixture.detectChanges();
+      await flush();
+
+      fixture.componentRef.setInput('triple', {
+        id: 2, subjectId: 3, predicateId: 2, objectLiteral: 'b',
+        subjectUri: 'x:node3', predicateUri: 'x:node2',
+      } as UriTriple);
+      fixture.detectChanges();
+      await flush();
+      expect(component.form.subjectNode().value()?.id).toBe(3);
+
+      // the response for the first triple arrives late
+      late.next(makeNode(1));
+      late.complete();
+      await flush();
+
+      expect(component.form.subjectNode().value()?.id).toBe(3);
     });
   });
 });

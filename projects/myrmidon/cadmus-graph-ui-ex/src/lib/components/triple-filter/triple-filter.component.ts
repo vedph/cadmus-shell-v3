@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, effect, input, model } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  linkedSignal,
+  model,
+  untracked,
+} from '@angular/core';
+import { FormField, form, maxLength } from '@angular/forms/signals';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { forkJoin, from } from 'rxjs';
 
@@ -26,6 +28,99 @@ import { GraphService, UriNode } from '@myrmidon/cadmus-api';
 import { PagedTripleFilter } from '../../graph-walker';
 
 /**
+ * The editable shape behind the filter form. Text fields use '' as their
+ * empty value, as they are bound to native inputs; nodes are picked via
+ * lookups.
+ */
+interface TripleFilterControls {
+  pageNumber: number;
+  pageSize: number;
+  litPattern: string;
+  litType: string;
+  litLanguage: string;
+  minLitNumber: number | null;
+  maxLitNumber: number | null;
+
+  subj: UriNode | null;
+  /** UI toggle: true to add picked predicates to notPreds. */
+  isNotPred: boolean;
+  preds: UriNode[];
+  notPreds: UriNode[];
+  hasLiteralObj: boolean | null;
+  obj: UriNode | null;
+  sid: string;
+  isSidPrefix: boolean;
+  tag: string;
+}
+
+/**
+ * Bound filter -> draft. Nodes are not part of the filter (only their IDs
+ * are), so they start empty and get loaded afterwards.
+ */
+function toDraft(
+  filter: PagedTripleFilter,
+  isNotPred = false
+): TripleFilterControls {
+  return {
+    pageNumber: filter.pageNumber,
+    pageSize: filter.pageSize,
+    litPattern: filter.literalPattern || '',
+    litType: filter.literalType || '',
+    litLanguage: filter.literalLanguage || '',
+    minLitNumber: filter.minLiteralNumber ?? null,
+    maxLitNumber: filter.maxLiteralNumber ?? null,
+
+    subj: null,
+    isNotPred,
+    preds: [],
+    notPreds: [],
+    hasLiteralObj: filter.hasLiteralObject ?? null,
+    obj: null,
+    sid: filter.sid || '',
+    isSidPrefix: filter.isSidPrefix || false,
+    tag: filter.tag || '',
+  };
+}
+
+function toFilter(v: TripleFilterControls): PagedTripleFilter {
+  return {
+    pageNumber: +v.pageNumber,
+    pageSize: +v.pageSize,
+    literalPattern: v.litPattern || undefined,
+    literalType: v.litType || undefined,
+    literalLanguage: v.litLanguage || undefined,
+    minLiteralNumber: v.minLitNumber ?? undefined,
+    maxLiteralNumber: v.maxLitNumber ?? undefined,
+
+    subjectId: v.subj?.id || undefined,
+    predicateIds: v.preds.length ? v.preds.map((n) => n.id) : undefined,
+    notPredicateIds: v.notPreds.length
+      ? v.notPreds.map((n) => n.id)
+      : undefined,
+    hasLiteralObject: v.hasLiteralObj !== null ? v.hasLiteralObj : undefined,
+    objectId: v.obj?.id || undefined,
+    sid: v.sid || undefined,
+    isSidPrefix: v.isSidPrefix,
+    tag: v.tag || undefined,
+  };
+}
+
+function isSameFilter(
+  filter: PagedTripleFilter,
+  v: TripleFilterControls
+): boolean {
+  return JSON.stringify(filter) === JSON.stringify(toFilter(v));
+}
+
+/**
+ * Fresh copies of the non-null nodes, so that the draft never adopts
+ * objects owned by a service or a lookup.
+ */
+function copyNodes(nodes: (UriNode | null | undefined)[]): UriNode[] {
+  return nodes.filter((n) => n).map((n) => ({ ...n! }));
+}
+
+/**
  * Triples filter.
  */
 @Component({
@@ -33,8 +128,7 @@ import { PagedTripleFilter } from '../../graph-walker';
   templateUrl: './triple-filter.component.html',
   styleUrls: ['./triple-filter.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatPaginator,
     MatTabGroup,
     MatTab,
@@ -75,152 +169,99 @@ export class TripleFilterComponent {
     pageSize: 10,
   });
 
-  public pageNumber: FormControl<number>;
-  public pageSize: FormControl<number>;
-  public litPattern: FormControl<string | null>;
-  public litType: FormControl<string | null>;
-  public litLanguage: FormControl<string | null>;
-  public minLitNumber: FormControl<number | null>;
-  public maxLitNumber: FormControl<number | null>;
+  /**
+   * The editable draft, derived from filter. On the echo of our own apply
+   * the live draft is kept (with its already loaded nodes). The isNotPred
+   * UI toggle is not part of the filter, so it survives a rebuild.
+   */
+  private readonly _draft = linkedSignal<PagedTripleFilter, TripleFilterControls>(
+    {
+      source: () => this.filter(),
+      computation: (filter, previous) =>
+        previous && isSameFilter(filter, previous.value)
+          ? previous.value
+          : toDraft(filter, previous?.value.isNotPred),
+    }
+  );
 
-  public subj: FormControl<UriNode | null>;
-  public isNotPred: FormControl<boolean>;
-  public preds: FormControl<UriNode[]>;
-  public notPreds: FormControl<UriNode[]>;
-  public hasLiteralObj: FormControl<boolean | null>;
-  public obj: FormControl<UriNode | null>;
-  public sid: FormControl<string | null>;
-  public isSidPrefix: FormControl<boolean>;
-  public tag: FormControl<string | null>;
-
-  public form: FormGroup;
+  public readonly form = form(this._draft, (path) => {
+    // [formField] renders these as the inputs' maxlength attributes
+    maxLength(path.sid, 500);
+    maxLength(path.tag, 50);
+  });
 
   constructor(
-    formBuilder: FormBuilder,
     public lookupService: GraphNodeLookupService,
     private _graphService: GraphService
   ) {
-    // form
-    this.pageNumber = formBuilder.control(1, { nonNullable: true });
-    this.pageSize = formBuilder.control(10, { nonNullable: true });
-    this.litPattern = formBuilder.control(null);
-    this.litType = formBuilder.control(null);
-    this.litLanguage = formBuilder.control(null);
-    this.minLitNumber = formBuilder.control(null);
-    this.maxLitNumber = formBuilder.control(null);
-
-    this.subj = formBuilder.control(null);
-    this.preds = formBuilder.control([], { nonNullable: true });
-    this.isNotPred = formBuilder.control(false, { nonNullable: true });
-    this.notPreds = formBuilder.control([], { nonNullable: true });
-    this.hasLiteralObj = formBuilder.control(null);
-    this.obj = formBuilder.control(null);
-    this.sid = formBuilder.control(null);
-    this.isSidPrefix = formBuilder.control(false, { nonNullable: true });
-    this.tag = formBuilder.control(null);
-
-    this.form = formBuilder.group({
-      pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      litPattern: this.litPattern,
-      litType: this.litType,
-      litLanguage: this.litLanguage,
-      minLitNumber: this.minLitNumber,
-      maxLitNumber: this.maxLitNumber,
-
-      subj: this.subj,
-      preds: this.preds,
-      isNotPred: this.isNotPred,
-      notPreds: this.notPreds,
-      hasLiteralObj: this.hasLiteralObj,
-      obj: this.obj,
-      sid: this.sid,
-      isSidPrefix: this.isSidPrefix,
-      tag: this.tag,
-    });
-
+    // a new filter was bound: clear interaction state and load its nodes.
+    // Nothing to do on the echo of our own apply, as the draft already has
+    // those nodes.
     effect(() => {
-      this.updateForm(this.filter());
+      const filter = this.filter();
+      untracked(() => {
+        if (!isSameFilter(filter, this._draft())) {
+          this.form().reset();
+          this.loadNodes(filter);
+        }
+      });
     });
   }
 
-  private updateForm(filter: PagedTripleFilter): void {
-    this.pageNumber.setValue(filter.pageNumber);
-    this.pageSize.setValue(filter.pageSize);
-    this.litPattern.setValue(filter.literalPattern || null);
-    this.litType.setValue(filter.literalType || null);
-    this.litLanguage.setValue(filter.literalLanguage || null);
-    this.minLitNumber.setValue(filter.minLiteralNumber || null);
-    this.maxLitNumber.setValue(filter.maxLiteralNumber || null);
-
-    this.hasLiteralObj.setValue(filter.hasLiteralObject || null);
-    this.sid.setValue(filter.sid || null);
-    this.isSidPrefix.setValue(filter.isSidPrefix || false);
-    this.tag.setValue(filter.tag || null);
-
-    // load the referenced nodes so we can show them by label
+  /**
+   * Load the referenced nodes so we can show them by label.
+   */
+  private loadNodes(filter: PagedTripleFilter): void {
     forkJoin({
       s: filter.subjectId
         ? this._graphService.getNode(filter.subjectId)
         : from([null]),
       // from([]) emits no value at all, which would make forkJoin never
-      // emit (and so never update subj/obj/preds nor mark the form
-      // pristine) even when subjectId/objectId ARE set; from([[]]) emits
-      // a single empty array, matching the from([null]) placeholder used
-      // by the s/o branches above.
+      // emit (and so never update subj/obj/preds) even when
+      // subjectId/objectId ARE set; from([[]]) emits a single empty array,
+      // matching the from([null]) placeholder used by the s/o branches.
       p: filter.predicateIds?.length
         ? this._graphService.getNodeSet(filter.predicateIds)
+        : from([[]]),
+      np: filter.notPredicateIds?.length
+        ? this._graphService.getNodeSet(filter.notPredicateIds)
         : from([[]]),
       o: filter.objectId
         ? this._graphService.getNode(filter.objectId)
         : from([null]),
     }).subscribe((result) => {
-      this.subj.setValue(result.s);
-      this.preds.setValue(result.p.filter((n) => n) as UriNode[]);
-      this.obj.setValue(result.o);
-      this.form.markAsPristine();
+      // ignore a late response for a filter no longer bound
+      const ids = (f: PagedTripleFilter) =>
+        JSON.stringify([
+          f.subjectId,
+          f.predicateIds,
+          f.notPredicateIds,
+          f.objectId,
+        ]);
+      if (ids(this.filter()) !== ids(filter)) {
+        return;
+      }
+      this._draft.update((v) => ({
+        ...v,
+        subj: result.s ? { ...result.s } : null,
+        preds: copyNodes(result.p),
+        notPreds: copyNodes(result.np),
+        obj: result.o ? { ...result.o } : null,
+      }));
     });
   }
 
-  private getFilter(): PagedTripleFilter {
-    return {
-      pageNumber: +this.pageNumber.value,
-      pageSize: +this.pageSize.value,
-      literalPattern: this.litPattern.value || undefined,
-      literalType: this.litType.value || undefined,
-      literalLanguage: this.litLanguage.value || undefined,
-      minLiteralNumber: this.minLitNumber.value || undefined,
-      maxLiteralNumber: this.maxLitNumber.value || undefined,
-
-      subjectId: this.subj.value?.id || undefined,
-      predicateIds: this.preds.value?.length
-        ? this.preds.value.map((n) => n.id)
-        : undefined,
-      notPredicateIds: this.notPreds.value?.length
-        ? this.notPreds.value.map((n) => n.id)
-        : undefined,
-      hasLiteralObject:
-        this.hasLiteralObj.value !== null
-          ? this.hasLiteralObj.value
-          : undefined,
-      objectId: this.obj.value?.id || undefined,
-      sid: this.sid.value || undefined,
-      isSidPrefix: this.isSidPrefix.value,
-      tag: this.tag.value || undefined,
-    };
-  }
-
   public onPageChange(page: PageEvent): void {
-    this.pageNumber.setValue(page.pageIndex + 1);
-    this.filter.set(this.getFilter());
+    this.form.pageNumber().value.set(page.pageIndex + 1);
+    this.filter.set(toFilter(this._draft()));
   }
 
   public onSubjectNodeChange(node: unknown): void {
-    this.subj.setValue(node as UriNode);
+    this.form.subj().value.set(node ? { ...(node as UriNode) } : null);
   }
 
   public onObjectNodeChange(node: unknown): void {
-    this.obj.setValue(node as UriNode);
+    this.form.obj().value.set(node ? { ...(node as UriNode) } : null);
   }
 
   public onPredicateNodeChange(node: unknown): void {
@@ -228,55 +269,36 @@ export class TripleFilterComponent {
       return;
     }
     const un = node as UriNode;
-    if (this.isNotPred.value) {
-      const nodes = [...this.notPreds.value];
-      if (nodes.some((n) => n.id === un.id)) {
-        return;
-      }
-      nodes.push(un);
-      this.notPreds.setValue(nodes);
-      this.notPreds.updateValueAndValidity();
-      this.notPreds.markAsDirty();
-    } else {
-      const nodes = [...this.preds.value];
-      if (nodes.some((n) => n.id === un.id)) {
-        return;
-      }
-      nodes.push(un);
-      this.preds.setValue(nodes);
-      this.preds.updateValueAndValidity();
-      this.preds.markAsDirty();
+    const field = this.form.isNotPred().value()
+      ? this.form.notPreds
+      : this.form.preds;
+    const nodes = field().value();
+    if (nodes.some((n) => n.id === un.id)) {
+      return;
     }
+    field().value.set([...nodes, { ...un }]);
+    field().markAsDirty();
   }
 
   public deleteNotPred(node: UriNode): void {
-    const nodes = [...this.notPreds.value];
-    const i = nodes.indexOf(node);
-    nodes.splice(i, 1);
-    this.notPreds.setValue(nodes);
-    this.notPreds.updateValueAndValidity();
-    this.notPreds.markAsDirty();
+    this.form
+      .notPreds()
+      .value.update((nodes) => nodes.filter((n) => n !== node));
+    this.form.notPreds().markAsDirty();
   }
 
   public deletePred(node: UriNode): void {
-    const nodes = [...this.preds.value];
-    const i = nodes.indexOf(node);
-    nodes.splice(i, 1);
-    this.preds.setValue(nodes);
-    this.preds.updateValueAndValidity();
-    this.preds.markAsDirty();
+    this.form.preds().value.update((nodes) => nodes.filter((n) => n !== node));
+    this.form.preds().markAsDirty();
   }
 
   public reset(): void {
-    this.form.reset();
-    this.filter.set(this.getFilter());
+    this._draft.set(toDraft({ pageNumber: 1, pageSize: 10 }));
+    this.filter.set(toFilter(this._draft()));
   }
 
   public apply(): void {
-    if (this.form.invalid) {
-      return;
-    }
-    this.filter.set(this.getFilter());
-    this.form.markAsPristine();
+    this.filter.set(toFilter(this._draft()));
+    this.form().reset();
   }
 }

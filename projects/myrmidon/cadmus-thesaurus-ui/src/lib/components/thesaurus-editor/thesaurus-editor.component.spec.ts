@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 
 import { ThesaurusEditorComponent } from './thesaurus-editor.component';
 import { ThesaurusNodesService, ThesaurusNode } from '../../services/thesaurus-nodes.service';
@@ -34,7 +34,9 @@ describe('ThesaurusEditorComponent', () => {
     importEntries: ReturnType<typeof vi.fn>;
     getNodes: ReturnType<typeof vi.fn>;
     selectParentIds: ReturnType<typeof vi.fn>;
+    selectNodes: ReturnType<typeof vi.fn>;
   };
+  let nodes$: BehaviorSubject<ThesaurusNode[]>;
   let dialogService: { confirm: ReturnType<typeof vi.fn> };
   let repository: {
     loading$: Subject<any>;
@@ -46,6 +48,7 @@ describe('ThesaurusEditorComponent', () => {
   };
 
   beforeEach(async () => {
+    nodes$ = new BehaviorSubject<ThesaurusNode[]>([]);
     nodesService = {
       add: vi.fn(),
       toggleAll: vi.fn(),
@@ -55,6 +58,7 @@ describe('ThesaurusEditorComponent', () => {
       importEntries: vi.fn(),
       getNodes: vi.fn().mockReturnValue([]),
       selectParentIds: vi.fn().mockReturnValue(of([])),
+      selectNodes: vi.fn().mockReturnValue(nodes$),
     };
     dialogService = { confirm: vi.fn().mockReturnValue(of(true)) };
     repository = {
@@ -89,9 +93,8 @@ describe('ThesaurusEditorComponent', () => {
       fixture.componentRef.setInput('thesaurus', makeThesaurus());
       fixture.detectChanges();
 
-      expect(component.id.value).toBe('colors@en');
-      expect(component.entryCount.value).toBe(2);
-      expect(component.alias.value).toBe(false);
+      expect(component.form.id().value()).toBe('colors@en');
+      expect(component.form.alias().value()).toBe(false);
       expect(nodesService.importEntries).toHaveBeenCalledWith(
         [
           { id: 'r', value: 'red' },
@@ -121,8 +124,8 @@ describe('ThesaurusEditorComponent', () => {
       );
       fixture.detectChanges();
 
-      expect(component.alias.value).toBe(true);
-      expect(component.targetId.value).toBe('colors');
+      expect(component.form.alias().value()).toBe(true);
+      expect(component.form.targetId().value()).toBe('colors');
     });
 
     it('should reset the form when the thesaurus becomes undefined', () => {
@@ -131,32 +134,29 @@ describe('ThesaurusEditorComponent', () => {
       fixture.componentRef.setInput('thesaurus', undefined);
       fixture.detectChanges();
 
-      expect(component.id.value).toBeNull();
+      expect(component.form.id().value()).toBe('');
     });
   });
 
   describe('validators toggle with alias', () => {
-    it('should require targetId and not entryCount when alias is true', () => {
-      component.alias.setValue(true);
-      expect(component.targetId.hasError('required')).toBe(true);
-      expect(component.entryCount.hasError('min')).toBe(false);
+    it('should require targetId and not entries when alias is true', () => {
+      component.form.alias().value.set(true);
+      expect(component.form.targetId().getError('required')).toBeTruthy();
+      expect(component.form().getError('noEntries')).toBeFalsy();
     });
 
-    it('should require entryCount (min 1) and not targetId when alias is false', () => {
-      component.alias.setValue(true);
-      component.alias.setValue(false);
-      // regression: entryCount used to be validated with
-      // strictMinLengthValidator, which checks a `.length` property that a
-      // number never has, so this never actually fired for any value
-      expect(component.entryCount.hasError('min')).toBe(true);
-      expect(component.targetId.hasError('required')).toBe(false);
+    it('should require entries and not targetId when alias is false', () => {
+      component.form.alias().value.set(true);
+      component.form.alias().value.set(false);
+      expect(component.form().getError('noEntries')).toBeTruthy();
+      expect(component.form.targetId().getError('required')).toBeFalsy();
     });
   });
 
   describe('onTargetIdChange', () => {
     it('should set the targetId control', () => {
       component.onTargetIdChange('new-target');
-      expect(component.targetId.value).toBe('new-target');
+      expect(component.form.targetId().value()).toBe('new-target');
     });
   });
 
@@ -169,8 +169,8 @@ describe('ThesaurusEditorComponent', () => {
 
   describe('applyFilter', () => {
     it('should map empty filter values to undefined', () => {
-      component.idOrValue.setValue('');
-      component.parentId.setValue('');
+      component.filterForm.idOrValue().value.set('');
+      component.filterForm.parentId().value.set('');
       component.applyFilter();
       expect(repository.setFilter).toHaveBeenCalledWith({
         idOrValue: undefined,
@@ -179,8 +179,8 @@ describe('ThesaurusEditorComponent', () => {
     });
 
     it('should pass through non-empty filter values', () => {
-      component.idOrValue.setValue('red');
-      component.parentId.setValue('colors');
+      component.filterForm.idOrValue().value.set('red');
+      component.filterForm.parentId().value.set('colors');
       component.applyFilter();
       expect(repository.setFilter).toHaveBeenCalledWith({
         idOrValue: 'red',
@@ -317,9 +317,9 @@ describe('ThesaurusEditorComponent', () => {
     });
 
     it('should save a non-alias thesaurus built from the current nodes', () => {
-      component.id.setValue('colors@en');
-      component.alias.setValue(false);
-      component.entryCount.setValue(1);
+      component.form.id().value.set('colors@en');
+      component.form.alias().value.set(false);
+      nodes$.next([makeNode({ id: 'r', value: 'red' })]);
       nodesService.getNodes.mockReturnValue([
         { id: 'r', value: 'red', level: 1, ordinal: 1 },
       ]);
@@ -334,17 +334,97 @@ describe('ThesaurusEditorComponent', () => {
     });
 
     it('should save an alias thesaurus with a targetId and no entries', () => {
-      component.id.setValue('alias@en');
-      component.alias.setValue(true);
+      component.form.id().value.set('alias@en');
+      component.form.alias().value.set(true);
       // targetId is validated against THES_ID_PATTERN, same shape as a
       // thesaurus id (id@lang) - a bare id like 'colors' is invalid here
-      component.targetId.setValue('colors@en');
+      component.form.targetId().value.set('colors@en');
 
       component.save();
 
       const saved = component.thesaurus();
       expect(saved!.targetId).toBe('colors@en');
       expect(saved!.entries).toEqual([]);
+    });
+  });
+
+  describe('signal form', () => {
+    it('requires a valid target ID only for aliases, and entries otherwise', () => {
+      fixture.componentRef.setInput('thesaurus', makeThesaurus());
+      fixture.detectChanges();
+      component.form.alias().value.set(true);
+      expect(component.form.targetId().getError('required')).toBeTruthy();
+      expect(component.form().getError('noEntries')).toBeFalsy();
+
+      component.form.alias().value.set(false);
+      expect(component.form.targetId().valid()).toBe(true);
+      nodes$.next([]);
+      expect(component.form().getError('noEntries')).toBeTruthy();
+    });
+
+    it('renders no <form>, not even nested for the filters', () => {
+      fixture.componentRef.setInput('thesaurus', makeThesaurus());
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    });
+
+    it('applies the filter on Enter in its text box, and on click', () => {
+      fixture.componentRef.setInput('thesaurus', makeThesaurus());
+      fixture.detectChanges();
+      const input: HTMLInputElement = Array.from<HTMLInputElement>(
+        fixture.nativeElement.querySelectorAll('input[matinput]')
+      )[1];
+      input.value = 'x';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(repository.setFilter).toHaveBeenLastCalledWith({
+        idOrValue: 'x',
+        parentId: undefined,
+      });
+      expect(component.thesaurus()?.id).toBe(makeThesaurus().id);
+
+      repository.setFilter.mockClear();
+      const apply: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'button[mattooltip="Apply filters"]'
+      );
+      expect(apply.type).toBe('button');
+      apply.click();
+      expect(repository.setFilter).toHaveBeenCalled();
+    });
+
+    it('re-imports the entries also on the echo of its own save', () => {
+      fixture.componentRef.setInput('thesaurus', makeThesaurus());
+      fixture.detectChanges();
+      // as the real service does on import
+      nodes$.next([makeNode({ id: 'r', value: 'red' })]);
+      nodesService.importEntries.mockClear();
+      component.save();
+      fixture.detectChanges();
+      expect(nodesService.importEntries).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('entries of a new thesaurus', () => {
+    it('becomes valid once a node is added', () => {
+      fixture.componentRef.setInput('thesaurus', { id: 'new@en', entries: [] });
+      fixture.detectChanges();
+      expect(component.form().valid()).toBe(false);
+
+      nodes$.next([makeNode({ id: 'n1', value: 'one' })]);
+      fixture.detectChanges();
+
+      expect(component.form().valid()).toBe(true);
+    });
+
+    it('becomes invalid again when its last node is deleted', () => {
+      fixture.componentRef.setInput('thesaurus', makeThesaurus());
+      nodes$.next([makeNode({ id: 'n1', value: 'one' })]);
+      fixture.detectChanges();
+      expect(component.form().valid()).toBe(true);
+
+      nodes$.next([]);
+      fixture.detectChanges();
+      expect(component.form().valid()).toBe(false);
     });
   });
 });

@@ -55,17 +55,17 @@ describe('ItemQueryComponent', () => {
     expect(appRepository.load).toHaveBeenCalled();
   });
 
-  describe('updateForm (via the query input effect)', () => {
+  describe('draft (via the query input)', () => {
     it('should set the query control value from the input', () => {
       fixture.componentRef.setInput('query', 'find me');
       fixture.detectChanges();
-      expect(component.queryCtl.value).toBe('find me');
+      expect(component.form.queryCtl().value()).toBe('find me');
     });
 
-    it('should set the control to null when query is falsy', () => {
+    it('should set the query to empty when query is falsy', () => {
       fixture.componentRef.setInput('query', '');
       fixture.detectChanges();
-      expect(component.queryCtl.value).toBeNull();
+      expect(component.form.queryCtl().value()).toBe('');
     });
   });
 
@@ -113,7 +113,9 @@ describe('ItemQueryComponent', () => {
     it('should fetch pin definitions for the selected part def', async () => {
       const defs = [{ name: 'color', type: 0 }];
       itemService.getDataPinDefinitions.mockReturnValue(of(defs));
-      component.partDef.setValue('it.vedph.note');
+      component.form.partDef().value.set('it.vedph.note');
+      // toObservable emits from an effect, flushed by change detection
+      fixture.detectChanges();
 
       await new Promise((resolve) => setTimeout(resolve, 250));
 
@@ -127,14 +129,14 @@ describe('ItemQueryComponent', () => {
 
   describe('setQuery', () => {
     it('should do nothing for a falsy query', () => {
-      component.queryCtl.setValue('kept');
+      component.form.queryCtl().value.set('kept');
       component.setQuery(null);
-      expect(component.queryCtl.value).toBe('kept');
+      expect(component.form.queryCtl().value()).toBe('kept');
     });
 
     it('should set the query control value', () => {
       component.setQuery('new query');
-      expect(component.queryCtl.value).toBe('new query');
+      expect(component.form.queryCtl().value()).toBe('new query');
     });
   });
 
@@ -142,7 +144,7 @@ describe('ItemQueryComponent', () => {
     it('should not emit when the form is invalid', () => {
       const spy = vi.fn();
       component.querySubmit.subscribe(spy);
-      component.queryCtl.setValue(null); // required -> invalid
+      component.form.queryCtl().value.set(''); // required -> invalid
       component.submitQuery();
       expect(spy).not.toHaveBeenCalled();
     });
@@ -150,7 +152,7 @@ describe('ItemQueryComponent', () => {
     it('should emit the query value when valid', () => {
       const spy = vi.fn();
       component.querySubmit.subscribe(spy);
-      component.queryCtl.setValue('find this');
+      component.form.queryCtl().value.set('find this');
       component.submitQuery();
       expect(spy).toHaveBeenCalledWith('find this');
     });
@@ -173,6 +175,65 @@ describe('ItemQueryComponent', () => {
     it('should delegate to the Clipboard service', () => {
       component.copyToClipboard('hello');
       expect(clipboard.copy).toHaveBeenCalledWith('hello');
+    });
+  });
+
+  describe('signal form', () => {
+    it('should not fetch pin definitions for the initial empty part def', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      expect(itemService.getDataPinDefinitions).not.toHaveBeenCalled();
+    });
+
+    it('should keep history and part def when the query input changes', () => {
+      component.form.history().value.set('old');
+      component.form.partDef().value.set('it.vedph.note');
+      fixture.componentRef.setInput('query', 'q2');
+      fixture.detectChanges();
+      expect(component.form.queryCtl().value()).toBe('q2');
+      expect(component.form.history().value()).toBe('old');
+      expect(component.form.partDef().value()).toBe('it.vedph.note');
+    });
+
+    it('clearQuery should empty the query', () => {
+      component.form.queryCtl().value.set('x');
+      component.clearQuery();
+      expect(component.form.queryCtl().value()).toBe('');
+      expect(component.form().invalid()).toBe(true);
+    });
+
+    it('renders no <form>; the search button submits via click', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const spy = vi.fn();
+      component.querySubmit.subscribe(spy);
+      const textarea: HTMLTextAreaElement =
+        fixture.nativeElement.querySelector('textarea');
+      textarea.value = 'typed';
+      textarea.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      const button: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'button[mattooltip="Search items"]'
+      );
+      expect(button.type).toBe('button');
+      button.click();
+      expect(spy).toHaveBeenCalledWith('typed');
+    });
+
+    it('submits on Enter in the query textarea', () => {
+      const spy = vi.fn();
+      component.querySubmit.subscribe(spy);
+      component.form.queryCtl().value.set('q');
+      fixture.detectChanges();
+      const textarea: HTMLTextAreaElement =
+        fixture.nativeElement.querySelector('textarea');
+      const event = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        cancelable: true,
+      });
+      textarea.dispatchEvent(event);
+      expect(spy).toHaveBeenCalledWith('q');
+      // no newline is inserted
+      expect(event.defaultPrevented).toBe(true);
     });
   });
 });

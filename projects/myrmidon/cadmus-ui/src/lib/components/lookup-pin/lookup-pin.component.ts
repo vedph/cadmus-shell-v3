@@ -4,18 +4,13 @@ import {
   effect,
   Inject,
   input,
-  OnInit,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import {
-  UntypedFormBuilder,
-  UntypedFormControl,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { FormField, form } from '@angular/forms/signals';
 import { Observable, of } from 'rxjs';
 import {
   debounceTime,
@@ -46,9 +41,9 @@ import { ItemService } from '@myrmidon/cadmus-api';
  * of a pin's value, and get the full pin. For instance, if you have
  * a lookup set of colors and type "gr", you might get the pins
  * corresponding to "green" (e.g. id=color, value=green), "gray", etc.
- * Usage: add a FormControl to hold a DataPinInfo value; in the HTML
- * template set the component's lookupKey, label, initialValue, and
- * entryChange handler. The initialValue, if any, should be the initial
+ * Usage: in the HTML template set the component's lookupKey, label,
+ * initialValue, and entryChange handler, and store the picked
+ * DataPinInfo value from entryChange. The initialValue, if any, should be the initial
  * DataPinInfo value.
  * If you are using this component as a pure lookup device, don't set
  * the initialValue and set resetOnPick=true.
@@ -58,8 +53,7 @@ import { ItemService } from '@myrmidon/cadmus-api';
   templateUrl: './lookup-pin.component.html',
   styleUrls: ['./lookup-pin.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatAutocomplete,
     MatOption,
     MatFormField,
@@ -72,7 +66,7 @@ import { ItemService } from '@myrmidon/cadmus-api';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LookupPinComponent implements OnInit {
+export class LookupPinComponent {
   /**
    * The entry value initially set when the component loads.
    */
@@ -103,29 +97,49 @@ export class LookupPinComponent implements OnInit {
    */
   public readonly entryChange = output<DataPinInfo | null>();
 
-  public form: UntypedFormGroup;
-  public lookup: UntypedFormControl;
-  public entries$: Observable<DataPinInfo[]> | undefined;
+  /**
+   * The lookup text box: a filter string while the user is typing, or the
+   * picked entry once one is selected (the autocomplete trigger is a CVA,
+   * so this is not restricted to strings). Its empty value is null, never
+   * undefined: an undefined leaf value unmaps its field.
+   */
+  private readonly _draft = signal<{ lookup: DataPinInfo | string | null }>({
+    lookup: null,
+  });
+
+  public readonly form = form(this._draft);
+
+  public readonly entries$: Observable<DataPinInfo[]>;
 
   public readonly entry = signal<DataPinInfo | undefined>(undefined);
 
   constructor(
-    formBuilder: UntypedFormBuilder,
     private _itemService: ItemService,
     @Inject('indexLookupDefinitions')
     private _lookupDefs: IndexLookupDefinitions
   ) {
-    // form
-    this.lookup = formBuilder.control(null);
-    this.form = formBuilder.group({
-      lookup: this.lookup,
-    });
+    this.entries$ = toObservable(this.form.lookup().value).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        // if it's a string it's a filter; else it's the entry got
+        if (typeof value === 'string') {
+          return this.lookupEntries(value, this.limit());
+        } else {
+          // unlike valueChanges, toObservable also emits the initial
+          // null: map it to no entries rather than to an empty option
+          return of(value ? [value] : []);
+        }
+      })
+    );
 
+    // reset when initialValue or lookupKey change: these are the only
+    // dependencies, as the reset itself (which reads other signals and
+    // writes the form) is untracked
     effect(() => {
-      console.log('lookup pin initial value', this.initialValue());
-      if (this.lookup) {
-        this.resetToInitial();
-      }
+      this.initialValue();
+      this.lookupKey();
+      untracked(() => this.resetToInitial());
     });
   }
 
@@ -134,21 +148,6 @@ export class LookupPinComponent implements OnInit {
    * This should be a key from the injectable indexLookupDefinitions.
    */
   public readonly lookupKey = input<string>();
-
-  public ngOnInit(): void {
-    this.entries$ = this.lookup.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap((value: DataPinInfo | string) => {
-        // if it's a string it's a filter; else it's the entry got
-        if (typeof value === 'string') {
-          return this.lookupEntries(value, this.limit());
-        } else {
-          return of([value]);
-        }
-      })
-    );
-  }
 
   private lookupEntries(
     filter: string,
@@ -184,13 +183,13 @@ export class LookupPinComponent implements OnInit {
     this.lookupEntries(this.initialValue() || '', 1)
       .pipe(take(1))
       .subscribe((entries) => {
-        this.lookup.setValue(entries.length ? entries[0] : undefined);
+        this.form.lookup().value.set(entries.length ? entries[0] : null);
       });
   }
 
   public clear(): void {
     this.entry.set(undefined);
-    this.lookup.setValue(null);
+    this.form.lookup().value.set(null);
     this.entryChange.emit(null);
   }
 

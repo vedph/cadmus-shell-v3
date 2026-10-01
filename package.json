@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "check-libs": "node scripts/check-local-libs.js",
+    "build:libs": "node scripts/build-libs.mjs",
     "build-cor": "ng build @myrmidon/cadmus-core",
     "build-api": "ng build @myrmidon/cadmus-api",
     "build-ui": "ng build @myrmidon/cadmus-state && ng build @myrmidon/cadmus-ui",

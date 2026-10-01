@@ -8,17 +8,11 @@ import {
 } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import {
-  AbstractControl,
-  FormsModule,
-  ReactiveFormsModule,
-  ValidationErrors,
-} from '@angular/forms';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+  FormField,
+  form,
+  required,
+  validate,
+} from '@angular/forms/signals';
 import { Subscription } from 'rxjs';
 
 import { MatButton } from '@angular/material/button';
@@ -35,19 +29,20 @@ import { EnvService } from '@myrmidon/ngx-tools';
 
 import { UploadService } from '@myrmidon/cadmus-api';
 
-class FileExtensionValidator {
-  constructor(private allowedExtensions: string[]) {}
+/**
+ * True if the file has one of the allowed extensions.
+ */
+function hasAllowedExtension(file: File, allowedExtensions: string[]): boolean {
+  const extension = file.name.split('.').pop();
+  return allowedExtensions.includes(extension!);
+}
 
-  validate(control: AbstractControl): ValidationErrors | null {
-    const file = control.value as File | null;
-    if (file) {
-      const extension = file.name.split('.').pop();
-      if (!this.allowedExtensions.includes(extension!)) {
-        return { invalidExtension: true };
-      }
-    }
-    return null;
-  }
+/**
+ * The editable shape behind the form.
+ */
+interface UploadControls {
+  file: File | null;
+  dryRun: boolean;
 }
 
 interface UploadResult {
@@ -66,8 +61,7 @@ interface UploadResult {
   styleUrls: ['./settings-import.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatButton,
     MatCheckbox,
     MatProgressBar,
@@ -84,42 +78,40 @@ export class SettingsImportComponent {
   public readonly uploadStart = output();
   public readonly uploadEnd = output<boolean>();
 
-  public file: FormControl<File | null>;
-  public dryRun: FormControl<boolean>;
-  public form: FormGroup;
+  public readonly form = form(
+    signal<UploadControls>({
+      file: null,
+      dryRun: false,
+    }),
+    (path) => {
+      required(path.file);
+      validate(path.file, ({ value }) => {
+        const file = value();
+        return file && !hasAllowedExtension(file, ['json'])
+          ? { kind: 'invalidExtension' }
+          : null;
+      });
+    },
+  );
 
   public readonly uploadProgress = signal<number>(0);
   public readonly uploading = signal<boolean>(false);
   public readonly result = signal<UploadResult | undefined>(undefined);
 
   constructor(
-    formBuilder: FormBuilder,
     private _env: EnvService,
-    private _uploadService: UploadService
-  ) {
-    const fileExtensionValidator = new FileExtensionValidator(['json']);
-    this.file = formBuilder.control(null, [
-      Validators.required,
-      (control) => fileExtensionValidator.validate(control),
-    ]);
-    this.dryRun = formBuilder.control(false, {
-      nonNullable: true,
-    });
-    this.form = formBuilder.group({
-      file: this.file,
-      dryRun: this.dryRun,
-    });
-  }
+    private _uploadService: UploadService,
+  ) {}
 
   public onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
-      this.file.setValue(input.files[0]);
+      this.form.file().value.set(input.files[0]);
     }
   }
 
   public upload() {
-    if (!this.form.valid) {
+    if (!this.form().valid()) {
       return;
     }
     this.result.set(undefined);
@@ -127,12 +119,12 @@ export class SettingsImportComponent {
     this.uploadStart.emit();
 
     let url = `${this._env.get('apiUrl')}settings/import`;
-    if (this.dryRun.value) {
+    if (this.form.dryRun().value()) {
       url += '?dryRun=true';
     }
 
     this._sub = this._uploadService
-      .uploadFile(this.file.value!, url, {
+      .uploadFile(this.form.file().value()!, url, {
         reportProgress: true,
       })
       .subscribe({

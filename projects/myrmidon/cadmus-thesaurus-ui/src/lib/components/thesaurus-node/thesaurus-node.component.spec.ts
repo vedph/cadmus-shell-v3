@@ -29,7 +29,7 @@ describe('ThesaurusNodeComponent', () => {
 
   it('should create with an empty form when there is no node', () => {
     expect(component).toBeTruthy();
-    expect(component.id.value).toBeNull();
+    expect(component.form.id().value()).toBe('');
     expect(component.editing()).toBe(false);
   });
 
@@ -39,8 +39,8 @@ describe('ThesaurusNodeComponent', () => {
       fixture.componentRef.setInput('node', makeNode({ id: 'n2', value: 'V2' }));
       fixture.detectChanges();
 
-      expect(component.id.value).toBe('n2');
-      expect(component.value.value).toBe('V2');
+      expect(component.form.id().value()).toBe('n2');
+      expect(component.form.value().value()).toBe('V2');
       expect(component.editing()).toBe(false);
     });
 
@@ -50,7 +50,7 @@ describe('ThesaurusNodeComponent', () => {
       fixture.componentRef.setInput('node', undefined);
       fixture.detectChanges();
 
-      expect(component.id.value).toBeNull();
+      expect(component.form.id().value()).toBe('');
       expect(component.indent()).toBe('');
     });
 
@@ -80,8 +80,8 @@ describe('ThesaurusNodeComponent', () => {
     it('should not update the node when not editing (regression: editing() must be called, not the signal itself)', () => {
       fixture.componentRef.setInput('node', makeNode({ id: 'n1', value: 'V1' }));
       fixture.detectChanges();
-      component.id.setValue('changed');
-      component.value.setValue('changed');
+      component.form.id().value.set('changed');
+      component.form.value().value.set('changed');
       // editing is false here (updateForm always turns it off)
       expect(component.editing()).toBe(false);
 
@@ -96,7 +96,7 @@ describe('ThesaurusNodeComponent', () => {
       fixture.componentRef.setInput('node', makeNode());
       fixture.detectChanges();
       component.toggleEdit(true);
-      component.id.setValue(''); // required -> invalid
+      component.form.id().value.set(''); // required -> invalid
 
       component.save();
 
@@ -107,15 +107,15 @@ describe('ThesaurusNodeComponent', () => {
       fixture.componentRef.setInput('node', makeNode({ id: 'n1', value: 'V1' }));
       fixture.detectChanges();
       component.toggleEdit(true);
-      component.id.setValue('  new-id  ');
-      component.value.setValue('  New Value  ');
+      component.form.id().value.set('  new-id  ');
+      component.form.value().value.set('  New Value  ');
 
       component.save();
 
       expect(component.node()!.id).toBe('new-id');
       expect(component.node()!.value).toBe('New Value');
       expect(component.editing()).toBe(false);
-      expect(component.form.pristine).toBe(true);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should preserve level and ordinal from the current node', () => {
@@ -125,7 +125,7 @@ describe('ThesaurusNodeComponent', () => {
       );
       fixture.detectChanges();
       component.toggleEdit(true);
-      component.value.setValue('changed');
+      component.form.value().value.set('changed');
 
       component.save();
 
@@ -149,6 +149,63 @@ describe('ThesaurusNodeComponent', () => {
           payload: expect.objectContaining({ id: 'n1', value: 'V1' }),
         })
       );
+    });
+  });
+
+  describe('signal form', () => {
+    function startEditing(): HTMLInputElement[] {
+      fixture.componentRef.setInput('node', makeNode({ id: 'n1', value: 'V1' }));
+      fixture.detectChanges();
+      component.toggleEdit(true);
+      fixture.detectChanges();
+      return Array.from(fixture.nativeElement.querySelectorAll('input'));
+    }
+
+    it('renders no <form> while editing; save is a type=button click', () => {
+      startEditing();
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const save: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'button[mattooltip="Save changes"]'
+      );
+      expect(save.type).toBe('button');
+      expect(save.disabled).toBe(true);
+    });
+
+    it('saves on Enter once edited, not while pristine', () => {
+      const inputs = startEditing();
+      inputs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(component.editing()).toBe(true);
+
+      inputs[1].value = 'V1 changed ';
+      inputs[1].dispatchEvent(new Event('input'));
+      inputs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(component.editing()).toBe(false);
+      expect(component.node()?.value).toBe('V1 changed');
+    });
+
+    it('cancels editing on Escape', () => {
+      const inputs = startEditing();
+      inputs[0].dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+      );
+      expect(component.editing()).toBe(false);
+    });
+  });
+
+  describe('discard', () => {
+    it('reverts the edited values', () => {
+      fixture.componentRef.setInput('node', makeNode({ id: 'n1', value: 'V1' }));
+      fixture.detectChanges();
+      component.toggleEdit(true);
+      component.form.value().value.set('changed');
+      component.form.value().markAsDirty();
+
+      component.toggleEdit(false);
+      component.toggleEdit(true);
+
+      expect(component.form.value().value()).toBe('V1');
+      expect(component.form().dirty()).toBe(false);
+      expect(component.node()?.value).toBe('V1');
     });
   });
 });

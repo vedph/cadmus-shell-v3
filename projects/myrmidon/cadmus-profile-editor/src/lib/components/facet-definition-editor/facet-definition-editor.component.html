@@ -1,4 +1,4 @@
-<form [formGroup]="form" (submit)="save()">
+<div>
   <mat-tab-group>
     <!-- GENERAL -->
     <mat-tab label="general">
@@ -6,11 +6,11 @@
         <!-- id -->
         <mat-form-field>
           <mat-label>ID</mat-label>
-          <input matInput [formControl]="id" />
-          @if ($any(id).errors?.required && (id.dirty || id.touched)) {
+          <input matInput [formField]="form.id" />
+          @if (form.id().getError('required') && (form.id().dirty() || form.id().touched())) {
             <mat-error>ID required</mat-error>
           }
-          @if ($any(id).errors?.maxlength && (id.dirty || id.touched)) {
+          @if (form.id().getError('maxLength') && (form.id().dirty() || form.id().touched())) {
             <mat-error>ID too long</mat-error>
           }
         </mat-form-field>
@@ -18,12 +18,12 @@
         <!-- label -->
         <mat-form-field>
           <mat-label>label</mat-label>
-          <input matInput [formControl]="label" />
-          @if ($any(label).errors?.required && (label.dirty || label.touched)) {
+          <input matInput [formField]="form.label" />
+          @if (form.label().getError('required') && (form.label().dirty() || form.label().touched())) {
             <mat-error>label required</mat-error>
           }
           @if (
-            $any(label).errors?.maxlength && (label.dirty || label.touched)
+            form.label().getError('maxLength') && (form.label().dirty() || form.label().touched())
           ) {
             <mat-error>label too long</mat-error>
           }
@@ -32,10 +32,10 @@
         <!-- color -->
         <mat-form-field class="color-input">
           <mat-label>color</mat-label>
-          <input matInput [formControl]="colorKey" />
+          <input matInput [formField]="form.colorKey" />
           @if (
-            $any(colorKey).errors?.pattern &&
-            (colorKey.dirty || colorKey.touched)
+            form.colorKey().getError('pattern') &&
+            (form.colorKey().dirty() || form.colorKey().touched())
           ) {
             <mat-error>invalid color key</mat-error>
           }
@@ -44,7 +44,9 @@
             class="color-picker-input"
             #colorPicker
             [value]="
-              colorKey.value.length === 6 ? '#' + colorKey.value : '#000000'
+              form.colorKey().value().length === 6
+                ? '#' + form.colorKey().value()
+                : '#000000'
             "
             (input)="onColorPick(colorPicker.value)"
           />
@@ -58,17 +60,17 @@
             <mat-icon>palette</mat-icon>
           </button>
         </mat-form-field>
-        <div class="color-sample" [style.--swatch-color]="'#' + colorKey.value"></div>
+        <div class="color-sample" [style.--swatch-color]="'#' + form.colorKey().value()"></div>
       </div>
 
       <!-- description -->
       <div>
         <mat-form-field class="long-text">
           <mat-label>description</mat-label>
-          <textarea matInput [formControl]="description" rows="2"></textarea>
+          <textarea matInput [formField]="form.description" rows="2"></textarea>
           @if (
-            $any(description).errors?.maxlength &&
-            (description.dirty || description.touched)
+            form.description().getError('maxLength') &&
+            (form.description().dirty() || form.description().touched())
           ) {
             <mat-error>description too long</mat-error>
           }
@@ -88,7 +90,7 @@
           <mat-icon>add_circle</mat-icon> part
         </button>
       </div>
-      @if (partDefinitions.value.length) {
+      @if (form.partDefinitions().value().length) {
         <table>
           <thead>
             <tr>
@@ -104,7 +106,7 @@
           </thead>
           <tbody>
             @for (
-              entry of partDefinitions.value;
+              entry of form.partDefinitions().value();
               track entry;
               let i = $index;
               let first = $first;
@@ -204,12 +206,13 @@
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
-      type="submit"
+      type="button"
       mat-icon-button
       matTooltip="Accept changes"
-      [disabled]="form.invalid || form.pristine"
+      [disabled]="form().invalid() || !form().dirty()"
+      (click)="save()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

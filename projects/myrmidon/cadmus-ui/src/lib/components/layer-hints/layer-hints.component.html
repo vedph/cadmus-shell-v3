@@ -1,5 +1,5 @@
 @if (hints().length) {
-<form [formGroup]="form" (submit)="emitRequestPatch()">
+<div>
   <table class="patches">
     <thead>
       <tr>
@@ -19,6 +19,7 @@
             mat-icon-button
             matTooltip="Edit this fragment"
             [disabled]="disabled()"
+            (click)="emitRequestEdit(hint)"
           >
             <mat-icon>edit</mat-icon>
           </button>
@@ -52,7 +53,7 @@
           @if (hint.patchOperation) {
           <mat-checkbox
             matTooltip="Apply this patch"
-            [formControl]="checks.at(i)"
+            [formField]="form.checks[i]"
           >
             {{ hint.patchOperation }}
           </mat-checkbox>
@@ -66,11 +67,12 @@
   <div>move target: {{ targetLocation() }}</div>
   }
   <button
-    type="submit"
+    type="button"
     mat-flat-button
-    [disabled]="readonly() || disabled() || form.invalid"
+    [disabled]="readonly() || disabled()"
+    (click)="emitRequestPatch()"
   >
     apply patches
   </button>
-</form>
+</div>
 }

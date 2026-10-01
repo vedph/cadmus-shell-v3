@@ -8,7 +8,7 @@
           <input
             matInput
             [matDatepicker]="startPicker"
-            [formControl]="start"
+            [formField]="form.start"
             readonly
           />
           <mat-datepicker-toggle matIconSuffix [for]="startPicker" />
@@ -20,7 +20,7 @@
           <input
             matInput
             [matDatepicker]="endPicker"
-            [formControl]="end"
+            [formField]="form.end"
             readonly
           />
           <mat-datepicker-toggle matIconSuffix [for]="endPicker" />
@@ -29,7 +29,7 @@
 
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>interval</mat-label>
-          <mat-select [formControl]="interval">
+          <mat-select [formField]="form.interval">
             <mat-option value="1h">1 hour</mat-option>
             <mat-option value="1d">1 day</mat-option>
             <mat-option value="1w">1 week</mat-option>
@@ -52,13 +52,13 @@
       <!-- visibility controls -->
       <div class="visibility-controls">
         <div class="checkbox-group">
-          <mat-checkbox [formControl]="created" class="checkbox created">
+          <mat-checkbox [formField]="form.created" class="checkbox created">
             created
           </mat-checkbox>
-          <mat-checkbox [formControl]="updated" class="checkbox updated">
+          <mat-checkbox [formField]="form.updated" class="checkbox updated">
             updated
           </mat-checkbox>
-          <mat-checkbox [formControl]="deleted" class="checkbox deleted">
+          <mat-checkbox [formField]="form.deleted" class="checkbox deleted">
             deleted
           </mat-checkbox>
         </div>

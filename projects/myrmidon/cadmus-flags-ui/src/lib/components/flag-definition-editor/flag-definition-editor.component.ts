@@ -1,12 +1,20 @@
-import { ChangeDetectionStrategy, Component, effect, model, output } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  linkedSignal,
+  model,
+  output,
+  untracked,
+} from '@angular/core';
+import {
+  FormField,
+  form,
+  max,
+  maxLength,
+  min,
+  required,
+} from '@angular/forms/signals';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
@@ -20,6 +28,56 @@ import { MatIcon } from '@angular/material/icon';
 import { FlagDefinition } from '@myrmidon/cadmus-core';
 
 /**
+ * The editable shape behind the form. Text fields use '' as their empty
+ * value, as they are bound to native inputs.
+ */
+interface FlagDefinitionControls {
+  /** The 1-based index of the flag's bit (1-32). */
+  id: number;
+  label: string;
+  /** The color in the form #rrggbb, or ''. */
+  colorKey: string;
+  description: string;
+  isAdmin: boolean;
+}
+
+/**
+ * Get the 0-based index of the lowest bit set in value, or -1.
+ */
+function getBit(value: number): number {
+  let test = 1;
+  for (let i = 0; i < 32; i++) {
+    if ((value & test) !== 0) {
+      return i;
+    }
+    test <<= 1;
+  }
+  return -1;
+}
+
+function toDraft(flag: FlagDefinition | undefined): FlagDefinitionControls {
+  return !flag
+    ? { id: 1, label: '', colorKey: '', description: '', isAdmin: false }
+    : {
+        id: getBit(flag.id) + 1,
+        label: flag.label || '',
+        colorKey: flag.colorKey ? '#' + flag.colorKey : '',
+        description: flag.description || '',
+        isAdmin: flag.isAdmin === true,
+      };
+}
+
+function toFlag(v: FlagDefinitionControls): FlagDefinition {
+  return {
+    id: 1 << (v.id - 1),
+    label: v.label.trim(),
+    colorKey: v.colorKey.substring(1),
+    description: v.description.trim(),
+    isAdmin: v.isAdmin,
+  };
+}
+
+/**
  * Flag definition editor.
  */
 @Component({
@@ -27,8 +85,7 @@ import { FlagDefinition } from '@myrmidon/cadmus-core';
   templateUrl: './flag-definition-editor.component.html',
   styleUrls: ['./flag-definition-editor.component.scss'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatSelect,
@@ -47,81 +104,50 @@ export class FlagDefinitionEditorComponent {
 
   public readonly editorClose = output();
 
-  public id: FormControl<number>;
-  public label: FormControl<string | null>;
-  public colorKey: FormControl<string | null>;
-  public description: FormControl<string | null>;
-  public isAdmin: FormControl<boolean>;
-  public form: FormGroup;
-  public flagNumbers: number[];
+  public readonly flagNumbers = Array.from({ length: 32 }, (_, i) => i + 1);
 
-  constructor(formBuilder: FormBuilder) {
-    // https://2ality.com/2014/05/es6-array-methods.html
-    this.flagNumbers = Array.from({ length: 32 }, (_, i) => i + 1);
-    // form
-    this.id = formBuilder.control(1, {
-      validators: [Validators.required, Validators.min(1), Validators.max(32)],
-      nonNullable: true,
-    });
-    this.label = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(50),
-    ]);
-    this.colorKey = formBuilder.control(null, Validators.required);
-    this.description = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(100),
-    ]);
-    this.isAdmin = formBuilder.control(false, { nonNullable: true });
-    this.form = formBuilder.group({
-      id: this.id,
-      label: this.label,
-      colorKey: this.colorKey,
-      description: this.description,
-      isAdmin: this.isAdmin,
-    });
+  /**
+   * The editable draft, derived from flag. On the echo of our own save the
+   * live draft is kept, as toFlag() normalizes (trims) its values.
+   */
+  private readonly _draft = linkedSignal<
+    FlagDefinition | undefined,
+    FlagDefinitionControls
+  >({
+    source: () => this.flag(),
+    computation: (flag, previous) =>
+      previous &&
+      JSON.stringify(flag) === JSON.stringify(toFlag(previous.value))
+        ? previous.value
+        : toDraft(flag),
+  });
 
+  public readonly form = form(this._draft, (path) => {
+    required(path.id);
+    min(path.id, 1);
+    max(path.id, 32);
+    required(path.label);
+    maxLength(path.label, 50);
+    required(path.colorKey);
+    required(path.description);
+    maxLength(path.description, 100);
+  });
+
+  constructor() {
+    // once the draft mirrors the bound flag again, clear interaction state
     effect(() => {
-      this.updateForm(this.flag());
+      const draft = this._draft();
+      untracked(() => {
+        if (this.isDraftInSync(draft)) {
+          this.form().reset();
+        }
+      });
     });
   }
 
-  private getBit(value: number): number {
-    let test = 1;
-    for (let i = 0; i < 32; i++) {
-      if ((value & test) !== 0) {
-        return i;
-      }
-      test <<= 1;
-    }
-    return -1;
-  }
-
-  private updateForm(definition: FlagDefinition | undefined): void {
-    if (!definition) {
-      this.form.reset();
-      return;
-    }
-
-    this.id.setValue(this.getBit(definition.id) + 1);
-    this.label.setValue(definition.label);
-    this.colorKey.setValue(
-      definition.colorKey ? '#' + definition.colorKey : null
-    );
-    this.description.setValue(definition.description);
-    this.isAdmin.setValue(definition.isAdmin === true);
-
-    this.form.markAsPristine();
-  }
-
-  private getFlag(): FlagDefinition {
-    return {
-      id: 1 << (this.id.value - 1),
-      label: this.label.value?.trim() || '',
-      colorKey: this.colorKey.value?.substring(1) || '',
-      description: this.description.value?.trim() || '',
-      isAdmin: this.isAdmin.value === true,
-    };
+  /** True when the draft still mirrors the bound flag. */
+  private isDraftInSync(draft: FlagDefinitionControls): boolean {
+    return JSON.stringify(draft) === JSON.stringify(toDraft(this.flag()));
   }
 
   public cancel(): void {
@@ -129,9 +155,11 @@ export class FlagDefinitionEditorComponent {
   }
 
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
-    this.flag.set(this.getFlag());
+    this.flag.set(toFlag(this._draft()));
+    this.form().reset();
   }
 }

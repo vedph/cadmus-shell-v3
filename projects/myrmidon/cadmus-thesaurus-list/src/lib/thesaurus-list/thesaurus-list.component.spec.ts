@@ -110,22 +110,26 @@ describe('ThesaurusListComponent', () => {
   describe('newThesaurusForm cross-field validator', () => {
     it('should flag sameTargetId when targetId equals id', () => {
       createComponent();
-      component.newThesaurusId.setValue('x@en');
-      component.newThesaurusTargetId.setValue('x@en');
-      expect(component.newThesaurusForm.hasError('sameTargetId')).toBe(true);
+      component.newThesaurusForm.newThesaurusId().value.set('x@en');
+      component.newThesaurusForm.newThesaurusTargetId().value.set('x@en');
+      expect(
+        component.newThesaurusForm.newThesaurusTargetId().getError('sameTargetId')
+      ).toBeTruthy();
     });
 
     it('should be valid when targetId differs from id', () => {
       createComponent();
-      component.newThesaurusId.setValue('x@en');
-      component.newThesaurusTargetId.setValue('y@en');
-      expect(component.newThesaurusForm.hasError('sameTargetId')).toBe(false);
+      component.newThesaurusForm.newThesaurusId().value.set('x@en');
+      component.newThesaurusForm.newThesaurusTargetId().value.set('y@en');
+      expect(
+        component.newThesaurusForm.newThesaurusTargetId().getError('sameTargetId')
+      ).toBeFalsy();
     });
 
     it('should be valid with no targetId at all', () => {
       createComponent();
-      component.newThesaurusId.setValue('x@en');
-      expect(component.newThesaurusForm.valid).toBe(true);
+      component.newThesaurusForm.newThesaurusId().value.set('x@en');
+      expect(component.newThesaurusForm().valid()).toBe(true);
     });
   });
 
@@ -224,8 +228,8 @@ describe('ThesaurusListComponent', () => {
 
   describe('addThesaurus', () => {
     function setValidForm(id = 'new1@en', targetId: string | null = null) {
-      component.newThesaurusId.setValue(id);
-      component.newThesaurusTargetId.setValue(targetId);
+      component.newThesaurusForm.newThesaurusId().value.set(id);
+      component.newThesaurusForm.newThesaurusTargetId().value.set(targetId ?? '');
     }
 
     it('should do nothing when the form is invalid', () => {
@@ -366,6 +370,54 @@ describe('ThesaurusListComponent', () => {
       );
       expect(router.navigate).not.toHaveBeenCalled();
       expect(component.adding()).toBe(false);
+    });
+  });
+
+  describe('adder submission root', () => {
+    function renderPage(): HTMLFormElement {
+      (repository.page$ as Subject<any>).next({
+        items: [],
+        total: 0,
+        pageNumber: 1,
+        pageSize: 10,
+      });
+      fixture.detectChanges();
+      return fixture.nativeElement.querySelector('form');
+    }
+
+    it('adds on submit, preventing the native submission', async () => {
+      createComponent();
+      thesaurusService.getThesaurus.mockReturnValue(of({ id: 'n@en', entries: [] }));
+      thesaurusService.addThesaurus.mockReturnValue(of(true));
+      const formEl = renderPage();
+      expect(formEl).toBeTruthy();
+      component.newThesaurusForm.newThesaurusId().value.set('n@en');
+      fixture.detectChanges();
+
+      const event = new Event('submit', { cancelable: true });
+      formEl.dispatchEvent(event);
+      await Promise.resolve();
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(thesaurusService.getThesaurus).toHaveBeenCalledWith('n@en', true);
+    });
+
+    it('does not add when invalid, and shows the same-target error', async () => {
+      createComponent();
+      const formEl = renderPage();
+      component.newThesaurusForm.newThesaurusId().value.set('x@en');
+      component.newThesaurusForm.newThesaurusTargetId().value.set('x@en');
+      component.newThesaurusForm.newThesaurusTargetId().markAsTouched();
+      fixture.detectChanges();
+
+      formEl.dispatchEvent(new Event('submit', { cancelable: true }));
+      await Promise.resolve();
+      fixture.detectChanges();
+
+      expect(thesaurusService.getThesaurus).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.textContent).toContain(
+        'Target ID must differ from ID'
+      );
     });
   });
 });

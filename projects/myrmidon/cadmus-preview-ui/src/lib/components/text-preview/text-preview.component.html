@@ -20,7 +20,11 @@
         @if (layers().length) {
           <mat-form-field>
             <mat-label>layer</mat-label>
-            <mat-select [formControl]="selectedLayer">
+            <mat-select
+              [formField]="form.selectedLayer"
+              [compareWith]="compareLayers"
+              (selectionChange)="onLayerChange()"
+            >
               <mat-option [value]="{ id: 'all' }">all</mat-option>
               @for (l of layers(); track l.id) {
                 <mat-option [value]="l">{{
@@ -30,9 +34,9 @@
             </mat-select>
           </mat-form-field>
         }
-        @if (selectedLayer.value) {
+        @if (form.selectedLayer().value(); as layer) {
           <span style="margin-left: 6px">{{
-            selectedLayer.value.fragmentCount
+            layer.fragmentCount
           }}</span>
         }
       </div>

@@ -66,13 +66,13 @@ describe('PartDefinitionEditorComponent', () => {
 
     it('should be true when the current typeId is a base text part', () => {
       fixture.componentRef.setInput('facetModelSettings', makeSettings());
-      component.typeId.setValue('base_text');
+      component.form.typeId().value.set('base_text');
       expect(component.isBaseTextPart()).toBe(true);
     });
 
     it('should be false when the current typeId is not a base text part', () => {
       fixture.componentRef.setInput('facetModelSettings', makeSettings());
-      component.typeId.setValue('note');
+      component.form.typeId().value.set('note');
       expect(component.isBaseTextPart()).toBe(false);
     });
   });
@@ -92,35 +92,35 @@ describe('PartDefinitionEditorComponent', () => {
       );
       fixture.detectChanges();
 
-      expect(component.typeId.value).toBe('note');
-      expect(component.roleId.value).toBe('r1');
-      expect(component.name.value).toBe('Note');
-      expect(component.required.value).toBe(true);
-      expect(component.description.value).toBe('d');
-      expect(component.colorKey.value).toBe('aabbcc');
-      expect(component.groupKey.value).toBe('g');
-      expect(component.sortKey.value).toBe('01');
-      expect(component.form.pristine).toBe(true);
+      expect(component.form.typeId().value()).toBe('note');
+      expect(component.form.roleId().value()).toBe('r1');
+      expect(component.form.name().value()).toBe('Note');
+      expect(component.form.required().value()).toBe(true);
+      expect(component.form.description().value()).toBe('d');
+      expect(component.form.colorKey().value()).toBe('aabbcc');
+      expect(component.form.groupKey().value()).toBe('g');
+      expect(component.form.sortKey().value()).toBe('01');
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should reset the form when the definition becomes undefined', () => {
       fixture.componentRef.setInput('definition', makePartDefinition());
       fixture.detectChanges();
-      expect(component.typeId.value).toBe('note');
+      expect(component.form.typeId().value()).toBe('note');
 
       fixture.componentRef.setInput('definition', undefined);
       fixture.detectChanges();
 
-      expect(component.typeId.value).toBe('');
-      expect(component.name.value).toBe('');
+      expect(component.form.typeId().value()).toBe('');
+      expect(component.form.name().value()).toBe('');
     });
   });
 
   describe('onColorPick', () => {
     it('should strip the leading # and mark the control dirty', () => {
       component.onColorPick('#aabbcc');
-      expect(component.colorKey.value).toBe('aabbcc');
-      expect(component.colorKey.dirty).toBe(true);
+      expect(component.form.colorKey().value()).toBe('aabbcc');
+      expect(component.form.colorKey().dirty()).toBe(true);
     });
   });
 
@@ -139,18 +139,18 @@ describe('PartDefinitionEditorComponent', () => {
       // definition is a model(); subscribe via effect not directly possible,
       // assert via reading the signal after save() instead
       component.save();
-      expect(component.typeId.touched).toBe(true);
+      expect(component.form.typeId().touched()).toBe(true);
       expect(component.definition()).toBeUndefined();
     });
 
     it('should update the definition model with trimmed values when valid', () => {
-      component.typeId.setValue('  note  ');
-      component.name.setValue('  Note  ');
-      component.roleId.setValue('  r1  ');
-      component.description.setValue('  d  ');
-      component.colorKey.setValue('aabbcc');
-      component.groupKey.setValue('  g  ');
-      component.sortKey.setValue('  01  ');
+      component.form.typeId().value.set('  note  ');
+      component.form.name().value.set('  Note  ');
+      component.form.roleId().value.set('  r1  ');
+      component.form.description().value.set('  d  ');
+      component.form.colorKey().value.set('aabbcc');
+      component.form.groupKey().value.set('  g  ');
+      component.form.sortKey().value.set('  01  ');
 
       component.save();
 
@@ -164,22 +164,22 @@ describe('PartDefinitionEditorComponent', () => {
         groupKey: 'g',
         sortKey: '01',
       });
-      expect(component.form.pristine).toBe(true);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should keep the form dirty when pristine=false', () => {
-      component.typeId.setValue('note');
-      component.name.setValue('Note');
-      component.form.markAsDirty();
+      component.form.typeId().value.set('note');
+      component.form.name().value.set('Note');
+      component.form().markAsDirty();
 
       component.save(false);
 
-      expect(component.form.pristine).toBe(false);
+      expect(component.form().dirty()).toBe(true);
     });
 
     it('should map empty optional strings to undefined', () => {
-      component.typeId.setValue('note');
-      component.name.setValue('Note');
+      component.form.typeId().value.set('note');
+      component.form.name().value.set('Note');
 
       component.save();
 
@@ -189,6 +189,63 @@ describe('PartDefinitionEditorComponent', () => {
       expect(data.colorKey).toBeUndefined();
       expect(data.groupKey).toBeUndefined();
       expect(data.sortKey).toBeUndefined();
+    });
+  });
+
+  describe('signal form', () => {
+    it('accepts an empty color key, rejects a malformed one', () => {
+      component.form.colorKey().value.set('');
+      expect(component.form.colorKey().valid()).toBe(true);
+      component.form.colorKey().value.set('zz');
+      expect(component.form.colorKey().getError('pattern')).toBeTruthy();
+    });
+
+    it('keeps the typed text when its own save echoes back normalized', () => {
+      fixture.componentRef.setInput('definition', makePartDefinition());
+      fixture.detectChanges();
+      component.form.name().value.set('abc ');
+      component.save(false);
+      fixture.detectChanges();
+
+      expect(component.definition()?.name).toBe('abc');
+      expect(component.form.name().value()).toBe('abc ');
+    });
+
+    it('rebuilds the draft and clears dirty when a new definition is bound', () => {
+      fixture.componentRef.setInput('definition', makePartDefinition());
+      fixture.detectChanges();
+      component.form.name().value.set('edited');
+      component.form.name().markAsDirty();
+      fixture.componentRef.setInput(
+        'definition',
+        makePartDefinition({ name: 'Other' })
+      );
+      fixture.detectChanges();
+
+      expect(component.form.name().value()).toBe('Other');
+      expect(component.form().dirty()).toBe(false);
+    });
+
+    it('renders no <form>; save is a type=button click, disabled while pristine', () => {
+      fixture.componentRef.setInput('definition', makePartDefinition());
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const save: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'button[mattooltip="Accept changes"]'
+      );
+      expect(save.type).toBe('button');
+      expect(save.disabled).toBe(true);
+
+      const name: HTMLInputElement = Array.from<HTMLInputElement>(
+        fixture.nativeElement.querySelectorAll('input[matinput]')
+      ).find((i) => i.value === 'Note')!;
+      name.value = 'Renamed';
+      name.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(save.disabled).toBe(false);
+
+      save.click();
+      expect(component.definition()?.name).toBe('Renamed');
     });
   });
 });

@@ -23,7 +23,8 @@
     "@myrmidon/cadmus-state": "^16.0.0",
     "@myrmidon/cadmus-ui": "^17.0.1",
     "@myrmidon/cadmus-item-editor": "^17.0.1",
-    "@myrmidon/cadmus-part-general-ui": "^18.0.1"
+    "@myrmidon/cadmus-part-general-ui": "^18.0.1",
+    "@myrmidon/cadmus-api": "^15.0.3"
   },
   "dependencies": {
     "tslib": "^2.3.0"

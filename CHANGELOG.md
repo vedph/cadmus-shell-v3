@@ -1,5 +1,32 @@
 # History
 
+- 2026-09-30:
+  - ⚠️ migrated from reactive forms to Angular signal forms (`@angular/forms/signals`) the components of `@myrmidon/cadmus-ui` (layer hints, lookup pin), `cadmus-flags-ui`, `cadmus-graph-ui`, `cadmus-graph-ui-ex`, `cadmus-item-list`, `cadmus-item-editor`, `cadmus-item-search`, `cadmus-layer-demo`, `cadmus-preview-ui`, `cadmus-profile-editor`, `cadmus-profile-import`, `cadmus-statistics`, `cadmus-thesaurus-ui` and `cadmus-thesaurus-list`. Inputs, models and outputs are unchanged. Breaking for code that reached into these components' internals:
+    - each component now exposes its form as a signal form field tree (usually `form`; `metadata` and `newPart` in the item editor, `rendition` in the layer demo, `filterForm` and `newThesaurusForm` in the thesaurus editor/list), replacing the former public `FormControl`/`FormGroup` fields (e.g. `ItemEditorComponent.title` is now `metadata.title`, `facetCtrl` is `metadata.facet`; `TextPreviewComponent.selectedLayer`/`selectedLayerValue` are now `form.selectedLayer`; `LayerHintsComponent.checks` is now `form.checks`);
+    - embeddable widgets no longer render a `<form>` element, so they no longer create nested forms. Their action buttons are plain buttons, and Enter-to-confirm is kept where it existed through explicit key handlers. Components that are real submission roots (item editor metadata, item generation dialog, layer demo, new thesaurus adder) use `<form [formRoot]>`;
+    - `EditFrameStatsComponent`'s `createdSignal`/`updatedSignal`/`deletedSignal` are now read-only computed signals.
+  - 🐛 validation messages which could never appear because of a wrong error key (`maxLength` vs `maxlength`), e.g. in the item editor and thesaurus editor, now appear; the "Target ID must differ from ID" message in the thesaurus list now appears; the walker's triple filter now shows the excluded predicates of the filter it is bound to.
+  - ℹ️ not yet migrated: `ModelEditorComponentBase`, `CloseSaveButtonsComponent`, `CustomValidators`, `JsonValidators` and the `extract*Changes` helpers (`@myrmidon/cadmus-ui`), and `TaxoStoreNodesPartComponent` (`@myrmidon/cadmus-part-taxo-ui`). These are the reactive-forms contract of all part/fragment editors, including those in `cadmus-part-general-*`, `cadmus-part-philology-*` and in your own apps, and will be migrated together with them.
+  - 🐛 fixed:
+    - layer hints (`cadmus-ui`): the "Edit this fragment" button now emits `requestEdit`.
+    - graph (`cadmus-api`, `cadmus-graph-ui`, `cadmus-graph-ui-ex`):
+      - the walker's linked-node filter now correctly sends "not-class" (`isClass: false`) and the "user" source type (`0`), which were lost or inverted;
+      - `0` literal number bounds are no longer dropped, by the filters nor by `GraphService`;
+      - the walker filters' paginators now get the total count;
+      - their subject/predicate/object lookups now show the nodes loaded from the filter;
+      - the graph node filter's reset now also clears the linked node and class nodes;
+      - the graph triple filter now has its tag input;
+      - the graph triple editor and walker filters ignore node data arriving late for a triple/filter no longer being edited.
+    - items: the item filter's flags matching select now shows its value, and the user picked in its user lookup is now displayed (`cadmus-item-list`); unsaved item metadata edits are no longer discarded when the item is reloaded unchanged, e.g. after setting the parts thesaurus scope (`cadmus-item-editor`).
+    - layer demo: removing a location no longer re-renders the text.
+    - text preview (`cadmus-preview-ui`): "all" layers now appears selected; removed debug console output.
+    - thesauri (`cadmus-thesaurus-ui`, `cadmus-thesaurus-list`):
+      - a new thesaurus can now be saved once it has nodes, and a thesaurus whose nodes were all deleted can no longer be saved as a non-alias;
+      - "Discard changes" in a thesaurus node now reverts the edits;
+      - the thesaurus lookup `resetOnPick` input now works;
+      - the thesauri list filter's "(any)" alias option no longer hides aliases, and is the default.
+    - the libraries' `package.json` files now declare as peer dependencies all the Cadmus libraries they import.
+  - 🛠️ added `pnpm build:libs [lib...]` (`scripts/build-libs.mjs`), which builds the specified libraries and all the libraries depending on them (or all the libraries), in dependency order.
 - 2026-09-26:
   - 🆕 added context help to part and fragment editors (`@myrmidon/cadmus-ui`, `@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-philology-ui`). `ModelEditorComponentBase` now exposes `helpUrl()` (the URL of the help page for the edited model, or undefined when not available) and `hasHelp()`. The new `HelpLinkComponent` (`<cadmus-help-link [url]="helpUrl()" />`) shows a help button opening that page in a new tab, or nothing when no page is available. It has been added to the right edge of the card header of all the part/fragment editors in the general and philology libraries; to add it to your own editors, import `HelpLinkComponent` from `@myrmidon/cadmus-ui` and place it as the last child of `mat-card-header`. See below for configuring it.
   - 🐛 fixed `hasMetadataBuilders` in item editor (`@myrmidon/cadmus-item-editor`) always being false when set to `true` (boolean) in `env.js`.

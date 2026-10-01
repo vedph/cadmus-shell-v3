@@ -209,7 +209,6 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
     if (identity?.partId && !('loc' in identity)) {
       const part = this.data()?.value as Part;
       if (part && !part.id) {
-        console.log('part identity set', identity.partId);
         part.id = identity.partId;
       }
     }

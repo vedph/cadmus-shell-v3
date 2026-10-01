@@ -22,7 +22,9 @@
     "@angular/material": "^22.0.0",
     "@myrmidon/ngx-tools": "^3.0.1",
     "@myrmidon/ngx-mat-tools": "^3.0.1",
-    "@myrmidon/cadmus-state": "^16.0.0"
+    "@myrmidon/cadmus-state": "^16.0.0",
+    "@myrmidon/cadmus-api": "^15.0.3",
+    "@myrmidon/cadmus-core": "^13.0.1"
   },
   "sideEffects": false
 }

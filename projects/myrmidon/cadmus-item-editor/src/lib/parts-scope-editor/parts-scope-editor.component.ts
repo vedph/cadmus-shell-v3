@@ -2,17 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
+  linkedSignal,
   output,
-  effect,
 } from '@angular/core';
 import {
-  FormGroup,
-  FormArray,
-  FormBuilder,
-  FormControl,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FormField,
+  form,
+  maxLength,
+  pattern,
+  validate,
+} from '@angular/forms/signals';
 import { DatePipe } from '@angular/common';
 
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -25,7 +24,6 @@ import { ColorService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { Part } from '@myrmidon/cadmus-core';
-import { CustomValidators } from '@myrmidon/cadmus-ui';
 import { FacetService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 
@@ -33,6 +31,15 @@ import { EditedItemRepository } from '../state/edited-item.repository';
 
 export interface PartScopeSetRequest {
   ids: string[];
+  scope: string;
+}
+
+/**
+ * The editable shape behind the form: one check per part, and the scope
+ * to assign ('' to remove it).
+ */
+interface PartsScopeControls {
+  checks: boolean[];
   scope: string;
 }
 
@@ -47,7 +54,7 @@ export interface PartScopeSetRequest {
   styleUrls: ['./parts-scope-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ReactiveFormsModule,
+    FormField,
     MatCheckbox,
     MatFormField,
     MatLabel,
@@ -63,48 +70,38 @@ export class PartsScopeEditorComponent {
   public readonly readonly = input<boolean>();
   public readonly setScopeRequest = output<PartScopeSetRequest>();
 
-  public checks: FormArray;
-  public scope: FormControl<string | null>;
-  public form: FormGroup;
+  /**
+   * One check per part: rebuilt (all unchecked) whenever parts change.
+   * The scope is not related to parts, so it survives the rebuild.
+   */
+  private readonly _draft = linkedSignal<Part[] | undefined, PartsScopeControls>(
+    {
+      source: () => this.parts(),
+      computation: (parts, previous) => ({
+        checks: (parts || []).map(() => false),
+        scope: previous?.value.scope ?? '',
+      }),
+    },
+  );
+
+  public readonly form = form(this._draft, (path) => {
+    // at least 1 part must be checked
+    validate(path.checks, ({ value }) =>
+      value().some((c) => c) ? null : { kind: 'minChecked' },
+    );
+    maxLength(path.scope, 50);
+    pattern(path.scope, /^[-a-zA-Z0-9_]+$/);
+  });
 
   constructor(
-    private _formBuilder: FormBuilder,
     private _facetService: FacetService,
     private _dialogService: DialogService,
     private _appRepository: AppRepository,
     private _colorService: ColorService,
     private _editedItemRepository: EditedItemRepository,
   ) {
-    this.checks = _formBuilder.array([], CustomValidators.minChecked(1));
-    this.scope = _formBuilder.control(null, [
-      Validators.maxLength(50),
-      Validators.pattern(/^[-a-zA-Z0-9_]+$/),
-    ]);
-    this.form = _formBuilder.group({
-      checks: this.checks,
-      scope: this.scope,
-    });
     // ensure app data is loaded
     this._appRepository.load();
-
-    effect(() => {
-      this.updateForm(this.parts());
-    });
-  }
-
-  private updateForm(parts?: Part[]): void {
-    this.checks.clear();
-    if (!parts?.length) {
-      return;
-    }
-    for (let i = 0; i < parts.length; i++) {
-      this.checks.push(this._formBuilder.control(false));
-    }
-    this.form.updateValueAndValidity();
-  }
-
-  public onCheckChanged(): void {
-    this.form.updateValueAndValidity();
   }
 
   public getPartColor(typeId: string, roleId?: string): string {
@@ -139,19 +136,16 @@ export class PartsScopeEditorComponent {
   }
 
   public submit(): void {
-    if (this.form.invalid || !this.parts()?.length) {
+    if (this.form().invalid() || !this.parts()?.length) {
       return;
     }
-    const ids: string[] = [];
-    const parts = this.parts()!;
-    for (let i = 0; i < this.checks.length; i++) {
-      if (this.checks.controls[i].value === true) {
-        ids.push(parts[i].id);
-      }
-    }
+    const { checks, scope } = this._draft();
+    const ids = this.parts()!
+      .filter((_, i) => checks[i])
+      .map((p) => p.id);
 
-    let msg = this.scope.value
-      ? `Assign scope "${this.scope.value}" to ${ids.length} part`
+    let msg = scope
+      ? `Assign scope "${scope}" to ${ids.length} part`
       : `Remove scope from ${ids.length} part`;
     msg += ids.length > 1 ? 's?' : '?';
 
@@ -161,7 +155,8 @@ export class PartsScopeEditorComponent {
       }
       this.setScopeRequest.emit({
         ids,
-        scope: this.scope.value!,
+        // no scope is sent as null, as the old form control did
+        scope: scope || null!,
       });
     });
   }

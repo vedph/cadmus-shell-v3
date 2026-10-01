@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component, output, input, effect } from '@angular/core';
 import {
-  FormGroup,
-  FormArray,
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  FormControl,
-} from '@angular/forms';
+  ChangeDetectionStrategy,
+  Component,
+  output,
+  input,
+  linkedSignal,
+} from '@angular/core';
+import { FormField, form } from '@angular/forms/signals';
 
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -22,8 +21,7 @@ import { LayerHint } from '@myrmidon/cadmus-core';
   templateUrl: './layer-hints.component.html',
   styleUrls: ['./layer-hints.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatIconButton,
     MatTooltip,
     MatIcon,
@@ -44,29 +42,18 @@ export class LayerHintsComponent {
   public readonly requestMove = output<LayerHint>();
   public readonly requestPatch = output<string[]>();
 
-  public form: FormGroup;
-  public checks: FormArray<FormControl<boolean>>;
+  /**
+   * One patch check per hint: rebuilt (all unchecked) whenever hints
+   * change, and locally toggled by the user in between.
+   */
+  private readonly _draft = linkedSignal<LayerHint[], { checks: boolean[] }>({
+    source: () => this.hints(),
+    computation: (hints) => ({ checks: hints.map(() => false) }),
+  });
 
-  constructor(
-    private _formBuilder: FormBuilder,
-    private _dialogService: DialogService
-  ) {
-    this.checks = _formBuilder.array<FormControl<boolean>>([]);
-    this.form = _formBuilder.group({
-      checks: this.checks,
-    });
+  public readonly form = form(this._draft);
 
-    effect(() => {
-      this.updateChecks(this.hints());
-    });
-  }
-
-  private updateChecks(hints: LayerHint[]) {
-    this.checks.clear();
-    for (let i = 0; i < hints.length; i++) {
-      this.checks.push(this._formBuilder.control(false, { nonNullable: true }));
-    }
-  }
+  constructor(private _dialogService: DialogService) {}
 
   public emitRequestEdit(hint: LayerHint) {
     this.requestEdit.emit(hint);
@@ -99,19 +86,14 @@ export class LayerHintsComponent {
   }
 
   public emitRequestPatch() {
-    if (this.form.invalid) {
-      return;
-    }
     this._dialogService
       .confirm('Confirm Patch', `Patch the selected fragments?`)
       .subscribe((ok: boolean) => {
         if (ok) {
-          const patches: string[] = [];
-          for (let i = 0; i < this.checks.length; i++) {
-            if (this.checks.at(i).value) {
-              patches.push(this.hints()[i].patchOperation!);
-            }
-          }
+          const checks = this._draft().checks;
+          const patches = this.hints()
+            .filter((_, i) => checks[i])
+            .map((h) => h.patchOperation!);
           this.requestPatch.emit(patches);
         }
       });

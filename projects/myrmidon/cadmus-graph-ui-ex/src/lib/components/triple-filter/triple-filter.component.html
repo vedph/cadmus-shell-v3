@@ -1,9 +1,9 @@
-<form [formGroup]="form" (submit)="apply()" [attr.disabled]="disabled()">
+<div [attr.disabled]="disabled()">
   <!-- paginator -->
   @if (hasPager()) {
   <mat-paginator
-    [length]="total"
-    [pageSize]="pageSize.value || 10"
+    [length]="total()"
+    [pageSize]="form.pageSize().value() || 10"
     [pageSizeOptions]="[5, 10, 20]"
     (page)="onPageChange($event)"
     aria-label="Select page"
@@ -17,6 +17,7 @@
         <cadmus-refs-lookup
           label="subject"
           [service]="lookupService"
+          [item]="form.subj().value()"
           (itemChange)="onSubjectNodeChange($event)"
         />
       </div>
@@ -28,12 +29,12 @@
           [baseFilter]="{ tag: 'property' }"
           (itemChange)="onPredicateNodeChange($event)"
         />
-        <mat-checkbox [formControl]="isNotPred">not</mat-checkbox>
+        <mat-checkbox [formField]="form.isNotPred">not</mat-checkbox>
         <!-- notPreds -->
-        @if (isNotPred.value) {
+        @if (form.isNotPred().value()) {
         <div>
           <mat-list dense>
-            @for (n of notPreds.value; track n.id) {
+            @for (n of form.notPreds().value(); track n.id) {
             <mat-list-item>
               <span>{{ n.label }}</span>
               <button type="button" mat-icon-button (click)="deleteNotPred(n)">
@@ -45,10 +46,10 @@
         </div>
         }
         <!-- preds -->
-        @if (!isNotPred.value) {
+        @if (!form.isNotPred().value()) {
         <div>
           <mat-list dense>
-            @for (n of preds.value; track n.id) {
+            @for (n of form.preds().value(); track n.id) {
             <mat-list-item>
               <span>{{ n.label }}</span>
               <button type="button" mat-icon-button (click)="deletePred(n)">
@@ -65,6 +66,7 @@
         <cadmus-refs-lookup
           label="object"
           [service]="lookupService"
+          [item]="form.obj().value()"
           (itemChange)="onObjectNodeChange($event)"
         />
       </div>
@@ -73,22 +75,22 @@
         <mat-form-field>
           <input
             matInput
-            [formControl]="sid"
+            [formField]="form.sid"
             placeholder="sid"
-            maxlength="500"
+            (keydown.enter)="!disabled() && apply()"
           />
         </mat-form-field>
         &nbsp;
-        <mat-checkbox [formControl]="isSidPrefix">prefix</mat-checkbox>
+        <mat-checkbox [formField]="form.isSidPrefix">prefix</mat-checkbox>
       </div>
       <!-- tag -->
       <div>
         <mat-form-field>
           <input
             matInput
-            [formControl]="tag"
+            [formField]="form.tag"
             placeholder="tag"
-            maxlength="50"
+            (keydown.enter)="!disabled() && apply()"
           />
         </mat-form-field>
       </div>
@@ -98,19 +100,34 @@
       <!-- litPattern -->
       <div>
         <mat-form-field>
-          <input matInput [formControl]="litPattern" placeholder="pattern" />
+          <input
+            matInput
+            [formField]="form.litPattern"
+            placeholder="pattern"
+            (keydown.enter)="!disabled() && apply()"
+          />
         </mat-form-field>
       </div>
       <!-- litType -->
       <div>
         <mat-form-field>
-          <input matInput [formControl]="litType" placeholder="type" />
+          <input
+            matInput
+            [formField]="form.litType"
+            placeholder="type"
+            (keydown.enter)="!disabled() && apply()"
+          />
         </mat-form-field>
       </div>
       <!-- litLanguage-->
       <div>
         <mat-form-field>
-          <input matInput [formControl]="litLanguage" placeholder="language" />
+          <input
+            matInput
+            [formField]="form.litLanguage"
+            placeholder="language"
+            (keydown.enter)="!disabled() && apply()"
+          />
         </mat-form-field>
       </div>
       <!-- minLitNumber, maxLitNumber -->
@@ -119,7 +136,8 @@
           <input
             matInput
             type="number"
-            [formControl]="minLitNumber"
+            [formField]="form.minLitNumber"
+            (keydown.enter)="!disabled() && apply()"
             placeholder="min."
           />
         </mat-form-field>
@@ -128,7 +146,8 @@
           <input
             matInput
             type="number"
-            [formControl]="maxLitNumber"
+            [formField]="form.maxLitNumber"
+            (keydown.enter)="!disabled() && apply()"
             placeholder="max."
           />
         </mat-form-field>
@@ -151,12 +170,13 @@
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
-      type="submit"
+      type="button"
       mat-icon-button
       [disabled]="disabled()"
       matTooltip="Apply filters"
+      (click)="apply()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

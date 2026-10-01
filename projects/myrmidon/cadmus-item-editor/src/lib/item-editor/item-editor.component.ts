@@ -3,17 +3,22 @@ import {
   Component,
   computed,
   effect,
+  linkedSignal,
   OnInit,
   Signal,
   signal,
+  untracked,
+  WritableSignal,
 } from '@angular/core';
 import {
-  FormControl,
-  FormGroup,
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  disabled,
+  FieldTree,
+  FormField,
+  FormRoot,
+  form,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -84,6 +89,66 @@ import { EnvService } from '@myrmidon/ngx-tools';
  * The ID of the item being edited is extracted from the route. For a new item
  * this is 'new', which here is stored as an empty string.
  */
+/**
+ * The editable shape behind the item metadata form. Text fields use '' as
+ * their empty value, as they are bound to native inputs.
+ */
+interface ItemMetadataControls {
+  title: string;
+  sortKey: string;
+  description: string;
+  facet: string | null;
+  group: string;
+  flags: number;
+}
+
+/**
+ * The item metadata edited by the metadata form.
+ */
+type ItemMetadata = Pick<
+  Item,
+  'title' | 'sortKey' | 'description' | 'facetId' | 'groupId' | 'flags'
+>;
+
+function toMetadataDraft(item: Item | undefined): ItemMetadataControls {
+  return {
+    title: item?.title || '',
+    sortKey: item?.sortKey || '',
+    description: item?.description || '',
+    facet: item?.facetId ?? null,
+    group: item?.groupId ?? '',
+    flags: item?.flags ?? 0,
+  };
+}
+
+/**
+ * Draft -> metadata. Normalizes values (trimming), so the metadata saved
+ * from a draft may differ from the draft itself.
+ */
+function toMetadata(v: ItemMetadataControls): ItemMetadata {
+  return {
+    title: v.title.trim(),
+    sortKey: v.sortKey.trim(),
+    description: v.description.trim(),
+    facetId: v.facet?.trim() || '',
+    groupId: v.group.trim(),
+    flags: v.flags,
+  };
+}
+
+function metadataOf(item: Item | undefined): ItemMetadata | undefined {
+  return item
+    ? {
+        title: item.title,
+        sortKey: item.sortKey,
+        description: item.description,
+        facetId: item.facetId,
+        groupId: item.groupId,
+        flags: item.flags,
+      }
+    : undefined;
+}
+
 @Component({
   selector: 'cadmus-item-editor',
   templateUrl: './item-editor.component.html',
@@ -97,7 +162,8 @@ import { EnvService } from '@myrmidon/ngx-tools';
     MatProgressBar,
     MatTabGroup,
     MatTab,
-    ReactiveFormsModule,
+    FormField,
+    FormRoot,
     MatFormField,
     MatLabel,
     MatInput,
@@ -153,16 +219,16 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   public readonly checkedFlagIds: Signal<string[]>;
 
   // new part form
-  public newPartType: FormControl<PartDefinition | null>;
-  public newPart: FormGroup;
-  // item metadata form
-  public title: FormControl<string | null>;
-  public sortKey: FormControl<string | null>;
-  public description: FormControl<string | null>;
-  public facetCtrl: FormControl<string | null>;
-  public group: FormControl<string | null>;
-  public flags: FormControl<number>;
-  public metadata: FormGroup;
+  public readonly newPart = form(
+    signal<{ newPartType: PartDefinition | null }>({ newPartType: null }),
+    (path) => {
+      required(path.newPartType);
+    },
+  );
+
+  // item metadata form: derived from the edited item
+  private readonly _metadata: WritableSignal<ItemMetadataControls>;
+  public readonly metadata: FieldTree<ItemMetadataControls>;
 
   constructor(
     public itemLookupService: ItemRefLookupService,
@@ -179,7 +245,6 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     private _userLevelService: UserLevelService,
     private _messaging: MessagingService,
     private _envService: EnvService,
-    _formBuilder: FormBuilder,
   ) {
     this.id.set(this._route.snapshot.params['id']);
     if (this.id() === 'new') {
@@ -189,38 +254,6 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     this.hasMetadataBuilders.set(
       String(this._envService.get('hasMetadataBuilders')) === 'true',
     );
-
-    // new part form
-    this.newPartType = _formBuilder.control(null, Validators.required);
-    this.newPart = _formBuilder.group({
-      newPartType: this.newPartType,
-    });
-
-    // item metadata form
-    this.title = _formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.sortKey = _formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.sortKey.disable();
-    this.description = _formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(1000),
-    ]);
-    this.facetCtrl = _formBuilder.control(null, Validators.required);
-    this.group = _formBuilder.control(null, Validators.maxLength(100));
-    this.flags = _formBuilder.control(0, { nonNullable: true });
-    this.metadata = _formBuilder.group({
-      title: this.title,
-      sortKey: this.sortKey,
-      description: this.description,
-      facet: this.facetCtrl,
-      group: this.group,
-      flags: this.flags,
-    });
 
     // signals from repositories
     this.item = toSignal(this._repository.item$);
@@ -260,8 +293,66 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       return this._userLevelService.getCurrentUserLevel();
     });
 
-    // flags signal (tracks the flags form control value)
-    this._flagsValue = toSignal(this.flags.valueChanges, { initialValue: 0 });
+    // item metadata form. The live draft is kept when the same item is
+    // reloaded with unchanged metadata, and on the echo of our own save;
+    // otherwise (another item, or a saved item coming back different, e.g.
+    // with a new sort key computed by the server) it is rebuilt.
+    this._metadata = linkedSignal<Item | undefined, ItemMetadataControls>({
+      source: this.item,
+      computation: (item, previous) =>
+        previous &&
+        // the same item reloaded with unchanged metadata (e.g. after a
+        // part operation): keep any unsaved edits
+        ((item?.id === previous.source?.id &&
+          JSON.stringify(metadataOf(item)) ===
+            JSON.stringify(metadataOf(previous.source))) ||
+          // the echo of our own save
+          JSON.stringify(metadataOf(item)) ===
+            JSON.stringify(toMetadata(previous.value)))
+          ? previous.value
+          : toMetadataDraft(item),
+    });
+    this.metadata = form(
+      this._metadata,
+      (path) => {
+        required(path.title);
+        maxLength(path.title, 500);
+        // the sort key is computed by the server
+        disabled(path.sortKey);
+        required(path.sortKey);
+        maxLength(path.sortKey, 500);
+        required(path.description);
+        maxLength(path.description, 1000);
+        required(path.facet);
+        maxLength(path.group, 100);
+      },
+      {
+        // this is a real submission root: the save button and Enter in its
+        // text inputs submit the item to the server
+        submission: {
+          action: async () => {
+            this.save();
+            return undefined;
+          },
+        },
+      },
+    );
+
+    // once the draft mirrors the edited item again, clear interaction state
+    effect(() => {
+      const draft = this._metadata();
+      untracked(() => {
+        if (
+          JSON.stringify(draft) ===
+          JSON.stringify(toMetadataDraft(this.item()))
+        ) {
+          this.metadata().reset();
+        }
+      });
+    });
+
+    // flags signal (tracks the flags field value)
+    this._flagsValue = computed(() => this.metadata.flags().value());
 
     // flags for FlagSetComponent: exclude admin flags for non-admins
     this.flagSetFlags = computed<Flag[]>(() =>
@@ -287,11 +378,6 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
         .filter((def) => (value & def.id) !== 0)
         .map((def) => String(def.id));
     });
-
-    // update the metadata form whenever the item changes
-    effect(() => {
-      this.updateMetadataForm(this.item());
-    });
   }
 
   public ngOnInit(): void {
@@ -299,21 +385,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public canDeactivate(): boolean | Observable<boolean> {
-    return !this.metadata.dirty;
-  }
-
-  private updateMetadataForm(item?: Item): void {
-    if (!item) {
-      this.metadata.reset();
-    } else {
-      this.title.setValue(item.title);
-      this.sortKey.setValue(item.sortKey);
-      this.description.setValue(item.description);
-      this.facetCtrl.setValue(item.facetId ?? null);
-      this.group.setValue(item.groupId ?? null);
-      this.flags.setValue(item.flags);
-      this.metadata.markAsPristine();
-    }
+    return !this.metadata().dirty();
   }
 
   /**
@@ -325,7 +397,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     let value = 0;
     // non-admins cannot change admin flags: preserve their current bits
     if (this.userLevel() < 4) {
-      const current = this.flags.value;
+      const current = this.metadata.flags().value();
       for (const def of this.flagDefinitions()) {
         if (def.isAdmin && (current & def.id) !== 0) {
           value |= def.id;
@@ -335,8 +407,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     for (const id of ids) {
       value |= Number(id);
     }
-    this.flags.setValue(value);
-    this.flags.markAsDirty();
+    this.metadata.flags().value.set(value);
+    this.metadata.flags().markAsDirty();
   }
 
   public getTypeIdName(typeId: string): string {
@@ -361,32 +433,23 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public save(): void {
-    if (this.busy() || !this.metadata.valid) {
+    if (this.busy() || !this.metadata().valid()) {
       return;
     }
     const currentItem = this._repository.getItem();
     if (!currentItem) {
       return;
     }
-    const item = { ...currentItem };
-    item.title = this.title.value?.trim() || '';
-    item.sortKey = this.sortKey.value?.trim() || '';
-    item.description = this.description.value?.trim() || '';
-    item.facetId = this.facetCtrl.value?.trim() || '';
-    item.groupId = this.group.value?.trim() || '';
-    item.flags = this.flags.value;
+    const item = { ...currentItem, ...toMetadata(this._metadata()) };
 
     this.busy.set(true);
     this._repository
       .save(item as Item)
       .then((saved) => {
         this._messaging.sendMessage(MESSAGE_ITEM_LIST_REPOSITORY_RESET);
-        // mark form pristine immediately: in a zoneless app the effect that
-        // calls updateMetadataForm (and thus markAsPristine) is scheduled
-        // asynchronously, so without this explicit call the pending-changes
-        // guard would still see a dirty form and prompt the user even though
-        // the item was just saved successfully.
-        this.metadata.markAsPristine();
+        // clear interaction state immediately, so that the pending-changes
+        // guard does not prompt the user for an item just saved
+        this.metadata().reset();
         // reload to force change in page URL for new items
         if (!item.id) {
           this.id.set(saved.id);
@@ -421,7 +484,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public addPart(def?: PartDefinition): void {
-    if (!def && !this.newPartType.valid) {
+    if (!def && !this.newPart().valid()) {
       return;
     }
     if (!this.id()) {
@@ -430,8 +493,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       });
       return;
     }
-    const typeId = def ? def.typeId : this.newPartType.value!.typeId;
-    const roleId = def ? def.roleId : this.newPartType.value!.roleId;
+    const typeId = def ? def.typeId : this.newPart.newPartType().value()!.typeId;
+    const roleId = def ? def.roleId : this.newPart.newPartType().value()!.roleId;
 
     if (this.partExists(typeId, roleId)) {
       return;
@@ -544,7 +607,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       if (!targetItem || part.itemId === targetItem.id) {
         return;
       }
-      if (this.facetCtrl.value !== targetItem.facetId) {
+      if (this.metadata.facet().value() !== targetItem.facetId) {
         this._snackbar.open(
           'Cannot copy part to an item with a different facet',
           'OK',
@@ -623,9 +686,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       next: (title) => {
         const result = title['T'];
         if (result) {
-          this.title.setValue(result);
-          this.title.markAsDirty();
-          this.title.updateValueAndValidity();
+          this.metadata.title().value.set(result);
+          this.metadata.title().markAsDirty();
         } else {
           this._snackbar.open('No title generated', 'OK', { duration: 3000 });
         }
@@ -649,9 +711,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       next: (description) => {
         const result = description['D'];
         if (result) {
-          this.description.setValue(result);
-          this.description.markAsDirty();
-          this.description.updateValueAndValidity();
+          this.metadata.description().value.set(result);
+          this.metadata.description().markAsDirty();
         } else {
           this._snackbar.open('No description generated', 'OK', {
             duration: 3000,

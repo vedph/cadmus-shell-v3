@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component, effect, input, model, output, signal } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  linkedSignal,
+  model,
+  output,
+  untracked,
+} from '@angular/core';
+import { FormField, form, maxLength, required } from '@angular/forms/signals';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -20,6 +23,42 @@ import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
 
 /**
+ * The editable shape behind the form. Text fields use '' as their empty
+ * value, as they are bound to native inputs (tag may also be bound to a
+ * mat-select, whose "no tag" option has value '').
+ */
+interface GraphNodeControls {
+  uri: string;
+  label: string;
+  isClass: boolean;
+  tag: string;
+}
+
+function toDraft(node: UriNode | undefined): GraphNodeControls {
+  return {
+    uri: node?.uri || '',
+    label: node?.label || '',
+    isClass: !!node?.isClass,
+    tag: node?.tag || '',
+  };
+}
+
+/**
+ * Build a node from the draft, keeping the ID and source type of the
+ * edited node if any.
+ */
+function toNode(v: GraphNodeControls, node: UriNode | undefined): UriNode {
+  return {
+    id: node?.id || 0,
+    sourceType: node?.sourceType || NodeSourceType.User,
+    uri: v.uri.trim(),
+    label: v.label.trim(),
+    isClass: v.isClass,
+    tag: v.tag.trim() || undefined,
+  };
+}
+
+/**
  * Graph node editor.
  */
 @Component({
@@ -27,8 +66,7 @@ import { UriNode, NodeSourceType } from '@myrmidon/cadmus-api';
   templateUrl: './graph-node-editor.component.html',
   styleUrls: ['./graph-node-editor.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatInput,
@@ -57,61 +95,44 @@ export class GraphNodeEditorComponent {
    */
   public readonly editorClose = output();
 
-  public readonly isNew = signal<boolean>(true);
+  /**
+   * True if the edited node is new (it has no ID).
+   */
+  public readonly isNew = computed<boolean>(() => !this.node()?.id);
 
-  public uri: FormControl<string | null>;
-  public label: FormControl<string | null>;
-  public isClass: FormControl<boolean>;
-  public tag: FormControl<string | null>;
-  public form: FormGroup;
-
-  constructor(formBuilder: FormBuilder) {
-    // form
-    this.uri = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.label = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.isClass = formBuilder.control(false, { nonNullable: true });
-    this.tag = formBuilder.control(null, Validators.maxLength(50));
-    this.form = formBuilder.group({
-      uri: this.uri,
-      label: this.label,
-      isClass: this.isClass,
-      tag: this.tag,
-    });
-
-    effect(() => {
-      this.updateForm(this.node());
-    });
-  }
-
-  private updateForm(node?: UriNode): void {
-    if (!node) {
-      this.form.reset();
-      this.isNew.set(true);
-      return;
+  /**
+   * The editable draft, derived from node. On the echo of our own save the
+   * live draft is kept, as toNode() normalizes (trims) its values.
+   */
+  private readonly _draft = linkedSignal<UriNode | undefined, GraphNodeControls>(
+    {
+      source: () => this.node(),
+      computation: (node, previous) =>
+        previous &&
+        JSON.stringify(node) === JSON.stringify(toNode(previous.value, node))
+          ? previous.value
+          : toDraft(node),
     }
-    this.uri.setValue(node.uri);
-    this.label.setValue(node.label);
-    this.isClass.setValue(node.isClass ? true : false);
-    this.tag.setValue(node.tag || null);
-    this.isNew.set(node.id ? false : true);
-    this.form.markAsPristine();
-  }
+  );
 
-  private getNode(): UriNode {
-    return {
-      id: this.node()?.id || 0,
-      sourceType: this.node()?.sourceType || NodeSourceType.User,
-      uri: this.uri.value?.trim() || '',
-      label: this.label.value?.trim() || '',
-      isClass: this.isClass.value,
-      tag: this.tag.value?.trim(),
-    };
+  public readonly form = form(this._draft, (path) => {
+    required(path.uri);
+    maxLength(path.uri, 500);
+    required(path.label);
+    maxLength(path.label, 500);
+    maxLength(path.tag, 50);
+  });
+
+  constructor() {
+    // once the draft mirrors the bound node again, clear interaction state
+    effect(() => {
+      const draft = this._draft();
+      untracked(() => {
+        if (JSON.stringify(draft) === JSON.stringify(toDraft(this.node()))) {
+          this.form().reset();
+        }
+      });
+    });
   }
 
   public cancel(): void {
@@ -119,9 +140,11 @@ export class GraphNodeEditorComponent {
   }
 
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
-    this.node.set(this.getNode());
+    this.node.set(toNode(this._draft(), this.node()));
+    this.form().reset();
   }
 }

@@ -69,26 +69,26 @@ describe('FacetDefinitionEditorComponent', () => {
       );
       fixture.detectChanges();
 
-      expect(component.id.value).toBe('f1');
-      expect(component.label.value).toBe('Facet 1');
-      expect(component.colorKey.value).toBe('ff0000');
-      expect(component.description.value).toBe('desc');
-      expect(component.partDefinitions.value.map((p) => p.typeId)).toEqual([
+      expect(component.form.id().value()).toBe('f1');
+      expect(component.form.label().value()).toBe('Facet 1');
+      expect(component.form.colorKey().value()).toBe('ff0000');
+      expect(component.form.description().value()).toBe('desc');
+      expect(component.form.partDefinitions().value().map((p) => p.typeId)).toEqual([
         'a',
         'b',
       ]);
-      expect(component.form.pristine).toBe(true);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should reset the form when the definition becomes undefined', () => {
       fixture.componentRef.setInput('definition', makeFacet());
       fixture.detectChanges();
-      expect(component.id.value).toBe('f1');
+      expect(component.form.id().value()).toBe('f1');
 
       fixture.componentRef.setInput('definition', undefined);
       fixture.detectChanges();
 
-      expect(component.id.value).toBe('');
+      expect(component.form.id().value()).toBe('');
     });
   });
 
@@ -127,30 +127,30 @@ describe('FacetDefinitionEditorComponent', () => {
       component.addPartDefinition();
       component.savePartDefinition(makePart({ typeId: 'p1' }));
 
-      expect(component.partDefinitions.value).toEqual([
+      expect(component.form.partDefinitions().value()).toEqual([
         expect.objectContaining({ typeId: 'p1', sortKey: '01' }),
       ]);
-      expect(component.partDefinitions.dirty).toBe(true);
+      expect(component.form.partDefinitions().dirty()).toBe(true);
       expect(component.edited()).toBeUndefined();
     });
 
     it('savePartDefinition should replace the entry at editedIndex when editing', () => {
-      component.partDefinitions.setValue([
+      component.form.partDefinitions().value.set([
         makePart({ typeId: 'a' }),
         makePart({ typeId: 'b' }),
       ]);
-      component.editPartDefinition(component.partDefinitions.value[1], 1);
+      component.editPartDefinition(component.form.partDefinitions().value()[1], 1);
 
       component.savePartDefinition(makePart({ typeId: 'b2' }));
 
-      expect(component.partDefinitions.value.map((p) => p.typeId)).toEqual([
+      expect(component.form.partDefinitions().value().map((p) => p.typeId)).toEqual([
         'a',
         'b2',
       ]);
     });
 
     it('deletePartDefinition should remove the entry after confirmation', () => {
-      component.partDefinitions.setValue([
+      component.form.partDefinitions().value.set([
         makePart({ typeId: 'a' }),
         makePart({ typeId: 'b' }),
       ]);
@@ -158,24 +158,24 @@ describe('FacetDefinitionEditorComponent', () => {
       component.deletePartDefinition(0);
 
       expect(dialogService.confirm).toHaveBeenCalled();
-      expect(component.partDefinitions.value.map((p) => p.typeId)).toEqual([
+      expect(component.form.partDefinitions().value().map((p) => p.typeId)).toEqual([
         'b',
       ]);
-      expect(component.partDefinitions.dirty).toBe(true);
+      expect(component.form.partDefinitions().dirty()).toBe(true);
     });
 
     it('deletePartDefinition should do nothing when not confirmed', () => {
       dialogService.confirm.mockReturnValue(of(false));
-      component.partDefinitions.setValue([makePart({ typeId: 'a' })]);
+      component.form.partDefinitions().value.set([makePart({ typeId: 'a' })]);
 
       component.deletePartDefinition(0);
 
-      expect(component.partDefinitions.value.length).toBe(1);
+      expect(component.form.partDefinitions().value().length).toBe(1);
     });
 
     it('deletePartDefinition should close the editor when deleting the currently edited entry', () => {
-      component.partDefinitions.setValue([makePart({ typeId: 'a' })]);
-      component.editPartDefinition(component.partDefinitions.value[0], 0);
+      component.form.partDefinitions().value.set([makePart({ typeId: 'a' })]);
+      component.editPartDefinition(component.form.partDefinitions().value()[0], 0);
 
       component.deletePartDefinition(0);
 
@@ -185,38 +185,38 @@ describe('FacetDefinitionEditorComponent', () => {
 
     describe('movePartDefinitionUp', () => {
       it('should do nothing at index 0', () => {
-        component.partDefinitions.setValue([
+        component.form.partDefinitions().value.set([
           makePart({ typeId: 'a' }),
           makePart({ typeId: 'b' }),
         ]);
         component.movePartDefinitionUp(0);
-        expect(component.partDefinitions.value.map((p) => p.typeId)).toEqual([
+        expect(component.form.partDefinitions().value().map((p) => p.typeId)).toEqual([
           'a',
           'b',
         ]);
-        expect(component.partDefinitions.dirty).toBe(false);
+        expect(component.form.partDefinitions().dirty()).toBe(false);
       });
 
       it('should swap the entry with its predecessor and re-key sort order', () => {
-        component.partDefinitions.setValue([
+        component.form.partDefinitions().value.set([
           makePart({ typeId: 'a' }),
           makePart({ typeId: 'b' }),
         ]);
         component.movePartDefinitionUp(1);
-        expect(component.partDefinitions.value.map((p) => p.typeId)).toEqual([
+        expect(component.form.partDefinitions().value().map((p) => p.typeId)).toEqual([
           'b',
           'a',
         ]);
-        expect(component.partDefinitions.value[0].sortKey).toBe('01');
-        expect(component.partDefinitions.value[1].sortKey).toBe('02');
+        expect(component.form.partDefinitions().value()[0].sortKey).toBe('01');
+        expect(component.form.partDefinitions().value()[1].sortKey).toBe('02');
       });
 
       it('should keep editedIndex tracking the moved entry', () => {
-        component.partDefinitions.setValue([
+        component.form.partDefinitions().value.set([
           makePart({ typeId: 'a' }),
           makePart({ typeId: 'b' }),
         ]);
-        component.editPartDefinition(component.partDefinitions.value[1], 1);
+        component.editPartDefinition(component.form.partDefinitions().value()[1], 1);
         component.movePartDefinitionUp(1);
         expect(component.editedIndex()).toBe(0);
       });
@@ -224,29 +224,29 @@ describe('FacetDefinitionEditorComponent', () => {
 
     describe('movePartDefinitionDown', () => {
       it('should do nothing at the last index', () => {
-        component.partDefinitions.setValue([makePart({ typeId: 'a' })]);
+        component.form.partDefinitions().value.set([makePart({ typeId: 'a' })]);
         component.movePartDefinitionDown(0);
-        expect(component.partDefinitions.dirty).toBe(false);
+        expect(component.form.partDefinitions().dirty()).toBe(false);
       });
 
       it('should swap the entry with its successor', () => {
-        component.partDefinitions.setValue([
+        component.form.partDefinitions().value.set([
           makePart({ typeId: 'a' }),
           makePart({ typeId: 'b' }),
         ]);
         component.movePartDefinitionDown(0);
-        expect(component.partDefinitions.value.map((p) => p.typeId)).toEqual([
+        expect(component.form.partDefinitions().value().map((p) => p.typeId)).toEqual([
           'b',
           'a',
         ]);
       });
 
       it('should keep editedIndex tracking the moved entry', () => {
-        component.partDefinitions.setValue([
+        component.form.partDefinitions().value.set([
           makePart({ typeId: 'a' }),
           makePart({ typeId: 'b' }),
         ]);
-        component.editPartDefinition(component.partDefinitions.value[0], 0);
+        component.editPartDefinition(component.form.partDefinitions().value()[0], 0);
         component.movePartDefinitionDown(0);
         expect(component.editedIndex()).toBe(1);
       });
@@ -256,8 +256,8 @@ describe('FacetDefinitionEditorComponent', () => {
   describe('onColorPick', () => {
     it('should strip the leading # and mark the control dirty', () => {
       component.onColorPick('#aabbcc');
-      expect(component.colorKey.value).toBe('aabbcc');
-      expect(component.colorKey.dirty).toBe(true);
+      expect(component.form.colorKey().value()).toBe('aabbcc');
+      expect(component.form.colorKey().dirty()).toBe(true);
     });
   });
 
@@ -273,16 +273,16 @@ describe('FacetDefinitionEditorComponent', () => {
   describe('save', () => {
     it('should mark all as touched and not update the model when the form is invalid', () => {
       component.save();
-      expect(component.id.touched).toBe(true);
+      expect(component.form.id().touched()).toBe(true);
       expect(component.definition()).toBeUndefined();
     });
 
     it('should update the definition model with trimmed values when valid', () => {
-      component.id.setValue('  f1  ');
-      component.label.setValue('  Label  ');
-      component.colorKey.setValue('aabbcc');
-      component.description.setValue('  d  ');
-      component.partDefinitions.setValue([makePart()]);
+      component.form.id().value.set('  f1  ');
+      component.form.label().value.set('  Label  ');
+      component.form.colorKey().value.set('aabbcc');
+      component.form.description().value.set('  d  ');
+      component.form.partDefinitions().value.set([makePart()]);
 
       component.save();
 
@@ -293,18 +293,85 @@ describe('FacetDefinitionEditorComponent', () => {
         description: 'd',
         partDefinitions: [makePart()],
       });
-      expect(component.form.pristine).toBe(true);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should keep the form dirty when pristine=false', () => {
-      component.id.setValue('f1');
-      component.label.setValue('Label');
-      component.partDefinitions.setValue([makePart()]);
-      component.form.markAsDirty();
+      component.form.id().value.set('f1');
+      component.form.label().value.set('Label');
+      component.form.partDefinitions().value.set([makePart()]);
+      component.form().markAsDirty();
 
       component.save(false);
 
-      expect(component.form.pristine).toBe(false);
+      expect(component.form().dirty()).toBe(true);
+    });
+  });
+
+  describe('signal form', () => {
+    it('requires at least 1 part definition', () => {
+      component.form.id().value.set('f1');
+      component.form.label().value.set('Label');
+      expect(component.form.partDefinitions().value()).toEqual([]);
+      expect(component.form.partDefinitions().getError('required')).toBeTruthy();
+      expect(component.form().invalid()).toBe(true);
+
+      component.form.partDefinitions().value.set([makePart()]);
+      expect(component.form().valid()).toBe(true);
+    });
+
+    it('neither tags the received nor emits tagged part definitions', () => {
+      const received = makePart({ typeId: 'p1', sortKey: '01' });
+      fixture.componentRef.setInput('definition', {
+        id: 'f1',
+        label: 'Label',
+        colorKey: 'aabbcc',
+        description: '',
+        partDefinitions: [received],
+      });
+      fixture.detectChanges();
+      component.movePartDefinitionDown(0);
+      component.addPartDefinition();
+      component.savePartDefinition(makePart({ typeId: 'p2' }));
+      fixture.detectChanges();
+
+      component.save();
+
+      expect(Object.getOwnPropertySymbols(received).length).toBe(0);
+      const emitted = component.definition()!.partDefinitions;
+      expect(emitted.map((p) => p.typeId)).toEqual(['p1', 'p2']);
+      expect(
+        emitted.every((p) => Object.getOwnPropertySymbols(p).length === 0)
+      ).toBe(true);
+    });
+
+    it('keeps the typed text when its own save echoes back normalized', () => {
+      fixture.componentRef.setInput('definition', {
+        id: 'f1',
+        label: 'Label',
+        colorKey: 'aabbcc',
+        description: '',
+        partDefinitions: [makePart()],
+      });
+      fixture.detectChanges();
+      component.form.label().value.set('abc ');
+      component.save(false);
+      fixture.detectChanges();
+
+      expect(component.definition()?.label).toBe('abc');
+      expect(component.form.label().value()).toBe('abc ');
+    });
+
+    it('renders no <form>, including in the nested part definition editor', () => {
+      component.addPartDefinition();
+      fixture.detectChanges();
+      // the parts tab is not rendered until selected, but the nested
+      // editor has its own spec for this; here check the outer one
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const save: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'button[mattooltip="Accept changes"]'
+      );
+      expect(save.type).toBe('button');
     });
   });
 });

@@ -1,9 +1,9 @@
-<form [formGroup]="form" (submit)="apply()" [attr.disabled]="disabled()">
+<div [attr.disabled]="disabled()">
   <!-- paginator -->
   @if (hasPager()) {
   <mat-paginator
-    [length]="total"
-    [pageSize]="pageSize.value || 10"
+    [length]="total()"
+    [pageSize]="form.pageSize().value() || 10"
     [pageSizeOptions]="[5, 10, 20]"
     (page)="onPageChange($event)"
     aria-label="Select page"
@@ -13,35 +13,50 @@
   <!-- label -->
   <div>
     <mat-form-field>
-      <input matInput [formControl]="label" placeholder="label" />
+      <input
+        matInput
+        [formField]="form.label"
+        placeholder="label"
+        (keydown.enter)="!disabled() && apply()"
+      />
     </mat-form-field>
   </div>
   <!-- uid -->
   <div>
     <mat-form-field>
-      <input matInput [formControl]="uid" placeholder="UID" />
+      <input
+        matInput
+        [formField]="form.uid"
+        placeholder="UID"
+        (keydown.enter)="!disabled() && apply()"
+      />
     </mat-form-field>
   </div>
   <!-- isClass -->
   <div>
     <mat-form-field>
-      <mat-select [formControl]="isClass" placeholder="class">
-        <mat-option [value]="0">(any)</mat-option>
-        <mat-option [value]="1">not-class</mat-option>
-        <mat-option [value]="2">class</mat-option>
+      <mat-select [formField]="form.isClass" placeholder="class">
+        <mat-option [value]="null">(any)</mat-option>
+        <mat-option [value]="true">class</mat-option>
+        <mat-option [value]="false">not-class</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
   <!-- tag -->
   <div>
     <mat-form-field>
-      <input matInput [formControl]="tag" placeholder="tag" />
+      <input
+        matInput
+        [formField]="form.tag"
+        placeholder="tag"
+        (keydown.enter)="!disabled() && apply()"
+      />
     </mat-form-field>
   </div>
   <!-- sourceType -->
   <div>
     <mat-form-field>
-      <mat-select [formControl]="sourceType" placeholder="source type">
+      <mat-select [formField]="form.sourceType" placeholder="source type">
         <mat-option [value]="null">(any)</mat-option>
         <mat-option [value]="0">user</mat-option>
         <mat-option [value]="1">item</mat-option>
@@ -55,11 +70,16 @@
     <!-- sid -->
     <div>
       <mat-form-field>
-        <input matInput [formControl]="sid" placeholder="SID" />
+        <input
+          matInput
+          [formField]="form.sid"
+          placeholder="SID"
+          (keydown.enter)="!disabled() && apply()"
+        />
       </mat-form-field>
 
       <!-- isSidPrefix -->
-      <mat-checkbox [formControl]="isSidPrefix">prefix</mat-checkbox>
+      <mat-checkbox [formField]="form.isSidPrefix">prefix</mat-checkbox>
     </div>
   </div>
   <!-- classes -->
@@ -73,9 +93,9 @@
         (itemChange)="onClassAdd($event)"
       />
 
-      @if (classes.value.length) {
+      @if (form.classes().value().length) {
       <mat-chip-listbox>
-        @for (node of classes.value; track node.id) {
+        @for (node of form.classes().value(); track node.id) {
         <mat-chip-option
           [removable]="true"
           (removed)="onClassRemove(node)"
@@ -107,12 +127,13 @@
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
-      type="submit"
+      type="button"
       mat-icon-button
       [disabled]="disabled()"
       matTooltip="Apply filters"
+      (click)="apply()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

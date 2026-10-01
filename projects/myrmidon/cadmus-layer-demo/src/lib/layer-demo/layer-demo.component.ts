@@ -6,12 +6,12 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import {
-  FormGroup,
-  FormControl,
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FormField,
+  FormRoot,
+  form,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 
 import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
@@ -34,8 +34,8 @@ import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
     MatCard,
     MatCardHeader,
     MatCardContent,
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
+    FormRoot,
     MatFormField,
     MatLabel,
     MatInput,
@@ -55,24 +55,33 @@ export class LayerDemoComponent {
   public readonly userLocation = signal<TokenLocation | undefined>(undefined);
   public readonly textSize = signal<number>(14);
 
-  // form
-  public rendition: FormGroup;
-  public text: FormControl<string | null>;
-  public location: FormControl<string | null>;
+  /**
+   * The rendition form. This page is a submission root: submitting it
+   * (the render button, or Enter in the location input) renders the text.
+   * As with the old ngSubmit, rendering does not depend on validity: the
+   * location is required only to add it.
+   */
+  public readonly rendition = form(
+    signal({
+      text: 'alpha beta\ngamma\ndelta epsilon waw\nzeta',
+      location: '1.2@2x2',
+    }),
+    (path) => {
+      maxLength(path.text, 1000);
+      required(path.location);
+    },
+    {
+      submission: {
+        action: async () => {
+          this.render();
+          return undefined;
+        },
+        ignoreValidators: 'all',
+      },
+    },
+  );
 
-  constructor(
-    formBuilder: FormBuilder,
-    private _textLayerService: TextLayerService,
-  ) {
-    this.text = formBuilder.control(
-      'alpha beta\ngamma\ndelta epsilon waw\nzeta',
-    );
-    this.location = formBuilder.control('1.2@2x2');
-    this.rendition = formBuilder.group({
-      text: this.text,
-      location: this.location,
-    });
-  }
+  constructor(private _textLayerService: TextLayerService) {}
 
   public makeLarger(): void {
     const size = this.textSize() + 2;
@@ -106,10 +115,11 @@ export class LayerDemoComponent {
   }
 
   public addLocation(): void {
-    if (!this.location.value) {
+    const location = this.rendition.location().value();
+    if (!location) {
       return;
     }
-    const loc = TokenLocation.parse(this.location.value);
+    const loc = TokenLocation.parse(location);
     if (!loc) {
       return;
     }
@@ -152,22 +162,22 @@ export class LayerDemoComponent {
   }
 
   public render(): void {
-    if (!this.text.value) {
+    const text = this.rendition.text().value();
+    if (!text) {
       return;
     }
-    this.result.set(
-      this._textLayerService.render(this.text.value, this.locations()),
-    );
+    this.result.set(this._textLayerService.render(text, this.locations()));
   }
 
   public getLocationForNew(): void {
-    if (!this.text.value) {
+    const text = this.rendition.text().value();
+    if (!text) {
       return;
     }
     this.userLocation.set(
       this._textLayerService.getSelectedLocationForNew(
         this._textLayerService.getSelectedRange()!,
-        this.text.value,
+        text,
       ) || undefined,
     );
   }

@@ -25,7 +25,8 @@
     "@myrmidon/cadmus-refs-lookup": "^11.0.0",
     "@myrmidon/cadmus-api": "^15.0.1",
     "@myrmidon/cadmus-graph-ui": "^16.0.0",
-    "@myrmidon/cadmus-graph-ui-ex": "^17.0.0"
+    "@myrmidon/cadmus-graph-ui-ex": "^17.0.0",
+    "@myrmidon/cadmus-core": "^13.0.1"
   },
   "sideEffects": false
 }

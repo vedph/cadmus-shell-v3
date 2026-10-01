@@ -8,17 +8,12 @@ import {
   AfterViewInit,
   output,
   input,
-  effect,
+  linkedSignal,
   signal,
 } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { FormField, form, required } from '@angular/forms/signals';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -50,6 +45,16 @@ import {
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { Subscription } from 'rxjs';
 
+/**
+ * The editable shape behind the form. The query uses '' as its empty value,
+ * as it is bound to a native textarea.
+ */
+interface ItemQueryControls {
+  queryCtl: string;
+  history: string | null;
+  partDef: string | null;
+}
+
 interface PartDefViewModel {
   typeId: string;
   name: string;
@@ -67,7 +72,7 @@ interface PartDefViewModel {
   imports: [
     MatCard,
     MatCardContent,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatInput,
@@ -88,11 +93,6 @@ interface PartDefViewModel {
 })
 export class ItemQueryComponent implements OnInit, AfterViewInit {
   private _sub?: Subscription;
-  public form: FormGroup;
-
-  public queryCtl: FormControl<string | null>;
-  public history: FormControl<string | null>;
-  public partDef: FormControl<string | null>;
 
   @ViewChild('queryta', { static: false })
   public queryElement?: ElementRef<HTMLElement>;
@@ -112,30 +112,53 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
   public readonly pinDefs = signal<DataPinDefinition[]>([]);
   public readonly loadingPinDefs = signal<boolean>(false);
 
+  /**
+   * The editable draft: the query text follows the query input, while the
+   * history and part definition pickers are not related to it and keep
+   * their values.
+   */
+  private readonly _draft = linkedSignal<string | undefined, ItemQueryControls>(
+    {
+      source: () => this.query(),
+      computation: (query, previous) => ({
+        queryCtl: query || '',
+        history: previous?.value.history ?? null,
+        partDef: previous?.value.partDef ?? null,
+      }),
+    },
+  );
+
+  public readonly form = form(this._draft, (path) => {
+    required(path.queryCtl);
+  });
+
   constructor(
-    formBuilder: FormBuilder,
     private _clipboard: Clipboard,
     private _appRepository: AppRepository,
     private _itemService: ItemService,
   ) {
-    this.queryCtl = formBuilder.control(null, Validators.required);
-    this.history = formBuilder.control(null);
-    this.partDef = formBuilder.control(null);
-    this.form = formBuilder.group({
-      queryCtl: this.queryCtl,
-      history: this.history,
-      partDef: this.partDef,
-    });
-
-    effect(() => {
-      this.updateForm(this.query());
-    });
-  }
-
-  private updateForm(query?: string) {
-    this.queryCtl.setValue(query || null);
-    this.queryCtl.markAsDirty();
-    this.queryCtl.updateValueAndValidity();
+    // when selected part def changes, load its pins defs. Unlike the old
+    // valueChanges, toObservable also emits the initial null: skip it
+    toObservable(this.form.partDef().value)
+      .pipe(
+        filter((id): id is string => !!id),
+        debounceTime(200),
+        distinctUntilChanged(),
+        takeUntilDestroyed(),
+      )
+      .subscribe((id) => {
+        this.loadingPinDefs.set(true);
+        this._itemService.getDataPinDefinitions(id).subscribe({
+          next: (defs) => {
+            this.loadingPinDefs.set(false);
+            this.pinDefs.set(defs);
+          },
+          error: (err) => {
+            console.error(err);
+            this.loadingPinDefs.set(false);
+          },
+        });
+      });
   }
 
   private getTypeId(def: PartDefinition): string {
@@ -178,22 +201,6 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     this._sub = this._appRepository.facets$.subscribe((facets) => {
       this.updatePartDefs(facets);
     });
-    // when selected part def changes, load its pins defs
-    this.partDef.valueChanges
-      .pipe(debounceTime(200), distinctUntilChanged())
-      .subscribe((id) => {
-        this.loadingPinDefs.set(true);
-        this._itemService.getDataPinDefinitions(id!).subscribe({
-          next: (defs) => {
-            this.loadingPinDefs.set(false);
-            this.pinDefs.set(defs);
-          },
-          error: (err) => {
-            console.error(err);
-            this.loadingPinDefs.set(false);
-          },
-        });
-      });
     // ensure app data is loaded
     this._appRepository.load();
   }
@@ -214,15 +221,20 @@ export class ItemQueryComponent implements OnInit, AfterViewInit {
     if (!query) {
       return;
     }
-    this.queryCtl.setValue(query);
+    this.form.queryCtl().value.set(query);
     this.focusQuery();
   }
 
+  public clearQuery(): void {
+    this.form.queryCtl().value.set('');
+    this.form.queryCtl().reset();
+  }
+
   public submitQuery(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       return;
     }
-    this.querySubmit.emit(this.queryCtl.value!);
+    this.querySubmit.emit(this.form.queryCtl().value());
   }
 
   public pinTypeIdToString(id: number): string {

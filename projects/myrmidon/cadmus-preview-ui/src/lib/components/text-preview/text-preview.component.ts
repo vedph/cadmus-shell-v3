@@ -7,13 +7,7 @@ import {
   untracked,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  FormBuilder,
-  FormControl,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { FormField, form } from '@angular/forms/signals';
 import { forkJoin, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -58,8 +52,7 @@ export interface DecoratedLayerPartInfo extends LayerPartInfo {
     MatFormField,
     MatLabel,
     MatSelect,
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatOption,
     MatTabGroup,
     MatTab,
@@ -88,57 +81,30 @@ export class TextPreviewComponent {
   public readonly busy = signal<boolean>(false);
   public readonly item = signal<Item | undefined>(undefined);
 
-  public readonly selectedLayer: FormControl<DecoratedLayerPartInfo | null>;
-  public readonly selectedLayerValue: ReturnType<
-    typeof toSignal<DecoratedLayerPartInfo | null | undefined>
-  >;
+  /**
+   * The layer picker. Segments are (re)loaded when a layer gets selected,
+   * either by loadItem or by the user (see onLayerChange).
+   */
+  public readonly form = form(
+    signal<{ selectedLayer: DecoratedLayerPartInfo | null }>({
+      selectedLayer: null,
+    }),
+  );
 
   constructor(
     private _previewService: PreviewService,
     private _itemService: ItemService,
     private _appRepository: AppRepository,
     private _snackbar: MatSnackBar,
-    formBuilder: FormBuilder,
   ) {
-    // form
-    this.selectedLayer = formBuilder.control(null);
-    this.selectedLayerValue = toSignal(this.selectedLayer.valueChanges);
-
     // react to source changes
     effect(() => {
       const source = this.source();
-      console.log('[EFFECT-SOURCE] Triggered. source:', source);
       // Use untracked to prevent signal writes in loadItem from retriggering
       // Only track the source input signal
       untracked(() => {
-        console.log('[EFFECT-SOURCE] isLoading:', this._isLoading());
         if (!this._isLoading()) {
-          console.log('[EFFECT-SOURCE] Calling loadItem');
           this.loadItem(source);
-        } else {
-          console.log('[EFFECT-SOURCE] Skipped loadItem (loading)');
-        }
-      });
-    });
-
-    // react to selected layer changes
-    effect(() => {
-      const layer = this.selectedLayerValue();
-      console.log('[EFFECT-LAYER] Triggered. layer:', layer);
-      // Use untracked to read _isLoading without tracking it as a dependency
-      untracked(() => {
-        console.log('[EFFECT-LAYER] isLoading (untracked):', this._isLoading());
-        // Only load if we have a valid selection and not currently loading
-        if (!this._isLoading() && layer !== undefined) {
-          console.log('[EFFECT-LAYER] Calling loadLayer');
-          this.loadLayer();
-        } else {
-          console.log(
-            '[EFFECT-LAYER] Skipped loadLayer. isLoading:',
-            this._isLoading(),
-            'layer:',
-            layer,
-          );
         }
       });
     });
@@ -165,16 +131,13 @@ export class TextPreviewComponent {
   }
 
   private loadLayer(): void {
-    console.log('[loadLayer] Called');
-    const layer = this.selectedLayer.value;
+    const layer = this.form.selectedLayer().value();
     const layers = !layer || layer.id === 'all' ? this.layers() : [layer];
 
     if (this._isLoading()) {
-      console.log('[loadLayer] Aborted (already loading)');
       return;
     }
 
-    console.log('[loadLayer] Setting isLoading=true, starting request');
     this._isLoading.set(true);
     this.busy.set(true);
 
@@ -186,16 +149,13 @@ export class TextPreviewComponent {
       .pipe(take(1))
       .subscribe({
         next: (spans) => {
-          console.log('[loadLayer] Success, setting isLoading=false');
           this.busy.set(false);
           this._isLoading.set(false);
           // convert initial/final WS into mid dot
           this.adjustSpanWS(spans);
           this.segments.set(spans);
-          console.log('[loadLayer] Done');
         },
         error: (error) => {
-          console.log('[loadLayer] Error, setting isLoading=false');
           this.busy.set(false);
           this._isLoading.set(false);
           console.error(
@@ -209,22 +169,37 @@ export class TextPreviewComponent {
       });
   }
 
+  /**
+   * Compare layers by ID, so that the "all" option (a fresh object) and the
+   * loaded layers match the selected value.
+   */
+  public compareLayers(
+    a: DecoratedLayerPartInfo | null,
+    b: DecoratedLayerPartInfo | null,
+  ): boolean {
+    return a?.id === b?.id;
+  }
+
+  /**
+   * Handle the user picking a layer: mat-select emits selectionChange only
+   * for user interaction, after its value has been written to the field.
+   */
+  public onLayerChange(): void {
+    this.loadLayer();
+  }
+
   private loadItem(source?: PartPreviewSource): void {
-    console.log('[loadItem] Called with source:', source);
     if (this._isLoading()) {
-      console.log('[loadItem] Aborted (already loading)');
       return;
     }
 
     if (!source?.partId) {
-      console.log('[loadItem] No partId, clearing data');
       this.item.set(undefined);
       this.layers.set([]);
       this.segments.set([]);
       return;
     }
 
-    console.log('[loadItem] Setting isLoading=true, starting forkJoin');
     this._isLoading.set(true);
     this.busy.set(true);
 
@@ -235,7 +210,6 @@ export class TextPreviewComponent {
       .pipe(take(1))
       .subscribe({
         next: (result) => {
-          console.log('[loadItem] forkJoin success, setting isLoading=false');
           this.busy.set(false);
           this._isLoading.set(false);
           this.item.set(result.item || undefined);
@@ -243,25 +217,22 @@ export class TextPreviewComponent {
           this.layers.set(result.layers);
           // select layer if requested
           if (source!.layerId) {
-            console.log(
-              '[loadItem] Setting selectedLayer to specific layer:',
-              source!.layerId,
-            );
-            this.selectedLayer.setValue(
-              this.layers().find((l) => l.roleId === source!.layerId) || null,
-            );
-            // loadLayer will be called by the effect when selectedLayer changes
+            this.form
+              .selectedLayer()
+              .value.set(
+                this.layers().find((l) => l.roleId === source!.layerId) ||
+                  null,
+              );
           } else {
-            // set default "all" value to trigger initial load
-            console.log('[loadItem] Setting selectedLayer to "all"');
-            this.selectedLayer.setValue({
-              id: 'all',
-            } as DecoratedLayerPartInfo);
+            // set default "all" value
+            this.form
+              .selectedLayer()
+              .value.set({ id: 'all' } as DecoratedLayerPartInfo);
           }
-          console.log('[loadItem] Done');
+          // load the segments of the selected layer
+          this.loadLayer();
         },
         error: (error) => {
-          console.log('[loadItem] forkJoin error, setting isLoading=false');
           this.busy.set(false);
           this._isLoading.set(false);
           console.error(`Error previewing text part ${source!.partId}`, error);

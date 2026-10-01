@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, input, OnDestroy, OnInit } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  linkedSignal,
+  WritableSignal,
+} from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FieldTree, FormField, form, maxLength } from '@angular/forms/signals';
+import { Observable } from 'rxjs';
 
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -25,6 +25,37 @@ import { GraphTripleListRepository } from '../../state/graph-triple-list.reposit
 import { GraphNodeLookupService } from '../../services/graph-node-lookup.service';
 
 /**
+ * The editable shape behind the filter form. Text fields use '' as their
+ * empty value, as they are bound to native inputs.
+ */
+interface GraphTripleFilterControls {
+  literal: boolean;
+  objectLit: string;
+  sid: string;
+  sidPrefix: boolean;
+  tag: string;
+}
+
+/**
+ * The values of a cleared filter form.
+ */
+function makeEmptyDraft(): GraphTripleFilterControls {
+  return { literal: false, objectLit: '', sid: '', sidPrefix: false, tag: '' };
+}
+
+function toDraft(filter: TripleFilter): GraphTripleFilterControls {
+  return {
+    literal: !!filter.literalPattern,
+    objectLit: filter.literalPattern || '',
+    sid: filter.sid || '',
+    // sidPrefix is not part of TripleFilter: the old form never set it
+    // from the filter either
+    sidPrefix: false,
+    tag: filter.tag || '',
+  };
+}
+
+/**
  * Graph triples filter used in graph triples list.
  * Its data are in the graph triples store, which gets updated when
  * users apply new filters.
@@ -34,8 +65,7 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   templateUrl: './graph-triple-filter.component.html',
   styleUrls: ['./graph-triple-filter.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     RefLookupComponent,
     MatIconButton,
     MatIcon,
@@ -48,15 +78,8 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GraphTripleFilterComponent implements OnInit, OnDestroy {
-  private _sub?: Subscription;
+export class GraphTripleFilterComponent {
   public filter$: Observable<TripleFilter>;
-  public literal: FormControl<boolean>;
-  public objectLit: FormControl<string | null>;
-  public sid: FormControl<string | null>;
-  public sidPrefix: FormControl<boolean>;
-  public tag: FormControl<string | null>;
-  public form: FormGroup;
 
   public subjectNode$: Observable<UriNode | undefined>;
   public predicateNode$: Observable<UriNode | undefined>;
@@ -64,8 +87,15 @@ export class GraphTripleFilterComponent implements OnInit, OnDestroy {
 
   public readonly disabled = input<boolean>();
 
+  /**
+   * The editable draft: rebuilt from the repository filter whenever it
+   * changes (including after apply), and locally edited in between.
+   */
+  private readonly _draft: WritableSignal<GraphTripleFilterControls>;
+
+  public readonly form: FieldTree<GraphTripleFilterControls>;
+
   constructor(
-    formBuilder: FormBuilder,
     public lookupService: GraphNodeLookupService,
     private _repository: GraphTripleListRepository
   ) {
@@ -73,58 +103,38 @@ export class GraphTripleFilterComponent implements OnInit, OnDestroy {
     this.subjectNode$ = _repository.subjectNode$;
     this.predicateNode$ = _repository.predicateNode$;
     this.objectNode$ = _repository.objectNode$;
-    // form
-    this.literal = formBuilder.control(false, { nonNullable: true });
-    this.objectLit = formBuilder.control(null, Validators.maxLength(100));
-    this.sid = formBuilder.control(null);
-    this.sidPrefix = formBuilder.control(false, { nonNullable: true });
-    this.tag = formBuilder.control(null);
-    this.form = formBuilder.group({
-      literal: this.literal,
-      objectLit: this.objectLit,
-      sid: this.sid,
-      sidPrefix: this.sidPrefix,
-      tag: this.tag,
+
+    const filter = toSignal(_repository.filter$, { requireSync: true });
+    this._draft = linkedSignal(() => toDraft(filter()));
+    this.form = form(this._draft, (path) => {
+      // [formField] renders these as the inputs' maxlength attributes
+      maxLength(path.objectLit, 100);
+      maxLength(path.sid, 500);
+      maxLength(path.tag, 50);
     });
-  }
 
-  public ngOnInit(): void {
-    this._sub = this.filter$.subscribe((f) => {
-      this.updateForm(f);
+    // the subject/predicate/object terms are not in the form: they live
+    // in the repository, which loads them from the filter's IDs
+    _repository.filter$.pipe(takeUntilDestroyed()).subscribe((f) => {
+      this._repository.setTermId(f.subjectId, 'S');
+      this._repository.setTermId(
+        f.predicateIds?.length ? f.predicateIds[0] : null,
+        'P'
+      );
+      this._repository.setTermId(f.objectId, 'O');
     });
-  }
-
-  public ngOnDestroy(): void {
-    this._sub?.unsubscribe();
-  }
-
-  private updateForm(filter: TripleFilter): void {
-    this._repository.setTermId(filter.subjectId, 'S');
-    this._repository.setTermId(
-      filter.predicateIds?.length ? filter.predicateIds[0] : null,
-      'P'
-    );
-    this._repository.setTermId(filter.objectId, 'O');
-    this.literal.setValue(filter.literalPattern ? true : false);
-    this.objectLit.setValue(filter.literalPattern || null);
-    this.sid.setValue(filter.sid || null);
-    this.tag.setValue(filter.tag || null);
-    this.form.markAsPristine();
   }
 
   private getFilter(): TripleFilter {
+    const v = this._draft();
     const pid = this._repository.getTerm('P')?.id;
     return {
       subjectId: this._repository.getTerm('S')?.id,
       predicateIds: pid ? [pid] : undefined,
-      objectId: this.literal.value
-        ? undefined
-        : this._repository.getTerm('O')?.id,
-      literalPattern: this.literal.value
-        ? this.objectLit.value?.trim()
-        : undefined,
-      sid: this.sid.value?.trim(),
-      tag: this.tag.value?.trim(),
+      objectId: v.literal ? undefined : this._repository.getTerm('O')?.id,
+      literalPattern: v.literal ? v.objectLit.trim() || undefined : undefined,
+      sid: v.sid.trim() || undefined,
+      tag: v.tag.trim() || undefined,
     };
   }
 
@@ -153,10 +163,10 @@ export class GraphTripleFilterComponent implements OnInit, OnDestroy {
   }
 
   public reset(): void {
-    this.form.reset();
-    // form.reset() only clears the scalar controls; the subject/predicate/
-    // object node terms live in the repository and must be cleared too, or
-    // a previously picked node would survive a "reset filters" action.
+    this._draft.set(makeEmptyDraft());
+    // the subject/predicate/object node terms live in the repository and
+    // must be cleared too, or a previously picked node would survive a
+    // "reset filters" action.
     this._repository.setTerm(null, 'S');
     this._repository.setTerm(null, 'P');
     this._repository.setTerm(null, 'O');
@@ -164,7 +174,7 @@ export class GraphTripleFilterComponent implements OnInit, OnDestroy {
   }
 
   public apply(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       return;
     }
     const filter = this.getFilter();

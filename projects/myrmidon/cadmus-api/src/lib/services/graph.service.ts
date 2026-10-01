@@ -395,13 +395,19 @@ export class GraphService {
     if (filter.literalLanguage) {
       httpParams = httpParams.set('literalLanguage', filter.literalLanguage);
     }
-    if (filter.minLiteralNumber) {
+    if (
+      filter.minLiteralNumber !== null &&
+      filter.minLiteralNumber !== undefined
+    ) {
       httpParams = httpParams.set(
         'minLiteralNumber',
         filter.minLiteralNumber.toString()
       );
     }
-    if (filter.maxLiteralNumber) {
+    if (
+      filter.maxLiteralNumber !== null &&
+      filter.maxLiteralNumber !== undefined
+    ) {
       httpParams = httpParams.set(
         'maxLiteralNumber',
         filter.maxLiteralNumber.toString()
@@ -464,7 +470,7 @@ export class GraphService {
     if (filter.label) {
       httpParams = httpParams.set('label', filter.label);
     }
-    if (filter.sourceType) {
+    if (filter.sourceType !== null && filter.sourceType !== undefined) {
       httpParams = httpParams.set('sourceType', +filter.sourceType);
     }
     if (filter.sid) {

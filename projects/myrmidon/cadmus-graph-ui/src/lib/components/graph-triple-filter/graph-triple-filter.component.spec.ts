@@ -85,15 +85,15 @@ describe('GraphTripleFilterComponent', () => {
 
   describe('initial form state', () => {
     it('should build a form with default (unset) values', () => {
-      expect(component.literal.value).toBe(false);
-      expect(component.objectLit.value).toBeNull();
-      expect(component.sid.value).toBeNull();
-      expect(component.sidPrefix.value).toBe(false);
-      expect(component.tag.value).toBeNull();
+      expect(component.form.literal().value()).toBe(false);
+      expect(component.form.objectLit().value()).toBe('');
+      expect(component.form.sid().value()).toBe('');
+      expect(component.form.sidPrefix().value()).toBe(false);
+      expect(component.form.tag().value()).toBe('');
     });
   });
 
-  describe('updateForm (via filter$ subscription)', () => {
+  describe('draft (via filter$)', () => {
     it('should populate the form and resolve terms when the repository filter changes', () => {
       repository.setTermId.mockClear();
       const filter: TripleFilter = {
@@ -110,11 +110,11 @@ describe('GraphTripleFilterComponent', () => {
       expect(repository.setTermId).toHaveBeenCalledWith(1, 'S');
       expect(repository.setTermId).toHaveBeenCalledWith(2, 'P');
       expect(repository.setTermId).toHaveBeenCalledWith(3, 'O');
-      expect(component.literal.value).toBe(true);
-      expect(component.objectLit.value).toBe('foo');
-      expect(component.sid.value).toBe('sid1');
-      expect(component.tag.value).toBe('tag1');
-      expect(component.form.pristine).toBe(true);
+      expect(component.form.literal().value()).toBe(true);
+      expect(component.form.objectLit().value()).toBe('foo');
+      expect(component.form.sid().value()).toBe('sid1');
+      expect(component.form.tag().value()).toBe('tag1');
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should pass null predicate id when predicateIds is empty', () => {
@@ -125,7 +125,7 @@ describe('GraphTripleFilterComponent', () => {
       expect(repository.setTermId).toHaveBeenCalledWith(undefined, 'S');
       expect(repository.setTermId).toHaveBeenCalledWith(null, 'P');
       expect(repository.setTermId).toHaveBeenCalledWith(undefined, 'O');
-      expect(component.literal.value).toBe(false);
+      expect(component.form.literal().value()).toBe(false);
     });
   });
 
@@ -166,9 +166,8 @@ describe('GraphTripleFilterComponent', () => {
 
   describe('apply', () => {
     it('should not call setFilter when the form is invalid', () => {
-      component.objectLit.setValue('a'.repeat(101));
-      component.objectLit.updateValueAndValidity();
-      expect(component.form.invalid).toBe(true);
+      component.form.objectLit().value.set('a'.repeat(101));
+      expect(component.form().invalid()).toBe(true);
 
       component.apply();
 
@@ -178,8 +177,8 @@ describe('GraphTripleFilterComponent', () => {
     it('should build and set the filter from term ids and literal fields', () => {
       component.onSubjectNodeChange(makeNode(1));
       component.onPredicateNodeChange(makeNode(2));
-      component.sid.setValue('  mysid  ');
-      component.tag.setValue('  mytag  ');
+      component.form.sid().value.set('  mysid  ');
+      component.form.tag().value.set('  mytag  ');
 
       component.apply();
 
@@ -195,7 +194,7 @@ describe('GraphTripleFilterComponent', () => {
 
     it('should use the object term id (not literalPattern) when literal is false', () => {
       component.onObjectNodeChange(makeNode(3));
-      component.literal.setValue(false);
+      component.form.literal().value.set(false);
 
       component.apply();
 
@@ -206,8 +205,8 @@ describe('GraphTripleFilterComponent', () => {
 
     it('should use literalPattern (not object term id) when literal is true', () => {
       component.onObjectNodeChange(makeNode(3));
-      component.literal.setValue(true);
-      component.objectLit.setValue(' hello ');
+      component.form.literal().value.set(true);
+      component.form.objectLit().value.set(' hello ');
 
       component.apply();
 
@@ -219,13 +218,20 @@ describe('GraphTripleFilterComponent', () => {
 
   describe('reset', () => {
     it('should reset the form and re-apply the (now empty) filter', () => {
-      component.sid.setValue('something');
-      component.sid.markAsDirty();
+      component.form.sid().value.set('something');
+      component.form.sid().markAsDirty();
 
       component.reset();
 
-      expect(component.sid.value).toBeNull();
-      expect(repository.setFilter).toHaveBeenCalled();
+      expect(component.form.sid().value()).toBe('');
+      expect(repository.setFilter).toHaveBeenCalledWith({
+        subjectId: undefined,
+        predicateIds: undefined,
+        objectId: undefined,
+        literalPattern: undefined,
+        sid: undefined,
+        tag: undefined,
+      });
     });
 
     it('should clear previously selected subject/predicate/object terms', () => {
@@ -235,6 +241,82 @@ describe('GraphTripleFilterComponent', () => {
 
       const arg = repository.setFilter.mock.calls.at(-1)![0] as TripleFilter;
       expect(arg.subjectId).toBeUndefined();
+    });
+  });
+
+  describe('template', () => {
+    function button(tooltip: string): HTMLButtonElement {
+      return fixture.nativeElement.querySelector(
+        `button[mattooltip="${tooltip}"]`
+      );
+    }
+
+    it('renders no <form> element; apply is a type=button click', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const apply = button('Apply filters');
+      expect(apply.type).toBe('button');
+      component.form.sid().value.set('s');
+      apply.click();
+      expect(repository.setFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ sid: 's' })
+      );
+    });
+
+    it('renders the length limits as maxlength attributes', () => {
+      component.form.literal().value.set(true);
+      fixture.detectChanges();
+      const inputs: HTMLInputElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('input[matinput]')
+      );
+      // objectLit, sid, tag
+      expect(inputs.map((i) => i.maxLength)).toEqual([100, 500, 50]);
+    });
+
+    it('applies when Enter is pressed in a text input, unless disabled', () => {
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input[matinput]');
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(repository.setFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ sid: 'typed' })
+      );
+
+      repository.setFilter.mockClear();
+      fixture.componentRef.setInput('disabled', true);
+      fixture.detectChanges();
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(repository.setFilter).not.toHaveBeenCalled();
+    });
+
+    it('should stop listening to filter$ on destroy', () => {
+      fixture.destroy();
+      repository.setTermId.mockClear();
+      repository.filter$.next({ subjectId: 5 });
+      expect(repository.setTermId).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('tag and disabled', () => {
+    it('lets the user filter by tag', () => {
+      const inputs: HTMLInputElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('input[matinput]')
+      );
+      const tag = inputs[inputs.length - 1];
+      tag.value = ' mytag ';
+      tag.dispatchEvent(new Event('input'));
+      tag.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(repository.setFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ tag: 'mytag' })
+      );
+    });
+
+    it('renders no disabled attribute while enabled', () => {
+      const root: HTMLElement = fixture.nativeElement.firstElementChild;
+      expect(root.hasAttribute('disabled')).toBe(false);
+      fixture.componentRef.setInput('disabled', true);
+      fixture.detectChanges();
+      expect(root.getAttribute('disabled')).toBe('true');
     });
   });
 });

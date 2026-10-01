@@ -1,13 +1,14 @@
 import {
   Component,
-  effect,
   input,
+  linkedSignal,
   signal,
   computed,
   OnDestroy,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { FormField, form } from '@angular/forms/signals';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,16 +25,36 @@ import {
   takeUntil,
   debounceTime,
   distinctUntilChanged,
-  combineLatest,
 } from 'rxjs';
 import { EChartsOption } from 'echarts';
 
 import { ItemEditFrameStats, StatsService } from '@myrmidon/cadmus-api';
 
+/**
+ * The editable shape behind the controls.
+ */
+interface EditFrameStatsControls {
+  created: boolean;
+  updated: boolean;
+  deleted: boolean;
+  start: Date | null;
+  end: Date | null;
+  interval: string;
+}
+
+/**
+ * The initial* inputs.
+ */
+interface EditFrameStatsInitials {
+  start: Date | null;
+  end: Date | null;
+  interval: string;
+}
+
 @Component({
   selector: 'cadmus-edit-frame-stats',
   imports: [
-    ReactiveFormsModule,
+    FormField,
     NgxEchartsDirective,
     MatCardModule,
     MatFormFieldModule,
@@ -56,29 +77,45 @@ export class EditFrameStatsComponent implements OnDestroy {
   public readonly initialEnd = input<Date | null>(null);
   public readonly initialInterval = input<string>('1d');
 
-  public readonly created: FormControl<boolean> = new FormControl(true, {
-    nonNullable: true,
+  /**
+   * The controls values. Each initial* input, when it changes to a truthy
+   * value, sets its own control; the others keep their current values.
+   */
+  private readonly _draft = linkedSignal<
+    EditFrameStatsInitials,
+    EditFrameStatsControls
+  >({
+    source: () => ({
+      start: this.initialStart(),
+      end: this.initialEnd(),
+      interval: this.initialInterval(),
+    }),
+    computation: (initials, previous) => {
+      const v = previous?.value ?? {
+        created: true,
+        updated: true,
+        deleted: true,
+        start: null,
+        end: null,
+        interval: '1d',
+      };
+      const changed = (key: keyof EditFrameStatsInitials) =>
+        !!initials[key] && initials[key] !== previous?.source[key];
+      return {
+        ...v,
+        start: changed('start') ? initials.start : v.start,
+        end: changed('end') ? initials.end : v.end,
+        interval: changed('interval') ? initials.interval : v.interval,
+      };
+    },
   });
-  public readonly updated: FormControl<boolean> = new FormControl(true, {
-    nonNullable: true,
-  });
-  public readonly deleted: FormControl<boolean> = new FormControl(true, {
-    nonNullable: true,
-  });
-  public readonly start: FormControl<Date | null> =
-    new FormControl<Date | null>(null);
-  public readonly end: FormControl<Date | null> = new FormControl<Date | null>(
-    null,
-  );
-  public readonly interval: FormControl<string> = new FormControl<string>(
-    '1d',
-    { nonNullable: true },
-  );
 
-  // convert form control values to signals for reactive computation
-  public readonly createdSignal = signal<boolean>(true);
-  public readonly updatedSignal = signal<boolean>(true);
-  public readonly deletedSignal = signal<boolean>(true);
+  public readonly form = form(this._draft);
+
+  // checkboxes values, for reactive computation
+  public readonly createdSignal = computed(() => this.form.created().value());
+  public readonly updatedSignal = computed(() => this.form.updated().value());
+  public readonly deletedSignal = computed(() => this.form.deleted().value());
 
   public readonly data = signal<ItemEditFrameStats[]>([]);
   public readonly loading = signal<boolean>(false);
@@ -207,53 +244,21 @@ export class EditFrameStatsComponent implements OnDestroy {
   });
 
   constructor(private _statsService: StatsService) {
-    // set initial values from input signals
-    effect(() => {
-      const initialStart = this.initialStart();
-      if (initialStart) {
-        this.start.setValue(initialStart);
-      }
-    });
-
-    effect(() => {
-      const initialEnd = this.initialEnd();
-      if (initialEnd) {
-        this.end.setValue(initialEnd);
-      }
-    });
-
-    effect(() => {
-      const initialInterval = this.initialInterval();
-      if (initialInterval) {
-        this.interval.setValue(initialInterval);
-      }
-    });
-
-    // sync form control values with signals for checkboxes
-    this.created.valueChanges
-      .pipe(takeUntil(this._destroy$))
-      .subscribe((value) => this.createdSignal.set(value));
-
-    this.updated.valueChanges
-      .pipe(takeUntil(this._destroy$))
-      .subscribe((value) => this.updatedSignal.set(value));
-
-    this.deleted.valueChanges
-      .pipe(takeUntil(this._destroy$))
-      .subscribe((value) => this.deletedSignal.set(value));
-
-    // auto-refresh data when start, end, or interval changes
-    combineLatest([
-      this.start.valueChanges,
-      this.end.valueChanges,
-      this.interval.valueChanges,
-    ])
+    // auto-refresh data when start, end, or interval change
+    toObservable(
+      computed(
+        () =>
+          [
+            this.form.start().value(),
+            this.form.end().value(),
+            this.form.interval().value(),
+          ] as const,
+      ),
+    )
       .pipe(
         debounceTime(300),
-        // combineLatest emits a new array instance each time, so the
-        // default reference-equality distinctUntilChanged() never
-        // actually filters anything out; compare the tuple's own values
-        // instead to skip redundant reloads.
+        // a new array instance is emitted each time, so compare the
+        // tuple's own values to skip redundant reloads
         distinctUntilChanged(
           (a, b) =>
             a[0]?.getTime() === b[0]?.getTime() &&
@@ -276,9 +281,9 @@ export class EditFrameStatsComponent implements OnDestroy {
   }
 
   public loadData(): void {
-    const startValue = this.start.value;
-    const endValue = this.end.value;
-    const intervalValue = this.interval.value;
+    const startValue = this.form.start().value();
+    const endValue = this.form.end().value();
+    const intervalValue = this.form.interval().value();
 
     if (!startValue || !endValue || !intervalValue) {
       return;

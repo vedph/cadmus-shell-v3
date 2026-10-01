@@ -1,5 +1,5 @@
 <!-- form -->
-<form [formGroup]="form" (submit)="upload()">
+<div>
   <fieldset>
     <legend>source</legend>
 
@@ -21,11 +21,11 @@
       >
         select file
       </button>
-      <span class="file-name">{{ file.value?.name }}</span>
-      @if ($any(file).errors?.required) {
+      <span class="file-name">{{ form.file().value()?.name }}</span>
+      @if (form.file().getError('required')) {
         <span class="error">file required</span>
       }
-      @if ($any(file).errors?.invalidExtension) {
+      @if (form.file().getError('invalidExtension')) {
         <span class="error">invalid file type (JSON only)</span>
       }
     </div>
@@ -33,22 +33,23 @@
 
     <!-- dry run -->
     <div class="form-row">
-      <mat-checkbox [formControl]="dryRun">dry run</mat-checkbox>
+      <mat-checkbox [formField]="form.dryRun">dry run</mat-checkbox>
     </div>
 
     <!-- submit -->
     <div style="margin-top: 16px">
       <button
-        type="submit"
+        type="button"
         mat-flat-button
         class="mat-warn"
-        [disabled]="uploading() || form.invalid"
+        [disabled]="uploading() || form().invalid()"
+        (click)="upload()"
       >
         upload
       </button>
     </div>
   </fieldset>
-</form>
+</div>
 
 <!-- uploading -->
 @if (uploading()) {

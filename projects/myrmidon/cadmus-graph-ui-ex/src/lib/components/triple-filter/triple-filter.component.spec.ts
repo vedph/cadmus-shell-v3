@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { By } from '@angular/platform-browser';
+import { MatPaginator } from '@angular/material/paginator';
+import { RefLookupComponent } from '@myrmidon/cadmus-refs-lookup';
+import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { GraphService, NodeSourceType, UriNode } from '@myrmidon/cadmus-api';
@@ -17,6 +20,10 @@ function makeNode(id: number, overrides?: Partial<UriNode>): UriNode {
     ...overrides,
   };
 }
+
+// FieldTree tags array items with a hidden identity Symbol: compare
+// through a JSON round-trip
+const json = (v: unknown) => JSON.parse(JSON.stringify(v));
 
 describe('TripleFilterComponent', () => {
   let component: TripleFilterComponent;
@@ -61,26 +68,26 @@ describe('TripleFilterComponent', () => {
 
   describe('initial form state', () => {
     it('should build a form with default (unset) values', () => {
-      expect(component.pageNumber.value).toBe(1);
-      expect(component.pageSize.value).toBe(10);
-      expect(component.litPattern.value).toBeNull();
-      expect(component.litType.value).toBeNull();
-      expect(component.litLanguage.value).toBeNull();
-      expect(component.minLitNumber.value).toBeNull();
-      expect(component.maxLitNumber.value).toBeNull();
-      expect(component.subj.value).toBeNull();
-      expect(component.isNotPred.value).toBe(false);
-      expect(component.preds.value).toEqual([]);
-      expect(component.notPreds.value).toEqual([]);
-      expect(component.hasLiteralObj.value).toBeNull();
-      expect(component.obj.value).toBeNull();
-      expect(component.sid.value).toBeNull();
-      expect(component.isSidPrefix.value).toBe(false);
-      expect(component.tag.value).toBeNull();
+      expect(component.form.pageNumber().value()).toBe(1);
+      expect(component.form.pageSize().value()).toBe(10);
+      expect(component.form.litPattern().value()).toBe('');
+      expect(component.form.litType().value()).toBe('');
+      expect(component.form.litLanguage().value()).toBe('');
+      expect(component.form.minLitNumber().value()).toBeNull();
+      expect(component.form.maxLitNumber().value()).toBeNull();
+      expect(component.form.subj().value()).toBeNull();
+      expect(component.form.isNotPred().value()).toBe(false);
+      expect(json(component.form.preds().value())).toEqual(json([]));
+      expect(json(component.form.notPreds().value())).toEqual(json([]));
+      expect(component.form.hasLiteralObj().value()).toBeNull();
+      expect(component.form.obj().value()).toBeNull();
+      expect(component.form.sid().value()).toBe('');
+      expect(component.form.isSidPrefix().value()).toBe(false);
+      expect(component.form.tag().value()).toBe('');
     });
   });
 
-  describe('updateForm (via filter model effect)', () => {
+  describe('draft (via filter model)', () => {
     it('should populate scalar fields and resolve subject/predicate/object nodes', () => {
       const subject = makeNode(1);
       const predicate = makeNode(2);
@@ -110,16 +117,16 @@ describe('TripleFilterComponent', () => {
       fixture.componentRef.setInput('filter', filter);
       fixture.detectChanges();
 
-      expect(component.pageNumber.value).toBe(2);
-      expect(component.pageSize.value).toBe(20);
-      expect(component.litPattern.value).toBe('foo');
-      expect(component.sid.value).toBe('sid1');
-      expect(component.isSidPrefix.value).toBe(true);
-      expect(component.tag.value).toBe('tag1');
-      expect(component.subj.value).toEqual(subject);
-      expect(component.preds.value).toEqual([predicate]);
-      expect(component.obj.value).toEqual(object);
-      expect(component.form.pristine).toBe(true);
+      expect(component.form.pageNumber().value()).toBe(2);
+      expect(component.form.pageSize().value()).toBe(20);
+      expect(component.form.litPattern().value()).toBe('foo');
+      expect(component.form.sid().value()).toBe('sid1');
+      expect(component.form.isSidPrefix().value()).toBe(true);
+      expect(component.form.tag().value()).toBe('tag1');
+      expect(component.form.subj().value()).toEqual(subject);
+      expect(json(component.form.preds().value())).toEqual(json([predicate]));
+      expect(component.form.obj().value()).toEqual(object);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should not fetch subject/object nodes when their ids are absent', () => {
@@ -133,9 +140,9 @@ describe('TripleFilterComponent', () => {
       fixture.detectChanges();
 
       expect(graphService.getNode).not.toHaveBeenCalled();
-      expect(component.subj.value).toBeNull();
-      expect(component.obj.value).toBeNull();
-      expect(component.preds.value).toEqual([]);
+      expect(component.form.subj().value()).toBeNull();
+      expect(component.form.obj().value()).toBeNull();
+      expect(json(component.form.preds().value())).toEqual(json([]));
     });
 
     it('should still resolve subject/object and mark the form pristine when predicateIds is absent', () => {
@@ -160,10 +167,10 @@ describe('TripleFilterComponent', () => {
       });
       fixture.detectChanges();
 
-      expect(component.subj.value).toEqual(subject);
-      expect(component.obj.value).toEqual(object);
-      expect(component.preds.value).toEqual([]);
-      expect(component.form.pristine).toBe(true);
+      expect(component.form.subj().value()).toEqual(subject);
+      expect(component.form.obj().value()).toEqual(object);
+      expect(json(component.form.preds().value())).toEqual(json([]));
+      expect(component.form().dirty()).toBe(false);
     });
   });
 
@@ -171,47 +178,48 @@ describe('TripleFilterComponent', () => {
     it('onPredicateNodeChange should add to preds when isNotPred is false', () => {
       const node = makeNode(2);
       component.onPredicateNodeChange(node);
-      expect(component.preds.value).toEqual([node]);
-      expect(component.notPreds.value).toEqual([]);
-      expect(component.preds.dirty).toBe(true);
+      expect(json(component.form.preds().value())).toEqual(json([node]));
+      expect(json(component.form.notPreds().value())).toEqual(json([]));
+      expect(component.form.preds().dirty()).toBe(true);
     });
 
     it('onPredicateNodeChange should add to notPreds when isNotPred is true', () => {
-      component.isNotPred.setValue(true);
+      component.form.isNotPred().value.set(true);
       const node = makeNode(2);
       component.onPredicateNodeChange(node);
-      expect(component.notPreds.value).toEqual([node]);
-      expect(component.preds.value).toEqual([]);
+      expect(json(component.form.notPreds().value())).toEqual(json([node]));
+      expect(json(component.form.preds().value())).toEqual(json([]));
     });
 
     it('onPredicateNodeChange should not add a duplicate predicate (same id)', () => {
       const node = makeNode(2);
       component.onPredicateNodeChange(node);
-      component.preds.markAsPristine();
+      // reset() clears interaction state (dirty) only
+      component.form.preds().reset();
       component.onPredicateNodeChange(makeNode(2, { label: 'Other label' }));
-      expect(component.preds.value).toEqual([node]);
-      expect(component.preds.dirty).toBe(false);
+      expect(json(component.form.preds().value())).toEqual(json([node]));
+      expect(component.form.preds().dirty()).toBe(false);
     });
 
     it('onPredicateNodeChange should do nothing when node is falsy', () => {
       component.onPredicateNodeChange(null);
-      expect(component.preds.value).toEqual([]);
+      expect(json(component.form.preds().value())).toEqual(json([]));
     });
 
     it('deletePred should remove the given predicate', () => {
       const n1 = makeNode(1);
       const n2 = makeNode(2);
-      component.preds.setValue([n1, n2]);
+      component.form.preds().value.set([n1, n2]);
       component.deletePred(n1);
-      expect(component.preds.value).toEqual([n2]);
+      expect(json(component.form.preds().value())).toEqual(json([n2]));
     });
 
     it('deleteNotPred should remove the given predicate', () => {
       const n1 = makeNode(1);
       const n2 = makeNode(2);
-      component.notPreds.setValue([n1, n2]);
+      component.form.notPreds().value.set([n1, n2]);
       component.deleteNotPred(n1);
-      expect(component.notPreds.value).toEqual([n2]);
+      expect(json(component.form.notPreds().value())).toEqual(json([n2]));
     });
   });
 
@@ -219,13 +227,13 @@ describe('TripleFilterComponent', () => {
     it('onSubjectNodeChange should set the subject term', () => {
       const node = makeNode(1);
       component.onSubjectNodeChange(node);
-      expect(component.subj.value).toEqual(node);
+      expect(component.form.subj().value()).toEqual(node);
     });
 
     it('onObjectNodeChange should set the object term', () => {
       const node = makeNode(3);
       component.onObjectNodeChange(node);
-      expect(component.obj.value).toEqual(node);
+      expect(component.form.obj().value()).toEqual(node);
     });
   });
 
@@ -235,8 +243,8 @@ describe('TripleFilterComponent', () => {
       component.onPredicateNodeChange(makeNode(2));
       // note: the component does not trim sid/tag values, so whitespace
       // is preserved as-is in the emitted filter.
-      component.sid.setValue('mysid');
-      component.tag.setValue('mytag');
+      component.form.sid().value.set('mysid');
+      component.form.tag().value.set('mytag');
 
       component.apply();
 
@@ -257,11 +265,11 @@ describe('TripleFilterComponent', () => {
         isSidPrefix: false,
         tag: 'mytag',
       });
-      expect(component.form.pristine).toBe(true);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should use notPredicateIds from notPreds', () => {
-      component.isNotPred.setValue(true);
+      component.form.isNotPred().value.set(true);
       component.onPredicateNodeChange(makeNode(2));
 
       component.apply();
@@ -280,7 +288,7 @@ describe('TripleFilterComponent', () => {
 
     it('should also include literalPattern when set, alongside objectId', () => {
       component.onObjectNodeChange(makeNode(3));
-      component.litPattern.setValue('hello');
+      component.form.litPattern().value.set('hello');
 
       component.apply();
 
@@ -291,12 +299,12 @@ describe('TripleFilterComponent', () => {
 
   describe('reset', () => {
     it('should reset the form and re-emit the (now empty) filter', () => {
-      component.sid.setValue('something');
-      component.sid.markAsDirty();
+      component.form.sid().value.set('something');
+      component.form.sid().markAsDirty();
 
       component.reset();
 
-      expect(component.sid.value).toBeNull();
+      expect(component.form.sid().value()).toBe('');
       expect(component.filter().sid).toBeUndefined();
     });
 
@@ -306,7 +314,7 @@ describe('TripleFilterComponent', () => {
       component.reset();
 
       expect(component.filter().subjectId).toBeUndefined();
-      expect(component.subj.value).toBeNull();
+      expect(component.form.subj().value()).toBeNull();
     });
   });
 
@@ -318,8 +326,149 @@ describe('TripleFilterComponent', () => {
         length: 100,
       });
 
-      expect(component.pageNumber.value).toBe(3);
+      expect(component.form.pageNumber().value()).toBe(3);
       expect(component.filter().pageNumber).toBe(3);
+    });
+  });
+
+  describe('template, echo and rebuild', () => {
+    it('renders no <form> element; apply is a type=button click', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      const apply: HTMLButtonElement = fixture.nativeElement.querySelector(
+        'button[mattooltip="Apply filters"]'
+      );
+      expect(apply.type).toBe('button');
+      component.form.sid().value.set('s');
+      apply.click();
+      expect(component.filter().sid).toBe('s');
+    });
+
+    it('renders the length limits as maxlength attributes', () => {
+      const inputs: HTMLInputElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('input[matinput]')
+      );
+      // triple tab: sid, tag
+      expect(inputs.map((i) => i.maxLength)).toEqual([500, 50]);
+    });
+
+    it('applies when Enter is pressed in a text input, unless disabled', () => {
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input[matinput]');
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(component.filter().sid).toBe('typed');
+
+      fixture.componentRef.setInput('disabled', true);
+      fixture.detectChanges();
+      input.value = 'other';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      expect(component.filter().sid).toBe('typed');
+    });
+
+    it('does not refetch nodes nor reset the draft on the echo of its own apply', () => {
+      component.onSubjectNodeChange(makeNode(1));
+      component.form.isNotPred().value.set(true);
+      component.onPredicateNodeChange(makeNode(2));
+      graphService.getNode.mockClear();
+      graphService.getNodeSet.mockClear();
+
+      component.apply();
+      fixture.detectChanges();
+
+      expect(component.filter().subjectId).toBe(1);
+      expect(component.filter().notPredicateIds).toEqual([2]);
+      expect(graphService.getNode).not.toHaveBeenCalled();
+      expect(graphService.getNodeSet).not.toHaveBeenCalled();
+      expect(component.form.notPreds().value().length).toBe(1);
+      expect(component.form.isNotPred().value()).toBe(true);
+    });
+
+    it('loads notPreds from notPredicateIds when another filter is bound', () => {
+      const np = makeNode(4);
+      graphService.getNodeSet.mockImplementation((ids: number[]) =>
+        of(ids.includes(4) ? [np] : [])
+      );
+      fixture.componentRef.setInput('filter', {
+        pageNumber: 1,
+        pageSize: 10,
+        notPredicateIds: [4],
+      });
+      fixture.detectChanges();
+
+      expect(json(component.form.notPreds().value())).toEqual(json([np]));
+      // the service's own object is not adopted by the draft
+      expect(Object.getOwnPropertySymbols(np).length).toBe(0);
+      // re-applying keeps the filter's notPredicateIds
+      component.apply();
+      expect(component.filter().notPredicateIds).toEqual([4]);
+    });
+
+    it('keeps the isNotPred toggle when another filter is bound', () => {
+      component.form.isNotPred().value.set(true);
+      fixture.componentRef.setInput('filter', {
+        pageNumber: 3,
+        pageSize: 10,
+      });
+      fixture.detectChanges();
+
+      expect(component.form.pageNumber().value()).toBe(3);
+      expect(component.form.isNotPred().value()).toBe(true);
+    });
+  });
+
+  describe('reported bugs', () => {
+    it('keeps 0 literal numbers and a false hasLiteralObject', () => {
+      fixture.componentRef.setInput('filter', {
+        pageNumber: 1,
+        pageSize: 10,
+        minLiteralNumber: 0,
+        hasLiteralObject: false,
+      });
+      fixture.detectChanges();
+      expect(component.form.minLitNumber().value()).toBe(0);
+      component.apply();
+      expect(component.filter().minLiteralNumber).toBe(0);
+      expect(component.filter().hasLiteralObject).toBe(false);
+    });
+
+    it('passes the total count to the paginator', () => {
+      fixture.componentRef.setInput('hasPager', true);
+      fixture.componentRef.setInput('total', 42);
+      fixture.detectChanges();
+      const pager = fixture.debugElement.query(By.directive(MatPaginator));
+      expect(pager.componentInstance.length).toBe(42);
+    });
+
+    it('shows the subject and object loaded from the filter in the lookups', () => {
+      graphService.getNode.mockImplementation((id: number) => of(makeNode(id)));
+      fixture.componentRef.setInput('filter', {
+        pageNumber: 1,
+        pageSize: 10,
+        subjectId: 1,
+        objectId: 3,
+      });
+      fixture.detectChanges();
+      const items = fixture.debugElement
+        .queryAll(By.directive(RefLookupComponent))
+        .map((d) => d.componentInstance.item()?.id);
+      // subject, predicate (a picker, not a selection), object
+      expect(items).toEqual([1, undefined, 3]);
+    });
+
+    it('ignores nodes loaded for a filter no longer bound', () => {
+      const late = new Subject<UriNode>();
+      graphService.getNode.mockImplementation((id: number) =>
+        id === 1 ? late : of(makeNode(id))
+      );
+      fixture.componentRef.setInput('filter', { pageNumber: 1, pageSize: 10, subjectId: 1 });
+      fixture.detectChanges();
+      fixture.componentRef.setInput('filter', { pageNumber: 1, pageSize: 10, subjectId: 3 });
+      fixture.detectChanges();
+      late.next(makeNode(1));
+      late.complete();
+      expect(component.form.subj().value()?.id).toBe(3);
     });
   });
 });

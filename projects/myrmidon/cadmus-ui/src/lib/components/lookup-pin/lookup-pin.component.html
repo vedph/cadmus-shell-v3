@@ -1,4 +1,4 @@
-<form [formGroup]="form">
+<div>
   <mat-autocomplete #lookupAuto="matAutocomplete" [displayWith]="entryToName">
     @for (entry of entries$ | async; track entry) {
     <mat-option [value]="entry" (onSelectionChange)="pickEntry(entry)">
@@ -12,7 +12,7 @@
       matInput
       type="text"
       [placeholder]="label()"
-      [formControl]="lookup"
+      [formField]="form.lookup"
       [matAutocomplete]="lookupAuto"
     />
   </mat-form-field>
@@ -25,4 +25,4 @@
   >
     <mat-icon class="mat-warn">clear</mat-icon>
   </button>
-</form>
+</div>

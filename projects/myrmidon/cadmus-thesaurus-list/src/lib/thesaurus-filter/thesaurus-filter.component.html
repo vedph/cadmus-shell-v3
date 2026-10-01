@@ -1,10 +1,10 @@
-<form role="form" [formGroup]="form" (submit)="apply()">
+<div role="form">
   <div class="form-row">
     <!-- id -->
     <div>
       <mat-form-field>
         <mat-label>ID</mat-label>
-        <input matInput formControlName="id" maxlength="100" />
+        <input matInput [formField]="form.id" (keydown.enter)="apply()" />
       </mat-form-field>
     </div>
 
@@ -12,7 +12,7 @@
     <div>
       <mat-form-field>
         <mat-label>language</mat-label>
-        <input matInput formControlName="language" maxlength="2" />
+        <input matInput [formField]="form.language" (keydown.enter)="apply()" />
       </mat-form-field>
     </div>
 
@@ -20,7 +20,7 @@
     <div>
       <mat-form-field>
         <mat-label>alias</mat-label>
-        <mat-select formControlName="alias">
+        <mat-select [formField]="form.alias">
           <mat-option [value]="null">(any)</mat-option>
           <mat-option [value]="true">alias</mat-option>
           <mat-option [value]="false">not an alias</mat-option>
@@ -39,12 +39,13 @@
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
-      type="submit"
+      type="button"
       mat-icon-button
-      [disabled]="form.invalid"
+      [disabled]="form().invalid()"
       matTooltip="Apply filters"
+      (click)="apply()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

@@ -6,19 +6,14 @@ import {
   output,
   signal,
 } from '@angular/core';
+import {
+  FormField,
+  form,
+  min,
+  required,
+  validate,
+} from '@angular/forms/signals';
 import { HttpEventType } from '@angular/common/http';
-import {
-  AbstractControl,
-  ValidationErrors,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { MatButton } from '@angular/material/button';
@@ -44,20 +39,25 @@ import { EnvService } from '@myrmidon/ngx-tools';
 
 import { UploadService } from '@myrmidon/cadmus-api';
 
-class FileExtensionValidator {
-  constructor(private allowedExtensions: string[]) {}
+/**
+ * True if the file has one of the allowed extensions.
+ */
+function hasAllowedExtension(file: File, allowedExtensions: string[]): boolean {
+  const extension = file.name.split('.').pop();
+  return allowedExtensions.includes(extension!);
+}
 
-  validate(control: AbstractControl): ValidationErrors | null {
-    const file = control.value as File | null;
-    if (file) {
-      const fileName = file.name;
-      const extension = fileName.split('.').pop();
-      if (!this.allowedExtensions.includes(extension!)) {
-        return { invalidExtension: true };
-      }
-    }
-    return null;
-  }
+/**
+ * The editable shape behind the form.
+ */
+interface ThesaurusImportControls {
+  file: File | null;
+  /** R=replace, P=patch, S=synch. */
+  mode: string;
+  dryRun: boolean;
+  excelSheet: number | null;
+  excelRow: number | null;
+  excelColumn: number | null;
 }
 
 interface UploadResult {
@@ -74,8 +74,7 @@ interface UploadResult {
   styleUrls: ['./thesaurus-import.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatButton,
     MatFormField,
     MatLabel,
@@ -99,70 +98,51 @@ export class ThesaurusImportComponent {
   public readonly uploadStart = output();
   public readonly uploadEnd = output<boolean>();
 
-  public file: FormControl<File | null>;
-  public mode: FormControl<string>;
-  public excelSheet: FormControl<number>;
-  public excelRow: FormControl<number>;
-  public excelColumn: FormControl<number>;
-  public dryRun: FormControl<boolean>;
-  public form: FormGroup;
+  public readonly form = form(
+    signal<ThesaurusImportControls>({
+      file: null,
+      mode: 'R',
+      dryRun: false,
+      excelSheet: 1,
+      excelRow: 1,
+      excelColumn: 1,
+    }),
+    (path) => {
+      required(path.file);
+      validate(path.file, ({ value }) => {
+        const file = value();
+        return file &&
+          !hasAllowedExtension(file, ['json', 'csv', 'xls', 'xlsx'])
+          ? { kind: 'invalidExtension' }
+          : null;
+      });
+      required(path.mode);
+      // [formField] renders these as the inputs' min attributes
+      min(path.excelSheet, 1);
+      min(path.excelRow, 1);
+      min(path.excelColumn, 1);
+    },
+  );
 
   public readonly uploadProgress = signal<number>(0);
   public readonly uploading = signal<boolean>(false);
   public readonly result = signal<UploadResult | undefined>(undefined);
 
   constructor(
-    formBuilder: FormBuilder,
     private _env: EnvService,
     private _uploadService: UploadService,
   ) {
     this._destroyRef.onDestroy(() => this._sub?.unsubscribe());
-    const fileExtensionValidator = new FileExtensionValidator([
-      'json',
-      'csv',
-      'xls',
-      'xlsx',
-    ]);
-    this.file = formBuilder.control(null, [
-      Validators.required,
-      (control) => fileExtensionValidator.validate(control),
-    ]);
-
-    this.mode = formBuilder.control('R', {
-      validators: Validators.required,
-      nonNullable: true,
-    });
-    this.excelSheet = formBuilder.control(1, {
-      nonNullable: true,
-      validators: [Validators.min(1)],
-    });
-    this.excelRow = formBuilder.control(1, {
-      nonNullable: true,
-      validators: [Validators.min(1)],
-    });
-    this.excelColumn = formBuilder.control(1, {
-      nonNullable: true,
-      validators: [Validators.min(1)],
-    });
-    this.dryRun = formBuilder.control(false, {
-      nonNullable: true,
-    });
-    this.form = formBuilder.group({
-      file: this.file,
-      mode: this.mode,
-      excelSheet: this.excelSheet,
-      excelRow: this.excelRow,
-      excelColumn: this.excelColumn,
-      dryRun: this.dryRun,
-    });
   }
 
   public onFileSelected(event: any) {
-    this.file.setValue(event.target.files[0]);
+    // null, not undefined, when no file: an undefined leaf value unmaps
+    // its field
+    this.form.file().value.set(event.target.files[0] ?? null);
   }
 
   public upload() {
-    if (!this.form.valid) {
+    if (!this.form().valid()) {
       return;
     }
     this.result.set(undefined);
@@ -171,19 +151,19 @@ export class ThesaurusImportComponent {
 
     // build URL with proper query string
     const params: string[] = [];
-    if (this.mode.value !== 'R') {
-      params.push(`mode=${this.mode.value}`);
+    if (this.form.mode().value() !== 'R') {
+      params.push(`mode=${this.form.mode().value()}`);
     }
-    if (this.excelSheet.value !== 1) {
-      params.push(`excelSheet=${this.excelSheet.value}`);
+    if (this.form.excelSheet().value() !== 1) {
+      params.push(`excelSheet=${this.form.excelSheet().value()}`);
     }
-    if (this.excelRow.value !== 1) {
-      params.push(`excelRow=${this.excelRow.value}`);
+    if (this.form.excelRow().value() !== 1) {
+      params.push(`excelRow=${this.form.excelRow().value()}`);
     }
-    if (this.excelColumn.value !== 1) {
-      params.push(`excelColumn=${this.excelColumn.value}`);
+    if (this.form.excelColumn().value() !== 1) {
+      params.push(`excelColumn=${this.form.excelColumn().value()}`);
     }
-    if (this.dryRun.value) {
+    if (this.form.dryRun().value()) {
       params.push('dryRun=true');
     }
 
@@ -193,7 +173,7 @@ export class ThesaurusImportComponent {
     }
 
     this._sub = this._uploadService
-      .uploadFile(this.file.value!, url, {
+      .uploadFile(this.form.file().value()!, url, {
         reportProgress: true,
       })
       .subscribe({

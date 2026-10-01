@@ -30,8 +30,8 @@ describe('ItemGenerateDialogComponent', () => {
   it('should create with default form values', () => {
     createComponent({ flags: [makeFlag(1), makeFlag(2)] });
     expect(component).toBeTruthy();
-    expect(component.itemCount.value).toBe(1);
-    expect(component.itemTitle.value).toBe('');
+    expect(component.form.itemCount().value()).toBe(1);
+    expect(component.form.itemTitle().value()).toBe('');
     expect(component.flags()).toEqual([makeFlag(1), makeFlag(2)]);
   });
 
@@ -43,16 +43,17 @@ describe('ItemGenerateDialogComponent', () => {
   describe('apply', () => {
     it('should not close the dialog when the form is invalid', () => {
       createComponent({});
-      component.itemTitle.setValue(''); // required, stays invalid
+      component.form.itemTitle().value.set(''); // required, stays invalid
       component.apply();
       expect(dialogRef.close).not.toHaveBeenCalled();
     });
 
     it('should close with count/title and OR-ed flags when valid', () => {
       createComponent({});
-      component.itemCount.setValue(5);
-      component.itemTitle.setValue('Item {0}');
-      component.itemFlags.setValue([makeFlag(1), makeFlag(4)]);
+      component.form.itemCount().value.set(5);
+      component.form.itemTitle().value.set('Item {0}');
+      // flags are held by ID
+      component.form.itemFlags().value.set([1, 4]);
 
       component.apply();
 
@@ -65,14 +66,67 @@ describe('ItemGenerateDialogComponent', () => {
 
     it('should reject a count outside 1-100', () => {
       createComponent({});
-      component.itemTitle.setValue('x');
-      component.itemCount.setValue(0);
+      component.form.itemTitle().value.set('x');
+      component.form.itemCount().value.set(0);
       component.apply();
       expect(dialogRef.close).not.toHaveBeenCalled();
 
-      component.itemCount.setValue(101);
+      component.form.itemCount().value.set(101);
       component.apply();
       expect(dialogRef.close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('submission root', () => {
+    it('renders a <form> that submits via apply when valid', async () => {
+      createComponent({});
+      component.form.itemTitle().value.set('Item {0}');
+      fixture.detectChanges();
+
+      const formEl: HTMLFormElement =
+        fixture.nativeElement.querySelector('form');
+      const event = new Event('submit', { cancelable: true });
+      formEl.dispatchEvent(event);
+      await Promise.resolve();
+
+      // [formRoot] prevents the native submission (no page reload)
+      expect(event.defaultPrevented).toBe(true);
+      expect(dialogRef.close).toHaveBeenCalledWith({
+        count: 1,
+        title: 'Item {0}',
+        flags: 0,
+      });
+    });
+
+    it('does not submit when invalid, and reveals the errors', async () => {
+      createComponent({});
+      fixture.detectChanges();
+      fixture.nativeElement
+        .querySelector('form')
+        .dispatchEvent(new Event('submit', { cancelable: true }));
+      await Promise.resolve();
+
+      expect(dialogRef.close).not.toHaveBeenCalled();
+      expect(component.form.itemTitle().touched()).toBe(true);
+    });
+
+    it('renders the count limits as min/max attributes', () => {
+      createComponent({});
+      const input: HTMLInputElement = fixture.nativeElement.querySelector(
+        'input[type="number"]'
+      );
+      expect(input.min).toBe('1');
+      expect(input.max).toBe('100');
+    });
+
+    it('does not tag the caller\'s flag definitions', () => {
+      const flags = [makeFlag(1), makeFlag(4)];
+      createComponent({ flags });
+      component.form.itemFlags().value.set([1, 4]);
+      fixture.detectChanges();
+      expect(flags.every((f) => !Object.getOwnPropertySymbols(f).length)).toBe(
+        true
+      );
     });
   });
 });

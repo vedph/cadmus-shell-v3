@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, input, OnDestroy, OnInit } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  linkedSignal,
+  WritableSignal,
+} from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FieldTree, FormField, form } from '@angular/forms/signals';
 import { AsyncPipe } from '@angular/common';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -31,6 +32,59 @@ import { NodeListRepository } from '../../state/graph-node-list.repository';
 import { GraphNodeLookupService } from '../../services/graph-node-lookup.service';
 
 /**
+ * The editable shape behind the filter form. Text fields use '' as their
+ * empty value, as they are bound to native inputs.
+ */
+interface GraphNodeFilterControls {
+  label: string;
+  /** 0=any, 1=class, 2=not-class. */
+  isClass: number;
+  uid: string;
+  tag: string;
+  sourceType: number | null;
+  sid: string;
+  sidPrefix: boolean;
+  linkedNodeRole: 'S' | 'O' | null;
+}
+
+/**
+ * The values of a cleared filter form.
+ */
+function makeEmptyDraft(): GraphNodeFilterControls {
+  return {
+    label: '',
+    isClass: 0,
+    uid: '',
+    tag: '',
+    sourceType: null,
+    sid: '',
+    sidPrefix: false,
+    linkedNodeRole: null,
+  };
+}
+
+function toDraft(filter: NodeFilter): GraphNodeFilterControls {
+  return {
+    label: filter.label || '',
+    isClass:
+      filter.isClass === undefined || filter.isClass === null
+        ? 0
+        : filter.isClass
+          ? 1
+          : 2,
+    uid: filter.uid || '',
+    tag: filter.tag || '',
+    sourceType:
+      filter.sourceType === undefined || filter.sourceType === null
+        ? null
+        : filter.sourceType,
+    sid: filter.sid || '',
+    sidPrefix: !!filter.isSidPrefix,
+    linkedNodeRole: filter.linkedNodeRole || 'S',
+  };
+}
+
+/**
  * Graph nodes filter used in graph nodes list.
  * Its data are in the graph nodes store, which gets updated when
  * users apply new filters.
@@ -40,8 +94,7 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   templateUrl: './graph-node-filter.component.html',
   styleUrls: ['./graph-node-filter.component.css'],
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatInput,
@@ -59,98 +112,53 @@ import { GraphNodeLookupService } from '../../services/graph-node-lookup.service
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GraphNodeFilterComponent implements OnInit, OnDestroy {
-  private _sub?: Subscription;
+export class GraphNodeFilterComponent {
   public filter$: Observable<NodeFilter>;
   public linkedNode$: Observable<UriNode | undefined>;
   public classNodes$: Observable<UriNode[] | undefined>;
 
   public readonly disabled = input<boolean>();
 
-  public label: FormControl<string | null>;
-  public isClass: FormControl<number>;
-  public uid: FormControl<string | null>;
-  public tag: FormControl<string | null>;
-  public sourceType: FormControl<number | null>;
-  public sid: FormControl<string | null>;
-  public sidPrefix: FormControl<boolean>;
-  public linkedNodeRole: FormControl<'S' | 'O' | null>;
-  public form: FormGroup;
+  /**
+   * The editable draft: rebuilt from the repository filter whenever it
+   * changes (including after apply), and locally edited in between.
+   */
+  private readonly _draft: WritableSignal<GraphNodeFilterControls>;
+
+  public readonly form: FieldTree<GraphNodeFilterControls>;
 
   constructor(
-    formBuilder: FormBuilder,
     public lookupService: GraphNodeLookupService,
     private _repository: NodeListRepository
   ) {
     this.filter$ = _repository.filter$;
     this.linkedNode$ = _repository.linkedNode$;
     this.classNodes$ = _repository.classNodes$;
-    // form
-    this.label = formBuilder.control(null);
-    this.isClass = formBuilder.control(0, { nonNullable: true });
-    this.uid = formBuilder.control(null);
-    this.tag = formBuilder.control(null);
-    this.sourceType = formBuilder.control(null);
-    this.sid = formBuilder.control(null);
-    this.sidPrefix = formBuilder.control(false, { nonNullable: true });
-    this.linkedNodeRole = formBuilder.control(null);
-    this.form = formBuilder.group({
-      label: this.label,
-      isClass: this.isClass,
-      uid: this.uid,
-      tag: this.tag,
-      sourceType: this.sourceType,
-      sid: this.sid,
-      sidPrefix: this.sidPrefix,
-      linkedNodeRole: this.linkedNodeRole,
+
+    const filter = toSignal(_repository.filter$, { requireSync: true });
+    this._draft = linkedSignal(() => toDraft(filter()));
+    this.form = form(this._draft);
+
+    // the linked node and class nodes are not in the form: they live in
+    // the repository, which loads them from the filter's IDs
+    _repository.filter$.pipe(takeUntilDestroyed()).subscribe((f) => {
+      this._repository.setLinkedNodeId(f.linkedNodeId);
+      this._repository.setClassNodeIds(f.classIds);
     });
-  }
-
-  public ngOnInit(): void {
-    this._sub = this.filter$.subscribe((f) => {
-      this.updateForm(f);
-    });
-  }
-
-  public ngOnDestroy(): void {
-    this._sub?.unsubscribe();
-  }
-
-  private updateForm(filter: NodeFilter): void {
-    this.label.setValue(filter.label || null);
-    // is-class: 0=unset, 1=class, 2=not-class
-    if (filter.isClass !== undefined && filter.isClass !== null) {
-      this.isClass.setValue(filter.isClass ? 1 : 2);
-    } else {
-      this.isClass.setValue(0);
-    }
-    this.uid.setValue(filter.uid || null);
-    this.tag.setValue(filter.tag || null);
-    if (filter.sourceType === undefined || filter.sourceType === null) {
-      this.sourceType.setValue(null);
-    } else {
-      this.sourceType.setValue(filter.sourceType);
-    }
-    this.sid.setValue(filter.sid || null);
-    this.sidPrefix.setValue(filter.isSidPrefix ? true : false);
-    this._repository.setLinkedNodeId(filter.linkedNodeId);
-    this.linkedNodeRole.setValue(filter.linkedNodeRole || 'S');
-    this._repository.setClassNodeIds(filter.classIds);
-    this.form.markAsPristine();
   }
 
   private getFilter(): NodeFilter {
+    const v = this._draft();
     return {
-      label: this.label.value?.trim(),
-      isClass: this.isClass.value === 0 ? undefined : this.isClass.value === 1,
-      uid: this.uid.value?.trim(),
-      tag: this.tag.value?.trim(),
-      sourceType:
-        this.sourceType.value === null ? undefined : this.sourceType.value,
-      sid: this.sid.value?.trim(),
-      isSidPrefix: this.sidPrefix.value,
+      label: v.label.trim() || undefined,
+      isClass: v.isClass === 0 ? undefined : v.isClass === 1,
+      uid: v.uid.trim() || undefined,
+      tag: v.tag.trim() || undefined,
+      sourceType: v.sourceType === null ? undefined : v.sourceType,
+      sid: v.sid.trim() || undefined,
+      isSidPrefix: v.sidPrefix,
       linkedNodeId: this._repository.getLinkedNode()?.id,
-      linkedNodeRole: this.linkedNodeRole.value || undefined,
+      linkedNodeRole: v.linkedNodeRole || undefined,
       classIds: this._repository.getClassNodes()?.map((n) => n.id),
     };
   }
@@ -178,14 +186,14 @@ export class GraphNodeFilterComponent implements OnInit, OnDestroy {
   }
 
   public reset(): void {
-    this.form.reset();
+    this._draft.set(makeEmptyDraft());
+    // the linked node and class nodes are filters too, held in the repository
+    this._repository.setLinkedNode();
+    this._repository.setClassNodeIds();
     this.apply();
   }
 
   public apply(): void {
-    if (this.form.invalid) {
-      return;
-    }
     const filter = this.getFilter();
 
     // update filter in state
