@@ -1,19 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  effect,
-  inject,
+  computed,
   input,
   output,
-  signal,
 } from '@angular/core';
-import { FormGroup, UntypedFormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { FieldTree } from '@angular/forms/signals';
 
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
+/**
+ * Close and save buttons for a part/fragment editor. Both are plain
+ * buttons: they emit `closeRequest` and `saveRequest` respectively, so
+ * that they work with no enclosing `<form>`.
+ */
 @Component({
   selector: 'cadmus-close-save-buttons',
   templateUrl: './close-save-buttons.component.html',
@@ -22,40 +23,35 @@ import { MatIcon } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CloseSaveButtonsComponent {
-  private _statusSub?: Subscription;
-  private readonly _destroyRef = inject(DestroyRef);
-
-  public readonly form = input<FormGroup | UntypedFormGroup>();
+  /**
+   * The signal form whose validity enables the save button.
+   */
+  public readonly form = input<FieldTree<unknown>>();
+  /**
+   * True to hide the save button.
+   */
   public readonly noSave = input<boolean>();
+  /**
+   * Emitted when the user clicks the close button.
+   */
   public readonly closeRequest = output();
+  /**
+   * Emitted when the user clicks the save button.
+   */
+  public readonly saveRequest = output();
 
   /**
-   * Reactive invalid state: true when the current form is invalid.
-   * Derived from the form's statusChanges so that OnPush components
-   * re-render whenever validity changes without a reference change.
+   * True when the current form is invalid.
    */
-  public readonly invalid = signal<boolean>(false);
-
-  constructor() {
-    // Clean up the statusChanges subscription when the component is destroyed
-    this._destroyRef.onDestroy(() => this._statusSub?.unsubscribe());
-
-    // Re-subscribe whenever the form input changes
-    effect(() => {
-      this._statusSub?.unsubscribe();
-      const f = this.form();
-      if (f) {
-        this.invalid.set(f.invalid);
-        this._statusSub = f.statusChanges.subscribe(() =>
-          this.invalid.set(f.invalid),
-        );
-      } else {
-        this.invalid.set(false);
-      }
-    });
-  }
+  public readonly invalid = computed<boolean>(
+    () => this.form()?.().invalid() ?? false,
+  );
 
   public close(): void {
     this.closeRequest.emit();
+  }
+
+  public save(): void {
+    this.saveRequest.emit();
   }
 }

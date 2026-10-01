@@ -1,6 +1,16 @@
 # History
 
-- 2026-09-30:
+- 2026-10-01:
+  - ⚠️ migrated the part/fragment editors base to Angular signal forms (`@myrmidon/cadmus-ui`). This is breaking for all the part and fragment editors, including those of your own apps. See [Migrating a part editor](#migrating-a-part-editor) below.
+    - `ModelEditorComponentBase`:
+      - `form` is now an abstract signal form field tree (`FieldTree`), which the derived class creates from its draft with the new `createForm(draft, schema?)`. The whole form is disabled while the `disabled` input is true.
+      - `buildForm(formBuilder)` was removed, and the constructor no longer takes parameters: call `super()`. `authService` is still available to derived classes.
+      - `onDataSet(data)` is no longer abstract: override it only to react to new data beyond the form's draft.
+      - `isDirty` is now a read-only computed signal. `dirtyChange` is still emitted only when the dirty state changes.
+      - Whenever new data is bound (or saved), the form's interaction state (dirty, touched) is cleared.
+      - Saving an invalid form now also marks it as touched, so that its errors appear.
+    - `CloseSaveButtonsComponent`: its `form` input is now a signal form, and its save button is a plain button emitting the new `saveRequest` output. So editors need no `<form>` element: bind `(saveRequest)="save()"`.
+    - 🆕 `CustomSignalValidators.minChecked(path, min)` and `JsonSignalValidators.json(path)`: signal forms versions of `CustomValidators.minChecked` and `JsonValidators.json`, which are now deprecated.
   - ⚠️ migrated from reactive forms to Angular signal forms (`@angular/forms/signals`) the components of `@myrmidon/cadmus-ui` (layer hints, lookup pin), `cadmus-flags-ui`, `cadmus-graph-ui`, `cadmus-graph-ui-ex`, `cadmus-item-list`, `cadmus-item-editor`, `cadmus-item-search`, `cadmus-layer-demo`, `cadmus-preview-ui`, `cadmus-profile-editor`, `cadmus-profile-import`, `cadmus-statistics`, `cadmus-thesaurus-ui` and `cadmus-thesaurus-list`. Inputs, models and outputs are unchanged. Breaking for code that reached into these components' internals:
     - each component now exposes its form as a signal form field tree (usually `form`; `metadata` and `newPart` in the item editor, `rendition` in the layer demo, `filterForm` and `newThesaurusForm` in the thesaurus editor/list), replacing the former public `FormControl`/`FormGroup` fields (e.g. `ItemEditorComponent.title` is now `metadata.title`, `facetCtrl` is `metadata.facet`; `TextPreviewComponent.selectedLayer`/`selectedLayerValue` are now `form.selectedLayer`; `LayerHintsComponent.checks` is now `form.checks`);
     - embeddable widgets no longer render a `<form>` element, so they no longer create nested forms. Their action buttons are plain buttons, and Enter-to-confirm is kept where it existed through explicit key handlers. Components that are real submission roots (item editor metadata, item generation dialog, layer demo, new thesaurus adder) use `<form [formRoot]>`;
@@ -30,6 +40,54 @@
 - 2026-09-26:
   - 🆕 added context help to part and fragment editors (`@myrmidon/cadmus-ui`, `@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-philology-ui`). `ModelEditorComponentBase` now exposes `helpUrl()` (the URL of the help page for the edited model, or undefined when not available) and `hasHelp()`. The new `HelpLinkComponent` (`<cadmus-help-link [url]="helpUrl()" />`) shows a help button opening that page in a new tab, or nothing when no page is available. It has been added to the right edge of the card header of all the part/fragment editors in the general and philology libraries; to add it to your own editors, import `HelpLinkComponent` from `@myrmidon/cadmus-ui` and place it as the last child of `mat-card-header`. See below for configuring it.
   - 🐛 fixed `hasMetadataBuilders` in item editor (`@myrmidon/cadmus-item-editor`) always being false when set to `true` (boolean) in `env.js`.
+
+## Migrating a part editor
+
+Since 2026-10-01, `ModelEditorComponentBase` uses Angular signal forms. A part (or fragment) editor derived from it is migrated like this (example from the note part editor):
+
+```ts
+// the editable shape behind the form
+interface NotePartControls {
+  tag: string;
+  text: string;
+}
+
+// bound part -> editable draft
+function toDraft(part?: NotePart | null): NotePartControls {
+  return { tag: part?.tag || "", text: part?.text || "" };
+}
+
+export class NotePartComponent extends ModelEditorComponentBase<NotePart> {
+  // the draft is derived from the bound data, and rebuilt when it changes
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  // the form: the base class adds the disabled state
+  public readonly form = this.createForm(this._draft, (p) => {
+    maxLength(p.tag, 100);
+    required(p.text);
+  });
+
+  constructor() {
+    super();
+  }
+
+  // editable draft -> part
+  protected getValue(): NotePart {
+    const part = this.getEditedPart(NOTE_PART_TYPEID) as NotePart;
+    const draft = this._draft();
+    part.tag = draft.tag || undefined;
+    part.text = draft.text.trim();
+    return part;
+  }
+}
+```
+
+In the template:
+
+- remove the `<form [formGroup]="form" (submit)="save()">` wrapper;
+- bind each control with `[formField]="form.tag"` instead of `[formControl]`/`formControlName`, and read its state as `form.tag().getError('maxLength')`, `form.tag().dirty()`, `form.tag().touched()` etc. Note that some error kinds differ from reactive forms, e.g. `maxLength` instead of `maxlength`;
+- add `(saveRequest)="save()"` to `<cadmus-close-save-buttons>`.
+
+Finally, replace `ReactiveFormsModule` with `FormField` in the component's imports.
 
 ## Context Help Configuration
 

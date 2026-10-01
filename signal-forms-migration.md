@@ -926,3 +926,98 @@ Fix:
   value without `detectChanges()`, which looks like the same
   `toObservable` harness issue seen here. The fifth is an accessibility
   test on the clear button.
+
+## Iteration 2 (2026-10-01): the editors base and the part libraries
+
+Scope, by owner request: the libraries left out of iteration 1, i.e.
+the editors base in `cadmus-ui` (`ModelEditorComponentBase`,
+`CloseSaveButtonsComponent`, the validators), `cadmus-part-taxo-ui`,
+`cadmus-part-general-*` and `cadmus-part-philology-*`. One commit per
+library, not pushed.
+
+Before starting, the 5 failing `RefLookupComponent` tests in the bricks
+workspace were fixed and committed there (`58744fe`, together with the
+`NG0956` fix). They were harness issues, and the component was not
+changed for them:
+
+- four `items$` tests set the lookup value without running change
+  detection, which `toObservable` needs before it emits. They now call
+  `fixture.detectChanges()` after setting it;
+- the clear button test read `aria-describedby` right after
+  `detectChanges()`. `MatTooltip` sets it in an `afterNextRender` hook
+  (read in `@angular/material` 22.2.0's tooltip source), so the test now
+  awaits `fixture.whenStable()` first;
+- result: 106 of 106 tests pass in that library.
+
+### Design of the editors base (`cadmus-ui`)
+
+- **No `<form>` in part editors.** Part editors embed child editors and
+  bricks widgets (which already render no `<form>`). Inside a
+  `<form>` with a submit button, a browser submits the form when Enter is
+  pressed in any of its text inputs (implicit submission). So, as long as
+  part editors used `<form (submit)="save()">`, Enter in a child widget's
+  input would save the whole part. **Believed, not measured** for the
+  pre-migration code: to check, run the previous commit, open a part
+  editor that embeds a bricks widget with a text input (e.g. a historical
+  date), and press Enter in it.
+  - So the save button of `CloseSaveButtonsComponent` is now
+    `type="button"` and emits `saveRequest`. Editors bind
+    `(saveRequest)="save()"`.
+  - Behaviour change: Enter in a part editor's own input no longer saves
+    the part. Saving takes the save button.
+- `form` is an abstract `FieldTree<unknown>`. A derived editor creates
+  it with `createForm(draft, schema?)` from its own draft, which wraps
+  `form()` and adds `disabled(root, () => this.disabled())`.
+  - `FieldTree<any>` does not work as the base type. With `any`, the
+    `FieldTree` conditional type resolves to its reactive-forms
+    compatibility branch, and `FieldTree<{ title: string }>` is then not
+    assignable to it (TS2416, measured). `FieldTree<unknown>` is
+    assignable.
+  - Disabling the root disables every field. This was read in the forms
+    source (`disabledReasons` is parent's plus own) and measured: a spec
+    checks the root, a child field and the rendered `<input>`. A mutation
+    check (the rule's condition made always false) fails it.
+- The draft lives in the derived class, normally as
+  `linkedSignal(() => toDraft(this.data()?.value))`. That rebuilds the
+  draft from every new `data`, including the echo of a save, as the old
+  `onDataSet` → `updateForm` did. These are manual-save editors, so the
+  autosave echo problem of the canonical template does not arise.
+- One base `effect` on `data` resets the form's interaction state and
+  then calls `onDataSet(data)`. That replaces the `markAsPristine()` at
+  the end of every old `updateForm()`. Mutation-checked: without the
+  reset, the "clear the dirty state when new data is bound" spec fails.
+- `isDirty` is `computed(() => this.form().dirty())`, and `dirtyChange`
+  is emitted from an effect only when the value changes. The old one was
+  emitted on `PristineChangeEvent`. Specs check one emission for two
+  keystrokes, none for binding data to a pristine form, and
+  `[true, false]` when new data arrives after an edit.
+- `save()`: an invalid form is not saved (as before), and is now marked
+  as touched. `markAsPristine()` became `form().reset()`, which resets
+  only the interaction state.
+- The constructor takes no parameters. `authService` is `inject()`ed
+  and still `protected`. `FormBuilder` is gone.
+- `CustomSignalValidators.minChecked` and `JsonSignalValidators.json`
+  were added next to the reactive ones, which are kept but marked
+  `@deprecated`. Nothing in this workspace uses the reactive ones
+  (grepped), and downstream apps may.
+- `extractTouchedChanges`/`extractPristineChanges` (`utils.ts`) were left
+  as they are: they are generic `AbstractControl` helpers, and nothing
+  here uses them.
+- Measured: 167 of 167 `cadmus-ui` tests pass, and the library builds.
+
+### `cadmus-part-taxo-ui`
+
+- `TaxoStoreNodesPartComponent`:
+  - The draft is `{ nodeIds: StringPair[] }`. The pairs are copied on the
+    way in (`toDraft`) and on the way out (`getValue`).
+  - Specs check that the bound part's objects stay free of FieldTree's
+    identity Symbol. A save through the real save button emits a part
+    whose `nodeIds` equal plain pairs. Replacing the outgoing copy with a
+    spread makes that spec fail, because the Symbol leaks out (mutation
+    check).
+  - The template no longer reads `nodeIds.value`, a plain property, under
+    `OnPush`. It now reads `form.nodeIds().value()`, a signal.
+- Specs compare the draft's arrays through a JSON round-trip. The items
+  carry the identity Symbol, as in iteration 1.
+- Measured: 23 of 23 tests pass, and `cadmus-part-taxo-ui` and
+  `cadmus-part-taxo-pg` build.

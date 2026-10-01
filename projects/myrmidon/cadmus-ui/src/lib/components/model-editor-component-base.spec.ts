@@ -1,6 +1,10 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  linkedSignal,
+} from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormField, required } from '@angular/forms/signals';
 import { BehaviorSubject } from 'rxjs';
 
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
@@ -11,19 +15,21 @@ import { ModelEditorComponentBase } from './model-editor-component-base';
 import { EditorHelpService } from '../services/editor-help.service';
 
 @Component({
-  template: '',
-  standalone: true,
+  template: '<input [formField]="form.title" />',
+  imports: [FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestEditorComponent extends ModelEditorComponentBase<Part> {
-  public buildFormCalls = 0;
   public onDataSetCalls: (EditedObject<Part> | undefined)[] = [];
   public getValueResult: Part = makePart();
 
-  protected override buildForm(fb: FormBuilder): FormGroup {
-    this.buildFormCalls++;
-    return fb.group({ title: [''] });
-  }
+  // the draft mirrors the bound part's roleId as "title"
+  private readonly _draft = linkedSignal(() => ({
+    title: this.data()?.value?.roleId || '',
+  }));
+  public readonly form = this.createForm(this._draft, (path) => {
+    required(path.title);
+  });
 
   protected override onDataSet(data?: EditedObject<Part>): void {
     this.onDataSetCalls.push(data);
@@ -115,10 +121,10 @@ describe('ModelEditorComponentBase', () => {
   }
 
   describe('initialization', () => {
-    it('should build the form via buildForm on ngOnInit', () => {
+    it('should expose the form built with createForm', () => {
       const fixture = createComponent();
-      expect(fixture.componentInstance.buildFormCalls).toBe(1);
-      expect(fixture.componentInstance.form).toBeTruthy();
+      expect(fixture.componentInstance.form.title().value()).toBe('');
+      expect(fixture.componentInstance.isDirty()).toBe(false);
     });
 
     it('should start with userLevel 0 and no user when unauthenticated', () => {
@@ -154,11 +160,16 @@ describe('ModelEditorComponentBase', () => {
   });
 
   describe('disabled input', () => {
-    it('should disable the form when disabled is true', () => {
+    it('should disable the form and its fields when disabled is true', () => {
       const fixture = createComponent();
       fixture.componentRef.setInput('disabled', true);
       fixture.detectChanges();
-      expect(fixture.componentInstance.form.disabled).toBe(true);
+      const form = fixture.componentInstance.form;
+      expect(form().disabled()).toBe(true);
+      expect(form.title().disabled()).toBe(true);
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input');
+      expect(input.disabled).toBe(true);
     });
 
     it('should enable the form when disabled is false', () => {
@@ -167,7 +178,59 @@ describe('ModelEditorComponentBase', () => {
       fixture.detectChanges();
       fixture.componentRef.setInput('disabled', false);
       fixture.detectChanges();
-      expect(fixture.componentInstance.form.disabled).toBe(false);
+      expect(fixture.componentInstance.form().disabled()).toBe(false);
+      expect(fixture.componentInstance.form.title().disabled()).toBe(false);
+    });
+  });
+
+  describe('dirty state', () => {
+    it('should become dirty on user input and emit dirtyChange once', () => {
+      const fixture = createComponent();
+      const emitted: boolean[] = [];
+      fixture.componentInstance.dirtyChange.subscribe((d) => emitted.push(d));
+
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input');
+      input.value = 'x';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      input.value = 'xy';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.isDirty()).toBe(true);
+      expect(emitted).toEqual([true]);
+    });
+
+    it('should not emit dirtyChange when nothing changed', () => {
+      const fixture = createComponent();
+      const emitted: boolean[] = [];
+      fixture.componentInstance.dirtyChange.subscribe((d) => emitted.push(d));
+      fixture.componentRef.setInput('data', {
+        value: makePart(),
+        thesauri: {},
+      });
+      fixture.detectChanges();
+      expect(emitted).toEqual([]);
+    });
+
+    it('should clear the dirty state when new data is bound', () => {
+      const fixture = createComponent();
+      const emitted: boolean[] = [];
+      fixture.componentInstance.dirtyChange.subscribe((d) => emitted.push(d));
+      fixture.componentInstance.form.title().markAsDirty();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.isDirty()).toBe(true);
+
+      fixture.componentRef.setInput('data', {
+        value: makePart({ roleId: 'new' }),
+        thesauri: {},
+      });
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.form.title().value()).toBe('new');
+      expect(fixture.componentInstance.isDirty()).toBe(false);
+      expect(emitted).toEqual([true, false]);
     });
   });
 
@@ -475,25 +538,30 @@ describe('ModelEditorComponentBase', () => {
       expect(spy).toHaveBeenCalled();
     });
 
-    it('should not save when the form is invalid', () => {
+    it('should not save when the form is invalid, and show its errors', () => {
       const fixture = createComponent();
-      fixture.componentInstance.form.setErrors({ invalid: true });
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      // title is required and empty
+      expect(fixture.componentInstance.form().invalid()).toBe(true);
 
       fixture.componentInstance.save();
 
       // getValue() must not have influenced data(): still undefined
       expect(fixture.componentInstance.data()).toBeUndefined();
+      expect(fixture.componentInstance.form.title().touched()).toBe(true);
+      warn.mockRestore();
     });
 
     it('should update data and mark the form pristine when valid', () => {
       const fixture = createComponent();
       fixture.componentInstance.getValueResult = makePart({ id: 'saved-id' });
-      fixture.componentInstance.form.markAsDirty();
+      fixture.componentInstance.form.title().value.set('a title');
+      fixture.componentInstance.form.title().markAsDirty();
 
       fixture.componentInstance.save();
 
       expect(fixture.componentInstance.data()!.value!.id).toBe('saved-id');
-      expect(fixture.componentInstance.form.pristine).toBe(true);
+      expect(fixture.componentInstance.form().dirty()).toBe(false);
     });
   });
 });

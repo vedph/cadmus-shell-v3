@@ -1,12 +1,21 @@
+import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder } from '@angular/forms';
+import { FieldTree, form, required } from '@angular/forms/signals';
 
 import { CloseSaveButtonsComponent } from './close-save-buttons.component';
 
 describe('CloseSaveButtonsComponent', () => {
   let component: CloseSaveButtonsComponent;
   let fixture: ComponentFixture<CloseSaveButtonsComponent>;
-  const fb = new FormBuilder();
+
+  // a form with a required name, initially empty (invalid)
+  function makeForm(name = ''): FieldTree<{ name: string }> {
+    return runInInjectionContext(TestBed.inject(Injector), () =>
+      form(signal({ name }), (p) => {
+        required(p.name);
+      }),
+    );
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,6 +27,12 @@ describe('CloseSaveButtonsComponent', () => {
     fixture.detectChanges();
   });
 
+  function buttons(): HTMLButtonElement[] {
+    return Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
+    );
+  }
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -27,28 +42,26 @@ describe('CloseSaveButtonsComponent', () => {
   });
 
   it('should reflect the initial validity of the bound form', () => {
-    const form = fb.group({ name: ['', () => ({ required: true })] });
-    fixture.componentRef.setInput('form', form);
+    fixture.componentRef.setInput('form', makeForm());
     fixture.detectChanges();
     expect(component.invalid()).toBe(true);
   });
 
   it('should track form validity changes over time', () => {
-    const form = fb.group({ name: ['', () => ({ required: true })] });
-    fixture.componentRef.setInput('form', form);
+    const f = makeForm();
+    fixture.componentRef.setInput('form', f);
     fixture.detectChanges();
     expect(component.invalid()).toBe(true);
+    expect(buttons()[1].disabled).toBe(true);
 
-    // the group's own validity also depends on its children, so the
-    // always-failing validator on "name" must be cleared too
-    form.get('name')!.setValidators(null);
-    form.get('name')!.updateValueAndValidity();
+    f.name().value.set('ok');
+    fixture.detectChanges();
     expect(component.invalid()).toBe(false);
+    expect(buttons()[1].disabled).toBe(false);
   });
 
   it('should reset invalid to false when the form input is cleared', () => {
-    const form = fb.group({ name: ['', () => ({ required: true })] });
-    fixture.componentRef.setInput('form', form);
+    fixture.componentRef.setInput('form', makeForm());
     fixture.detectChanges();
 
     fixture.componentRef.setInput('form', undefined);
@@ -56,18 +69,17 @@ describe('CloseSaveButtonsComponent', () => {
     expect(component.invalid()).toBe(false);
   });
 
-  it('should unsubscribe from the previous form when a new one is bound', () => {
-    const form1 = fb.group({ name: ['', () => ({ required: true })] });
-    const form2 = fb.group({ name: ['ok'] });
+  it('should follow only the currently bound form', () => {
+    const form1 = makeForm();
+    const form2 = makeForm('ok');
     fixture.componentRef.setInput('form', form1);
     fixture.detectChanges();
     fixture.componentRef.setInput('form', form2);
     fixture.detectChanges();
     expect(component.invalid()).toBe(false);
 
-    // changes on the old (now detached) form must no longer affect invalid()
-    form1.setErrors({ stale: true });
-    form1.updateValueAndValidity();
+    // changes on the old form must no longer affect invalid()
+    form1.name().value.set('');
     expect(component.invalid()).toBe(false);
   });
 
@@ -79,22 +91,55 @@ describe('CloseSaveButtonsComponent', () => {
   });
 
   it('should not render the buttons row when there is no form', () => {
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('button')).toBeNull();
+    expect(buttons().length).toBe(0);
   });
 
   it('should render both buttons when a form is bound and noSave is false', () => {
-    fixture.componentRef.setInput('form', fb.group({}));
+    fixture.componentRef.setInput('form', makeForm());
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelectorAll('button').length).toBe(2);
+    expect(buttons().length).toBe(2);
   });
 
   it('should render only the close button when noSave is true', () => {
-    fixture.componentRef.setInput('form', fb.group({}));
+    fixture.componentRef.setInput('form', makeForm());
     fixture.componentRef.setInput('noSave', true);
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelectorAll('button').length).toBe(1);
+    expect(buttons().length).toBe(1);
+  });
+
+  it('should render plain buttons, so that no enclosing form is needed', () => {
+    fixture.componentRef.setInput('form', makeForm('ok'));
+    fixture.detectChanges();
+    for (const b of buttons()) {
+      expect(b.type).toBe('button');
+    }
+  });
+
+  it('should emit saveRequest when the save button is clicked', () => {
+    const closeSpy = vi.fn();
+    const saveSpy = vi.fn();
+    component.closeRequest.subscribe(closeSpy);
+    component.saveRequest.subscribe(saveSpy);
+    fixture.componentRef.setInput('form', makeForm('ok'));
+    fixture.detectChanges();
+
+    buttons()[1].click();
+
+    expect(saveSpy).toHaveBeenCalledTimes(1);
+    expect(closeSpy).not.toHaveBeenCalled();
+  });
+
+  it('should emit closeRequest when the close button is clicked', () => {
+    const saveSpy = vi.fn();
+    const closeSpy = vi.fn();
+    component.saveRequest.subscribe(saveSpy);
+    component.closeRequest.subscribe(closeSpy);
+    fixture.componentRef.setInput('form', makeForm('ok'));
+    fixture.detectChanges();
+
+    buttons()[0].click();
+
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(saveSpy).not.toHaveBeenCalled();
   });
 });

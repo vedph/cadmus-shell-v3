@@ -6,7 +6,8 @@
     </button>
     @if (!noSave()) {
       <button
-        type="submit"
+        type="button"
+        (click)="save()"
         [disabled]="invalid()"
         mat-flat-button
         class="mat-primary"

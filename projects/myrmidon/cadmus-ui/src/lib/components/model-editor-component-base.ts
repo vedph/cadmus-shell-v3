@@ -10,14 +10,17 @@ import {
   computed,
   inject,
   signal,
-  ChangeDetectionStrategy
+  untracked,
+  ChangeDetectionStrategy,
+  WritableSignal,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormGroup,
-  PristineChangeEvent,
-  UntypedFormGroup,
-} from '@angular/forms';
+  FieldTree,
+  SchemaFn,
+  SchemaPath,
+  disabled as disabledRule,
+  form,
+} from '@angular/forms/signals';
 import { Subscription } from 'rxjs';
 
 import { deepCopy } from '@myrmidon/ngx-tools';
@@ -38,8 +41,19 @@ import { EditorHelpService } from '../services/editor-help.service';
  * Base class for part/fragment editors dumb components.
  * The model type is the templated argument T.
  *
+ * The editor's form is a signal form. The derived class:
+ * - keeps its editable draft in a signal derived from `data`, usually
+ *   `linkedSignal(() => toDraft(this.data()?.value))`;
+ * - builds its root form from that draft with `createForm()`, assigning it
+ *   to the `form` property;
+ * - implements `getValue()`, which builds the model from the draft.
+ *
+ * The base class provides the dirty state (`isDirty`, `dirtyChange`),
+ * disables the whole form when `disabled` is true, clears the form's
+ * interaction state whenever new data is bound, and saves via `save()`.
+ *
  * When deriving from this editor, be sure to call super.ngOnInit()
- * from the derived editor's ngOnInit handler.
+ * from the derived editor's ngOnInit handler, if you override it.
  */
 @Component({
   template: '',
@@ -51,15 +65,19 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
 {
   private readonly _mebSubs: Subscription[] = [];
   private readonly _injector = inject(Injector);
+  private _lastDirty = false;
   private readonly _helpService = inject(EditorHelpService);
   private readonly _helpUrl = signal<string | undefined>(undefined);
   private _helpRequest = 0;
   protected readonly _appRepository?: AppRepository;
+  protected readonly authService = inject(AuthJwtService);
 
   /**
-   * The root form of the editor.
+   * The root form of the editor. Implement it in the derived class with
+   * `createForm()`, e.g.
+   * `public readonly form = this.createForm(this._draft, (p) => {...})`.
    */
-  public form: FormGroup | UntypedFormGroup;
+  public abstract readonly form: FieldTree<unknown>;
 
   /**
    * The current user.
@@ -72,9 +90,10 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   public userLevel: number;
 
   /**
-   * A signal with the current dirty state of the editor.
+   * A signal with the current dirty state of the editor, i.e. true when
+   * the user changed the form since the data was bound or last saved.
    */
-  public readonly isDirty = signal<boolean>(false);
+  public readonly isDirty = computed<boolean>(() => this.form().dirty());
 
   /**
    * The identity of the edited model.
@@ -93,7 +112,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
 
   /**
    * Event emitted when the dirty state has changed.
-   * This event just reflects changes in isDirty$, and is a facility
+   * This event just reflects changes in isDirty, and is a facility
    * for propagating it to the parent's component.
    */
   public readonly dirtyChange = output<boolean>();
@@ -150,23 +169,29 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
 
   /**
    * Create a new instance of the editor.
-   *
-   * @param authService The authentication service.
-   * @param formBuilder Form builder.
    */
-  constructor(
-    protected authService: AuthJwtService,
-    protected formBuilder: FormBuilder
-  ) {
-    this.form = formBuilder.group({});
+  constructor() {
     this.userLevel = 0;
     this._appRepository = inject(AppRepository);
 
+    // new data bound (or saved): the form mirrors it, so there are no
+    // unsaved edits; then let the derived class react to the data
     effect(() => {
-      this.disableForm(this.disabled());
+      const data = this.data();
+      untracked(() => {
+        this.form().reset();
+        this.onDataSet(data);
+      });
     });
+    // propagate dirty state changes
     effect(() => {
-      this.onDataSet(this.data());
+      const dirty = this.isDirty();
+      untracked(() => {
+        if (dirty !== this._lastDirty) {
+          this._lastDirty = dirty;
+          this.dirtyChange.emit(dirty);
+        }
+      });
     });
     effect(() => {
       this.onIdentitySet(this.identity());
@@ -193,12 +218,24 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
       .catch(() => {});
   }
 
-  private disableForm(disabled?: boolean) {
-    if (disabled) {
-      this.form.disable();
-    } else {
-      this.form.enable();
-    }
+  /**
+   * Create the root form of this editor from its editable draft. The
+   * whole form is disabled when the `disabled` input is true. Call this
+   * from a field initializer of the derived class, after its draft.
+   *
+   * @param model The draft signal the form edits.
+   * @param schema The optional schema function with the form's rules.
+   * @returns The form.
+   */
+  protected createForm<C>(
+    model: WritableSignal<C>,
+    schema?: SchemaFn<C>
+  ): FieldTree<C> {
+    return form(model, (path) => {
+      // the root path: its disabled state is inherited by all the fields
+      disabledRule(path as SchemaPath<C>, () => !!this.disabled());
+      schema?.(path);
+    });
   }
 
   private onIdentitySet(identity?: PartIdentity | FragmentIdentity) {
@@ -245,19 +282,6 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   }
 
   public ngOnInit(): void {
-    // form
-    this.form = this.buildForm(this.formBuilder);
-
-    // dirty check on form
-    this._mebSubs.push(
-      this.form.events.subscribe((e) => {
-        if (e instanceof PristineChangeEvent) {
-          this.isDirty.set(!e.pristine);
-          this.dirtyChange.emit(!e.pristine);
-        }
-      })
-    );
-
     // auth service
     this.userLevel = this.getCurrentUserLevel();
     this._mebSubs.push(
@@ -270,17 +294,6 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   public ngOnDestroy(): void {
     this._mebSubs.forEach((s) => s.unsubscribe());
   }
-
-  /**
-   * Implement in the derived class to build the root form of this editor.
-   * The form built will then be attached to the dirty check mechanism
-   * provided by this base class.
-   *
-   * @param formBuilder The form builder.
-   */
-  protected abstract buildForm(
-    formBuilder: FormBuilder
-  ): FormGroup | UntypedFormGroup;
 
   /**
    * Get the authorization level of the current user if any.
@@ -327,13 +340,14 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   }
 
   /**
-   * Invoked whenever the model property is set (=data comes from input model
-   * property), unless setting it via updateModel. Implement to update the form
-   * controls to reflect the new model data.
+   * Invoked whenever the data model is set, either from its input binding
+   * or by saving. Override to react to new data beyond the form's draft,
+   * which should rather be derived from `data` (e.g. with `linkedSignal`).
+   * The default implementation does nothing.
    *
    * @param data The data set, or undefined.
    */
-  protected abstract onDataSet(data?: EditedObject<T>): void;
+  protected onDataSet(data?: EditedObject<T>): void {}
 
   /**
    * Get a new object from the edited part if any, else as a new part.
@@ -373,7 +387,7 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   }
 
   /**
-   * Implement in derived classes to get the data from form's controls.
+   * Implement in derived classes to get the model from the form's draft.
    * This is used when saving.
    */
   protected abstract getValue(): T;
@@ -394,16 +408,18 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   }
 
   /**
-   * Save the edited data if valid.
+   * Save the edited data if valid; else mark the form as touched, so that
+   * its errors are displayed.
    */
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       console.warn('Save invoked with invalid form');
+      this.form().markAsTouched();
       return;
     }
     const value = this.getValue();
     this.updateValue(value);
     // the form is no more dirty
-    this.form.markAsPristine();
+    this.form().reset();
   }
 }
