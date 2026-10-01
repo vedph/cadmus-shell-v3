@@ -35,7 +35,9 @@
         <!-- text -->
         <div id="editor">
           <ngx-monaco-editor
-            [formField]="form.text"
+            [value]="form.text().value()"
+            (valueChange)="setFieldFromEditor(form.text, $event)"
+            (blur)="form.text().markAsTouched()"
             [language]="'markdown'"
             [options]="editorOptions"
             (editorInitialized)="onEditorInit($event)"

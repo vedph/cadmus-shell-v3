@@ -49,6 +49,7 @@ import {
 import { NotePart, NOTE_PART_TYPEID } from '../note-part';
 import { MonacoEditorHelper } from '../monaco-editor-helper';
 import { marked } from 'marked';
+import { setFieldFromEditor } from '../signal-form-utils';
 
 interface NotePartControls {
   tag: string;
@@ -109,6 +110,11 @@ export class NotePartComponent extends ModelEditorComponentBase<NotePart> {
     maxLength(p.tag, 100);
     required(p.text);
   });
+
+  /**
+   * Set a text field from its editor. See setFieldFromEditor.
+   */
+  public setFieldFromEditor = setFieldFromEditor;
 
   public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
     () => this.data()?.thesauri?.['note-tags']?.entries,

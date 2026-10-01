@@ -77,7 +77,7 @@ import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
 
 import { IndexKeyword } from '../index-keywords-part';
 import { CommentFragment } from '../comment-fragment';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromEditor } from '../signal-form-utils';
 
 interface CommentPartSettings {
   lookupProviderOptions?: LookupProviderOptions;
@@ -261,6 +261,11 @@ export class CommentEditorComponent extends ModelEditorComponentBase<
       maxLength(k.note, 500);
     });
   });
+
+  /**
+   * Set a text field from its editor. See setFieldFromEditor.
+   */
+  public setFieldFromEditor = setFieldFromEditor;
 
   constructor(
     private _editService: CadmusTextEdService,

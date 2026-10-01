@@ -42,6 +42,7 @@ import {
   TOKEN_TEXT_PART_TYPEID,
   TokenTextLine,
 } from '../token-text-part';
+import { setFieldFromEditor } from '../signal-form-utils';
 
 interface TokenTextPartControls {
   citation: string;
@@ -106,6 +107,11 @@ export class TokenTextPartComponent extends ModelEditorComponentBase<TokenTextPa
   public readonly form = this.createForm(this._draft, (p) => {
     required(p.text);
   });
+
+  /**
+   * Set a text field from its editor. See setFieldFromEditor.
+   */
+  public setFieldFromEditor = setFieldFromEditor;
 
   // the selected text transformation (not part of the edited model)
   public readonly transform = signal<string>('ws');

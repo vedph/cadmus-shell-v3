@@ -292,6 +292,21 @@ describe('NotePartComponent', () => {
       expect(component.form.text().value()).toBe('typed text');
     });
 
+    it('should ignore the editor echoing back the text it was given', () => {
+      fixture.componentRef.setInput('data', {
+        value: makePart({ text: 'from part' }),
+        thesauri: {},
+      } as EditedObject<NotePart>);
+      fixture.detectChanges();
+      // the Monaco editor emits valueChange also when its value is set
+      component.setFieldFromEditor(component.form.text, 'from part');
+      expect(component.isDirty()).toBe(false);
+
+      component.setFieldFromEditor(component.form.text, 'from part!');
+      expect(component.form.text().value()).toBe('from part!');
+      expect(component.isDirty()).toBe(true);
+    });
+
     it('should save the edited part into data', () => {
       fixture.componentRef.setInput('data', {
         value: makePart({ text: 'old' }),
