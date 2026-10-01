@@ -143,8 +143,10 @@ export class ChronotopesPartComponent extends ModelEditorComponentBase<Chronotop
     NgxToolsSignalValidators.strictMinLength(p.chronotopes, 1);
   });
 
-  constructor(private _dialogService: DialogService,
-    private _storage: RamStorageService) {
+  constructor(
+    private _dialogService: DialogService,
+    private _storage: RamStorageService,
+  ) {
     super();
     // settings
     this.initSettings<ChronotopesPartSettings>(
