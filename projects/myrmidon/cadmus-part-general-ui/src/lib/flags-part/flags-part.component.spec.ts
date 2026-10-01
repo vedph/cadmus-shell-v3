@@ -16,6 +16,12 @@ import {
 import { FlagsPartComponent } from './flags-part.component';
 import { FlagsPart, FLAGS_PART_TYPEID } from '../flags-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('FlagsPartComponent', () => {
   let component: FlagsPartComponent;
   let fixture: ComponentFixture<FlagsPartComponent>;
@@ -83,12 +89,12 @@ describe('FlagsPartComponent', () => {
     });
 
     it('should build an initially invalid form (empty flags)', () => {
-      expect(component.flags.value).toEqual([]);
-      expect(component.form.invalid).toBe(true);
+      expect(plain(component.form.flags().value())).toEqual([]);
+      expect(component.form().invalid()).toBe(true);
     });
 
     it('should default notes to empty definitions/notes', () => {
-      expect(component.notes.value).toEqual({ definitions: [], notes: {} });
+      expect(plain(component.form.notes().value())).toEqual({ definitions: [], notes: {} });
     });
 
     it('should not call getSettingFor before identity is set', () => {
@@ -96,10 +102,19 @@ describe('FlagsPartComponent', () => {
     });
 
     it('should compute featureFlags from flagEntries', () => {
-      component.flagEntries.set([
-        { id: 'a', value: 'Alpha' },
-        { id: 'b', value: 'Beta' },
-      ]);
+      fixture.componentRef.setInput('data', {
+        value: getPart(),
+        thesauri: {
+          flags: {
+            id: 'flags',
+            entries: [
+              { id: 'a', value: 'Alpha' },
+              { id: 'b', value: 'Beta' },
+            ],
+          },
+        },
+      } as EditedObject<FlagsPart>);
+      fixture.detectChanges();
 
       expect(component.featureFlags()).toEqual([
         { id: 'a', label: 'Alpha' },
@@ -154,10 +169,10 @@ describe('FlagsPartComponent', () => {
         } as EditedObject<FlagsPart>);
         fixture.detectChanges();
 
-        expect(component.flags.value).toEqual(['a', 'b']);
+        expect(plain(component.form.flags().value())).toEqual(['a', 'b']);
         // no settings loaded -> notes are always the empty default, part.notes ignored
-        expect(component.notes.value).toEqual({ definitions: [], notes: {} });
-        expect(component.form.pristine).toBe(true);
+        expect(plain(component.form.notes().value())).toEqual({ definitions: [], notes: {} });
+        expect(component.form().dirty()).toBe(false);
       });
 
       it('should reset the form when data is unset', () => {
@@ -170,7 +185,7 @@ describe('FlagsPartComponent', () => {
         fixture.componentRef.setInput('data', undefined);
         fixture.detectChanges();
 
-        expect(component.flags.value).toEqual([]);
+        expect(plain(component.form.flags().value())).toEqual([]);
       });
 
       it('getValue should set flags and omit notes when all values are null', () => {
@@ -180,7 +195,7 @@ describe('FlagsPartComponent', () => {
         } as EditedObject<FlagsPart>);
         fixture.detectChanges();
 
-        component.notes.setValue({
+        component.form.notes().value.set({
           definitions: [],
           notes: { k1: null as any, k2: undefined as any },
         });
@@ -197,7 +212,7 @@ describe('FlagsPartComponent', () => {
         } as EditedObject<FlagsPart>);
         fixture.detectChanges();
 
-        component.notes.setValue({
+        component.form.notes().value.set({
           definitions: [],
           notes: { k1: 'hello', k2: null as any },
         });
@@ -209,22 +224,18 @@ describe('FlagsPartComponent', () => {
       it('onFlagsCheckedIdsChange should update flags and mark dirty', () => {
         component.onFlagsCheckedIdsChange(['x', 'y']);
 
-        expect(component.flags.value).toEqual(['x', 'y']);
-        expect(component.flags.dirty).toBe(true);
+        expect(plain(component.form.flags().value())).toEqual(['x', 'y']);
+        expect(component.form.flags().dirty()).toBe(true);
       });
 
-      it('onSetChange should update the notes control', () => {
+      it('onSetChange should update the notes field and mark it dirty', () => {
         const set: NoteSet = { definitions: [], notes: { k1: 'v' } };
 
         component.onSetChange(set);
 
-        expect(component.notes.value).toEqual(set);
-      });
-
-      it('onNoteChange should not throw', () => {
-        expect(() =>
-          component.onNoteChange({ key: 'k1', value: 'v' }),
-        ).not.toThrow();
+        expect(plain(component.form.notes().value())).toEqual(set);
+        expect(component.form.notes().dirty()).toBe(true);
+        expect(component.isDirty()).toBe(true);
       });
     });
   });
@@ -248,10 +259,43 @@ describe('FlagsPartComponent', () => {
       } as EditedObject<FlagsPart>);
       fixture.detectChanges();
 
-      expect(component.notes.value).toEqual({
+      expect(plain(component.form.notes().value())).toEqual({
         definitions: NOTE_SET_SETTING.definitions,
         notes: { k1: 'hello' },
       });
+    });
+
+    it('should save the notes changed in the notes editor', () => {
+      fixture.componentRef.setInput('data', {
+        value: getPart({ flags: ['a'], notes: { k1: 'hello' } }),
+        thesauri: {},
+      } as EditedObject<FlagsPart>);
+      fixture.detectChanges();
+
+      component.onSetChange({
+        definitions: NOTE_SET_SETTING.definitions,
+        notes: { k1: 'changed' },
+      });
+      component.save();
+
+      expect(component.data()!.value!.notes).toEqual({ k1: 'changed' });
+    });
+
+    it('should not pass the editor its own changes back as a new note set', () => {
+      fixture.componentRef.setInput('data', {
+        value: getPart({ notes: { k1: 'hello' } }),
+        thesauri: {},
+      } as EditedObject<FlagsPart>);
+      fixture.detectChanges();
+      const before = component.noteSet();
+
+      component.onSetChange({
+        definitions: NOTE_SET_SETTING.definitions,
+        notes: { k1: 'changed' },
+      });
+      fixture.detectChanges();
+
+      expect(component.noteSet()).toBe(before);
     });
 
     it('getNoteSet should default part.notes to {} when the part has none', () => {
@@ -261,10 +305,46 @@ describe('FlagsPartComponent', () => {
       } as EditedObject<FlagsPart>);
       fixture.detectChanges();
 
-      expect(component.notes.value).toEqual({
+      expect(plain(component.form.notes().value())).toEqual({
         definitions: NOTE_SET_SETTING.definitions,
         notes: {},
       });
     });
+  });
+
+  describe('with note settings loaded after data', () => {
+    let resolveSettings!: (value: unknown) => void;
+
+    beforeEach(async () => {
+      await configure(undefined);
+      appRepository.getSettingFor.mockReturnValue(
+        new Promise((r) => (resolveSettings = r)),
+      );
+      fixture.componentRef.setInput('identity', IDENTITY);
+      fixture.componentRef.setInput('data', {
+        value: getPart({ notes: { k1: 'hello' } }),
+        thesauri: {},
+      } as EditedObject<FlagsPart>);
+      fixture.detectChanges();
+    });
+
+    it('should merge the part notes once settings arrive', async () => {
+      resolveSettings(NOTE_SET_SETTING);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(plain(component.form.notes().value())).toEqual({
+        definitions: NOTE_SET_SETTING.definitions,
+        notes: { k1: 'hello' },
+      });
+    });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

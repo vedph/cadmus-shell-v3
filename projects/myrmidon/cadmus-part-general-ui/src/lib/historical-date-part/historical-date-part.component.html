@@ -1,38 +1,37 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>picture_in_picture</mat-icon>
-      </div>
-      <mat-card-title>{{
-        (modelName() | titlecase) || "Historical Date Part"
-      }}</mat-card-title>
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
-    <mat-card-content>
-      <cadmus-refs-historical-date
-        [date]="date.value"
-        (dateChange)="onDateChange($event!)"
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>picture_in_picture</mat-icon>
+    </div>
+    <mat-card-title>{{
+      (modelName() | titlecase) || "Historical Date Part"
+    }}</mat-card-title>
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
+  <mat-card-content>
+    <cadmus-refs-historical-date
+      [date]="form.date().value()"
+      (dateChange)="onDateChange($event!)"
+    />
+    <!-- references -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>references</mat-panel-title>
+      </mat-expansion-panel-header>
+      <cadmus-refs-doc-references
+        [references]="form.references().value()"
+        [typeEntries]="typeEntries()"
+        [tagEntries]="tagEntries()"
+        (referencesChange)="onReferencesChange($event)"
       />
-      <!-- references -->
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>references</mat-panel-title>
-        </mat-expansion-panel-header>
-        <cadmus-refs-doc-references
-          [references]="references.value"
-          [typeEntries]="typeEntries()"
-          [tagEntries]="tagEntries()"
-          (referencesChange)="onReferencesChange($event)"
-        />
-      </mat-expansion-panel>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+    </mat-expansion-panel>
+  </mat-card-content>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

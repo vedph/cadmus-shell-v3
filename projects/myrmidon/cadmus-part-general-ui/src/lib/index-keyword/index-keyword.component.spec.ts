@@ -1,10 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { IndexKeywordComponent } from './index-keyword.component';
 import { IndexKeyword } from '../index-keywords-part';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 describe('IndexKeywordComponent', () => {
   let component: IndexKeywordComponent;
@@ -12,7 +18,7 @@ describe('IndexKeywordComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, IndexKeywordComponent],
+      imports: [IndexKeywordComponent],
       providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
   });
@@ -30,8 +36,8 @@ describe('IndexKeywordComponent', () => {
   it('resets the form when keyword is undefined', () => {
     fixture.componentRef.setInput('keyword', undefined);
     fixture.detectChanges();
-    expect(component.value.value).toBeFalsy();
-    expect(component.form.invalid).toBe(true);
+    expect(plain(component.form.value().value())).toBeFalsy();
+    expect(component.form().invalid()).toBe(true);
   });
 
   it('updates the form when keyword is set', () => {
@@ -45,12 +51,12 @@ describe('IndexKeywordComponent', () => {
     fixture.componentRef.setInput('keyword', keyword);
     fixture.detectChanges();
 
-    expect(component.indexId.value).toBe('idx1');
-    expect(component.language.value).toBe('eng');
-    expect(component.value.value).toBe('hello');
-    expect(component.note.value).toBe('a note');
-    expect(component.tag.value).toBe('tag1');
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.indexId().value())).toBe('idx1');
+    expect(plain(component.form.language().value())).toBe('eng');
+    expect(plain(component.form.value().value())).toBe('hello');
+    expect(plain(component.form.note().value())).toBe('a note');
+    expect(plain(component.form.tag().value())).toBe('tag1');
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('defaults indexId to null when keyword has no indexId', () => {
@@ -61,9 +67,9 @@ describe('IndexKeywordComponent', () => {
     fixture.componentRef.setInput('keyword', keyword);
     fixture.detectChanges();
 
-    expect(component.indexId.value).toBeNull();
-    expect(component.note.value).toBeNull();
-    expect(component.tag.value).toBeNull();
+    expect(component.form.indexId().value()).toBe('');
+    expect(component.form.note().value()).toBe('');
+    expect(component.form.tag().value()).toBe('');
   });
 
   it('does not emit/set keyword on submit when form is invalid', () => {
@@ -78,11 +84,11 @@ describe('IndexKeywordComponent', () => {
   it('sets keyword with trimmed values on valid submit', () => {
     // indexId has a slug-like pattern validator that rejects whitespace,
     // so it can't be padded like the other fields here
-    component.indexId.setValue('idx1');
-    component.language.setValue('  eng  ');
-    component.value.setValue('  hello  ');
-    component.note.setValue('  note  ');
-    component.tag.setValue('  tag1  ');
+    component.form.indexId().value.set('idx1');
+    component.form.language().value.set('  eng  ');
+    component.form.value().value.set('  hello  ');
+    component.form.note().value.set('  note  ');
+    component.form.tag().value.set('  tag1  ');
 
     component.submit();
 
@@ -96,11 +102,11 @@ describe('IndexKeywordComponent', () => {
   });
 
   it('sets optional fields to undefined when blank', () => {
-    component.indexId.setValue(null);
-    component.language.setValue('eng');
-    component.value.setValue('hello');
-    component.note.setValue(null);
-    component.tag.setValue(null);
+    component.form.indexId().value.set('');
+    component.form.language().value.set('eng');
+    component.form.value().value.set('hello');
+    component.form.note().value.set('');
+    component.form.tag().value.set('');
 
     component.submit();
 
@@ -115,5 +121,22 @@ describe('IndexKeywordComponent', () => {
     component.editorClose.subscribe(() => (emitted = true));
     component.cancel();
     expect(emitted).toBe(true);
+  });
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input',
+    );
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
   });
 });

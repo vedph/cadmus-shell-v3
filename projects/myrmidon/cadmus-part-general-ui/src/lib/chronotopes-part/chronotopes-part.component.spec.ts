@@ -12,6 +12,12 @@ import { LOOKUP_CONFIGS_KEY, RefLookupConfig } from '@myrmidon/cadmus-refs-looku
 import { ChronotopesPartComponent } from './chronotopes-part.component';
 import { ChronotopesPart, CHRONOTOPES_PART_TYPEID } from '../chronotopes-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function makePart(overrides?: Partial<ChronotopesPart>): ChronotopesPart {
   return {
     id: 'part1',
@@ -85,11 +91,11 @@ describe('ChronotopesPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.chronotopes.value).toEqual([makeChronotope()]);
+      expect(plain(component.form.chronotopes().value())).toEqual([makeChronotope()]);
 
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
-      expect(component.chronotopes.value).toEqual([]);
+      expect(plain(component.form.chronotopes().value())).toEqual([]);
     });
 
     it('should populate the chronotopes control from the part', () => {
@@ -100,8 +106,8 @@ describe('ChronotopesPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.chronotopes.value).toEqual(chronotopes);
-      expect(component.form.pristine).toBe(true);
+      expect(plain(component.form.chronotopes().value())).toEqual(chronotopes);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should populate all thesaurus-driven entry signals when present', () => {
@@ -221,7 +227,7 @@ describe('ChronotopesPartComponent', () => {
       const data: EditedObject<ChronotopesPart> = { value: makePart(), thesauri: {} };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      component.chronotopes.setValue(chronotopes);
+      component.form.chronotopes().value.set(chronotopes);
 
       const part = (component as any).getValue() as ChronotopesPart;
       expect(part.chronotopes).toEqual(chronotopes);
@@ -254,13 +260,13 @@ describe('ChronotopesPartComponent', () => {
 
   describe('onChronotopeChange / saveChronotope', () => {
     it('should append a new chronotope when editedIndex is -1', () => {
-      component.chronotopes.setValue([makeChronotope({ place: { value: 'A' } })]);
+      component.form.chronotopes().value.set([makeChronotope({ place: { value: 'A' } })]);
       component.addChronotope();
       component.onChronotopeChange(makeChronotope({ place: { value: 'B' } }));
 
       component.saveChronotope();
 
-      expect(component.chronotopes.value).toEqual([
+      expect(plain(component.form.chronotopes().value())).toEqual([
         makeChronotope({ place: { value: 'A' } }),
         makeChronotope({ place: { value: 'B' } }),
       ]);
@@ -273,13 +279,13 @@ describe('ChronotopesPartComponent', () => {
         makeChronotope({ place: { value: 'A' } }),
         makeChronotope({ place: { value: 'B' } }),
       ];
-      component.chronotopes.setValue(original);
+      component.form.chronotopes().value.set(original);
       component.editChronotope(original[1], 1);
       component.onChronotopeChange(makeChronotope({ place: { value: 'B2' } }));
 
       component.saveChronotope();
 
-      expect(component.chronotopes.value).toEqual([
+      expect(plain(component.form.chronotopes().value())).toEqual([
         original[0],
         makeChronotope({ place: { value: 'B2' } }),
       ]);
@@ -289,7 +295,7 @@ describe('ChronotopesPartComponent', () => {
       component.addChronotope();
       component.onChronotopeChange(makeChronotope());
       component.saveChronotope();
-      expect(component.chronotopes.dirty).toBe(true);
+      expect(component.form.chronotopes().dirty()).toBe(true);
     });
   });
 
@@ -297,11 +303,11 @@ describe('ChronotopesPartComponent', () => {
     it('should not remove the chronotope when the user cancels the confirmation', () => {
       dialogService.confirm.mockReturnValue(of(false));
       const chronotopes = [makeChronotope()];
-      component.chronotopes.setValue(chronotopes);
+      component.form.chronotopes().value.set(chronotopes);
 
       component.deleteChronotope(0);
 
-      expect(component.chronotopes.value).toEqual(chronotopes);
+      expect(plain(component.form.chronotopes().value())).toEqual(chronotopes);
     });
 
     it('should remove the chronotope at the given index when confirmed', () => {
@@ -310,11 +316,11 @@ describe('ChronotopesPartComponent', () => {
         makeChronotope({ place: { value: 'A' } }),
         makeChronotope({ place: { value: 'B' } }),
       ];
-      component.chronotopes.setValue(chronotopes);
+      component.form.chronotopes().value.set(chronotopes);
 
       component.deleteChronotope(0);
 
-      expect(component.chronotopes.value).toEqual([chronotopes[1]]);
+      expect(plain(component.form.chronotopes().value())).toEqual([chronotopes[1]]);
     });
   });
 
@@ -324,9 +330,9 @@ describe('ChronotopesPartComponent', () => {
         makeChronotope({ place: { value: 'A' } }),
         makeChronotope({ place: { value: 'B' } }),
       ];
-      component.chronotopes.setValue(chronotopes);
+      component.form.chronotopes().value.set(chronotopes);
       component.moveChronotopeUp(0);
-      expect(component.chronotopes.value).toEqual(chronotopes);
+      expect(plain(component.form.chronotopes().value())).toEqual(chronotopes);
     });
 
     it('should swap with the previous entry when moving up', () => {
@@ -334,9 +340,9 @@ describe('ChronotopesPartComponent', () => {
         makeChronotope({ place: { value: 'A' } }),
         makeChronotope({ place: { value: 'B' } }),
       ];
-      component.chronotopes.setValue(chronotopes);
+      component.form.chronotopes().value.set(chronotopes);
       component.moveChronotopeUp(1);
-      expect(component.chronotopes.value).toEqual([chronotopes[1], chronotopes[0]]);
+      expect(plain(component.form.chronotopes().value())).toEqual([chronotopes[1], chronotopes[0]]);
     });
 
     it('should do nothing when moving the last entry down', () => {
@@ -344,9 +350,9 @@ describe('ChronotopesPartComponent', () => {
         makeChronotope({ place: { value: 'A' } }),
         makeChronotope({ place: { value: 'B' } }),
       ];
-      component.chronotopes.setValue(chronotopes);
+      component.form.chronotopes().value.set(chronotopes);
       component.moveChronotopeDown(1);
-      expect(component.chronotopes.value).toEqual(chronotopes);
+      expect(plain(component.form.chronotopes().value())).toEqual(chronotopes);
     });
 
     it('should swap with the next entry when moving down', () => {
@@ -354,9 +360,17 @@ describe('ChronotopesPartComponent', () => {
         makeChronotope({ place: { value: 'A' } }),
         makeChronotope({ place: { value: 'B' } }),
       ];
-      component.chronotopes.setValue(chronotopes);
+      component.form.chronotopes().value.set(chronotopes);
       component.moveChronotopeDown(0);
-      expect(component.chronotopes.value).toEqual([chronotopes[1], chronotopes[0]]);
+      expect(plain(component.form.chronotopes().value())).toEqual([chronotopes[1], chronotopes[0]]);
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

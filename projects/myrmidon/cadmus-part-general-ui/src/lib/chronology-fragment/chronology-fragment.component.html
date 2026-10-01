@@ -1,95 +1,94 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>picture_in_picture</mat-icon>
-      </div>
-      <mat-card-title>
-        {{ (modelName() | titlecase) || "Chronology Fragment" }}
-        {{ data()?.value?.location }}</mat-card-title
-      >
-      <mat-card-subtitle>
-        {{ data()?.value?.baseText }}
-      </mat-card-subtitle>
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>picture_in_picture</mat-icon>
+    </div>
+    <mat-card-title>
+      {{ (modelName() | titlecase) || "Chronology Fragment" }}
+      {{ data()?.value?.location }}</mat-card-title
+    >
+    <mat-card-subtitle>
+      {{ data()?.value?.baseText }}
+    </mat-card-subtitle>
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
 
-    <mat-card-content>
-      <div class="form-row">
-        <!-- free tag -->
-        @if (!tagEntries()) {
-          <div>
-            <mat-form-field>
-              <mat-label>tag</mat-label>
-              <input type="text" matInput formControlName="tag" />
-              @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
-                <mat-error>tag too long</mat-error>
+  <mat-card-content>
+    <div class="form-row">
+      <!-- free tag -->
+      @if (!tagEntries()) {
+        <div>
+          <mat-form-field>
+            <mat-label>tag</mat-label>
+            <input type="text" matInput [formField]="form.tag" />
+            @if (form.tag().getError("maxLength") && (form.tag().dirty() || form.tag().touched())) {
+              <mat-error>tag too long</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      }
+      <!-- bound tag -->
+      @else {
+        <div>
+          <mat-form-field>
+            <mat-label>tag</mat-label>
+            <mat-select [formField]="form.tag">
+              @for (e of tagEntries(); track e.id) {
+                <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
-            </mat-form-field>
-          </div>
-        }
-        <!-- bound tag -->
-        @else {
-          <div>
-            <mat-form-field>
-              <mat-label>tag</mat-label>
-              <mat-select formControlName="tag">
-                @for (e of tagEntries(); track e.id) {
-                  <mat-option [value]="e.id">{{ e.value }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        }
-
-        <!-- label -->
-        <div>
-          <mat-form-field>
-            <mat-label>label</mat-label>
-            <input matInput type="text" formControlName="label" />
-            @if (
-              label.hasError("maxlength") && (label.dirty || label.touched)
-            ) {
-              <mat-error>label too long</mat-error>
-            }
+            </mat-select>
           </mat-form-field>
         </div>
+      }
 
-        <!-- event ID -->
-        <div>
-          <mat-form-field>
-            <mat-label>event ID</mat-label>
-            <input
-              matInput
-              type="text"
-              formControlName="eventId"
-              spellcheck="false"
-            />
-            @if (
-              eventId.hasError("maxlength") &&
-              (eventId.dirty || eventId.touched)
-            ) {
-              <mat-error>event ID too long</mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </div>
-
-      <!-- date -->
+      <!-- label -->
       <div>
-        <cadmus-refs-historical-date
-          [date]="date.value || undefined"
-          (dateChange)="onDateChange($event!)"
-        />
+        <mat-form-field>
+          <mat-label>label</mat-label>
+          <input matInput type="text" [formField]="form.label" />
+          @if (
+            form.label().getError("maxLength") && (form.label().dirty() || form.label().touched())
+          ) {
+            <mat-error>label too long</mat-error>
+          }
+        </mat-form-field>
       </div>
-    </mat-card-content>
 
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
+      <!-- event ID -->
+      <div>
+        <mat-form-field>
+          <mat-label>event ID</mat-label>
+          <input
+            matInput
+            type="text"
+            [formField]="form.eventId"
+            spellcheck="false"
+          />
+          @if (
+            form.eventId().getError("maxLength") &&
+            (form.eventId().dirty() || form.eventId().touched())
+          ) {
+            <mat-error>event ID too long</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- date -->
+    <div>
+      <cadmus-refs-historical-date
+        [date]="form.date().value() || undefined"
+        (dateChange)="onDateChange($event!)"
       />
-    </mat-card-actions>
-  </mat-card>
-</form>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

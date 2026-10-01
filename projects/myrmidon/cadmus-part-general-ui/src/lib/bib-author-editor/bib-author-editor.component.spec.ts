@@ -5,6 +5,12 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BibAuthorEditorComponent } from './bib-author-editor.component';
 import { BibAuthor } from '../bibliography-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('BibAuthorEditorComponent', () => {
   let component: BibAuthorEditorComponent;
   let fixture: ComponentFixture<BibAuthorEditorComponent>;
@@ -28,8 +34,8 @@ describe('BibAuthorEditorComponent', () => {
     fixture.componentRef.setInput('author', undefined);
     fixture.detectChanges();
     // lastName is nonNullable and defaults to '', which fails required
-    expect(component.lastName.value).toBe('');
-    expect(component.form.invalid).toBe(true);
+    expect(plain(component.form.lastName().value())).toBe('');
+    expect(component.form().invalid()).toBe(true);
   });
 
   it('updates the form when author is set', () => {
@@ -41,10 +47,10 @@ describe('BibAuthorEditorComponent', () => {
     fixture.componentRef.setInput('author', author);
     fixture.detectChanges();
 
-    expect(component.lastName.value).toBe('Doe');
-    expect(component.firstName.value).toBe('John');
-    expect(component.role.value).toBe('editor');
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.lastName().value())).toBe('Doe');
+    expect(plain(component.form.firstName().value())).toBe('John');
+    expect(plain(component.form.role().value())).toBe('editor');
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('sets firstName/role to null when not present in author', () => {
@@ -52,8 +58,8 @@ describe('BibAuthorEditorComponent', () => {
     fixture.componentRef.setInput('author', author);
     fixture.detectChanges();
 
-    expect(component.firstName.value).toBeNull();
-    expect(component.role.value).toBeNull();
+    expect(component.form.firstName().value()).toBe('');
+    expect(component.form.role().value()).toBe('');
   });
 
   it('marks all as touched and does not save when form invalid', () => {
@@ -63,15 +69,15 @@ describe('BibAuthorEditorComponent', () => {
 
     component.save();
 
-    expect(component.lastName.touched).toBe(true);
+    expect(component.form.lastName().touched()).toBe(true);
     expect(component.author()).toBe(before);
   });
 
   it('saves trimmed author and marks form pristine by default', () => {
-    component.lastName.setValue('  Doe  ');
-    component.firstName.setValue('  John  ');
-    component.role.setValue('  editor  ');
-    component.form.markAsDirty();
+    component.form.lastName().value.set('  Doe  ');
+    component.form.firstName().value.set('  John  ');
+    component.form.role().value.set('  editor  ');
+    component.form().markAsDirty();
 
     component.save();
 
@@ -80,13 +86,13 @@ describe('BibAuthorEditorComponent', () => {
       firstName: 'John',
       roleId: 'editor',
     });
-    expect(component.form.pristine).toBe(true);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('sets firstName/roleId to undefined when blank after trim', () => {
-    component.lastName.setValue('Doe');
-    component.firstName.setValue('   ');
-    component.role.setValue(null);
+    component.form.lastName().value.set('Doe');
+    component.form.firstName().value.set('   ');
+    component.form.role().value.set('');
 
     component.save();
 
@@ -96,12 +102,12 @@ describe('BibAuthorEditorComponent', () => {
   });
 
   it('keeps the form dirty when save(false) is called', () => {
-    component.lastName.setValue('Doe');
-    component.form.markAsDirty();
+    component.form.lastName().value.set('Doe');
+    component.form().markAsDirty();
 
     component.save(false);
 
-    expect(component.form.dirty).toBe(true);
+    expect(component.form().dirty()).toBe(true);
     expect(component.author()?.lastName).toBe('Doe');
   });
 
@@ -110,5 +116,49 @@ describe('BibAuthorEditorComponent', () => {
     component.cancelEdit.subscribe(() => (emitted = true));
     component.cancel();
     expect(emitted).toBe(true);
+  });
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('saves on Enter only when the save button would be enabled', () => {
+    fixture.componentRef.setInput('author', { lastName: 'Doe' });
+    fixture.detectChanges();
+    const spy = vi.fn();
+    component.author.subscribe(spy);
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    const enter = () =>
+      input.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Enter',
+          cancelable: true,
+          bubbles: true,
+        }),
+      );
+
+    // pristine: the save button is disabled
+    enter();
+    expect(spy).not.toHaveBeenCalled();
+
+    input.value = 'Smith';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    enter();
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(component.author()?.lastName).toBe('Smith');
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input',
+    );
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
   });
 });

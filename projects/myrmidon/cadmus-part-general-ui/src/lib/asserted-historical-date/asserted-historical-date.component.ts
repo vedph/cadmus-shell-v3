@@ -1,18 +1,18 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   effect,
   input,
   model,
   output,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+  FormField,
+  form,
+  required,
+} from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -30,6 +30,25 @@ import {
   HistoricalDateComponent,
   HistoricalDateModel,
 } from '@myrmidon/cadmus-refs-historical-date';
+import { isImplicitSubmission } from '../signal-form-utils';
+
+interface AssertedHistoricalDateControls {
+  tag: string;
+  hd: HistoricalDateModel | null;
+  assertion: Assertion | null;
+}
+
+function toDraft(
+  date?: AssertedHistoricalDate | null,
+): AssertedHistoricalDateControls {
+  return !date
+    ? { tag: '', hd: null, assertion: null }
+    : {
+        tag: date.tag || '',
+        hd: { a: date.a, b: date.b },
+        assertion: date.assertion || null,
+      };
+}
 
 /**
  * Dumb editor component for a single asserted historical date.
@@ -39,7 +58,7 @@ import {
 @Component({
   selector: 'cadmus-asserted-historical-date',
   imports: [
-    ReactiveFormsModule,
+    FormField,
     MatButtonModule,
     MatCheckboxModule,
     MatExpansionModule,
@@ -68,11 +87,6 @@ export class AssertedHistoricalDateComponent {
    */
   public readonly dateCancel = output();
 
-  public tag: FormControl<string | null>;
-  public hd: FormControl<HistoricalDateModel | null>;
-  public assertion: FormControl<Assertion | null>;
-  public form: FormGroup;
-
   // asserted-historical-dates-tags
   public tagEntries = input<ThesaurusEntry[]>();
   // assertion-tags
@@ -82,67 +96,62 @@ export class AssertedHistoricalDateComponent {
   // doc-reference-tags
   public docReferenceTagEntries = input<ThesaurusEntry[]>();
 
-  constructor(formBuilder: FormBuilder) {
-    // form
-    this.tag = formBuilder.control(null);
-    this.hd = formBuilder.control(null, Validators.required);
-    this.assertion = formBuilder.control(null);
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.date()));
+  public readonly form = form(this._draft, (p) => {
+    required(p.hd);
+  });
 
-    this.form = formBuilder.group({
-      tag: this.tag,
-      hd: this.hd,
-      assertion: this.assertion,
-    });
-
-    // when model changes, update form
+  constructor() {
+    // a new date was bound: no unsaved edits (keyed on the bound model:
+    // the draft also changes with each user edit)
     effect(() => {
-      const date = this.date();
-      this.updateForm(date);
+      this.date();
+      untracked(() => this.form().reset());
     });
-  }
-
-  private updateForm(date: AssertedHistoricalDate | undefined | null): void {
-    if (!date) {
-      this.form.reset();
-      return;
-    }
-
-    this.tag.setValue(date.tag || null, { emitEvent: false });
-    this.hd.setValue(date ? { a: date.a, b: date.b } : null, {
-      emitEvent: false,
-    });
-    this.assertion.setValue(date.assertion || null, { emitEvent: false });
-
-    this.form.markAsPristine();
   }
 
   private getDate(): AssertedHistoricalDate {
+    const draft = this._draft();
     return {
-      tag: this.tag.value || undefined,
-      a: this.hd.value!.a || undefined,
-      b: this.hd.value?.b || undefined,
-      assertion: this.assertion.value || undefined,
+      tag: draft.tag || undefined,
+      a: draft.hd!.a || undefined,
+      b: draft.hd?.b || undefined,
+      assertion: draft.assertion || undefined,
     };
   }
 
   public onAssertionChange(assertion: Assertion | undefined): void {
-    this.assertion.setValue(assertion || null);
-    this.assertion.updateValueAndValidity();
-    this.assertion.markAsDirty();
+    this.form.assertion().value.set(assertion || null);
+    this.form.assertion().markAsDirty();
   }
 
   public onDateChange(date?: HistoricalDateModel): void {
-    this.hd.setValue(date || null);
-    this.hd.updateValueAndValidity();
-    this.hd.markAsDirty();
+    this.form.hd().value.set(date || null);
+    this.form.hd().markAsDirty();
   }
 
   public cancel(): void {
     this.dateCancel.emit();
   }
 
+  /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (!isImplicitSubmission(event) || this.form().invalid()) {
+      return;
+    }
+    event.preventDefault();
+    this.save();
+  }
+
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
     const date = this.getDate();

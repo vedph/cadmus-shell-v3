@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
@@ -16,6 +16,12 @@ import {
   ChronologyFragment,
   CHRONOLOGY_FRAGMENT_TYPEID,
 } from '../chronology-fragment';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 describe('ChronologyFragmentComponent', () => {
   let component: ChronologyFragmentComponent;
@@ -40,8 +46,7 @@ describe('ChronologyFragmentComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
+        FormField,
         ChronologyFragmentComponent,
       ],
       providers: [
@@ -73,8 +78,8 @@ describe('ChronologyFragmentComponent', () => {
   });
 
   it('builds a form with a required date control', () => {
-    expect(component.form.get('date')).toBeTruthy();
-    expect(component.date.hasError('required')).toBe(true);
+    expect(component.form.date).toBeTruthy();
+    expect(!!component.form.date().getError('required')).toBe(true);
   });
 
   it('resets the form when data has no value', () => {
@@ -82,7 +87,7 @@ describe('ChronologyFragmentComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.date.value).toBeNull();
+    expect(plain(component.form.date().value())).toBeNull();
   });
 
   it('populates the chronology-tags thesaurus and clears it when missing', () => {
@@ -117,11 +122,11 @@ describe('ChronologyFragmentComponent', () => {
     fixture.componentRef.setInput('data', { value: fragment, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.date.value).toEqual(date);
-    expect(component.label.value).toBe('lbl');
-    expect(component.tag.value).toBe('tg');
-    expect(component.eventId.value).toBe('ev1');
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.date().value())).toEqual(date);
+    expect(plain(component.form.label().value())).toBe('lbl');
+    expect(plain(component.form.tag().value())).toBe('tg');
+    expect(plain(component.form.eventId().value())).toBe('ev1');
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('resets the form when the fragment has no date', () => {
@@ -133,7 +138,7 @@ describe('ChronologyFragmentComponent', () => {
     fixture.componentRef.setInput('identity', identity);
     fixture.componentRef.setInput('data', { value: fragment, thesauri: {} });
     fixture.detectChanges();
-    expect(component.label.value).toBe('lbl');
+    expect(plain(component.form.label().value())).toBe('lbl');
 
     // now push a fragment-like object without a date: form should reset
     fixture.componentRef.setInput('data', {
@@ -142,14 +147,14 @@ describe('ChronologyFragmentComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(component.label.value).toBeNull();
-    expect(component.date.value).toBeNull();
+    expect(component.form.label().value()).toBe('');
+    expect(plain(component.form.date().value())).toBeNull();
   });
 
   it('onDateChange updates the date control and marks it dirty', () => {
     component.onDateChange(date);
-    expect(component.date.value).toEqual(date);
-    expect(component.date.dirty).toBe(true);
+    expect(plain(component.form.date().value())).toEqual(date);
+    expect(component.form.date().dirty()).toBe(true);
   });
 
   it('getValue builds a fragment from the current form and identity', () => {
@@ -157,10 +162,10 @@ describe('ChronologyFragmentComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    component.date.setValue(date);
-    component.label.setValue('  lbl  ');
-    component.eventId.setValue('  ev1  ');
-    component.tag.setValue('  tg  ');
+    component.form.date().value.set(date);
+    component.form.label().value.set('  lbl  ');
+    component.form.eventId().value.set('  ev1  ');
+    component.form.tag().value.set('  tg  ');
 
     const value = (component as any).getValue() as ChronologyFragment;
 
@@ -176,10 +181,18 @@ describe('ChronologyFragmentComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    component.date.setValue(date);
-    component.tag.setValue(null);
+    component.form.date().value.set(date);
+    component.form.tag().value.set('');
 
     const value = (component as any).getValue() as ChronologyFragment;
     expect(value.tag).toBeUndefined();
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

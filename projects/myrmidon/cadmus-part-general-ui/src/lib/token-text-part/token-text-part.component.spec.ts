@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BehaviorSubject, of } from 'rxjs';
@@ -18,6 +18,12 @@ import {
 
 import { TokenTextPartComponent } from './token-text-part.component';
 import { TokenTextPart, TokenTextLine } from '../token-text-part';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 function buildPart(lines: TokenTextLine[]): TokenTextPart {
   return {
@@ -54,7 +60,7 @@ describe('TokenTextPartComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [CommonModule, FormsModule, ReactiveFormsModule, TokenTextPartComponent],
+      imports: [CommonModule, TokenTextPartComponent],
       providers: [
         provideHttpClient(withXhr()),
         provideHttpClientTesting(),
@@ -85,19 +91,19 @@ describe('TokenTextPartComponent', () => {
 
   //#region form validators
   it('should require text', () => {
-    component.text.setValue(null);
-    expect(component.text.hasError('required')).toBe(true);
-    component.text.setValue('hello');
-    expect(component.text.valid).toBe(true);
+    component.form.text().value.set('');
+    expect(!!component.form.text().getError('required')).toBe(true);
+    component.form.text().value.set('hello');
+    expect(component.form.text().valid()).toBe(true);
   });
   //#endregion
 
   //#region onDataSet / updateForm / getTextFromModel
   it('should reset the form when data has no value', () => {
-    component.citation.setValue('x');
+    component.form.citation().value.set('x');
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
-    expect(component.citation.value).toBeNull();
+    expect(component.form.citation().value()).toBe('');
   });
 
   it('should join model lines with LF to populate the text control', () => {
@@ -110,9 +116,9 @@ describe('TokenTextPartComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.citation.value).toBe('cit');
-    expect(component.text.value).toBe('line one\nline two\nline three');
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.citation().value())).toBe('cit');
+    expect(plain(component.form.text().value())).toBe('line one\nline two\nline three');
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should set text to null when the model has no lines', () => {
@@ -120,7 +126,7 @@ describe('TokenTextPartComponent', () => {
     (part as any).lines = undefined;
     fixture.componentRef.setInput('data', { value: part, thesauri: {} });
     fixture.detectChanges();
-    expect(component.text.value).toBeNull();
+    expect(component.form.text().value()).toBe('');
   });
   //#endregion
 
@@ -131,7 +137,7 @@ describe('TokenTextPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.text.setValue('alpha\nbeta\ngamma');
+    component.form.text().value.set('alpha\nbeta\ngamma');
 
     const value = (component as any).getValue() as TokenTextPart;
     expect(value.lines).toEqual([
@@ -147,7 +153,7 @@ describe('TokenTextPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.text.setValue('');
+    component.form.text().value.set('');
 
     const value = (component as any).getValue() as TokenTextPart;
     expect(value.lines).toEqual([]);
@@ -159,13 +165,13 @@ describe('TokenTextPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.text.setValue('x');
-    component.citation.setValue('  my citation  ');
+    component.form.text().value.set('x');
+    component.form.citation().value.set('  my citation  ');
 
     let value = (component as any).getValue() as TokenTextPart;
     expect(value.citation).toBe('my citation');
 
-    component.citation.setValue('   ');
+    component.form.citation().value.set('   ');
     value = (component as any).getValue() as TokenTextPart;
     expect(value.citation).toBeUndefined();
   });
@@ -182,7 +188,7 @@ describe('TokenTextPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.text.setValue('alpha\r\nbeta\r\ngamma\r\ndelta');
+    component.form.text().value.set('alpha\r\nbeta\r\ngamma\r\ndelta');
 
     const value = (component as any).getValue() as TokenTextPart;
     expect(value.lines).toEqual([
@@ -201,8 +207,8 @@ describe('TokenTextPartComponent', () => {
   //#region applyTransform - whitespace normalization
   it('applyTransform("ws") should collapse runs of spaces/tabs and trim edges', () => {
     dialogService.confirm.mockReturnValue(of(true));
-    component.transform.setValue('ws');
-    component.text.setValue('  a   b  \n  c  ');
+    component.transform.set('ws');
+    component.form.text().value.set('  a   b  \n  c  ');
 
     component.applyTransform();
 
@@ -210,27 +216,27 @@ describe('TokenTextPartComponent', () => {
       'Transform Text',
       'Apply whitespace normalization?',
     );
-    expect(component.text.value).toBe('a b\nc');
-    expect(component.text.dirty).toBe(true);
+    expect(plain(component.form.text().value())).toBe('a b\nc');
+    expect(component.form.text().dirty()).toBe(true);
   });
 
   it('applyTransform("ws") should not change the text when not confirmed', () => {
     dialogService.confirm.mockReturnValue(of(false));
-    component.transform.setValue('ws');
-    component.text.setValue('  a   b  ');
+    component.transform.set('ws');
+    component.form.text().value.set('  a   b  ');
 
     component.applyTransform();
 
-    expect(component.text.value).toBe('  a   b  ');
-    expect(component.text.dirty).toBe(false);
+    expect(plain(component.form.text().value())).toBe('  a   b  ');
+    expect(component.form.text().dirty()).toBe(false);
   });
   //#endregion
 
   //#region applyTransform - split at stops
   it('applyTransform("split") should break text into one line per sentence (LF join)', () => {
     dialogService.confirm.mockReturnValue(of(true));
-    component.transform.setValue('split');
-    component.text.setValue('Hi. Bye! Ok.');
+    component.transform.set('split');
+    component.form.text().value.set('Hi. Bye! Ok.');
 
     component.applyTransform();
 
@@ -238,45 +244,53 @@ describe('TokenTextPartComponent', () => {
       'Transform Text',
       'Apply text splitting?',
     );
-    expect(component.text.value).toBe('Hi.\nBye!\nOk.');
+    expect(plain(component.form.text().value())).toBe('Hi.\nBye!\nOk.');
   });
 
   it('applyTransform("split") should keep runs of punctuation together', () => {
     dialogService.confirm.mockReturnValue(of(true));
-    component.transform.setValue('split');
-    component.text.setValue('Wait... What?');
+    component.transform.set('split');
+    component.form.text().value.set('Wait... What?');
 
     component.applyTransform();
 
-    expect(component.text.value).toBe('Wait...\nWhat?');
+    expect(plain(component.form.text().value())).toBe('Wait...\nWhat?');
   });
 
   it('applyTransform("split") should join with CRLF when the original text contains CRLF', () => {
     dialogService.confirm.mockReturnValue(of(true));
-    component.transform.setValue('split');
-    component.text.setValue('Hi.\r\nBye! Ok.');
+    component.transform.set('split');
+    component.form.text().value.set('Hi.\r\nBye! Ok.');
 
     component.applyTransform();
 
-    expect(component.text.value).toBe('Hi.\r\nBye!\r\nOk.');
+    expect(plain(component.form.text().value())).toBe('Hi.\r\nBye!\r\nOk.');
   });
 
   it('applyTransform("split") should leave text with no stop punctuation as a single line', () => {
     dialogService.confirm.mockReturnValue(of(true));
-    component.transform.setValue('split');
-    component.text.setValue('Just plain text');
+    component.transform.set('split');
+    component.form.text().value.set('Just plain text');
 
     component.applyTransform();
 
-    expect(component.text.value).toBe('Just plain text');
+    expect(plain(component.form.text().value())).toBe('Just plain text');
   });
   //#endregion
 
   it('applyTransform should do nothing for an unknown transform value', () => {
-    component.transform.setValue('unknown' as any);
-    component.text.setValue('a b');
+    component.transform.set('unknown' as any);
+    component.form.text().value.set('a b');
     component.applyTransform();
     expect(dialogService.confirm).not.toHaveBeenCalled();
-    expect(component.text.value).toBe('a b');
+    expect(plain(component.form.text().value())).toBe('a b');
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

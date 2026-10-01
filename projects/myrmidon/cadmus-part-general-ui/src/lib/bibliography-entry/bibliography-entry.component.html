@@ -1,4 +1,4 @@
-<form [formGroup]="form" (submit)="save()">
+<div (keydown.enter)="onEnterKey($event)">
   <mat-tab-group>
     <!-- general -->
     <mat-tab label="General">
@@ -7,7 +7,7 @@
         @if (typeEntries()?.length) {
           <mat-form-field>
             <mat-label>type</mat-label>
-            <mat-select formControlName="type">
+            <mat-select [formField]="form.type">
               @for (e of typeEntries() || []; track e) {
                 <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
@@ -20,12 +20,12 @@
               matInput
               type="text"
               spellcheck="false"
-              formControlName="type"
+              [formField]="form.type"
             />
-            @if (type.hasError("required") && (type.dirty || type.touched)) {
+            @if (form.type().getError("required") && (form.type().dirty() || form.type().touched())) {
               <mat-error>entry type required</mat-error>
             }
-            @if (type.hasError("maxlength") && (type.dirty || type.touched)) {
+            @if (form.type().getError("maxLength") && (form.type().dirty() || form.type().touched())) {
               <mat-error>too long</mat-error>
             }
           </mat-form-field>
@@ -35,7 +35,7 @@
         @if (tagEntries()?.length) {
           <mat-form-field>
             <mat-label>tag</mat-label>
-            <mat-select [formControl]="tag">
+            <mat-select [formField]="form.tag">
               @for (e of tagEntries(); track e.id) {
                 <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
@@ -46,8 +46,8 @@
         @else {
           <mat-form-field>
             <mat-label>tag</mat-label>
-            <input matInput [formControl]="tag" />
-            @if (tag.hasError("maxlength") && (tag.dirty || tag.touched)) {
+            <input matInput [formField]="form.tag" />
+            @if (form.tag().getError("maxLength") && (form.tag().dirty() || form.tag().touched())) {
               <mat-error>tag too long</mat-error>
             }
           </mat-form-field>
@@ -57,7 +57,7 @@
         @if (langEntries()?.length) {
           <mat-form-field>
             <mat-label>language</mat-label>
-            <mat-select formControlName="language">
+            <mat-select [formField]="form.language">
               @for (e of langEntries() || []; track e.id) {
                 <mat-option [value]="e.id">{{ e.value }}</mat-option>
               }
@@ -68,10 +68,10 @@
         @else {
           <mat-form-field>
             <mat-label>language</mat-label>
-            <input matInput [formControl]="language" />
+            <input matInput [formField]="form.language" />
             @if (
-              language.hasError("pattern") &&
-              (language.dirty || language.touched)
+              form.language().getError("pattern") &&
+              (form.language().dirty() || form.language().touched())
             ) {
               <mat-error>invalid</mat-error>
             }
@@ -81,8 +81,8 @@
         <!-- key -->
         <mat-form-field>
           <mat-label>key</mat-label>
-          <input matInput [formControl]="key" />
-          @if (key.hasError("maxlength") && (key.dirty || key.touched)) {
+          <input matInput [formField]="form.key" />
+          @if (form.key().getError("maxLength") && (form.key().dirty() || form.key().touched())) {
             <mat-error>key too long</mat-error>
           }
         </mat-form-field>
@@ -92,7 +92,7 @@
       <fieldset>
         <legend>author(s)</legend>
         <cadmus-bib-authors-editor
-          [authors]="authors.value"
+          [authors]="form.authors().value()"
           (authorsChange)="onAuthorsChange($event)"
           [roleEntries]="roleEntries()"
         />
@@ -102,11 +102,11 @@
       <div>
         <mat-form-field class="long-text">
           <mat-label>title</mat-label>
-          <input matInput type="text" formControlName="title" />
-          @if (title.hasError("required") && (title.dirty || title.touched)) {
+          <input matInput type="text" [formField]="form.title" />
+          @if (form.title().getError("required") && (form.title().dirty() || form.title().touched())) {
             <mat-error>title required</mat-error>
           }
-          @if (title.hasError("maxlength") && (title.dirty || title.touched)) {
+          @if (form.title().getError("maxLength") && (form.title().dirty() || form.title().touched())) {
             <mat-error>too long</mat-error>
           }
         </mat-form-field>
@@ -116,8 +116,8 @@
       <div>
         <mat-form-field class="long-text">
           <mat-label>note</mat-label>
-          <textarea matInput formControlName="note" rows="2"></textarea>
-          @if (note.hasError("maxlength") && (note.dirty || note.touched)) {
+          <textarea matInput [formField]="form.note" rows="2"></textarea>
+          @if (form.note().getError("maxLength") && (form.note().dirty() || form.note().touched())) {
             <mat-error>too long</mat-error>
           }
         </mat-form-field>
@@ -130,7 +130,7 @@
       <fieldset>
         <legend>container author(s)</legend>
         <cadmus-bib-authors-editor
-          [authors]="contributors.value"
+          [authors]="form.contributors().value()"
           (authorsChange)="onContributorsChange($event)"
           [roleEntries]="roleEntries()"
         />
@@ -140,10 +140,10 @@
       <div>
         <mat-form-field class="long-text">
           <mat-label>container</mat-label>
-          <input matInput type="text" formControlName="container" />
+          <input matInput type="text" [formField]="form.container" />
           @if (
-            container.hasError("maxlength") &&
-            (container.dirty || container.touched)
+            form.container().getError("maxLength") &&
+            (form.container().dirty() || form.container().touched())
           ) {
             <mat-error>too long</mat-error>
           }
@@ -158,10 +158,10 @@
             matInput
             type="text"
             spellcheck="false"
-            formControlName="number"
+            [formField]="form.number"
           />
           @if (
-            number.hasError("maxlength") && (number.dirty || number.touched)
+            form.number().getError("maxLength") && (form.number().dirty() || form.number().touched())
           ) {
             <mat-error>too long</mat-error>
           }
@@ -171,14 +171,14 @@
         &nbsp;
         <mat-form-field [style.width.em]="5">
           <mat-label>from</mat-label>
-          <input matInput type="number" formControlName="firstPage" />
+          <input matInput type="number" [formField]="form.firstPage" />
           @if (
-            firstPage.hasError("min") && (firstPage.dirty || firstPage.touched)
+            form.firstPage().getError("min") && (form.firstPage().dirty() || form.firstPage().touched())
           ) {
             <mat-error>page less than 0</mat-error>
           }
           @if (
-            firstPage.hasError("max") && (firstPage.dirty || firstPage.touched)
+            form.firstPage().getError("max") && (form.firstPage().dirty() || form.firstPage().touched())
           ) {
             <mat-error>page number too big</mat-error>
           }
@@ -187,14 +187,14 @@
         <!-- lastPage -->
         <mat-form-field [style.width.em]="5">
           <mat-label>to</mat-label>
-          <input matInput type="number" formControlName="lastPage" />
+          <input matInput type="number" [formField]="form.lastPage" />
           @if (
-            lastPage.hasError("min") && (lastPage.dirty || lastPage.touched)
+            form.lastPage().getError("min") && (form.lastPage().dirty() || form.lastPage().touched())
           ) {
             <mat-error>page less than 0</mat-error>
           }
           @if (
-            lastPage.hasError("max") && (lastPage.dirty || lastPage.touched)
+            form.lastPage().getError("max") && (form.lastPage().dirty() || form.lastPage().touched())
           ) {
             <mat-error>page number too big</mat-error>
           }
@@ -205,10 +205,10 @@
         <!-- publisher -->
         <mat-form-field>
           <mat-label>publisher</mat-label>
-          <input matInput [formControl]="publisher" />
+          <input matInput [formField]="form.publisher" />
           @if (
-            publisher.hasError("maxlength") &&
-            (publisher.dirty || publisher.touched)
+            form.publisher().getError("maxLength") &&
+            (form.publisher().dirty() || form.publisher().touched())
           ) {
             <mat-error>publisher too long</mat-error>
           }
@@ -217,10 +217,10 @@
         <!-- placePub -->
         <mat-form-field>
           <mat-label>place</mat-label>
-          <input matInput type="text" formControlName="placePub" />
+          <input matInput type="text" [formField]="form.placePub" />
           @if (
-            placePub.hasError("maxlength") &&
-            (placePub.dirty || placePub.touched)
+            form.placePub().getError("maxLength") &&
+            (form.placePub().dirty() || form.placePub().touched())
           ) {
             <mat-error>too long</mat-error>
           }
@@ -229,11 +229,11 @@
         <!-- yearPub -->
         <mat-form-field class="nr">
           <mat-label>year</mat-label>
-          <input matInput type="number" formControlName="yearPub" />
-          @if (yearPub.hasError("min") && (yearPub.dirty || yearPub.touched)) {
+          <input matInput type="number" [formField]="form.yearPub" />
+          @if (form.yearPub().getError("min") && (form.yearPub().dirty() || form.yearPub().touched())) {
             <mat-error>year less than 0</mat-error>
           }
-          @if (yearPub.hasError("max") && (yearPub.dirty || yearPub.touched)) {
+          @if (form.yearPub().getError("max") && (form.yearPub().dirty() || form.yearPub().touched())) {
             <mat-error>year past the current one</mat-error>
           }
         </mat-form-field>
@@ -241,11 +241,11 @@
         <!-- edition -->
         <mat-form-field class="nr">
           <mat-label>ed.</mat-label>
-          <input matInput type="number" formControlName="edition" />
-          @if (edition.hasError("min") && (edition.dirty || edition.touched)) {
+          <input matInput type="number" [formField]="form.edition" />
+          @if (form.edition().getError("min") && (form.edition().dirty() || form.edition().touched())) {
             <mat-error>edition less than 0</mat-error>
           }
-          @if (edition.hasError("max") && (edition.dirty || edition.touched)) {
+          @if (form.edition().getError("max") && (form.edition().dirty() || form.edition().touched())) {
             <mat-error>edition greater than 100</mat-error>
           }
         </mat-form-field>
@@ -258,12 +258,12 @@
           <input
             matInput
             type="text"
-            formControlName="location"
+            [formField]="form.location"
             spellcheck="false"
           />
           @if (
-            location.hasError("maxlength") &&
-            (location.dirty || location.touched)
+            form.location().getError("maxLength") &&
+            (form.location().dirty() || form.location().touched())
           ) {
             <mat-error>too long</mat-error>
           }
@@ -275,7 +275,7 @@
           <input
             matInput
             [matDatepicker]="picker"
-            formControlName="accessDate"
+            [formField]="form.accessDate"
           />
           <mat-datepicker-toggle
             matSuffix
@@ -288,13 +288,13 @@
 
     <!-- keywords -->
     <mat-tab label="Keywords">
-      <form [formGroup]="keyForm" (submit)="addKeyword()">
+      <div>
         <div class="form-row">
           <!-- language (bound) -->
           @if (langEntries()?.length) {
             <mat-form-field>
               <mat-label>language</mat-label>
-              <mat-select formControlName="keyLanguage">
+              <mat-select [formField]="keyForm.language">
                 @for (e of langEntries() || []; track e.id) {
                   <mat-option [value]="e.id">{{ e.value }}</mat-option>
                 }
@@ -305,16 +305,20 @@
           @else {
             <mat-form-field>
               <mat-label>language</mat-label>
-              <input matInput [formControl]="keyLanguage" />
+              <input
+                matInput
+                [formField]="keyForm.language"
+                (keydown.enter)="$event.preventDefault(); addKeyword()"
+              />
               @if (
-                keyLanguage.hasError("required") &&
-                (keyLanguage.dirty || keyLanguage.touched)
+                keyForm.language().getError("required") &&
+                (keyForm.language().dirty() || keyForm.language().touched())
               ) {
                 <mat-error>required</mat-error>
               }
               @if (
-                keyLanguage.hasError("pattern") &&
-                (keyLanguage.dirty || keyLanguage.touched)
+                keyForm.language().getError("pattern") &&
+                (keyForm.language().dirty() || keyForm.language().touched())
               ) {
                 <mat-error>invalid</mat-error>
               }
@@ -324,32 +328,38 @@
           <!-- value -->
           <mat-form-field>
             <mat-label>value</mat-label>
-            <input matInput type="text" formControlName="keyValue" />
+            <input
+              matInput
+              type="text"
+              [formField]="keyForm.text"
+              (keydown.enter)="$event.preventDefault(); addKeyword()"
+            />
             @if (
-              keyValue.hasError("required") &&
-              (keyValue.dirty || keyValue.touched)
+              keyForm.text().getError("required") &&
+              (keyForm.text().dirty() || keyForm.text().touched())
             ) {
               <mat-error>required</mat-error>
             }
             @if (
-              keyValue.hasError("maxlength") &&
-              (keyValue.dirty || keyValue.touched)
+              keyForm.text().getError("maxLength") &&
+              (keyForm.text().dirty() || keyForm.text().touched())
             ) {
               <mat-error>too long</mat-error>
             }
           </mat-form-field>
           <button
             mat-flat-button
-            type="submit"
-            [disabled]="keyForm.invalid"
+            type="button"
+            [disabled]="keyForm().invalid()"
             matTooltip="Add new keyword"
+            (click)="addKeyword()"
           >
             <mat-icon class="mat-primary">add_circle</mat-icon> keyword
           </button>
         </div>
-      </form>
+      </div>
       <!-- list -->
-      @if (keywords().length) {
+      @if (form.keywords().value().length) {
         <table>
           <thead>
             <tr>
@@ -360,7 +370,7 @@
           </thead>
           <tbody>
             @for (
-              k of keywords();
+              k of form.keywords().value();
               track k;
               let i = $index;
               let first = $first;
@@ -418,12 +428,13 @@
       <mat-icon class="mat-warn">cancel</mat-icon>
     </button>
     <button
-      type="submit"
-      [disabled]="form.invalid"
+      type="button"
+      [disabled]="form().invalid()"
       mat-icon-button
       matTooltip="Save entry"
+      (click)="save()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
   </div>
-</form>
+</div>

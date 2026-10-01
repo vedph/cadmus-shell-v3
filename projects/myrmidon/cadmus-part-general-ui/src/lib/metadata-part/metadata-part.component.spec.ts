@@ -93,8 +93,8 @@ describe('MetadataPartComponent', () => {
     });
 
     it('should build the form with an empty, invalid metadata array', () => {
-      expect(component.metadata.length).toBe(0);
-      expect(component.metadata.invalid).toBe(true);
+      expect(component.form.metadata().value().length).toBe(0);
+      expect(component.form.metadata().invalid()).toBe(true);
     });
 
     it('should clear the metadata rows when data is unset', () => {
@@ -108,12 +108,12 @@ describe('MetadataPartComponent', () => {
         thesauri: {},
       } as EditedObject<MetadataPart>);
       fixture.detectChanges();
-      expect(component.metadata.length).toBe(2);
+      expect(component.form.metadata().value().length).toBe(2);
 
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
 
-      expect(component.metadata.length).toBe(0);
+      expect(component.form.metadata().value().length).toBe(0);
     });
 
     describe('with identity and data set', () => {
@@ -153,7 +153,7 @@ describe('MetadataPartComponent', () => {
         expect(component.nameEntries()).toBeUndefined();
       });
 
-      it('should populate the metadata FormArray from the part', () => {
+      it('should populate the metadata rows from the part', () => {
         fixture.componentRef.setInput('data', {
           value: getPart([
             { type: 'a', name: 'n1', value: 'v1' },
@@ -163,16 +163,16 @@ describe('MetadataPartComponent', () => {
         } as EditedObject<MetadataPart>);
         fixture.detectChanges();
 
-        expect(component.metadata.length).toBe(2);
-        const g0 = component.metadata.at(0) as any;
-        expect(g0.controls.type.value).toBe('a');
-        expect(g0.controls.name.value).toBe('n1');
-        expect(g0.controls.value.value).toBe('v1');
-        const g1 = component.metadata.at(1) as any;
-        // FormControl normalizes an undefined initial value to null
-        expect(g1.controls.type.value).toBeNull();
-        expect(g1.controls.name.value).toBe('n2');
-        expect(component.form.pristine).toBe(true);
+        expect(component.form.metadata().value().length).toBe(2);
+        const g0 = component.form.metadata[0]!;
+        expect(g0.type().value()).toBe('a');
+        expect(g0.name().value()).toBe('n1');
+        expect(g0.value().value()).toBe('v1');
+        const g1 = component.form.metadata[1]!;
+        // a missing type becomes an empty string
+        expect(g1.type().value()).toBe('');
+        expect(g1.name().value()).toBe('n2');
+        expect(component.form().dirty()).toBe(false);
       });
 
       it('getValue should build a MetadataPart with trimmed values from the form', () => {
@@ -182,9 +182,9 @@ describe('MetadataPartComponent', () => {
         } as EditedObject<MetadataPart>);
         fixture.detectChanges();
 
-        const g0 = component.metadata.at(0) as any;
-        g0.controls.name.setValue('  n1-edited  ');
-        g0.controls.value.setValue('  v1-edited  ');
+        const g0 = component.form.metadata[0]!;
+        g0.name().value.set('  n1-edited  ');
+        g0.value().value.set('  v1-edited  ');
 
         const value = (component as any).getValue() as MetadataPart;
         expect(value.typeId).toBe(METADATA_PART_TYPEID);
@@ -193,7 +193,7 @@ describe('MetadataPartComponent', () => {
         ]);
       });
 
-      it('addMetadatum should push a new row with an incrementing _uid and mark the array dirty', () => {
+      it('addMetadatum should append a new row and mark the array dirty', () => {
         fixture.componentRef.setInput('data', {
           value: getPart([]),
           thesauri: {},
@@ -203,28 +203,56 @@ describe('MetadataPartComponent', () => {
         component.addMetadatum({ name: 'foo', value: 'bar' });
         component.addMetadatum({ name: 'baz', value: 'qux' });
 
-        expect(component.metadata.length).toBe(2);
-        const uid0 = (component.metadata.at(0) as any).controls._uid.value;
-        const uid1 = (component.metadata.at(1) as any).controls._uid.value;
-        expect(uid1).toBe(uid0 + 1);
-        expect(component.metadata.dirty).toBe(true);
+        expect(component.form.metadata().value().length).toBe(2);
+        expect(component.form.metadata[1]!.name().value()).toBe('baz');
+        expect(component.form.metadata().dirty()).toBe(true);
       });
 
-      it('addMetadatum should mark the array dirty when an added row changes value', () => {
+      it('should mark the form dirty when the user edits a row', () => {
         fixture.componentRef.setInput('data', {
-          value: getPart([]),
+          value: getPart([{ name: 'foo', value: 'bar' }]),
           thesauri: {},
         } as EditedObject<MetadataPart>);
         fixture.detectChanges();
+        expect(component.form().dirty()).toBe(false);
 
-        component.addMetadatum({ name: 'foo', value: 'bar' });
-        component.metadata.markAsPristine();
-        expect(component.metadata.pristine).toBe(true);
+        const inputs: HTMLInputElement[] = Array.from(
+          fixture.nativeElement.querySelectorAll('tbody input'),
+        );
+        const valueInput = inputs[inputs.length - 1];
+        valueInput.value = 'changed';
+        valueInput.dispatchEvent(new Event('input'));
+        fixture.detectChanges();
 
-        const g = component.metadata.at(0) as any;
-        g.controls.value.setValue('changed');
+        expect(component.form.metadata[0]!.value().value()).toBe('changed');
+        expect(component.form().dirty()).toBe(true);
+        expect(component.isDirty()).toBe(true);
+      });
 
-        expect(component.metadata.dirty).toBe(true);
+      it('should keep each row field state with its row when moving rows', () => {
+        fixture.componentRef.setInput('data', {
+          value: getPart([
+            { name: 'n1', value: 'v1' },
+            { name: 'n2', value: 'v2' },
+          ]),
+          thesauri: {},
+        } as EditedObject<MetadataPart>);
+        fixture.detectChanges();
+        component.form.metadata[1]!.name().markAsTouched();
+
+        component.moveMetadatumUp(1);
+
+        expect(component.form.metadata[0]!.name().value()).toBe('n2');
+        expect(component.form.metadata[0]!.name().touched()).toBe(true);
+        expect(component.form.metadata[1]!.name().touched()).toBe(false);
+      });
+
+      it('should require name and value in each row', () => {
+        component.addMetadatum({ name: '', value: '' });
+        const row = component.form.metadata[0]!;
+        expect(row.name().getError('required')).toBeTruthy();
+        expect(row.value().getError('required')).toBeTruthy();
+        expect(component.form().invalid()).toBe(true);
       });
 
       it('removeMetadatum should remove the row at the given index', () => {
@@ -239,8 +267,8 @@ describe('MetadataPartComponent', () => {
 
         component.removeMetadatum(0);
 
-        expect(component.metadata.length).toBe(1);
-        expect((component.metadata.at(0) as any).controls.name.value).toBe(
+        expect(component.form.metadata().value().length).toBe(1);
+        expect(component.form.metadata[0]!.name().value()).toBe(
           'n2',
         );
       });
@@ -257,7 +285,7 @@ describe('MetadataPartComponent', () => {
 
         component.moveMetadatumUp(0);
 
-        expect((component.metadata.at(0) as any).controls.name.value).toBe(
+        expect(component.form.metadata[0]!.name().value()).toBe(
           'n1',
         );
       });
@@ -274,10 +302,10 @@ describe('MetadataPartComponent', () => {
 
         component.moveMetadatumUp(1);
 
-        expect((component.metadata.at(0) as any).controls.name.value).toBe(
+        expect(component.form.metadata[0]!.name().value()).toBe(
           'n2',
         );
-        expect((component.metadata.at(1) as any).controls.name.value).toBe(
+        expect(component.form.metadata[1]!.name().value()).toBe(
           'n1',
         );
       });
@@ -294,7 +322,7 @@ describe('MetadataPartComponent', () => {
 
         component.moveMetadatumDown(1);
 
-        expect((component.metadata.at(1) as any).controls.name.value).toBe(
+        expect(component.form.metadata[1]!.name().value()).toBe(
           'n2',
         );
       });
@@ -311,10 +339,10 @@ describe('MetadataPartComponent', () => {
 
         component.moveMetadatumDown(0);
 
-        expect((component.metadata.at(0) as any).controls.name.value).toBe(
+        expect(component.form.metadata[0]!.name().value()).toBe(
           'n2',
         );
-        expect((component.metadata.at(1) as any).controls.name.value).toBe(
+        expect(component.form.metadata[1]!.name().value()).toBe(
           'n1',
         );
       });
@@ -341,5 +369,13 @@ describe('MetadataPartComponent', () => {
       await fixture.whenStable();
       expect(component.noType()).toBe(false);
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
@@ -16,6 +16,12 @@ import {
   IndexKeyword,
   INDEX_KEYWORDS_PART_TYPEID,
 } from '../index-keywords-part';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 describe('IndexKeywordsPartComponent', () => {
   let component: IndexKeywordsPartComponent;
@@ -37,8 +43,7 @@ describe('IndexKeywordsPartComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        FormsModule,
-        ReactiveFormsModule,
+        FormField,
         IndexKeywordComponent,
         IndexKeywordsPartComponent,
       ],
@@ -84,9 +89,9 @@ describe('IndexKeywordsPartComponent', () => {
   });
 
   it('builds a form with a keywords control requiring at least 1 item', () => {
-    expect(component.form.get('keywords')).toBeTruthy();
-    expect(component.keywords.value).toEqual([]);
-    expect(component.keywords.invalid).toBe(true);
+    expect(component.form.keywords).toBeTruthy();
+    expect(plain(component.form.keywords().value())).toEqual([]);
+    expect(component.form.keywords().invalid()).toBe(true);
   });
 
   it('resets the form when data has no value', () => {
@@ -94,7 +99,7 @@ describe('IndexKeywordsPartComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.keywords.value).toEqual([]);
+    expect(plain(component.form.keywords().value())).toEqual([]);
   });
 
   it('populates thesauri signals from data and clears missing ones', () => {
@@ -130,8 +135,8 @@ describe('IndexKeywordsPartComponent', () => {
     fixture.componentRef.setInput('data', { value: part, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.keywords.value).toEqual(keywords);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.keywords().value())).toEqual(keywords);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('getValue returns a part with a copy of the current keywords', () => {
@@ -152,7 +157,7 @@ describe('IndexKeywordsPartComponent', () => {
     const value = (component as any).getValue() as IndexKeywordsPart;
     expect(value.id).toBe('p1');
     expect(value.keywords).toEqual(part.keywords);
-    expect(value.keywords).not.toBe(component.keywords.value);
+    expect(value.keywords).not.toBe(component.form.keywords().value());
   });
 
   it('addKeyword defaults language to the first langEntries id', () => {
@@ -206,41 +211,41 @@ describe('IndexKeywordsPartComponent', () => {
     component.addKeyword();
     component.saveKeyword({ language: 'eng', value: 'hi' });
 
-    expect(component.keywords.value).toEqual([{ language: 'eng', value: 'hi' }]);
-    expect(component.keywords.dirty).toBe(true);
+    expect(plain(component.form.keywords().value())).toEqual([{ language: 'eng', value: 'hi' }]);
+    expect(component.form.keywords().dirty()).toBe(true);
     expect(component.editedKeywordIndex()).toBe(-1);
     expect(component.editedKeyword()).toBeUndefined();
   });
 
   it('saveKeyword replaces the keyword at the edited index', () => {
-    component.keywords.setValue([
+    component.form.keywords().value.set([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
-    component.editKeyword(component.keywords.value[1], 1);
+    component.editKeyword(component.form.keywords().value()[1], 1);
 
     component.saveKeyword({ language: 'eng', value: 'b2' });
 
-    expect(component.keywords.value).toEqual([
+    expect(plain(component.form.keywords().value())).toEqual([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b2' },
     ]);
   });
 
   it('deleteKeyword removes the keyword at the given index (no confirmation dialog)', () => {
-    component.keywords.setValue([
+    component.form.keywords().value.set([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
 
     component.deleteKeyword(0);
 
-    expect(component.keywords.value).toEqual([{ language: 'eng', value: 'b' }]);
+    expect(plain(component.form.keywords().value())).toEqual([{ language: 'eng', value: 'b' }]);
   });
 
   it('deleteKeyword closes the editor when deleting the currently edited keyword', () => {
-    component.keywords.setValue([{ language: 'eng', value: 'a' }]);
-    component.editKeyword(component.keywords.value[0], 0);
+    component.form.keywords().value.set([{ language: 'eng', value: 'a' }]);
+    component.editKeyword(component.form.keywords().value()[0], 0);
 
     component.deleteKeyword(0);
 
@@ -249,19 +254,19 @@ describe('IndexKeywordsPartComponent', () => {
   });
 
   it('moveKeywordUp does nothing for index 0', () => {
-    component.keywords.setValue([
+    component.form.keywords().value.set([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
     component.moveKeywordUp(0);
-    expect(component.keywords.value).toEqual([
+    expect(plain(component.form.keywords().value())).toEqual([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
   });
 
   it('moveKeywordUp swaps entries and tracks the moved edited index', () => {
-    component.keywords.setValue([
+    component.form.keywords().value.set([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
@@ -269,7 +274,7 @@ describe('IndexKeywordsPartComponent', () => {
 
     component.moveKeywordUp(1);
 
-    expect(component.keywords.value).toEqual([
+    expect(plain(component.form.keywords().value())).toEqual([
       { language: 'eng', value: 'b' },
       { language: 'eng', value: 'a' },
     ]);
@@ -277,7 +282,7 @@ describe('IndexKeywordsPartComponent', () => {
   });
 
   it('moveKeywordUp tracks the other swapped entry when it was the edited one', () => {
-    component.keywords.setValue([
+    component.form.keywords().value.set([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
@@ -289,19 +294,19 @@ describe('IndexKeywordsPartComponent', () => {
   });
 
   it('moveKeywordDown does nothing for the last index', () => {
-    component.keywords.setValue([
+    component.form.keywords().value.set([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
     component.moveKeywordDown(1);
-    expect(component.keywords.value).toEqual([
+    expect(plain(component.form.keywords().value())).toEqual([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
   });
 
   it('moveKeywordDown swaps entries and tracks the moved edited index', () => {
-    component.keywords.setValue([
+    component.form.keywords().value.set([
       { language: 'eng', value: 'a' },
       { language: 'eng', value: 'b' },
     ]);
@@ -309,10 +314,18 @@ describe('IndexKeywordsPartComponent', () => {
 
     component.moveKeywordDown(0);
 
-    expect(component.keywords.value).toEqual([
+    expect(plain(component.form.keywords().value())).toEqual([
       { language: 'eng', value: 'b' },
       { language: 'eng', value: 'a' },
     ]);
     expect(component.editedKeywordIndex()).toBe(1);
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

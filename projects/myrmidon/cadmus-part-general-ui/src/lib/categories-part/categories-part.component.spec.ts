@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
@@ -12,6 +12,12 @@ import { EditedObject, ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { CategoriesPartComponent } from './categories-part.component';
 import { CategoriesPart, CATEGORIES_PART_TYPEID } from '../categories-part';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 function buildPart(categories: string[]): CategoriesPart {
   return {
@@ -45,8 +51,7 @@ describe('CategoriesPartComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
+        FormField,
         CategoriesPartComponent,
       ],
       providers: [
@@ -69,18 +74,18 @@ describe('CategoriesPartComponent', () => {
   });
 
   it('categories control should require at least 1 entry', () => {
-    expect(component.categories.value).toEqual([]);
-    expect(component.categories.hasError('minlength')).toBe(true);
-    component.categories.setValue([{ id: 'c1', value: 'Cat 1' }]);
-    expect(component.categories.valid).toBe(true);
+    expect(plain(component.form.categories().value())).toEqual([]);
+    expect(!!component.form.categories().getError('strictMinLength')).toBe(true);
+    component.form.categories().value.set([{ id: 'c1', value: 'Cat 1' }]);
+    expect(component.form.categories().valid()).toBe(true);
   });
 
   //#region onDataSet / updateForm
   it('should reset categories when the data has no value', () => {
-    component.categories.setValue([{ id: 'c1', value: 'Cat 1' }]);
+    component.form.categories().value.set([{ id: 'c1', value: 'Cat 1' }]);
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
-    expect(component.categories.value).toEqual([]);
+    expect(plain(component.form.categories().value())).toEqual([]);
   });
 
   it('should populate the categories thesaurus entries signal from the data', () => {
@@ -111,11 +116,11 @@ describe('CategoriesPartComponent', () => {
     fixture.detectChanges();
 
     // sorted alphabetically by value: "Apple tree" before "Zebra"
-    expect(component.categories.value).toEqual([
+    expect(plain(component.form.categories().value())).toEqual([
       { id: 'plant', value: 'Apple tree' },
       { id: 'animal', value: 'Zebra' },
     ]);
-    expect(component.form.pristine).toBe(true);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should fall back to {id, value: id} for category IDs not found in the thesaurus', () => {
@@ -129,7 +134,7 @@ describe('CategoriesPartComponent', () => {
 
     // sorted by value: "Animal" < "unknown-id" (capital A sorts before
     // lowercase u in localeCompare)
-    expect(component.categories.value).toEqual([
+    expect(plain(component.form.categories().value())).toEqual([
       { id: 'animal', value: 'Animal' },
       { id: 'unknown-id', value: 'unknown-id' },
     ]);
@@ -155,7 +160,7 @@ describe('CategoriesPartComponent', () => {
     expect(component.entries()).toBeUndefined();
     // falls back to {id: 'animal', value: 'animal'} since the thesaurus
     // entries are no longer available to resolve a display value
-    expect(component.categories.value).toEqual([
+    expect(plain(component.form.categories().value())).toEqual([
       { id: 'animal', value: 'animal' },
     ]);
   });
@@ -168,7 +173,7 @@ describe('CategoriesPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.categories.setValue([
+    component.form.categories().value.set([
       { id: 'c1', value: 'Cat 1' },
       { id: 'c2', value: 'Cat 2' },
     ]);
@@ -180,36 +185,71 @@ describe('CategoriesPartComponent', () => {
 
   //#region onEntryChange
   it('onEntryChange should add a new entry and sort by display value', () => {
-    component.categories.setValue([{ id: 'z', value: 'Zebra' }]);
+    component.form.categories().value.set([{ id: 'z', value: 'Zebra' }]);
     component.onEntryChange({ id: 'a', value: 'Apple' });
 
-    expect(component.categories.value).toEqual([
+    expect(plain(component.form.categories().value())).toEqual([
       { id: 'a', value: 'Apple' },
       { id: 'z', value: 'Zebra' },
     ]);
-    expect(component.categories.dirty).toBe(true);
+    expect(component.form.categories().dirty()).toBe(true);
   });
 
   it('onEntryChange should not add a duplicate entry (same id)', () => {
-    component.categories.setValue([{ id: 'a', value: 'Apple' }]);
+    component.form.categories().value.set([{ id: 'a', value: 'Apple' }]);
     component.onEntryChange({ id: 'a', value: 'Apple (renamed)' });
 
     // unchanged: the guard returns early before setValue/markAsDirty
-    expect(component.categories.value).toEqual([{ id: 'a', value: 'Apple' }]);
-    expect(component.categories.dirty).toBe(false);
+    expect(plain(component.form.categories().value())).toEqual([{ id: 'a', value: 'Apple' }]);
+    expect(component.form.categories().dirty()).toBe(false);
   });
   //#endregion
 
   //#region removeCategory
   it('removeCategory should remove the entry at the given index and dirty the control', () => {
-    component.categories.setValue([
+    component.form.categories().value.set([
       { id: 'a', value: 'Apple' },
       { id: 'b', value: 'Banana' },
     ]);
     component.removeCategory(0);
 
-    expect(component.categories.value).toEqual([{ id: 'b', value: 'Banana' }]);
-    expect(component.categories.dirty).toBe(true);
+    expect(plain(component.form.categories().value())).toEqual([{ id: 'b', value: 'Banana' }]);
+    expect(component.form.categories().dirty()).toBe(true);
+  });
+  //#endregion
+
+  //#region signal form
+  it('should not wrap the editor in a <form>', () => {
+    // the thesaurus tree renders its own filter form: what matters is
+    // that the editor and its buttons are inside no form
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
+
+  it('should save the picked categories as IDs', () => {
+    fixture.componentRef.setInput('data', {
+      value: buildPart([]),
+      thesauri: {},
+    });
+    fixture.detectChanges();
+    component.onEntryChange({ id: 'b', value: 'Banana' });
+    component.onEntryChange({ id: 'a', value: 'Apple' });
+    expect(component.isDirty()).toBe(true);
+
+    component.save();
+
+    expect(component.data()!.value!.categories).toEqual(['a', 'b']);
+    expect(component.isDirty()).toBe(false);
+  });
+
+  it('should not adopt the picked thesaurus entry objects', () => {
+    const entry: ThesaurusEntry = { id: 'a', value: 'Apple' };
+    component.onEntryChange(entry);
+    fixture.detectChanges();
+    expect(Object.getOwnPropertySymbols(entry)).toEqual([]);
   });
   //#endregion
 

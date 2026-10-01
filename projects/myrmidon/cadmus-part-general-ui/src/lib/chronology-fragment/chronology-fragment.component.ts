@@ -1,21 +1,12 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
-  signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  Validators,
-  UntypedFormGroup,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormField, maxLength, required } from '@angular/forms/signals';
 
-import { EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -37,14 +28,32 @@ import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { ThesauriSet, ThesaurusEntry } from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   HistoricalDateModel,
   HistoricalDateComponent,
 } from '@myrmidon/cadmus-refs-historical-date';
 
 import { ChronologyFragment } from '../chronology-fragment';
+
+interface ChronologyFragmentControls {
+  date: HistoricalDateModel | null;
+  tag: string;
+  label: string;
+  eventId: string;
+}
+
+function toDraft(fr?: ChronologyFragment | null): ChronologyFragmentControls {
+  // a fragment with no date is reset, as a new one
+  return !fr?.date
+    ? { date: null, tag: '', label: '', eventId: '' }
+    : {
+        date: fr.date,
+        tag: fr.tag || '',
+        label: fr.label || '',
+        eventId: fr.eventId || '',
+      };
+}
 
 /**
  * Chronology fragment editor component.
@@ -56,8 +65,7 @@ import { ChronologyFragment } from '../chronology-fragment';
   styleUrls: ['./chronology-fragment.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -78,87 +86,34 @@ import { ChronologyFragment } from '../chronology-fragment';
     CloseSaveButtonsComponent,
   ],
 })
-export class ChronologyFragmentComponent
-  extends ModelEditorComponentBase<ChronologyFragment>
-  implements OnInit
-{
+export class ChronologyFragmentComponent extends ModelEditorComponentBase<ChronologyFragment> {
   // chronology-tags thesaurus entries
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['chronology-tags']?.entries,
+  );
 
   // form
-  public date: FormControl<HistoricalDateModel | null>;
-  public tag: FormControl<string | null>;
-  public label: FormControl<string | null>;
-  public eventId: FormControl<string | null>;
-
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.date = formBuilder.control(null, Validators.required);
-    this.tag = formBuilder.control(null, Validators.maxLength(100));
-    this.label = formBuilder.control(null, Validators.maxLength(150));
-    this.eventId = formBuilder.control(null, Validators.maxLength(300));
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      date: this.date,
-      tag: this.tag,
-      label: this.label,
-      eventId: this.eventId,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    const key = 'chronology-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-  }
-
-  private updateForm(fragment?: ChronologyFragment | null): void {
-    if (!fragment || !fragment.date) {
-      this.form.reset();
-    } else {
-      // date
-      this.date.setValue(fragment.date);
-      // label and tag
-      this.label.setValue(fragment.label || null);
-      this.tag.setValue(fragment.tag || null);
-      this.eventId.setValue(fragment.eventId || null);
-      this.form.markAsPristine();
-    }
-  }
-
-  protected override onDataSet(data?: EditedObject<ChronologyFragment>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value as ChronologyFragment);
-  }
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    required(p.date);
+    maxLength(p.tag, 100);
+    maxLength(p.label, 150);
+    maxLength(p.eventId, 300);
+  });
 
   public onDateChange(date: HistoricalDateModel): void {
-    this.date.setValue(date);
-    this.date.updateValueAndValidity();
-    this.date.markAsDirty();
+    this.form.date().value.set(date);
+    this.form.date().markAsDirty();
   }
 
   protected getValue(): ChronologyFragment {
     let fr = this.getEditedFragment() as ChronologyFragment;
-    fr.date = this.date.value!;
+    const draft = this._draft();
+    fr.date = draft.date!;
     // label and tag
-    fr.label = this.label.value?.trim();
-    fr.eventId = this.eventId.value?.trim();
-    fr.tag = this.tag.value?.trim() || undefined;
+    fr.label = draft.label.trim() || undefined;
+    fr.eventId = draft.eventId.trim() || undefined;
+    fr.tag = draft.tag.trim() || undefined;
     return fr;
   }
 }

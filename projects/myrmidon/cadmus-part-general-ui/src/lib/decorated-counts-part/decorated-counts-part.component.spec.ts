@@ -15,6 +15,12 @@ import {
   DECORATED_COUNTS_PART_TYPEID,
 } from '../decorated-counts-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('DecoratedCountsPartComponent', () => {
   let component: DecoratedCountsPartComponent;
   let fixture: ComponentFixture<DecoratedCountsPartComponent>;
@@ -59,9 +65,9 @@ describe('DecoratedCountsPartComponent', () => {
   });
 
   it('builds a form with a counts control requiring at least 1 item', () => {
-    expect(component.form.get('counts')).toBeTruthy();
-    expect(component.counts.value).toEqual([]);
-    expect(component.counts.invalid).toBe(true);
+    expect(component.form.counts).toBeTruthy();
+    expect(plain(component.form.counts().value())).toEqual([]);
+    expect(component.form.counts().invalid()).toBe(true);
   });
 
   it('resets the form when data has no value', () => {
@@ -69,7 +75,7 @@ describe('DecoratedCountsPartComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.counts.value).toEqual([]);
+    expect(plain(component.form.counts().value())).toEqual([]);
   });
 
   it('populates thesauri signals from data and clears missing ones', () => {
@@ -107,8 +113,8 @@ describe('DecoratedCountsPartComponent', () => {
     fixture.componentRef.setInput('data', { value: part, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.counts.value).toEqual(counts);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.counts().value())).toEqual(counts);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('getValue returns a part with the current counts', () => {
@@ -137,16 +143,27 @@ describe('DecoratedCountsPartComponent', () => {
     const counts: DecoratedCount[] = [{ id: 'c1', value: 2 }];
     component.onCountsChange(counts);
 
-    expect(component.counts.value).toEqual(counts);
-    expect(component.counts.dirty).toBe(true);
+    expect(plain(component.form.counts().value())).toEqual(counts);
+    expect(component.form.counts().dirty()).toBe(true);
   });
 
-  it('getValue defaults counts to an empty array when control value is falsy', () => {
+  it('getValue defaults counts to an empty array when the part has none', () => {
     fixture.componentRef.setInput('identity', identity);
+    fixture.componentRef.setInput('data', {
+      value: { counts: undefined },
+      thesauri: {},
+    } as unknown as EditedObject<DecoratedCountsPart>);
     fixture.detectChanges();
-    component.counts.setValue(undefined as any);
 
     const value = (component as any).getValue() as DecoratedCountsPart;
     expect(value.counts).toEqual([]);
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

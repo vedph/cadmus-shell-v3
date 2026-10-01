@@ -8,6 +8,12 @@ import { EditedObject, ThesauriSet } from '@myrmidon/cadmus-core';
 import { KeywordsPartComponent } from './keywords-part.component';
 import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function makePart(overrides?: Partial<KeywordsPart>): KeywordsPart {
   return {
     id: 'part1',
@@ -65,11 +71,11 @@ describe('KeywordsPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.keywords.value).toEqual([{ language: 'eng', value: 'x' }]);
+      expect(plain(component.form.keywords().value())).toEqual([{ language: 'eng', value: 'x' }]);
 
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
-      expect(component.keywords.value).toEqual([]);
+      expect(plain(component.form.keywords().value())).toEqual([]);
     });
 
     it('should sort keywords by language then value on load', () => {
@@ -86,12 +92,12 @@ describe('KeywordsPartComponent', () => {
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
 
-      expect(component.keywords.value).toEqual([
+      expect(plain(component.form.keywords().value())).toEqual([
         { language: 'eng', value: 'a' },
         { language: 'eng', value: 'z' },
         { language: 'ita', value: 'b' },
       ]);
-      expect(component.form.pristine).toBe(true);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should populate langEntries when the languages thesaurus is present', () => {
@@ -143,23 +149,23 @@ describe('KeywordsPartComponent', () => {
 
   describe('addKeyword', () => {
     it('should do nothing when the new-keyword form is invalid', () => {
-      component.newLanguage.setValue(null);
-      component.newValue.setValue(null);
+      component.newForm.language().value.set(null);
+      component.newForm.text().value.set('');
       component.addKeyword();
-      expect(component.keywords.value).toEqual([]);
+      expect(plain(component.form.keywords().value())).toEqual([]);
     });
 
     it('should insert the new keyword in sorted order (by language then value)', () => {
-      component.keywords.setValue([
+      component.form.keywords().value.set([
         { language: 'eng', value: 'a' },
         { language: 'eng', value: 'z' },
       ]);
 
-      component.newLanguage.setValue('eng');
-      component.newValue.setValue('m');
+      component.newForm.language().value.set('eng');
+      component.newForm.text().value.set('m');
       component.addKeyword();
 
-      expect(component.keywords.value).toEqual([
+      expect(plain(component.form.keywords().value())).toEqual([
         { language: 'eng', value: 'a' },
         { language: 'eng', value: 'm' },
         { language: 'eng', value: 'z' },
@@ -167,48 +173,83 @@ describe('KeywordsPartComponent', () => {
     });
 
     it('should append the new keyword at the end when it sorts after all existing ones', () => {
-      component.keywords.setValue([{ language: 'eng', value: 'a' }]);
+      component.form.keywords().value.set([{ language: 'eng', value: 'a' }]);
 
-      component.newLanguage.setValue('ita');
-      component.newValue.setValue('b');
+      component.newForm.language().value.set('ita');
+      component.newForm.text().value.set('b');
       component.addKeyword();
 
-      expect(component.keywords.value).toEqual([
+      expect(plain(component.form.keywords().value())).toEqual([
         { language: 'eng', value: 'a' },
         { language: 'ita', value: 'b' },
       ]);
     });
 
     it('should prepend the new keyword when it sorts before all existing ones', () => {
-      component.keywords.setValue([{ language: 'ita', value: 'b' }]);
+      component.form.keywords().value.set([{ language: 'ita', value: 'b' }]);
 
-      component.newLanguage.setValue('eng');
-      component.newValue.setValue('a');
+      component.newForm.language().value.set('eng');
+      component.newForm.text().value.set('a');
       component.addKeyword();
 
-      expect(component.keywords.value).toEqual([
+      expect(plain(component.form.keywords().value())).toEqual([
         { language: 'eng', value: 'a' },
         { language: 'ita', value: 'b' },
       ]);
     });
 
     it('should not add a duplicate keyword (same language and value)', () => {
-      component.keywords.setValue([{ language: 'eng', value: 'a' }]);
+      component.form.keywords().value.set([{ language: 'eng', value: 'a' }]);
 
-      component.newLanguage.setValue('eng');
-      component.newValue.setValue('a');
+      component.newForm.language().value.set('eng');
+      component.newForm.text().value.set('a');
       component.addKeyword();
 
-      expect(component.keywords.value).toEqual([
+      expect(plain(component.form.keywords().value())).toEqual([
         { language: 'eng', value: 'a' },
       ]);
     });
 
     it('should mark the keywords control dirty after a successful add', () => {
-      component.newLanguage.setValue('eng');
-      component.newValue.setValue('a');
+      component.newForm.language().value.set('eng');
+      component.newForm.text().value.set('a');
       component.addKeyword();
-      expect(component.keywords.dirty).toBe(true);
+      expect(component.form.keywords().dirty()).toBe(true);
+    });
+  });
+
+  describe('new keyword input', () => {
+    it('should add the keyword on Enter, with no form submission', () => {
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input#value');
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      const enter = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        cancelable: true,
+      });
+      input.dispatchEvent(enter);
+      fixture.detectChanges();
+
+      expect(plain(component.form.keywords().value())).toEqual([
+        { language: 'eng', value: 'typed' },
+      ]);
+      expect(enter.defaultPrevented).toBe(true);
+    });
+
+    it('should save the added keywords', () => {
+      fixture.componentRef.setInput('data', {
+        value: makePart({ keywords: [] }),
+        thesauri: {},
+      } as EditedObject<KeywordsPart>);
+      fixture.detectChanges();
+      component.newForm.text().value.set('k');
+      component.addKeyword();
+      component.save();
+      expect(component.data()!.value!.keywords).toEqual([
+        { language: 'eng', value: 'k' },
+      ]);
+      expect(component.isDirty()).toBe(false);
     });
   });
 
@@ -216,11 +257,19 @@ describe('KeywordsPartComponent', () => {
     it('should remove the given keyword instance from the list', () => {
       const k1: Keyword = { language: 'eng', value: 'a' };
       const k2: Keyword = { language: 'ita', value: 'b' };
-      component.keywords.setValue([k1, k2]);
+      component.form.keywords().value.set([k1, k2]);
 
       component.deleteKeyword(k1);
 
-      expect(component.keywords.value).toEqual([k2]);
+      expect(plain(component.form.keywords().value())).toEqual([k2]);
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

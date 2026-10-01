@@ -12,6 +12,12 @@ import { AssertedId } from '@myrmidon/cadmus-refs-asserted-ids';
 import { ExternalIdsPartComponent } from './external-ids-part.component';
 import { ExternalIdsPart, EXTERNAL_IDS_PART_TYPEID } from '../external-ids-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function buildPart(ids: AssertedId[]): ExternalIdsPart {
   return {
     id: 'part1',
@@ -63,18 +69,18 @@ describe('ExternalIdsPartComponent', () => {
   });
 
   it('ids control should require at least 1 entry', () => {
-    expect(component.ids.value).toEqual([]);
-    expect(component.ids.hasError('minlength')).toBe(true);
-    component.ids.setValue([{ value: 'x1', scope: 's1' }]);
-    expect(component.ids.valid).toBe(true);
+    expect(plain(component.form.ids().value())).toEqual([]);
+    expect(!!component.form.ids().getError('strictMinLength')).toBe(true);
+    component.form.ids().value.set([{ value: 'x1', scope: 's1' }]);
+    expect(component.form.ids().valid()).toBe(true);
   });
 
   //#region onDataSet
   it('should reset the form when data has no value', () => {
-    component.ids.setValue([{ value: 'x1', scope: 's1' }]);
+    component.form.ids().value.set([{ value: 'x1', scope: 's1' }]);
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
-    expect(component.ids.value).toEqual([]);
+    expect(plain(component.form.ids().value())).toEqual([]);
   });
 
   it('should populate ids from the part', () => {
@@ -89,8 +95,8 @@ describe('ExternalIdsPartComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.ids.value).toEqual(ids);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.ids().value())).toEqual(ids);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should populate all 5 thesaurus entry signals when all thesauri are present', () => {
@@ -139,7 +145,7 @@ describe('ExternalIdsPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.ids.setValue(ids);
+    component.form.ids().value.set(ids);
 
     const value = (component as any).getValue() as ExternalIdsPart;
     expect(value.ids).toEqual(ids);
@@ -147,11 +153,19 @@ describe('ExternalIdsPartComponent', () => {
 
   it('onIdsChange should update, dirty and revalidate the control', () => {
     const ids: AssertedId[] = [{ value: 'x1', scope: 's1' }];
-    expect(component.ids.dirty).toBe(false);
+    expect(component.form.ids().dirty()).toBe(false);
     component.onIdsChange(ids);
-    expect(component.ids.value).toEqual(ids);
-    expect(component.ids.dirty).toBe(true);
-    expect(component.ids.valid).toBe(true);
+    expect(plain(component.form.ids().value())).toEqual(ids);
+    expect(component.form.ids().dirty()).toBe(true);
+    expect(component.form.ids().valid()).toBe(true);
   });
   //#endregion
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
 });

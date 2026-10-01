@@ -1,18 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  computed,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import {
   MatCard,
@@ -24,17 +17,14 @@ import {
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import {
   AssertedCompositeId,
   AssertedCompositeIdsComponent,
 } from '@myrmidon/cadmus-refs-asserted-ids';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -44,6 +34,15 @@ import {
 
 import { PinLinksPart, PIN_LINKS_PART_TYPEID } from '../pin-links-part';
 import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
+import { copyFormValue } from '../signal-form-utils';
+
+interface PinLinksPartControls {
+  links: AssertedCompositeId[];
+}
+
+function toDraft(part?: PinLinksPart | null): PinLinksPartControls {
+  return { links: copyFormValue(part?.links || []) };
+}
 
 interface PinLinksPartSettings {
   lookupProviderOptions?: LookupProviderOptions;
@@ -61,8 +60,6 @@ interface PinLinksPartSettings {
   styleUrls: ['./pin-links-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -76,35 +73,35 @@ interface PinLinksPartSettings {
     CloseSaveButtonsComponent,
   ],
 })
-export class PinLinksPartComponent
-  extends ModelEditorComponentBase<PinLinksPart>
-  implements OnInit
-{
-  public links: FormControl<AssertedCompositeId[]>;
+export class PinLinksPartComponent extends ModelEditorComponentBase<PinLinksPart> {
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.links, 1);
+  });
 
   // pin-link-scopes
-  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly idScopeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['pin-link-scopes']?.entries,
   );
   // pin-link-tags
-  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly idTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['pin-link-tags']?.entries,
   );
   // pin-link-assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly assTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['pin-link-assertion-tags']?.entries,
   );
   // pin-link-docref-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTypeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['pin-link-docref-types']?.entries,
   );
   // pin-link-docref-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['pin-link-docref-tags']?.entries,
   );
   // asserted-id-features
-  public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly featureEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['asserted-id-features']?.entries,
   );
 
   // lookup options depending on role
@@ -112,14 +109,8 @@ export class PinLinksPartComponent
     LookupProviderOptions | undefined
   >(undefined);
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.links = formBuilder.control([], {
-      // at least 1 entry
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
+  constructor() {
+    super();
     // settings
     this.initSettings<PinLinksPartSettings>(
       PIN_LINKS_PART_TYPEID,
@@ -131,82 +122,14 @@ export class PinLinksPartComponent
     );
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      links: this.links,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'pin-link-scopes';
-    if (this.hasThesaurus(key)) {
-      this.idScopeEntries.set(thesauri[key].entries);
-    } else {
-      this.idScopeEntries.set(undefined);
-    }
-    key = 'pin-link-tags';
-    if (this.hasThesaurus(key)) {
-      this.idTagEntries.set(thesauri[key].entries);
-    } else {
-      this.idTagEntries.set(undefined);
-    }
-    key = 'pin-link-assertion-tags';
-    if (this.hasThesaurus(key)) {
-      this.assTagEntries.set(thesauri[key].entries);
-    } else {
-      this.assTagEntries.set(undefined);
-    }
-    key = 'pin-link-docref-types';
-    if (this.hasThesaurus(key)) {
-      this.refTypeEntries.set(thesauri[key].entries);
-    } else {
-      this.refTypeEntries.set(undefined);
-    }
-    key = 'pin-link-docref-tags';
-    if (this.hasThesaurus(key)) {
-      this.refTagEntries.set(thesauri[key].entries);
-    } else {
-      this.refTagEntries.set(undefined);
-    }
-    key = 'asserted-id-features';
-    if (this.hasThesaurus(key)) {
-      this.featureEntries.set(thesauri[key].entries);
-    } else {
-      this.featureEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: PinLinksPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.links.setValue(part.links || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<PinLinksPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-    // form
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): PinLinksPart {
     let part = this.getEditedPart(PIN_LINKS_PART_TYPEID) as PinLinksPart;
-    part.links = this.links.value || [];
+    part.links = copyFormValue(this._draft().links);
     return part;
   }
 
   public onIdsChange(ids: AssertedCompositeId[]): void {
-    this.links.setValue(ids);
-    this.links.updateValueAndValidity();
-    this.links.markAsDirty();
+    this.form.links().value.set(copyFormValue(ids || []));
+    this.form.links().markAsDirty();
   }
 }

@@ -1,120 +1,119 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>picture_in_picture</mat-icon>
-      </div>
-      <mat-card-title>{{
-        (modelName() | titlecase) || "Bibliography Part"
-      }}</mat-card-title>
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
-    <mat-card-content>
-      <button
-        type="button"
-        mat-flat-button
-        class="mat-primary"
-        (click)="addEntry()"
-      >
-        <mat-icon>add_circle</mat-icon> entry
-      </button>
-      @if (entries.value.length) {
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>type</th>
-              <th>author(s)</th>
-              <th>title</th>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>picture_in_picture</mat-icon>
+    </div>
+    <mat-card-title>{{
+      (modelName() | titlecase) || "Bibliography Part"
+    }}</mat-card-title>
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
+  <mat-card-content>
+    <button
+      type="button"
+      mat-flat-button
+      class="mat-primary"
+      (click)="addEntry()"
+    >
+      <mat-icon>add_circle</mat-icon> entry
+    </button>
+    @if (form.entries().value().length) {
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>type</th>
+            <th>author(s)</th>
+            <th>title</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (
+            entry of form.entries().value();
+            track entry;
+            let i = $index;
+            let first = $first;
+            let last = $last
+          ) {
+            <tr [class.selected]="i === editedIndex()">
+              <td class="fit-width">
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Edit entry"
+                  (click)="editEntry(entry, i)"
+                >
+                  <mat-icon class="mat-primary">edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Move entry up"
+                  [disabled]="first"
+                  (click)="moveEntryUp(i)"
+                >
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Move entry down"
+                  [disabled]="last"
+                  (click)="moveEntryDown(i)"
+                >
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Remove this entry"
+                  (click)="removeEntry(i)"
+                >
+                  <mat-icon class="mat-warn">remove_circle</mat-icon>
+                </button>
+              </td>
+              <td>
+                {{
+                  entry.typeId | flatLookup: typeEntries() : "id" : "value"
+                }}
+              </td>
+              <td>{{ getAuthors(entry.authors || []) }}</td>
+              <td>{{ entry.title }}</td>
             </tr>
-          </thead>
-          <tbody>
-            @for (
-              entry of entries.value;
-              track entry;
-              let i = $index;
-              let first = $first;
-              let last = $last
-            ) {
-              <tr [class.selected]="i === editedIndex()">
-                <td class="fit-width">
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Edit entry"
-                    (click)="editEntry(entry, i)"
-                  >
-                    <mat-icon class="mat-primary">edit</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Move entry up"
-                    [disabled]="first"
-                    (click)="moveEntryUp(i)"
-                  >
-                    <mat-icon>arrow_upward</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Move entry down"
-                    [disabled]="last"
-                    (click)="moveEntryDown(i)"
-                  >
-                    <mat-icon>arrow_downward</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    type="button"
-                    matTooltip="Remove this entry"
-                    (click)="removeEntry(i)"
-                  >
-                    <mat-icon class="mat-warn">remove_circle</mat-icon>
-                  </button>
-                </td>
-                <td>
-                  {{
-                    entry.typeId | flatLookup: typeEntries() : "id" : "value"
-                  }}
-                </td>
-                <td>{{ getAuthors(entry.authors || []) }}</td>
-                <td>{{ entry.title }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
-      <!-- entry editor -->
-      <mat-expansion-panel
-        id="editor"
-        [expanded]="edited()"
-        [disabled]="!edited()"
-      >
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            {{ edited()?.title || "entry" }}
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <fieldset>
-          <cadmus-bibliography-entry
-            [entry]="edited()"
-            [langEntries]="langEntries()"
-            [typeEntries]="typeEntries()"
-            [tagEntries]="tagEntries()"
-            [roleEntries]="roleEntries()"
-            (editorClose)="closeEntry()"
-            (entryChange)="saveEntry($event!)"
-          />
-        </fieldset>
-      </mat-expansion-panel>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+          }
+        </tbody>
+      </table>
+    }
+    <!-- entry editor -->
+    <mat-expansion-panel
+      id="editor"
+      [expanded]="edited()"
+      [disabled]="!edited()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ edited()?.title || "entry" }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <fieldset>
+        <cadmus-bibliography-entry
+          [entry]="edited()"
+          [langEntries]="langEntries()"
+          [typeEntries]="typeEntries()"
+          [tagEntries]="tagEntries()"
+          [roleEntries]="roleEntries()"
+          (editorClose)="closeEntry()"
+          (entryChange)="saveEntry($event!)"
+        />
+      </fieldset>
+    </mat-expansion-panel>
+  </mat-card-content>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

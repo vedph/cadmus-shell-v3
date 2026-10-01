@@ -1,18 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  computed,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 import { take } from 'rxjs/operators';
 
 import {
@@ -27,9 +20,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsValidators, RamStorageService } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators, RamStorageService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   AssertedChronotope,
   AssertedChronotopeComponent,
@@ -38,9 +30,7 @@ import {
 import { HistoricalDatePipe } from '@myrmidon/cadmus-refs-historical-date';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -55,6 +45,15 @@ import {
 } from '@myrmidon/cadmus-refs-lookup';
 
 import { ChronotopesPart, CHRONOTOPES_PART_TYPEID } from '../chronotopes-part';
+import { copyFormValue } from '../signal-form-utils';
+
+interface ChronotopesPartControls {
+  chronotopes: AssertedChronotope[];
+}
+
+function toDraft(part?: ChronotopesPart | null): ChronotopesPartControls {
+  return { chronotopes: copyFormValue(part?.chronotopes || []) };
+}
 
 interface ChronotopesPartSettings {
   placeLookupServiceId?: string;
@@ -78,8 +77,6 @@ interface ChronotopesPartSettings {
   styleUrls: ['./chronotopes-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -99,28 +96,27 @@ interface ChronotopesPartSettings {
     CloseSaveButtonsComponent,
   ],
 })
-export class ChronotopesPartComponent
-  extends ModelEditorComponentBase<ChronotopesPart>
-  implements OnInit
-{
+export class ChronotopesPartComponent extends ModelEditorComponentBase<ChronotopesPart> {
   // state
   public readonly editedIndex = signal<number>(-1);
   public readonly edited = signal<AssertedChronotope | undefined>(undefined);
 
   // thesauri:
   // chronotope-place-tags
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['chronotope-place-tags']?.entries,
+  );
   // chronotope-assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly assTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['chronotope-assertion-tags']?.entries,
   );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTypeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-types']?.entries,
   );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-tags']?.entries,
   );
 
   /**
@@ -142,65 +138,19 @@ export class ChronotopesPartComponent
   >(undefined);
 
   // form
-  public chronotopes: FormControl<AssertedChronotope[]>;
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.chronotopes, 1);
+  });
 
-  constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
-    private _dialogService: DialogService,
-    private _storage: RamStorageService,
-  ) {
-    super(authService, formBuilder);
-    // form
-    this.chronotopes = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
+  constructor(private _dialogService: DialogService,
+    private _storage: RamStorageService) {
+    super();
     // settings
     this.initSettings<ChronotopesPartSettings>(
       CHRONOTOPES_PART_TYPEID,
       (settings) => this.updateSettings(settings),
     );
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      entries: this.chronotopes,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'chronotope-place-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-
-    key = 'chronotope-assertion-tags';
-    if (this.hasThesaurus(key)) {
-      this.assTagEntries.set(thesauri[key].entries);
-    } else {
-      this.assTagEntries.set(undefined);
-    }
-
-    key = 'doc-reference-types';
-    if (this.hasThesaurus(key)) {
-      this.refTypeEntries.set(thesauri[key].entries);
-    } else {
-      this.refTypeEntries.set(undefined);
-    }
-
-    key = 'doc-reference-tags';
-    if (this.hasThesaurus(key)) {
-      this.refTagEntries.set(thesauri[key].entries);
-    } else {
-      this.refTagEntries.set(undefined);
-    }
   }
 
   private updateSettings(settings: ChronotopesPartSettings | undefined): void {
@@ -221,28 +171,9 @@ export class ChronotopesPartComponent
     );
   }
 
-  private updateForm(part?: ChronotopesPart | null): void {
-    if (!part) {
-      this.form!.reset();
-      return;
-    }
-    this.chronotopes.setValue(part.chronotopes || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<ChronotopesPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): ChronotopesPart {
     let part = this.getEditedPart(CHRONOTOPES_PART_TYPEID) as ChronotopesPart;
-    part.chronotopes = this.chronotopes.value;
+    part.chronotopes = copyFormValue(this._draft().chronotopes);
     return part;
   }
 
@@ -260,15 +191,14 @@ export class ChronotopesPartComponent
   }
 
   public saveChronotope(): void {
-    const chronotopes = [...this.chronotopes.value];
+    const chronotopes = [...this.form.chronotopes().value()];
     if (this.editedIndex() === -1) {
       chronotopes.push(this.edited()!);
     } else {
       chronotopes.splice(this.editedIndex(), 1, this.edited()!);
     }
-    this.chronotopes.setValue(chronotopes);
-    this.chronotopes.updateValueAndValidity();
-    this.chronotopes.markAsDirty();
+    this.form.chronotopes().value.set(chronotopes);
+    this.form.chronotopes().markAsDirty();
     this.closeChronotope();
   }
 
@@ -283,11 +213,10 @@ export class ChronotopesPartComponent
       .pipe(take(1))
       .subscribe((yes) => {
         if (yes) {
-          const entries = [...this.chronotopes.value];
+          const entries = [...this.form.chronotopes().value()];
           entries.splice(index, 1);
-          this.chronotopes.setValue(entries);
-          this.chronotopes.updateValueAndValidity();
-          this.chronotopes.markAsDirty();
+          this.form.chronotopes().value.set(entries);
+          this.form.chronotopes().markAsDirty();
         }
       });
   }
@@ -296,25 +225,23 @@ export class ChronotopesPartComponent
     if (index < 1) {
       return;
     }
-    const entry = this.chronotopes.value[index];
-    const entries = [...this.chronotopes.value];
+    const entry = this.form.chronotopes().value()[index];
+    const entries = [...this.form.chronotopes().value()];
     entries.splice(index, 1);
     entries.splice(index - 1, 0, entry);
-    this.chronotopes.setValue(entries);
-    this.chronotopes.updateValueAndValidity();
-    this.chronotopes.markAsDirty();
+    this.form.chronotopes().value.set(entries);
+    this.form.chronotopes().markAsDirty();
   }
 
   public moveChronotopeDown(index: number): void {
-    if (index + 1 >= this.chronotopes.value.length) {
+    if (index + 1 >= this.form.chronotopes().value().length) {
       return;
     }
-    const entry = this.chronotopes.value[index];
-    const entries = [...this.chronotopes.value];
+    const entry = this.form.chronotopes().value()[index];
+    const entries = [...this.form.chronotopes().value()];
     entries.splice(index, 1);
     entries.splice(index + 1, 0, entry);
-    this.chronotopes.setValue(entries);
-    this.chronotopes.updateValueAndValidity();
-    this.chronotopes.markAsDirty();
+    this.form.chronotopes().value.set(entries);
+    this.form.chronotopes().markAsDirty();
   }
 }

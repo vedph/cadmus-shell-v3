@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 import { TitleCasePipe } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 
 import {
   MatCard,
@@ -110,8 +110,7 @@ describe('NotePartComponent', () => {
       .overrideComponent(NotePartComponent, {
         set: {
           imports: [
-            FormsModule,
-            ReactiveFormsModule,
+            FormField,
             MatCard,
             MatCardHeader,
             MatCardAvatar,
@@ -175,13 +174,13 @@ describe('NotePartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.tag.value).toBe('t');
-      expect(component.text.value).toBe('some text');
+      expect(component.form.tag().value()).toBe('t');
+      expect(component.form.text().value()).toBe('some text');
 
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
-      expect(component.tag.value).toBeNull();
-      expect(component.text.value).toBeNull();
+      expect(component.form.tag().value()).toBe('');
+      expect(component.form.text().value()).toBe('');
     });
 
     it('should populate tag/text controls from the part', () => {
@@ -191,19 +190,19 @@ describe('NotePartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.tag.value).toBe('important');
-      expect(component.text.value).toBe('the text');
-      expect(component.form.pristine).toBe(true);
+      expect(component.form.tag().value()).toBe('important');
+      expect(component.form.text().value()).toBe('the text');
+      expect(component.form().dirty()).toBe(false);
     });
 
-    it('should default tag to null when the part has none', () => {
+    it('should default tag to empty when the part has none', () => {
       const data: EditedObject<NotePart> = {
         value: makePart({ tag: undefined }),
         thesauri: {},
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.tag.value).toBeNull();
+      expect(component.form.tag().value()).toBe('');
     });
 
     it('should populate tagEntries when the note-tags thesaurus is present', () => {
@@ -227,9 +226,11 @@ describe('NotePartComponent', () => {
     });
   });
 
-  describe('preview (updatePreview via debounced text.valueChanges)', () => {
-    it('should render markdown from the text control into previewHtml', async () => {
-      component.text.setValue('**bold**');
+  describe('preview (updatePreview via debounced text value)', () => {
+    it('should render markdown from the text field into previewHtml', async () => {
+      component.form.text().value.set('**bold**');
+      // toObservable emits only when change detection runs
+      fixture.detectChanges();
       // wait out the 50ms debounce with real timers: rxjs's asyncScheduler
       // does not reliably observe fake timers installed after the
       // debounced subscription was already set up in ngOnInit
@@ -243,6 +244,70 @@ describe('NotePartComponent', () => {
     });
   });
 
+  describe('signal form', () => {
+    it('should render no <form> element', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    });
+
+    it('should require the text and limit the tag length', () => {
+      component.form.text().value.set('');
+      expect(component.form.text().getError('required')).toBeTruthy();
+      component.form.tag().value.set('x'.repeat(101));
+      expect(component.form.tag().getError('maxLength')).toBeTruthy();
+      expect(component.form().invalid()).toBe(true);
+    });
+
+    it('should show the tag length error once the tag is touched', () => {
+      component.form.tag().value.set('x'.repeat(101));
+      component.form.tag().markAsTouched();
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('tag too long');
+    });
+
+    it('should bind the tag input to the form', () => {
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input');
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(component.form.tag().value()).toBe('typed');
+      expect(component.isDirty()).toBe(true);
+    });
+
+    it('should bind the text editor to the form, both ways', async () => {
+      fixture.componentRef.setInput('data', {
+        value: makePart({ text: 'from part' }),
+        thesauri: {},
+      } as EditedObject<NotePart>);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const textarea: HTMLTextAreaElement = fixture.nativeElement.querySelector(
+        'ngx-monaco-editor textarea',
+      );
+      expect(textarea.value).toBe('from part');
+
+      textarea.value = 'typed text';
+      textarea.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(component.form.text().value()).toBe('typed text');
+    });
+
+    it('should save the edited part into data', () => {
+      fixture.componentRef.setInput('data', {
+        value: makePart({ text: 'old' }),
+        thesauri: {},
+      } as EditedObject<NotePart>);
+      fixture.detectChanges();
+      component.form.text().value.set('new text ');
+      component.form.text().markAsDirty();
+
+      component.save();
+
+      expect(component.data()!.value!.text).toBe('new text');
+      expect(component.isDirty()).toBe(false);
+    });
+  });
+
   describe('getValue', () => {
     it('should build a NotePart trimming the text and defaulting empty tag to undefined', () => {
       const data: EditedObject<NotePart> = {
@@ -252,8 +317,8 @@ describe('NotePartComponent', () => {
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
 
-      component.tag.setValue('');
-      component.text.setValue('  some text  ');
+      component.form.tag().value.set('');
+      component.form.text().value.set('  some text  ');
 
       const part = (component as any).getValue() as NotePart;
       expect(part.text).toBe('some text');
@@ -266,19 +331,19 @@ describe('NotePartComponent', () => {
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
 
-      component.tag.setValue('important');
-      component.text.setValue('text');
+      component.form.tag().value.set('important');
+      component.form.text().value.set('text');
 
       const part = (component as any).getValue() as NotePart;
       expect(part.tag).toBe('important');
     });
 
-    it('should return an empty string for text when the control value is null', () => {
+    it('should return an empty string for text when the text is blank', () => {
       const data: EditedObject<NotePart> = { value: makePart(), thesauri: {} };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
 
-      component.text.setValue(null);
+      component.form.text().value.set('   ');
       const part = (component as any).getValue() as NotePart;
       expect(part.text).toBe('');
     });

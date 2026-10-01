@@ -1,64 +1,62 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>picture_in_picture</mat-icon>
-      </div>
-      <mat-card-title
-        [matBadge]="categories.value.length"
-        matBadgeOverlap="false"
-      >
-        {{ (modelName() | titlecase) || "Categories Part" }}</mat-card-title
-      >
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
-    <mat-card-content>
-      <div id="container">
-        <!-- available categories (from thesaurus) -->
-        <fieldset id="picker">
-          <legend>available categories</legend>
-          <cadmus-thesaurus-tree
-            [entries]="entries()"
-            rootLabel="categories"
-            [renderLabel]="renderLabel"
-            (entryChange)="onEntryChange($event)"
-          />
-        </fieldset>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>picture_in_picture</mat-icon>
+    </div>
+    <mat-card-title
+      [matBadge]="form.categories().value().length"
+      matBadgeOverlap="false"
+    >
+      {{ (modelName() | titlecase) || "Categories Part" }}</mat-card-title
+    >
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
+  <mat-card-content>
+    <div id="container">
+      <!-- available categories (from thesaurus) -->
+      <fieldset id="picker">
+        <legend>available categories</legend>
+        <cadmus-thesaurus-tree
+          [entries]="entries()"
+          rootLabel="categories"
+          [renderLabel]="renderLabel"
+          (entryChange)="onEntryChange($event)"
+        />
+      </fieldset>
 
-        <!-- categories -->
-        @if (categories.value.length) {
-          <fieldset id="list">
-            <legend>assigned categories</legend>
-            <table>
-              <tbody>
-                @for (entry of categories.value; track entry; let i = $index) {
-                  <tr>
-                    <td>
-                      <button
-                        type="button"
-                        mat-icon-button
-                        type="button"
-                        matTooltip="Remove this category"
-                        (click)="removeCategory(i)"
-                      >
-                        <mat-icon class="mat-warn">remove_circle</mat-icon>
-                      </button>
-                    </td>
-                    <td [matTooltip]="entry.id">{{ entry.value }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </fieldset>
-        }
-      </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+      <!-- categories -->
+      @if (form.categories().value().length) {
+        <fieldset id="list">
+          <legend>assigned categories</legend>
+          <table>
+            <tbody>
+              @for (entry of form.categories().value(); track entry.id; let i = $index) {
+                <tr>
+                  <td>
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Remove this category"
+                      (click)="removeCategory(i)"
+                    >
+                      <mat-icon class="mat-warn">remove_circle</mat-icon>
+                    </button>
+                  </td>
+                  <td [matTooltip]="entry.id">{{ entry.value }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </fieldset>
+      }
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

@@ -23,6 +23,12 @@ import {
   HISTORICAL_DATE_PART_TYPEID,
 } from '../historical-date-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('HistoricalDatePartComponent', () => {
   let component: HistoricalDatePartComponent;
   let fixture: ComponentFixture<HistoricalDatePartComponent>;
@@ -83,13 +89,13 @@ describe('HistoricalDatePartComponent', () => {
   });
 
   it('should default date to a fresh HistoricalDate and references to []', () => {
-    expect(component.date.value.a.value).toBe(0);
-    expect(component.date.value.b).toBeUndefined();
-    expect(component.references.value).toEqual([]);
+    expect(component.form.date().value().a.value).toBe(0);
+    expect(component.form.date().value().b).toBeUndefined();
+    expect(plain(component.form.references().value())).toEqual([]);
   });
 
   it('should have an always-valid form (no validators defined)', () => {
-    expect(component.form.valid).toBe(true);
+    expect(component.form().valid()).toBe(true);
   });
 
   describe('with identity set', () => {
@@ -131,9 +137,9 @@ describe('HistoricalDatePartComponent', () => {
       } as EditedObject<HistoricalDatePart>);
       fixture.detectChanges();
 
-      expect(component.date.value).toEqual(part.date);
-      expect(component.references.value).toEqual([REF]);
-      expect(component.form.pristine).toBe(true);
+      expect(plain(component.form.date().value())).toEqual(part.date);
+      expect(plain(component.form.references().value())).toEqual([REF]);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should default references to [] when the part has none', () => {
@@ -143,7 +149,7 @@ describe('HistoricalDatePartComponent', () => {
       } as EditedObject<HistoricalDatePart>);
       fixture.detectChanges();
 
-      expect(component.references.value).toEqual([]);
+      expect(plain(component.form.references().value())).toEqual([]);
     });
 
     it('should reset date/references to their defaults when data is unset', () => {
@@ -156,9 +162,9 @@ describe('HistoricalDatePartComponent', () => {
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
 
-      expect(component.date.value.a.value).toBe(0);
-      expect(component.date.value.b).toBeUndefined();
-      expect(component.references.value).toEqual([]);
+      expect(component.form.date().value().a.value).toBe(0);
+      expect(component.form.date().value().b).toBeUndefined();
+      expect(plain(component.form.references().value())).toEqual([]);
     });
 
     it('getValue should build a part with references set when non-empty', () => {
@@ -170,7 +176,7 @@ describe('HistoricalDatePartComponent', () => {
 
       const value = (component as any).getValue() as HistoricalDatePart;
       expect(value.typeId).toBe(HISTORICAL_DATE_PART_TYPEID);
-      expect(value.date).toEqual(component.date.value);
+      expect(value.date).toEqual(component.form.date().value());
       expect(value.references).toEqual([REF]);
     });
 
@@ -195,8 +201,8 @@ describe('HistoricalDatePartComponent', () => {
       const newDate: HistoricalDateModel = { a: { value: 200 } };
       component.onDateChange(newDate);
 
-      expect(component.date.value).toEqual(newDate);
-      expect(component.date.dirty).toBe(true);
+      expect(plain(component.form.date().value())).toEqual(newDate);
+      expect(component.form.date().dirty()).toBe(true);
     });
 
     it('onReferencesChange should update the references control and mark it dirty', () => {
@@ -208,8 +214,16 @@ describe('HistoricalDatePartComponent', () => {
 
       component.onReferencesChange([REF]);
 
-      expect(component.references.value).toEqual([REF]);
-      expect(component.references.dirty).toBe(true);
+      expect(plain(component.form.references().value())).toEqual([REF]);
+      expect(component.form.references().dirty()).toBe(true);
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

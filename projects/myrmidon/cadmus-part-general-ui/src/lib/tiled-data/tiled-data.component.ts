@@ -1,22 +1,24 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
-  OnDestroy,
+  computed,
+  effect,
   input,
+  linkedSignal,
   model,
   output,
-  effect,
+  signal,
+  untracked,
 } from '@angular/core';
 import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
+  FormField,
+  applyEach,
+  form,
+  maxLength,
+  pattern,
+  required,
+  validate,
+} from '@angular/forms/signals';
 
 import {
   MatFormField,
@@ -30,7 +32,6 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { Subscription } from 'rxjs';
 
 interface Data {
   [key: string]: any;
@@ -46,14 +47,41 @@ interface DataKey {
  */
 const VALUE_MAX_LEN = 100;
 
+interface DatumRow {
+  key: string;
+  value: string;
+}
+
+interface TiledDataControls {
+  rows: DatumRow[];
+}
+
+/**
+ * Bound data -> editable draft: one row per visible key, sorted by key.
+ * Values are edited as text.
+ */
+function toDraft(data: Data | undefined, hiddenKeys: string[]): TiledDataControls {
+  if (!data) {
+    return { rows: [] };
+  }
+  return {
+    rows: Object.getOwnPropertyNames(data)
+      .filter((key) => !hiddenKeys.includes(key))
+      .sort((a, b) => a.localeCompare(b))
+      .map((key) => ({
+        key,
+        value: data[key] === undefined || data[key] === null ? '' : `${data[key]}`,
+      })),
+  };
+}
+
 @Component({
   selector: 'cadmus-tiled-data',
   templateUrl: './tiled-data.component.html',
   styleUrls: ['./tiled-data.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatInput,
@@ -65,11 +93,7 @@ const VALUE_MAX_LEN = 100;
     MatError,
   ],
 })
-export class TiledDataComponent implements OnInit, OnDestroy {
-  private _sub?: Subscription;
-  private _hiddenData: Data;
-  public keys: DataKey[];
-
+export class TiledDataComponent {
   public readonly title = input<string>();
 
   public readonly data = model<Data>({});
@@ -78,132 +102,92 @@ export class TiledDataComponent implements OnInit, OnDestroy {
 
   public readonly cancel = output();
 
-  public keyFilter: FormControl<string | null>;
-  public filterForm: FormGroup;
+  // filter form
+  private readonly _filterDraft = signal<{ keyFilter: string }>({
+    keyFilter: '',
+  });
+  public readonly filterForm = form(this._filterDraft);
 
-  public newKey: FormControl<string | null>;
-  public newValue: FormControl<string | null>;
-  public newForm: FormGroup;
+  // new datum form
+  private readonly _newDraft = signal<{ newKey: string; newValue: string }>({
+    newKey: '',
+    newValue: '',
+  });
+  public readonly newForm = form(this._newDraft, (p) => {
+    required(p.newKey);
+    pattern(p.newKey, /^[a-zA-Z_$][[a-zA-Z_$0-9]{0,49}$/);
+    // hidden keys are not edited here
+    validate(p.newKey, ({ value }) =>
+      this.hiddenKeys().includes(value()) ? { kind: 'hidden' } : null,
+    );
+    maxLength(p.newValue, VALUE_MAX_LEN);
+  });
 
-  public form: FormGroup;
-
-  constructor(
-    private _formBuilder: FormBuilder,
-    private _dialogService: DialogService,
-  ) {
-    this._hiddenData = {};
-    this.keys = [];
-    // filter form
-    this.keyFilter = _formBuilder.control(null);
-    this.filterForm = _formBuilder.group({
-      keyFilter: this.keyFilter,
+  // editing form: one row per visible datum
+  private readonly _draft = linkedSignal(() =>
+    toDraft(this.data(), this.hiddenKeys()),
+  );
+  public readonly form = form(this._draft, (p) => {
+    applyEach(p.rows, (row) => {
+      maxLength(row.value, VALUE_MAX_LEN);
     });
-    // new datum form
-    this.newKey = _formBuilder.control(null, [
-      Validators.required,
-      Validators.pattern('^[a-zA-Z_$][[a-zA-Z_$0-9]{0,49}$'),
-    ]);
-    this.newValue = _formBuilder.control(null, [
-      Validators.maxLength(VALUE_MAX_LEN),
-    ]);
-    this.newForm = _formBuilder.group({
-      newKey: this.newKey,
-      newValue: this.newValue,
-    });
-    // editing form (controls are dynamically populated)
-    this.form = _formBuilder.group({});
+  });
 
+  /**
+   * The keys of the visible (not hidden) data, each with its visibility
+   * according to the key filter.
+   */
+  public readonly keys = computed<DataKey[]>(() => {
+    const filter = this.filterForm.keyFilter().value().toLowerCase();
+    return this.form
+      .rows()
+      .value()
+      .map((row) => ({
+        value: row.key,
+        visible: !filter || row.key.toLowerCase().indexOf(filter) > -1,
+      }));
+  });
+
+  constructor(private _dialogService: DialogService) {
+    // new data were bound: no unsaved edits (keyed on the bound model:
+    // the draft also changes with each user edit)
     effect(() => {
-      this.updateForm(this.data(), this.hiddenKeys());
+      this.data();
+      this.hiddenKeys();
+      untracked(() => this.form().reset());
     });
-  }
-
-  public ngOnInit(): void {
-    this._sub = this.keyFilter.valueChanges
-      .pipe(distinctUntilChanged(), debounceTime(300))
-      .subscribe((_) => {
-        this.updateDataVisibility();
-      });
-  }
-
-  public ngOnDestroy(): void {
-    this._sub?.unsubscribe();
-  }
-
-  private matchesFilter(key: string): boolean {
-    if (!this.keyFilter.value) {
-      return true;
-    }
-    const filter = this.keyFilter.value.toLowerCase();
-    return key.toLowerCase().indexOf(filter) > -1;
   }
 
   public isVisibleKey(key: string): boolean {
-    const dataKey = this.keys.find((k) => {
-      return k.value === key;
-    });
+    const dataKey = this.keys().find((k) => k.value === key);
     return dataKey ? dataKey.visible : false;
   }
 
-  private updateForm(data?: Data, hiddenKeys?: string[]): void {
-    // reset
-    this.keys = [];
-    this._hiddenData = {};
-    this.form = this._formBuilder.group({});
-
-    if (!data) {
-      return;
-    }
-
-    // collect keys from data's own properties and sort the result
-    const cache: DataKey[] = [];
-    Object.getOwnPropertyNames(data).forEach((key: string) => {
-      if (!hiddenKeys || hiddenKeys.indexOf(key) === -1) {
-        cache.push({ value: key, visible: this.matchesFilter(key) });
-      } else {
-        this._hiddenData[key] = data[key];
-      }
-    });
-    // BUG FIX: Array.prototype.sort() with no comparator converts each
-    // element to a string; since cache holds DataKey *objects*, every
-    // element stringifies to "[object Object]" and the sort is a silent
-    // no-op, leaving keys in property-insertion order instead of the
-    // alphabetical order the surrounding comment/intent describes. Sorting
-    // explicitly by the key's own `value` string restores that intent.
-    cache.sort((a, b) => a.value.localeCompare(b.value));
-
-    // add a control for each collected key
-    for (let i = 0; i < cache.length; i++) {
-      const key = cache[i];
-      this.form.addControl(
-        key.value,
-        this._formBuilder.control(
-          data[key.value],
-          Validators.maxLength(VALUE_MAX_LEN),
-        ),
-      );
-    }
-    this.keys = cache;
-  }
-
-  private updateDataVisibility(): void {
-    for (let i = 0; i < this.keys.length; i++) {
-      this.keys[i] = {
-        value: this.keys[i].value,
-        visible: this.matchesFilter(this.keys[i].value),
-      };
-    }
+  public clearFilter(): void {
+    this.filterForm.keyFilter().value.set('');
   }
 
   private getData(): Data {
-    const data: Data = this._hiddenData ? { ...this._hiddenData } : {};
-
-    for (let i = 0; i < this.keys.length; i++) {
-      const keyValue = this.keys[i].value;
-      data[keyValue] = this.form.controls[keyValue].value;
+    const original = this.data() || {};
+    const hiddenKeys = this.hiddenKeys();
+    const data: Data = {};
+    for (const key of Object.getOwnPropertyNames(original)) {
+      if (hiddenKeys.includes(key)) {
+        data[key] = original[key];
+      }
     }
-
+    for (const row of this._draft().rows) {
+      // keep the original value (and type) unless it was changed
+      const old = original[row.key];
+      const oldText = old === undefined || old === null ? '' : `${old}`;
+      data[row.key] = oldText === row.value && row.key in original ? old : row.value;
+    }
     return data;
+  }
+
+  private setRows(rows: DatumRow[]): void {
+    this.form.rows().value.set(rows);
+    this.form.rows().markAsDirty();
   }
 
   public deleteDatum(key: DataKey): void {
@@ -213,23 +197,31 @@ export class TiledDataComponent implements OnInit, OnDestroy {
         if (!ok) {
           return;
         }
-        const data = { ...this.data() };
-        delete data[key.value];
-        this.data.set(data);
-        this.updateForm(this.data());
+        this.setRows(
+          this.form
+            .rows()
+            .value()
+            .filter((r) => r.key !== key.value),
+        );
       });
   }
 
   public addDatum(): void {
-    if (this.newForm.invalid) {
+    if (this.newForm().invalid()) {
+      this.newForm().markAsTouched();
       return;
     }
-
-    const newData = { ...this.data() };
-    newData[this.newKey.value!] = this.newValue.value;
-    this.data.set(newData);
-    this.newForm.reset();
-    this.updateForm(this.data());
+    const key = this.newForm.newKey().value();
+    const value = this.newForm.newValue().value();
+    const rows = this.form.rows().value();
+    // an existing key gets the new value
+    this.setRows(
+      rows.some((r) => r.key === key)
+        ? rows.map((r) => (r.key === key ? { key, value } : r))
+        : [...rows, { key, value }].sort((a, b) => a.key.localeCompare(b.key)),
+    );
+    this._newDraft.set({ newKey: '', newValue: '' });
+    this.newForm().reset();
   }
 
   public close(): void {
@@ -237,7 +229,8 @@ export class TiledDataComponent implements OnInit, OnDestroy {
   }
 
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
     this.data.set(this.getData());

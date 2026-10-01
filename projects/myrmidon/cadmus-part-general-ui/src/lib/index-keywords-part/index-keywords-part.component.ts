@@ -1,18 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import {
   MatCard,
@@ -32,13 +25,10 @@ import {
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { FlatLookupPipe, NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -52,6 +42,15 @@ import {
   INDEX_KEYWORDS_PART_TYPEID,
 } from '../index-keywords-part';
 import { IndexKeywordComponent } from '../index-keyword/index-keyword.component';
+import { copyFormValue } from '../signal-form-utils';
+
+interface IndexKeywordsPartControls {
+  keywords: IndexKeyword[];
+}
+
+function toDraft(part?: IndexKeywordsPart | null): IndexKeywordsPartControls {
+  return { keywords: copyFormValue(part?.keywords || []) };
+}
 
 interface IndexKeywordsPartSetting {
   noIndexId?: boolean;
@@ -67,8 +66,6 @@ interface IndexKeywordsPartSetting {
   styleUrls: ['./index-keywords-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -90,29 +87,31 @@ interface IndexKeywordsPartSetting {
     CloseSaveButtonsComponent,
   ],
 })
-export class IndexKeywordsPartComponent
-  extends ModelEditorComponentBase<IndexKeywordsPart>
-  implements OnInit
-{
+export class IndexKeywordsPartComponent extends ModelEditorComponentBase<IndexKeywordsPart> {
   public readonly editedKeyword = signal<IndexKeyword | undefined>(undefined);
   public readonly editedKeywordIndex = signal<number | undefined>(-1);
 
   // thesaurus
-  public readonly idxEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idxEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['keyword-indexes']?.entries,
+  );
+  public readonly langEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['languages']?.entries,
+  );
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['keyword-tags']?.entries,
+  );
 
   public readonly noIndexId = signal<boolean>(false);
 
-  public keywords: FormControl<IndexKeyword[]>;
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.keywords, 1);
+  });
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.keywords = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
+  constructor() {
+    super();
 
     // get setting for noIndexId (global, not role-specific)
     this._appRepository
@@ -124,62 +123,11 @@ export class IndexKeywordsPartComponent
       });
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      keywords: this.keywords,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'languages';
-    if (this.hasThesaurus(key)) {
-      this.langEntries.set(thesauri[key].entries);
-    } else {
-      this.langEntries.set(undefined);
-    }
-    key = 'keyword-indexes';
-    if (this.hasThesaurus(key)) {
-      this.idxEntries.set(thesauri[key].entries);
-    } else {
-      this.idxEntries.set(undefined);
-    }
-    key = 'keyword-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: IndexKeywordsPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-
-    this.keywords.setValue(part.keywords || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<IndexKeywordsPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): IndexKeywordsPart {
     let part = this.getEditedPart(
       INDEX_KEYWORDS_PART_TYPEID,
     ) as IndexKeywordsPart;
-    part.keywords = [...this.keywords.value];
+    part.keywords = copyFormValue(this._draft().keywords);
     return part;
   }
 
@@ -203,15 +151,14 @@ export class IndexKeywordsPartComponent
   }
 
   public saveKeyword(entry: IndexKeyword): void {
-    const entries = [...this.keywords.value];
+    const entries = [...this.form.keywords().value()];
     if (this.editedKeywordIndex() === -1) {
       entries.push(entry);
     } else {
       entries.splice(this.editedKeywordIndex()!, 1, entry);
     }
-    this.keywords.setValue(entries);
-    this.keywords.markAsDirty();
-    this.keywords.updateValueAndValidity();
+    this.form.keywords().value.set(entries);
+    this.form.keywords().markAsDirty();
     this.closeKeyword();
   }
 
@@ -219,24 +166,22 @@ export class IndexKeywordsPartComponent
     if (this.editedKeywordIndex() === index) {
       this.closeKeyword();
     }
-    const entries = [...this.keywords.value];
+    const entries = [...this.form.keywords().value()];
     entries.splice(index, 1);
-    this.keywords.setValue(entries);
-    this.keywords.markAsDirty();
-    this.keywords.updateValueAndValidity();
+    this.form.keywords().value.set(entries);
+    this.form.keywords().markAsDirty();
   }
 
   public moveKeywordUp(index: number): void {
     if (index < 1) {
       return;
     }
-    const entry = this.keywords.value[index];
-    const entries = [...this.keywords.value];
+    const entry = this.form.keywords().value()[index];
+    const entries = [...this.form.keywords().value()];
     entries.splice(index, 1);
     entries.splice(index - 1, 0, entry);
-    this.keywords.setValue(entries);
-    this.keywords.markAsDirty();
-    this.keywords.updateValueAndValidity();
+    this.form.keywords().value.set(entries);
+    this.form.keywords().markAsDirty();
     // keep editedKeywordIndex in sync
     if (this.editedKeywordIndex() === index) {
       this.editedKeywordIndex.set(index - 1);
@@ -246,16 +191,15 @@ export class IndexKeywordsPartComponent
   }
 
   public moveKeywordDown(index: number): void {
-    if (index + 1 >= this.keywords.value.length) {
+    if (index + 1 >= this.form.keywords().value().length) {
       return;
     }
-    const entry = this.keywords.value[index];
-    const entries = [...this.keywords.value];
+    const entry = this.form.keywords().value()[index];
+    const entries = [...this.form.keywords().value()];
     entries.splice(index, 1);
     entries.splice(index + 1, 0, entry);
-    this.keywords.setValue(entries);
-    this.keywords.markAsDirty();
-    this.keywords.updateValueAndValidity();
+    this.form.keywords().value.set(entries);
+    this.form.keywords().markAsDirty();
     // keep editedKeywordIndex in sync
     if (this.editedKeywordIndex() === index) {
       this.editedKeywordIndex.set(index + 1);

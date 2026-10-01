@@ -1,15 +1,15 @@
-<form [formGroup]="form" class="form-row" (submit)="save()">
+<div class="form-row" (keydown.enter)="onEnterKey($event)">
   <!-- relation (bound) -->
   @if (relationEntries()?.length) {
     <mat-form-field class="long-text">
       <mat-label>relation</mat-label>
-      <mat-select [formControl]="relation">
+      <mat-select [formField]="form.relation">
         @for (e of relationEntries(); track e.id) {
           <mat-option [value]="e.id">{{ e.value }}</mat-option>
         }
       </mat-select>
       @if (
-        $any(relation).errors?.required && (relation.dirty || relation.touched)
+        form.relation().getError("required") && (form.relation().dirty() || form.relation().touched())
       ) {
         <mat-error>relation required</mat-error>
       }
@@ -19,14 +19,14 @@
   @else {
     <mat-form-field class="long-text">
       <mat-label>relation</mat-label>
-      <input matInput [formControl]="relation" />
+      <input matInput [formField]="form.relation" />
       @if (
-        $any(relation).errors?.required && (relation.dirty || relation.touched)
+        form.relation().getError("required") && (form.relation().dirty() || form.relation().touched())
       ) {
         <mat-error>relation required</mat-error>
       }
       @if (
-        $any(relation).errors?.maxlength && (relation.dirty || relation.touched)
+        form.relation().getError("maxLength") && (form.relation().dirty() || form.relation().touched())
       ) {
         <mat-error>relation too long</mat-error>
       }
@@ -44,14 +44,19 @@
     [pinByTypeMode]="true"
     [canSwitchMode]="true"
     [canEditTarget]="true"
-    [id]="id.value || undefined"
+    [id]="form.id().value() || undefined"
     (idChange)="onIdChange($event!)"
   />
 
   <button mat-icon-button type="button" (click)="cancel()">
     <mat-icon class="mat-warn">close</mat-icon>
   </button>
-  <button mat-icon-button type="submit" matTooltip="Save entity">
+  <button
+    mat-icon-button
+    type="button"
+    matTooltip="Save entity"
+    (click)="save()"
+  >
     <mat-icon class="mat-primary">check_circle</mat-icon>
   </button>
-</form>
+</div>

@@ -1,11 +1,10 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   input,
   model,
   signal,
 } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   MatExpansionPanel,
@@ -29,8 +28,6 @@ import { BibAuthor } from '../bibliography-part';
 @Component({
   selector: 'cadmus-bib-authors-editor',
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,

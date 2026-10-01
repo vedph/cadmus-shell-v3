@@ -1,18 +1,10 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
-  signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -24,17 +16,14 @@ import {
   MatCardActions,
 } from '@angular/material/card';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import {
   DecoratedCount,
   DecoratedCountsComponent,
 } from '@myrmidon/cadmus-refs-decorated-counts';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -46,6 +35,15 @@ import {
   DECORATED_COUNTS_PART_TYPEID,
   DecoratedCountsPart,
 } from '../decorated-counts-part';
+import { copyFormValue } from '../signal-form-utils';
+
+interface DecoratedCountsPartControls {
+  counts: DecoratedCount[];
+}
+
+function toDraft(part?: DecoratedCountsPart | null): DecoratedCountsPartControls {
+  return { counts: copyFormValue(part?.counts || []) };
+}
 
 /**
  * Decorated counts part editor component.
@@ -57,8 +55,6 @@ import {
   styleUrl: './decorated-counts-part.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -72,83 +68,32 @@ import {
     CloseSaveButtonsComponent,
   ],
 })
-export class DecoratedCountsPartComponent
-  extends ModelEditorComponentBase<DecoratedCountsPart>
-  implements OnInit
-{
+export class DecoratedCountsPartComponent extends ModelEditorComponentBase<DecoratedCountsPart> {
   // thesauri:
   // decorated-count-ids
-  public readonly idEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['decorated-count-ids']?.entries,
+  );
   // decorated-count-tags
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['decorated-count-tags']?.entries,
+  );
 
-  // form
-  public counts: FormControl<DecoratedCount[]>;
-
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.counts = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      counts: this.counts,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'decorated-count-ids';
-    if (this.hasThesaurus(key)) {
-      this.idEntries.set(thesauri[key].entries);
-    } else {
-      this.idEntries.set(undefined);
-    }
-    key = 'decorated-count-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: DecoratedCountsPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.counts.setValue(part.counts || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<DecoratedCountsPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.counts, 1);
+  });
 
   protected getValue(): DecoratedCountsPart {
     let part = this.getEditedPart(
       DECORATED_COUNTS_PART_TYPEID,
     ) as DecoratedCountsPart;
-    part.counts = this.counts.value || [];
+    part.counts = copyFormValue(this._draft().counts);
     return part;
   }
 
   public onCountsChange(counts: DecoratedCount[]): void {
-    this.counts.setValue(counts);
-    this.counts.markAsDirty();
-    this.counts.updateValueAndValidity();
+    this.form.counts().value.set(copyFormValue(counts || []));
+    this.form.counts().markAsDirty();
   }
 }

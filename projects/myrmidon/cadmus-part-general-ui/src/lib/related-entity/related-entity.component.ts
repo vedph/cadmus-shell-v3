@@ -1,19 +1,19 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
-  Component,
   effect,
+  Component,
   input,
   model,
   output,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FormField,
+  form,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
@@ -31,6 +31,19 @@ import {
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { RelatedEntity } from '../historical-events-part';
+import { isImplicitSubmission } from '../signal-form-utils';
+
+interface RelatedEntityControls {
+  relation: string;
+  id: AssertedCompositeId | null;
+}
+
+function toDraft(entity?: RelatedEntity): RelatedEntityControls {
+  return {
+    relation: entity?.relation || '',
+    id: entity?.id || null,
+  };
+}
 
 /**
  * Related entity component to edit the entity related to a historical event.
@@ -41,8 +54,7 @@ import { RelatedEntity } from '../historical-events-part';
   styleUrls: ['./related-entity.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatFormField,
     MatLabel,
     MatSelect,
@@ -85,58 +97,56 @@ export class RelatedEntityComponent {
   public readonly editorClose = output();
 
   // form
-  public relation: FormControl<string | null>;
-  public id: FormControl<AssertedCompositeId | null>;
-  public form: FormGroup;
+  private readonly _draft = linkedSignal(() => toDraft(this.entity()));
+  public readonly form = form(this._draft, (p) => {
+    required(p.relation);
+    maxLength(p.relation, 500);
+    required(p.id);
+  });
 
-  constructor(formBuilder: FormBuilder) {
-    this.relation = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.id = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.form = formBuilder.group({
-      relation: this.relation,
-      id: this.id,
-    });
-
+  constructor() {
+    // a new entity was bound: no unsaved edits (keyed on the bound model:
+    // the draft also changes with each user edit)
     effect(() => {
-      this.updateForm(this.entity());
+      this.entity();
+      untracked(() => this.form().reset());
     });
-  }
-
-  private updateForm(entity: RelatedEntity | undefined): void {
-    if (!entity) {
-      this.form.reset();
-      return;
-    }
-    this.relation.setValue(entity.relation);
-    this.id.setValue(entity.id);
-    this.form.markAsPristine();
   }
 
   private getEntity(): RelatedEntity {
+    const draft = this._draft();
     return {
-      relation: this.relation.value?.trim()!,
-      id: this.id.value!,
+      relation: draft.relation.trim(),
+      id: draft.id!,
     };
   }
 
   public onIdChange(id: AssertedCompositeId): void {
-    this.id.setValue(id);
-    this.id.updateValueAndValidity();
-    this.id.markAsDirty();
+    this.form.id().value.set(id);
+    this.form.id().markAsDirty();
   }
 
   public cancel(): void {
     this.editorClose.emit();
   }
 
+  /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (!isImplicitSubmission(event)) {
+      return;
+    }
+    event.preventDefault();
+    this.save();
+  }
+
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
     this.entity.set(this.getEntity());

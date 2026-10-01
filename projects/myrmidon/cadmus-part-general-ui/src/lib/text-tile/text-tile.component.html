@@ -10,31 +10,32 @@
     (keydown.space)="toggleCheckedNonEdit()"
   >
     @if (editing()) {
-      <form [formGroup]="form" (submit)="save()">
+      <div>
         <mat-form-field>
           <mat-label>text [{{ tile()!.x }}]</mat-label>
           <input
             #textInput
             matInput
             spellcheck="false"
-            formControlName="editedText"
+            [formField]="form.editedText"
             (keydown.esc)="cancel()"
+            (keydown.enter)="$event.preventDefault(); save()"
           />
           @if (
-            editedText.hasError("required") &&
-            (editedText.dirty || editedText.touched)
+            form.editedText().getError("required") &&
+            (form.editedText().dirty() || form.editedText().touched())
           ) {
             <mat-error>enter a text</mat-error>
           }
           @if (
-            editedText.hasError("maxlength") &&
-            (editedText.dirty || editedText.touched)
+            form.editedText().getError("maxLength") &&
+            (form.editedText().dirty() || form.editedText().touched())
           ) {
             <mat-error>text too long</mat-error>
           }
           @if (
-            editedText.hasError("pattern") &&
-            (editedText.dirty || editedText.touched)
+            form.editedText().getError("pattern") &&
+            (form.editedText().dirty() || form.editedText().touched())
           ) {
             <mat-error>no whitespaces allowed</mat-error>
           }
@@ -48,14 +49,15 @@
           <mat-icon class="mat-warn">clear</mat-icon>
         </button>
         <button
-          type="submit"
-          [disabled]="form.invalid"
+          type="button"
+          [disabled]="form().invalid()"
           mat-icon-button
           matTooltip="Save text"
+          (click)="save()"
         >
           <mat-icon class="mat-primary">check_circle</mat-icon>
         </button>
-      </form>
+      </div>
     } @else {
       <ng-container style="display: flex; align-items: center">
         <span class="text">{{ text() }}</span>
@@ -71,7 +73,8 @@
         }
         @if (checkable()) {
           <mat-checkbox
-            [formControl]="checker"
+            [checked]="checked()"
+            (change)="onCheckerChange($event.checked)"
             matTooltip="Toggle check"
           ></mat-checkbox>
         }

@@ -9,6 +9,12 @@ import { HistoricalDateModel } from '@myrmidon/cadmus-refs-historical-date';
 
 import { AssertedHistoricalDateComponent } from './asserted-historical-date.component';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('AssertedHistoricalDateComponent', () => {
   let component: AssertedHistoricalDateComponent;
   let fixture: ComponentFixture<AssertedHistoricalDateComponent>;
@@ -42,28 +48,28 @@ describe('AssertedHistoricalDateComponent', () => {
   });
 
   it('should reset the form to nulls when date is initially unset', () => {
-    expect(component.tag.value).toBeNull();
-    expect(component.hd.value).toBeNull();
-    expect(component.assertion.value).toBeNull();
-    expect(component.form.invalid).toBe(true); // hd is required
+    expect(component.form.tag().value()).toBe('');
+    expect(plain(component.form.hd().value())).toBeNull();
+    expect(plain(component.form.assertion().value())).toBeNull();
+    expect(component.form().invalid()).toBe(true); // hd is required
   });
 
   it('should populate the form when date is set', () => {
     fixture.componentRef.setInput('date', getDate());
     fixture.detectChanges();
 
-    expect(component.tag.value).toBe('approx');
-    expect(component.hd.value).toEqual({ a: { value: 100 }, b: { value: 150 } });
-    expect(component.assertion.value).toEqual(ASSERTION);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.tag().value())).toBe('approx');
+    expect(plain(component.form.hd().value())).toEqual({ a: { value: 100 }, b: { value: 150 } });
+    expect(plain(component.form.assertion().value())).toEqual(ASSERTION);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should default tag/assertion to null when absent from the date', () => {
     fixture.componentRef.setInput('date', getDate({ tag: undefined, assertion: undefined }));
     fixture.detectChanges();
 
-    expect(component.tag.value).toBeNull();
-    expect(component.assertion.value).toBeNull();
+    expect(component.form.tag().value()).toBe('');
+    expect(plain(component.form.assertion().value())).toBeNull();
   });
 
   it('should reset the form when date is set back to undefined', () => {
@@ -73,38 +79,38 @@ describe('AssertedHistoricalDateComponent', () => {
     fixture.componentRef.setInput('date', undefined);
     fixture.detectChanges();
 
-    expect(component.tag.value).toBeNull();
-    expect(component.hd.value).toBeNull();
-    expect(component.assertion.value).toBeNull();
+    expect(component.form.tag().value()).toBe('');
+    expect(plain(component.form.hd().value())).toBeNull();
+    expect(plain(component.form.assertion().value())).toBeNull();
   });
 
   it('onDateChange should update hd and mark it dirty', () => {
     component.onDateChange(HD);
 
-    expect(component.hd.value).toEqual(HD);
-    expect(component.hd.dirty).toBe(true);
+    expect(plain(component.form.hd().value())).toEqual(HD);
+    expect(component.form.hd().dirty()).toBe(true);
   });
 
   it('onDateChange with no argument should set hd to null (invalid)', () => {
     component.onDateChange(HD);
     component.onDateChange(undefined);
 
-    expect(component.hd.value).toBeNull();
-    expect(component.form.invalid).toBe(true);
+    expect(plain(component.form.hd().value())).toBeNull();
+    expect(component.form().invalid()).toBe(true);
   });
 
   it('onAssertionChange should update assertion and mark it dirty', () => {
     component.onAssertionChange(ASSERTION);
 
-    expect(component.assertion.value).toEqual(ASSERTION);
-    expect(component.assertion.dirty).toBe(true);
+    expect(plain(component.form.assertion().value())).toEqual(ASSERTION);
+    expect(component.form.assertion().dirty()).toBe(true);
   });
 
   it('onAssertionChange with no argument should set assertion to null', () => {
     component.onAssertionChange(ASSERTION);
     component.onAssertionChange(undefined);
 
-    expect(component.assertion.value).toBeNull();
+    expect(plain(component.form.assertion().value())).toBeNull();
   });
 
   it('cancel should emit dateCancel', () => {
@@ -124,7 +130,7 @@ describe('AssertedHistoricalDateComponent', () => {
     });
 
     it('should build and set the date from the form when valid', () => {
-      component.tag.setValue('approx');
+      component.form.tag().value.set('approx');
       component.onDateChange(HD);
       component.onAssertionChange(ASSERTION);
 
@@ -155,5 +161,22 @@ describe('AssertedHistoricalDateComponent', () => {
 
       expect(component.date()?.b).toBeUndefined();
     });
+  });
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input',
+    );
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
   });
 });

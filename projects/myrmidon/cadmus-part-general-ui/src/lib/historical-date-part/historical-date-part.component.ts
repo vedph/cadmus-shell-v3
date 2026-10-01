@@ -1,18 +1,10 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
-  signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import {
   MatCard,
@@ -29,7 +21,6 @@ import {
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   HistoricalDate,
   HistoricalDateModel,
@@ -40,11 +31,7 @@ import {
   DocReferencesComponent,
 } from '@myrmidon/cadmus-refs-doc-references';
 
-import {
-  ThesauriSet,
-  ThesaurusEntry,
-  EditedObject,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -55,6 +42,19 @@ import {
   HistoricalDatePart,
   HISTORICAL_DATE_PART_TYPEID,
 } from '../historical-date-part';
+import { copyFormValue } from '../signal-form-utils';
+
+interface HistoricalDatePartControls {
+  date: HistoricalDateModel;
+  references: DocReference[];
+}
+
+function toDraft(part?: HistoricalDatePart | null): HistoricalDatePartControls {
+  return {
+    date: part?.date || new HistoricalDate(),
+    references: copyFormValue(part?.references || []),
+  };
+}
 
 /**
  * Historical date part editor.
@@ -66,8 +66,6 @@ import {
   styleUrls: ['./historical-date-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -85,95 +83,39 @@ import {
     CloseSaveButtonsComponent,
   ],
 })
-export class HistoricalDatePartComponent
-  extends ModelEditorComponentBase<HistoricalDatePart>
-  implements OnInit
-{
-  // form
-  public references: FormControl<DocReference[]>;
-  public date: FormControl<HistoricalDateModel>;
+export class HistoricalDatePartComponent extends ModelEditorComponentBase<HistoricalDatePart> {
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft);
 
   // thesauri:
   // doc-reference-types
-  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly typeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-types']?.entries,
+  );
   // doc-reference-tags
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.date = formBuilder.control(new HistoricalDate(), {
-      nonNullable: true,
-    });
-    this.references = formBuilder.control([], { nonNullable: true });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      date: this.date,
-      references: this.references,
-    });
-  }
-
-  private updateForm(part?: HistoricalDatePart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.references.setValue(part.references || []);
-    this.date.setValue(part.date);
-    this.form.markAsPristine();
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'doc-reference-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-
-    key = 'doc-reference-types';
-    if (this.hasThesaurus(key)) {
-      this.typeEntries.set(thesauri[key].entries);
-    } else {
-      this.typeEntries.set(undefined);
-    }
-  }
-
-  protected override onDataSet(data?: EditedObject<HistoricalDatePart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    this.updateForm(data?.value);
-  }
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-tags']?.entries,
+  );
 
   protected getValue(): HistoricalDatePart {
     let part = this.getEditedPart(
       HISTORICAL_DATE_PART_TYPEID,
     ) as HistoricalDatePart;
-    part.date = this.date.value;
-    part.references = this.references.value?.length
-      ? this.references.value
+    const draft = this._draft();
+    part.date = draft.date;
+    part.references = draft.references.length
+      ? copyFormValue(draft.references)
       : undefined;
     return part;
   }
 
   public onDateChange(date: HistoricalDateModel): void {
-    this.date.setValue(date);
-    this.date.markAsDirty();
-    this.date.updateValueAndValidity();
+    this.form.date().value.set(date);
+    this.form.date().markAsDirty();
   }
 
   public onReferencesChange(references: DocReference[]): void {
-    this.references.setValue(references);
-    this.references.updateValueAndValidity();
-    this.references.markAsDirty();
+    this.form.references().value.set(copyFormValue(references));
+    this.form.references().markAsDirty();
   }
 }

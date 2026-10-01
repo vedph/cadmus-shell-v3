@@ -1,138 +1,137 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>picture_in_picture</mat-icon>
-      </div>
-      <mat-card-title
-        [matBadge]="keywords.value.length"
-        matBadgeOverlap="false"
-        >{{
-          (modelName() | titlecase) || "Index Keywords Part"
-        }}</mat-card-title
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>picture_in_picture</mat-icon>
+    </div>
+    <mat-card-title
+      [matBadge]="form.keywords().value().length"
+      matBadgeOverlap="false"
+      >{{
+        (modelName() | titlecase) || "Index Keywords Part"
+      }}</mat-card-title
+    >
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
+  <mat-card-content>
+    <div>
+      <button
+        type="button"
+        mat-flat-button
+        class="mat-primary"
+        (click)="addKeyword()"
       >
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
-    <mat-card-content>
-      <div>
-        <button
-          type="button"
-          mat-flat-button
-          class="mat-primary"
-          (click)="addKeyword()"
-        >
-          <mat-icon>add_circle</mat-icon> keyword
-        </button>
-      </div>
+        <mat-icon>add_circle</mat-icon> keyword
+      </button>
+    </div>
 
-      @if (keywords.value.length) {
-        <div id="list">
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>index</th>
-                <th>lang.</th>
-                <th>tag</th>
-                <th>keyword</th>
+    @if (form.keywords().value().length) {
+      <div id="list">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>index</th>
+              <th>lang.</th>
+              <th>tag</th>
+              <th>keyword</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              k of form.keywords().value();
+              let i = $index;
+              let first = $first;
+              let last = $last;
+              track k
+            ) {
+              <tr [class.selected]="editedKeyword() === k">
+                <td class="fit-width">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Edit this keyword"
+                    (click)="editKeyword(k, i)"
+                  >
+                    <mat-icon class="mat-primary">edit</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this keyword up"
+                    [disabled]="first"
+                    (click)="moveKeywordUp(i)"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matTooltip="Move this keyword down"
+                    [disabled]="last"
+                    (click)="moveKeywordDown(i)"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Delete this keyword"
+                    (click)="deleteKeyword(i)"
+                  >
+                    <mat-icon class="mat-warn">remove_circle</mat-icon>
+                  </button>
+                </td>
+                <td>{{ k.indexId }}</td>
+                <td>
+                  {{
+                    k.language | flatLookup: langEntries() : "id" : "value"
+                  }}
+                </td>
+                <td>
+                  {{ k.tag | flatLookup: tagEntries() : "id" : "value" }}
+                </td>
+                <td>{{ k.value }}</td>
               </tr>
-            </thead>
-            <tbody>
-              @for (
-                k of keywords.value;
-                let i = $index;
-                let first = $first;
-                let last = $last;
-                track k
-              ) {
-                <tr [class.selected]="editedKeyword() === k">
-                  <td class="fit-width">
-                    <button
-                      mat-icon-button
-                      type="button"
-                      matTooltip="Edit this keyword"
-                      (click)="editKeyword(k, i)"
-                    >
-                      <mat-icon class="mat-primary">edit</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      matTooltip="Move this keyword up"
-                      [disabled]="first"
-                      (click)="moveKeywordUp(i)"
-                    >
-                      <mat-icon>arrow_upward</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      matTooltip="Move this keyword down"
-                      [disabled]="last"
-                      (click)="moveKeywordDown(i)"
-                    >
-                      <mat-icon>arrow_downward</mat-icon>
-                    </button>
-
-                    <button
-                      mat-icon-button
-                      type="button"
-                      matTooltip="Delete this keyword"
-                      (click)="deleteKeyword(i)"
-                    >
-                      <mat-icon class="mat-warn">remove_circle</mat-icon>
-                    </button>
-                  </td>
-                  <td>{{ k.indexId }}</td>
-                  <td>
-                    {{
-                      k.language | flatLookup: langEntries() : "id" : "value"
-                    }}
-                  </td>
-                  <td>
-                    {{ k.tag | flatLookup: tagEntries() : "id" : "value" }}
-                  </td>
-                  <td>{{ k.value }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-      @if (editedKeyword()) {
-        <fieldset>
-          <mat-expansion-panel
-            [disabled]="!editedKeyword()"
-            [expanded]="editedKeyword()"
-          >
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <span
-                  >keyword&nbsp;<strong>{{
-                    editedKeyword()?.value
-                  }}</strong></span
-                >
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <cadmus-index-keyword
-              [keyword]="editedKeyword()"
-              [idxEntries]="idxEntries()"
-              [langEntries]="langEntries()"
-              [tagEntries]="tagEntries()"
-              [noIndexId]="noIndexId()"
-              (editorClose)="closeKeyword()"
-              (keywordChange)="saveKeyword($event!)"
-            />
-          </mat-expansion-panel>
-        </fieldset>
-      }
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @if (editedKeyword()) {
+      <fieldset>
+        <mat-expansion-panel
+          [disabled]="!editedKeyword()"
+          [expanded]="editedKeyword()"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span
+                >keyword&nbsp;<strong>{{
+                  editedKeyword()?.value
+                }}</strong></span
+              >
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <cadmus-index-keyword
+            [keyword]="editedKeyword()"
+            [idxEntries]="idxEntries()"
+            [langEntries]="langEntries()"
+            [tagEntries]="tagEntries()"
+            [noIndexId]="noIndexId()"
+            (editorClose)="closeKeyword()"
+            (keywordChange)="saveKeyword($event!)"
+          />
+        </mat-expansion-panel>
+      </fieldset>
+    }
+  </mat-card-content>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

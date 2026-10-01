@@ -12,6 +12,12 @@ import { ItemService } from '@myrmidon/cadmus-api';
 import { HistoricalEventEditorComponent } from './historical-event-editor.component';
 import { HistoricalEvent, RelatedEntity } from '../historical-events-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function tick(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
@@ -47,42 +53,42 @@ describe('HistoricalEventEditorComponent', () => {
 
   //#region form validators
   it('should mark eid as required and maxLength(500)', () => {
-    component.eid.setValue(null);
-    expect(component.eid.hasError('required')).toBe(true);
+    component.form.eid().value.set('');
+    expect(!!component.form.eid().getError('required')).toBe(true);
 
-    component.eid.setValue('a'.repeat(501));
-    expect(component.eid.hasError('maxlength')).toBe(true);
+    component.form.eid().value.set('a'.repeat(501));
+    expect(!!component.form.eid().getError('maxLength')).toBe(true);
 
-    component.eid.setValue('e1');
-    expect(component.eid.valid).toBe(true);
+    component.form.eid().value.set('e1');
+    expect(component.form.eid().valid()).toBe(true);
   });
 
   it('should mark type as required and maxLength(500)', () => {
-    component.type.setValue(null);
-    expect(component.type.hasError('required')).toBe(true);
+    component.form.type().value.set('');
+    expect(!!component.form.type().getError('required')).toBe(true);
 
-    component.type.setValue('a'.repeat(501));
-    expect(component.type.hasError('maxlength')).toBe(true);
+    component.form.type().value.set('a'.repeat(501));
+    expect(!!component.form.type().getError('maxLength')).toBe(true);
 
-    component.type.setValue('person.birth');
-    expect(component.type.valid).toBe(true);
+    component.form.type().value.set('person.birth');
+    expect(component.form.type().valid()).toBe(true);
   });
 
   it('should limit tag to maxLength(50)', () => {
-    component.tag.setValue('a'.repeat(51));
-    expect(component.tag.hasError('maxlength')).toBe(true);
-    component.tag.setValue('short');
-    expect(component.tag.valid).toBe(true);
+    component.form.tag().value.set('a'.repeat(51));
+    expect(!!component.form.tag().getError('maxLength')).toBe(true);
+    component.form.tag().value.set('short');
+    expect(component.form.tag().valid()).toBe(true);
   });
 
   it('should limit description to maxLength(1000)', () => {
-    component.description.setValue('a'.repeat(1001));
-    expect(component.description.hasError('maxlength')).toBe(true);
+    component.form.description().value.set('a'.repeat(1001));
+    expect(!!component.form.description().getError('maxLength')).toBe(true);
   });
 
   it('should limit note to maxLength(1000)', () => {
-    component.note.setValue('a'.repeat(1001));
-    expect(component.note.hasError('maxlength')).toBe(true);
+    component.form.note().value.set('a'.repeat(1001));
+    expect(!!component.form.note().getError('maxLength')).toBe(true);
   });
   //#endregion
 
@@ -98,12 +104,12 @@ describe('HistoricalEventEditorComponent', () => {
     } as HistoricalEvent);
     fixture.detectChanges();
     await tick();
-    expect(component.eid.value).toBe('e1');
+    expect(plain(component.form.eid().value())).toBe('e1');
 
     fixture.componentRef.setInput('event', undefined);
     fixture.detectChanges();
     await tick();
-    expect(component.eid.value).toBeFalsy();
+    expect(plain(component.form.eid().value())).toBeFalsy();
   });
 
   it('should populate form controls from the event model', async () => {
@@ -126,16 +132,16 @@ describe('HistoricalEventEditorComponent', () => {
     fixture.detectChanges();
     await tick();
 
-    expect(component.eid.value).toBe('e1');
-    expect(component.type.value).toBe('person.birth');
-    expect(component.tag.value).toBe('tag1');
-    expect(component.description.value).toBe('a description');
-    expect(component.note.value).toBe('a note');
-    expect(component.chronotopes.value).toEqual(model.chronotopes);
-    expect(component.hasAssertion.value).toBe(true);
-    expect(component.assertion.value).toEqual(model.assertion);
-    expect(component.relatedEntities.value).toEqual(model.relatedEntities);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.eid().value())).toBe('e1');
+    expect(plain(component.form.type().value())).toBe('person.birth');
+    expect(plain(component.form.tag().value())).toBe('tag1');
+    expect(plain(component.form.description().value())).toBe('a description');
+    expect(plain(component.form.note().value())).toBe('a note');
+    expect(plain(component.form.chronotopes().value())).toEqual(model.chronotopes);
+    expect(plain(component.form.hasAssertion().value())).toBe(true);
+    expect(plain(component.form.assertion().value())).toEqual(model.assertion);
+    expect(plain(component.form.relatedEntities().value())).toEqual(model.relatedEntities);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should default tag/description/note/hasAssertion when not in the model', async () => {
@@ -147,13 +153,13 @@ describe('HistoricalEventEditorComponent', () => {
     fixture.detectChanges();
     await tick();
 
-    expect(component.tag.value).toBeNull();
-    expect(component.description.value).toBeNull();
-    expect(component.note.value).toBeNull();
-    expect(component.chronotopes.value).toEqual([]);
-    expect(component.hasAssertion.value).toBe(false);
-    expect(component.assertion.value).toBeNull();
-    expect(component.relatedEntities.value).toEqual([]);
+    expect(component.form.tag().value()).toBe('');
+    expect(component.form.description().value()).toBe('');
+    expect(component.form.note().value()).toBe('');
+    expect(plain(component.form.chronotopes().value())).toEqual([]);
+    expect(plain(component.form.hasAssertion().value())).toBe(false);
+    expect(plain(component.form.assertion().value())).toBeNull();
+    expect(plain(component.form.relatedEntities().value())).toEqual([]);
   });
   //#endregion
 
@@ -161,7 +167,7 @@ describe('HistoricalEventEditorComponent', () => {
   it('should build the type entry prefix by replacing the first dot when tailCut is 0 (default)', async () => {
     component.onTypeEntryChange({ id: 'person.birth', value: 'Birth' });
     await tick();
-    expect(component.type.value).toBe('person.birth');
+    expect(plain(component.form.type().value())).toBe('person.birth');
     expect(component.typeEntryPrefix()).toBe('person:birth:');
   });
 
@@ -235,20 +241,20 @@ describe('HistoricalEventEditorComponent', () => {
   //#region chronotopes / assertion change handlers
   it('onChronotopesChange should update and dirty the chronotopes control', () => {
     const chronotopes = [{ place: { value: 'Rome' } } as AssertedChronotope];
-    expect(component.chronotopes.dirty).toBe(false);
+    expect(component.form.chronotopes().dirty()).toBe(false);
     component.onChronotopesChange(chronotopes);
-    expect(component.chronotopes.value).toEqual(chronotopes);
-    expect(component.chronotopes.dirty).toBe(true);
+    expect(plain(component.form.chronotopes().value())).toEqual(chronotopes);
+    expect(component.form.chronotopes().dirty()).toBe(true);
   });
 
   it('onAssertionChange should update and dirty the assertion control', () => {
     const assertion = { rank: 2 } as Assertion;
     component.onAssertionChange(assertion);
-    expect(component.assertion.value).toEqual(assertion);
-    expect(component.assertion.dirty).toBe(true);
+    expect(plain(component.form.assertion().value())).toEqual(assertion);
+    expect(component.form.assertion().dirty()).toBe(true);
 
     component.onAssertionChange(undefined);
-    expect(component.assertion.value).toBeNull();
+    expect(plain(component.form.assertion().value())).toBeNull();
   });
   //#endregion
 
@@ -287,8 +293,8 @@ describe('HistoricalEventEditorComponent', () => {
     };
     component.editedEntityIndex.set(-1);
     component.onEntityChange(entity);
-    expect(component.relatedEntities.value).toEqual([entity]);
-    expect(component.relatedEntities.dirty).toBe(true);
+    expect(plain(component.form.relatedEntities().value())).toEqual([entity]);
+    expect(component.form.relatedEntities().dirty()).toBe(true);
     // editor should be closed after saving
     expect(component.editedEntity()).toBeUndefined();
     expect(component.editedEntityIndex()).toBe(-1);
@@ -303,7 +309,7 @@ describe('HistoricalEventEditorComponent', () => {
       relation: 'r2',
       id: { target: { gid: 'g2', label: 'L2' } },
     };
-    component.relatedEntities.setValue([e1, e2]);
+    component.form.relatedEntities().value.set([e1, e2]);
     component.editedEntityIndex.set(1);
 
     const edited: RelatedEntity = {
@@ -312,7 +318,7 @@ describe('HistoricalEventEditorComponent', () => {
     };
     component.onEntityChange(edited);
 
-    expect(component.relatedEntities.value).toEqual([e1, edited]);
+    expect(plain(component.form.relatedEntities().value())).toEqual([e1, edited]);
   });
 
   it('the duplicate guard prevents logically-equal entities from being added twice', () => {
@@ -330,7 +336,7 @@ describe('HistoricalEventEditorComponent', () => {
     component.editedEntityIndex.set(-1);
     component.onEntityChange(e1Clone);
 
-    expect(component.relatedEntities.value.length).toBe(1);
+    expect(component.form.relatedEntities().value().length).toBe(1);
   });
 
   it('closeEntity should clear the edited entity and index', () => {
@@ -352,10 +358,10 @@ describe('HistoricalEventEditorComponent', () => {
       relation: 'r2',
       id: { target: { gid: 'g2', label: 'L2' } },
     };
-    component.relatedEntities.setValue([e1, e2]);
+    component.form.relatedEntities().value.set([e1, e2]);
     component.deleteEntity(0);
-    expect(component.relatedEntities.value).toEqual([e2]);
-    expect(component.relatedEntities.dirty).toBe(true);
+    expect(plain(component.form.relatedEntities().value())).toEqual([e2]);
+    expect(component.form.relatedEntities().dirty()).toBe(true);
   });
 
   it('deleteEntity should also close the editor if deleting the entity being edited', () => {
@@ -363,7 +369,7 @@ describe('HistoricalEventEditorComponent', () => {
       relation: 'r1',
       id: { target: { gid: 'g1', label: 'L1' } },
     };
-    component.relatedEntities.setValue([e1]);
+    component.form.relatedEntities().value.set([e1]);
     component.editEntity(e1, 0);
     component.deleteEntity(0);
     expect(component.editedEntity()).toBeUndefined();
@@ -375,9 +381,9 @@ describe('HistoricalEventEditorComponent', () => {
       relation: 'r1',
       id: { target: { gid: 'g1', label: 'L1' } },
     };
-    component.relatedEntities.setValue([e1]);
+    component.form.relatedEntities().value.set([e1]);
     component.deleteEntity(-1);
-    expect(component.relatedEntities.value).toEqual([e1]);
+    expect(plain(component.form.relatedEntities().value())).toEqual([e1]);
   });
   //#endregion
 
@@ -390,24 +396,24 @@ describe('HistoricalEventEditorComponent', () => {
   });
 
   it('save should do nothing when the form is invalid', () => {
-    component.eid.setValue(null); // required -> invalid
+    component.form.eid().value.set(''); // required -> invalid
     const before = component.event();
     component.save();
     expect(component.event()).toBe(before);
   });
 
   it('save should set the event model built from the form when valid', () => {
-    component.eid.setValue(' e1 ');
-    component.type.setValue(' person.birth ');
-    component.tag.setValue(' t ');
-    component.description.setValue(' desc ');
-    component.note.setValue(' note ');
-    component.chronotopes.setValue([
+    component.form.eid().value.set(' e1 ');
+    component.form.type().value.set(' person.birth ');
+    component.form.tag().value.set(' t ');
+    component.form.description().value.set(' desc ');
+    component.form.note().value.set(' note ');
+    component.form.chronotopes().value.set([
       { place: { value: 'Rome' } } as AssertedChronotope,
     ]);
-    component.hasAssertion.setValue(true);
-    component.assertion.setValue({ rank: 1 } as Assertion);
-    component.relatedEntities.setValue([
+    component.form.hasAssertion().value.set(true);
+    component.form.assertion().value.set({ rank: 1 } as Assertion);
+    component.form.relatedEntities().value.set([
       { relation: 'r1', id: { target: { gid: 'g1', label: 'L1' } } },
     ]);
 
@@ -428,10 +434,10 @@ describe('HistoricalEventEditorComponent', () => {
   });
 
   it('save should omit assertion when hasAssertion is false, and omit empty arrays', () => {
-    component.eid.setValue('e1');
-    component.type.setValue('t1');
-    component.hasAssertion.setValue(false);
-    component.assertion.setValue({ rank: 5 } as Assertion);
+    component.form.eid().value.set('e1');
+    component.form.type().value.set('t1');
+    component.form.hasAssertion().value.set(false);
+    component.form.assertion().value.set({ rank: 5 } as Assertion);
 
     component.save();
 
@@ -439,7 +445,24 @@ describe('HistoricalEventEditorComponent', () => {
     expect(event?.assertion).toBeUndefined();
     expect(event?.chronotopes).toBeUndefined();
     expect(event?.relatedEntities).toBeUndefined();
-    expect(event?.tag).toBe('');
+    expect(event?.tag).toBeUndefined();
   });
   //#endregion
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input',
+    );
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
+  });
 });

@@ -16,6 +16,12 @@ import {
   PHYSICAL_STATES_PART_TYPEID,
 } from '../physical-states-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('PhysicalStatesPartComponent', () => {
   let component: PhysicalStatesPartComponent;
   let fixture: ComponentFixture<PhysicalStatesPartComponent>;
@@ -65,9 +71,9 @@ describe('PhysicalStatesPartComponent', () => {
   });
 
   it('builds a form with an entries control requiring at least 1 item', () => {
-    expect(component.form.get('entries')).toBeTruthy();
-    expect(component.entries.value).toEqual([]);
-    expect(component.entries.invalid).toBe(true);
+    expect(component.form.entries).toBeTruthy();
+    expect(plain(component.form.entries().value())).toEqual([]);
+    expect(component.form.entries().invalid()).toBe(true);
   });
 
   it('resets the form when data has no value', () => {
@@ -75,7 +81,7 @@ describe('PhysicalStatesPartComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.entries.value).toEqual([]);
+    expect(plain(component.form.entries().value())).toEqual([]);
   });
 
   it('populates thesauri signals from data and clears missing ones', () => {
@@ -115,8 +121,8 @@ describe('PhysicalStatesPartComponent', () => {
     fixture.componentRef.setInput('data', { value: part, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.entries.value).toEqual(states);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual(states);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('getValue returns a part with the current entries', () => {
@@ -134,7 +140,7 @@ describe('PhysicalStatesPartComponent', () => {
     fixture.componentRef.setInput('data', { value: part, thesauri: {} });
     fixture.detectChanges();
 
-    component.entries.setValue([{ type: 's2' }]);
+    component.form.entries().value.set([{ type: 's2' }]);
 
     const value = (component as any).getValue() as PhysicalStatesPart;
     expect(value.id).toBe('p1');
@@ -192,42 +198,42 @@ describe('PhysicalStatesPartComponent', () => {
     component.addState();
     component.saveState({ type: 's1' });
 
-    expect(component.entries.value).toEqual([{ type: 's1' }]);
-    expect(component.entries.dirty).toBe(true);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 's1' }]);
+    expect(component.form.entries().dirty()).toBe(true);
     expect(component.editedIndex()).toBe(-1);
     expect(component.edited()).toBeUndefined();
   });
 
   it('saveState replaces the entry at the edited index', () => {
-    component.entries.setValue([{ type: 'a' }, { type: 'b' }]);
-    component.editState(component.entries.value[1], 1);
+    component.form.entries().value.set([{ type: 'a' }, { type: 'b' }]);
+    component.editState(component.form.entries().value()[1], 1);
 
     component.saveState({ type: 'b2' });
 
-    expect(component.entries.value).toEqual([{ type: 'a' }, { type: 'b2' }]);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 'a' }, { type: 'b2' }]);
   });
 
   it('deleteState removes the entry when confirmed', () => {
-    component.entries.setValue([{ type: 'a' }, { type: 'b' }]);
+    component.form.entries().value.set([{ type: 'a' }, { type: 'b' }]);
 
     component.deleteState(0);
 
     expect(dialogService.confirm).toHaveBeenCalled();
-    expect(component.entries.value).toEqual([{ type: 'b' }]);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 'b' }]);
   });
 
   it('deleteState does not remove the entry when not confirmed', () => {
     dialogService.confirm.mockReturnValue(of(false));
-    component.entries.setValue([{ type: 'a' }]);
+    component.form.entries().value.set([{ type: 'a' }]);
 
     component.deleteState(0);
 
-    expect(component.entries.value).toEqual([{ type: 'a' }]);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 'a' }]);
   });
 
   it('deleteState closes the editor when deleting the currently edited entry', () => {
-    component.entries.setValue([{ type: 'a' }]);
-    component.editState(component.entries.value[0], 0);
+    component.form.entries().value.set([{ type: 'a' }]);
+    component.editState(component.form.entries().value()[0], 0);
 
     component.deleteState(0);
 
@@ -236,26 +242,34 @@ describe('PhysicalStatesPartComponent', () => {
   });
 
   it('moveStateUp does nothing for index 0', () => {
-    component.entries.setValue([{ type: 'a' }, { type: 'b' }]);
+    component.form.entries().value.set([{ type: 'a' }, { type: 'b' }]);
     component.moveStateUp(0);
-    expect(component.entries.value).toEqual([{ type: 'a' }, { type: 'b' }]);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 'a' }, { type: 'b' }]);
   });
 
   it('moveStateUp swaps with the previous entry', () => {
-    component.entries.setValue([{ type: 'a' }, { type: 'b' }]);
+    component.form.entries().value.set([{ type: 'a' }, { type: 'b' }]);
     component.moveStateUp(1);
-    expect(component.entries.value).toEqual([{ type: 'b' }, { type: 'a' }]);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 'b' }, { type: 'a' }]);
   });
 
   it('moveStateDown does nothing for the last index', () => {
-    component.entries.setValue([{ type: 'a' }, { type: 'b' }]);
+    component.form.entries().value.set([{ type: 'a' }, { type: 'b' }]);
     component.moveStateDown(1);
-    expect(component.entries.value).toEqual([{ type: 'a' }, { type: 'b' }]);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 'a' }, { type: 'b' }]);
   });
 
   it('moveStateDown swaps with the next entry', () => {
-    component.entries.setValue([{ type: 'a' }, { type: 'b' }]);
+    component.form.entries().value.set([{ type: 'a' }, { type: 'b' }]);
     component.moveStateDown(0);
-    expect(component.entries.value).toEqual([{ type: 'b' }, { type: 'a' }]);
+    expect(plain(component.form.entries().value())).toEqual([{ type: 'b' }, { type: 'a' }]);
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

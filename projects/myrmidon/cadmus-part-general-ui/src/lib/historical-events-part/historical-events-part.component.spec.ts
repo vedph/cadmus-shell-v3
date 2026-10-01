@@ -14,6 +14,12 @@ import {
   HISTORICAL_EVENTS_PART_TYPEID,
 } from '../historical-events-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function makePart(
   overrides?: Partial<HistoricalEventsPart>,
 ): HistoricalEventsPart {
@@ -94,7 +100,7 @@ describe('HistoricalEventsPartComponent', () => {
       fixture.detectChanges();
       expect(component.editedEventIndex()).toBe(-1);
       expect(component.editedEvent()).toBeUndefined();
-      expect(component.events.value).toEqual([]);
+      expect(plain(component.form.events().value())).toEqual([]);
     });
 
     it('should populate the events control from the part and close any open editor', () => {
@@ -107,10 +113,10 @@ describe('HistoricalEventsPartComponent', () => {
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
 
-      expect(component.events.value).toEqual(events);
+      expect(plain(component.form.events().value())).toEqual(events);
       expect(component.editedEventIndex()).toBe(-1);
       expect(component.editedEvent()).toBeUndefined();
-      expect(component.form.pristine).toBe(true);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should populate all thesaurus-driven entry signals when present', () => {
@@ -175,21 +181,20 @@ describe('HistoricalEventsPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      component.events.setValue(events);
+      component.form.events().value.set(events);
 
       const part = (component as any).getValue() as HistoricalEventsPart;
       expect(part.events).toEqual(events);
       expect(part.typeId).toBe(HISTORICAL_EVENTS_PART_TYPEID);
     });
 
-    it('should default events to an empty array when the control value is falsy', () => {
+    it('should default events to an empty array when the part has none', () => {
       const data: EditedObject<HistoricalEventsPart> = {
-        value: makePart(),
+        value: makePart({ events: undefined as any }),
         thesauri: {},
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      component.events.setValue(null as any);
 
       const part = (component as any).getValue() as HistoricalEventsPart;
       expect(part.events).toEqual([]);
@@ -239,13 +244,13 @@ describe('HistoricalEventsPartComponent', () => {
 
   describe('onEventSave', () => {
     it('should append a new event when editedEventIndex is -1', () => {
-      component.events.setValue([makeEvent({ eid: 'a' })]);
+      component.form.events().value.set([makeEvent({ eid: 'a' })]);
       component.addEvent();
       const newEvent = makeEvent({ eid: 'b' });
 
       component.onEventSave(newEvent);
 
-      expect(component.events.value).toEqual([
+      expect(plain(component.form.events().value())).toEqual([
         makeEvent({ eid: 'a' }),
         newEvent,
       ]);
@@ -255,19 +260,19 @@ describe('HistoricalEventsPartComponent', () => {
 
     it('should replace the event at editedEventIndex when editing an existing one', () => {
       const original = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(original);
+      component.form.events().value.set(original);
       component.editEvent(original[1], 1);
       const updated = makeEvent({ eid: 'b2' });
 
       component.onEventSave(updated);
 
-      expect(component.events.value).toEqual([original[0], updated]);
+      expect(plain(component.form.events().value())).toEqual([original[0], updated]);
     });
 
     it('should mark the events control dirty after saving', () => {
       component.addEvent();
       component.onEventSave(makeEvent());
-      expect(component.events.dirty).toBe(true);
+      expect(component.form.events().dirty()).toBe(true);
     });
   });
 
@@ -275,27 +280,27 @@ describe('HistoricalEventsPartComponent', () => {
     it('should not remove the event when the user cancels the confirmation', () => {
       dialogService.confirm.mockReturnValue(of(false));
       const events = [makeEvent({ eid: 'a' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
 
       component.deleteEvent(0);
 
-      expect(component.events.value).toEqual(events);
+      expect(plain(component.form.events().value())).toEqual(events);
     });
 
     it('should remove the event at the given index when confirmed', () => {
       dialogService.confirm.mockReturnValue(of(true));
       const events = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
 
       component.deleteEvent(0);
 
-      expect(component.events.value).toEqual([events[1]]);
+      expect(plain(component.form.events().value())).toEqual([events[1]]);
     });
 
     it('should close the editor if the deleted event was the one being edited', () => {
       dialogService.confirm.mockReturnValue(of(true));
       const events = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
       component.editEvent(events[0], 0);
 
       component.deleteEvent(0);
@@ -307,7 +312,7 @@ describe('HistoricalEventsPartComponent', () => {
     it('should keep the editor open if a different event is deleted', () => {
       dialogService.confirm.mockReturnValue(of(true));
       const events = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
       component.editEvent(events[1], 1);
 
       component.deleteEvent(0);
@@ -319,30 +324,38 @@ describe('HistoricalEventsPartComponent', () => {
   describe('moveEventUp / moveEventDown', () => {
     it('should do nothing when moving the first event up', () => {
       const events = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
       component.moveEventUp(0);
-      expect(component.events.value).toEqual(events);
+      expect(plain(component.form.events().value())).toEqual(events);
     });
 
     it('should swap with the previous event when moving up', () => {
       const events = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
       component.moveEventUp(1);
-      expect(component.events.value).toEqual([events[1], events[0]]);
+      expect(plain(component.form.events().value())).toEqual([events[1], events[0]]);
     });
 
     it('should do nothing when moving the last event down', () => {
       const events = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
       component.moveEventDown(1);
-      expect(component.events.value).toEqual(events);
+      expect(plain(component.form.events().value())).toEqual(events);
     });
 
     it('should swap with the next event when moving down', () => {
       const events = [makeEvent({ eid: 'a' }), makeEvent({ eid: 'b' })];
-      component.events.setValue(events);
+      component.form.events().value.set(events);
       component.moveEventDown(0);
-      expect(component.events.value).toEqual([events[1], events[0]]);
+      expect(plain(component.form.events().value())).toEqual([events[1], events[0]]);
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

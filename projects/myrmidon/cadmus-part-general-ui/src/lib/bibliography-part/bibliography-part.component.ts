@@ -1,18 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import {
   MatCard,
@@ -27,13 +20,10 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { FlatLookupPipe, NgxToolsValidators } from '@myrmidon/ngx-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { FlatLookupPipe, NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -49,6 +39,15 @@ import {
   BibAuthor,
 } from '../bibliography-part';
 import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-entry.component';
+import { copyFormValue } from '../signal-form-utils';
+
+interface BibliographyPartControls {
+  entries: BibEntry[];
+}
+
+function toDraft(part?: BibliographyPart | null): BibliographyPartControls {
+  return { entries: copyFormValue(part?.entries || []) };
+}
 
 /**
  * Bibliography part editor.
@@ -61,8 +60,6 @@ import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-e
   styleUrls: ['./bibliography-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -81,101 +78,41 @@ import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-e
     FlatLookupPipe,
   ],
 })
-export class BibliographyPartComponent
-  extends ModelEditorComponentBase<BibliographyPart>
-  implements OnInit
-{
+export class BibliographyPartComponent extends ModelEditorComponentBase<BibliographyPart> {
   public readonly editedIndex = signal<number>(-1);
   public readonly edited = signal<BibEntry | undefined>(undefined);
 
   // thesauri
   // bibliography-languages
-  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly langEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['bibliography-languages']?.entries,
+  );
   // bibliography-author-roles
-  public readonly roleEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly roleEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['bibliography-author-roles']?.entries,
+  );
   // bibliography-tags
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['bibliography-tags']?.entries,
+  );
   // bibliography-types
-  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly typeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['bibliography-types']?.entries,
+  );
 
   // form
-  public entries: FormControl<BibEntry[]>;
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.entries, 1);
+  });
 
-  constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
-    private _dialogService: DialogService,
-  ) {
-    super(authService, formBuilder);
-    // form
-    this.entries = formBuilder.control<BibEntry[]>([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      entries: this.entries,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'bibliography-languages';
-    if (this.hasThesaurus(key)) {
-      this.langEntries.set(thesauri[key].entries);
-    } else {
-      this.langEntries.set(undefined);
-    }
-
-    key = 'bibliography-types';
-    if (this.hasThesaurus(key)) {
-      this.typeEntries.set(thesauri[key].entries);
-    } else {
-      this.typeEntries.set(undefined);
-    }
-
-    key = 'bibliography-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-
-    key = 'bibliography-author-roles';
-    if (this.hasThesaurus(key)) {
-      this.roleEntries.set(thesauri[key].entries);
-    } else {
-      this.roleEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: BibliographyPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.entries.setValue([...part.entries]);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<BibliographyPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
+  constructor(private _dialogService: DialogService) {
+    super();
   }
 
   protected getValue(): BibliographyPart {
     let part = this.getEditedPart(BIBLIOGRAPHY_PART_TYPEID) as BibliographyPart;
-    part.entries = this.entries.value;
+    part.entries = copyFormValue(this._draft().entries);
     return part;
   }
 
@@ -204,14 +141,13 @@ export class BibliographyPartComponent
       return;
     }
     if (this.editedIndex() === -1) {
-      this.entries.setValue([...this.entries.value, entry]);
+      this.form.entries().value.set([...this.form.entries().value(), entry]);
     } else {
-      const entries = [...this.entries.value];
+      const entries = [...this.form.entries().value()];
       entries.splice(this.editedIndex(), 1, entry);
-      this.entries.setValue(entries);
+      this.form.entries().value.set(entries);
     }
-    this.entries.markAsDirty();
-    this.entries.updateValueAndValidity();
+    this.form.entries().markAsDirty();
 
     this.closeEntry();
   }
@@ -223,11 +159,10 @@ export class BibliographyPartComponent
         if (!result) {
           return;
         }
-        const entries = [...this.entries.value];
+        const entries = [...this.form.entries().value()];
         entries.splice(index, 1);
-        this.entries.setValue(entries);
-        this.entries.markAsDirty();
-        this.entries.updateValueAndValidity();
+        this.form.entries().value.set(entries);
+        this.form.entries().markAsDirty();
       });
   }
 
@@ -235,26 +170,24 @@ export class BibliographyPartComponent
     if (index < 1) {
       return;
     }
-    const entry = this.entries.value[index];
-    const entries = [...this.entries.value];
+    const entry = this.form.entries().value()[index];
+    const entries = [...this.form.entries().value()];
     entries.splice(index, 1);
     entries.splice(index - 1, 0, entry);
-    this.entries.setValue(entries);
-    this.entries.markAsDirty();
-    this.entries.updateValueAndValidity();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
   }
 
   public moveEntryDown(index: number): void {
-    if (index + 1 >= this.entries.value.length) {
+    if (index + 1 >= this.form.entries().value().length) {
       return;
     }
-    const entry = this.entries.value[index];
-    const entries = [...this.entries.value];
+    const entry = this.form.entries().value()[index];
+    const entries = [...this.form.entries().value()];
     entries.splice(index, 1);
     entries.splice(index + 1, 0, entry);
-    this.entries.setValue(entries);
-    this.entries.markAsDirty();
-    this.entries.updateValueAndValidity();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
   }
 
   public getAuthors(authors: BibAuthor[]): string {

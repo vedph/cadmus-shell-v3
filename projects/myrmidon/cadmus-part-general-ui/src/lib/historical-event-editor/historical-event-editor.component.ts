@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -7,15 +7,15 @@
   model,
   output,
   signal,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+  FormField,
+  form,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -45,9 +45,36 @@ import {
 } from '@myrmidon/cadmus-thesaurus-store';
 
 import { HistoricalEvent, RelatedEntity } from '../historical-events-part';
+import { copyFormValue, isImplicitSubmission } from '../signal-form-utils';
 import { RelatedEntityComponent } from '../related-entity/related-entity.component';
 
 const RELATION_SEP = ':';
+
+interface HistoricalEventControls {
+  eid: string;
+  type: string;
+  tag: string;
+  description: string;
+  note: string;
+  relatedEntities: RelatedEntity[];
+  chronotopes: AssertedChronotope[];
+  hasAssertion: boolean;
+  assertion: Assertion | null;
+}
+
+function toDraft(event?: HistoricalEvent): HistoricalEventControls {
+  return {
+    eid: event?.eid || '',
+    type: event?.type || '',
+    tag: event?.tag || '',
+    description: event?.description || '',
+    note: event?.note || '',
+    relatedEntities: copyFormValue(event?.relatedEntities || []),
+    chronotopes: copyFormValue(event?.chronotopes || []),
+    hasAssertion: !!event?.assertion,
+    assertion: event?.assertion || null,
+  };
+}
 
 /**
  * Historical event editor.
@@ -58,8 +85,7 @@ const RELATION_SEP = ':';
   styleUrls: ['./historical-event-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatTabGroup,
     MatTab,
     MatFormField,
@@ -149,21 +175,24 @@ export class HistoricalEventEditorComponent {
 
   public readonly editorClose = output();
 
-  // event
-  public eid: FormControl<string | null>;
-  public type: FormControl<string | null>;
-  public tag: FormControl<string | null>;
-  public description: FormControl<string | null>;
-  public note: FormControl<string | null>;
-  public relatedEntities: FormControl<RelatedEntity[]>;
-  public chronotopes: FormControl<AssertedChronotope[]>;
-  public hasAssertion: FormControl<boolean>;
-  public assertion: FormControl<Assertion | null>;
-  public form: FormGroup;
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.event()));
+  public readonly form = form(this._draft, (p) => {
+    required(p.eid);
+    maxLength(p.eid, 500);
+    required(p.type);
+    maxLength(p.type, 500);
+    maxLength(p.tag, 50);
+    maxLength(p.description, 1000);
+    maxLength(p.note, 1000);
+  });
 
   // related entity
-  // the prefix used to filter the relation entries
-  public readonly typeEntryPrefix = signal<string | undefined>(undefined);
+  // the prefix used to filter the relation entries, from the event type
+  public readonly typeEntryPrefix = computed<string | undefined>(() => {
+    const type = this.form.type().value();
+    return type ? this.getTypeEntryPrefix(type) : undefined;
+  });
 
   // the current relation entries, filtered by the type prefix
   public readonly currentRelEntries = computed<ThesaurusEntry[]>(() => {
@@ -183,38 +212,12 @@ export class HistoricalEventEditorComponent {
   public readonly editedEntity = signal<RelatedEntity | undefined>(undefined);
   public readonly editedEntityIndex = signal<number>(-1);
 
-  constructor(formBuilder: FormBuilder) {
-    // form
-    this.eid = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.type = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(500),
-    ]);
-    this.tag = formBuilder.control(null, Validators.maxLength(50));
-    this.description = formBuilder.control(null, Validators.maxLength(1000));
-    this.note = formBuilder.control(null, Validators.maxLength(1000));
-    this.relatedEntities = formBuilder.control([], { nonNullable: true });
-    this.chronotopes = formBuilder.control([], { nonNullable: true });
-    this.hasAssertion = formBuilder.control(false, { nonNullable: true });
-    this.assertion = formBuilder.control(null);
-    this.form = formBuilder.group({
-      eid: this.eid,
-      type: this.type,
-      tag: this.tag,
-      description: this.description,
-      note: this.note,
-      relatedEntities: this.relatedEntities,
-      chronotopes: this.chronotopes,
-      hasAssertion: this.hasAssertion,
-      assertion: this.assertion,
-    });
-
+  constructor() {
+    // a new event was bound: no unsaved edits (keyed on the bound model:
+    // the draft also changes with each user edit)
     effect(() => {
-      const event = this.event();
-      this.updateForm(event);
+      this.event();
+      untracked(() => this.form().reset());
     });
   }
 
@@ -245,73 +248,37 @@ export class HistoricalEventEditorComponent {
     return p.replace('.', RELATION_SEP) + RELATION_SEP;
   }
 
-  private updateTypeEntryPrefix(id: string): void {
-    const prefix = this.getTypeEntryPrefix(id);
-    this.typeEntryPrefix.set(prefix);
-  }
-
   public onTypeEntryChange(entry: ThesaurusEntry): void {
-    setTimeout(() => {
-      this.type.setValue(entry.id);
-      this.updateTypeEntryPrefix(entry.id);
-    }, 0);
-  }
-
-  private updateForm(model: HistoricalEvent | undefined): void {
-    if (!model) {
-      this.form.reset();
-      return;
-    }
-    this.eid.setValue(model.eid, { emitEvent: false });
-    this.type.setValue(model.type, { emitEvent: false });
-    this.tag.setValue(model.tag || null, { emitEvent: false });
-    this.description.setValue(model.description || null, { emitEvent: false });
-    this.note.setValue(model.note || null, { emitEvent: false });
-    this.chronotopes.setValue(model.chronotopes || [], { emitEvent: false });
-    this.hasAssertion.setValue(model.assertion ? true : false, {
-      emitEvent: false,
-    });
-    this.assertion.setValue(model.assertion || null, { emitEvent: false });
-    this.relatedEntities.setValue(model.relatedEntities || [], {
-      emitEvent: false,
-    });
-
-    this.form.markAsPristine();
-
-    setTimeout(() => {
-      this.updateTypeEntryPrefix(model.type);
-    }, 0);
+    this.form.type().value.set(entry.id);
+    this.form.type().markAsDirty();
   }
 
   private getModel(): HistoricalEvent {
+    const draft = this._draft();
     return {
-      eid: this.eid.value?.trim() || '',
-      type: this.type.value?.trim() || '',
-      tag: this.tag.value?.trim() || '',
-      description: this.description.value?.trim() || undefined,
-      note: this.note.value?.trim() || undefined,
-      chronotopes: this.chronotopes.value.length
-        ? this.chronotopes.value
+      eid: draft.eid.trim(),
+      type: draft.type.trim(),
+      tag: draft.tag.trim() || undefined,
+      description: draft.description.trim() || undefined,
+      note: draft.note.trim() || undefined,
+      chronotopes: draft.chronotopes.length
+        ? copyFormValue(draft.chronotopes)
         : undefined,
-      assertion: this.hasAssertion.value
-        ? this.assertion.value || undefined
-        : undefined,
-      relatedEntities: this.relatedEntities.value.length
-        ? this.relatedEntities.value
+      assertion: draft.hasAssertion ? draft.assertion || undefined : undefined,
+      relatedEntities: draft.relatedEntities.length
+        ? copyFormValue(draft.relatedEntities)
         : undefined,
     };
   }
 
   public onChronotopesChange(chronotope: AssertedChronotope[]): void {
-    this.chronotopes.setValue(chronotope);
-    this.chronotopes.updateValueAndValidity();
-    this.chronotopes.markAsDirty();
+    this.form.chronotopes().value.set(copyFormValue(chronotope || []));
+    this.form.chronotopes().markAsDirty();
   }
 
   public onAssertionChange(assertion: Assertion | undefined): void {
-    this.assertion.setValue(assertion || null);
-    this.assertion.updateValueAndValidity();
-    this.assertion.markAsDirty();
+    this.form.assertion().value.set(assertion || null);
+    this.form.assertion().markAsDirty();
   }
 
   public addEntity(): void {
@@ -335,7 +302,7 @@ export class HistoricalEventEditorComponent {
     // nope if already present (id is a nested object handed back as a new
     // instance by the child editor, so it must be compared by value)
     if (
-      this.relatedEntities.value.find(
+      this.form.relatedEntities().value().find(
         (e) =>
           JSON.stringify(e.id) === JSON.stringify(entity.id) &&
           e.relation === entity.relation,
@@ -345,15 +312,14 @@ export class HistoricalEventEditorComponent {
       return;
     }
     // add or replace
-    const entities = [...this.relatedEntities.value];
+    const entities = [...this.form.relatedEntities().value()];
     if (this.editedEntityIndex() === -1) {
       entities.push(entity);
     } else {
       entities.splice(this.editedEntityIndex(), 1, entity);
     }
-    this.relatedEntities.setValue(entities);
-    this.relatedEntities.updateValueAndValidity();
-    this.relatedEntities.markAsDirty();
+    this.form.relatedEntities().value.set(entities);
+    this.form.relatedEntities().markAsDirty();
     this.closeEntity();
   }
 
@@ -367,11 +333,10 @@ export class HistoricalEventEditorComponent {
       this.closeEntity();
     }
     if (index > -1) {
-      const entities = [...this.relatedEntities.value];
+      const entities = [...this.form.relatedEntities().value()];
       entities.splice(index, 1);
-      this.relatedEntities.setValue(entities);
-      this.relatedEntities.updateValueAndValidity();
-      this.relatedEntities.markAsDirty();
+      this.form.relatedEntities().value.set(entities);
+      this.form.relatedEntities().markAsDirty();
     }
   }
 
@@ -379,8 +344,23 @@ export class HistoricalEventEditorComponent {
     this.editorClose.emit();
   }
 
+  /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (!isImplicitSubmission(event) || this.form().invalid() || !this.form().dirty()) {
+      return;
+    }
+    event.preventDefault();
+    this.save();
+  }
+
   public save(): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
+      this.form().markAsTouched();
       return;
     }
     this.event.set(this.getModel());

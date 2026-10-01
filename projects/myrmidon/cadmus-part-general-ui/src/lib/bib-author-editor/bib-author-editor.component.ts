@@ -1,18 +1,19 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   effect,
   input,
   model,
   output,
+  linkedSignal,
+  untracked,
 } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+  FormField,
+  form,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 
 // material
 import { MatButtonModule } from '@angular/material/button';
@@ -26,6 +27,21 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { BibAuthor } from '../bibliography-part';
+import { isImplicitSubmission } from '../signal-form-utils';
+
+interface BibAuthorControls {
+  lastName: string;
+  firstName: string;
+  role: string;
+}
+
+function toDraft(author?: BibAuthor | null): BibAuthorControls {
+  return {
+    lastName: author?.lastName || '',
+    firstName: author?.firstName || '',
+    role: author?.roleId || '',
+  };
+}
 
 /**
  * Dumb editor component for a bibliography record's author.
@@ -34,7 +50,7 @@ import { BibAuthor } from '../bibliography-part';
 @Component({
   selector: 'cadmus-bib-author-editor',
   imports: [
-    ReactiveFormsModule,
+    FormField,
     MatButtonModule,
     MatCheckboxModule,
     MatFormFieldModule,
@@ -63,52 +79,29 @@ export class BibAuthorEditorComponent {
   public readonly roleEntries = input<ThesaurusEntry[] | undefined>();
 
   // form
-  public lastName: FormControl<string>;
-  public firstName: FormControl<string | null>;
-  public role: FormControl<string | null>;
-  public form: FormGroup;
+  private readonly _draft = linkedSignal(() => toDraft(this.author()));
+  public readonly form = form(this._draft, (p) => {
+    required(p.lastName);
+    maxLength(p.lastName, 100);
+    maxLength(p.firstName, 100);
+    maxLength(p.role, 50);
+  });
 
-  constructor(formBuilder: FormBuilder) {
-    // form
-    this.lastName = formBuilder.control('', {
-      validators: [Validators.required, Validators.maxLength(100)],
-      nonNullable: true,
-    });
-    this.firstName = formBuilder.control<string | null>(null, {
-      validators: [Validators.maxLength(100)],
-    });
-    this.role = formBuilder.control<string | null>(null, {
-      validators: [Validators.maxLength(50)],
-    });
-    this.form = formBuilder.group({
-      lastName: this.lastName,
-      firstName: this.firstName,
-      role: this.role,
-    });
-
-    // when model changes, update form
+  constructor() {
+    // a new author was bound: no unsaved edits (keyed on the bound model:
+    // the draft also changes with each user edit)
     effect(() => {
-      const data = this.author();
-      this.updateForm(data);
+      this.author();
+      untracked(() => this.form().reset());
     });
-  }
-
-  private updateForm(author: BibAuthor | undefined | null): void {
-    if (!author) {
-      this.form.reset();
-    } else {
-      this.lastName.setValue(author.lastName || '');
-      this.firstName.setValue(author.firstName || null);
-      this.role.setValue(author.roleId || null);
-      this.form.markAsPristine();
-    }
   }
 
   private getAuthor(): BibAuthor {
+    const draft = this._draft();
     return {
-      lastName: this.lastName.value.trim(),
-      firstName: this.firstName.value?.trim() || undefined,
-      roleId: this.role.value?.trim() || undefined,
+      lastName: draft.lastName.trim(),
+      firstName: draft.firstName.trim() || undefined,
+      roleId: draft.role.trim() || undefined,
     };
   }
 
@@ -117,17 +110,28 @@ export class BibAuthorEditorComponent {
   }
 
   /**
-   * Saves the current form data by updating the `data` model signal.
-   * This method can be called manually (e.g., by a Save button) or
-   * automatically (via auto-save).
-   * @param pristine If true (default), the form is marked as pristine
-   * after saving.
-   * Set to false for auto-save if you want the form to remain dirty.
+   * Saves the current form data by updating the `author` model signal.
+   * @param pristine If true (default), the form's interaction state is
+   * reset after saving.
    */
+  /**
+   * Handle Enter in this editor: in a text input, save as the save button
+   * would, when enabled. This replaces the implicit submission of the form
+   * this editor used to render.
+   * @param event The keydown event.
+   */
+  public onEnterKey(event: Event): void {
+    if (!isImplicitSubmission(event) || this.form().invalid() || !this.form().dirty()) {
+      return;
+    }
+    event.preventDefault();
+    this.save();
+  }
+
   public save(pristine = true): void {
-    if (this.form.invalid) {
+    if (this.form().invalid()) {
       // show validation errors
-      this.form.markAllAsTouched();
+      this.form().markAsTouched();
       return;
     }
 
@@ -135,7 +139,7 @@ export class BibAuthorEditorComponent {
     this.author.set(author);
 
     if (pristine) {
-      this.form.markAsPristine();
+      this.form().reset();
     }
   }
 }

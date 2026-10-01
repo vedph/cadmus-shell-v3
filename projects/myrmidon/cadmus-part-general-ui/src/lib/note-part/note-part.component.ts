@@ -1,25 +1,17 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   Inject,
-  OnDestroy,
-  OnInit,
   Optional,
+  computed,
   inject,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import {
-  FormControl,
-  FormBuilder,
-  Validators,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { FormField, maxLength, required } from '@angular/forms/signals';
 import { debounceTime } from 'rxjs/operators';
 
 import {
@@ -42,13 +34,7 @@ import {
   StandaloneEditorConstructionOptions,
 } from '@jean-merelis/ngx-monaco-editor';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-
-import {
-  ThesauriSet,
-  ThesaurusEntry,
-  EditedObject,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -64,6 +50,18 @@ import { NotePart, NOTE_PART_TYPEID } from '../note-part';
 import { MonacoEditorHelper } from '../monaco-editor-helper';
 import { marked } from 'marked';
 
+interface NotePartControls {
+  tag: string;
+  text: string;
+}
+
+function toDraft(part?: NotePart | null): NotePartControls {
+  return {
+    tag: part?.tag || '',
+    text: part?.text || '',
+  };
+}
+
 /**
  * Note part editor component.
  * Thesauri: optionally "note-tags", when you want to use a closed set of tags.
@@ -74,8 +72,7 @@ import { marked } from 'marked';
   styleUrls: ['./note-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -96,13 +93,9 @@ import { marked } from 'marked';
   ],
   providers: [CadmusTextEdService],
 })
-export class NotePartComponent
-  extends ModelEditorComponentBase<NotePart>
-  implements OnInit, OnDestroy
-{
+export class NotePartComponent extends ModelEditorComponentBase<NotePart> {
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _textHelper = new MonacoEditorHelper();
-  private _textSub?: Subscription;
 
   public readonly editorOptions: StandaloneEditorConstructionOptions = {
     minimap: { side: 'right' },
@@ -111,39 +104,30 @@ export class NotePartComponent
   };
   public readonly previewHtml = signal<SafeHtml>('');
 
-  public tag: FormControl<string | null>;
-  public text: FormControl<string | null>;
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    maxLength(p.tag, 100);
+    required(p.text);
+  });
 
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['note-tags']?.entries,
+  );
 
   constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
     private _editService: CadmusTextEdService,
     @Inject(CADMUS_TEXT_ED_BINDINGS_TOKEN)
     @Optional()
     private _editorBindings?: CadmusTextEdBindings,
   ) {
-    super(authService, formBuilder);
-    // form
-    this.tag = formBuilder.control(null, Validators.maxLength(100));
-    this.text = formBuilder.control(null, Validators.required);
+    super();
+    toObservable(this.form.text().value)
+      .pipe(debounceTime(50), takeUntilDestroyed())
+      .subscribe((text) => this.updatePreview(text));
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-    this._textSub = this.text.valueChanges
-      .pipe(debounceTime(50))
-      .subscribe(() => this.updatePreview());
-  }
-
-  public override ngOnDestroy() {
-    super.ngOnDestroy();
-    this._textSub?.unsubscribe();
-  }
-
-  private updatePreview(): void {
-    const html = marked.parse(this.text.value || '', { async: false }) as string;
+  private updatePreview(text: string): void {
+    const html = marked.parse(text || '', { async: false }) as string;
     this.previewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
@@ -180,46 +164,11 @@ export class NotePartComponent
     }
   }
 
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      tag: this.tag,
-      text: this.text,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    const key = 'note-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: NotePart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.tag.setValue(part.tag || null);
-    this.text.setValue(part.text);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<NotePart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): NotePart {
     let part = this.getEditedPart(NOTE_PART_TYPEID) as NotePart;
-    part.tag = this.tag.value || undefined;
-    part.text = this.text.value?.trim() || '';
+    const draft = this._draft();
+    part.tag = draft.tag || undefined;
+    part.text = draft.text?.trim() || '';
     return part;
   }
 }

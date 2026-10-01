@@ -1,25 +1,16 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   signal,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import { EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
-import {
-  FormControl,
-  FormBuilder,
-  Validators,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormField, maxLength } from '@angular/forms/signals';
 
 import {
   CdkDragDrop,
@@ -45,7 +36,6 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import { TextTileComponent } from '../text-tile/text-tile.component';
 import { TiledDataComponent } from '../tiled-data/tiled-data.component';
@@ -56,9 +46,49 @@ import {
   TEXT_TILE_TEXT_DATA_NAME,
   TextTile,
 } from '../tiled-text-part';
+import { copyFormValue } from '../signal-form-utils';
 
 interface Data {
   [key: string]: any;
+}
+
+interface TiledTextPartControls {
+  citation: string;
+  rows: TextTileRow[];
+}
+
+function toDraft(part?: TiledTextPart | null): TiledTextPartControls {
+  return {
+    citation: part?.citation || '',
+    rows: copyFormValue(part?.rows || []),
+  };
+}
+
+/**
+ * Get the specified rows with their coordinates recalculated according to
+ * their position. Rows and tiles whose coordinates are already correct are
+ * kept as they are.
+ * @param rows The rows.
+ * @param replaced The map receiving each replaced tile with its replacement.
+ * @returns The rows.
+ */
+function withCoords(
+  rows: TextTileRow[],
+  replaced?: Map<TextTile, TextTile>,
+): TextTileRow[] {
+  return rows.map((row, i) => {
+    let changed = row.y !== i + 1;
+    const tiles = row.tiles?.map((tile, j) => {
+      if (tile.x === j + 1) {
+        return tile;
+      }
+      changed = true;
+      const t = { ...tile, x: j + 1 };
+      replaced?.set(tile, t);
+      return t;
+    });
+    return changed ? { ...row, y: i + 1, tiles } : row;
+  });
 }
 
 @Component({
@@ -67,8 +97,7 @@ interface Data {
   styleUrls: ['./tiled-text-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -95,10 +124,7 @@ interface Data {
     CloseSaveButtonsComponent,
   ],
 })
-export class TiledTextPartComponent
-  extends ModelEditorComponentBase<TiledTextPart>
-  implements OnInit
-{
+export class TiledTextPartComponent extends ModelEditorComponentBase<TiledTextPart> {
   private _editedDataTile?: TextTile;
   private _editedDataRow?: TextTileRow;
   // the ORIGINAL (non-cloned) tile object currently being edited, kept
@@ -107,71 +133,42 @@ export class TiledTextPartComponent
   // by reference. See saveEditedData() for why this is required.
   private _editedTileRef?: TextTile;
 
-  public citation: FormControl<string | null>;
-  public rows: FormControl<TextTileRow[]>;
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    maxLength(p.citation, 1000);
+  });
 
   public readonly selectedTile = signal<TextTile | undefined>(undefined);
   public readonly editedData = signal<Data | undefined>(undefined);
   public readonly editedDataTitle = signal<string | undefined>(undefined);
   public readonly currentTabIndex = signal<number>(0);
 
-  constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
-    private _dialogService: DialogService,
-  ) {
-    super(authService, formBuilder);
-    // form
-    this.rows = formBuilder.control([], { nonNullable: true });
-    this.citation = formBuilder.control(null, Validators.maxLength(1000));
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      citation: this.citation,
-      rows: this.rows,
-    });
-  }
-
-  private updateForm(part?: TiledTextPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.citation.setValue(part.citation || null);
-    this.rows.setValue(part.rows || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<TiledTextPart>): void {
-    // form
-    this.updateForm(data?.value);
+  constructor(private _dialogService: DialogService) {
+    super();
   }
 
   /**
-   * Recalculate the coordinates of all the tiles in this set,
-   * according to the tiles position.
+   * Set the rows, recalculating their coordinates, and mark them as dirty.
+   * A selected tile replaced because of its new coordinates stays selected.
+   * @param rows The rows.
    */
-  private adjustCoords(): void {
-    const rows = this.rows.value.map((row, i) => ({
-      ...row,
-      y: i + 1,
-      tiles: row.tiles?.map((tile, j) => ({ ...tile, x: j + 1 })),
-    }));
-    this.rows.setValue(rows);
+  private setRows(rows: TextTileRow[]): void {
+    const replaced = new Map<TextTile, TextTile>();
+    this.form.rows().value.set(withCoords(rows, replaced));
+    this.form.rows().markAsDirty();
+    const selected = this.selectedTile();
+    if (selected && replaced.has(selected)) {
+      this.selectedTile.set(replaced.get(selected));
+    }
   }
 
   protected getValue(): TiledTextPart {
-    // ensure that form's coordinates are ok
-    this.adjustCoords();
-
+    const draft = this._draft();
     let part = this.getEditedPart(TILED_TEXT_PART_TYPEID) as TiledTextPart;
-    part.citation = this.citation.value?.trim() || undefined;
-    part.rows = this.rows.value;
+    part.citation = draft.citation.trim() || undefined;
+    // ensure that coordinates are ok
+    part.rows = copyFormValue(withCoords(draft.rows));
     return part;
   }
 
@@ -181,20 +178,19 @@ export class TiledTextPartComponent
   public addRow(): void {
     const data: { [key: string]: any } = {};
     data[TEXT_TILE_TEXT_DATA_NAME] = 'text1';
-
-    const rows = [...this.rows.value];
-    rows.push({
-      y: rows.length + 1,
-      tiles: [
-        {
-          x: 1,
-          data: data,
-        },
-      ],
-    });
-    this.rows.setValue(rows);
-    this.rows.markAsDirty();
-    this.rows.updateValueAndValidity();
+    const rows = this.form.rows().value();
+    this.setRows([
+      ...rows,
+      {
+        y: rows.length + 1,
+        tiles: [
+          {
+            x: 1,
+            data: data,
+          },
+        ],
+      },
+    ]);
   }
 
   /**
@@ -205,45 +201,39 @@ export class TiledTextPartComponent
     const x = row.tiles ? row.tiles.length + 1 : 1;
     const data: { [key: string]: any } = {};
     data[TEXT_TILE_TEXT_DATA_NAME] = 'text' + x;
-    // clone tiles array and add new tile
     const tiles = row.tiles ? [...row.tiles, { x, data }] : [{ x, data }];
-    // update rows immutably
-    const rows = this.rows.value.map((r) => (r === row ? { ...r, tiles } : r));
-    this.rows.setValue(rows);
-    this.rows.markAsDirty();
-    this.rows.updateValueAndValidity();
+    this.setRows(
+      this.form
+        .rows()
+        .value()
+        .map((r) => (r === row ? { ...r, tiles } : r)),
+    );
   }
 
   /**
-   * Delete the selected tile, if any.
+   * Delete the selected tile, if any. The tile which takes its place, if
+   * any, is selected; else the tile preceding it, if any.
    */
   public deleteSelectedTile(): void {
-    if (!this.selectedTile()) {
+    const selected = this.selectedTile();
+    if (!selected) {
       return;
     }
-
-    for (let i = 0; i < this.rows.value.length; i++) {
-      const row = this.rows.value[i];
-      if (row.tiles && this.selectedTile()) {
-        const index = row.tiles.indexOf(this.selectedTile()!);
-        if (index > -1) {
-          // create a new tiles array without the deleted tile
-          const newTiles = row.tiles.slice();
-          newTiles.splice(index, 1);
-          // update selected tile
-          this.selectedTile.set(
-            index + 1 < newTiles.length
-              ? newTiles[index + 1]
-              : newTiles.length > 0
-                ? newTiles[index - 1]
-                : undefined,
-          );
-          row.tiles = newTiles;
-          this.adjustCoords();
-          this.rows.markAsDirty();
-          this.rows.updateValueAndValidity();
-          break;
-        }
+    const rows = this.form.rows().value();
+    for (let i = 0; i < rows.length; i++) {
+      const index = rows[i].tiles?.indexOf(selected) ?? -1;
+      if (index > -1) {
+        const tiles = rows[i].tiles.filter((_, j) => j !== index);
+        this.setRows(rows.map((r, n) => (n === i ? { ...r, tiles } : r)));
+        const newTiles = this.form.rows().value()[i].tiles;
+        this.selectedTile.set(
+          index < newTiles.length
+            ? newTiles[index]
+            : newTiles.length > 0
+              ? newTiles[index - 1]
+              : undefined,
+        );
+        break;
       }
     }
   }
@@ -259,12 +249,9 @@ export class TiledTextPartComponent
         if (!ok) {
           return;
         }
-        const rows = [...this.rows.value];
+        const rows = [...this.form.rows().value()];
         rows.splice(rowIndex, 1);
-        this.rows.setValue(rows);
-        this.rows.markAsDirty();
-        this.adjustCoords();
-        this.rows.updateValueAndValidity();
+        this.setRows(rows);
       });
   }
 
@@ -276,11 +263,9 @@ export class TiledTextPartComponent
     if (rowIndex < 1) {
       return;
     }
-    const rows = [...this.rows.value];
+    const rows = [...this.form.rows().value()];
     moveItemInArray(rows, rowIndex, rowIndex - 1);
-    this.rows.setValue(rows);
-    this.adjustCoords();
-    this.form?.markAsDirty();
+    this.setRows(rows);
   }
 
   /**
@@ -288,27 +273,44 @@ export class TiledTextPartComponent
    * @param rowIndex The row index.
    */
   public moveRowDown(rowIndex: number): void {
-    if (rowIndex + 1 === this.rows.value.length) {
+    if (rowIndex + 1 >= this.form.rows().value().length) {
       return;
     }
-    const rows = [...this.rows.value];
+    const rows = [...this.form.rows().value()];
     moveItemInArray(rows, rowIndex, rowIndex + 1);
-    this.rows.setValue(rows);
-    this.adjustCoords();
-    this.form?.markAsDirty();
+    this.setRows(rows);
   }
 
   public drop(event: CdkDragDrop<TextTile[]>, row: TextTileRow): void {
-    // clone tiles array before moving
     const tiles = [...row.tiles];
     moveItemInArray(tiles, event.previousIndex, event.currentIndex);
-    row.tiles = tiles;
-    this.adjustCoords();
-    this.form?.markAsDirty();
+    this.setRows(
+      this.form
+        .rows()
+        .value()
+        .map((r) => (r === row ? { ...r, tiles } : r)),
+    );
   }
 
-  public onTileChange(tile: TextTile): void {
-    this.form?.markAsDirty();
+  /**
+   * Replace a tile with its edited version, e.g. after its text was edited.
+   * @param oldTile The tile being replaced.
+   * @param tile The new tile.
+   */
+  public onTileChange(oldTile: TextTile, tile: TextTile): void {
+    this.setRows(
+      this.form
+        .rows()
+        .value()
+        .map((r) =>
+          r.tiles?.includes(oldTile)
+            ? { ...r, tiles: r.tiles.map((t) => (t === oldTile ? tile : t)) }
+            : r,
+        ),
+    );
+    if (this.selectedTile() === oldTile) {
+      this.selectedTile.set(tile);
+    }
   }
 
   public editRowData(row: TextTileRow): void {
@@ -346,30 +348,34 @@ export class TiledTextPartComponent
       // this._editedDataTile.data: the latter was deep-cloned in
       // editTileData() via structuredClone(), so its `data` object can
       // never be === to the `data` object still referenced by the tile
-      // inside this.rows.value. The previous comparison meant the
-      // .some()/.map() predicates always evaluated to false, so edited
-      // tile data was silently discarded and never written back to the
-      // part.
-      const rows = this.rows.value.map((row) => {
-        if (row.tiles && row.tiles.includes(this._editedTileRef!)) {
-          const tiles = row.tiles.map((t) =>
-            t === this._editedTileRef ? { ...t, data } : t,
-          );
-          return { ...row, tiles };
-        }
-        return row;
-      });
-      this.rows.setValue(rows);
+      // inside the rows.
+      this.setRows(
+        this.form
+          .rows()
+          .value()
+          .map((row) => {
+            if (row.tiles && row.tiles.includes(this._editedTileRef!)) {
+              const tiles = row.tiles.map((t) =>
+                t === this._editedTileRef ? { ...t, data } : t,
+              );
+              return { ...row, tiles };
+            }
+            return row;
+          }),
+      );
     } else if (this._editedDataRow) {
       // find and replace the row in the rows array immutably
-      const rows = this.rows.value.map((row) =>
-        row.y === this._editedDataRow!.y
-          ? { ...this._editedDataRow!, data }
-          : row,
+      this.setRows(
+        this.form
+          .rows()
+          .value()
+          .map((row) =>
+            row.y === this._editedDataRow!.y
+              ? { ...this._editedDataRow!, data }
+              : row,
+          ),
       );
-      this.rows.setValue(rows);
     }
-    this.form?.markAsDirty();
     this.closeDataEditor();
   }
 
@@ -380,9 +386,10 @@ export class TiledTextPartComponent
     if (!tile) {
       return '';
     } else {
+      const rows = this.form.rows().value();
       let y = 0;
-      for (let i = 0; i < this.rows.value.length; i++) {
-        if (this.rows.value[i].tiles.indexOf(tile) > -1) {
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].tiles.indexOf(tile) > -1) {
           y = i + 1;
           break;
         }

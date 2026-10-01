@@ -1,20 +1,12 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   computed,
+  linkedSignal,
   inject,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import {
   MatCard,
@@ -26,17 +18,14 @@ import {
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import {
   PhysicalMeasurement,
   PhysicalMeasurementSetComponent,
 } from '@myrmidon/cadmus-mat-physical-size';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -53,6 +42,15 @@ import {
   PhysicalMeasurementsFormulaService,
   PhysicalMeasurementsSettings,
 } from './physical-measurements-formula.service';
+import { copyFormValue } from '../signal-form-utils';
+
+interface PhysicalMeasurementsPartControls {
+  measurements: PhysicalMeasurement[];
+}
+
+function toDraft(part?: PhysicalMeasurementsPart | null): PhysicalMeasurementsPartControls {
+  return { measurements: copyFormValue(part?.measurements || []) };
+}
 
 /**
  * PhysicalMeasurements part editor component.
@@ -64,8 +62,6 @@ import {
   styleUrl: './physical-measurements-part.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -79,29 +75,29 @@ import {
     CloseSaveButtonsComponent,
   ],
 })
-export class PhysicalMeasurementsPartComponent
-  extends ModelEditorComponentBase<PhysicalMeasurementsPart>
-  implements OnInit
-{
-  public measurements: FormControl<PhysicalMeasurement[]>;
+export class PhysicalMeasurementsPartComponent extends ModelEditorComponentBase<PhysicalMeasurementsPart> {
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.measurements, 1);
+  });
 
   // physical-size-units
-  public readonly unitEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly unitEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['physical-size-units']?.entries,
+  );
   // physical-size-dim-tags
-  public readonly dimTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly dimTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['physical-size-dim-tags']?.entries,
   );
   // physical-size-set-names
-  public readonly nameEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly nameEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['physical-size-set-names']?.entries,
+  );
 
   // settings loaded for this part's type/role ID (formulas), if any
   private readonly _settings = signal<PhysicalMeasurementsSettings | undefined>(
     undefined,
   );
-  // mirrors measurements' value as a signal, so formula results can be
-  // recomputed whenever it changes
-  private readonly _measurements = signal<PhysicalMeasurement[]>([]);
-
   private readonly _formulaService = inject(PhysicalMeasurementsFormulaService);
 
   /**
@@ -111,17 +107,12 @@ export class PhysicalMeasurementsPartComponent
   public readonly formulaResults = computed<FormulaResult[]>(() =>
     this._formulaService.computeResults(
       this._settings(),
-      this._measurements(),
+      this.form.measurements().value(),
     ),
   );
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.measurements = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
+  constructor() {
+    super();
     // settings (formulas), looked up by this part's type ID and role ID
     this.initSettings<PhysicalMeasurementsSettings>(
       PHYSICAL_MEASUREMENTS_PART_TYPEID,
@@ -129,72 +120,16 @@ export class PhysicalMeasurementsPartComponent
     );
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      measurements: this.measurements,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'physical-size-units';
-    if (this.hasThesaurus(key)) {
-      this.unitEntries.set(thesauri[key].entries);
-    } else {
-      this.unitEntries.set(undefined);
-    }
-    key = 'physical-size-dim-tags';
-    if (this.hasThesaurus(key)) {
-      this.dimTagEntries.set(thesauri[key].entries);
-    } else {
-      this.dimTagEntries.set(undefined);
-    }
-    key = 'physical-size-set-names';
-    if (this.hasThesaurus(key)) {
-      this.nameEntries.set(thesauri[key].entries);
-    } else {
-      this.nameEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: PhysicalMeasurementsPart | null): void {
-    if (!part) {
-      this.form.reset();
-      this._measurements.set([]);
-      return;
-    }
-    this.measurements.setValue(part.measurements || []);
-    this._measurements.set(part.measurements || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(
-    data?: EditedObject<PhysicalMeasurementsPart>,
-  ): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): PhysicalMeasurementsPart {
     let part = this.getEditedPart(
       PHYSICAL_MEASUREMENTS_PART_TYPEID,
     ) as PhysicalMeasurementsPart;
-    part.measurements = this.measurements.value || [];
+    part.measurements = copyFormValue(this._draft().measurements);
     return part;
   }
 
   public onMeasurementsChange(measurements: PhysicalMeasurement[]): void {
-    this.measurements.setValue(measurements || []);
-    this.measurements.markAsDirty();
-    this.measurements.updateValueAndValidity();
-    this._measurements.set(measurements || []);
+    this.form.measurements().value.set(copyFormValue(measurements || []));
+    this.form.measurements().markAsDirty();
   }
 }

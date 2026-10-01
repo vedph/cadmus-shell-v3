@@ -187,4 +187,10 @@ describe('BibAuthorsEditorComponent', () => {
       { lastName: 'A' },
     ]);
   });
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
 });

@@ -13,6 +13,12 @@ import {
   ASSERTED_HISTORICAL_DATES_PART_TYPEID,
 } from '../asserted-historical-dates-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function makePart(
   overrides?: Partial<AssertedHistoricalDatesPart>,
 ): AssertedHistoricalDatesPart {
@@ -83,11 +89,11 @@ describe('AssertedHistoricalDatesPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.dates.value).toEqual([makeDate(100)]);
+      expect(plain(component.form.dates().value())).toEqual([makeDate(100)]);
 
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
-      expect(component.dates.value).toEqual([]);
+      expect(plain(component.form.dates().value())).toEqual([]);
     });
 
     it('should populate the dates control from the part', () => {
@@ -98,8 +104,8 @@ describe('AssertedHistoricalDatesPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.dates.value).toEqual(dates);
-      expect(component.form.pristine).toBe(true);
+      expect(plain(component.form.dates().value())).toEqual(dates);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should populate all thesaurus-driven entry signals when present', () => {
@@ -183,21 +189,20 @@ describe('AssertedHistoricalDatesPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
 
       const part = (component as any).getValue() as AssertedHistoricalDatesPart;
       expect(part.dates).toEqual(dates);
       expect(part.typeId).toBe(ASSERTED_HISTORICAL_DATES_PART_TYPEID);
     });
 
-    it('should default dates to an empty array when the control value is falsy', () => {
+    it('should default dates to an empty array when the part has none', () => {
       const data: EditedObject<AssertedHistoricalDatesPart> = {
-        value: makePart(),
+        value: makePart({ dates: undefined as any }),
         thesauri: {},
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      component.dates.setValue(null as any);
 
       const part = (component as any).getValue() as AssertedHistoricalDatesPart;
       expect(part.dates).toEqual([]);
@@ -224,7 +229,7 @@ describe('AssertedHistoricalDatesPartComponent', () => {
       await Promise.resolve();
       expect(component.maxDateCount()).toBe(1);
 
-      component.dates.setValue([makeDate(100)]);
+      component.form.dates().value.set([makeDate(100)]);
       component.addDate();
 
       expect(component.edited()).toBeUndefined();
@@ -243,7 +248,7 @@ describe('AssertedHistoricalDatesPartComponent', () => {
       await Promise.resolve();
       await Promise.resolve();
 
-      component.dates.setValue([makeDate(100)]);
+      component.form.dates().value.set([makeDate(100)]);
       component.addDate();
 
       expect(component.edited()).toEqual({ a: { value: 0 } });
@@ -269,34 +274,34 @@ describe('AssertedHistoricalDatesPartComponent', () => {
 
   describe('saveDate', () => {
     it('should append a new date when editedIndex is -1', () => {
-      component.dates.setValue([makeDate(100)]);
+      component.form.dates().value.set([makeDate(100)]);
       component.addDate();
 
       component.saveDate(makeDate(200));
 
-      expect(component.dates.value).toEqual([makeDate(100), makeDate(200)]);
+      expect(plain(component.form.dates().value())).toEqual([makeDate(100), makeDate(200)]);
       expect(component.editedIndex()).toBe(-1);
       expect(component.edited()).toBeUndefined();
     });
 
     it('should replace the date at editedIndex when editing an existing one', () => {
       const original = [makeDate(100), makeDate(200)];
-      component.dates.setValue(original);
+      component.form.dates().value.set(original);
       component.editDate(original[1], 1);
 
       component.saveDate(makeDate(300));
 
-      expect(component.dates.value).toEqual([makeDate(100), makeDate(300)]);
+      expect(plain(component.form.dates().value())).toEqual([makeDate(100), makeDate(300)]);
     });
 
     it('should reject a date whose sort value duplicates an existing one', () => {
-      component.dates.setValue([makeDate(100)]);
+      component.form.dates().value.set([makeDate(100)]);
       component.addDate();
 
       component.saveDate(makeDate(100));
 
       // unchanged: the duplicate was silently rejected
-      expect(component.dates.value).toEqual([makeDate(100)]);
+      expect(plain(component.form.dates().value())).toEqual([makeDate(100)]);
       // the editor stays open since closeDate() is only reached past the
       // duplicate check
       expect(component.editedIndex()).toBe(-1);
@@ -305,7 +310,7 @@ describe('AssertedHistoricalDatesPartComponent', () => {
     it('should mark the dates control dirty after a successful save', () => {
       component.addDate();
       component.saveDate(makeDate(100));
-      expect(component.dates.dirty).toBe(true);
+      expect(component.form.dates().dirty()).toBe(true);
     });
   });
 
@@ -313,27 +318,27 @@ describe('AssertedHistoricalDatesPartComponent', () => {
     it('should not remove the date when the user cancels the confirmation', () => {
       dialogService.confirm.mockReturnValue(of(false));
       const dates = [makeDate(100)];
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
 
       component.deleteDate(0);
 
-      expect(component.dates.value).toEqual(dates);
+      expect(plain(component.form.dates().value())).toEqual(dates);
     });
 
     it('should remove the date at the given index when confirmed', () => {
       dialogService.confirm.mockReturnValue(of(true));
       const dates = [makeDate(100), makeDate(200)];
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
 
       component.deleteDate(0);
 
-      expect(component.dates.value).toEqual([dates[1]]);
+      expect(plain(component.form.dates().value())).toEqual([dates[1]]);
     });
 
     it('should close the editor if the deleted date was the one being edited', () => {
       dialogService.confirm.mockReturnValue(of(true));
       const dates = [makeDate(100), makeDate(200)];
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
       component.editDate(dates[0], 0);
 
       component.deleteDate(0);
@@ -346,30 +351,38 @@ describe('AssertedHistoricalDatesPartComponent', () => {
   describe('moveDateUp / moveDateDown', () => {
     it('should do nothing when moving the first date up', () => {
       const dates = [makeDate(100), makeDate(200)];
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
       component.moveDateUp(0);
-      expect(component.dates.value).toEqual(dates);
+      expect(plain(component.form.dates().value())).toEqual(dates);
     });
 
     it('should swap with the previous date when moving up', () => {
       const dates = [makeDate(100), makeDate(200)];
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
       component.moveDateUp(1);
-      expect(component.dates.value).toEqual([dates[1], dates[0]]);
+      expect(plain(component.form.dates().value())).toEqual([dates[1], dates[0]]);
     });
 
     it('should do nothing when moving the last date down', () => {
       const dates = [makeDate(100), makeDate(200)];
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
       component.moveDateDown(1);
-      expect(component.dates.value).toEqual(dates);
+      expect(plain(component.form.dates().value())).toEqual(dates);
     });
 
     it('should swap with the next date when moving down', () => {
       const dates = [makeDate(100), makeDate(200)];
-      component.dates.setValue(dates);
+      component.form.dates().value.set(dates);
       component.moveDateDown(0);
-      expect(component.dates.value).toEqual([dates[1], dates[0]]);
+      expect(plain(component.form.dates().value())).toEqual([dates[1], dates[0]]);
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

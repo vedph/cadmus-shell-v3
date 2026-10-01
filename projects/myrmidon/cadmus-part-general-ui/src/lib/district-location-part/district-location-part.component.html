@@ -1,46 +1,48 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>picture_in_picture</mat-icon>
-      </div>
-      <mat-card-title>{{
-        (modelName() | titlecase) || "District Location Part"
-      }}</mat-card-title>
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
-    <mat-card-content>
-      <!-- place -->
-      <div>
-        <fieldset>
-          <legend i18n>place</legend>
-          <cadmus-refs-proper-name
-            [langEntries]="langEntries()"
-            [typeEntries]="typeEntries()"
-            [name]="name()"
-            [hideAssertion]="true"
-            (nameChange)="onNameChange($event)"
-          />
-        </fieldset>
-      </div>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>picture_in_picture</mat-icon>
+    </div>
+    <mat-card-title>{{
+      (modelName() | titlecase) || "District Location Part"
+    }}</mat-card-title>
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
+  <mat-card-content>
+    <!-- place -->
+    <div>
+      <fieldset>
+        <legend i18n>place</legend>
+        <cadmus-refs-proper-name
+          [langEntries]="langEntries()"
+          [typeEntries]="typeEntries()"
+          [name]="name()"
+          [hideAssertion]="true"
+          (nameChange)="onNameChange($event)"
+        />
+      </fieldset>
+    </div>
 
-      <!-- note -->
-      <div>
-        <mat-form-field class="long-text">
-          <mat-label i18n>note</mat-label>
-          <textarea matInput [formControl]="note"></textarea>
-          @if ($any(note).errors?.maxlength && (note.dirty || note.touched)) {
-            <mat-error i18n>note too long</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+    <!-- note -->
+    <div>
+      <mat-form-field class="long-text">
+        <mat-label i18n>note</mat-label>
+        <textarea matInput [formField]="form.note"></textarea>
+        @if (
+          form.note().getError("maxLength") &&
+          (form.note().dirty() || form.note().touched())
+        ) {
+          <mat-error i18n>note too long</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

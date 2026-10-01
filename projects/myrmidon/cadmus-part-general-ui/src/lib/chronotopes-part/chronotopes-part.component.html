@@ -1,122 +1,121 @@
-<form [formGroup]="form" (submit)="save()">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar>
-        <mat-icon>picture_in_picture</mat-icon>
-      </div>
-      <mat-card-title>{{
-        (modelName() | titlecase) || "Chronotopes Part"
-      }}</mat-card-title>
-      <cadmus-help-link [url]="helpUrl()" />
-    </mat-card-header>
-    <mat-card-content>
-      <div>
-        <button
-          type="button"
-          mat-flat-button
-          class="mat-primary"
-          (click)="addChronotope()"
-        >
-          <mat-icon>add_circle</mat-icon> chronotope
-        </button>
-      </div>
-      @if (chronotopes.value.length) {
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>place</th>
-              <th>date</th>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <div mat-card-avatar>
+      <mat-icon>picture_in_picture</mat-icon>
+    </div>
+    <mat-card-title>{{
+      (modelName() | titlecase) || "Chronotopes Part"
+    }}</mat-card-title>
+    <cadmus-help-link [url]="helpUrl()" />
+  </mat-card-header>
+  <mat-card-content>
+    <div>
+      <button
+        type="button"
+        mat-flat-button
+        class="mat-primary"
+        (click)="addChronotope()"
+      >
+        <mat-icon>add_circle</mat-icon> chronotope
+      </button>
+    </div>
+    @if (form.chronotopes().value().length) {
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>place</th>
+            <th>date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (
+            entry of form.chronotopes().value();
+            track entry;
+            let i = $index;
+            let first = $first;
+            let last = $last
+          ) {
+            <tr [class.selected]="i === editedIndex()">
+              <td class="fit-width">
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Edit this chronotope"
+                  (click)="editChronotope(entry, i)"
+                >
+                  <mat-icon class="mat-primary">edit</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Move this chronotope up"
+                  [disabled]="first"
+                  (click)="moveChronotopeUp(i)"
+                >
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Move this chronotope down"
+                  [disabled]="last"
+                  (click)="moveChronotopeDown(i)"
+                >
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Delete this chronotope"
+                  (click)="deleteChronotope(i)"
+                >
+                  <mat-icon class="mat-warn">remove_circle</mat-icon>
+                </button>
+              </td>
+              <td>{{ entry.place?.value }}</td>
+              <td>{{ entry.date | historicalDate }}</td>
             </tr>
-          </thead>
-          <tbody>
-            @for (
-              entry of chronotopes.value;
-              track entry;
-              let i = $index;
-              let first = $first;
-              let last = $last
-            ) {
-              <tr [class.selected]="i === editedIndex()">
-                <td class="fit-width">
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Edit this chronotope"
-                    (click)="editChronotope(entry, i)"
-                  >
-                    <mat-icon class="mat-primary">edit</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this chronotope up"
-                    [disabled]="first"
-                    (click)="moveChronotopeUp(i)"
-                  >
-                    <mat-icon>arrow_upward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this chronotope down"
-                    [disabled]="last"
-                    (click)="moveChronotopeDown(i)"
-                  >
-                    <mat-icon>arrow_downward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Delete this chronotope"
-                    (click)="deleteChronotope(i)"
-                  >
-                    <mat-icon class="mat-warn">remove_circle</mat-icon>
-                  </button>
-                </td>
-                <td>{{ entry.place?.value }}</td>
-                <td>{{ entry.date | historicalDate }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
+          }
+        </tbody>
+      </table>
+    }
 
-      <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            {{ (edited() | assertedChronotopes) || "chronotope" }}
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <fieldset>
-          <cadmus-refs-asserted-chronotope
-            [tagEntries]="tagEntries()"
-            [assTagEntries]="assTagEntries()"
-            [refTagEntries]="refTagEntries()"
-            [refTypeEntries]="refTypeEntries()"
-            [placeLookupConfig]="placeLookupConfig()"
-            [lookupProviderOptions]="lookupProviderOptions()"
-            [chronotope]="edited()"
-            (chronotopeChange)="onChronotopeChange($event!)"
-          />
-          <div class="form-row">
-            <button type="button" (click)="closeChronotope()" mat-icon-button>
-              <mat-icon class="mat-warn">cancel</mat-icon>
-            </button>
-            <button type="button" (click)="saveChronotope()" mat-icon-button>
-              <mat-icon class="mat-primary">check_circle</mat-icon>
-            </button>
-            <span>chronotope</span>
-          </div>
-        </fieldset>
-      </mat-expansion-panel>
-    </mat-card-content>
-    <mat-card-actions>
-      <cadmus-close-save-buttons
-        [form]="form"
-        [noSave]="userLevel < 2"
-        (closeRequest)="close()"
-      />
-    </mat-card-actions>
-  </mat-card>
-</form>
+    <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ (edited() | assertedChronotopes) || "chronotope" }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <fieldset>
+        <cadmus-refs-asserted-chronotope
+          [tagEntries]="tagEntries()"
+          [assTagEntries]="assTagEntries()"
+          [refTagEntries]="refTagEntries()"
+          [refTypeEntries]="refTypeEntries()"
+          [placeLookupConfig]="placeLookupConfig()"
+          [lookupProviderOptions]="lookupProviderOptions()"
+          [chronotope]="edited()"
+          (chronotopeChange)="onChronotopeChange($event!)"
+        />
+        <div class="form-row">
+          <button type="button" (click)="closeChronotope()" mat-icon-button>
+            <mat-icon class="mat-warn">cancel</mat-icon>
+          </button>
+          <button type="button" (click)="saveChronotope()" mat-icon-button>
+            <mat-icon class="mat-primary">check_circle</mat-icon>
+          </button>
+          <span>chronotope</span>
+        </div>
+      </fieldset>
+    </mat-expansion-panel>
+  </mat-card-content>
+  <mat-card-actions>
+    <cadmus-close-save-buttons
+      [form]="form"
+      [noSave]="userLevel < 2"
+      (closeRequest)="close()"
+      (saveRequest)="save()"
+    />
+  </mat-card-actions>
+</mat-card>

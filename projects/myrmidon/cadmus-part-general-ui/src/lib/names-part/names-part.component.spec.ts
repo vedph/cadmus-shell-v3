@@ -17,6 +17,12 @@ import {
 import { NamesPartComponent } from './names-part.component';
 import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('NamesPartComponent', () => {
   let component: NamesPartComponent;
   let fixture: ComponentFixture<NamesPartComponent>;
@@ -87,8 +93,8 @@ describe('NamesPartComponent', () => {
   });
 
   it('should build an initially invalid form (empty names array)', () => {
-    expect(component.names.value).toEqual([]);
-    expect(component.form.invalid).toBe(true);
+    expect(plain(component.form.names().value())).toEqual([]);
+    expect(component.form().invalid()).toBe(true);
   });
 
   describe('with identity set', () => {
@@ -141,8 +147,8 @@ describe('NamesPartComponent', () => {
       } as EditedObject<NamesPart>);
       fixture.detectChanges();
 
-      expect(component.names.value).toEqual([NAME_A, NAME_B]);
-      expect(component.form.pristine).toBe(true);
+      expect(plain(component.form.names().value())).toEqual([NAME_A, NAME_B]);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should reset the names control when data is unset', () => {
@@ -155,7 +161,7 @@ describe('NamesPartComponent', () => {
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
 
-      expect(component.names.value).toEqual([]);
+      expect(plain(component.form.names().value())).toEqual([]);
     });
 
     it('getValue should return a NamesPart with the current names', () => {
@@ -190,23 +196,23 @@ describe('NamesPartComponent', () => {
 
         component.addName();
 
-        expect(component.names.value.length).toBe(1);
-        expect(component.names.value[0].language).toBe('ita');
-        expect(component.names.value[0].pieces).toEqual([]);
-        expect(component.names.dirty).toBe(true);
+        expect(component.form.names().value().length).toBe(1);
+        expect(component.form.names().value()[0].language).toBe('ita');
+        expect(component.form.names().value()[0].pieces).toEqual([]);
+        expect(component.form.names().dirty()).toBe(true);
       });
 
       it('should default language to empty string when no langEntries thesaurus', () => {
         component.addName();
 
-        expect(component.names.value[0].language).toBe('');
+        expect(component.form.names().value()[0].language).toBe('');
       });
 
       it('should open the editor on the newly added name', () => {
         component.addName();
 
         expect(component.editedIndex()).toBe(0);
-        expect(component.edited()).toEqual(component.names.value[0]);
+        expect(component.edited()).toEqual(component.form.names().value()[0]);
       });
     });
 
@@ -225,7 +231,7 @@ describe('NamesPartComponent', () => {
         expect(component.editedIndex()).toBe(1);
         expect(component.edited()).toEqual(NAME_B);
         // must be a clone, not the same reference
-        expect(component.edited()).not.toBe(component.names.value[1]);
+        expect(component.edited()).not.toBe(component.form.names().value()[1]);
       });
 
       it('should clear editedIndex/edited when index < 0', () => {
@@ -252,27 +258,19 @@ describe('NamesPartComponent', () => {
 
         component.onNameChange(updated);
 
-        expect(component.names.value[0]).toBe(updated);
-        expect(component.names.value[1]).toEqual(NAME_B);
-        expect(component.names.dirty).toBe(true);
+        expect(component.form.names().value()[0]).toBe(updated);
+        expect(plain(component.form.names().value()[1])).toEqual(NAME_B);
+        expect(component.form.names().dirty()).toBe(true);
       });
 
       it('should do nothing when name is undefined', () => {
-        const before = component.names.value;
+        const before = component.form.names().value();
 
         component.onNameChange(undefined);
 
-        expect(component.names.value).toBe(before);
+        expect(component.form.names().value()).toBe(before);
       });
 
-      it('should be a no-op while the form is being programmatically updated', () => {
-        (component as any)._updatingForm = true;
-        const before = component.names.value;
-
-        component.onNameChange({ language: 'fra', pieces: [] });
-
-        expect(component.names.value).toBe(before);
-      });
     });
 
     it('onNameClose should clear the edited name', () => {
@@ -303,8 +301,8 @@ describe('NamesPartComponent', () => {
 
         component.deleteName(0);
 
-        expect(component.names.value).toEqual([NAME_B]);
-        expect(component.names.dirty).toBe(true);
+        expect(plain(component.form.names().value())).toEqual([NAME_B]);
+        expect(component.form.names().dirty()).toBe(true);
       });
 
       it('should not remove the name when the user cancels', () => {
@@ -312,7 +310,7 @@ describe('NamesPartComponent', () => {
 
         component.deleteName(0);
 
-        expect(component.names.value).toEqual([NAME_A, NAME_B]);
+        expect(plain(component.form.names().value())).toEqual([NAME_A, NAME_B]);
       });
     });
 
@@ -327,23 +325,31 @@ describe('NamesPartComponent', () => {
 
       it('moveNameUp should be a no-op at index 0', () => {
         component.moveNameUp(0);
-        expect(component.names.value).toEqual([NAME_A, NAME_B]);
+        expect(plain(component.form.names().value())).toEqual([NAME_A, NAME_B]);
       });
 
       it('moveNameUp should swap with the previous entry', () => {
         component.moveNameUp(1);
-        expect(component.names.value).toEqual([NAME_B, NAME_A]);
+        expect(plain(component.form.names().value())).toEqual([NAME_B, NAME_A]);
       });
 
       it('moveNameDown should be a no-op at the last index', () => {
         component.moveNameDown(1);
-        expect(component.names.value).toEqual([NAME_A, NAME_B]);
+        expect(plain(component.form.names().value())).toEqual([NAME_A, NAME_B]);
       });
 
       it('moveNameDown should swap with the next entry', () => {
         component.moveNameDown(0);
-        expect(component.names.value).toEqual([NAME_B, NAME_A]);
+        expect(plain(component.form.names().value())).toEqual([NAME_B, NAME_A]);
       });
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

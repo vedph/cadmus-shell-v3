@@ -1,10 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { TextTileComponent } from './text-tile.component';
 import { TextTile, TEXT_TILE_TEXT_DATA_NAME } from '../tiled-text-part';
+
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
 
 describe('TextTileComponent', () => {
   let component: TextTileComponent;
@@ -12,7 +18,7 @@ describe('TextTileComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule, ReactiveFormsModule, TextTileComponent],
+      imports: [TextTileComponent],
       providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     }).compileComponents();
   });
@@ -39,8 +45,8 @@ describe('TextTileComponent', () => {
     fixture.detectChanges();
 
     expect(component.text()).toBe('abc');
-    expect(component.editedText.value).toBe('abc');
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.editedText().value())).toBe('abc');
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('sets text to undefined when tile has no data', () => {
@@ -51,14 +57,31 @@ describe('TextTileComponent', () => {
     expect(component.text()).toBeUndefined();
   });
 
-  it('syncs the checker control from the checked model', () => {
+  it('shows the checked model in the check box', () => {
+    fixture.componentRef.setInput('tile', { x: 1 } as TextTile);
+    fixture.componentRef.setInput('checkable', true);
     fixture.componentRef.setInput('checked', true);
     fixture.detectChanges();
-    expect(component.checker.value).toBe(true);
+    const box = (): HTMLInputElement =>
+      fixture.nativeElement.querySelector('mat-checkbox input');
+    expect(box().checked).toBe(true);
 
     fixture.componentRef.setInput('checked', false);
     fixture.detectChanges();
-    expect(component.checker.value).toBe(false);
+    expect(box().checked).toBe(false);
+  });
+
+  it('sets checked when the user clicks the check box', () => {
+    fixture.componentRef.setInput('tile', { x: 1 } as TextTile);
+    fixture.componentRef.setInput('checkable', true);
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector('mat-checkbox input') as HTMLInputElement
+    ).click();
+    fixture.detectChanges();
+
+    expect(component.checked()).toBe(true);
   });
 
   it('propagates checker changes to checked when checkable is true and a tile is present', () => {
@@ -67,7 +90,7 @@ describe('TextTileComponent', () => {
     fixture.componentRef.setInput('checkable', true);
     fixture.detectChanges();
 
-    component.checker.setValue(true);
+    component.onCheckerChange(true);
 
     expect(component.checked()).toBe(true);
   });
@@ -82,7 +105,7 @@ describe('TextTileComponent', () => {
     fixture.componentRef.setInput('checked', false);
     fixture.detectChanges();
 
-    component.checker.setValue(true);
+    component.onCheckerChange(true);
 
     expect(component.checked()).toBe(false);
   });
@@ -92,7 +115,7 @@ describe('TextTileComponent', () => {
     fixture.componentRef.setInput('checkable', true);
     fixture.detectChanges();
 
-    component.checker.setValue(true);
+    component.onCheckerChange(true);
 
     expect(component.checked()).toBe(false);
   });
@@ -242,7 +265,7 @@ describe('TextTileComponent', () => {
     const tile: TextTile = { x: 1, data: { [TEXT_TILE_TEXT_DATA_NAME]: 'abc' } };
     fixture.componentRef.setInput('tile', tile);
     fixture.detectChanges();
-    component.editedText.setValue(null); // required -> invalid
+    component.form.editedText().value.set(''); // required -> invalid
     component.editing.set(true);
 
     component.save();
@@ -255,7 +278,7 @@ describe('TextTileComponent', () => {
     fixture.componentRef.setInput('tile', tile);
     fixture.componentRef.setInput('readonly', true);
     fixture.detectChanges();
-    component.editedText.setValue('xyz');
+    component.form.editedText().value.set('xyz');
     component.editing.set(true);
 
     component.save();
@@ -267,7 +290,7 @@ describe('TextTileComponent', () => {
     const tile: TextTile = { x: 1, data: { [TEXT_TILE_TEXT_DATA_NAME]: 'abc' } };
     fixture.componentRef.setInput('tile', tile);
     fixture.detectChanges();
-    component.editedText.setValue('xyz');
+    component.form.editedText().value.set('xyz');
     component.editing.set(true);
 
     component.save();
@@ -279,12 +302,55 @@ describe('TextTileComponent', () => {
   it('save() does nothing when there is no tile', () => {
     fixture.componentRef.setInput('tile', undefined);
     fixture.detectChanges();
-    component.editedText.setValue('xyz');
+    component.form.editedText().value.set('xyz');
     component.editing.set(true);
 
     component.save();
 
     // editing stays true since save() bailed out early (no tile)
     expect(component.editing()).toBe(true);
+  });
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector(':scope > form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('saves the edited text on Enter', () => {
+    fixture.componentRef.setInput('tile', {
+      x: 1,
+      data: { [TEXT_TILE_TEXT_DATA_NAME]: 'abc' },
+    } as TextTile);
+    fixture.detectChanges();
+    component.edit();
+    fixture.detectChanges();
+
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = 'xyz';
+    input.dispatchEvent(new Event('input'));
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    input.dispatchEvent(enter);
+    fixture.detectChanges();
+
+    expect(component.tile()!.data![TEXT_TILE_TEXT_DATA_NAME]).toBe('xyz');
+    expect(component.text()).toBe('xyz');
+    expect(component.editing()).toBe(false);
+    expect(enter.defaultPrevented).toBe(true);
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    fixture.componentRef.setInput('tile', { x: 1, data: { text: 'abc' } });
+    fixture.detectChanges();
+    component.edit();
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'input',
+    );
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
   });
 });

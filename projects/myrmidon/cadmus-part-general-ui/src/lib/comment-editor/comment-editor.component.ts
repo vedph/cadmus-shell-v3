@@ -1,25 +1,21 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   Inject,
-  OnDestroy,
-  OnInit,
   Optional,
   inject,
   signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
-  FormControl,
-  FormBuilder,
-  Validators,
-  FormArray,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { Subscription } from 'rxjs';
+  FormField,
+  applyEach,
+  maxLength,
+  required,
+} from '@angular/forms/signals';
 import { debounceTime } from 'rxjs/operators';
 import { marked } from 'marked';
 
@@ -50,7 +46,6 @@ import {
   StandaloneEditorConstructionOptions,
 } from '@jean-merelis/ngx-monaco-editor';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   DocReference,
   DocReferencesComponent,
@@ -65,11 +60,7 @@ import {
   CadmusTextEdService,
 } from '@myrmidon/cadmus-text-ed';
 
-import {
-  ThesauriSet,
-  ThesaurusEntry,
-  EditedObject,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry, EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -86,9 +77,66 @@ import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
 
 import { IndexKeyword } from '../index-keywords-part';
 import { CommentFragment } from '../comment-fragment';
+import { copyFormValue } from '../signal-form-utils';
 
 interface CommentPartSettings {
   lookupProviderOptions?: LookupProviderOptions;
+}
+
+interface KeywordRow {
+  indexId: string;
+  tag: string;
+  language: string;
+  value: string;
+  note: string;
+}
+
+interface CommentEditorControls {
+  tag: string;
+  text: string;
+  references: DocReference[];
+  links: AssertedCompositeId[];
+  categories: ThesaurusEntry[];
+  keywords: KeywordRow[];
+}
+
+function toKeywordRow(keyword?: IndexKeyword): KeywordRow {
+  return {
+    indexId: keyword?.indexId || '',
+    tag: keyword?.tag || '',
+    language: keyword?.language || '',
+    value: keyword?.value || '',
+    note: keyword?.note || '',
+  };
+}
+
+function sortEntries(entries: ThesaurusEntry[]): ThesaurusEntry[] {
+  return entries.sort((a, b) => a.value.localeCompare(b.value));
+}
+
+/**
+ * Bound data -> editable draft. The category IDs are mapped to the
+ * corresponding entries of the comment-categories thesaurus, if any (else
+ * to entries whose value is their ID), sorted by their display value.
+ */
+function toDraft(
+  data?: EditedObject<CommentPart | CommentFragment>,
+): CommentEditorControls {
+  const comment = data?.value;
+  const catEntries = data?.thesauri?.['comment-categories']?.entries;
+  return {
+    tag: comment?.tag || '',
+    text: comment?.text || '',
+    references: copyFormValue(comment?.references || []),
+    links: copyFormValue(comment?.links || []),
+    categories: sortEntries(
+      (comment?.categories || []).map((id) => {
+        const entry = catEntries?.find((e) => e.id === id);
+        return entry ? { id: entry.id, value: entry.value } : { id, value: id };
+      }),
+    ),
+    keywords: (comment?.keywords || []).map((k) => toKeywordRow(k)),
+  };
 }
 
 /**
@@ -104,8 +152,7 @@ interface CommentPartSettings {
   styleUrls: ['./comment-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -135,13 +182,11 @@ interface CommentPartSettings {
   ],
   providers: [CadmusTextEdService],
 })
-export class CommentEditorComponent
-  extends ModelEditorComponentBase<CommentPart | CommentFragment>
-  implements OnInit, OnDestroy
-{
+export class CommentEditorComponent extends ModelEditorComponentBase<
+  CommentPart | CommentFragment
+> {
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _textHelper = new MonacoEditorHelper();
-  private _textSub?: Subscription;
 
   public readonly editorOptions: StandaloneEditorConstructionOptions = {
     minimap: { side: 'right' },
@@ -152,42 +197,48 @@ export class CommentEditorComponent
 
   // thesauri:
   // comment-tags
-  public readonly comTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly comTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['comment-tags']?.entries,
   );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-tags']?.entries,
   );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTypeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-types']?.entries,
   );
   // comment-categories
-  public readonly catEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly catEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['comment-categories']?.entries,
+  );
   // comment-keyword-languages
-  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly langEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['comment-keyword-languages']?.entries,
+  );
   // comment-keyword-indexes
-  public readonly idxEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly idxEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['comment-keyword-indexes']?.entries,
+  );
   // comment-keyword-tags
-  public readonly keyTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly keyTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['comment-keyword-tags']?.entries,
   );
   // comment-id-scopes
-  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly idScopeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['comment-id-scopes']?.entries,
   );
   // comment-id-tags
-  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly idTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['comment-id-tags']?.entries,
   );
   // assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly assTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['assertion-tags']?.entries,
   );
   // asserted-id-features
-  public readonly featureEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly featureEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['asserted-id-features']?.entries,
   );
   // lookup options depending on role
   public readonly lookupProviderOptions = signal<
@@ -195,54 +246,43 @@ export class CommentEditorComponent
   >(undefined);
 
   // form
-  public tag: FormControl<string | null>;
-  public text: FormControl<string | null>;
-  public references: FormControl<DocReference[]>;
-  public links: FormControl<AssertedCompositeId[]>;
-  public categories: FormControl<ThesaurusEntry[]>;
-  public keywords: FormArray;
+  private readonly _draft = linkedSignal(() => toDraft(this.data()));
+  public readonly form = this.createForm(this._draft, (p) => {
+    maxLength(p.tag, 50);
+    required(p.text);
+    maxLength(p.text, 50000);
+    applyEach(p.keywords, (k) => {
+      maxLength(k.indexId, 50);
+      maxLength(k.tag, 50);
+      required(k.language);
+      maxLength(k.language, 50);
+      required(k.value);
+      maxLength(k.value, 50);
+      maxLength(k.note, 500);
+    });
+  });
 
   constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
     private _editService: CadmusTextEdService,
     @Inject(CADMUS_TEXT_ED_BINDINGS_TOKEN)
     @Optional()
     private _editorBindings?: CadmusTextEdBindings,
   ) {
-    super(authService, formBuilder);
-    // form
-    this.tag = formBuilder.control(null, Validators.maxLength(50));
-    this.text = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(50000),
-    ]);
-    this.references = formBuilder.control([], { nonNullable: true });
-    this.links = formBuilder.control([], { nonNullable: true });
-    this.categories = formBuilder.control([], { nonNullable: true });
-    this.keywords = formBuilder.array([]);
+    super();
     // settings
     this.initSettings<CommentPartSettings>(COMMENT_PART_TYPEID, (settings) => {
       this.lookupProviderOptions.set(
         settings?.lookupProviderOptions || undefined,
       );
     });
+    // preview
+    toObservable(this.form.text().value)
+      .pipe(debounceTime(50), takeUntilDestroyed())
+      .subscribe((text) => this.updatePreview(text));
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-    this._textSub = this.text.valueChanges
-      .pipe(debounceTime(50))
-      .subscribe(() => this.updatePreview());
-  }
-
-  public override ngOnDestroy() {
-    super.ngOnDestroy();
-    this._textSub?.unsubscribe();
-  }
-
-  private updatePreview(): void {
-    const html = marked.parse(this.text.value || '', { async: false }) as string;
+  private updatePreview(text: string): void {
+    const html = marked.parse(text || '', { async: false }) as string;
     this.previewHtml.set(this._sanitizer.bypassSecurityTrustHtml(html));
   }
 
@@ -279,158 +319,16 @@ export class CommentEditorComponent
     }
   }
 
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      tag: this.tag,
-      text: this.text,
-      references: this.references,
-      ids: this.links,
-      categories: this.categories,
-      keywords: this.keywords,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'comment-tags';
-    if (this.hasThesaurus(key)) {
-      this.comTagEntries.set(thesauri[key].entries);
-    } else {
-      this.comTagEntries.set(undefined);
-    }
-
-    key = 'doc-reference-tags';
-    if (this.hasThesaurus(key)) {
-      this.refTagEntries.set(thesauri[key].entries);
-    } else {
-      this.refTagEntries.set(undefined);
-    }
-
-    key = 'doc-reference-types';
-    if (this.hasThesaurus(key)) {
-      this.refTypeEntries.set(thesauri[key].entries);
-    } else {
-      this.refTypeEntries.set(undefined);
-    }
-
-    key = 'comment-categories';
-    if (this.hasThesaurus(key)) {
-      this.catEntries.set(thesauri[key].entries);
-    } else {
-      this.catEntries.set(undefined);
-    }
-
-    key = 'comment-keyword-languages';
-    if (this.hasThesaurus(key)) {
-      this.langEntries.set(thesauri[key].entries);
-    } else {
-      this.langEntries.set(undefined);
-    }
-
-    key = 'comment-keyword-indexes';
-    if (this.hasThesaurus(key)) {
-      this.idxEntries.set(thesauri[key].entries);
-    } else {
-      this.idxEntries.set(undefined);
-    }
-
-    key = 'comment-keyword-tags';
-    if (this.hasThesaurus(key)) {
-      this.keyTagEntries.set(thesauri[key].entries);
-    } else {
-      this.keyTagEntries.set(undefined);
-    }
-
-    key = 'comment-id-scopes';
-    if (this.hasThesaurus(key)) {
-      this.idScopeEntries.set(thesauri[key].entries);
-    } else {
-      this.idScopeEntries.set(undefined);
-    }
-
-    key = 'comment-id-tags';
-    if (this.hasThesaurus(key)) {
-      this.idTagEntries.set(thesauri[key].entries);
-    } else {
-      this.idTagEntries.set(undefined);
-    }
-    key = 'assertion-tags';
-    if (this.hasThesaurus(key)) {
-      this.assTagEntries.set(thesauri[key].entries);
-    } else {
-      this.assTagEntries.set(undefined);
-    }
-    key = 'asserted-id-features';
-    if (this.hasThesaurus(key)) {
-      this.featureEntries.set(thesauri[key].entries);
-    } else {
-      this.featureEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: CommentPart | CommentFragment | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.tag.setValue(part.tag || null);
-    this.text.setValue(part.text);
-    this.references.setValue(part.references || []);
-    this.links.setValue(part.links || []);
-    // keywords
-    this.keywords.clear();
-    if (part.keywords?.length) {
-      for (let keyword of part.keywords) {
-        this.keywords.controls.push(this.getKeywordGroup(keyword));
-      }
-    }
-    // categories
-    if (part.categories?.length) {
-      // map the category IDs to the corresponding thesaurus
-      // entries, if any -- else just use the IDs
-      const entries: ThesaurusEntry[] = part.categories.map((id) => {
-        const entry = this.catEntries()?.find((e) => e.id === id);
-        return entry
-          ? entry
-          : {
-              id,
-              value: id,
-            };
-      });
-      // sort the entries by their display value
-      entries.sort((a: ThesaurusEntry, b: ThesaurusEntry) => {
-        return a.value.localeCompare(b.value);
-      });
-      // assign them to the control
-      this.categories.setValue(entries || []);
-    } else {
-      this.categories.setValue([]);
-    }
-
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(
-    data?: EditedObject<CommentPart | CommentFragment>,
-  ): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-    // form
-    this.updateForm(data?.value);
-  }
-
   private updateComment(comment: Comment): void {
-    comment.tag = this.tag.value?.trim();
-    comment.text = this.text.value?.trim() || '';
-    comment.references = this.references.value?.length
-      ? this.references.value
+    const draft = this._draft();
+    comment.tag = draft.tag.trim() || undefined;
+    comment.text = draft.text.trim();
+    comment.references = draft.references.length
+      ? copyFormValue(draft.references)
       : undefined;
-    comment.links = this.links.value?.length ? this.links.value : undefined;
-    comment.categories = this.categories.value?.length
-      ? this.categories.value.map((entry: ThesaurusEntry) => {
-          return entry.id;
-        })
+    comment.links = draft.links.length ? copyFormValue(draft.links) : undefined;
+    comment.categories = draft.categories.length
+      ? draft.categories.map((entry) => entry.id)
       : undefined;
     comment.keywords = this.getKeywords();
   }
@@ -448,48 +346,37 @@ export class CommentEditorComponent
   }
 
   public onReferencesChange(references: DocReference[]): void {
-    this.references.setValue(references || []);
-    this.references.updateValueAndValidity();
-    this.references.markAsDirty();
-    this.form.markAsDirty();
+    this.form.references().value.set(copyFormValue(references || []));
+    this.form.references().markAsDirty();
   }
 
   public onIdsChange(ids: AssertedCompositeId[]): void {
-    this.links.setValue(ids || []);
-    this.links.updateValueAndValidity();
-    this.links.markAsDirty();
-    this.form.markAsDirty();
+    this.form.links().value.set(copyFormValue(ids || []));
+    this.form.links().markAsDirty();
   }
 
   //#region Categories
+  private setCategories(entries: ThesaurusEntry[]): void {
+    this.form.categories().value.set(entries);
+    this.form.categories().markAsDirty();
+  }
+
   public onCategoryChange(entry: ThesaurusEntry): void {
+    const categories = this.form.categories().value();
     // add the new entry unless already present
-    if (this.categories.value?.some((e: ThesaurusEntry) => e.id === entry.id)) {
+    if (categories.some((e) => e.id === entry.id)) {
       return;
     }
-    const entries: ThesaurusEntry[] = Object.assign(
-      [],
-      this.categories.value || [],
-    );
-    entries.push(entry);
-
     // sort the entries by their display value
-    entries.sort((a: ThesaurusEntry, b: ThesaurusEntry) => {
-      return a.value.localeCompare(b.value);
-    });
-
-    // assign to the categories control
-    this.categories.setValue(entries);
-    this.categories.updateValueAndValidity();
-    this.categories.markAsDirty();
+    this.setCategories(
+      sortEntries([...categories, { id: entry.id, value: entry.value }]),
+    );
   }
 
   public removeCategory(index: number): void {
-    const entries = Object.assign([], this.categories.value);
+    const entries = [...this.form.categories().value()];
     entries.splice(index, 1);
-    this.categories.setValue(entries);
-    this.categories.updateValueAndValidity();
-    this.categories.markAsDirty();
+    this.setCategories(entries);
   }
 
   public renderLabel(label: string): string {
@@ -498,67 +385,51 @@ export class CommentEditorComponent
   //#endregion
 
   //#region Keywords
-  private getKeywordGroup(keyword?: IndexKeyword): FormGroup {
-    return this.formBuilder.group({
-      indexId: this.formBuilder.control(
-        keyword?.indexId,
-        Validators.maxLength(50),
-      ),
-      tag: this.formBuilder.control(keyword?.tag, Validators.maxLength(50)),
-      language: this.formBuilder.control(keyword?.language, [
-        Validators.required,
-        Validators.maxLength(50),
-      ]),
-      value: this.formBuilder.control(keyword?.value, [
-        Validators.required,
-        Validators.maxLength(50),
-      ]),
-      note: this.formBuilder.control(keyword?.note, Validators.maxLength(500)),
-    });
+  private setKeywords(rows: KeywordRow[]): void {
+    this.form.keywords().value.set(rows);
+    this.form.keywords().markAsDirty();
   }
 
   public addKeyword(keyword?: IndexKeyword): void {
-    this.keywords.push(this.getKeywordGroup(keyword));
-    this.keywords.markAsDirty();
+    this.setKeywords([...this.form.keywords().value(), toKeywordRow(keyword)]);
   }
 
   public removeKeyword(index: number): void {
-    this.keywords.removeAt(index);
-    this.keywords.markAsDirty();
+    const rows = [...this.form.keywords().value()];
+    rows.splice(index, 1);
+    this.setKeywords(rows);
   }
 
   public moveKeywordUp(index: number): void {
     if (index < 1) {
       return;
     }
-    const keyword = this.keywords.controls[index];
-    this.keywords.removeAt(index);
-    this.keywords.insert(index - 1, keyword);
-    this.keywords.markAsDirty();
+    const rows = [...this.form.keywords().value()];
+    const row = rows[index];
+    rows.splice(index, 1);
+    rows.splice(index - 1, 0, row);
+    this.setKeywords(rows);
   }
 
   public moveKeywordDown(index: number): void {
-    if (index + 1 >= this.keywords.length) {
+    const rows = [...this.form.keywords().value()];
+    if (index + 1 >= rows.length) {
       return;
     }
-    const keyword = this.keywords.controls[index];
-    this.keywords.removeAt(index);
-    this.keywords.insert(index + 1, keyword);
-    this.keywords.markAsDirty();
+    const row = rows[index];
+    rows.splice(index, 1);
+    rows.splice(index + 1, 0, row);
+    this.setKeywords(rows);
   }
 
   private getKeywords(): IndexKeyword[] | undefined {
-    const entries: IndexKeyword[] = [];
-    for (let i = 0; i < this.keywords.length; i++) {
-      const g = this.keywords.at(i) as FormGroup;
-      entries.push({
-        indexId: g.controls['indexId'].value?.trim(),
-        tag: g.controls['tag'].value?.trim(),
-        language: g.controls['language'].value?.trim(),
-        value: g.controls['value'].value?.trim(),
-        note: g.controls['note'].value?.trim(),
-      });
-    }
+    const entries: IndexKeyword[] = this._draft().keywords.map((k) => ({
+      indexId: k.indexId.trim() || undefined,
+      tag: k.tag.trim() || undefined,
+      language: k.language.trim(),
+      value: k.value.trim(),
+      note: k.note.trim() || undefined,
+    }));
     return entries.length ? entries : undefined;
   }
   //#endregion

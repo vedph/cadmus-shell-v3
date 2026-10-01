@@ -1,18 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  linkedSignal,
+  signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  Validators,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormField, required } from '@angular/forms/signals';
 import { take } from 'rxjs/operators';
 
 import {
@@ -37,7 +30,6 @@ import {
 } from '@jean-merelis/ngx-monaco-editor';
 
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 
 import {
   CloseSaveButtonsComponent,
@@ -50,7 +42,25 @@ import {
   TOKEN_TEXT_PART_TYPEID,
   TokenTextLine,
 } from '../token-text-part';
-import { EditedObject } from '@myrmidon/cadmus-core';
+
+interface TokenTextPartControls {
+  citation: string;
+  text: string;
+}
+
+function getTextFromModel(model?: TokenTextPart | null): string {
+  if (!model || !model.lines) {
+    return '';
+  }
+  return model.lines.map((l) => l.text).join('\n');
+}
+
+function toDraft(part?: TokenTextPart | null): TokenTextPartControls {
+  return {
+    citation: part?.citation || '',
+    text: getTextFromModel(part),
+  };
+}
 
 /**
  * Editor component for base text, as referenced by token-based layers.
@@ -62,8 +72,7 @@ import { EditedObject } from '@myrmidon/cadmus-core';
   styleUrls: ['./token-text-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -85,49 +94,24 @@ import { EditedObject } from '@myrmidon/cadmus-core';
     CloseSaveButtonsComponent,
   ],
 })
-export class TokenTextPartComponent
-  extends ModelEditorComponentBase<TokenTextPart>
-  implements OnInit
-{
+export class TokenTextPartComponent extends ModelEditorComponentBase<TokenTextPart> {
   public readonly editorOptions: StandaloneEditorConstructionOptions = {
     minimap: { side: 'right' },
     wordWrap: 'on',
     automaticLayout: true,
   };
 
-  public citation: FormControl<string | null>;
-  public text: FormControl<string | null>;
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    required(p.text);
+  });
 
-  public transform: FormControl<string | null>;
+  // the selected text transformation (not part of the edited model)
+  public readonly transform = signal<string>('ws');
 
-  constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
-    private _dialogService: DialogService,
-  ) {
-    super(authService, formBuilder);
-    // form
-    this.citation = formBuilder.control(null);
-    this.text = formBuilder.control(null, Validators.required);
-    this.transform = formBuilder.control('ws');
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      citation: this.citation,
-      text: this.text,
-    });
-  }
-
-  private getTextFromModel(model: TokenTextPart): string | null {
-    if (!model || !model.lines) {
-      return null;
-    }
-    return model.lines.map((l) => l.text).join('\n');
+  constructor(private _dialogService: DialogService) {
+    super();
   }
 
   private getLinesFromText(text?: string | null): TokenTextLine[] {
@@ -156,24 +140,11 @@ export class TokenTextPartComponent
     return lines;
   }
 
-  private updateForm(part?: TokenTextPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.citation.setValue(part.citation || null);
-    this.text.setValue(this.getTextFromModel(part));
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<TokenTextPart>): void {
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): TokenTextPart {
     let part = this.getEditedPart(TOKEN_TEXT_PART_TYPEID) as TokenTextPart;
-    part.citation = this.citation.value?.trim() || undefined;
-    part.lines = this.getLinesFromText(this.text.value);
+    const draft = this._draft();
+    part.citation = draft.citation.trim() || undefined;
+    part.lines = this.getLinesFromText(draft.text);
     return part;
   }
 
@@ -192,7 +163,6 @@ export class TokenTextPartComponent
     let m: RegExpExecArray | null;
 
     while ((m = r.exec(text))) {
-      console.log(m[1].length);
       const end = m.index + m[1].length;
       if (end < text.length) {
         parts.push(text.substring(start, end));
@@ -207,7 +177,7 @@ export class TokenTextPartComponent
 
   public applyTransform(): void {
     let name: string;
-    switch (this.transform.value) {
+    switch (this.transform()) {
       case 'ws':
         name = 'whitespace normalization';
         break;
@@ -223,9 +193,9 @@ export class TokenTextPartComponent
       .pipe(take(1))
       .subscribe((yes) => {
         if (yes) {
-          let text: string = this.text.value || '';
+          let text: string = this.form.text().value() || '';
 
-          switch (this.transform.value) {
+          switch (this.transform()) {
             case 'ws':
               text = this.normalizeWs(text);
               break;
@@ -233,9 +203,8 @@ export class TokenTextPartComponent
               text = this.splitAtStops(text);
               break;
           }
-          this.text.setValue(text);
-          this.text.updateValueAndValidity();
-          this.text.markAsDirty();
+          this.form.text().value.set(text);
+          this.form.text().markAsDirty();
         }
       });
   }

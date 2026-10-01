@@ -1,18 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  computed,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import {
   MatCard,
@@ -24,15 +17,10 @@ import {
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import { DocReference } from '@myrmidon/cadmus-refs-doc-references';
 
-import {
-  ThesauriSet,
-  ThesaurusEntry,
-  EditedObject,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -44,11 +32,20 @@ import {
   DOC_REFERENCES_PART_TYPEID,
 } from '../doc-references-part';
 import { LookupDocReferencesComponent } from '@myrmidon/cadmus-refs-lookup';
+import { copyFormValue } from '../signal-form-utils';
 
 interface DocReferencesPartSettings {
   noLookup?: boolean;
   noCitation?: boolean;
   defaultPicker?: 'citation' | 'lookup';
+}
+
+interface DocReferencesPartControls {
+  references: DocReference[];
+}
+
+function toDraft(part?: DocReferencesPart | null): DocReferencesPartControls {
+  return { references: copyFormValue(part?.references || []) };
 }
 
 /**
@@ -62,8 +59,6 @@ interface DocReferencesPartSettings {
   styleUrls: ['./doc-references-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -77,30 +72,28 @@ interface DocReferencesPartSettings {
     CloseSaveButtonsComponent,
   ],
 })
-export class DocReferencesPartComponent
-  extends ModelEditorComponentBase<DocReferencesPart>
-  implements OnInit
-{
-  // form
-  public references: FormControl<DocReference[]>;
+export class DocReferencesPartComponent extends ModelEditorComponentBase<DocReferencesPart> {
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.references, 1);
+  });
 
   // thesauri
   // doc-reference-types
-  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly typeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-types']?.entries,
+  );
   // doc-reference-tags
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-tags']?.entries,
+  );
 
   public readonly settings = signal<DocReferencesPartSettings | undefined>(
     undefined,
   );
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.references = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
+  constructor() {
+    super();
     // settings
     this.initSettings<DocReferencesPartSettings>(
       DOC_REFERENCES_PART_TYPEID,
@@ -108,62 +101,16 @@ export class DocReferencesPartComponent
     );
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      references: this.references,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'doc-reference-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-
-    key = 'doc-reference-types';
-    if (this.hasThesaurus(key)) {
-      this.typeEntries.set(thesauri[key].entries);
-    } else {
-      this.typeEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: DocReferencesPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.references.setValue(part.references || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<DocReferencesPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): DocReferencesPart {
     let part = this.getEditedPart(
       DOC_REFERENCES_PART_TYPEID,
     ) as DocReferencesPart;
-    part.references = this.references.value;
+    part.references = copyFormValue(this._draft().references);
     return part;
   }
 
   public onReferencesChange(references: DocReference[]): void {
-    this.references.setValue(references);
-    this.references.updateValueAndValidity();
-    this.references.markAsDirty();
+    this.form.references().value.set(copyFormValue(references || []));
+    this.form.references().markAsDirty();
   }
 }

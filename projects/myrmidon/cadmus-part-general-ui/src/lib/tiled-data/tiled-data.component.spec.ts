@@ -10,6 +10,12 @@ describe('TiledDataComponent', () => {
   let fixture: ComponentFixture<TiledDataComponent>;
   let dialogService: { confirm: ReturnType<typeof vi.fn> };
 
+  // the keys of the editing rows
+  const rowKeys = () => component.form.rows().value().map((r) => r.key);
+  // the value of the editing row with the specified key
+  const rowValue = (key: string) =>
+    component.form.rows().value().find((r) => r.key === key)?.value;
+
   beforeEach(async () => {
     dialogService = {
       confirm: vi.fn().mockReturnValue(of(true)),
@@ -29,52 +35,40 @@ describe('TiledDataComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('updateForm (via data/hiddenKeys effect)', () => {
-    it('should reset keys and form when data is empty object', () => {
+  describe('rows (from data/hiddenKeys)', () => {
+    it('should have no keys and rows when data is empty object', () => {
       fixture.componentRef.setInput('data', {});
       fixture.detectChanges();
-      expect(component.keys).toEqual([]);
-      expect(Object.keys(component.form.controls)).toEqual([]);
+      expect(component.keys()).toEqual([]);
+      expect(rowKeys()).toEqual([]);
     });
 
-    it('should build one form control per own property, keys sorted alphabetically by value', () => {
+    it('should build one row per own property, keys sorted alphabetically', () => {
       // inserted out of alphabetical order (z before a) to prove the sort
-      // actually reorders them (see bug fix in updateForm: cache.sort() with
-      // no comparator on DataKey objects was previously a no-op)
       fixture.componentRef.setInput('data', { z: '26', a: '1' });
       fixture.detectChanges();
 
-      expect(component.keys.map((k) => k.value)).toEqual(['a', 'z']);
-      expect(component.form.contains('a')).toBe(true);
-      expect(component.form.contains('z')).toBe(true);
-      expect(component.form.controls['a'].value).toBe('1');
-      expect(component.form.controls['z'].value).toBe('26');
+      expect(component.keys().map((k) => k.value)).toEqual(['a', 'z']);
+      expect(rowKeys()).toEqual(['a', 'z']);
+      expect(rowValue('a')).toBe('1');
+      expect(rowValue('z')).toBe('26');
+      expect(component.form().dirty()).toBe(false);
     });
 
-    it('should move hidden keys into the internal hidden-data bucket and exclude them from the form', () => {
+    it('should exclude hidden keys from the rows', () => {
       fixture.componentRef.setInput('data', { a: '1', secret: 'shh' });
       fixture.componentRef.setInput('hiddenKeys', ['secret']);
       fixture.detectChanges();
 
-      expect(component.keys.map((k) => k.value)).toEqual(['a']);
-      expect(component.form.contains('secret')).toBe(false);
-      expect(component.form.contains('a')).toBe(true);
+      expect(component.keys().map((k) => k.value)).toEqual(['a']);
+      expect(rowKeys()).toEqual(['a']);
     });
 
-    it('should mark a DataKey visible/invisible depending on the current key filter', () => {
-      fixture.componentRef.setInput('data', { alpha: '1', beta: '2' });
+    it('should edit non-string values as text', () => {
+      fixture.componentRef.setInput('data', { n: 12, e: null });
       fixture.detectChanges();
-      component.keyFilter.setValue('al');
-      // matchesFilter is invoked from updateForm at the time data/hiddenKeys
-      // change; force a re-run by re-setting data (same reference triggers a
-      // new object identity through setInput below)
-      fixture.componentRef.setInput('data', { alpha: '1', beta: '2' });
-      fixture.detectChanges();
-
-      const alpha = component.keys.find((k) => k.value === 'alpha')!;
-      const beta = component.keys.find((k) => k.value === 'beta')!;
-      expect(alpha.visible).toBe(true);
-      expect(beta.visible).toBe(false);
+      expect(rowValue('n')).toBe('12');
+      expect(rowValue('e')).toBe('');
     });
   });
 
@@ -90,20 +84,33 @@ describe('TiledDataComponent', () => {
     });
   });
 
-  describe('updateDataVisibility (via keyFilter valueChanges, debounced)', () => {
-    it('should recompute visibility for all keys when the filter changes', async () => {
-      vi.useFakeTimers();
+  describe('key filter', () => {
+    it('should recompute visibility for all keys when the filter changes', () => {
       fixture.componentRef.setInput('data', { alpha: '1', beta: '2' });
       fixture.detectChanges();
 
-      component.keyFilter.setValue('bet');
-      vi.advanceTimersByTime(310);
+      component.filterForm.keyFilter().value.set('bet');
 
-      const alpha = component.keys.find((k) => k.value === 'alpha')!;
-      const beta = component.keys.find((k) => k.value === 'beta')!;
+      const alpha = component.keys().find((k) => k.value === 'alpha')!;
+      const beta = component.keys().find((k) => k.value === 'beta')!;
       expect(beta.visible).toBe(true);
       expect(alpha.visible).toBe(false);
-      vi.useRealTimers();
+    });
+
+    it('should render only the visible rows, and clear the filter', () => {
+      fixture.componentRef.setInput('data', { alpha: '1', beta: '2' });
+      fixture.detectChanges();
+      component.filterForm.keyFilter().value.set('al');
+      fixture.detectChanges();
+      const labels = () =>
+        Array.from(
+          fixture.nativeElement.querySelectorAll('td.key-label'),
+        ).map((td: any) => td.textContent.trim());
+      expect(labels()).toEqual(['alpha']);
+
+      component.clearFilter();
+      fixture.detectChanges();
+      expect(labels()).toEqual(['alpha', 'beta']);
     });
   });
 
@@ -111,24 +118,78 @@ describe('TiledDataComponent', () => {
     it('should do nothing when newForm is invalid (no key entered)', () => {
       fixture.componentRef.setInput('data', {});
       fixture.detectChanges();
-      component.newValue.setValue('x');
+      component.newForm.newValue().value.set('x');
       component.addDatum();
-      expect(component.data()).toEqual({});
+      expect(rowKeys()).toEqual([]);
+      expect(component.newForm.newKey().touched()).toBe(true);
     });
 
-    it('should add a new key/value pair to data and rebuild the form', () => {
-      fixture.componentRef.setInput('data', { a: '1' });
+    it('should add a new row in order, and reset the new datum form', () => {
+      fixture.componentRef.setInput('data', { a: '1', c: '3' });
       fixture.detectChanges();
 
-      component.newKey.setValue('b');
-      component.newValue.setValue('2');
+      component.newForm.newKey().value.set('b');
+      component.newForm.newValue().value.set('2');
       component.addDatum();
 
-      expect(component.data()).toEqual({ a: '1', b: '2' });
-      expect(component.form.contains('b')).toBe(true);
+      expect(rowKeys()).toEqual(['a', 'b', 'c']);
+      expect(rowValue('b')).toBe('2');
+      expect(component.form().dirty()).toBe(true);
       // the new-datum form is reset after adding
-      expect(component.newKey.value).toBeNull();
-      expect(component.newValue.value).toBeNull();
+      expect(component.newForm.newKey().value()).toBe('');
+      expect(component.newForm.newValue().value()).toBe('');
+    });
+
+    it('should not emit data before saving, so the editor stays open', () => {
+      fixture.componentRef.setInput('data', { a: '1' });
+      fixture.detectChanges();
+      const spy = vi.fn();
+      component.data.subscribe(spy);
+
+      component.newForm.newKey().value.set('b');
+      component.newForm.newValue().value.set('2');
+      component.addDatum();
+      component.newForm.newKey().value.set('c');
+      component.newForm.newValue().value.set('3');
+      component.addDatum();
+
+      expect(spy).not.toHaveBeenCalled();
+      component.save();
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(component.data()).toEqual({ a: '1', b: '2', c: '3' });
+    });
+
+    it('should keep the edits of other rows when adding a datum', () => {
+      fixture.componentRef.setInput('data', { a: '1' });
+      fixture.detectChanges();
+      component.form.rows[0]!.value().value.set('edited');
+
+      component.newForm.newKey().value.set('b');
+      component.newForm.newValue().value.set('2');
+      component.addDatum();
+      component.save();
+
+      expect(component.data()).toEqual({ a: 'edited', b: '2' });
+    });
+
+    it('should set the value of an existing key', () => {
+      fixture.componentRef.setInput('data', { a: '1' });
+      fixture.detectChanges();
+      component.newForm.newKey().value.set('a');
+      component.newForm.newValue().value.set('9');
+      component.addDatum();
+      expect(rowKeys()).toEqual(['a']);
+      expect(rowValue('a')).toBe('9');
+    });
+
+    it('should reject a hidden key', () => {
+      fixture.componentRef.setInput('data', { a: '1', text: 't' });
+      fixture.componentRef.setInput('hiddenKeys', ['text']);
+      fixture.detectChanges();
+      component.newForm.newKey().value.set('text');
+      expect(component.newForm.newKey().getError('hidden')).toBeTruthy();
+      component.addDatum();
+      expect(rowKeys()).toEqual(['a']);
     });
   });
 
@@ -140,18 +201,20 @@ describe('TiledDataComponent', () => {
 
       component.deleteDatum({ value: 'a', visible: true });
 
-      expect(component.data()).toEqual({ a: '1' });
+      expect(rowKeys()).toEqual(['a']);
     });
 
-    it('should delete the datum and rebuild the form when confirmed', () => {
+    it('should delete the row when confirmed, and save without it', () => {
       dialogService.confirm.mockReturnValue(of(true));
       fixture.componentRef.setInput('data', { a: '1', b: '2' });
       fixture.detectChanges();
 
       component.deleteDatum({ value: 'a', visible: true });
 
+      expect(rowKeys()).toEqual(['b']);
+      expect(component.form().dirty()).toBe(true);
+      component.save();
       expect(component.data()).toEqual({ b: '2' });
-      expect(component.form.contains('a')).toBe(false);
     });
   });
 
@@ -168,23 +231,65 @@ describe('TiledDataComponent', () => {
     it('should not update data when the editing form is invalid', () => {
       fixture.componentRef.setInput('data', { a: '1' });
       fixture.detectChanges();
-      component.form.controls['a'].setErrors({ invalid: true });
+      component.form.rows[0]!.value().value.set('x'.repeat(101));
 
       const before = component.data();
       component.save();
 
       expect(component.data()).toBe(before);
+      expect(component.form.rows[0]!.value().touched()).toBe(true);
     });
 
-    it('should set data from the current form + hidden data on save, including edited values', () => {
+    it('should set data from the rows + hidden data on save, including edited values', () => {
       fixture.componentRef.setInput('data', { a: '1', secret: 'shh' });
       fixture.componentRef.setInput('hiddenKeys', ['secret']);
       fixture.detectChanges();
 
-      component.form.controls['a'].setValue('changed');
+      component.form.rows[0]!.value().value.set('changed');
       component.save();
 
       expect(component.data()).toEqual({ a: 'changed', secret: 'shh' });
     });
+
+    it('should keep the original values (and types) of unchanged data', () => {
+      fixture.componentRef.setInput('data', { n: 12, e: null, s: 'x' });
+      fixture.detectChanges();
+      component.form.rows[2]!.value().value.set('y');
+      component.save();
+      expect(component.data()).toEqual({ n: 12, e: null, s: 'y' });
+    });
+
+    it('should save on Enter in a row input', () => {
+      fixture.componentRef.setInput('data', { a: '1' });
+      fixture.detectChanges();
+      const input: HTMLInputElement = fixture.nativeElement.querySelector(
+        'td input',
+      );
+      input.value = 'typed';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }),
+      );
+      expect(component.data()).toEqual({ a: 'typed' });
+    });
+  });
+
+  it('should render no <form> of its own, and no submit buttons', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector('form')).toBeNull();
+    expect(root.querySelectorAll('button[type="submit"]').length).toBe(0);
+  });
+
+  it('should keep the dirty state of a user edit across change detection', () => {
+    fixture.componentRef.setInput('data', { a: '1' });
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+      'td input',
+    );
+    input.value = input.value + 'x';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(component.form().dirty()).toBe(true);
   });
 });

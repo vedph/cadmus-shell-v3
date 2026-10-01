@@ -15,6 +15,12 @@ import {
   PhysicalMeasurementsPart,
 } from '../physical-measurements-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function buildPart(measurements: PhysicalMeasurement[]): PhysicalMeasurementsPart {
   return {
     id: 'part1',
@@ -64,19 +70,19 @@ describe('PhysicalMeasurementsPartComponent', () => {
   });
 
   it('measurements control should require at least 1 entry', () => {
-    expect(component.measurements.value).toEqual([]);
-    expect(component.measurements.hasError('minlength')).toBe(true);
+    expect(plain(component.form.measurements().value())).toEqual([]);
+    expect(!!component.form.measurements().getError('strictMinLength')).toBe(true);
 
-    component.measurements.setValue([{ name: 'height', value: 10, unit: 'cm' }]);
-    expect(component.measurements.valid).toBe(true);
+    component.form.measurements().value.set([{ name: 'height', value: 10, unit: 'cm' }]);
+    expect(component.form.measurements().valid()).toBe(true);
   });
 
   //#region onDataSet
   it('should reset the form when data has no value', () => {
-    component.measurements.setValue([{ name: 'height', value: 10, unit: 'cm' }]);
+    component.form.measurements().value.set([{ name: 'height', value: 10, unit: 'cm' }]);
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
-    expect(component.measurements.value).toEqual([]);
+    expect(plain(component.form.measurements().value())).toEqual([]);
   });
 
   it('should populate measurements from the part', () => {
@@ -91,8 +97,8 @@ describe('PhysicalMeasurementsPartComponent', () => {
     fixture.componentRef.setInput('data', data);
     fixture.detectChanges();
 
-    expect(component.measurements.value).toEqual(measurements);
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.measurements().value())).toEqual(measurements);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should populate thesaurus entry signals only for thesauri present in the data', () => {
@@ -149,7 +155,7 @@ describe('PhysicalMeasurementsPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.measurements.setValue(measurements);
+    component.form.measurements().value.set(measurements);
 
     const value = (component as any).getValue() as PhysicalMeasurementsPart;
     expect(value.measurements).toEqual(measurements);
@@ -160,16 +166,16 @@ describe('PhysicalMeasurementsPartComponent', () => {
     const measurements: PhysicalMeasurement[] = [
       { name: 'height', value: 10, unit: 'cm' },
     ];
-    expect(component.measurements.dirty).toBe(false);
+    expect(component.form.measurements().dirty()).toBe(false);
     component.onMeasurementsChange(measurements);
-    expect(component.measurements.value).toEqual(measurements);
-    expect(component.measurements.dirty).toBe(true);
-    expect(component.measurements.valid).toBe(true);
+    expect(plain(component.form.measurements().value())).toEqual(measurements);
+    expect(component.form.measurements().dirty()).toBe(true);
+    expect(component.form.measurements().valid()).toBe(true);
   });
 
   it('onMeasurementsChange should tolerate a falsy argument by using an empty array', () => {
     component.onMeasurementsChange(undefined as any);
-    expect(component.measurements.value).toEqual([]);
+    expect(plain(component.form.measurements().value())).toEqual([]);
   });
 
   //#region settings (initSettings) -> formulaResults
@@ -260,4 +266,12 @@ describe('PhysicalMeasurementsPartComponent', () => {
     });
   });
   //#endregion
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
 });

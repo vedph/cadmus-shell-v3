@@ -1,19 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  OnInit,
+  linkedSignal,
   signal,
 } from '@angular/core';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
-
-import { CommonModule, KeyValue } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -23,27 +15,45 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import { Flag, FlagSetComponent } from '@myrmidon/cadmus-ui-flag-set';
 import { NoteSet, NoteSetComponent } from '@myrmidon/cadmus-ui-note-set';
-import {
-  EditedObject,
-  ThesauriSet,
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
 import { FLAGS_PART_TYPEID, FlagsPart } from '../flags-part';
+import { copyFormValue } from '../signal-form-utils';
 
 function entryToFlag(entry: ThesaurusEntry): Flag {
   return {
     id: entry.id,
     label: entry.value,
+  };
+}
+
+interface FlagsPartControls {
+  flags: string[];
+  notes: NoteSet;
+}
+
+/**
+ * Bound part and note settings -> editable draft. The note set merges the
+ * definitions from settings with the notes from the part; with no settings
+ * there are no notes.
+ */
+function toDraft(
+  part: FlagsPart | null | undefined,
+  settings: NoteSet | undefined,
+): FlagsPartControls {
+  return {
+    flags: [...(part?.flags || [])],
+    notes: settings
+      ? copyFormValue({ ...settings, notes: part?.notes || {} })
+      : { definitions: [], notes: {} },
   };
 }
 
@@ -58,7 +68,6 @@ function entryToFlag(entry: ThesaurusEntry): Flag {
   selector: 'cadmus-flags-part',
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
     HelpLinkComponent,
@@ -77,117 +86,62 @@ function entryToFlag(entry: ThesaurusEntry): Flag {
   styleUrl: './flags-part.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FlagsPartComponent
-  extends ModelEditorComponentBase<FlagsPart>
-  implements OnInit
-{
-  public flags: FormControl<string[]>;
-  public notes: FormControl<NoteSet>;
-
+export class FlagsPartComponent extends ModelEditorComponentBase<FlagsPart> {
   // note settings
   public readonly settings = signal<NoteSet | undefined>(undefined);
 
   // flags
-  public readonly flagEntries = signal<ThesaurusEntry[]>([]);
+  public readonly flagEntries = computed<ThesaurusEntry[]>(
+    () => this.data()?.thesauri?.['flags']?.entries || [],
+  );
 
   // flags mapped from thesaurus entries
-  public featureFlags = computed<Flag[]>(
+  public readonly featureFlags = computed<Flag[]>(
     () => this.flagEntries()?.map((e) => entryToFlag(e)) || [],
   );
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.flags = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-    this.notes = formBuilder.control<NoteSet>(
-      { definitions: [], notes: {} },
-      {
-        nonNullable: true,
-      },
-    );
+  // the draft depends on settings too, which may be loaded after data
+  private readonly _draft = linkedSignal(() =>
+    toDraft(this.data()?.value, this.settings()),
+  );
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.flags, 1);
+  });
+
+  /**
+   * The note set for the notes editor. It changes only with data or
+   * settings, not with the editor's own changes: the editor resets its
+   * state whenever it gets a different set object.
+   */
+  public readonly noteSet = computed<NoteSet>(
+    () => toDraft(this.data()?.value, this.settings()).notes,
+  );
+
+  constructor() {
+    super();
     // settings
     this.initSettings<NoteSet>(FLAGS_PART_TYPEID, (settings) => {
       this.settings.set(settings);
     });
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      flags: this.flags,
-      notes: this.notes,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    const key = 'flags';
-    if (this.hasThesaurus(key)) {
-      this.flagEntries.set(thesauri[key].entries || []);
-    } else {
-      this.flagEntries.set([]);
-    }
-  }
-
-  private getNoteSet(part: FlagsPart): NoteSet {
-    // no notes if no settings defining them
-    if (!this.settings()) {
-      return { definitions: [], notes: {} };
-    }
-
-    // build a note set by merging definitions from settings with notes from part
-    return { ...this.settings()!, notes: part.notes || {} };
-  }
-
-  private updateForm(part?: FlagsPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    // flags
-    this.flags.setValue(part.flags || []);
-    // notes
-    this.notes.setValue(this.getNoteSet(part));
-
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<FlagsPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
-
   public onFlagsCheckedIdsChange(ids: string[]): void {
-    this.flags.setValue(ids);
-    this.flags.markAsDirty();
-    this.flags.updateValueAndValidity();
-  }
-
-  public onNoteChange(note: KeyValue<string, string | null>): void {
-    console.log(`Note "${note.key}" changed to: ${note.value}`);
+    this.form.flags().value.set([...ids]);
+    this.form.flags().markAsDirty();
   }
 
   public onSetChange(set: NoteSet): void {
-    console.log('Complete set updated:', set);
-    this.notes.setValue(set);
+    this.form.notes().value.set(copyFormValue(set));
+    this.form.notes().markAsDirty();
   }
 
   protected getValue(): FlagsPart {
     let part = this.getEditedPart(FLAGS_PART_TYPEID) as FlagsPart;
-    part.flags = this.flags.value || [];
+    const draft = this._draft();
+    part.flags = [...draft.flags];
 
     // remove keys with null/undefined values
-    const notesObj = this.notes.value?.notes || {};
+    const notesObj = draft.notes?.notes || {};
     const filteredNotes: { [key: string]: any } = {};
     for (const key of Object.keys(notesObj)) {
       if (notesObj[key] != null) {

@@ -1,4 +1,4 @@
-<form [formGroup]="form" (submit)="save()">
+<div (keydown.enter)="onEnterKey($event)">
   <mat-tab-group>
     <mat-tab label="general">
       <div id="container">
@@ -8,11 +8,11 @@
             <!-- eid -->
             <mat-form-field>
               <mat-label>EID</mat-label>
-              <input matInput [formControl]="eid" />
-              @if ($any(eid).errors?.required && (eid.dirty || eid.touched)) {
+              <input matInput [formField]="form.eid" />
+              @if (form.eid().getError("required") && (form.eid().dirty() || form.eid().touched())) {
                 <mat-error>EID required</mat-error>
               }
-              @if ($any(eid).errors?.maxlength && (eid.dirty || eid.touched)) {
+              @if (form.eid().getError("maxLength") && (form.eid().dirty() || form.eid().touched())) {
                 <mat-error>EID too long</mat-error>
               }
             </mat-form-field>
@@ -21,7 +21,7 @@
             @if (eventTagEntries()?.length) {
               <mat-form-field>
                 <mat-label>tag</mat-label>
-                <mat-select [formControl]="tag">
+                <mat-select [formField]="form.tag">
                   @for (e of eventTagEntries(); track e.id) {
                     <mat-option [value]="e.id">{{ e.value }}</mat-option>
                   }
@@ -32,9 +32,9 @@
             @else {
               <mat-form-field>
                 <mat-label>tag</mat-label>
-                <input matInput [formControl]="tag" />
+                <input matInput [formField]="form.tag" />
                 @if (
-                  $any(tag).errors?.maxlength && (tag.dirty || tag.touched)
+                  form.tag().getError("maxLength") && (form.tag().dirty() || form.tag().touched())
                 ) {
                   <mat-error>tag too long</mat-error>
                 }
@@ -48,12 +48,12 @@
               <mat-label>description</mat-label>
               <textarea
                 matInput
-                [formControl]="description"
+                [formField]="form.description"
                 rows="3"
               ></textarea>
               @if (
-                $any(description).errors?.maxlength &&
-                (description.dirty || description.touched)
+                form.description().getError("maxLength") &&
+                (form.description().dirty() || form.description().touched())
               ) {
                 <mat-error>description too long</mat-error>
               }
@@ -64,9 +64,9 @@
           <div>
             <mat-form-field class="long-text">
               <mat-label>note</mat-label>
-              <textarea matInput [formControl]="note"></textarea>
+              <textarea matInput [formField]="form.note"></textarea>
               @if (
-                $any(note).errors?.maxlength && (note.dirty || note.touched)
+                form.note().getError("maxLength") && (form.note().dirty() || form.note().touched())
               ) {
                 <mat-error>note too long</mat-error>
               }
@@ -79,12 +79,12 @@
           @if (eventTypeEntries()?.length) {
             <fieldset>
               <legend>type</legend>
-              @if (type.value) {
+              @if (form.type().value()) {
                 <div class="sel-type">
                   {{
-                    type.value | flatLookup: eventTypeEntries() : "id" : "value"
+                    form.type().value() | flatLookup: eventTypeEntries() : "id" : "value"
                   }}
-                  <span class="muted"> ({{ type.value }})</span>
+                  <span class="muted"> ({{ form.type().value() }})</span>
                 </div>
               } @else {
                 <mat-error>no type</mat-error>
@@ -96,7 +96,7 @@
                 (entryChange)="onTypeEntryChange($event)"
               />
               @if (
-                $any(type).errors?.required && (type.dirty || type.touched)
+                form.type().getError("required") && (form.type().dirty() || form.type().touched())
               ) {
                 <mat-error>type required</mat-error>
               }
@@ -105,14 +105,14 @@
             <!-- type (free) -->
             <mat-form-field>
               <mat-label>type</mat-label>
-              <input matInput [formControl]="type" />
+              <input matInput [formField]="form.type" />
               @if (
-                $any(type).errors?.required && (type.dirty || type.touched)
+                form.type().getError("required") && (form.type().dirty() || form.type().touched())
               ) {
                 <mat-error>type required</mat-error>
               }
               @if (
-                $any(type).errors?.maxlength && (type.dirty || type.touched)
+                form.type().getError("maxLength") && (form.type().dirty() || form.type().touched())
               ) {
                 <mat-error>type too long</mat-error>
               }
@@ -133,17 +133,17 @@
             [assTagEntries]="assTagEntries()"
             [refTagEntries]="refTagEntries()"
             [refTypeEntries]="refTypeEntries()"
-            [chronotopes]="chronotopes.value || undefined"
+            [chronotopes]="form.chronotopes().value() || undefined"
             (chronotopesChange)="onChronotopesChange($event!)"
           />
         </fieldset>
       </mat-expansion-panel>
 
       <!-- assertion -->
-      <mat-checkbox [formControl]="hasAssertion">assertion</mat-checkbox>
+      <mat-checkbox [formField]="form.hasAssertion">assertion</mat-checkbox>
       <mat-expansion-panel
-        [expanded]="hasAssertion.value"
-        [disabled]="!hasAssertion.value"
+        [expanded]="form.hasAssertion().value()"
+        [disabled]="!form.hasAssertion().value()"
       >
         <fieldset>
           <legend>assertion</legend>
@@ -151,7 +151,7 @@
             [assTagEntries]="assTagEntries()"
             [refTagEntries]="refTagEntries()"
             [refTypeEntries]="refTypeEntries()"
-            [assertion]="assertion.value || undefined"
+            [assertion]="form.assertion().value() || undefined"
             (assertionChange)="onAssertionChange($event)"
           />
         </fieldset>
@@ -179,7 +179,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (e of relatedEntities.value; track e.id; let i = $index) {
+          @for (e of form.relatedEntities().value(); track e.id; let i = $index) {
             <tr [class.selected]="i === editedEntityIndex()">
               <td class="fit-width">
                 <button
@@ -241,13 +241,14 @@
       <mat-icon class="mat-warn">clear</mat-icon>
     </button>
     <button
-      type="submit"
+      type="button"
       mat-icon-button
       matTooltip="Save event"
-      [disabled]="form.invalid || form.pristine"
+      [disabled]="form().invalid() || !form().dirty()"
+      (click)="save()"
     >
       <mat-icon class="mat-primary">check_circle</mat-icon>
     </button>
     <span>event</span>
   </div>
-</form>
+</div>

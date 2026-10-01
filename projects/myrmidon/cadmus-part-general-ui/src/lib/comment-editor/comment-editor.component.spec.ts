@@ -25,6 +25,12 @@ import { CommentPart, COMMENT_PART_TYPEID } from '../comment-part';
 import { CommentFragment } from '../comment-fragment';
 import { IndexKeyword } from '../index-keywords-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('CommentEditorComponent', () => {
   let component: CommentEditorComponent;
   let fixture: ComponentFixture<CommentEditorComponent>;
@@ -141,13 +147,13 @@ describe('CommentEditorComponent', () => {
   });
 
   it('builds a form with the expected controls', () => {
-    expect(component.form.get('tag')).toBeTruthy();
-    expect(component.form.get('text')).toBeTruthy();
-    expect(component.form.get('references')).toBeTruthy();
-    expect(component.form.get('ids')).toBeTruthy();
-    expect(component.form.get('categories')).toBeTruthy();
-    expect(component.form.get('keywords')).toBeTruthy();
-    expect(component.text.hasError('required')).toBe(true);
+    expect(component.form.tag).toBeTruthy();
+    expect(component.form.text).toBeTruthy();
+    expect(component.form.references).toBeTruthy();
+    expect(component.form.links).toBeTruthy();
+    expect(component.form.categories).toBeTruthy();
+    expect(component.form.keywords).toBeTruthy();
+    expect(!!component.form.text().getError('required')).toBe(true);
   });
 
   it('loads lookupProviderOptions via initSettings when identity is set', async () => {
@@ -217,8 +223,8 @@ describe('CommentEditorComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.text.value).toBeNull();
-    expect(component.keywords.length).toBe(0);
+    expect(component.form.text().value()).toBe('');
+    expect(component.form.keywords().value().length).toBe(0);
   });
 
   it('updates the form from a CommentPart, mapping and sorting categories', () => {
@@ -244,12 +250,12 @@ describe('CommentEditorComponent', () => {
     fixture.componentRef.setInput('data', { value: part, thesauri: ALL_THESAURI });
     fixture.detectChanges();
 
-    expect(component.tag.value).toBe('ct1');
-    expect(component.text.value).toBe('hello');
-    expect(component.references.value).toEqual(part.references);
-    expect(component.links.value).toEqual(part.links);
-    expect(component.keywords.length).toBe(1);
-    expect(component.keywords.at(0).value).toEqual({
+    expect(plain(component.form.tag().value())).toBe('ct1');
+    expect(plain(component.form.text().value())).toBe('hello');
+    expect(plain(component.form.references().value())).toEqual(part.references);
+    expect(plain(component.form.links().value())).toEqual(part.links);
+    expect(component.form.keywords().value().length).toBe(1);
+    expect(plain(component.form.keywords().value()[0])).toEqual({
       indexId: 'idx1',
       tag: 'kt1',
       language: 'eng',
@@ -258,12 +264,12 @@ describe('CommentEditorComponent', () => {
     });
     // categories: catB -> Beta, catA -> Alpha, catX -> not found (fallback),
     // sorted by display value: Alpha, Beta, catX
-    expect(component.categories.value).toEqual([
+    expect(plain(component.form.categories().value())).toEqual([
       { id: 'catA', value: 'Alpha' },
       { id: 'catB', value: 'Beta' },
       { id: 'catX', value: 'catX' },
     ]);
-    expect(component.form.pristine).toBe(true);
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('sets categories to an empty array when the part has none', () => {
@@ -281,7 +287,7 @@ describe('CommentEditorComponent', () => {
     fixture.componentRef.setInput('data', { value: part, thesauri: {} });
     fixture.detectChanges();
 
-    expect(component.categories.value).toEqual([]);
+    expect(plain(component.form.categories().value())).toEqual([]);
   });
 
   it('getValue builds a CommentPart when the edited value has no location', () => {
@@ -289,8 +295,8 @@ describe('CommentEditorComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    component.tag.setValue('  ct1  ');
-    component.text.setValue('  hello  ');
+    component.form.tag().value.set('  ct1  ');
+    component.form.text().value.set('  hello  ');
 
     const value = (component as any).getValue() as CommentPart;
     expect(value.typeId).toBe(COMMENT_PART_TYPEID);
@@ -305,7 +311,7 @@ describe('CommentEditorComponent', () => {
     fixture.componentRef.setInput('data', { value: fragment, thesauri: {} });
     fixture.detectChanges();
 
-    component.text.setValue('new text');
+    component.form.text().value.set('new text');
 
     const value = (component as any).getValue() as CommentFragment;
     expect(value.location).toBe('1.1');
@@ -317,7 +323,7 @@ describe('CommentEditorComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    component.text.setValue('hello');
+    component.form.text().value.set('hello');
     // leave references/links/categories/keywords empty
 
     const value = (component as any).getValue() as CommentPart;
@@ -332,8 +338,8 @@ describe('CommentEditorComponent', () => {
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
 
-    component.text.setValue('hello');
-    component.categories.setValue([
+    component.form.text().value.set('hello');
+    component.form.categories().value.set([
       { id: 'catA', value: 'Alpha' },
       { id: 'catB', value: 'Beta' },
     ]);
@@ -344,17 +350,17 @@ describe('CommentEditorComponent', () => {
 
   it('onReferencesChange updates references and marks form dirty', () => {
     component.onReferencesChange([{ citation: 'c1' }]);
-    expect(component.references.value).toEqual([{ citation: 'c1' }]);
-    expect(component.references.dirty).toBe(true);
-    expect(component.form.dirty).toBe(true);
+    expect(plain(component.form.references().value())).toEqual([{ citation: 'c1' }]);
+    expect(component.form.references().dirty()).toBe(true);
+    expect(component.form().dirty()).toBe(true);
   });
 
   it('onIdsChange updates links and marks form dirty', () => {
     const link = { target: { gid: 'g1', label: 'L1' } };
     component.onIdsChange([link]);
-    expect(component.links.value).toEqual([link]);
-    expect(component.links.dirty).toBe(true);
-    expect(component.form.dirty).toBe(true);
+    expect(plain(component.form.links().value())).toEqual([link]);
+    expect(component.form.links().dirty()).toBe(true);
+    expect(component.form().dirty()).toBe(true);
   });
 
   describe('categories management', () => {
@@ -362,7 +368,7 @@ describe('CommentEditorComponent', () => {
       component.onCategoryChange({ id: 'catB', value: 'Beta' });
       component.onCategoryChange({ id: 'catA', value: 'Alpha' });
 
-      expect(component.categories.value).toEqual([
+      expect(plain(component.form.categories().value())).toEqual([
         { id: 'catA', value: 'Alpha' },
         { id: 'catB', value: 'Beta' },
       ]);
@@ -372,18 +378,18 @@ describe('CommentEditorComponent', () => {
       component.onCategoryChange({ id: 'catA', value: 'Alpha' });
       component.onCategoryChange({ id: 'catA', value: 'Alpha' });
 
-      expect(component.categories.value).toEqual([{ id: 'catA', value: 'Alpha' }]);
+      expect(plain(component.form.categories().value())).toEqual([{ id: 'catA', value: 'Alpha' }]);
     });
 
     it('removeCategory removes the entry at the given index', () => {
-      component.categories.setValue([
+      component.form.categories().value.set([
         { id: 'catA', value: 'Alpha' },
         { id: 'catB', value: 'Beta' },
       ]);
 
       component.removeCategory(0);
 
-      expect(component.categories.value).toEqual([{ id: 'catB', value: 'Beta' }]);
+      expect(plain(component.form.categories().value())).toEqual([{ id: 'catB', value: 'Beta' }]);
     });
   });
 
@@ -395,15 +401,15 @@ describe('CommentEditorComponent', () => {
   describe('keywords management', () => {
     it('addKeyword pushes a new empty keyword group', () => {
       component.addKeyword();
-      expect(component.keywords.length).toBe(1);
-      expect(component.keywords.dirty).toBe(true);
+      expect(component.form.keywords().value().length).toBe(1);
+      expect(component.form.keywords().dirty()).toBe(true);
     });
 
     it('addKeyword pushes a keyword group prefilled from the given keyword', () => {
       const kw: IndexKeyword = { language: 'eng', value: 'v1' };
       component.addKeyword(kw);
-      expect(component.keywords.at(0).value.language).toBe('eng');
-      expect(component.keywords.at(0).value.value).toBe('v1');
+      expect(component.form.keywords[0]!.language().value()).toBe('eng');
+      expect(component.form.keywords[0]!.value().value()).toBe('v1');
     });
 
     it('removeKeyword removes the group at the given index', () => {
@@ -412,8 +418,8 @@ describe('CommentEditorComponent', () => {
 
       component.removeKeyword(0);
 
-      expect(component.keywords.length).toBe(1);
-      expect(component.keywords.at(0).value.value).toBe('b');
+      expect(component.form.keywords().value().length).toBe(1);
+      expect(component.form.keywords[0]!.value().value()).toBe('b');
     });
 
     it('moveKeywordUp does nothing for index 0', () => {
@@ -422,8 +428,8 @@ describe('CommentEditorComponent', () => {
 
       component.moveKeywordUp(0);
 
-      expect(component.keywords.at(0).value.value).toBe('a');
-      expect(component.keywords.at(1).value.value).toBe('b');
+      expect(component.form.keywords[0]!.value().value()).toBe('a');
+      expect(component.form.keywords[1]!.value().value()).toBe('b');
     });
 
     it('moveKeywordUp swaps with the previous group', () => {
@@ -432,8 +438,8 @@ describe('CommentEditorComponent', () => {
 
       component.moveKeywordUp(1);
 
-      expect(component.keywords.at(0).value.value).toBe('b');
-      expect(component.keywords.at(1).value.value).toBe('a');
+      expect(component.form.keywords[0]!.value().value()).toBe('b');
+      expect(component.form.keywords[1]!.value().value()).toBe('a');
     });
 
     it('moveKeywordDown does nothing for the last index', () => {
@@ -442,8 +448,8 @@ describe('CommentEditorComponent', () => {
 
       component.moveKeywordDown(1);
 
-      expect(component.keywords.at(0).value.value).toBe('a');
-      expect(component.keywords.at(1).value.value).toBe('b');
+      expect(component.form.keywords[0]!.value().value()).toBe('a');
+      expect(component.form.keywords[1]!.value().value()).toBe('b');
     });
 
     it('moveKeywordDown swaps with the next group', () => {
@@ -452,15 +458,15 @@ describe('CommentEditorComponent', () => {
 
       component.moveKeywordDown(0);
 
-      expect(component.keywords.at(0).value.value).toBe('b');
-      expect(component.keywords.at(1).value.value).toBe('a');
+      expect(component.form.keywords[0]!.value().value()).toBe('b');
+      expect(component.form.keywords[1]!.value().value()).toBe('a');
     });
 
     it('getKeywords (via getValue) trims values and returns undefined when empty', () => {
       fixture.componentRef.setInput('identity', partIdentity);
       fixture.componentRef.setInput('data', { value: null, thesauri: {} });
       fixture.detectChanges();
-      component.text.setValue('hello');
+      component.form.text().value.set('hello');
 
       let value = (component as any).getValue() as CommentPart;
       expect(value.keywords).toBeUndefined();
@@ -495,13 +501,21 @@ describe('CommentEditorComponent', () => {
   });
 
   it('renders a markdown preview of the text after debounce', async () => {
-    component.text.setValue('# Hello');
-    // wait out the 50ms debounce with real timers: rxjs's asyncScheduler
-    // does not reliably observe fake timers installed after the
-    // debounced subscription was already set up in ngOnInit
+    component.form.text().value.set('# Hello');
+    // toObservable emits only when change detection runs
+    fixture.detectChanges();
+    // wait out the 50ms debounce with real timers
     await new Promise((resolve) => setTimeout(resolve, 60));
     const html = component.previewHtml() as unknown as string;
     expect(html).toContain('SAFE(');
     expect(html).toContain('Hello');
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

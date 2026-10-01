@@ -1,19 +1,12 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  computed,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormBuilder,
-  FormControl,
-  Validators,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  UntypedFormGroup,
-} from '@angular/forms';
+import { FormField, form, maxLength, required } from '@angular/forms/signals';
 
 import {
   MatCard,
@@ -32,21 +25,54 @@ import { MatInput } from '@angular/material/input';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
 } from '@myrmidon/cadmus-ui';
-import {
-  ThesauriSet,
-  ThesaurusEntry,
-  EditedObject,
-} from '@myrmidon/cadmus-core';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';
+
+interface KeywordsPartControls {
+  keywords: Keyword[];
+}
+
+interface NewKeywordControls {
+  language: string | null;
+  text: string;
+}
+
+function compareKeywords(a: Keyword, b: Keyword): number {
+  if (!a) {
+    if (!b) {
+      return 0;
+    } else {
+      return -1;
+    }
+  }
+  if (!b) {
+    return 1;
+  }
+  const n = a.language.localeCompare(b.language);
+  if (n !== 0) {
+    return n;
+  }
+  return a.value.localeCompare(b.value);
+}
+
+/**
+ * Bound part -> editable draft: the keywords are copied and sorted.
+ */
+function toDraft(part?: KeywordsPart | null): KeywordsPartControls {
+  return {
+    keywords: (part?.keywords || [])
+      .map((k) => ({ language: k.language, value: k.value }))
+      .sort(compareKeywords),
+  };
+}
 
 /**
  * Keywords editor component.
@@ -58,8 +84,7 @@ import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';
   styleUrls: ['./keywords-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -82,142 +107,73 @@ import { KeywordsPart, Keyword, KEYWORDS_PART_TYPEID } from '../keywords-part';
     CloseSaveButtonsComponent,
   ],
 })
-export class KeywordsPartComponent
-  extends ModelEditorComponentBase<KeywordsPart>
-  implements OnInit
-{
-  public keywords: FormControl<Keyword[]>;
+export class KeywordsPartComponent extends ModelEditorComponentBase<KeywordsPart> {
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.keywords, 1);
+  });
+
   // new keyword form
-  public newLanguage: FormControl<string | null>;
-  public newValue: FormControl<string | null>;
-  public newForm: FormGroup;
+  private readonly _newDraft = signal<NewKeywordControls>({
+    language: 'eng',
+    text: '',
+  });
+  public readonly newForm = form(this._newDraft, (p) => {
+    required(p.language);
+    required(p.text);
+    maxLength(p.text, 100);
+  });
 
   // thesauri:
   // languages
-  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.keywords = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-    // new keyword form
-    this.newLanguage = formBuilder.control('eng', Validators.required);
-    this.newValue = formBuilder.control(null, [
-      Validators.required,
-      Validators.maxLength(100),
-    ]);
-    this.newForm = formBuilder.group({
-      newLanguage: this.newLanguage,
-      newValue: this.newValue,
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      keywords: this.keywords,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    const key = 'languages';
-    if (this.hasThesaurus(key)) {
-      this.langEntries.set(thesauri[key].entries);
-    } else {
-      this.langEntries.set(undefined);
-    }
-  }
-
-  private compareKeywords(a: Keyword, b: Keyword): number {
-    if (!a) {
-      if (!b) {
-        return 0;
-      } else {
-        return -1;
-      }
-    }
-    if (!b) {
-      return 1;
-    }
-    const n = a.language.localeCompare(b.language);
-    if (n !== 0) {
-      return n;
-    }
-    return a.value.localeCompare(b.value);
-  }
-
-  private updateForm(part?: KeywordsPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-
-    const keywords = [...part.keywords];
-    keywords.sort(this.compareKeywords);
-    this.keywords.setValue(keywords);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<KeywordsPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
+  public readonly langEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['languages']?.entries,
+  );
 
   protected getValue(): KeywordsPart {
     let part = this.getEditedPart(KEYWORDS_PART_TYPEID) as KeywordsPart;
-    part.keywords = [...this.keywords.value];
+    part.keywords = this._draft().keywords.map((k) => ({
+      language: k.language,
+      value: k.value,
+    }));
     return part;
   }
 
+  private setKeywords(keywords: Keyword[]): void {
+    this.form.keywords().value.set(keywords);
+    this.form.keywords().markAsDirty();
+  }
+
   public addKeyword(): void {
-    if (this.newForm.invalid) {
+    if (this.newForm().invalid()) {
+      this.newForm().markAsTouched();
       return;
     }
     const keyword: Keyword = {
-      language: this.newLanguage.value!,
-      value: this.newValue.value!,
+      language: this.newForm.language().value()!,
+      value: this.newForm.text().value(),
     };
+    const keywords = this.form.keywords().value();
     let i = 0;
-    while (i < this.keywords.value?.length || 0) {
-      const n = this.compareKeywords(keyword, this.keywords.value[i]);
+    while (i < keywords.length) {
+      const n = compareKeywords(keyword, keywords[i]);
       if (n === 0) {
         return;
       }
-      if (n <= 0) {
-        const keywords = [...this.keywords.value];
-        keywords.splice(i, 0, keyword);
-        this.keywords.setValue(keywords);
-        this.keywords.updateValueAndValidity();
-        this.keywords.markAsDirty();
+      if (n < 0) {
         break;
       }
       i++;
     }
-    if (i === this.keywords.value.length) {
-      const keywords = [...this.keywords.value];
-      keywords.push(keyword);
-      this.keywords.setValue(keywords);
-      this.keywords.updateValueAndValidity();
-      this.keywords.markAsDirty();
-    }
+    // insert in order
+    const updated = [...keywords];
+    updated.splice(i, 0, keyword);
+    this.setKeywords(updated);
   }
 
   public deleteKeyword(keyword: Keyword): void {
-    const keywords = [...this.keywords.value];
-    keywords.splice(this.keywords.value.indexOf(keyword), 1);
-    this.keywords.setValue(keywords);
-    this.keywords.updateValueAndValidity();
-    this.keywords.markAsDirty();
+    const keywords = [...this.form.keywords().value()];
+    keywords.splice(keywords.indexOf(keyword), 1);
+    this.setKeywords(keywords);
   }
 }

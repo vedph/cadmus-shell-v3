@@ -15,6 +15,12 @@ import {
   BIBLIOGRAPHY_PART_TYPEID,
 } from '../bibliography-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function makePart(overrides?: Partial<BibliographyPart>): BibliographyPart {
   return {
     id: 'part1',
@@ -83,11 +89,11 @@ describe('BibliographyPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.entries.value).toEqual([makeEntry()]);
+      expect(plain(component.form.entries().value())).toEqual([makeEntry()]);
 
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
-      expect(component.entries.value).toEqual([]);
+      expect(plain(component.form.entries().value())).toEqual([]);
     });
 
     it('should populate the entries control with a copy of the part entries', () => {
@@ -98,8 +104,8 @@ describe('BibliographyPartComponent', () => {
       };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      expect(component.entries.value).toEqual(entries);
-      expect(component.form.pristine).toBe(true);
+      expect(plain(component.form.entries().value())).toEqual(entries);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should populate all thesaurus-driven entry signals when present', () => {
@@ -137,7 +143,7 @@ describe('BibliographyPartComponent', () => {
       const data: EditedObject<BibliographyPart> = { value: makePart(), thesauri: {} };
       fixture.componentRef.setInput('data', data);
       fixture.detectChanges();
-      component.entries.setValue(entries);
+      component.form.entries().value.set(entries);
 
       const part = (component as any).getValue() as BibliographyPart;
       expect(part.entries).toEqual(entries);
@@ -188,12 +194,12 @@ describe('BibliographyPartComponent', () => {
 
   describe('saveEntry', () => {
     it('should append a new entry when editedIndex is -1', () => {
-      component.entries.setValue([makeEntry({ title: 'A' })]);
+      component.form.entries().value.set([makeEntry({ title: 'A' })]);
       component.addEntry();
 
       component.saveEntry(makeEntry({ title: 'B' }));
 
-      expect(component.entries.value).toEqual([
+      expect(plain(component.form.entries().value())).toEqual([
         makeEntry({ title: 'A' }),
         makeEntry({ title: 'B' }),
       ]);
@@ -203,24 +209,24 @@ describe('BibliographyPartComponent', () => {
 
     it('should replace the entry at editedIndex when editing an existing one', () => {
       const original = [makeEntry({ title: 'A' }), makeEntry({ title: 'B' })];
-      component.entries.setValue(original);
+      component.form.entries().value.set(original);
       component.editEntry(original[1], 1);
 
       component.saveEntry(makeEntry({ title: 'B2' }));
 
-      expect(component.entries.value).toEqual([original[0], makeEntry({ title: 'B2' })]);
+      expect(plain(component.form.entries().value())).toEqual([original[0], makeEntry({ title: 'B2' })]);
     });
 
     it('should mark the entries control dirty after saving', () => {
       component.addEntry();
       component.saveEntry(makeEntry());
-      expect(component.entries.dirty).toBe(true);
+      expect(component.form.entries().dirty()).toBe(true);
     });
 
     it('should do nothing when no edit session was opened first', () => {
-      component.entries.setValue([]);
+      component.form.entries().value.set([]);
       component.saveEntry(makeEntry({ title: 'Unsolicited' }));
-      expect(component.entries.value).toEqual([]);
+      expect(plain(component.form.entries().value())).toEqual([]);
     });
   });
 
@@ -228,51 +234,51 @@ describe('BibliographyPartComponent', () => {
     it('should not remove the entry when the user cancels the confirmation', () => {
       dialogService.confirm.mockReturnValue(of(false));
       const entries = [makeEntry()];
-      component.entries.setValue(entries);
+      component.form.entries().value.set(entries);
 
       component.removeEntry(0);
 
-      expect(component.entries.value).toEqual(entries);
+      expect(plain(component.form.entries().value())).toEqual(entries);
     });
 
     it('should remove the entry at the given index when confirmed', () => {
       dialogService.confirm.mockReturnValue(of(true));
       const entries = [makeEntry({ title: 'A' }), makeEntry({ title: 'B' })];
-      component.entries.setValue(entries);
+      component.form.entries().value.set(entries);
 
       component.removeEntry(0);
 
-      expect(component.entries.value).toEqual([entries[1]]);
+      expect(plain(component.form.entries().value())).toEqual([entries[1]]);
     });
   });
 
   describe('moveEntryUp / moveEntryDown', () => {
     it('should do nothing when moving the first entry up', () => {
       const entries = [makeEntry({ title: 'A' }), makeEntry({ title: 'B' })];
-      component.entries.setValue(entries);
+      component.form.entries().value.set(entries);
       component.moveEntryUp(0);
-      expect(component.entries.value).toEqual(entries);
+      expect(plain(component.form.entries().value())).toEqual(entries);
     });
 
     it('should swap with the previous entry when moving up', () => {
       const entries = [makeEntry({ title: 'A' }), makeEntry({ title: 'B' })];
-      component.entries.setValue(entries);
+      component.form.entries().value.set(entries);
       component.moveEntryUp(1);
-      expect(component.entries.value).toEqual([entries[1], entries[0]]);
+      expect(plain(component.form.entries().value())).toEqual([entries[1], entries[0]]);
     });
 
     it('should do nothing when moving the last entry down', () => {
       const entries = [makeEntry({ title: 'A' }), makeEntry({ title: 'B' })];
-      component.entries.setValue(entries);
+      component.form.entries().value.set(entries);
       component.moveEntryDown(1);
-      expect(component.entries.value).toEqual(entries);
+      expect(plain(component.form.entries().value())).toEqual(entries);
     });
 
     it('should swap with the next entry when moving down', () => {
       const entries = [makeEntry({ title: 'A' }), makeEntry({ title: 'B' })];
-      component.entries.setValue(entries);
+      component.form.entries().value.set(entries);
       component.moveEntryDown(0);
-      expect(component.entries.value).toEqual([entries[1], entries[0]]);
+      expect(plain(component.form.entries().value())).toEqual([entries[1], entries[0]]);
     });
   });
 
@@ -310,5 +316,13 @@ describe('BibliographyPartComponent', () => {
       ];
       expect(component.getAuthors(authors)).toBe('Smith; Jones, Amy');
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

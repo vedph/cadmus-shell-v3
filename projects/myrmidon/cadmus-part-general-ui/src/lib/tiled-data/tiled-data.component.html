@@ -2,38 +2,38 @@
   @if (title()) {
     <h3>{{ title() }}</h3>
   }
-  <form [formGroup]="filterForm">
+  <div>
     <mat-form-field>
       <mat-label>filter</mat-label>
       <input
         matInput
         type="text"
         spellcheck="false"
-        formControlName="keyFilter"
+        [formField]="filterForm.keyFilter"
       />
-      @if (keyFilter.value) {
+      @if (filterForm.keyFilter().value()) {
         <button
           type="button"
           matSuffix
           mat-icon-button
           aria-label="Clear"
-          (click)="keyFilter.setValue('')"
+          (click)="clearFilter()"
         >
           <mat-icon>close</mat-icon>
         </button>
       }
     </mat-form-field>
-  </form>
-  <form [formGroup]="form" (submit)="save()">
+  </div>
+  <div>
     <table>
       <tbody>
-        @for (key of keys; track key) {
+        @for (row of form.rows; track row) {
           <tr>
-            @if (key.visible) {
+            @if (isVisibleKey(row.key().value())) {
               <td>
                 <button
                   type="button"
-                  (click)="deleteDatum(key)"
+                  (click)="deleteDatum({ value: row.key().value(), visible: true })"
                   mat-icon-button
                   matTooltip="Remove this datum"
                 >
@@ -41,15 +41,22 @@
                 </button>
               </td>
               <td class="key-label">
-                {{ key.value }}
+                {{ row.key().value() }}
               </td>
               <td>
                 <mat-form-field>
                   <input
                     matInput
                     spellcheck="false"
-                    [formControlName]="key.value"
+                    [formField]="row.value"
+                    (keydown.enter)="$event.preventDefault(); save()"
                   />
+                  @if (
+                    row.value().getError("maxLength") &&
+                    (row.value().dirty() || row.value().touched())
+                  ) {
+                    <mat-error>too long</mat-error>
+                  }
                 </mat-form-field>
               </td>
             }
@@ -58,34 +65,59 @@
       </tbody>
     </table>
     <div>
-      <form [formGroup]="newForm" (submit)="addDatum()">
+      <div>
         <mat-form-field>
           <mat-label>key</mat-label>
-          <input matInput type="text" formControlName="newKey" />
+          <input
+            matInput
+            type="text"
+            [formField]="newForm.newKey"
+            (keydown.enter)="$event.preventDefault(); addDatum()"
+          />
           @if (
-            newKey.hasError("required") && (newKey.dirty || newKey.touched)
+            newForm.newKey().getError("required") &&
+            (newForm.newKey().dirty() || newForm.newKey().touched())
           ) {
             <mat-error>enter a key</mat-error>
           }
-          @if (newKey.hasError("pattern") && (newKey.dirty || newKey.touched)) {
+          @if (
+            newForm.newKey().getError("pattern") &&
+            (newForm.newKey().dirty() || newForm.newKey().touched())
+          ) {
             <mat-error>invalid key</mat-error>
+          }
+          @if (
+            newForm.newKey().getError("hidden") &&
+            (newForm.newKey().dirty() || newForm.newKey().touched())
+          ) {
+            <mat-error>reserved key</mat-error>
           }
         </mat-form-field>
         &nbsp;
         <mat-form-field>
           <mat-label>value</mat-label>
-          <input matInput type="text" formControlName="newValue" />
+          <input
+            matInput
+            type="text"
+            [formField]="newForm.newValue"
+            (keydown.enter)="$event.preventDefault(); addDatum()"
+          />
           @if (
-            newValue.hasError("maxlength") &&
-            (newValue.dirty || newValue.touched)
+            newForm.newValue().getError("maxLength") &&
+            (newForm.newValue().dirty() || newForm.newValue().touched())
           ) {
             <mat-error>too long</mat-error>
           }
         </mat-form-field>
-        <button type="submit" matTooltip="Add new datum" mat-icon-button>
+        <button
+          type="button"
+          matTooltip="Add new datum"
+          mat-icon-button
+          (click)="addDatum()"
+        >
           <mat-icon>add_circle</mat-icon>
         </button>
-      </form>
+      </div>
     </div>
     <div>
       <button
@@ -97,15 +129,16 @@
         <mat-icon class="mat-warn">clear</mat-icon>
       </button>
       <button
-        type="submit"
+        type="button"
         mat-button
         class="mat-primary"
-        [disabled]="form.invalid"
+        [disabled]="form().invalid()"
         matTooltip="Save data"
+        (click)="save()"
       >
         <mat-icon>check_circle</mat-icon>
         save data
       </button>
     </div>
-  </form>
+  </div>
 </div>

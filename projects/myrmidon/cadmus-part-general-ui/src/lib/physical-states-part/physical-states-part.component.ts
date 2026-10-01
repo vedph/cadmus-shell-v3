@@ -1,17 +1,10 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  computed,
+  linkedSignal,
   signal,
 } from '@angular/core';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 
 import {
@@ -27,18 +20,15 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { NgxToolsValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   PhysicalState,
   PhysicalStateComponent,
 } from '@myrmidon/cadmus-mat-physical-state';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -50,6 +40,15 @@ import {
   PHYSICAL_STATES_PART_TYPEID,
   PhysicalStatesPart,
 } from '../physical-states-part';
+import { copyFormValue } from '../signal-form-utils';
+
+interface PhysicalStatesPartControls {
+  entries: PhysicalState[];
+}
+
+function toDraft(part?: PhysicalStatesPart | null): PhysicalStatesPartControls {
+  return { entries: copyFormValue(part?.states || []) };
+}
 
 /**
  * PhysicalStatesPart editor component.
@@ -62,8 +61,6 @@ import {
   styleUrl: './physical-states-part.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -83,98 +80,40 @@ import {
     CloseSaveButtonsComponent,
   ],
 })
-export class PhysicalStatesPartComponent
-  extends ModelEditorComponentBase<PhysicalStatesPart>
-  implements OnInit
-{
+export class PhysicalStatesPartComponent extends ModelEditorComponentBase<PhysicalStatesPart> {
   // state
   public readonly editedIndex = signal<number>(-1);
   public readonly edited = signal<PhysicalState | undefined>(undefined);
 
   // thesauri:
   // physical-states
-  public readonly stateEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly stateEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['physical-states']?.entries,
   );
   // physical-state-features
-  public readonly featEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly featEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['physical-state-features']?.entries,
+  );
   // physical-state-reporters
-  public readonly reporterEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly reporterEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['physical-state-reporters']?.entries,
   );
 
   // form
-  public entries: FormControl<PhysicalState[]>;
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.entries, 1);
+  });
 
-  constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
-    private _dialogService: DialogService,
-  ) {
-    super(authService, formBuilder);
-    // form
-    this.entries = formBuilder.control([], {
-      // at least 1 entry
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      entries: this.entries,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'physical-states';
-    if (this.hasThesaurus(key)) {
-      this.stateEntries.set(thesauri[key].entries);
-    } else {
-      this.stateEntries.set(undefined);
-    }
-    key = 'physical-state-features';
-    if (this.hasThesaurus(key)) {
-      this.featEntries.set(thesauri[key].entries);
-    } else {
-      this.featEntries.set(undefined);
-    }
-    key = 'physical-state-reporters';
-    if (this.hasThesaurus(key)) {
-      this.reporterEntries.set(thesauri[key].entries);
-    } else {
-      this.reporterEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: PhysicalStatesPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.entries.setValue(part.states || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<PhysicalStatesPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
+  constructor(private _dialogService: DialogService) {
+    super();
   }
 
   protected getValue(): PhysicalStatesPart {
     let part = this.getEditedPart(
       PHYSICAL_STATES_PART_TYPEID,
     ) as PhysicalStatesPart;
-    part.states = this.entries.value || [];
+    part.states = copyFormValue(this._draft().entries);
     return part;
   }
 
@@ -196,15 +135,14 @@ export class PhysicalStatesPartComponent
   }
 
   public saveState(entry: PhysicalState): void {
-    const entries = [...this.entries.value];
+    const entries = [...this.form.entries().value()];
     if (this.editedIndex() === -1) {
       entries.push(entry);
     } else {
       entries.splice(this.editedIndex(), 1, entry);
     }
-    this.entries.setValue(entries);
-    this.entries.markAsDirty();
-    this.entries.updateValueAndValidity();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
     this.closeState();
   }
 
@@ -216,11 +154,10 @@ export class PhysicalStatesPartComponent
           if (this.editedIndex() === index) {
             this.closeState();
           }
-          const entries = [...this.entries.value];
+          const entries = [...this.form.entries().value()];
           entries.splice(index, 1);
-          this.entries.setValue(entries);
-          this.entries.markAsDirty();
-          this.entries.updateValueAndValidity();
+          this.form.entries().value.set(entries);
+          this.form.entries().markAsDirty();
         }
       });
   }
@@ -229,25 +166,23 @@ export class PhysicalStatesPartComponent
     if (index < 1) {
       return;
     }
-    const entry = this.entries.value[index];
-    const entries = [...this.entries.value];
+    const entry = this.form.entries().value()[index];
+    const entries = [...this.form.entries().value()];
     entries.splice(index, 1);
     entries.splice(index - 1, 0, entry);
-    this.entries.setValue(entries);
-    this.entries.markAsDirty();
-    this.entries.updateValueAndValidity();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
   }
 
   public moveStateDown(index: number): void {
-    if (index + 1 >= this.entries.value.length) {
+    if (index + 1 >= this.form.entries().value().length) {
       return;
     }
-    const entry = this.entries.value[index];
-    const entries = [...this.entries.value];
+    const entry = this.form.entries().value()[index];
+    const entries = [...this.form.entries().value()];
     entries.splice(index, 1);
     entries.splice(index + 1, 0, entry);
-    this.entries.setValue(entries);
-    this.entries.markAsDirty();
-    this.entries.updateValueAndValidity();
+    this.form.entries().value.set(entries);
+    this.form.entries().markAsDirty();
   }
 }

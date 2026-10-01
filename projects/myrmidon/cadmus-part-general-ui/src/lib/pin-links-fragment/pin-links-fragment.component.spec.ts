@@ -20,6 +20,12 @@ import {
   PIN_LINKS_FRAGMENT_TYPEID,
 } from '../pin-links-fragment';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 describe('PinLinksFragmentComponent', () => {
   let component: PinLinksFragmentComponent;
   let fixture: ComponentFixture<PinLinksFragmentComponent>;
@@ -82,8 +88,8 @@ describe('PinLinksFragmentComponent', () => {
   });
 
   it('should build an initially invalid form (empty links)', () => {
-    expect(component.links.value).toEqual([]);
-    expect(component.form.invalid).toBe(true);
+    expect(plain(component.form.links().value())).toEqual([]);
+    expect(component.form().invalid()).toBe(true);
   });
 
   it('should default pinByTypeMode/canSwitchMode/canEditTarget to true', () => {
@@ -159,8 +165,8 @@ describe('PinLinksFragmentComponent', () => {
       } as EditedObject<PinLinksFragment>);
       fixture.detectChanges();
 
-      expect(component.links.value).toEqual([ID]);
-      expect(component.form.pristine).toBe(true);
+      expect(plain(component.form.links().value())).toEqual([ID]);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should reset links to [] when data is unset', () => {
@@ -173,7 +179,7 @@ describe('PinLinksFragmentComponent', () => {
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
 
-      expect(component.links.value).toEqual([]);
+      expect(plain(component.form.links().value())).toEqual([]);
     });
 
     it('getValue should build a fragment (via getEditedFragment) with the current links', () => {
@@ -198,8 +204,8 @@ describe('PinLinksFragmentComponent', () => {
     it('onIdsChange should update links and mark dirty', () => {
       component.onIdsChange([ID]);
 
-      expect(component.links.value).toEqual([ID]);
-      expect(component.links.dirty).toBe(true);
+      expect(plain(component.form.links().value())).toEqual([ID]);
+      expect(component.form.links().dirty()).toBe(true);
     });
   });
 
@@ -218,5 +224,13 @@ describe('PinLinksFragmentComponent', () => {
     it('should set lookupProviderOptions from the resolved settings', () => {
       expect(component.lookupProviderOptions()).toEqual(LOOKUP_OPTIONS);
     });
+  });
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
   });
 });

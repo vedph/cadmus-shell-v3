@@ -1,18 +1,10 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
-  signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -24,8 +16,7 @@ import {
   MatCardActions,
 } from '@angular/material/card';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import {
   AssertedId,
   AssertedIdsComponent,
@@ -33,8 +24,6 @@ import {
 
 import {
   ThesaurusEntry,
-  ThesauriSet,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -46,6 +35,15 @@ import {
   ExternalIdsPart,
   EXTERNAL_IDS_PART_TYPEID,
 } from '../external-ids-part';
+import { copyFormValue } from '../signal-form-utils';
+
+interface ExternalIdsPartControls {
+  ids: AssertedId[];
+}
+
+function toDraft(part?: ExternalIdsPart | null): ExternalIdsPartControls {
+  return { ids: copyFormValue(part?.ids || []) };
+}
 
 /**
  * External IDs part editor component. This is just a collection of asserted
@@ -60,8 +58,6 @@ import {
   styleUrls: ['./external-ids-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -75,119 +71,43 @@ import {
     CloseSaveButtonsComponent,
   ],
 })
-export class ExternalIdsPartComponent
-  extends ModelEditorComponentBase<ExternalIdsPart>
-  implements OnInit
-{
-  public ids: FormControl<AssertedId[]>;
+export class ExternalIdsPartComponent extends ModelEditorComponentBase<ExternalIdsPart> {
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.ids, 1);
+  });
 
   // external-id-scopes
-  public readonly idScopeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly idScopeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['external-id-scopes']?.entries,
   );
   // external-id-tags
-  public readonly idTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly idTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['external-id-tags']?.entries,
   );
 
   // thesauri for assertions:
   // assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly assTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['assertion-tags']?.entries,
   );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTypeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-types']?.entries,
   );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-tags']?.entries,
   );
-
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.ids = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      ids: this.ids,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'assertion-tags';
-    if (this.hasThesaurus(key)) {
-      this.assTagEntries.set(thesauri[key].entries);
-    } else {
-      this.assTagEntries.set(undefined);
-    }
-
-    key = 'doc-reference-types';
-    if (this.hasThesaurus(key)) {
-      this.refTypeEntries.set(thesauri[key].entries);
-    } else {
-      this.refTypeEntries.set(undefined);
-    }
-
-    key = 'doc-reference-tags';
-    if (this.hasThesaurus(key)) {
-      this.refTagEntries.set(thesauri[key].entries);
-    } else {
-      this.refTagEntries.set(undefined);
-    }
-
-    key = 'external-id-scopes';
-    if (this.hasThesaurus(key)) {
-      this.idScopeEntries.set(thesauri[key].entries);
-    } else {
-      this.idScopeEntries.set(undefined);
-    }
-
-    key = 'external-id-tags';
-    if (this.hasThesaurus(key)) {
-      this.idTagEntries.set(thesauri[key].entries);
-    } else {
-      this.idTagEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: ExternalIdsPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.ids.setValue(part.ids || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<ExternalIdsPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
-  }
 
   protected getValue(): ExternalIdsPart {
     let part = this.getEditedPart(EXTERNAL_IDS_PART_TYPEID) as ExternalIdsPart;
-    part.ids = this.ids.value;
+    part.ids = copyFormValue(this._draft().ids);
     return part;
   }
 
   public onIdsChange(ids: AssertedId[]): void {
-    this.ids.setValue(ids);
-    this.ids.markAsDirty();
-    this.ids.updateValueAndValidity();
+    this.form.ids().value.set(copyFormValue(ids || []));
+    this.form.ids().markAsDirty();
   }
 }

@@ -12,6 +12,12 @@ import { ProperName } from '@myrmidon/cadmus-refs-proper-name';
 import { DistrictLocationPartComponent } from './district-location-part.component';
 import { DistrictLocationPart } from '../district-location-part';
 
+// the form tags the draft's array items with an identity Symbol (and
+// structuredClone drops Symbol keys): compare their plain data only
+function plain<T>(value: T): T {
+  return structuredClone(value);
+}
+
 function buildPart(place: ProperName, note?: string): DistrictLocationPart {
   return {
     id: 'part1',
@@ -63,27 +69,27 @@ describe('DistrictLocationPartComponent', () => {
 
   //#region validators
   it('should require place', () => {
-    component.place.setValue(null);
-    expect(component.place.hasError('required')).toBe(true);
-    component.place.setValue({ language: 'eng', pieces: [] });
-    expect(component.place.valid).toBe(true);
+    component.form.place().value.set(null);
+    expect(!!component.form.place().getError('required')).toBe(true);
+    component.form.place().value.set({ language: 'eng', pieces: [] });
+    expect(component.form.place().valid()).toBe(true);
   });
 
   it('should limit note to maxLength(5000)', () => {
-    component.note.setValue('a'.repeat(5001));
-    expect(component.note.hasError('maxlength')).toBe(true);
-    component.note.setValue('short note');
-    expect(component.note.valid).toBe(true);
+    component.form.note().value.set('a'.repeat(5001));
+    expect(!!component.form.note().getError('maxLength')).toBe(true);
+    component.form.note().value.set('short note');
+    expect(component.form.note().valid()).toBe(true);
   });
   //#endregion
 
   //#region onDataSet
   it('should reset name/form when data has no value', () => {
-    component.place.setValue({ language: 'eng', pieces: [] });
+    component.form.place().value.set({ language: 'eng', pieces: [] });
     fixture.componentRef.setInput('data', { value: null, thesauri: {} });
     fixture.detectChanges();
     expect(component.name()).toBeUndefined();
-    expect(component.place.value).toBeNull();
+    expect(plain(component.form.place().value())).toBeNull();
   });
 
   it('should populate name/place/note from the part', () => {
@@ -99,9 +105,9 @@ describe('DistrictLocationPartComponent', () => {
     fixture.detectChanges();
 
     expect(component.name()).toEqual(place);
-    expect(component.place.value).toEqual(place);
-    expect(component.note.value).toBe('a note');
-    expect(component.form.pristine).toBe(true);
+    expect(plain(component.form.place().value())).toEqual(place);
+    expect(plain(component.form.note().value())).toBe('a note');
+    expect(component.form().dirty()).toBe(false);
   });
 
   it('should default note to null when missing', () => {
@@ -111,7 +117,7 @@ describe('DistrictLocationPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    expect(component.note.value).toBeNull();
+    expect(component.form.note().value()).toBe('');
   });
 
   it('should populate thesaurus entry signals only for thesauri present in the data', () => {
@@ -136,15 +142,15 @@ describe('DistrictLocationPartComponent', () => {
   //#region onNameChange
   it('onNameChange should update and dirty the place control', () => {
     const name: ProperName = { language: 'eng', pieces: [] };
-    expect(component.place.dirty).toBe(false);
+    expect(component.form.place().dirty()).toBe(false);
     component.onNameChange(name);
-    expect(component.place.value).toEqual(name);
-    expect(component.place.dirty).toBe(true);
+    expect(plain(component.form.place().value())).toEqual(name);
+    expect(component.form.place().dirty()).toBe(true);
   });
 
   it('onNameChange should set place to null when given undefined', () => {
     component.onNameChange(undefined);
-    expect(component.place.value).toBeNull();
+    expect(plain(component.form.place().value())).toBeNull();
   });
   //#endregion
 
@@ -155,13 +161,13 @@ describe('DistrictLocationPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.place.setValue({ language: 'eng', pieces: [] });
-    component.note.setValue('  padded  ');
+    component.form.place().value.set({ language: 'eng', pieces: [] });
+    component.form.note().value.set('  padded  ');
 
     let value = (component as any).getValue() as DistrictLocationPart;
     expect(value.note).toBe('padded');
 
-    component.note.setValue('   ');
+    component.form.note().value.set('   ');
     value = (component as any).getValue() as DistrictLocationPart;
     expect(value.note).toBeUndefined();
   });
@@ -172,10 +178,49 @@ describe('DistrictLocationPartComponent', () => {
       thesauri: {},
     });
     fixture.detectChanges();
-    component.place.setValue(null);
+    component.form.place().value.set(null);
 
     const value = (component as any).getValue() as DistrictLocationPart;
     expect(value.place).toEqual({ language: '', pieces: [] });
   });
   //#endregion
+
+  it('should render its editor and buttons inside no <form>', () => {
+    const buttons: HTMLElement = fixture.nativeElement.querySelector(
+      'cadmus-close-save-buttons',
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.closest('form')).toBeNull();
+  });
+
+  it('should show the note length error once the note is touched', () => {
+    component.form.note().value.set('x'.repeat(5001));
+    component.form.note().markAsTouched();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('note too long');
+  });
+
+  it('should save the place and the trimmed note', () => {
+    const place: ProperName = {
+      language: 'ita',
+      pieces: [{ type: 'city', value: 'Roma' }],
+    };
+    fixture.componentRef.setInput('data', {
+      value: buildPart(place),
+      thesauri: {},
+    });
+    fixture.detectChanges();
+    const textarea: HTMLTextAreaElement =
+      fixture.nativeElement.querySelector('textarea');
+    textarea.value = ' a note ';
+    textarea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(component.isDirty()).toBe(true);
+
+    component.save();
+
+    expect(component.data()!.value!.note).toBe('a note');
+    expect(component.data()!.value!.place).toEqual(place);
+    expect(component.isDirty()).toBe(false);
+  });
 });

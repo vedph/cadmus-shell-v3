@@ -1021,3 +1021,150 @@ changed for them:
   carry the identity Symbol, as in iteration 1.
 - Measured: 23 of 23 tests pass, and `cadmus-part-taxo-ui` and
   `cadmus-part-taxo-pg` build.
+
+### `cadmus-part-general-ui`
+
+All 33 form components: 24 part/fragment editors on the base class and 9
+embedded sub-editors. Measured: 648 of 648 tests pass (36 spec files), the
+library builds with no warnings, and `cadmus-part-general-pg` builds and
+passes 268 of 268 tests unchanged.
+
+Patterns:
+
+- Part editors: `_draft = linkedSignal(() => toDraft(this.data()?.value))`
+  and `form = this.createForm(this._draft, schema)`. Thesaurus entries
+  became `computed()` over `data().thesauri`, replacing the
+  `updateThesauri()` setters.
+- Arrays whose items are objects (references, IDs, counts, links, ...)
+  are copied on the way in and out with `copyFormValue()`, a
+  `structuredClone` in the new internal `signal-form-utils.ts`.
+  Measured, in the doc references spec:
+  - the form's own copies carry FieldTree's identity Symbol;
+  - the objects emitted by the child widget and the saved model carry
+    none;
+  - the spec for the helper checks that the clone drops Symbol keys and
+    keeps `Date`s.
+- Children receive a fresh copy of what they emitted. The bricks widgets
+  involved were read for this: `DocReferencesComponent` keeps its draft
+  when the incoming references equal its own (a `linkedSignal` with a
+  `previous` check). `AssertedIdsComponent` derives nothing from its
+  input. `NoteSetComponent` does reset its state on any new `set` object,
+  so the flags part passes it a `noteSet` computed from data and
+  settings only. A spec checks that the note set object stays the same
+  across the editor's own changes.
+- Sub-editors (model, not base class) use the same draft and form, plus
+  an effect that resets the interaction state when the bound model
+  changes.
+  - **Bug found and fixed during this migration:** the first version of
+    that effect read the draft instead of the model. The draft also
+    changes with every keystroke, so each edit was reset to pristine at
+    the next change detection. In the bib author and historical event
+    editors, whose save button requires a dirty form, Save could then
+    never be enabled.
+  - A spec in each of the 8 sub-editors types into an input, runs change
+    detection twice, and expects `dirty()`. With the draft-keyed effect
+    restored in all 8, all 8 specs fail (plus the bib author Enter spec);
+    with the fix, they pass.
+- Rows (former `FormArray`s of `FormGroup`s: metadata, comment keywords,
+  tiled data) are arrays in the draft with `applyEach` rules. The
+  template iterates the field tree (`@for (g of form.metadata; track g)`).
+  - The `_uid` counters and the per-row `valueChanges` subscriptions are
+    gone.
+  - A spec moves a touched row and checks that the touched state moves
+    with it.
+  - A row field named `value` works as a child field (measured in the
+    metadata and comment specs, including typing into it).
+- Text fields use `''` as the empty value (native inputs need non-null
+  strings). The "(n/a)" and "-" options of the selects that share such a
+  field now have the value `''`.
+- `NG8022`-style rules: none of these templates had static validation
+  attributes.
+
+Enter key:
+
+- Part editors render no `<form>`, as decided for the base class.
+  Measured: each part editor spec has a test that the close/save buttons
+  are inside no `<form>`. The categories editor's thesaurus tree renders
+  its own `[formRoot]` filter form (`cadmus-thesaurus-store`, external).
+  That is not nested in anything any more, so its test checks the buttons
+  rather than the whole DOM.
+- The sub-editors used to be nested `<form>`s with a submit button, so
+  Enter in one of their text inputs saved the sub-item (browser implicit
+  submission). This is kept by an explicit `(keydown.enter)` handler on
+  their root, using the new `isImplicitSubmission(event)`:
+  - it acts only on text-like `<input>`s, not on textareas, check boxes,
+    selects or buttons;
+  - it does nothing if another handler already consumed the event, e.g.
+    an autocomplete picking an option;
+  - it does nothing where the old save button would have been disabled
+    (invalid, or pristine for the bib author and historical event
+    editors).
+  - The helper has its own spec. Specs in the related entity and bib
+    author editors drive the real key events, including the disabled
+    case.
+- Enter-to-add is kept where it existed: new keyword (keywords part),
+  bibliography keywords (both inputs), new datum (tiled data). Enter
+  saves the text tile and a tiled-data row, as the submit of their forms
+  did. Specs cover the keywords part, the text tile and tiled data.
+
+Bugs fixed (each has a spec):
+
+- Flags part:
+  - The notes editor was bound with `[(set)]="notes.value"`, which wrote
+    the raw control value and never marked anything dirty. Now note
+    changes mark the form dirty (spec: `onSetChange` makes `isDirty()`
+    true).
+  - The note set was built from the settings available when data arrived
+    (`getNoteSet()` returned an empty set if they were not loaded yet),
+    and was never rebuilt when they arrived. The draft now depends on
+    both. A spec resolves the settings after binding data. **Believed,
+    not measured, for the old code:** the race happened in the app. To
+    check, run the previous commit with slow settings loading.
+  - Removed two debug `console.log`s.
+- Tiled text part:
+  - `(tileChange)="onTileChange($event)"` only marked the form dirty and
+    never stored the edited tile. Read in the old source: the text tile
+    emits a new tile object, and nothing put it into `rows`. Now the tile
+    is replaced in its row; a spec saves a tile text edited this way.
+  - `deleteSelectedTile()` selected `newTiles[index + 1]`, skipping the
+    tile that moved into the deleted slot. Also, `adjustCoords()` cloned
+    every tile, so the selection pointed to an object no longer
+    displayed. The old specs pinned both behaviours. Now the tile in the
+    deleted slot is selected, and renumbering keeps unchanged objects and
+    remaps the selection.
+  - The citation length error had an empty `<mat-error>`.
+- Tiled data:
+  - Read in the old sources: `addDatum()`/`deleteDatum()` set the `data`
+    model at once, rebuilding it from the last saved data, not from the
+    edits. The tiled text part handles `dataChange` by saving the data
+    and closing the data editor. So adding a datum closed the editor and
+    discarded the edits of other rows.
+  - Now add and delete edit the draft; Save emits. Specs check that two
+    adds emit nothing until save, and that other rows' edits survive an
+    add.
+  - Hidden keys can no longer be added from the form (`hidden` error,
+    "reserved key"). Unchanged values keep their original type on save
+    (the inputs edit text).
+- Token text part: removed a debug `console.log`.
+- Asserted historical date: the tag had no length rule, and its error
+  key was the misspelled `max-length`, so "tag too long" could never
+  appear. The dead message was removed rather than inventing a limit.
+
+Behaviour changes, deliberate:
+
+- Empty optional strings are saved as missing, not `''`: bibliography
+  entry, historical event tag, chronology label/event ID, index keyword
+  and comment keyword fields. Specs that pinned `''` were updated.
+- `HistoricalEventEditorComponent.typeEntryPrefix` is computed from the
+  type. With an empty type it is `undefined` (all relations), where it
+  used to be `":"` (no relation matched).
+- The bibliography entry keeps its old effective access date default,
+  `null`. The `new Date()` initial value was always reset away, and a
+  spec documented that.
+- `MetadataPartComponent`, `CommentEditorComponent`: moving rows marks
+  the form dirty (as before); `TiledDataComponent.keys` and
+  `TextTileComponent.text` are computed signals.
+
+Not changed, reported: `cadmus-thesaurus-store`'s tree filter renders a
+`<form [formRoot]>`. That is fine for it, as a submission root, and it
+is now never nested.

@@ -1,18 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  computed,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
 import { take } from 'rxjs/operators';
 
 import {
@@ -28,9 +21,8 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 
-import { NgxToolsValidators } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   AssertedProperName,
   ProperNameComponent,
@@ -38,9 +30,7 @@ import {
 } from '@myrmidon/cadmus-refs-proper-name';
 
 import {
-  ThesauriSet,
   ThesaurusEntry,
-  EditedObject,
 } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
@@ -49,6 +39,15 @@ import {
 } from '@myrmidon/cadmus-ui';
 
 import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
+import { copyFormValue } from '../signal-form-utils';
+
+interface NamesPartControls {
+  names: AssertedProperName[];
+}
+
+function toDraft(part?: NamesPart | null): NamesPartControls {
+  return { names: copyFormValue(part?.names || []) };
+}
 
 /**
  * Names part editor component.
@@ -61,8 +60,6 @@ import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
   styleUrls: ['./names-part.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -81,11 +78,7 @@ import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
     CloseSaveButtonsComponent,
   ],
 })
-export class NamesPartComponent
-  extends ModelEditorComponentBase<NamesPart>
-  implements OnInit
-{
-  private _updatingForm?: boolean;
+export class NamesPartComponent extends ModelEditorComponentBase<NamesPart> {
 
   public readonly edited = signal<AssertedProperName | undefined>(undefined);
   public readonly editedIndex = signal<number>(-1);
@@ -93,117 +86,48 @@ export class NamesPartComponent
   /**
    * The optional thesaurus proper name languages entries (name-languages).
    */
-  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly langEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['name-languages']?.entries,
+  );
   /**
    * The optional thesaurus name's tag entries (name-tags).
    */
-  public readonly tagEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly tagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['name-tags']?.entries,
+  );
   /**
    * The optional thesaurus name piece's type entries (name-piece-types).
    */
-  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly typeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['name-piece-types']?.entries,
+  );
   // thesauri for assertions:
   // assertion-tags
-  public readonly assTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly assTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['assertion-tags']?.entries,
   );
   // doc-reference-types
-  public readonly refTypeEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTypeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-types']?.entries,
   );
   // doc-reference-tags
-  public readonly refTagEntries = signal<ThesaurusEntry[] | undefined>(
-    undefined,
+  public readonly refTagEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['doc-reference-tags']?.entries,
   );
 
-  public names: FormControl<AssertedProperName[]>;
+  // form
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    NgxToolsSignalValidators.strictMinLength(p.names, 1);
+  });
 
-  constructor(
-    authService: AuthJwtService,
-    formBuilder: FormBuilder,
-    private _dialogService: DialogService,
-  ) {
-    super(authService, formBuilder);
-    // form
-    this.names = formBuilder.control([], {
-      validators: NgxToolsValidators.strictMinLengthValidator(1),
-      nonNullable: true,
-    });
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      names: this.names,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'name-languages';
-    if (this.hasThesaurus(key)) {
-      this.langEntries.set(thesauri[key].entries);
-    } else {
-      this.langEntries.set(undefined);
-    }
-    key = 'name-tags';
-    if (this.hasThesaurus(key)) {
-      this.tagEntries.set(thesauri[key].entries);
-    } else {
-      this.tagEntries.set(undefined);
-    }
-    key = 'name-piece-types';
-    if (this.hasThesaurus(key)) {
-      this.typeEntries.set(thesauri[key].entries);
-    } else {
-      this.typeEntries.set(undefined);
-    }
-    key = 'assertion-tags';
-    if (this.hasThesaurus(key)) {
-      this.assTagEntries.set(thesauri[key].entries);
-    } else {
-      this.assTagEntries.set(undefined);
-    }
-    key = 'doc-reference-types';
-    if (this.hasThesaurus(key)) {
-      this.refTypeEntries.set(thesauri[key].entries);
-    } else {
-      this.refTypeEntries.set(undefined);
-    }
-    key = 'doc-reference-tags';
-    if (this.hasThesaurus(key)) {
-      this.refTagEntries.set(thesauri[key].entries);
-    } else {
-      this.refTagEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: NamesPart | null): void {
-    this._updatingForm = true;
-    if (!part) {
-      this.form.reset();
-    } else {
-      this.names.setValue(part.names || []);
-      this.form.markAsPristine();
-    }
-    this._updatingForm = false;
-  }
-
-  protected override onDataSet(data?: EditedObject<NamesPart>): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
+  constructor(private _dialogService: DialogService) {
+    super();
   }
 
   protected getValue(): NamesPart {
     let part = this.getEditedPart(NAMES_PART_TYPEID) as NamesPart;
-    part.names = this.names.value || [];
+    part.names = copyFormValue(this._draft().names);
     return part;
   }
 
@@ -212,10 +136,9 @@ export class NamesPartComponent
       language: this.langEntries()?.length ? this.langEntries()![0].id : '',
       pieces: [],
     };
-    this.names.setValue([...(this.names.value || []), name]);
-    this.names.updateValueAndValidity();
-    this.names.markAsDirty();
-    this.editName(this.names.value.length - 1);
+    this.form.names().value.set([...(this.form.names().value() || []), name]);
+    this.form.names().markAsDirty();
+    this.editName(this.form.names().value().length - 1);
   }
 
   public editName(index: number): void {
@@ -224,23 +147,19 @@ export class NamesPartComponent
       this.edited.set(undefined);
     } else {
       this.editedIndex.set(index);
-      this.edited.set(structuredClone(this.names.value[index]));
+      this.edited.set(structuredClone(this.form.names().value()[index]));
     }
   }
 
   public onNameChange(name: AssertedProperName | undefined): void {
-    if (this._updatingForm) {
-      return;
-    }
     if (name) {
       // else update replacing the old with the new name
-      this.names.setValue(
-        this.names.value.map((n: AssertedProperName, i: number) =>
+      this.form.names().value.set(
+        this.form.names().value().map((n: AssertedProperName, i: number) =>
           i === this.editedIndex() ? name : n,
         ),
       );
-      this.names.updateValueAndValidity();
-      this.names.markAsDirty();
+      this.form.names().markAsDirty();
     }
   }
 
@@ -254,11 +173,10 @@ export class NamesPartComponent
       .pipe(take(1))
       .subscribe((yes) => {
         if (yes) {
-          const names = [...this.names.value];
+          const names = [...this.form.names().value()];
           names.splice(index, 1);
-          this.names.setValue(names);
-          this.names.updateValueAndValidity();
-          this.names.markAsDirty();
+          this.form.names().value.set(names);
+          this.form.names().markAsDirty();
         }
       });
   }
@@ -267,25 +185,23 @@ export class NamesPartComponent
     if (index < 1) {
       return;
     }
-    const name = this.names.value[index];
-    const names = [...this.names.value];
+    const name = this.form.names().value()[index];
+    const names = [...this.form.names().value()];
     names.splice(index, 1);
     names.splice(index - 1, 0, name);
-    this.names.setValue(names);
-    this.names.updateValueAndValidity();
-    this.names.markAsDirty();
+    this.form.names().value.set(names);
+    this.form.names().markAsDirty();
   }
 
   public moveNameDown(index: number): void {
-    if (index + 1 >= this.names.value.length) {
+    if (index + 1 >= this.form.names().value().length) {
       return;
     }
-    const name = this.names.value[index];
-    const names = [...this.names.value];
+    const name = this.form.names().value()[index];
+    const names = [...this.form.names().value()];
     names.splice(index, 1);
     names.splice(index + 1, 0, name);
-    this.names.setValue(names);
-    this.names.updateValueAndValidity();
-    this.names.markAsDirty();
+    this.form.names().value.set(names);
+    this.form.names().markAsDirty();
   }
 }

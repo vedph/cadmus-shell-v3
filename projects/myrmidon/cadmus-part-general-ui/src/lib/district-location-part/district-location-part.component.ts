@@ -1,19 +1,11 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
-  signal,
+  computed,
+  linkedSignal,
 } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import {
-  FormControl,
-  FormBuilder,
-  Validators,
-  FormGroup,
-  UntypedFormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormField, maxLength, required } from '@angular/forms/signals';
 
 import {
   MatCard,
@@ -27,17 +19,12 @@ import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
 import {
   ProperName,
   ProperNameComponent,
 } from '@myrmidon/cadmus-refs-proper-name';
 
-import {
-  ThesauriSet,
-  ThesaurusEntry,
-  EditedObject,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -48,6 +35,21 @@ import {
   DistrictLocationPart,
   DISTRICT_LOCATION_PART_TYPEID,
 } from '../district-location-part';
+import { copyFormValue } from '../signal-form-utils';
+
+interface DistrictLocationPartControls {
+  place: ProperName | null;
+  note: string;
+}
+
+function toDraft(
+  part?: DistrictLocationPart | null,
+): DistrictLocationPartControls {
+  return {
+    place: copyFormValue(part?.place || null),
+    note: part?.note || '',
+  };
+}
 
 /**
  * DistrictLocation part editor component.
@@ -59,8 +61,7 @@ import {
   styleUrl: './district-location-part.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
     MatCard,
     MatCardHeader,
     HelpLinkComponent,
@@ -78,94 +79,43 @@ import {
     CloseSaveButtonsComponent,
   ],
 })
-export class DistrictLocationPartComponent
-  extends ModelEditorComponentBase<DistrictLocationPart>
-  implements OnInit
-{
-  // form
-  public place: FormControl<ProperName | null>;
-  public note: FormControl<string | null>;
+export class DistrictLocationPartComponent extends ModelEditorComponentBase<DistrictLocationPart> {
+  private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
+  public readonly form = this.createForm(this._draft, (p) => {
+    required(p.place);
+    maxLength(p.note, 5000);
+  });
 
-  // state
-  public readonly name = signal<ProperName | undefined>(undefined);
+  /**
+   * The name for the name editor. It changes only with data, not with
+   * the name editor's own changes.
+   */
+  public readonly name = computed<ProperName | undefined>(
+    () => this.data()?.value?.place,
+  );
 
   // thesauri:
   // district-name-piece-types
-  public readonly typeEntries = signal<ThesaurusEntry[] | undefined>(undefined);
+  public readonly typeEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['district-name-piece-types']?.entries,
+  );
   // district-name-lang-entries
-  public readonly langEntries = signal<ThesaurusEntry[] | undefined>(undefined);
-
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-    // form
-    this.place = formBuilder.control(null, Validators.required);
-    this.note = formBuilder.control(null, Validators.maxLength(5000));
-  }
-
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      place: this.place,
-      note: this.note,
-    });
-  }
-
-  private updateThesauri(thesauri: ThesauriSet): void {
-    let key = 'district-name-piece-types';
-    if (this.hasThesaurus(key)) {
-      this.typeEntries.set(thesauri[key].entries);
-    } else {
-      this.typeEntries.set(undefined);
-    }
-    key = 'district-name-lang-entries';
-    if (this.hasThesaurus(key)) {
-      this.langEntries.set(thesauri[key].entries);
-    } else {
-      this.langEntries.set(undefined);
-    }
-  }
-
-  private updateForm(part?: DistrictLocationPart | null): void {
-    if (!part) {
-      this.name.set(undefined);
-      this.form.reset();
-      return;
-    }
-    this.name.set(part.place);
-    this.place.setValue(part.place || null);
-    this.note.setValue(part.note || null);
-
-    this.form.markAsPristine();
-  }
+  public readonly langEntries = computed<ThesaurusEntry[] | undefined>(
+    () => this.data()?.thesauri?.['district-name-lang-entries']?.entries,
+  );
 
   public onNameChange(name: ProperName | undefined): void {
-    this.place.setValue(name || null);
-    this.place.updateValueAndValidity();
-    this.place.markAsDirty();
-  }
-
-  protected override onDataSet(
-    data?: EditedObject<DistrictLocationPart>,
-  ): void {
-    // thesauri
-    if (data?.thesauri) {
-      this.updateThesauri(data.thesauri);
-    }
-
-    // form
-    this.updateForm(data?.value);
+    this.form.place().value.set(copyFormValue(name || null));
+    this.form.place().markAsDirty();
   }
 
   protected getValue(): DistrictLocationPart {
     let part = this.getEditedPart(
       DISTRICT_LOCATION_PART_TYPEID,
     ) as DistrictLocationPart;
-
-    part.place = this.place.value || { language: '', pieces: [] };
-    part.note = this.note.value?.trim() || undefined;
+    const draft = this._draft();
+    part.place = copyFormValue(draft.place) || { language: '', pieces: [] };
+    part.note = draft.note?.trim() || undefined;
 
     return part;
   }
