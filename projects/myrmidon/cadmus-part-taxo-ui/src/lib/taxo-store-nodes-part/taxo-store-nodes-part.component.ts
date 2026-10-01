@@ -1,16 +1,9 @@
-﻿import {
+import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  linkedSignal,
   signal,
 } from '@angular/core';
-import {
-  FormControl,
-  FormBuilder,
-  FormGroup,
-  UntypedFormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { MatBadge } from '@angular/material/badge';
@@ -23,8 +16,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { AuthJwtService } from '@myrmidon/auth-jwt-login';
-import { EditedObject } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -62,6 +53,25 @@ const DEFAULT_SETTINGS: TaxoStoreNodesPartSettings = {
   canDelete: true,
 };
 
+interface TaxoStoreNodesPartControls {
+  nodeIds: StringPair[];
+}
+
+/**
+ * Bound part -> editable draft. The node pairs are copied, so that the
+ * form never adopts the bound part's objects.
+ */
+function toDraft(
+  part?: TaxoStoreNodesPart | null,
+): TaxoStoreNodesPartControls {
+  return {
+    nodeIds: (part?.nodeIds || []).map((n) => ({
+      value: n.value,
+      name: n.name,
+    })),
+  };
+}
+
 /**
  * TaxoStoreNodesPart editor component.
  * This has no thesauri, but requires the taxonomy tree ID to be set in settings,
@@ -71,7 +81,6 @@ const DEFAULT_SETTINGS: TaxoStoreNodesPartSettings = {
   selector: 'cadmus-taxo-store-nodes-part',
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     MatBadge,
     MatButtonModule,
     MatCardModule,
@@ -88,11 +97,11 @@ const DEFAULT_SETTINGS: TaxoStoreNodesPartSettings = {
   styleUrl: './taxo-store-nodes-part.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaxoStoreNodesPartComponent
-  extends ModelEditorComponentBase<TaxoStoreNodesPart>
-  implements OnInit
-{
-  public nodeIds: FormControl<StringPair[]>;
+export class TaxoStoreNodesPartComponent extends ModelEditorComponentBase<TaxoStoreNodesPart> {
+  private readonly _draft = linkedSignal<TaxoStoreNodesPartControls>(() =>
+    toDraft(this.data()?.value),
+  );
+  public readonly form = this.createForm(this._draft);
 
   /**
    * The ID of the taxonomy tree to use. This is specified in settings, possibly with
@@ -107,11 +116,8 @@ export class TaxoStoreNodesPartComponent
   public readonly canAdd = signal<boolean>(true);
   public readonly canDelete = signal<boolean>(true);
 
-  constructor(authService: AuthJwtService, formBuilder: FormBuilder) {
-    super(authService, formBuilder);
-
-    // form
-    this.nodeIds = formBuilder.control([], { nonNullable: true });
+  constructor() {
+    super();
 
     // settings: try role-specific first, fall back to global
     this.initSettings<TaxoStoreNodesPartSettings>(
@@ -141,48 +147,30 @@ export class TaxoStoreNodesPartComponent
     this.canDelete.set(settings.canDelete !== false);
   }
 
-  public override ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  protected buildForm(formBuilder: FormBuilder): FormGroup | UntypedFormGroup {
-    return formBuilder.group({
-      nodeIds: this.nodeIds,
-    });
-  }
-
-  private updateForm(part?: TaxoStoreNodesPart | null): void {
-    if (!part) {
-      this.form.reset();
-      return;
-    }
-    this.nodeIds.setValue(part.nodeIds || []);
-    this.form.markAsPristine();
-  }
-
-  protected override onDataSet(data?: EditedObject<TaxoStoreNodesPart>): void {
-    // form
-    this.updateForm(data?.value);
-  }
-
   protected getValue(): TaxoStoreNodesPart {
     let part = this.getEditedPart(
       TAXO_STORE_NODES_PART_TYPEID,
     ) as TaxoStoreNodesPart;
-    part.nodeIds = [...this.nodeIds.value];
+    part.nodeIds = this._draft().nodeIds.map((n) => ({
+      value: n.value,
+      name: n.name,
+    }));
     return part;
   }
 
+  private setNodes(nodes: StringPair[]): void {
+    this.form.nodeIds().value.set(nodes);
+    this.form.nodeIds().markAsDirty();
+  }
+
   public removeNode(index: number): void {
-    const nodes = [...this.nodeIds.value];
+    const nodes = [...this.form.nodeIds().value()];
     nodes.splice(index, 1);
-    this.nodeIds.setValue(nodes);
-    this.nodeIds.markAsDirty();
-    this.nodeIds.updateValueAndValidity();
+    this.setNodes(nodes);
   }
 
   public addNode(node: TaxoStoreNode): void {
-    const nodes = [...this.nodeIds.value];
+    const nodes = [...this.form.nodeIds().value()];
     const newNode: StringPair = { value: node.key, name: node.label };
 
     // if a node with the same key exists:
@@ -192,9 +180,7 @@ export class TaxoStoreNodesPartComponent
     if (i !== -1) {
       if (nodes[i].name !== node.label) {
         nodes[i] = newNode;
-        this.nodeIds.setValue(nodes);
-        this.nodeIds.markAsDirty();
-        this.nodeIds.updateValueAndValidity();
+        this.setNodes(nodes);
       }
       return;
     }
@@ -202,9 +188,6 @@ export class TaxoStoreNodesPartComponent
     // add new node and sort by label
     nodes.push(newNode);
     nodes.sort((a, b) => a.name.localeCompare(b.name));
-
-    this.nodeIds.setValue(nodes);
-    this.nodeIds.markAsDirty();
-    this.nodeIds.updateValueAndValidity();
+    this.setNodes(nodes);
   }
 }

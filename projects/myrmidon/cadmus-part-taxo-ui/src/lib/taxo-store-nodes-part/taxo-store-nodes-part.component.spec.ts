@@ -31,6 +31,12 @@ class FakeTaxoStorePicker {
   public readonly nodePick = output<TaxoStoreNode>();
 }
 
+// the form tags the draft's array items with an identity Symbol:
+// compare their plain data only
+function plain<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
+}
+
 function makePart(overrides?: Partial<TaxoStoreNodesPart>): TaxoStoreNodesPart {
   return {
     id: 'part1',
@@ -92,8 +98,8 @@ describe('TaxoStoreNodesPartComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should build an initially empty nodeIds control', () => {
-    expect(component.nodeIds.value).toEqual([]);
+  it('should build an initially empty nodeIds field', () => {
+    expect(plain(component.form.nodeIds().value())).toEqual([]);
   });
 
   describe('settings (via initSettings)', () => {
@@ -219,12 +225,12 @@ describe('TaxoStoreNodesPartComponent', () => {
         thesauri: {},
       } as EditedObject<TaxoStoreNodesPart>);
       fixture.detectChanges();
-      expect(component.nodeIds.value).toEqual([{ name: 'n1', value: 'v1' }]);
+      expect(plain(component.form.nodeIds().value())).toEqual([{ name: 'n1', value: 'v1' }]);
 
       fixture.componentRef.setInput('data', undefined);
       fixture.detectChanges();
 
-      expect(component.nodeIds.value).toEqual([]);
+      expect(plain(component.form.nodeIds().value())).toEqual([]);
     });
 
     it('should populate nodeIds from the part', () => {
@@ -238,8 +244,8 @@ describe('TaxoStoreNodesPartComponent', () => {
       } as EditedObject<TaxoStoreNodesPart>);
       fixture.detectChanges();
 
-      expect(component.nodeIds.value).toEqual(nodeIds);
-      expect(component.form.pristine).toBe(true);
+      expect(plain(component.form.nodeIds().value())).toEqual(nodeIds);
+      expect(component.form().dirty()).toBe(false);
     });
 
     it('should default nodeIds to an empty array when the part has none', () => {
@@ -249,7 +255,7 @@ describe('TaxoStoreNodesPartComponent', () => {
       } as EditedObject<TaxoStoreNodesPart>);
       fixture.detectChanges();
 
-      expect(component.nodeIds.value).toEqual([]);
+      expect(plain(component.form.nodeIds().value())).toEqual([]);
     });
   });
 
@@ -262,7 +268,7 @@ describe('TaxoStoreNodesPartComponent', () => {
         roleId: null,
       });
       const nodeIds = [{ name: 'n1', value: 'v1' }];
-      component.nodeIds.setValue(nodeIds);
+      component.form.nodeIds().value.set(nodeIds);
 
       const part = (component as any).getValue() as TaxoStoreNodesPart;
 
@@ -276,31 +282,81 @@ describe('TaxoStoreNodesPartComponent', () => {
       component.addNode({ key: 'k2', label: 'Beta' } as TaxoStoreNode);
       component.addNode({ key: 'k1', label: 'Alpha' } as TaxoStoreNode);
 
-      expect(component.nodeIds.value).toEqual([
+      expect(plain(component.form.nodeIds().value())).toEqual([
         { value: 'k1', name: 'Alpha' },
         { value: 'k2', name: 'Beta' },
       ]);
-      expect(component.nodeIds.dirty).toBe(true);
+      expect(component.form.nodeIds().dirty()).toBe(true);
     });
 
     it('should update the label when the same key is picked again with a different label', () => {
       component.addNode({ key: 'k1', label: 'Old' } as TaxoStoreNode);
-      component.nodeIds.markAsPristine();
+      component.form().reset();
 
       component.addNode({ key: 'k1', label: 'New' } as TaxoStoreNode);
 
-      expect(component.nodeIds.value).toEqual([{ value: 'k1', name: 'New' }]);
-      expect(component.nodeIds.dirty).toBe(true);
+      expect(plain(component.form.nodeIds().value())).toEqual([{ value: 'k1', name: 'New' }]);
+      expect(component.form.nodeIds().dirty()).toBe(true);
     });
 
     it('should do nothing when the same key/label is picked again', () => {
       component.addNode({ key: 'k1', label: 'Same' } as TaxoStoreNode);
-      component.nodeIds.markAsPristine();
+      component.form().reset();
 
       component.addNode({ key: 'k1', label: 'Same' } as TaxoStoreNode);
 
-      expect(component.nodeIds.value).toEqual([{ value: 'k1', name: 'Same' }]);
-      expect(component.nodeIds.dirty).toBe(false);
+      expect(plain(component.form.nodeIds().value())).toEqual([{ value: 'k1', name: 'Same' }]);
+      expect(component.form.nodeIds().dirty()).toBe(false);
+    });
+  });
+
+  describe('signal form', () => {
+    it('should not adopt the bound part node objects', () => {
+      const nodeIds = [{ name: 'n1', value: 'v1' }];
+      fixture.componentRef.setInput('data', {
+        value: makePart({ nodeIds }),
+        thesauri: {},
+      } as EditedObject<TaxoStoreNodesPart>);
+      fixture.detectChanges();
+
+      expect(component.form.nodeIds().value()[0]).not.toBe(nodeIds[0]);
+      expect(Object.getOwnPropertySymbols(nodeIds[0])).toEqual([]);
+    });
+
+    it('should render no <form> element', () => {
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    });
+
+    it('should save the picked nodes from the save button', () => {
+      // an editor can save (set before binding data, which re-renders)
+      component.userLevel = 3;
+      fixture.componentRef.setInput('identity', {
+        itemId: 'item1',
+        typeId: TAXO_STORE_NODES_PART_TYPEID,
+        partId: 'part1',
+        roleId: null,
+      });
+      fixture.componentRef.setInput('data', {
+        value: makePart(),
+        thesauri: {},
+      } as EditedObject<TaxoStoreNodesPart>);
+      fixture.detectChanges();
+      component.addNode({ key: 'k1', label: 'Alpha' } as TaxoStoreNode);
+      fixture.detectChanges();
+      expect(component.isDirty()).toBe(true);
+
+      const save = Array.from(
+        fixture.nativeElement.querySelectorAll(
+          'cadmus-close-save-buttons button',
+        ) as NodeListOf<HTMLButtonElement>,
+      ).find((b) => b.textContent?.includes('save'))!;
+      save.click();
+      fixture.detectChanges();
+
+      expect(component.data()!.value!.nodeIds).toEqual([
+        { value: 'k1', name: 'Alpha' },
+      ]);
+      expect(component.isDirty()).toBe(false);
     });
   });
 
@@ -311,8 +367,8 @@ describe('TaxoStoreNodesPartComponent', () => {
 
       component.removeNode(0);
 
-      expect(component.nodeIds.value).toEqual([{ value: 'k2', name: 'Beta' }]);
-      expect(component.nodeIds.dirty).toBe(true);
+      expect(plain(component.form.nodeIds().value())).toEqual([{ value: 'k2', name: 'Beta' }]);
+      expect(component.form.nodeIds().dirty()).toBe(true);
     });
   });
 });
