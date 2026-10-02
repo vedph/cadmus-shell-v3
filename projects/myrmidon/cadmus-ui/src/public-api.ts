@@ -14,9 +14,6 @@ export * from './lib/components/part-badge/part-badge.component';
 
 export * from './lib/components/model-editor-component-base';
 
-export * from './lib/validators/custom-validators';
-export * from './lib/validators/json-validators';
-
 export * from './lib/services/user-ref-lookup.service';
 export * from './lib/services/editor-help.service';
 

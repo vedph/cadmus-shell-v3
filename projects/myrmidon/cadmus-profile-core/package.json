@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-profile-core",
-  "version": "13.0.1",
+  "version": "20.0.0",
   "description": "Cadmus - profile services.",
   "keywords": [
     "Cadmus"
@@ -14,9 +14,9 @@
     "name": "Daniele Fusi"
   },
   "peerDependencies": {
-    "@angular/common": "^22.0.0",
-    "@angular/core": "^22.0.0",
-    "@myrmidon/cadmus-core": "^13.0.1"
+    "@angular/common": "^22.2.1",
+    "@angular/core": "^22.2.1",
+    "@myrmidon/cadmus-core": "^20.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

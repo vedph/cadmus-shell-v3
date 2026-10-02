@@ -1,5 +1,8 @@
 # History
 
+- 2026-10-02:
+  - ⚠️ removed legacy validators from `@myrmidon/cadmus-ui`.
+  - bumped all major versions to 20.
 - 2026-10-01:
   - ⚠️ migrated the part/fragment editors base to Angular signal forms (`@myrmidon/cadmus-ui`). This is breaking for all the part and fragment editors, including those of your own apps. See [Migrating a part editor](#migrating-a-part-editor) below.
     - `ModelEditorComponentBase`:
@@ -67,7 +70,7 @@
 
 ## Migrating a part editor
 
-Since 2026-10-01, `ModelEditorComponentBase` uses Angular signal forms. A part (or fragment) editor derived from it is migrated like this (example from the note part editor):
+Since version 20 (2026-10-01), `ModelEditorComponentBase` uses Angular signal forms. A part (or fragment) editor derived from it is migrated like this (example from the note part editor):
 
 ```ts
 // the editable shape behind the form
@@ -112,6 +115,8 @@ In the template:
 - add `(saveRequest)="save()"` to `<cadmus-close-save-buttons>`.
 
 Finally, replace `ReactiveFormsModule` with `FormField` in the component's imports.
+
+---
 
 ## Context Help Configuration
 

@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-graph-pg-ex",
-  "version": "17.0.1",
+  "version": "20.0.0",
   "description": "Cadmus - extended semantic graph page.",
   "keywords": [
     "Cadmus"
@@ -17,16 +17,16 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@angular/common": "^22.0.0",
-    "@angular/core": "^22.0.0",
-    "@angular/material": "^22.0.0",
-    "@myrmidon/ngx-tools": "^3.0.1",
+    "@angular/common": "^22.2.1",
+    "@angular/core": "^22.2.1",
+    "@angular/material": "^22.2.1",
+    "@myrmidon/ngx-tools": "^3.0.2",
     "@myrmidon/ngx-mat-tools": "^3.0.1",
-    "@myrmidon/cadmus-refs-lookup": "^11.0.0",
-    "@myrmidon/cadmus-api": "^15.0.1",
-    "@myrmidon/cadmus-graph-ui": "^16.0.0",
-    "@myrmidon/cadmus-graph-ui-ex": "^17.0.0",
-    "@myrmidon/cadmus-core": "^13.0.1"
+    "@myrmidon/cadmus-refs-lookup": "^11.0.6",
+    "@myrmidon/cadmus-api": "^20.0.0",
+    "@myrmidon/cadmus-graph-ui": "^20.0.0",
+    "@myrmidon/cadmus-graph-ui-ex": "^20.0.0",
+    "@myrmidon/cadmus-core": "^20.0.0"
   },
   "sideEffects": false
 }
