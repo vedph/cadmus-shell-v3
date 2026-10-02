@@ -1,5 +1,7 @@
 # History
 
+## 20.0.0
+
 - 2026-10-02:
   - ⚠️ removed legacy validators from `@myrmidon/cadmus-ui`.
   - bumped all major versions to 20.
