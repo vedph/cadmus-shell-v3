@@ -48,6 +48,7 @@ import {
 import { OrthographyFragment } from '../orthography-fragment';
 import { EditOperation } from '../services/edit-operation';
 import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-set.component';
+import { setFieldFromChild } from '../signal-form-utils';
 
 interface OrthographyFragmentControls {
   reference: string;
@@ -212,10 +213,10 @@ export class OrthographyFragmentComponent extends ModelEditorComponentBase<Ortho
   }
 
   public onTagEntriesChange(entries: ThesaurusEntry[]): void {
-    this.form
-      .tags()
-      .value.set(entries.map((e) => ({ id: e.id, value: e.value })));
-    this.form.tags().markAsDirty();
+    setFieldFromChild(
+      this.form.tags,
+      entries.map((e) => ({ id: e.id, value: e.value })),
+    );
   }
 
   protected override getValue(): OrthographyFragment {
@@ -233,8 +234,7 @@ export class OrthographyFragmentComponent extends ModelEditorComponentBase<Ortho
   }
 
   public onOperationsChange(operations: EditOperation[]): void {
-    this.form.operations().value.set(operations);
-    this.form.operations().markAsDirty();
+    setFieldFromChild(this.form.operations, operations);
   }
 
   public renderLabel(label: string): string {

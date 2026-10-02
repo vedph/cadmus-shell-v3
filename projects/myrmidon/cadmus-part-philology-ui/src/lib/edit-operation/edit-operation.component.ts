@@ -10,12 +10,7 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
-import {
-  FormField,
-  form,
-  maxLength,
-  min,
-} from '@angular/forms/signals';
+import { FormField, form, maxLength, min } from '@angular/forms/signals';
 
 // material
 import { MatButtonModule } from '@angular/material/button';
@@ -45,7 +40,7 @@ import {
   CharTextViewComponent,
   NumberedChar,
 } from '../char-text-view/char-text-view.component';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission, setFieldFromChild } from '../signal-form-utils';
 
 interface EditOperationControls {
   dsl: string;
@@ -101,7 +96,6 @@ function mapIdsToEntries(
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditOperationComponent {
-
   /**
    * The edit operation being edited (model).
    */
@@ -237,10 +231,10 @@ export class EditOperationComponent {
   }
 
   public onOpTagEntriesChange(entries: ThesaurusEntry[]) {
-    this.form
-      .tags()
-      .value.set(entries.map((e) => ({ id: e.id, value: e.value })));
-    this.form.tags().markAsDirty();
+    setFieldFromChild(
+      this.form.tags,
+      entries.map((e) => ({ id: e.id, value: e.value })),
+    );
   }
 
   private setInputTexts(op: EditOperation): void {

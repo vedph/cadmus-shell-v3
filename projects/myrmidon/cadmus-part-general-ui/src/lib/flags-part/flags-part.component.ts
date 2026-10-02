@@ -26,7 +26,7 @@ import {
 import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
 import { FLAGS_PART_TYPEID, FlagsPart } from '../flags-part';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 function entryToFlag(entry: ThesaurusEntry): Flag {
   return {
@@ -126,13 +126,11 @@ export class FlagsPartComponent extends ModelEditorComponentBase<FlagsPart> {
   }
 
   public onFlagsCheckedIdsChange(ids: string[]): void {
-    this.form.flags().value.set([...ids]);
-    this.form.flags().markAsDirty();
+    setFieldFromChild(this.form.flags, [...ids]);
   }
 
   public onSetChange(set: NoteSet): void {
-    this.form.notes().value.set(copyFormValue(set));
-    this.form.notes().markAsDirty();
+    setFieldFromChild(this.form.notes, copyFormValue(set));
   }
 
   protected getValue(): FlagsPart {

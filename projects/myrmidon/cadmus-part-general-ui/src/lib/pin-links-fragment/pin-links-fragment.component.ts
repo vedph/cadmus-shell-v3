@@ -23,9 +23,7 @@ import {
   AssertedCompositeIdsComponent,
 } from '@myrmidon/cadmus-refs-asserted-ids';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -37,7 +35,7 @@ import {
   PIN_LINKS_FRAGMENT_TYPEID,
   PinLinksFragment,
 } from '../pin-links-fragment';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface PinLinksFragmentPartControls {
   links: AssertedCompositeId[];
@@ -139,7 +137,6 @@ export class PinLinksFragmentComponent extends ModelEditorComponentBase<PinLinks
   }
 
   public onIdsChange(ids: AssertedCompositeId[]): void {
-    this.form.links().value.set(copyFormValue(ids || []));
-    this.form.links().markAsDirty();
+    setFieldFromChild(this.form.links, copyFormValue(ids || []));
   }
 }

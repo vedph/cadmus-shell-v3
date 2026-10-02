@@ -32,7 +32,7 @@ import {
   DOC_REFERENCES_PART_TYPEID,
 } from '../doc-references-part';
 import { LookupDocReferencesComponent } from '@myrmidon/cadmus-refs-lookup';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface DocReferencesPartSettings {
   noLookup?: boolean;
@@ -110,7 +110,6 @@ export class DocReferencesPartComponent extends ModelEditorComponentBase<DocRefe
   }
 
   public onReferencesChange(references: DocReference[]): void {
-    this.form.references().value.set(copyFormValue(references || []));
-    this.form.references().markAsDirty();
+    setFieldFromChild(this.form.references, copyFormValue(references || []));
   }
 }

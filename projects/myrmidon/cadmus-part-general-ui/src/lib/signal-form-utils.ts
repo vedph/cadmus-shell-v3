@@ -70,11 +70,97 @@ interface EditableTextField {
  * @param field The field to set.
  * @param value The value emitted by the editor.
  */
-export function setFieldFromEditor(field: EditableTextField, value: string): void {
+export function setFieldFromEditor(
+  field: EditableTextField,
+  value: string,
+): void {
   const state = field();
   if (state.value() === (value ?? '')) {
     return;
   }
   state.value.set(value ?? '');
+  state.markAsDirty();
+}
+
+// true for the values which stand for "no value" in a model
+function isEmptyFormValue(value: unknown): boolean {
+  return value === undefined || value === null || value === '';
+}
+
+/**
+ * True if the two values are equal as model values: they are deeply
+ * equal, except that null, undefined, an empty string and a missing
+ * property all count as the same empty value. Child editors often
+ * normalize the model they emit, e.g. turning a null into undefined or
+ * dropping an empty property, so their output can differ from the bound
+ * value in form only.
+ *
+ * @param a The first value.
+ * @param b The second value.
+ */
+export function sameFormValue(a: unknown, b: unknown): boolean {
+  if (isEmptyFormValue(a) || isEmptyFormValue(b)) {
+    return isEmptyFormValue(a) && isEmptyFormValue(b);
+  }
+  if (a === b) {
+    return true;
+  }
+  if (typeof a !== 'object' || typeof b !== 'object') {
+    return false;
+  }
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return (
+      Array.isArray(a) &&
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((item, i) => sameFormValue(item, b[i]))
+    );
+  }
+  if (a instanceof Date || b instanceof Date) {
+    return (
+      a instanceof Date && b instanceof Date && a.getTime() === b.getTime()
+    );
+  }
+  const ra = a as Record<string, unknown>;
+  const rb = b as Record<string, unknown>;
+  const keys = new Set([...Object.keys(ra), ...Object.keys(rb)]);
+  for (const key of keys) {
+    if (!sameFormValue(ra[key], rb[key])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * A field whose value can be set from a child editor component.
+ */
+interface EditableField<T> {
+  (): {
+    value: { (): T; set(value: T): void };
+    markAsDirty(): void;
+  };
+}
+
+/**
+ * Set a field from the value emitted by a child editor component, unless
+ * it is the same model value as the field's (see `sameFormValue`); in
+ * that case the field is left untouched. Else, the value is set and the
+ * field marked as dirty. Use this in the handlers of child editors whose
+ * value is bound to a field, like `(referencesChange)`: many of them
+ * (e.g. those which autosave after a debounce) emit also when they just
+ * received new data, a normalized copy of what they got; marking the
+ * field as dirty in this case makes the editor look edited right after
+ * loading.
+ *
+ * @param field The field to set.
+ * @param value The value emitted by the child editor.
+ */
+export function setFieldFromChild<T>(field: EditableField<T>, value: T): void {
+  const state = field();
+  if (sameFormValue(state.value(), value)) {
+    return;
+  }
+  state.value.set(value);
   state.markAsDirty();
 }

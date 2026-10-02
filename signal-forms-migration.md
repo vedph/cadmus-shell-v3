@@ -1299,3 +1299,29 @@ failed "pristine again after save".
   the cached second load.
 - Measured: 649 + 517 tests pass in the two libraries after the fix.
 
+
+**Bug found and fixed: child editor echo.** Opening a historical date or
+district location part and closing it without changes triggered the
+pending changes guard.
+
+- Measured on the real API data: both parts contain nulls
+  (`references[].tag: null`, `place.tag: null`).
+- `cadmus-refs-doc-references` and `cadmus-refs-proper-name` autosave
+  after a 300 ms debounce. Their equality check compares a normalized
+  copy (`tag: undefined`) against the bound value (`tag: null`), finds
+  a difference and emits. The parent handler then set the field and
+  called `markAsDirty()` without checking anything, after the base
+  class had reset the form.
+- Fix: `setFieldFromChild(field, value)` in `signal-form-utils.ts` (in
+  both general and philology). It ignores a value that
+  `sameFormValue()` finds equal to the field's: a deep comparison where
+  null, undefined, `''` and a missing property all count as empty. All
+  handlers bound to a child editor that stays mounted now use it:
+  historical date, district location, doc references, external IDs,
+  decorated counts, physical measurements, pin links (part and
+  fragment), flags, chronology, comment, bibliography entry, asserted
+  historical date, historical event, related entity, edit operation and
+  orthography. Handlers for add, remove, move and pick are user actions,
+  so they still always mark the form dirty.
+- Specs cover `sameFormValue` and `setFieldFromChild`. Measured: 655 +
+  523 tests pass in the two libraries.

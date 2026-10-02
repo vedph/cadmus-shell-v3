@@ -8,11 +8,7 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
-import {
-  FormField,
-  form,
-  required,
-} from '@angular/forms/signals';
+import { FormField, form, required } from '@angular/forms/signals';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -30,7 +26,7 @@ import {
   HistoricalDateComponent,
   HistoricalDateModel,
 } from '@myrmidon/cadmus-refs-historical-date';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission, setFieldFromChild } from '../signal-form-utils';
 
 interface AssertedHistoricalDateControls {
   tag: string;
@@ -122,13 +118,11 @@ export class AssertedHistoricalDateComponent {
   }
 
   public onAssertionChange(assertion: Assertion | undefined): void {
-    this.form.assertion().value.set(assertion || null);
-    this.form.assertion().markAsDirty();
+    setFieldFromChild(this.form.assertion, assertion || null);
   }
 
   public onDateChange(date?: HistoricalDateModel): void {
-    this.form.hd().value.set(date || null);
-    this.form.hd().markAsDirty();
+    setFieldFromChild(this.form.hd, date || null);
   }
 
   public cancel(): void {

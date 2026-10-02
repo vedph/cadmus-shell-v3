@@ -22,9 +22,7 @@ import {
   DecoratedCountsComponent,
 } from '@myrmidon/cadmus-refs-decorated-counts';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -35,13 +33,15 @@ import {
   DECORATED_COUNTS_PART_TYPEID,
   DecoratedCountsPart,
 } from '../decorated-counts-part';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface DecoratedCountsPartControls {
   counts: DecoratedCount[];
 }
 
-function toDraft(part?: DecoratedCountsPart | null): DecoratedCountsPartControls {
+function toDraft(
+  part?: DecoratedCountsPart | null,
+): DecoratedCountsPartControls {
   return { counts: copyFormValue(part?.counts || []) };
 }
 
@@ -93,7 +93,6 @@ export class DecoratedCountsPartComponent extends ModelEditorComponentBase<Decor
   }
 
   public onCountsChange(counts: DecoratedCount[]): void {
-    this.form.counts().value.set(copyFormValue(counts || []));
-    this.form.counts().markAsDirty();
+    setFieldFromChild(this.form.counts, copyFormValue(counts || []));
   }
 }

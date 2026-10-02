@@ -43,7 +43,11 @@ import { FlatLookupPipe, NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import { Keyword } from '../keywords-part';
 import { BibEntry, BibAuthor } from '../bibliography-part';
 import { BibAuthorsEditorComponent } from '../bib-authors-editor/bib-authors-editor.component';
-import { copyFormValue, isImplicitSubmission } from '../signal-form-utils';
+import {
+  copyFormValue,
+  isImplicitSubmission,
+  setFieldFromChild,
+} from '../signal-form-utils';
 
 interface BibEntryControls {
   // general
@@ -243,13 +247,14 @@ export class BibliographyEntryComponent {
   }
 
   public onAuthorsChange(authors: BibAuthor[]): void {
-    this.form.authors().value.set(copyFormValue(authors || []));
-    this.form.authors().markAsDirty();
+    setFieldFromChild(this.form.authors, copyFormValue(authors || []));
   }
 
   public onContributorsChange(contributors: BibAuthor[]): void {
-    this.form.contributors().value.set(copyFormValue(contributors || []));
-    this.form.contributors().markAsDirty();
+    setFieldFromChild(
+      this.form.contributors,
+      copyFormValue(contributors || []),
+    );
   }
 
   // #region Keywords

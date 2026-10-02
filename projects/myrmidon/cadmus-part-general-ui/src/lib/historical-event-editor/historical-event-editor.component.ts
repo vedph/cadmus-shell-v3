@@ -10,12 +10,7 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
-import {
-  FormField,
-  form,
-  maxLength,
-  required,
-} from '@angular/forms/signals';
+import { FormField, form, maxLength, required } from '@angular/forms/signals';
 
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -45,7 +40,11 @@ import {
 } from '@myrmidon/cadmus-thesaurus-store';
 
 import { HistoricalEvent, RelatedEntity } from '../historical-events-part';
-import { copyFormValue, isImplicitSubmission } from '../signal-form-utils';
+import {
+  copyFormValue,
+  isImplicitSubmission,
+  setFieldFromChild,
+} from '../signal-form-utils';
 import { RelatedEntityComponent } from '../related-entity/related-entity.component';
 
 const RELATION_SEP = ':';
@@ -272,13 +271,11 @@ export class HistoricalEventEditorComponent {
   }
 
   public onChronotopesChange(chronotope: AssertedChronotope[]): void {
-    this.form.chronotopes().value.set(copyFormValue(chronotope || []));
-    this.form.chronotopes().markAsDirty();
+    setFieldFromChild(this.form.chronotopes, copyFormValue(chronotope || []));
   }
 
   public onAssertionChange(assertion: Assertion | undefined): void {
-    this.form.assertion().value.set(assertion || null);
-    this.form.assertion().markAsDirty();
+    setFieldFromChild(this.form.assertion, assertion || null);
   }
 
   public addEntity(): void {
@@ -302,11 +299,14 @@ export class HistoricalEventEditorComponent {
     // nope if already present (id is a nested object handed back as a new
     // instance by the child editor, so it must be compared by value)
     if (
-      this.form.relatedEntities().value().find(
-        (e) =>
-          JSON.stringify(e.id) === JSON.stringify(entity.id) &&
-          e.relation === entity.relation,
-      )
+      this.form
+        .relatedEntities()
+        .value()
+        .find(
+          (e) =>
+            JSON.stringify(e.id) === JSON.stringify(entity.id) &&
+            e.relation === entity.relation,
+        )
     ) {
       this.closeEntity();
       return;
@@ -351,7 +351,11 @@ export class HistoricalEventEditorComponent {
    * @param event The keydown event.
    */
   public onEnterKey(event: Event): void {
-    if (!isImplicitSubmission(event) || this.form().invalid() || !this.form().dirty()) {
+    if (
+      !isImplicitSubmission(event) ||
+      this.form().invalid() ||
+      !this.form().dirty()
+    ) {
       return;
     }
     event.preventDefault();

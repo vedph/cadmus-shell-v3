@@ -24,9 +24,7 @@ import {
   PhysicalMeasurementSetComponent,
 } from '@myrmidon/cadmus-mat-physical-size';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -42,13 +40,15 @@ import {
   PhysicalMeasurementsFormulaService,
   PhysicalMeasurementsSettings,
 } from './physical-measurements-formula.service';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface PhysicalMeasurementsPartControls {
   measurements: PhysicalMeasurement[];
 }
 
-function toDraft(part?: PhysicalMeasurementsPart | null): PhysicalMeasurementsPartControls {
+function toDraft(
+  part?: PhysicalMeasurementsPart | null,
+): PhysicalMeasurementsPartControls {
   return { measurements: copyFormValue(part?.measurements || []) };
 }
 
@@ -129,7 +129,9 @@ export class PhysicalMeasurementsPartComponent extends ModelEditorComponentBase<
   }
 
   public onMeasurementsChange(measurements: PhysicalMeasurement[]): void {
-    this.form.measurements().value.set(copyFormValue(measurements || []));
-    this.form.measurements().markAsDirty();
+    setFieldFromChild(
+      this.form.measurements,
+      copyFormValue(measurements || []),
+    );
   }
 }

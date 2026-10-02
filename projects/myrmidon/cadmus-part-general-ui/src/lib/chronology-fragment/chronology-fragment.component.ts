@@ -35,6 +35,7 @@ import {
 } from '@myrmidon/cadmus-refs-historical-date';
 
 import { ChronologyFragment } from '../chronology-fragment';
+import { setFieldFromChild } from '../signal-form-utils';
 
 interface ChronologyFragmentControls {
   date: HistoricalDateModel | null;
@@ -102,8 +103,7 @@ export class ChronologyFragmentComponent extends ModelEditorComponentBase<Chrono
   });
 
   public onDateChange(date: HistoricalDateModel): void {
-    this.form.date().value.set(date);
-    this.form.date().markAsDirty();
+    setFieldFromChild(this.form.date, date);
   }
 
   protected getValue(): ChronologyFragment {

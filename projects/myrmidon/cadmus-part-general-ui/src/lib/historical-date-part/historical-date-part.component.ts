@@ -42,7 +42,7 @@ import {
   HistoricalDatePart,
   HISTORICAL_DATE_PART_TYPEID,
 } from '../historical-date-part';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface HistoricalDatePartControls {
   date: HistoricalDateModel;
@@ -110,12 +110,10 @@ export class HistoricalDatePartComponent extends ModelEditorComponentBase<Histor
   }
 
   public onDateChange(date: HistoricalDateModel): void {
-    this.form.date().value.set(date);
-    this.form.date().markAsDirty();
+    setFieldFromChild(this.form.date, date);
   }
 
   public onReferencesChange(references: DocReference[]): void {
-    this.form.references().value.set(copyFormValue(references));
-    this.form.references().markAsDirty();
+    setFieldFromChild(this.form.references, copyFormValue(references));
   }
 }

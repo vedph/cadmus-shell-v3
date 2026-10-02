@@ -8,12 +8,7 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
-import {
-  FormField,
-  form,
-  maxLength,
-  required,
-} from '@angular/forms/signals';
+import { FormField, form, maxLength, required } from '@angular/forms/signals';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
@@ -31,7 +26,7 @@ import {
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { RelatedEntity } from '../historical-events-part';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission, setFieldFromChild } from '../signal-form-utils';
 
 interface RelatedEntityControls {
   relation: string;
@@ -122,8 +117,7 @@ export class RelatedEntityComponent {
   }
 
   public onIdChange(id: AssertedCompositeId): void {
-    this.form.id().value.set(id);
-    this.form.id().markAsDirty();
+    setFieldFromChild(this.form.id, id);
   }
 
   public cancel(): void {

@@ -35,7 +35,7 @@ import {
   DistrictLocationPart,
   DISTRICT_LOCATION_PART_TYPEID,
 } from '../district-location-part';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface DistrictLocationPartControls {
   place: ProperName | null;
@@ -105,8 +105,7 @@ export class DistrictLocationPartComponent extends ModelEditorComponentBase<Dist
   );
 
   public onNameChange(name: ProperName | undefined): void {
-    this.form.place().value.set(copyFormValue(name || null));
-    this.form.place().markAsDirty();
+    setFieldFromChild(this.form.place, copyFormValue(name || null));
   }
 
   protected getValue(): DistrictLocationPart {

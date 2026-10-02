@@ -77,7 +77,11 @@ import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
 
 import { IndexKeyword } from '../index-keywords-part';
 import { CommentFragment } from '../comment-fragment';
-import { copyFormValue, setFieldFromEditor } from '../signal-form-utils';
+import {
+  copyFormValue,
+  setFieldFromEditor,
+  setFieldFromChild,
+} from '../signal-form-utils';
 
 interface CommentPartSettings {
   lookupProviderOptions?: LookupProviderOptions;
@@ -351,13 +355,11 @@ export class CommentEditorComponent extends ModelEditorComponentBase<
   }
 
   public onReferencesChange(references: DocReference[]): void {
-    this.form.references().value.set(copyFormValue(references || []));
-    this.form.references().markAsDirty();
+    setFieldFromChild(this.form.references, copyFormValue(references || []));
   }
 
   public onIdsChange(ids: AssertedCompositeId[]): void {
-    this.form.links().value.set(copyFormValue(ids || []));
-    this.form.links().markAsDirty();
+    setFieldFromChild(this.form.links, copyFormValue(ids || []));
   }
 
   //#region Categories

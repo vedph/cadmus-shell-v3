@@ -22,9 +22,7 @@ import {
   AssertedIdsComponent,
 } from '@myrmidon/cadmus-refs-asserted-ids';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
@@ -35,7 +33,7 @@ import {
   ExternalIdsPart,
   EXTERNAL_IDS_PART_TYPEID,
 } from '../external-ids-part';
-import { copyFormValue } from '../signal-form-utils';
+import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface ExternalIdsPartControls {
   ids: AssertedId[];
@@ -107,7 +105,6 @@ export class ExternalIdsPartComponent extends ModelEditorComponentBase<ExternalI
   }
 
   public onIdsChange(ids: AssertedId[]): void {
-    this.form.ids().value.set(copyFormValue(ids || []));
-    this.form.ids().markAsDirty();
+    setFieldFromChild(this.form.ids, copyFormValue(ids || []));
   }
 }
