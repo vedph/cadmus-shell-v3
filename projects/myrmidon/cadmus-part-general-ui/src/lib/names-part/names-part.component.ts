@@ -29,17 +29,15 @@ import {
   CadmusProperNamePipe,
 } from '@myrmidon/cadmus-refs-proper-name';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 
 import { NamesPart, NAMES_PART_TYPEID } from '../names-part';
-import { copyFormValue } from '../signal-form-utils';
 
 interface NamesPartControls {
   names: AssertedProperName[];
@@ -79,7 +77,6 @@ function toDraft(part?: NamesPart | null): NamesPartControls {
   ],
 })
 export class NamesPartComponent extends ModelEditorComponentBase<NamesPart> {
-
   public readonly edited = signal<AssertedProperName | undefined>(undefined);
   public readonly editedIndex = signal<number>(-1);
 
@@ -155,9 +152,12 @@ export class NamesPartComponent extends ModelEditorComponentBase<NamesPart> {
     if (name) {
       // else update replacing the old with the new name
       this.form.names().value.set(
-        this.form.names().value().map((n: AssertedProperName, i: number) =>
-          i === this.editedIndex() ? name : n,
-        ),
+        this.form
+          .names()
+          .value()
+          .map((n: AssertedProperName, i: number) =>
+            i === this.editedIndex() ? name : n,
+          ),
       );
       this.form.names().markAsDirty();
     }

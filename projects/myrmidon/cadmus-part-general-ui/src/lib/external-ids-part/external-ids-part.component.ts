@@ -27,13 +27,14 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import {
   ExternalIdsPart,
   EXTERNAL_IDS_PART_TYPEID,
 } from '../external-ids-part';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface ExternalIdsPartControls {
   ids: AssertedId[];

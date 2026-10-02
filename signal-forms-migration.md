@@ -1325,3 +1325,9 @@ pending changes guard.
   so they still always mark the form dirty.
 - Specs cover `sameFormValue` and `setFieldFromChild`. Measured: 655 +
   523 tests pass in the two libraries.
+- Later the same day, by owner request: `signal-form-utils.ts` and its
+  spec moved to `cadmus-ui`, which exports them. The copies in general and
+  philology were removed, and those libraries import the helpers from
+  `@myrmidon/cadmus-ui`, so other workspaces can reuse them too. Measured:
+  163 (`cadmus-ui`) + 643 + 511 tests pass, and the four editor libraries
+  build.

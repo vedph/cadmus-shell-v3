@@ -20,7 +20,10 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { NgxToolsSignalValidators, RamStorageService } from '@myrmidon/ngx-tools';
+import {
+  NgxToolsSignalValidators,
+  RamStorageService,
+} from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import {
   AssertedChronotope,
@@ -29,13 +32,12 @@ import {
 } from '@myrmidon/cadmus-refs-asserted-chronotope';
 import { HistoricalDatePipe } from '@myrmidon/cadmus-refs-historical-date';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 import { MatExpansionModule } from '@angular/material/expansion';
 import {
@@ -45,7 +47,6 @@ import {
 } from '@myrmidon/cadmus-refs-lookup';
 
 import { ChronotopesPart, CHRONOTOPES_PART_TYPEID } from '../chronotopes-part';
-import { copyFormValue } from '../signal-form-utils';
 
 interface ChronotopesPartControls {
   chronotopes: AssertedChronotope[];

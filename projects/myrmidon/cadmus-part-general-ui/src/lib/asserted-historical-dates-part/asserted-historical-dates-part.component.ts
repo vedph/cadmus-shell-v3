@@ -23,13 +23,12 @@ import {
   HistoricalDate,
   HistoricalDatePipe,
 } from '@myrmidon/cadmus-refs-historical-date';
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 import { AssertedHistoricalDate } from '@myrmidon/cadmus-refs-asserted-chronotope';
 
@@ -38,13 +37,14 @@ import {
   AssertedHistoricalDatesPart,
 } from '../asserted-historical-dates-part';
 import { AssertedHistoricalDateComponent } from '../asserted-historical-date/asserted-historical-date.component';
-import { copyFormValue } from '../signal-form-utils';
 
 interface AssertedHistoricalDatesPartControls {
   dates: AssertedHistoricalDate[];
 }
 
-function toDraft(part?: AssertedHistoricalDatesPart | null): AssertedHistoricalDatesPartControls {
+function toDraft(
+  part?: AssertedHistoricalDatesPart | null,
+): AssertedHistoricalDatesPartControls {
   return { dates: copyFormValue(part?.dates || []) };
 }
 
@@ -85,7 +85,9 @@ export class AssertedHistoricalDatesPartComponent extends ModelEditorComponentBa
 
   // component state
   public readonly editedIndex = signal<number>(-1);
-  public readonly edited = signal<AssertedHistoricalDate | undefined>(undefined);
+  public readonly edited = signal<AssertedHistoricalDate | undefined>(
+    undefined,
+  );
 
   // thesauri:
   // asserted-historical-dates-tags
@@ -97,13 +99,13 @@ export class AssertedHistoricalDatesPartComponent extends ModelEditorComponentBa
     () => this.data()?.thesauri?.['assertion-tags']?.entries,
   );
   // doc-reference-types
-  public readonly docReferenceTypeEntries = computed<ThesaurusEntry[] | undefined>(
-    () => this.data()?.thesauri?.['doc-reference-types']?.entries,
-  );
+  public readonly docReferenceTypeEntries = computed<
+    ThesaurusEntry[] | undefined
+  >(() => this.data()?.thesauri?.['doc-reference-types']?.entries);
   // doc-reference-tags
-  public readonly docReferenceTagEntries = computed<ThesaurusEntry[] | undefined>(
-    () => this.data()?.thesauri?.['doc-reference-tags']?.entries,
-  );
+  public readonly docReferenceTagEntries = computed<
+    ThesaurusEntry[] | undefined
+  >(() => this.data()?.thesauri?.['doc-reference-tags']?.entries);
 
   // form
   private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
@@ -157,7 +159,9 @@ export class AssertedHistoricalDatesPartComponent extends ModelEditorComponentBa
     // ensure that no date exists with the same value
     let newValue = new HistoricalDate(entry).getSortValue();
     if (
-      this.form.dates().value()
+      this.form
+        .dates()
+        .value()
         .map((e) => new HistoricalDate(e).getSortValue())
         .includes(newValue)
     ) {

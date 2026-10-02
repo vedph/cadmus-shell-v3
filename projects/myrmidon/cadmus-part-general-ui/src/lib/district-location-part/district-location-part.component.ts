@@ -29,13 +29,14 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import {
   DistrictLocationPart,
   DISTRICT_LOCATION_PART_TYPEID,
 } from '../district-location-part';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface DistrictLocationPartControls {
   place: ProperName | null;

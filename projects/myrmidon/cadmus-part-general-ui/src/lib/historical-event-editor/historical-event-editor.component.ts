@@ -44,7 +44,7 @@ import {
   copyFormValue,
   isImplicitSubmission,
   setFieldFromChild,
-} from '../signal-form-utils';
+} from '@myrmidon/cadmus-ui';
 import { RelatedEntityComponent } from '../related-entity/related-entity.component';
 
 const RELATION_SEP = ':';

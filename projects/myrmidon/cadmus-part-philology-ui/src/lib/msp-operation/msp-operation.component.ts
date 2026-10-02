@@ -47,7 +47,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TextRange } from '@myrmidon/cadmus-core';
 
 import { MspValidators } from '../msp-validators';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission } from '@myrmidon/cadmus-ui';
 
 interface MspVisualControls {
   operator: MspOperator;
@@ -148,8 +148,11 @@ export class MspOperationComponent {
     pattern(v.note, /^[^{}]+$/);
 
     // the fields used by each operator
-    const op = ({ valueOf }: { valueOf: (path: typeof v.operator) => MspOperator }) =>
-      valueOf(v.operator);
+    const op = ({
+      valueOf,
+    }: {
+      valueOf: (path: typeof v.operator) => MspOperator;
+    }) => valueOf(v.operator);
     const noOperator = (ctx: any) => op(ctx) === undefined || op(ctx) === null;
     disabled(v.rangeA, noOperator);
     disabled(v.valueA, noOperator);

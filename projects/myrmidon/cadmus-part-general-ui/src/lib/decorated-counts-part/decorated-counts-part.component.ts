@@ -27,13 +27,14 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import {
   DECORATED_COUNTS_PART_TYPEID,
   DecoratedCountsPart,
 } from '../decorated-counts-part';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface DecoratedCountsPartControls {
   counts: DecoratedCount[];

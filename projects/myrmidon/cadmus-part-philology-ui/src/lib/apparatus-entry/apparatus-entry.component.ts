@@ -44,7 +44,7 @@ import {
   AnnotatedValue,
   LocAnnotatedValue,
 } from '../apparatus-fragment';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission } from '@myrmidon/cadmus-ui';
 
 interface WitnessRow {
   value: string;
@@ -239,7 +239,10 @@ export class ApparatusEntryComponent {
   }
 
   public addWitness(witness?: AnnotatedValue): void {
-    this.setWitnesses([...this.form.witnesses().value(), toWitnessRow(witness)]);
+    this.setWitnesses([
+      ...this.form.witnesses().value(),
+      toWitnessRow(witness),
+    ]);
   }
 
   public addAuthor(author?: LocAnnotatedValue): void {

@@ -11,6 +11,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import {
@@ -35,7 +36,6 @@ import {
 } from '@myrmidon/cadmus-refs-historical-date';
 
 import { ChronologyFragment } from '../chronology-fragment';
-import { setFieldFromChild } from '../signal-form-utils';
 
 interface ChronologyFragmentControls {
   date: HistoricalDateModel | null;

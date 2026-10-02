@@ -9,12 +9,7 @@ import {
 import { TitleCasePipe } from '@angular/common';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import {
-  FormField,
-  form,
-  maxLength,
-  required,
-} from '@angular/forms/signals';
+import { FormField, form, maxLength, required } from '@angular/forms/signals';
 import { debounceTime } from 'rxjs/operators';
 import { marked } from 'marked';
 
@@ -33,7 +28,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 
-
 import {
   NgxMonacoEditorComponent,
   StandaloneEditorConstructionOptions,
@@ -43,12 +37,14 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  isImplicitSubmission,
+  setFieldFromEditor,
 } from '@myrmidon/cadmus-ui';
 
 import { WitnessesFragment, Witness } from '../witnesses-fragment';
 import { TextLayerService, TokenLocation } from '@myrmidon/cadmus-core';
 import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
-import { copyFormValue, isImplicitSubmission, setFieldFromEditor } from '../signal-form-utils';
 
 interface WitnessesFragmentControls {
   witnesses: Witness[];

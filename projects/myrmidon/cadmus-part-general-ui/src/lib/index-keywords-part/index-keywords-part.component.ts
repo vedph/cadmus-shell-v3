@@ -27,13 +27,12 @@ import {
 
 import { FlatLookupPipe, NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 
 import {
@@ -42,7 +41,6 @@ import {
   INDEX_KEYWORDS_PART_TYPEID,
 } from '../index-keywords-part';
 import { IndexKeywordComponent } from '../index-keyword/index-keyword.component';
-import { copyFormValue } from '../signal-form-utils';
 
 interface IndexKeywordsPartControls {
   keywords: IndexKeyword[];

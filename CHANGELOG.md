@@ -3,6 +3,8 @@
 - 2026-10-02:
   - ⚠️ removed legacy validators from `@myrmidon/cadmus-ui`.
   - bumped all major versions to 20.
+  - 🐛 fixed false pending changes in part/fragment editors (`@myrmidon/cadmus-part-general-ui`, `@myrmidon/cadmus-part-philology-ui`). Several editors became dirty right after they were opened, e.g. historical date and district location, when their data contained nulls. The cause was child editors (doc references, proper name etc.) emitting a normalized copy of the value they had just received. Their handlers now ignore values equal to the field's (`setFieldFromChild`). See the [migration checklist](#migration-checklist).
+  - 🆕 `@myrmidon/cadmus-ui` now exports the signal form helpers for editors: `copyFormValue`, `sameFormValue`, `setFieldFromChild`, `setFieldFromEditor` and `isImplicitSubmission`. They were internal copies in `@myrmidon/cadmus-part-general-ui` and `@myrmidon/cadmus-part-philology-ui`, which now import them from `@myrmidon/cadmus-ui`.
 - 2026-10-01:
   - ⚠️ migrated the part/fragment editors base to Angular signal forms (`@myrmidon/cadmus-ui`). This is breaking for all the part and fragment editors, including those of your own apps. See [Migrating a part editor](#migrating-a-part-editor) below.
     - `ModelEditorComponentBase`:
@@ -116,6 +118,127 @@ In the template:
 
 Finally, replace `ReactiveFormsModule` with `FormField` in the component's imports.
 
+### Migration checklist
+
+The rules below come from migrating all the editors in `cadmus-part-general-ui`, `cadmus-part-philology-ui` and `cadmus-part-taxo-ui`. Each one fixes a bug found during that work. Apply them to every part or fragment editor, and to the sub-editors they embed.
+
+#### Helpers
+
+Import these helpers from `@myrmidon/cadmus-ui`, which exports them since 2026-10-02. Do not copy them into your library:
+
+| Helper                            | Use                                                                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `copyFormValue(value)`            | Deep copy (`structuredClone`) of a value that goes into or comes out of a form.                                            |
+| `setFieldFromChild(field, value)` | Handler for a child editor's model output. It ignores echoes.                                                              |
+| `sameFormValue(a, b)`             | Deep equality that treats `null`, `undefined`, `''` and a missing property as the same value. `setFieldFromChild` uses it. |
+| `setFieldFromEditor(field, text)` | Handler for the Monaco editor's `valueChange`.                                                                             |
+| `isImplicitSubmission(event)`     | Keeps Enter-to-save in sub-editors, which no longer render a `<form>`.                                                     |
+
+#### Draft and form
+
+- Use `_draft = linkedSignal(() => toDraft(this.data()?.value))` and `form = this.createForm(this._draft, schema)`.
+  - `toDraft()` must return a value for every field, also when there is no data. Text fields use `''`, not `null`, because native inputs need strings. Selects bound to a field that can also be a text input use `''` for their "(none)" option.
+  - `getValue()` maps the draft back to the model. Trim strings, and save empty optional strings and empty arrays as `undefined`.
+- Remove `buildForm()`, `FormBuilder` and the constructor parameters (call `super()`), along with `updateForm()` and every `markAsPristine()`. The base class resets the form's interaction state whenever new data is bound or saved. Override `onDataSet()` only for work beyond the draft.
+- Turn thesaurus entries into `computed()` signals over `this.data()?.thesauri?.['…']?.entries`, replacing the `updateThesauri()` setters.
+- Load settings with `this.initSettings(typeId, callback)` in the constructor. If the draft depends on settings, as in the flags part, put them in a signal and read it from the `linkedSignal`/`computed`. Settings can arrive after the data.
+
+#### Copying values: the Symbol tag
+
+A signal form tags every object in its arrays with an identity `Symbol`, and object spread (`{ ...x }`) copies that tag. So:
+
+- copy arrays of objects with `copyFormValue()` (or field by field) on the way in (`toDraft`), on the way out (`getValue`), and when taking them from child outputs. Never use spread;
+- keep class instances whose methods you need as they are, e.g. `EditOperation` in the orthography fragment. Do not clone them;
+- in specs, set fields from copies of shared constants. Otherwise the tag leaks between tests.
+
+#### Child editors: avoid false dirty states
+
+This is the most common regression. Many child editors in the `@myrmidon/cadmus-refs-*` libraries and the bricks libraries autosave after a debounce: doc references, proper name, asserted IDs, decorated counts, physical measurements, historical date, assertion, and others. Right after data is bound, they emit a normalized copy of what they received, e.g. `tag: undefined` for `tag: null`.
+
+A handler that always calls `markAsDirty()` therefore makes the editor dirty as soon as it opens, and the pending changes guard fires when the user closes it without editing anything. So:
+
+- every handler bound to the model output (`(xxxChange)`) of a child editor that stays mounted must be written like this:
+
+  ```ts
+  public onReferencesChange(references: DocReference[]): void {
+    setFieldFromChild(this.form.references, copyFormValue(references || []));
+  }
+  ```
+
+  It must never be written as `value.set(...)` followed by `markAsDirty()`;
+
+- in the template, bind the child's input to the field value, e.g. `[references]="form.references().value()"`. A child editor that resets its state on every new object, like `NoteSetComponent`, should instead get a `computed()` built from data (and settings) only, so that it does not get a new object after each of its own changes;
+- handlers for actions the user takes (add, remove, move, pick from a list, save a sub-editor) still set the value and call `markAsDirty()` directly.
+
+#### Monaco editor
+
+The Monaco editor reports text set by code as a user change. Do not bind it with `[formField]`. Bind it like this:
+
+```html
+<ngx-monaco-editor [value]="form.text().value()" (valueChange)="setFieldFromEditor(form.text, $event)" (blur)="form.text().markAsTouched()" />
+```
+
+To use `setFieldFromEditor` in the template, expose it on the component as a field: `public readonly setFieldFromEditor = setFieldFromEditor;`.
+
+#### No `<form>` and the Enter key
+
+- Part and fragment editors render no `<form>`. Otherwise Enter in any child widget's input would submit it and save the whole part. As a result, Enter no longer saves a part.
+- Sub-editors such as entry editors also drop their `<form>`, and use `type="button" (click)` for their buttons. To keep Enter-to-save, add `(keydown.enter)="onEnterKey($event)"` to their root element:
+
+  ```ts
+  public onEnterKey(event: Event): void {
+    if (!isImplicitSubmission(event)) return;
+    event.preventDefault();
+    this.save(); // must do nothing where the save button would be disabled
+  }
+  ```
+
+- Keep Enter-to-add (e.g. a new keyword input) with an explicit `(keydown.enter)` handler on that input.
+
+#### Sub-editors (not derived from `ModelEditorComponentBase`)
+
+- Use the same pattern: `_draft = linkedSignal(() => toDraft(this.model()))`, then `form = form(this._draft, schema)`.
+- Reset the interaction state with an effect keyed on the bound model, not on the draft. The draft changes with every keystroke, so an effect keyed on it resets each edit, and a save button that requires a dirty form never gets enabled:
+
+  ```ts
+  effect(() => {
+    this.entity();
+    untracked(() => this.form().reset());
+  });
+  ```
+
+- An editor that emits its model while it is being edited (autosave) must not rebuild its draft from the echo of its own emission. Use `linkedSignal({ source, computation: (value, previous) => ... })` and keep `previous.value` when the incoming model equals what the draft maps to.
+
+#### Rows (former `FormArray` of `FormGroup`)
+
+- Make them arrays in the draft, with `applyEach(p.rows, (row) => { ... })` for their rules, and iterate the field tree in the template: `@for (row of form.rows; track row) { <input [formField]="row.name" /> }`.
+- Remove the `_uid` counters and the per-row `valueChanges` subscriptions.
+
+#### Validation
+
+- Error kinds are camel case: `maxLength`, `minLength`. Reactive forms used `maxlength`. Check every `getError`/`hasError` key, because many old messages could never appear.
+- `required()` does not flag an empty array. Port a reactive `Validators.required` on an array as `validate(p.items, ({ value }) => value().length ? null : { kind: 'required' })`.
+- Static validation attributes such as `min`, `max` and `required` are not allowed on `[formField]` elements (`NG8022`). Make them schema rules, using `{ when: ... }` for conditional ones. Replace `valueChanges` subscriptions that swapped validators with rules that use `when`.
+- Use `disabled(p.x, () => cond)` rules instead of `enable()`/`disable()` calls. The base class already disables the whole form while the `disabled` input is true.
+- Replace the deprecated `CustomValidators.minChecked` and `JsonValidators.json` with `CustomSignalValidators.minChecked` and `JsonSignalValidators.json`.
+- `mat-error` shows signal form errors only after the field is touched, as with reactive forms. `save()` marks an invalid form as touched.
+
+#### Reactivity
+
+- Replace `valueChanges`/`toSignal(...valueChanges)` with `computed()` over `form.x().value()`. Under `OnPush`, templates must read signals such as `form.x().value()`, not plain properties.
+- Replace synchronous "ignore the next change" flags with value comparisons, because signal writes propagate later.
+
+#### Tests and checks
+
+- Create forms in specs inside an injection context: `TestBed.runInInjectionContext(() => form(model))`.
+- For each editor, consider specs for:
+  - binding data, which leaves the editor pristine;
+  - typing, which makes it dirty;
+  - a child echo, which leaves it pristine;
+  - saving, where the emitted model carries no Symbol tags;
+  - the absence of a `<form>` around the close/save buttons.
+- Before you finish, open every editor in the app with real data, which usually contains `null`s, and close it without changes. No pending changes prompt should appear.
+
 ---
 
 ## Context Help Configuration
@@ -124,8 +247,7 @@ Help is configured in the app's `env.js`. When no template is set, no help butto
 
 ```js
 // URL template for help pages
-window.__env.helpUrlTemplate =
-  "https://www.mysite.com/help/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html";
+window.__env.helpUrlTemplate = "https://www.mysite.com/help/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html";
 // value of {separator} (optional, default: __)
 window.__env.helpUrlSeparator = "__";
 // false to skip checking page availability (optional, default: true)

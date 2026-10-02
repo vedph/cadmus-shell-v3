@@ -33,6 +33,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 import {
   renderLabelFromLastColon,
@@ -48,7 +49,6 @@ import {
 import { OrthographyFragment } from '../orthography-fragment';
 import { EditOperation } from '../services/edit-operation';
 import { EditOperationSetComponent } from '../edit-operation-set/edit-operation-set.component';
-import { setFieldFromChild } from '../signal-form-utils';
 
 interface OrthographyFragmentControls {
   reference: string;

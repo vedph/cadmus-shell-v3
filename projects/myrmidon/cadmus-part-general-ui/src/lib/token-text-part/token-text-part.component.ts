@@ -35,6 +35,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  setFieldFromEditor,
 } from '@myrmidon/cadmus-ui';
 
 import {
@@ -42,7 +43,6 @@ import {
   TOKEN_TEXT_PART_TYPEID,
   TokenTextLine,
 } from '../token-text-part';
-import { setFieldFromEditor } from '../signal-form-utils';
 
 interface TokenTextPartControls {
   citation: string;

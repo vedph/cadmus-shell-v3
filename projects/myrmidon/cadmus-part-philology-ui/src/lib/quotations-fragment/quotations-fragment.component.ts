@@ -28,6 +28,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 import {
   TextLayerService,
@@ -38,13 +39,14 @@ import {
 import { QuotationEntryComponent } from '../quotation-entry/quotation-entry.component';
 import { QuotationsFragment, QuotationEntry } from '../quotations-fragment';
 import { QuotationWorksService } from './quotation-works.service';
-import { copyFormValue } from '../signal-form-utils';
 
 interface QuotationsFragmentControls {
   entries: QuotationEntry[];
 }
 
-function toDraft(fragment?: QuotationsFragment | null): QuotationsFragmentControls {
+function toDraft(
+  fragment?: QuotationsFragment | null,
+): QuotationsFragmentControls {
   return { entries: copyFormValue(fragment?.entries || []) };
 }
 

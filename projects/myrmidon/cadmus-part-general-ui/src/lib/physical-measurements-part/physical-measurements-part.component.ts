@@ -29,6 +29,8 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import {
@@ -40,7 +42,6 @@ import {
   PhysicalMeasurementsFormulaService,
   PhysicalMeasurementsSettings,
 } from './physical-measurements-formula.service';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface PhysicalMeasurementsPartControls {
   measurements: PhysicalMeasurement[];

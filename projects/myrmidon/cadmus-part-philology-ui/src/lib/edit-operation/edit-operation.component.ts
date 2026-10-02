@@ -40,7 +40,7 @@ import {
   CharTextViewComponent,
   NumberedChar,
 } from '../char-text-view/char-text-view.component';
-import { isImplicitSubmission, setFieldFromChild } from '../signal-form-utils';
+import { isImplicitSubmission, setFieldFromChild } from '@myrmidon/cadmus-ui';
 
 interface EditOperationControls {
   dsl: string;

@@ -8,12 +8,7 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
-import {
-  FormField,
-  form,
-  maxLength,
-  required,
-} from '@angular/forms/signals';
+import { FormField, form, maxLength, required } from '@angular/forms/signals';
 
 // material
 import { MatButtonModule } from '@angular/material/button';
@@ -27,7 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { BibAuthor } from '../bibliography-part';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission } from '@myrmidon/cadmus-ui';
 
 interface BibAuthorControls {
   lastName: string;
@@ -121,7 +116,11 @@ export class BibAuthorEditorComponent {
    * @param event The keydown event.
    */
   public onEnterKey(event: Event): void {
-    if (!isImplicitSubmission(event) || this.form().invalid() || !this.form().dirty()) {
+    if (
+      !isImplicitSubmission(event) ||
+      this.form().invalid() ||
+      !this.form().dirty()
+    ) {
       return;
     }
     event.preventDefault();

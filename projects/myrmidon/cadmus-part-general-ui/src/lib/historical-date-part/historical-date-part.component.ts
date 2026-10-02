@@ -36,13 +36,14 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import {
   HistoricalDatePart,
   HISTORICAL_DATE_PART_TYPEID,
 } from '../historical-date-part';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface HistoricalDatePartControls {
   date: HistoricalDateModel;

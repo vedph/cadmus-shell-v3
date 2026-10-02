@@ -26,7 +26,7 @@ import {
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 
 import { RelatedEntity } from '../historical-events-part';
-import { isImplicitSubmission, setFieldFromChild } from '../signal-form-utils';
+import { isImplicitSubmission, setFieldFromChild } from '@myrmidon/cadmus-ui';
 
 interface RelatedEntityControls {
   relation: string;

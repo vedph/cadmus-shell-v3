@@ -22,11 +22,12 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
 import { FLAGS_PART_TYPEID, FlagsPart } from '../flags-part';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 function entryToFlag(entry: ThesaurusEntry): Flag {
   return {

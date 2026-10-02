@@ -22,13 +22,12 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { FlatLookupPipe, NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 import { MatExpansionModule } from '@angular/material/expansion';
 
@@ -39,7 +38,6 @@ import {
   BibAuthor,
 } from '../bibliography-part';
 import { BibliographyEntryComponent } from '../bibliography-entry/bibliography-entry.component';
-import { copyFormValue } from '../signal-form-utils';
 
 interface BibliographyPartControls {
   entries: BibEntry[];

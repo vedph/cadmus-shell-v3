@@ -9,6 +9,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 import { FormField, maxLength } from '@angular/forms/signals';
 
@@ -46,7 +47,6 @@ import {
   TEXT_TILE_TEXT_DATA_NAME,
   TextTile,
 } from '../tiled-text-part';
-import { copyFormValue } from '../signal-form-utils';
 
 interface Data {
   [key: string]: any;

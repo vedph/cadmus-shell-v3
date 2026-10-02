@@ -27,20 +27,18 @@ import {
   PhysicalStateComponent,
 } from '@myrmidon/cadmus-mat-physical-state';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 
 import {
   PHYSICAL_STATES_PART_TYPEID,
   PhysicalStatesPart,
 } from '../physical-states-part';
-import { copyFormValue } from '../signal-form-utils';
 
 interface PhysicalStatesPartControls {
   entries: PhysicalState[];

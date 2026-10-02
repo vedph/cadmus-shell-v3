@@ -47,7 +47,7 @@ import {
   copyFormValue,
   isImplicitSubmission,
   setFieldFromChild,
-} from '../signal-form-utils';
+} from '@myrmidon/cadmus-ui';
 
 interface BibEntryControls {
   // general

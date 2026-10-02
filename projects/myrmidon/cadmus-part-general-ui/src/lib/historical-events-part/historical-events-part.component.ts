@@ -28,13 +28,12 @@ import { NgxToolsSignalValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AssertedChronotopesPipe } from '@myrmidon/cadmus-refs-asserted-chronotope';
 
-import {
-  ThesaurusEntry,
-} from '@myrmidon/cadmus-core';
+import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 
 import { HistoricalEventEditorComponent } from '../historical-event-editor/historical-event-editor.component';
@@ -44,13 +43,14 @@ import {
   HistoricalEventsPart,
   HISTORICAL_EVENTS_PART_TYPEID,
 } from '../historical-events-part';
-import { copyFormValue } from '../signal-form-utils';
 
 interface HistoricalEventsPartControls {
   events: HistoricalEvent[];
 }
 
-function toDraft(part?: HistoricalEventsPart | null): HistoricalEventsPartControls {
+function toDraft(
+  part?: HistoricalEventsPart | null,
+): HistoricalEventsPartControls {
   return { events: copyFormValue(part?.events || []) };
 }
 

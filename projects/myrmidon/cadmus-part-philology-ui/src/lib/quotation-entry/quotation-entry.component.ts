@@ -10,12 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-import {
-  FormField,
-  form,
-  maxLength,
-  required,
-} from '@angular/forms/signals';
+import { FormField, form, maxLength, required } from '@angular/forms/signals';
 
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
@@ -29,7 +24,7 @@ import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { QuotationWorksService } from '../quotations-fragment/quotation-works.service';
 import { QuotationEntry } from '../quotations-fragment';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission } from '@myrmidon/cadmus-ui';
 
 interface QuotationEntryControls {
   author: string;

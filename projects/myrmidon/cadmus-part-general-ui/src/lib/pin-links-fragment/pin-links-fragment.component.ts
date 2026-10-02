@@ -28,6 +28,8 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
 
@@ -35,7 +37,6 @@ import {
   PIN_LINKS_FRAGMENT_TYPEID,
   PinLinksFragment,
 } from '../pin-links-fragment';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface PinLinksFragmentPartControls {
   links: AssertedCompositeId[];

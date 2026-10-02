@@ -26,7 +26,7 @@ import {
   HistoricalDateComponent,
   HistoricalDateModel,
 } from '@myrmidon/cadmus-refs-historical-date';
-import { isImplicitSubmission, setFieldFromChild } from '../signal-form-utils';
+import { isImplicitSubmission, setFieldFromChild } from '@myrmidon/cadmus-ui';
 
 interface AssertedHistoricalDateControls {
   tag: string;

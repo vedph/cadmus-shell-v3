@@ -25,6 +25,8 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import {
@@ -32,7 +34,6 @@ import {
   DOC_REFERENCES_PART_TYPEID,
 } from '../doc-references-part';
 import { LookupDocReferencesComponent } from '@myrmidon/cadmus-refs-lookup';
-import { copyFormValue, setFieldFromChild } from '../signal-form-utils';
 
 interface DocReferencesPartSettings {
   noLookup?: boolean;

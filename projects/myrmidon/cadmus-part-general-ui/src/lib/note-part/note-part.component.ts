@@ -39,6 +39,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  setFieldFromEditor,
 } from '@myrmidon/cadmus-ui';
 import {
   CadmusTextEdService,
@@ -49,7 +50,6 @@ import {
 import { NotePart, NOTE_PART_TYPEID } from '../note-part';
 import { MonacoEditorHelper } from '../monaco-editor-helper';
 import { marked } from 'marked';
-import { setFieldFromEditor } from '../signal-form-utils';
 
 interface NotePartControls {
   tag: string;

@@ -26,7 +26,7 @@ import { MatIcon } from '@angular/material/icon';
 
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
 import { IndexKeyword } from '../index-keywords-part';
-import { isImplicitSubmission } from '../signal-form-utils';
+import { isImplicitSubmission } from '@myrmidon/cadmus-ui';
 
 interface IndexKeywordControls {
   indexId: string;

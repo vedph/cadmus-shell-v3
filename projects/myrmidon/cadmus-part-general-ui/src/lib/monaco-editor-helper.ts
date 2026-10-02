@@ -7,8 +7,9 @@ import {
  * Helper to bind text editing plugin keyboard shortcuts (e.g. Ctrl+B for
  * bold) to a Monaco editor created via ngx-monaco-editor.
  *
- * Editor content is bound via `[formField]`, so this helper only tracks
- * the editor instance and wires up the shortcut commands.
+ * Editor content is bound via `[value]` and `(valueChange)` (see
+ * `setFieldFromEditor`), so this helper only tracks the editor instance
+ * and wires up the shortcut commands.
  */
 export class MonacoEditorHelper {
   private _editor?: StandaloneCodeEditor;

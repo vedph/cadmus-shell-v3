@@ -65,6 +65,9 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
+  setFieldFromEditor,
+  setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
 
 import { Comment, CommentPart, COMMENT_PART_TYPEID } from '../comment-part';
@@ -77,11 +80,6 @@ import { LookupProviderOptions } from '@myrmidon/cadmus-refs-lookup';
 
 import { IndexKeyword } from '../index-keywords-part';
 import { CommentFragment } from '../comment-fragment';
-import {
-  copyFormValue,
-  setFieldFromEditor,
-  setFieldFromChild,
-} from '../signal-form-utils';
 
 interface CommentPartSettings {
   lookupProviderOptions?: LookupProviderOptions;

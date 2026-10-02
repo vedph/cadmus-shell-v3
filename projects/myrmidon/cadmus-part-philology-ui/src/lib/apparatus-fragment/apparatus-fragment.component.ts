@@ -33,6 +33,7 @@ import {
   CloseSaveButtonsComponent,
   ModelEditorComponentBase,
   HelpLinkComponent,
+  copyFormValue,
 } from '@myrmidon/cadmus-ui';
 import {
   EditedObject,
@@ -45,7 +46,6 @@ import { ApparatusEntryComponent } from '../apparatus-entry/apparatus-entry.comp
 import { ApparatusEntryType, ApparatusEntry } from '../apparatus-fragment';
 import { ApparatusFragment } from '../apparatus-fragment';
 import { ApparatusEntrySummaryService } from './apparatus-entry-summary.service';
-import { copyFormValue } from '../signal-form-utils';
 
 interface ApparatusFragmentControls {
   tag: string;
