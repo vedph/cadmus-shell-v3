@@ -85,6 +85,31 @@ describe('signal form utils', () => {
       enterOn(input);
       expect(isImplicitSubmission(event!)).toBe(false);
     });
+
+    it('should be false for Enter in an input of a nested form', () => {
+      // e.g. a widget embedded in the editor, rendering its own form
+      const nested = document.createElement('form');
+      const input = document.createElement('input');
+      nested.appendChild(input);
+      host.appendChild(nested);
+      enterOn(input);
+      expect(isImplicitSubmission(event!)).toBe(false);
+    });
+
+    it('should be false for Enter in an input owned by a form elsewhere', () => {
+      const other = document.createElement('form');
+      other.id = 'other-form';
+      document.body.appendChild(other);
+      try {
+        const input = document.createElement('input');
+        input.setAttribute('form', 'other-form');
+        host.appendChild(input);
+        enterOn(input);
+        expect(isImplicitSubmission(event!)).toBe(false);
+      } finally {
+        other.remove();
+      }
+    });
   });
 
   describe('sameFormValue', () => {

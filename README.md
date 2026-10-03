@@ -19,35 +19,35 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 Latest versions:
 
-- cadmus-api: 15.0.1
-- cadmus-core: 13.0.0
-- cadmus-flags-pg: 16.0.0
-- cadmus-flags-ui: 16.0.0
-- cadmus-graph-pg: 16.0.0
-- cadmus-graph-pg-ex: 17.0.0
-- cadmus-graph-ui: 16.0.0
-- cadmus-graph-ui-ex: 17.0.0
-- cadmus-item-editor: 17.0.1
-- cadmus-item-list: 17.0.1
-- cadmus-item-search: 17.0.0
-- cadmus-layer-demo: 16.0.0
-- cadmus-part-general-pg: 18.0.0
-- cadmus-part-general-ui: 18.0.0
-- cadmus-part-philology-pg: 18.0.1
-- cadmus-part-philology-ui: 19.0.1
-- cadmus-part-taxo-pg: 1.0.0
-- cadmus-part-taxo-ui: 1.0.0
-- cadmus-preview-pg: 18.0.0
-- cadmus-preview-ui: 18.0.0
-- cadmus-profile-core: 13.0.0
-- cadmus-profile-editor: 1.0.0
-- cadmus-profile-import: 1.0.0
-- cadmus-state: 16.0.0
-- cadmus-statistics: 2.0.0
-- cadmus-thesaurus-editor: 17.0.0
-- cadmus-thesaurus-list: 17.0.0
-- cadmus-thesaurus-ui: 16.0.0
-- cadmus-ui: 17.0.1
+- cadmus-api: 20.0.0
+- cadmus-core: 20.0.0
+- cadmus-flags-pg: 20.0.0
+- cadmus-flags-ui: 20.0.0
+- cadmus-graph-pg: 20.0.0
+- cadmus-graph-pg-ex: 20.0.0
+- cadmus-graph-ui: 20.0.0
+- cadmus-graph-ui-ex: 20.0.0
+- cadmus-item-editor: 20.0.1
+- cadmus-item-list: 20.0.1
+- cadmus-item-search: 20.0.0
+- cadmus-layer-demo: 20.0.0
+- cadmus-part-general-pg: 20.0.0
+- cadmus-part-general-ui: 20.0.0
+- cadmus-part-philology-pg: 20.0.1
+- cadmus-part-philology-ui: 20.0.1
+- cadmus-part-taxo-pg: 20.0.0
+- cadmus-part-taxo-ui: 20.0.0
+- cadmus-preview-pg: 20.0.0
+- cadmus-preview-ui: 20.0.0
+- cadmus-profile-core: 20.0.0
+- cadmus-profile-editor: 20.0.0
+- cadmus-profile-import: 20.0.0
+- cadmus-state: 20.0.0
+- cadmus-statistics: 20.0.0
+- cadmus-thesaurus-editor: 20.0.0
+- cadmus-thesaurus-list: 20.0.0
+- cadmus-thesaurus-ui: 20.0.0
+- cadmus-ui: 20.0.1
 
 > cadmus-ui-pg has been removed!
 

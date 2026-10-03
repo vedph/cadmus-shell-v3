@@ -34,6 +34,9 @@ const SUBMITTING_INPUT_TYPES = new Set([
  * target is a text-like input, and no other handler (e.g. an autocomplete
  * picking an option) already consumed the event. Use it in editors which
  * render no form element, to keep their Enter-to-save behavior.
+ * Inputs which belong to a native form (e.g. one rendered by a widget
+ * embedded in the editor) are excluded: Enter there submits that form,
+ * and must not also save the editor.
  *
  * @param event The keydown event.
  */
@@ -43,7 +46,8 @@ export function isImplicitSubmission(event: Event): boolean {
     !event.defaultPrevented &&
     !(event as KeyboardEvent).isComposing &&
     target instanceof HTMLInputElement &&
-    SUBMITTING_INPUT_TYPES.has(target.type)
+    SUBMITTING_INPUT_TYPES.has(target.type) &&
+    !target.form
   );
 }
 

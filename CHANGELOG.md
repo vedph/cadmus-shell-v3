@@ -1,5 +1,9 @@
 # History
 
+## 20.0.1
+
+- 2026-10-03: 🐛 `isImplicitSubmission` (`@myrmidon/cadmus-ui`) is now false for inputs which belong to a native form, e.g. one rendered by a widget embedded in the editor (like the thesaurus tree filter). Enter there submits that form, and before this fix it also saved the editor hosting the widget. This restores the behavior editors had before they dropped their `<form>`, where Enter submitted only the innermost form.
+
 ## 20.0.0
 
 - 2026-10-02:
