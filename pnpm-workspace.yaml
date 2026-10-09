@@ -44,5 +44,5 @@ minimumReleaseAgeExclude:
   - '@myrmidon/taxo-store-picker@1.0.0 || 1.0.1'
   - three@0.185.1
   - marked@18.0.13 || 18.0.14
-  - '@rollup/rollup-win32-arm64-msvc@4.63.5 || 4.64.0'
+  - '@rollup/rollup-win32-arm64-msvc@4.63.5 || 4.64.0 || 4.64.3'
   - '@myrmidon/cadmus-ui-object-view@1.0.3'
