@@ -1,5 +1,8 @@
 # History
 
+- 2026-10-23:
+  - updated Angular and packages.
+  - updated `@myrmidon/cadmus-part-taxo-ui` to remove flags.
 - 2026-10-09: updated packages.
 
 ## 20.0.1

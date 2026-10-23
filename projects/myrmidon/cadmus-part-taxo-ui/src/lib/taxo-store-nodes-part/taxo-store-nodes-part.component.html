@@ -3,7 +3,10 @@
     <div mat-card-avatar>
       <mat-icon>picture_in_picture</mat-icon>
     </div>
-    <mat-card-title [matBadge]="form.nodeIds().value().length" matBadgeOverlap="false">
+    <mat-card-title
+      [matBadge]="form.nodeIds().value().length"
+      matBadgeOverlap="false"
+    >
       {{ (modelName() | titlecase) || "Taxo Store Nodes Part" }}
     </mat-card-title>
   </mat-card-header>
@@ -13,8 +16,6 @@
         <ts-taxo-store-picker
           [treeId]="treeId()"
           [hasTopNodeFilter]="hasTopNodeFilter()"
-          [hasFlagsFilter]="hasFlagsFilter()"
-          [availableFlags]="availableFlags()"
           [canEdit]="canEdit()"
           [canAdd]="canAdd()"
           [canDelete]="canDelete()"

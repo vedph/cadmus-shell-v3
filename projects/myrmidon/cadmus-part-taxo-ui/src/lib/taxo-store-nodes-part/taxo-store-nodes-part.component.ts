@@ -35,8 +35,6 @@ import {
 interface TaxoStoreNodesPartSettings {
   treeId: string;
   hasTopNodeFilter?: boolean;
-  hasFlagsFilter?: boolean;
-  availableFlags?: { id: string; name: string }[];
   canEdit?: boolean;
   canAdd?: boolean;
   canDelete?: boolean;
@@ -61,9 +59,7 @@ interface TaxoStoreNodesPartControls {
  * Bound part -> editable draft. The node pairs are copied, so that the
  * form never adopts the bound part's objects.
  */
-function toDraft(
-  part?: TaxoStoreNodesPart | null,
-): TaxoStoreNodesPartControls {
+function toDraft(part?: TaxoStoreNodesPart | null): TaxoStoreNodesPartControls {
   return {
     nodeIds: (part?.nodeIds || []).map((n) => ({
       value: n.value,
@@ -140,8 +136,6 @@ export class TaxoStoreNodesPartComponent extends ModelEditorComponentBase<TaxoSt
   private applySettings(settings: TaxoStoreNodesPartSettings): void {
     this.treeId.set(settings.treeId);
     this.hasTopNodeFilter.set(!!settings.hasTopNodeFilter);
-    this.hasFlagsFilter.set(!!settings.hasFlagsFilter);
-    this.availableFlags.set(settings.availableFlags || []);
     this.canEdit.set(settings.canEdit !== false);
     this.canAdd.set(settings.canAdd !== false);
     this.canDelete.set(settings.canDelete !== false);
