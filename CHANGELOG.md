@@ -1,5 +1,6 @@
 # History
 
+- 2026-10-24: reset password page fix.
 - 2026-10-23:
   - updated Angular and packages.
   - updated `@myrmidon/cadmus-part-taxo-ui` to remove flags.
