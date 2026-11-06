@@ -135,7 +135,6 @@ export class GraphService {
   ) {
     // use injected path if provided, otherwise fallback to 'graph'
     this._apiPath = apiPath || 'graph';
-    console.log(`GraphService API path: ${this._apiPath}`);
   }
 
   /**
@@ -187,7 +186,7 @@ export class GraphService {
     }
     if (filter.classIds?.length) {
       for (let i = 0; i < filter.classIds.length; i++) {
-        httpParams = httpParams.set('classIds', filter.classIds[i]);
+        httpParams = httpParams.append('classIds', filter.classIds[i]);
       }
     }
 
@@ -205,10 +204,11 @@ export class GraphService {
    * @returns List of nodes/nulls.
    */
   public getNodeSet(ids: number[]): Observable<(UriNode | null)[]> {
-    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes-set/`;
+    const url = this._env.get('apiUrl') + `${this._apiPath}/nodes-set`;
     let httpParams = new HttpParams();
+    // the API binds the IDs to its ids parameter
     for (let i = 0; i < ids.length; i++) {
-      httpParams = httpParams.append('id', ids[i].toString());
+      httpParams = httpParams.append('ids', ids[i].toString());
     }
 
     return this._http
@@ -239,7 +239,6 @@ export class GraphService {
    */
   public getNodeByUri(uri: string): Observable<UriNode> {
     const url = this._env.get('apiUrl') + `${this._apiPath}/nodes-by-uri`;
-    console.log(`Fetching URL: ${url}`);
     let httpParams = new HttpParams();
     httpParams = httpParams.set('uri', uri);
 
@@ -286,12 +285,12 @@ export class GraphService {
     }
     if (filter.predicateIds?.length) {
       filter.predicateIds!.forEach((p) => {
-        httpParams = httpParams.set('predicateIds', p);
+        httpParams = httpParams.append('predicateIds', p);
       });
     }
     if (filter.notPredicateIds?.length) {
       filter.notPredicateIds!.forEach((p) => {
-        httpParams = httpParams.set('notPredicateIds', p);
+        httpParams = httpParams.append('notPredicateIds', p);
       });
     }
     if (
@@ -316,7 +315,8 @@ export class GraphService {
       httpParams = httpParams.set('tag', filter.tag);
     }
 
-    return httpParams;
+    // the triple filter includes the literal filter
+    return this.applyLiteralFilter(filter, httpParams);
   }
 
   /**
@@ -481,7 +481,7 @@ export class GraphService {
     }
     if (filter.classIds?.length) {
       for (let i = 0; i < filter.classIds.length; i++) {
-        httpParams = httpParams.set('classIds', filter.classIds[i]);
+        httpParams = httpParams.append('classIds', filter.classIds[i]);
       }
     }
 

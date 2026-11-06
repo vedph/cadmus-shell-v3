@@ -144,9 +144,25 @@
           <p>
             Pairs are between <code>[]</code>. Each pair has field name +
             operator + field value. Connect multiple pairs with
-            <code>AND</code> and <code>OR</code>, and group them using brackets.
-            Example:
-            <code>[title*=test] AND ([facet=default] OR [facet=tiled])</code>.
+            <code>AND</code>, <code>OR</code> and <code>NOT</code>, and group
+            them using brackets. <code>AND</code> takes precedence over
+            <code>OR</code>; two pairs without any operator between them are
+            connected by <code>AND</code>. Example:
+            <code
+              >[title*=test] AND ([facet=default] OR [facet=tiled]) AND NOT
+              [flags:to revise]</code
+            >.
+          </p>
+          <p>
+            A query without any <code>[</code> searches for items whose title
+            contains it: e.g. <code>chronicle</code> is the same as
+            <code>[title*=chronicle]</code>.
+          </p>
+          <p>
+            Each pair about pins matches items having <em>any</em> pin like
+            that, whatever the part providing it: so
+            <code>[tag=odd] AND [year==1200]</code> finds items having both a
+            pin <code>tag=odd</code> and a pin <code>year=1200</code>.
           </p>
           <h4>Fields</h4>
           <ul>
@@ -158,6 +174,14 @@
             <li><code>group</code>, <code>groupId</code>: item's group ID.</li>
             <li><code>sortKey</code>: item's sort key.</li>
             <li><code>flags</code>: item's flags.</li>
+            <li><code>itemId</code>: item's ID.</li>
+            <li><code>creatorId</code>: item's creator.</li>
+            <li><code>userId</code>: item's last user.</li>
+            <li>
+              <code>timeCreated</code>, <code>timeModified</code>: item's
+              creation and last modification time.
+            </li>
+            <li><code>partId</code>: part ID.</li>
             <li>
               <code>type</code>, <code>partType</code>, <code>partTypeId</code>:
               part type ID.
@@ -165,7 +189,18 @@
             <li><code>role</code>, <code>roleId</code>: part role ID.</li>
             <li><code>n</code>, <code>name</code>: pin's name.</li>
             <li><code>v</code>, <code>value</code>: pin's value.</li>
+            <li>
+              <code>time</code>, <code>timeIndexed</code>: pin's indexing
+              time.
+            </li>
           </ul>
+          <p>
+            Any other name is the name of a pin, matched against its value:
+            e.g. <code>[eid=x12]</code>. Pin names are case-sensitive. To
+            search a pin whose name is equal to a field (e.g. a pin named
+            <code>title</code>), prefix it with <code>&#64;</code>:
+            <code>[&#64;title=Chronicon]</code>.
+          </p>
           <h4>Operators</h4>
           <ul>
             <li><code>=</code>: equal to.</li>
@@ -177,10 +212,13 @@
               <code>?=</code>: wildcards: <code>?</code>=any single character,
               <code>*</code>=0-N characters.
             </li>
-            <li><code>~=</code>: regular expression.</li>
             <li>
-              <code>%=</code>: fuzzy matching. The value is followed by
-              <code>:</code> and the minimum similarity treshold.
+              <code>~=</code>: regular expression (PostgreSQL syntax).
+            </li>
+            <li>
+              <code>%=</code>: fuzzy matching. The value can be followed by
+              <code>:</code> and the minimum similarity threshold, from 0 to 1
+              (default 0.9): e.g. <code>[title%=chronicon:0.4]</code>.
             </li>
             <li><code>==</code>: equal (numeric).</li>
             <li><code>!=</code>: not equal (numeric).</li>
@@ -201,11 +239,28 @@
               (comma-separated) must be present.
             </li>
           </ul>
-          <p>Flags can be specified either with name or value.</p>
+          <p>
+            Text matching is case-sensitive, and values are literal: e.g.
+            <code>%</code> has no special meaning in <code>[dsc*=100%]</code>.
+            Numeric operators consider only values which are numbers.
+          </p>
+          <p>
+            Flags are comma-separated, each specified either with its label or
+            with its hexadecimal value: e.g. <code>[flags:to revise,4]</code>.
+          </p>
+          <p>
+            Time fields accept only comparison operators (<code>=</code>,
+            <code>&lt;&gt;</code>, <code>==</code>, <code>!=</code>,
+            <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>,
+            <code>&gt;=</code>) with dates, e.g.
+            <code>[timeModified&gt;=2024-05-01]</code>.
+          </p>
           <p>
             Value escapes: <code>\[</code>=<code>[</code>,
-            <code>\]</code>=<code>]</code>, <code>\HHHH</code>=Unicode 16-bits
-            character code.
+            <code>\]</code>=<code>]</code>, <code>\\</code>=<code>\</code>,
+            <code>\HHHH</code>=Unicode 16-bits character code. Any other
+            backslash is kept as it is, so that regular expressions like
+            <code>\d+</code> can be written as such.
           </p>
         </div>
       </mat-expansion-panel>

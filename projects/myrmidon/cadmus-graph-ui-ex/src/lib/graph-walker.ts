@@ -410,6 +410,8 @@ export class GraphWalker {
               pageSize: this.pageSize,
             },
             sid: node.sid,
+            isClass: node.isClass,
+            tag: node.tag,
           };
           const n: GraphNode = {
             id: this.buildNodeId(node.id),
@@ -594,8 +596,6 @@ export class GraphWalker {
 
     // load
     this.toggleLoading(true);
-    const nodes = [...this._nodes$.value];
-    const edges = [...this._edges$.value];
 
     forkJoin({
       outs: this._graphService.getTripleGroups(
@@ -610,6 +610,11 @@ export class GraphWalker {
       ),
     }).subscribe({
       next: (result) => {
+        // start from the graph as it is now, rather than as it was when
+        // the request was sent: other expansions may have completed
+        // in the meantime
+        const nodes = [...this._nodes$.value];
+        const edges = [...this._edges$.value];
         node.data.expanded = true;
 
         // update origin's filters
@@ -682,8 +687,15 @@ export class GraphWalker {
             '^EP' + g.predicateId + 'N[0-9]+_' + node.id + '$'
           );
           if (!edges.some((e) => r.test(e.id!))) {
-            if (!nodes.some((n) => n.id === p.id)) {
+            const existing = nodes.find((n) => n.id === p.id);
+            if (!existing) {
               nodes.push(p);
+            } else if (existing.data?.originId === node.id) {
+              // the same predicate is both outbound and inbound for this
+              // node (e.g. rdfs:subClassOf for a class in the middle of a
+              // hierarchy): the group node is shared, and its expansion
+              // loads both directions, so its label is the sum of both
+              existing.label = (+(existing.label || 0) + g.count).toString();
             }
             this.addEdgeIfAbsent(edge, edges);
           }
@@ -695,7 +707,7 @@ export class GraphWalker {
       },
       error: (error) => {
         node.data.error = 'Error loading properties';
-        this._nodes$.next(nodes);
+        this._nodes$.next([...this._nodes$.value]);
         this.setError(error);
         // complete never fires after error in RxJS, so loading must also
         // be reset here or the loading indicator would stay stuck forever.
@@ -736,7 +748,7 @@ export class GraphWalker {
   }
 
   private buildNonLiteralNode(sourceId: string, node: UriNode): GraphNode {
-    const nid = this.getNodeNumericId(sourceId);
+    // the filters refer to this node, not to the group it comes from
     const data: WalkerNodeData = {
       originId: sourceId,
       customColor: '#80ff95',
@@ -746,19 +758,19 @@ export class GraphWalker {
       sid: node.sid,
       tag: node.tag,
       outFilter: {
-        pageNumber: 0,
+        pageNumber: 1,
         pageSize: this.pageSize,
-        subjectId: nid,
+        subjectId: node.id,
       },
       inFilter: {
-        pageNumber: 0,
+        pageNumber: 1,
         pageSize: this.pageSize,
-        objectId: nid,
+        objectId: node.id,
       },
     };
     return {
       id: this.buildNodeId(node.id),
-      label: node.label,
+      label: node.label || node.uri,
       data: data,
     };
   }
@@ -817,8 +829,6 @@ export class GraphWalker {
 
     // load
     this.toggleLoading(true);
-    const nodes = [...this._nodes$.value];
-    const edges = [...this._edges$.value];
 
     forkJoin({
       outs: this._graphService.getLinkedNodes(
@@ -834,6 +844,9 @@ export class GraphWalker {
       ),
     }).subscribe({
       next: (result) => {
+        // start from the graph as it is now (see expandNode)
+        const nodes = [...this._nodes$.value];
+        const edges = [...this._edges$.value];
         node.data.expanded = true;
 
         // update origin's filters
@@ -898,7 +911,7 @@ export class GraphWalker {
           // edge from property to literal
           const edge = {
             id: this.buildEdgeId(node.id, lit.id),
-            label: lit.data.literalType || '',
+            label: (lit.data as WalkerLitData).type || '',
             source: node.id,
             target: lit.id,
             data: {
@@ -914,7 +927,7 @@ export class GraphWalker {
       },
       error: (error) => {
         node.data.error = 'Error loading nodes';
-        this._nodes$.next(nodes);
+        this._nodes$.next([...this._nodes$.value]);
         this.setError(error);
         // complete never fires after error in RxJS, so loading must also
         // be reset here or the loading indicator would stay stuck forever.

@@ -1,4 +1,5 @@
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 import {
   GraphWalker,
@@ -398,6 +399,54 @@ describe('GraphWalker', () => {
     });
   });
 
+  describe('expandNode (shared and concurrent)', () => {
+    it('should share the group node of a predicate both outbound and inbound, summing its counts', () => {
+      const { walker, graphService } = createWalker();
+      graphService.getTripleGroups.mockImplementation(
+        (_pn: number, _ps: number, filter: any) =>
+          filter.subjectId
+            ? of(makePage([makeGroup(8, 'rdfs:subClassOf', 2)], 1))
+            : of(makePage([makeGroup(8, 'rdfs:subClassOf', 3)], 1))
+      );
+      const node = makeNNode('N1');
+
+      walker.expandNode(node);
+
+      const props = latest(walker.nodes$).filter((n) => n.id === 'P8N1');
+      expect(props.length).toBe(1);
+      expect(props[0].label).toBe('5');
+      const edges = latest(walker.edges$);
+      expect(edges.some((e) => e.id === 'EN1_P8N1')).toBe(true);
+    });
+
+    it('should not lose the results of an expansion completed while another was pending', () => {
+      const { walker, graphService } = createWalker();
+      const pending = new Subject<DataPage<TripleGroup>>();
+      // N1 expansion stays pending; N2 expansion completes at once
+      graphService.getTripleGroups.mockImplementation(
+        (_pn: number, _ps: number, filter: any) => {
+          const id = filter.subjectId ?? filter.objectId;
+          if (id === 1) return pending.pipe(take(1));
+          return filter.subjectId
+            ? of(makePage([makeGroup(20, 'x:p20', 1)], 1))
+            : of(makePage<TripleGroup>([], 0));
+        }
+      );
+      const n1 = makeNNode('N1');
+      const n2 = makeNNode('N2');
+
+      walker.expandNode(n1);
+      walker.expandNode(n2);
+      expect(latest(walker.nodes$).some((n) => n.id === 'P20N2')).toBe(true);
+
+      pending.next(makePage([makeGroup(10, 'x:p10', 1)], 1));
+
+      const ids = latest(walker.nodes$).map((n) => n.id);
+      expect(ids).toContain('P10N1');
+      expect(ids).toContain('P20N2');
+    });
+  });
+
   describe('expandSelectedNode', () => {
     it('should do nothing when there is no selection', () => {
       const { walker, graphService } = createWalker();
@@ -515,13 +564,7 @@ describe('GraphWalker', () => {
       errorSpy.mockRestore();
     });
 
-    // Documents current (possibly unintended) behavior: nodes discovered
-    // via expandProperty start with pageNumber 0 in their own outFilter/
-    // inFilter, unlike the root node (reset()) and property nodes
-    // (buildPropertyNode), which both start at pageNumber 1. Flagged for
-    // review rather than "fixed", since it is unclear whether some other
-    // part of the UI relies on 0 as a "not yet paged" sentinel.
-    it('documents that newly discovered non-literal nodes start with pageNumber 0 (inconsistent with root/property nodes)', () => {
+    it('should start newly discovered non-literal nodes at page 1, with filters on the node itself', () => {
       const { walker, graphService } = createWalker();
       graphService.getLinkedNodes.mockReturnValueOnce(
         of(makePage([makeUriNode(2)], 1))
@@ -533,8 +576,37 @@ describe('GraphWalker', () => {
 
       const child = latest(walker.nodes$).find((n) => n.id === 'N2')!;
       const data = child.data as WalkerNodeData;
-      expect(data.outFilter.pageNumber).toBe(0);
-      expect(data.inFilter.pageNumber).toBe(0);
+      // the API rejects page 0
+      expect(data.outFilter.pageNumber).toBe(1);
+      expect(data.inFilter.pageNumber).toBe(1);
+      // N2, not N1 (the node of the property group)
+      expect(data.outFilter.subjectId).toBe(2);
+      expect(data.inFilter.objectId).toBe(2);
+    });
+
+    it('should use the URI as the label of a linked node without label', () => {
+      const { walker, graphService } = createWalker();
+      graphService.getLinkedNodes.mockReturnValueOnce(
+        of(makePage([makeUriNode(2, { label: '' })], 1))
+      );
+      graphService.getLinkedNodes.mockReturnValue(of(makePage<UriNode>([], 0)));
+
+      walker.expandProperty(makePNode('P10N1'));
+
+      const child = latest(walker.nodes$).find((n) => n.id === 'N2')!;
+      expect(child.label).toBe('x:node2');
+    });
+
+    it('should label literal edges with the literal type', () => {
+      const { walker, graphService } = createWalker();
+      graphService.getLinkedLiterals.mockReturnValue(
+        of(makePage([makeLiteralTriple(9, { literalType: 'xsd:int' })], 1))
+      );
+
+      walker.expandProperty(makePNode('P10N1'));
+
+      const edge = latest(walker.edges$).find((e) => e.id === 'EP10N1_L9')!;
+      expect(edge.label).toBe('xsd:int');
     });
   });
 

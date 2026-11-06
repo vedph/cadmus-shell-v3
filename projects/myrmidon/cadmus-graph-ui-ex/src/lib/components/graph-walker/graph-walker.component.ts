@@ -138,9 +138,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
     // initialize walker when graphService is available
     effect(() => {
       const service = this.graphService();
-      console.log('GraphService effect triggered:', service);
       if (service && !this._walker) {
-        console.log('Creating new GraphWalker');
         this._walker = new GraphWalker(service);
         this.setupObservables();
       }
@@ -148,9 +146,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
 
     effect(() => {
       const id = this.nodeId();
-      console.log('NodeId effect triggered:', id);
       if (id && this._walker) {
-        console.log('Calling reset with id:', id);
         this.reset(id);
       }
     });
@@ -171,15 +167,6 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
     this.nOutFilter$ = this._walker.nOutFilter$;
     this.nInFilter$ = this._walker.nInFilter$;
     this.childTotals$ = this._walker.childTotals$;
-
-    // add debugging
-    this.nodes$.subscribe((nodes) => {
-      console.log('GraphWalker nodes updated:', nodes);
-    });
-
-    this.edges$.subscribe((edges) => {
-      console.log('GraphWalker edges updated:', edges);
-    });
   }
 
   public ngOnInit(): void {
@@ -199,12 +186,7 @@ export class GraphWalkerComponent implements OnInit, OnDestroy {
   }
 
   private reset(id: number): void {
-    console.log('GraphWalker reset called with id:', id);
-    if (this._walker) {
-      this._walker.reset(id);
-    } else {
-      console.log('GraphWalker instance not available');
-    }
+    this._walker?.reset(id);
   }
 
   public onReset(): void {

@@ -149,6 +149,25 @@ describe('GraphNodeEditorComponent', () => {
     });
   });
 
+  it('save should keep the SID of an edited node', () => {
+    fixture.componentRef.setInput(
+      'node',
+      buildNode({
+        id: 7,
+        sourceType: NodeSourceType.Part,
+        sid: 'c3a0c8f4-9c3a-4b5e-8e4a-6f1d2b3c4d5e/x',
+      })
+    );
+    fixture.detectChanges();
+    component.form.label().value.set('Changed');
+
+    component.save();
+
+    expect(component.node()?.sid).toBe('c3a0c8f4-9c3a-4b5e-8e4a-6f1d2b3c4d5e/x');
+    expect(component.node()?.sourceType).toBe(NodeSourceType.Part);
+    expect(component.node()?.label).toBe('Changed');
+  });
+
   it('save should default id=0 and sourceType=User for a brand new node', () => {
     component.form.uri().value.set('x:new');
     component.form.label().value.set('New label');

@@ -80,7 +80,7 @@
     <div id="filters">
       @if (selectedNode$ | async; as node) {
       <div id="filter-head">
-        <span [style.color]="node.data.color || 'black'">&#x2b24;</span>
+        <span [style.color]="node.data.customColor || 'black'">&#x2b24;</span>
         <span class="node-uri" matTooltip="{{ node.data.uri }}">{{
           node | graphNodeLabel
         }}</span>

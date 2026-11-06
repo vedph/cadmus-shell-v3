@@ -235,6 +235,32 @@ describe('GraphTripleEditorComponent', () => {
       expect(t?.objectUri).toBe('x:node3');
       expect(t?.objectLiteral).toBeUndefined();
     });
+
+    it('should keep the SID and tag of an edited triple', async () => {
+      fixture.componentRef.setInput('triple', {
+        id: 5,
+        subjectId: 1,
+        predicateId: 2,
+        objectLiteral: 'old',
+        subjectUri: 'x:node1',
+        predicateUri: 'x:node2',
+        sid: 'c3a0c8f4-9c3a-4b5e-8e4a-6f1d2b3c4d5e/x',
+        tag: 't',
+      });
+      fixture.detectChanges();
+      await flush();
+      component.form.subjectNode().value.set(makeNode(1));
+      component.form.predicateNode().value.set(makeNode(2));
+      component.form.literal().value.set('new');
+
+      component.save();
+
+      const t = component.triple();
+      expect(t?.id).toBe(5);
+      expect(t?.objectLiteral).toBe('new');
+      expect(t?.sid).toBe('c3a0c8f4-9c3a-4b5e-8e4a-6f1d2b3c4d5e/x');
+      expect(t?.tag).toBe('t');
+    });
   });
 
   describe('cancel', () => {

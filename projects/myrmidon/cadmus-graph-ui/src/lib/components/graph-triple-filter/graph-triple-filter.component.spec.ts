@@ -311,6 +311,23 @@ describe('GraphTripleFilterComponent', () => {
       );
     });
 
+    it('sends the SID prefix flag with a SID', () => {
+      component.form.sid().value.set('abc');
+      component.form.sidPrefix().value.set(true);
+      component.apply();
+      expect(repository.setFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ sid: 'abc', isSidPrefix: true })
+      );
+    });
+
+    it('does not send the SID prefix flag without a SID', () => {
+      component.form.sidPrefix().value.set(true);
+      component.apply();
+      expect(repository.setFilter).toHaveBeenCalledWith(
+        expect.objectContaining({ sid: undefined, isSidPrefix: undefined })
+      );
+    });
+
     it('renders no disabled attribute while enabled', () => {
       const root: HTMLElement = fixture.nativeElement.firstElementChild;
       expect(root.hasAttribute('disabled')).toBe(false);

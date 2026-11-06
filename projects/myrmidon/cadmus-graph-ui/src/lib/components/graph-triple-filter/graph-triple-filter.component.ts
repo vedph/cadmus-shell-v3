@@ -48,9 +48,7 @@ function toDraft(filter: TripleFilter): GraphTripleFilterControls {
     literal: !!filter.literalPattern,
     objectLit: filter.literalPattern || '',
     sid: filter.sid || '',
-    // sidPrefix is not part of TripleFilter: the old form never set it
-    // from the filter either
-    sidPrefix: false,
+    sidPrefix: !!filter.isSidPrefix,
     tag: filter.tag || '',
   };
 }
@@ -134,6 +132,7 @@ export class GraphTripleFilterComponent {
       objectId: v.literal ? undefined : this._repository.getTerm('O')?.id,
       literalPattern: v.literal ? v.objectLit.trim() || undefined : undefined,
       sid: v.sid.trim() || undefined,
+      isSidPrefix: v.sid.trim() && v.sidPrefix ? true : undefined,
       tag: v.tag.trim() || undefined,
     };
   }

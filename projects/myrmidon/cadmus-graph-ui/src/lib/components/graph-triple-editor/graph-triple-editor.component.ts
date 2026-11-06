@@ -61,9 +61,19 @@ function toDraft(triple: UriTriple | undefined): GraphTripleControls {
   };
 }
 
-function toTriple(v: GraphTripleControls, id: number | undefined): UriTriple {
+/**
+ * Build a triple from the draft, keeping the ID, SID and tag of the edited
+ * triple if any (they are not edited here). The SID tells which source owns
+ * the triple, so it must be kept.
+ */
+function toTriple(
+  v: GraphTripleControls,
+  triple: UriTriple | undefined
+): UriTriple {
   return {
-    id: id || 0,
+    id: triple?.id || 0,
+    sid: triple?.sid || undefined,
+    tag: triple?.tag || undefined,
     subjectId: v.subjectNode?.id || 0,
     predicateId: v.predicateNode?.id || 0,
     objectId: v.isLiteral ? undefined : v.objectNode?.id || 0,
@@ -81,7 +91,7 @@ function isSameTriple(
   v: GraphTripleControls
 ): boolean {
   return (
-    !!triple && JSON.stringify(triple) === JSON.stringify(toTriple(v, triple.id))
+    !!triple && JSON.stringify(triple) === JSON.stringify(toTriple(v, triple))
   );
 }
 
@@ -241,7 +251,7 @@ export class GraphTripleEditorComponent {
       this.form().markAsTouched();
       return;
     }
-    this.triple.set(toTriple(this._draft(), this.triple()?.id));
+    this.triple.set(toTriple(this._draft(), this.triple()));
     this.form().reset();
   }
 }
