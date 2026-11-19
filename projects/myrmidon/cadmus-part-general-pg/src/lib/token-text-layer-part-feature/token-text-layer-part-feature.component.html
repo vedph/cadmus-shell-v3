@@ -23,13 +23,16 @@
     <cadmus-current-layer-part-bar/>
   </mat-card-header>
   @if (!(loading$ | async)) {
+  @let selLoc = selectedLocation();
+  @let newLoc = newLocation();
   <mat-card-actions>
     <mat-toolbar>
       <button
         mat-icon-button
         type="button"
         (click)="editFragment()"
-        matTooltip="Edit the selected fragment"
+        [disabled]="!selLoc"
+        matTooltip="Edit the selected fragment (click a fragment to select it)"
       >
         <mat-icon>edit</mat-icon>
       </button>
@@ -37,7 +40,8 @@
         mat-icon-button
         type="button"
         (click)="deleteFragment()"
-        matTooltip="Delete the selected fragment"
+        [disabled]="!selLoc"
+        matTooltip="Delete the selected fragment (click a fragment to select it)"
       >
         <mat-icon class="mat-warn">delete</mat-icon>
       </button>
@@ -63,7 +67,8 @@
         mat-icon-button
         type="button"
         (click)="pickLocation()"
-        matTooltip="Pick the selection location for a new fragment"
+        [disabled]="!newLoc"
+        matTooltip="Pick the selection location as the target for moving a fragment from the layer hints"
       >
         <mat-icon>info</mat-icon>
       </button>
@@ -71,27 +76,44 @@
         mat-icon-button
         type="button"
         (click)="addFragment()"
+        [disabled]="!newLoc"
         matTooltip="Add a new fragment at selection"
       >
         <mat-icon class="mat-primary">add_circle</mat-icon>
       </button>
-      <span>{{ pickedLocation }}</span>
+      <div class="locations">
+        @if (selLoc) {
+        <span class="location" matTooltip="selected fragment"
+          ><mat-icon>bookmark</mat-icon>{{ selLoc.toString() }}</span
+        >
+        } @if (newLoc) {
+        <span class="location" matTooltip="selection"
+          ><mat-icon>highlight_alt</mat-icon>{{ newLoc.toString() }}</span
+        >
+        } @if (pickedLocation) {
+        <span class="location" matTooltip="picked location"
+          ><mat-icon>place</mat-icon>{{ pickedLocation }}</span
+        >
+        }
+      </div>
     </mat-toolbar>
   </mat-card-actions>
   }
-  <mat-card-content fxLayout="row">
+  <mat-card-content>
     @if (loading$ | async) {
     <mat-progress-bar mode="indeterminate"/>
     }
 
-    <div [style.font-size]="textSize + 'px'">
-      @if (baseText$ | async; as baseText) {
-      <cadmus-decorated-token-text
-        [baseText]="baseText"
-        [locations]="(locations$ | async) || []"
-      />
-      }
-    </div>
+    @if (baseText$ | async; as baseText) {
+    <cadmus-decorated-token-text
+      [baseText]="baseText"
+      [locations]="(locations$ | async) || []"
+      [fontSize]="textSize"
+      [showToolbar]="true"
+      [(selectedLocation)]="selectedLocation"
+      (selectionChange)="onSelectionChange($event)"
+    />
+    }
   </mat-card-content>
   <div>
     <button

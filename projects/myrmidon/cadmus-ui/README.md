@@ -7,7 +7,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 This library contains shared UI components, services and validators for Cadmus:
 
 - close/save buttons for part/fragment editors.
-- decorated token-based text for fragment editors.
+- decorated token-based text for text layers and fragment editors, with its token-based text segmenter.
 - errors list.
 - facets badge.
 - flags badge.
@@ -20,6 +20,84 @@ This library contains shared UI components, services and validators for Cadmus:
 - user lookup.
 - custom validators.
 - JSON validators.
+
+## Decorated Token Text
+
+- class: `DecoratedTokenTextComponent`
+- selector: `cadmus-decorated-token-text`
+
+This component displays the base text of a token-based text layer, together with the fragments of the layer, and lets users select any portion of the text with token-based coordinates. It is used both by the text layer part editor, to add, edit or delete fragments, and by fragment editors, to show the base text with the fragment being edited:
+
+```html
+<cadmus-decorated-token-text
+  [baseText]="data()?.baseText || ''"
+  [locations]="loc ? [loc] : []"
+/>
+```
+
+It is built on the generic `SegmentedTextView` from [@myrmidon/cadmus-text-segment](https://www.npmjs.com/package/@myrmidon/cadmus-text-segment), which knows nothing about Cadmus: it just displays a text split into segments grouped into blocks, and lets users select a contiguous range of segments according to the _selection mode_ of each segment. The Cadmus coordinates system is entirely defined by `TokenTextSegmenter` (see below), which builds the segments from the text and maps selections to and from coordinates. So, should other coordinates systems be required, it would be enough to provide another segmenter.
+
+Here, each character of the text is a segment, and each line is a block:
+
+- whitespace characters are `wrapped`: a selection never starts or ends with them, so that whitespace at the edges of a selection is always ignored.
+- combining characters are `attached` to their base character: a selection never splits them.
+- the characters of each fragment in `locations` are `blocked` and highlighted: users cannot start, end or extend a selection across them. Two fragments in the same layer never overlap by design, and this way the UI makes it impossible to select a portion of text overlapping an existing fragment.
+
+Users can:
+
+- select any portion of the text (by dragging, SHIFT+clicking, or with SHIFT+arrow keys), getting its coordinates, i.e. the location of a new fragment there.
+- click a fragment to pick it.
+- optionally, when the toolbar is shown, zoom, find text, and select by typing coordinates. As typed coordinates bypass selection modes, a typed selection overlapping a fragment is flagged as such and has no location.
+
+▶️ input:
+
+- `baseText` (`string`): the base text.
+- `locations` (`TokenLocation[]`): the locations of all the fragments to display.
+- `fontSize` (`number`, default 16): the font size in pixels.
+- `showToolbar` (`boolean`, default false): true to show the toolbar with zoom, find and coordinates.
+- `settings` (`Partial<SegmentedTextSettings>`): optional settings overriding `DEFAULT_DECORATED_TOKEN_TEXT_SETTINGS`, which make the segmented text look like normal text.
+- `colors` (`Partial<DecoratedTokenTextColors>`): optional colors for fragments, overriding `DEFAULT_DECORATED_TOKEN_TEXT_COLORS` (M3 theme tokens).
+
+🔁 model:
+
+- `selectedLocation` (`TokenLocation`): the location of the picked fragment. It is set when users click a fragment, and cleared when they make a new selection. The fragment equal to it (or, when none is equal, any fragment overlapping it) is highlighted as selected.
+
+🔥 output:
+
+- `selectionChange` (`DecoratedTokenTextSelection`): the new selection made by users, with its `location` (null when empty or overlapping a fragment), `coords`, `text`, and `overlapping` flag.
+
+The component grows with its text; to limit its height and let the text scroll, set the `--cadmus-decorated-token-text-max-height` CSS variable (e.g. to `60vh`).
+
+### Token Text Segmenter
+
+`TokenTextSegmenter` implements the Cadmus token-based coordinates system. Text coordinates are token-based, a token being any sequence of non-whitespace characters, and optionally character-based within tokens. A point is `Y.X@AxR`:
+
+- `Y`: block (line) ordinal (1-N).
+- `X`: token ordinal in the block (1-N).
+- optionally, if not selecting whole tokens: `A` is the ordinal of the first character in the token (1-N), and `R` the count of characters (1-N; omitted when 1, so `1.2@3` is equal to `1.2@3x1`).
+
+A selection within a single token has a single point. A selection spanning several tokens has a start and an end point, separated by `-`, both inclusive: the start point picks from its `A` to the end of its token, the end point picks the first `R` characters of its token. Whitespace between tokens is included, while whitespace at the edges of a selection is ignored. For instance, with this text:
+
+```txt
+alpha beta
+gamma
+delta epsilon waw
+zeta
+```
+
+- `2.1` = `gamma`.
+- `1.2@2x2` = `et` (of `beta`).
+- `3.1@4x2-3.2@1` = `ta e` (`ta` of `delta`, `e` of `epsilon`).
+- `1.2@4-4.1@1x2` = `a gamma delta epsilon waw ze` (from the 4th character of `beta` to the first two of `zeta`).
+
+This segmenter mirrors exactly the text model of the backend (`TextLine` and `TokenTextPart` in `Cadmus.General.Parts`) and of the legacy, DOM-based implementation (`TextLayerService` in `@myrmidon/cadmus-core`). Its unit tests check its parity with the legacy implementation for every possible selection in a set of sample texts. For this reason it differs from the generic `SpacedTextSegmenter` of `@myrmidon/cadmus-text-segment` in these corner cases:
+
+- text is split into lines at LF only, and each line is trimmed (so a CR before LF is ignored).
+- _each_ whitespace character is a token separator, so that a run of N whitespaces delimits N-1 empty tokens, which count for token ordinals: in `a  b` (with 2 spaces) `b` is `1.3`.
+- `A` and `R` count UTF-16 code units, like JavaScript and C# strings (this matters only for characters outside the Basic Multilingual Plane).
+- in an end point, `A` is ignored, like the backend does (when generated, it is always 1).
+
+Coordinates are always generated in their canonical form, i.e. the one produced by `TokenLocation.toString()`.
 
 ## Thesaurus Entries Picker
 
@@ -134,6 +212,10 @@ private getData(): WordForm {
 ```
 
 ## History
+
+### Unreleased
+
+- 2026-11-19: reimplemented `DecoratedTokenTextComponent` on top of `@myrmidon/cadmus-text-segment` (new dependency), adding `TokenTextSegmenter`. The selector and the `baseText`, `locations` and `selectedLocation` bindings are unchanged, so consumers using it just to display a fragment's base text need no change. New: `fontSize`, `showToolbar`, `settings`, `colors` inputs; `selectedLocation` is now a model; `selectionChange` output. The rendered HTML (`text` signal) was removed, and users can no longer select text across existing fragments.
 
 ### 16.0.0
 

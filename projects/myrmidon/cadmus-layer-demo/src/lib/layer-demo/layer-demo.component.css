@@ -1,25 +1,141 @@
-textarea#text {
-  min-width: 300px;
-  min-height: 100px;
-}
-/* https://stackoverflow.com/questions/36265026/angular-2-innerhtml-styling */
-:host ::ng-deep div#result {
-  counter-reset: text-y-counter;
-}
-
-:host ::ng-deep div#result p:before {
-  content: counter(text-y-counter);
-  counter-increment: text-y-counter;
-  margin-right: 6px;
-  color: #A0A0A0;
-}
-
-:host ::ng-deep span.fr {
-  background-color: yellow;
-  border: 1px solid silver;
-  border-radius: 6px;
-}
-
 article {
-  column-width: 20em;
+  column-width: 24em;
+  font: var(--mat-sys-body-medium);
+}
+
+article code,
+code.loc {
+  font-family: 'Roboto Mono', Consolas, monospace;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.text-field {
+  width: 100%;
+}
+
+textarea#text {
+  font-family: 'Roboto Mono', Consolas, monospace;
+}
+
+.location-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.location-row mat-form-field {
+  flex: 1 1 auto;
+}
+
+.location-row input {
+  font-family: 'Roboto Mono', Consolas, monospace;
+}
+
+.location-row button {
+  margin-top: 8px;
+}
+
+.fragments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: var(--mat-sys-title-small);
+}
+
+.fragments mat-chip {
+  font-family: 'Roboto Mono', Consolas, monospace;
+  cursor: pointer;
+}
+
+.output {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.size-bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+cadmus-decorated-token-text {
+  --cadmus-decorated-token-text-max-height: 60vh;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-small, 4px);
+  background-color: var(--mat-sys-surface-container-low);
+}
+
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--mat-sys-title-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.detail-title mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.detail-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  min-height: 24px;
+}
+
+.detail-body .text {
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.detail-body .warn {
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-label-medium);
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
 }

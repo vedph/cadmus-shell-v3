@@ -47,3 +47,6 @@ minimumReleaseAgeExclude:
   - '@rollup/rollup-win32-arm64-msvc@4.63.5 || 4.64.0 || 4.64.3 || 4.65.0'
   - '@myrmidon/cadmus-ui-object-view@1.0.3'
   - 3d-force-graph@1.80.2
+  - '@myrmidon/cadmus-text-segment@0.0.2'
+overrides:
+  '@rollup/rollup-win32-arm64-msvc': '4.68.7'

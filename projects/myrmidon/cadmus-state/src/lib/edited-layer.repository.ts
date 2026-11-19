@@ -275,9 +275,18 @@ export class EditedLayerRepository {
     if (!part) {
       return;
     }
-    const i = part.fragments.findIndex((p) => {
-      return TokenLocation.parse(p.location)?.overlaps(loc);
-    });
+    // prefer the fragment equal to the location: e.g. two point fragments
+    // in the same token (like 1.1@1x2 and 1.1@3x2) always overlap, so
+    // just picking the first overlapping one might delete the wrong one
+    const key = loc.toString();
+    let i = part.fragments.findIndex(
+      (p) => TokenLocation.parse(p.location)?.toString() === key,
+    );
+    if (i === -1) {
+      i = part.fragments.findIndex((p) => {
+        return TokenLocation.parse(p.location)?.overlaps(loc);
+      });
+    }
     if (i === -1) {
       return;
     }

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, of } from 'rxjs';
 
-import { TokenLocation, LayerHint, TextLayerService } from '@myrmidon/cadmus-core';
+import { TokenLocation, LayerHint } from '@myrmidon/cadmus-core';
 import { EditedLayerRepository } from '@myrmidon/cadmus-state';
 import { EditedItemRepository } from '@myrmidon/cadmus-item-editor';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
@@ -36,11 +36,6 @@ describe('TokenTextLayerPartFeatureComponent', () => {
     getFacet: ReturnType<typeof vi.fn>;
     facet$: Subject<any>;
     item$: Subject<any>;
-  };
-  let textLayerService: {
-    getSelectedRange: ReturnType<typeof vi.fn>;
-    getSelectedLocationForEdit: ReturnType<typeof vi.fn>;
-    getSelectedLocationForNew: ReturnType<typeof vi.fn>;
   };
   let dialogService: { confirm: ReturnType<typeof vi.fn> };
   let libraryRouteService: {
@@ -82,11 +77,6 @@ describe('TokenTextLayerPartFeatureComponent', () => {
       facet$: new Subject<any>(),
       item$: new Subject<any>(),
     };
-    textLayerService = {
-      getSelectedRange: vi.fn(),
-      getSelectedLocationForEdit: vi.fn(),
-      getSelectedLocationForNew: vi.fn(),
-    };
     dialogService = { confirm: vi.fn().mockReturnValue(of(true)) };
     libraryRouteService = {
       buildFragmentEditorRoute: vi
@@ -102,7 +92,6 @@ describe('TokenTextLayerPartFeatureComponent', () => {
         { provide: ActivatedRoute, useValue: makeRoute(overrides) },
         { provide: Router, useValue: router },
         { provide: EditedLayerRepository, useValue: repository },
-        { provide: TextLayerService, useValue: textLayerService },
         { provide: LibraryRouteService, useValue: libraryRouteService },
         { provide: EditedItemRepository, useValue: editedItemRepository },
         { provide: DialogService, useValue: dialogService },
@@ -176,22 +165,31 @@ describe('TokenTextLayerPartFeatureComponent', () => {
   });
 
   describe('deleteFragment', () => {
-    it('should do nothing when there is no selected range', () => {
-      textLayerService.getSelectedRange.mockReturnValue(null);
+    it('should do nothing when no fragment is selected', () => {
       component.deleteFragment();
       expect(dialogService.confirm).not.toHaveBeenCalled();
     });
 
-    it('should confirm and delete the fragment overlapping the selected location', () => {
+    it('should confirm and delete the selected fragment', () => {
       const loc = TokenLocation.parse('1.1')!;
-      textLayerService.getSelectedRange.mockReturnValue({} as any);
-      textLayerService.getSelectedLocationForEdit.mockReturnValue(loc);
+      component.selectedLocation.set(loc);
       repository.getPart.mockReturnValue({ fragments: [{ location: '1.1' }] });
 
       component.deleteFragment();
 
       expect(dialogService.confirm).toHaveBeenCalled();
       expect(repository.deleteFragment).toHaveBeenCalledWith(loc);
+      expect(component.selectedLocation()).toBeUndefined();
+    });
+
+    it('should not delete when not confirmed', () => {
+      dialogService.confirm.mockReturnValue(of(false));
+      component.selectedLocation.set(TokenLocation.parse('1.1')!);
+      repository.getPart.mockReturnValue({ fragments: [{ location: '1.1' }] });
+
+      component.deleteFragment();
+
+      expect(repository.deleteFragment).not.toHaveBeenCalled();
     });
   });
 
@@ -205,6 +203,38 @@ describe('TokenTextLayerPartFeatureComponent', () => {
     expect(repository.refreshBreakChance).toHaveBeenCalled();
   });
 
+  it('should render the base text with its fragments and toolbar', async () => {
+    repository.loading$.next(false);
+    repository.baseText$.next('alpha beta');
+    fixture.detectChanges();
+    // the mock subjects do not replay: emit locations once subscribed
+    // (i.e. once the base text is displayed)
+    repository.locations$.next([TokenLocation.parse('1.2')!]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const el = (fixture.nativeElement as HTMLElement).querySelector(
+      'cadmus-decorated-token-text',
+    ) as HTMLElement;
+    expect(el).toBeTruthy();
+    expect(el.textContent).toContain('alpha');
+    expect(el.querySelector('.toolbar')).toBeTruthy();
+    expect(el.querySelectorAll('.mode-blocked').length).toBe(4);
+  });
+
+  it('onSelectionChange should set the new location', () => {
+    const loc = TokenLocation.parse('1.2@2x2')!;
+    component.onSelectionChange({
+      location: loc,
+      coords: '1.2@2x2',
+      overlapping: false,
+      text: 'et',
+    });
+    expect(component.newLocation()).toBe(loc);
+    component.onSelectionChange({ location: null, overlapping: false, text: '' });
+    expect(component.newLocation()).toBeNull();
+  });
+
   describe('editFragment / addFragment / pickLocation', () => {
     beforeEach(() => {
       repository.getPart.mockReturnValue({
@@ -212,19 +242,17 @@ describe('TokenTextLayerPartFeatureComponent', () => {
         id: 'part1',
         typeId: 'it.vedph.token-text-layer',
         roleId: undefined,
+        fragments: [{ location: '1.1' }, { location: '2.1@1x1' }],
       });
     });
 
-    it('editFragment should do nothing without a selected range', () => {
-      textLayerService.getSelectedRange.mockReturnValue(null);
+    it('editFragment should do nothing without a selected fragment', () => {
       component.editFragment();
       expect(router.navigate).not.toHaveBeenCalled();
     });
 
-    it('editFragment should navigate to the fragment editor for the selected location', () => {
-      const loc = TokenLocation.parse('1.1')!;
-      textLayerService.getSelectedRange.mockReturnValue({} as any);
-      textLayerService.getSelectedLocationForEdit.mockReturnValue(loc);
+    it('editFragment should navigate to the fragment editor for the selected fragment', () => {
+      component.selectedLocation.set(TokenLocation.parse('1.1')!);
 
       component.editFragment();
 
@@ -239,24 +267,50 @@ describe('TokenTextLayerPartFeatureComponent', () => {
       expect(router.navigate).toHaveBeenCalled();
     });
 
+    it('editFragment should use the location as stored in the part', () => {
+      // stored as 2.1@1x1, whose canonical form is 2.1@1
+      component.selectedLocation.set(TokenLocation.parse('2.1@1x1')!);
+
+      component.editFragment();
+
+      expect(libraryRouteService.buildFragmentEditorRoute).toHaveBeenCalledWith(
+        [],
+        'item1',
+        'part1',
+        'it.vedph.token-text-layer',
+        undefined,
+        '2.1@1x1',
+      );
+    });
+
+    it('addFragment should do nothing without a selection', () => {
+      component.addFragment();
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
     it('addFragment should navigate to the fragment editor for a new location', () => {
-      const loc = TokenLocation.parse('2.1')!;
-      textLayerService.getSelectedRange.mockReturnValue({} as any);
-      textLayerService.getSelectedLocationForNew.mockReturnValue(loc);
+      component.newLocation.set(TokenLocation.parse('2.1@2x3')!);
 
       component.addFragment();
 
-      expect(textLayerService.getSelectedLocationForNew).toHaveBeenCalledWith(
-        {},
-        'some text',
+      expect(libraryRouteService.buildFragmentEditorRoute).toHaveBeenCalledWith(
+        [],
+        'item1',
+        'part1',
+        'it.vedph.token-text-layer',
+        undefined,
+        '2.1@2x3',
       );
       expect(router.navigate).toHaveBeenCalled();
     });
 
-    it('pickLocation should set pickedLocation from the selected range', () => {
-      const loc = TokenLocation.parse('3.1')!;
-      textLayerService.getSelectedRange.mockReturnValue({} as any);
-      textLayerService.getSelectedLocationForNew.mockReturnValue(loc);
+    it('pickLocation should do nothing without a selection', () => {
+      component.pickLocation();
+      expect(component.pickedLocation).toBeUndefined();
+    });
+
+    it('pickLocation should set pickedLocation from the selection', () => {
+      component.newLocation.set(TokenLocation.parse('3.1')!);
 
       component.pickLocation();
 

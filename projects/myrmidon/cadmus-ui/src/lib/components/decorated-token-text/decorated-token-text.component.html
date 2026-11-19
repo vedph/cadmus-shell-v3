@@ -1,1 +1,12 @@
-<div [innerHtml]="text() | safeHtml : 'html'" id="text" #textElem></div>
+<cadmus-segmented-text-view
+  [blocks]="blocks()"
+  [segmenter]="segmenter"
+  [settings]="resolvedSettings()"
+  [showZoom]="showToolbar()"
+  [showFind]="showToolbar()"
+  [showCoords]="showToolbar()"
+  ariaLabel="base text"
+  [(selectedIds)]="selectedIds"
+  (selectionChange)="onSelectionChange($event)"
+  (segmentClick)="onSegmentClick($event)"
+/>

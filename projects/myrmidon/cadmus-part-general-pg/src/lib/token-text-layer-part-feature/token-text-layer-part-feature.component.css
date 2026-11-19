@@ -1,0 +1,26 @@
+cadmus-decorated-token-text {
+  /* long texts scroll within the viewer */
+  --cadmus-decorated-token-text-max-height: 70vh;
+}
+
+.locations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-left: 8px;
+  font-family: 'Roboto Mono', Consolas, monospace;
+  font-size: 14px;
+}
+
+.location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.location mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--mat-sys-on-surface-variant);
+}

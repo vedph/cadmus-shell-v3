@@ -13,6 +13,11 @@ interface TextRange {
  * The selected range of text. This reflects Range useful properties;
  * in fact, you can just pass a Range to any method requiring this parameter type,
  * but this adds a level of indirection useful in testing.
+ *
+ * @deprecated Since the adoption of `DecoratedTokenTextComponent` based on
+ * `@myrmidon/cadmus-text-segment` (see `TokenTextSegmenter` in
+ * `@myrmidon/cadmus-ui`), this DOM-based logic is no longer used, and is
+ * kept only for backwards compatibility.
  */
 export interface SelectedRange {
   commonAncestorContainer: Node;
@@ -22,6 +27,16 @@ export interface SelectedRange {
   endOffset: number;
 }
 
+/**
+ * Token-based text layers service. This contains the logic of the token-based
+ * text model: `getLines` and `getTextFragment` are still used to extract the
+ * text of a location. The DOM-based rendition (`render`) and selection logic
+ * (`getSelectedLocationForNew`, `getSelectedLocationForEdit`,
+ * `getSelectedRange`) was used by the legacy implementation of
+ * `DecoratedTokenTextComponent`, and is deprecated: the same coordinates
+ * system is now implemented by `TokenTextSegmenter` in `@myrmidon/cadmus-ui`,
+ * whose tests ensure its parity with this service.
+ */
 @Injectable({ providedIn: 'root' })
 export class TextLayerService {
   private readonly _wsRegex: RegExp;
@@ -293,6 +308,10 @@ export class TextLayerService {
    * @param selectedLoc The optional location of the selected
    * fragment if any. The selected fragment gets decorated with an additional
    * class value.
+   * @deprecated Since the adoption of `DecoratedTokenTextComponent` based on
+   * `@myrmidon/cadmus-text-segment` (see `TokenTextSegmenter` in
+   * `@myrmidon/cadmus-ui`), this DOM-based logic is no longer used, and is
+   * kept only for backwards compatibility.
    */
   public render(
     text: string,
@@ -686,6 +705,10 @@ export class TextLayerService {
    * @param range The selected range. You can get it from the
    * current selection using getSelectedRange().
    * @returns The token location or null.
+   * @deprecated Since the adoption of `DecoratedTokenTextComponent` based on
+   * `@myrmidon/cadmus-text-segment` (see `TokenTextSegmenter` in
+   * `@myrmidon/cadmus-ui`), this DOM-based logic is no longer used, and is
+   * kept only for backwards compatibility.
    */
   public getSelectedLocationForEdit(
     range: SelectedRange
@@ -828,6 +851,10 @@ export class TextLayerService {
    * current selection using getSelectedRange().
    * @param text The full base text.
    * @returns TokenLocation The token location or undefined.
+   * @deprecated Since the adoption of `DecoratedTokenTextComponent` based on
+   * `@myrmidon/cadmus-text-segment` (see `TokenTextSegmenter` in
+   * `@myrmidon/cadmus-ui`), this DOM-based logic is no longer used, and is
+   * kept only for backwards compatibility.
    */
   public getSelectedLocationForNew(
     range: SelectedRange,
@@ -888,6 +915,10 @@ export class TextLayerService {
 
   /**
    * Get the currently selected range in the browser's document.
+   * @deprecated Since the adoption of `DecoratedTokenTextComponent` based on
+   * `@myrmidon/cadmus-text-segment` (see `TokenTextSegmenter` in
+   * `@myrmidon/cadmus-ui`), this DOM-based logic is no longer used, and is
+   * kept only for backwards compatibility.
    */
   public getSelectedRange(): Range | null {
     const sel = window.getSelection();

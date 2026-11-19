@@ -280,6 +280,37 @@ describe('EditedLayerRepository', () => {
         '1.3',
       ]);
     });
+
+    it('should prefer the fragment equal to the location over overlapping ones', () => {
+      // two points in the same token always overlap
+      const layerPart = makeLayerPart([
+        { location: '1.1@1x2' },
+        { location: '1.1@4x2' },
+      ]);
+      const { repo, itemService } = createRepository({ layerPart });
+      repo.load('item1', 'part1');
+      itemService.addPart.mockReturnValue(of(layerPart));
+
+      repo.deleteFragment(TokenLocation.parse('1.1@4x2')!);
+
+      const savedPart = itemService.addPart.mock.calls[0][0] as TextLayerPart;
+      expect(savedPart.fragments.map((f) => f.location)).toEqual(['1.1@1x2']);
+    });
+
+    it('should match a fragment stored in non-canonical form', () => {
+      const layerPart = makeLayerPart([
+        { location: '1.1@1' },
+        { location: '1.1@2x1' },
+      ]);
+      const { repo, itemService } = createRepository({ layerPart });
+      repo.load('item1', 'part1');
+      itemService.addPart.mockReturnValue(of(layerPart));
+
+      repo.deleteFragment(TokenLocation.parse('1.1@2')!);
+
+      const savedPart = itemService.addPart.mock.calls[0][0] as TextLayerPart;
+      expect(savedPart.fragments.map((f) => f.location)).toEqual(['1.1@1']);
+    });
   });
 
   describe('saveFragment', () => {

@@ -1,160 +1,218 @@
 <mat-card appearance="outlined">
   <mat-card-header>
-    <h3>Layered Text Demo</h3>
+    <mat-icon mat-card-avatar>layers</mat-icon>
+    <mat-card-title>Text Layers Demo</mat-card-title>
+    <mat-card-subtitle>token-based coordinates</mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>
-    <article>
-      <p>
-        Enter some base text and zero or more layer fragments locations, then
-        click the render button. This renders the base text with all its ranges.
-      </p>
-      <p>
-        Once the text has been decorated, select any portion of it, either
-        including a decorated part, or not. Then, if you selected a part
-        including decorations, click the location button with the checkmark
-        (=get the location of the fragment to edit); else, click the location
-        button with the plus (=get the location of a new fragment).
-      </p>
-      <p>
-        This will show you the token-based coordinates corresponding to your
-        selection, provided that if you include any portion of a decorated text
-        you will get the full coordinates of the decoration; otherwise, you will
-        just get the coordinates of the selected character(s).
-      </p>
-      <p>
-        This behavior is used to allow users edit existing part fragments by
-        just selecting any part of it, even partially; while they must be
-        precise when they are creating a new fragment.
-      </p>
-    </article>
-    <hr />
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>How it works</mat-panel-title>
+      </mat-expansion-panel-header>
+      <article>
+        <p>
+          A text layer annotates portions of a base text with fragments. Each
+          fragment has a <strong>location</strong> with token-based
+          coordinates, where a token is any sequence of non-whitespace
+          characters. A point is <code>Y.X&#64;AxR</code>:
+        </p>
+        <ul>
+          <li><code>Y</code>: the line number (1-N).</li>
+          <li><code>X</code>: the token number in the line (1-N).</li>
+          <li>
+            optionally, when not selecting whole tokens: <code>A</code> is
+            the first character in the token (1-N), and <code>R</code> the
+            count of characters (omitted when 1).
+          </li>
+        </ul>
+        <p>
+          A selection spanning several tokens has a start and an end point
+          separated by <code>-</code>: the start point picks from its
+          <code>A</code> to the end of its token, the end point picks the
+          first <code>R</code> characters of its token. Whitespace at the
+          edges of a selection is ignored. For instance, with the default
+          text: <code>2.1</code> is <em>gamma</em>, <code>1.2&#64;2x2</code>
+          is <em>et</em>, <code>3.1&#64;4x2-3.2&#64;1</code> is
+          <em>ta e</em>.
+        </p>
+        <p>
+          Fragments in the same layer never overlap: so their characters are
+          highlighted and <strong>blocked</strong>, and a selection always
+          stops before them. Click a fragment to pick it; select any other
+          portion of text (by dragging, SHIFT+clicking, or with SHIFT+arrows)
+          to get its location, and add it as a new fragment. You can also
+          type coordinates in the box below the text to select them.
+        </p>
+      </article>
+    </mat-expansion-panel>
 
-    <form [formRoot]="rendition">
-      <div>
-        <mat-form-field>
+    <div class="layout">
+      <!-- input -->
+      <form class="input" [formRoot]="demoForm">
+        <mat-form-field class="text-field">
           <mat-label>base text</mat-label>
           <textarea
             matInput
-            type="text"
             id="text"
+            rows="6"
             spellcheck="false"
-            [formField]="rendition.text"
+            [formField]="demoForm.text"
           ></textarea>
+          <mat-hint>each line is a block</mat-hint>
         </mat-form-field>
-      </div>
 
-      <div>
-        <mat-form-field>
-          <mat-label>location</mat-label>
-          <input
-            matInput
-            type="text"
-            id="location"
-            spellcheck="false"
-            [formField]="rendition.location"
-          />
-          <mat-hint>Y.X&#64;AxR</mat-hint>
-        </mat-form-field>
-      </div>
+        <div class="location-row">
+          <mat-form-field>
+            <mat-label>location</mat-label>
+            <input
+              matInput
+              id="location"
+              spellcheck="false"
+              autocomplete="off"
+              [formField]="demoForm.location"
+            />
+            @if (locationError(); as error) {
+              <mat-error>{{ error }}</mat-error>
+            } @else {
+              <mat-hint>Y.X&#64;AxR or Y.X&#64;AxR-Y.X&#64;AxR</mat-hint>
+            }
+          </mat-form-field>
+          <button
+            mat-icon-button
+            type="submit"
+            matTooltip="Add a fragment at the typed location"
+          >
+            <mat-icon class="mat-primary">add_circle</mat-icon>
+          </button>
+        </div>
 
-      <div>
-        <mat-toolbar>
-          <span>
+        <!-- fragments -->
+        <div class="fragments">
+          <div class="fragments-header">
+            <span>fragments: {{ locations().length }}</span>
             <button
               mat-icon-button
-              (click)="addLocation()"
               type="button"
-              matTooltip="Add the specified location"
-            >
-              <mat-icon style="color: #66cc75">add_circle</mat-icon>
-            </button>
-            <button
-              mat-icon-button
+              matTooltip="Remove all the fragments"
+              [disabled]="!locations().length"
               (click)="clearLocations()"
-              type="button"
-              matTooltip="Remove all the locations"
             >
               <mat-icon class="mat-warn">delete_sweep</mat-icon>
             </button>
-            <button
-              mat-icon-button
-              type="submit"
-              matTooltip="Render the decorated base text"
-            >
-              <mat-icon class="mat-primary">play_circle_outline</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              (click)="getLocationForNew()"
-              type="button"
-              matTooltip="Get location for new item"
-            >
-              <mat-icon>playlist_add</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              (click)="getLocationForEdit()"
-              type="button"
-              matTooltip="Get location for selected item"
-            >
-              <mat-icon>playlist_add_check</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              matTooltip="Larger text"
-              (click)="makeLarger()"
-              [disabled]="textSize() >= 24"
-            >
-              <mat-icon>format_size</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              matTooltip="Smaller text"
-              (click)="makeSmaller()"
-              [disabled]="textSize() <= 12"
-            >
-              <mat-icon>text_fields</mat-icon>
-            </button>
-          </span>
-          <span class="tb-fill-remaining-space"></span>
-          <span>{{ userLocation() }}</span>
-        </mat-toolbar>
-      </div>
-
-      <table>
-        <tbody>
-          @for (loc of locations(); track loc) {
-            <tr>
-              <td>
-                <button type="button" mat-icon-button (click)="removeLocation(loc)">
-                  <mat-icon class="mat-warn">remove_circle</mat-icon>
+          </div>
+          <mat-chip-set aria-label="fragments">
+            @for (loc of locations(); track loc) {
+              <mat-chip
+                [highlighted]="selectedLocation() === loc"
+                (click)="pickLocation(loc)"
+                (removed)="removeLocation(loc)"
+              >
+                {{ loc.toString() }}
+                <button
+                  matChipRemove
+                  type="button"
+                  [attr.aria-label]="'remove ' + loc.toString()"
+                >
+                  <mat-icon>cancel</mat-icon>
                 </button>
-              </td>
-              <td>{{ loc.toString() }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </form>
-  </mat-card-content>
-</mat-card>
+              </mat-chip>
+            }
+          </mat-chip-set>
+        </div>
+      </form>
 
-<mat-card appearance="outlined">
-  <mat-card-header>
-    <h3>Rendition</h3>
-  </mat-card-header>
-  <mat-card-content>
-    <div
-      [style.font-size]="textSize() + 'px'"
-      [innerHtml]="result() | safeHtml: 'html'"
-      id="result()"
-      #resultElem
-    ></div>
-    <hr />
-    <div>
-      <code>{{ result() }}</code>
+      <!-- text -->
+      <div class="output">
+        <div class="size-bar">
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Larger text"
+            (click)="makeLarger()"
+            [disabled]="textSize() >= 24"
+          >
+            <mat-icon>format_size</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Smaller text"
+            (click)="makeSmaller()"
+            [disabled]="textSize() <= 12"
+          >
+            <mat-icon>text_fields</mat-icon>
+          </button>
+        </div>
+        <cadmus-decorated-token-text
+          [baseText]="text()"
+          [locations]="locations()"
+          [fontSize]="textSize()"
+          [showToolbar]="true"
+          [(selectedLocation)]="selectedLocation"
+          (selectionChange)="onSelectionChange($event)"
+        />
+
+        <!-- details -->
+        <div class="details">
+          <div class="detail">
+            <div class="detail-title">
+              <mat-icon>highlight_alt</mat-icon> selection
+            </div>
+            @if (selection(); as sel) {
+              <div class="detail-body">
+                <code class="loc">{{ sel.coords }}</code>
+                <span class="text">{{ sel.text }}</span>
+                @if (sel.overlapping) {
+                  <span class="warn">overlaps a fragment</span>
+                }
+              </div>
+              <div class="detail-actions">
+                <button
+                  mat-flat-button
+                  type="button"
+                  [disabled]="!sel.location"
+                  (click)="addSelection()"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                  add fragment
+                </button>
+                <button mat-button type="button" (click)="clearSelection()">
+                  clear
+                </button>
+              </div>
+            } @else {
+              <div class="detail-body muted">
+                select any portion of the text
+              </div>
+            }
+          </div>
+
+          <div class="detail">
+            <div class="detail-title">
+              <mat-icon>bookmark</mat-icon> picked fragment
+            </div>
+            @if (selectedLocation(); as loc) {
+              <div class="detail-body">
+                <code class="loc">{{ loc.toString() }}</code>
+                <span class="text">{{ selectedText() }}</span>
+              </div>
+              <div class="detail-actions">
+                <button
+                  mat-button
+                  type="button"
+                  class="mat-warn"
+                  (click)="removeLocation(loc)"
+                >
+                  <mat-icon>remove_circle</mat-icon>
+                  remove
+                </button>
+              </div>
+            } @else {
+              <div class="detail-body muted">click a fragment to pick it</div>
+            }
+          </div>
+        </div>
+      </div>
     </div>
   </mat-card-content>
 </mat-card>

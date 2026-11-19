@@ -42,10 +42,10 @@
     "test:all": "pnpm run check-libs && pnpm run test-cor && pnpm run test-api && pnpm run test-ui && pnpm run test-itm && pnpm run test-ths && pnpm run test-gen && pnpm run test-phi && pnpm run test-grp && pnpm run test-pre && pnpm run test-flg && pnpm run test-sta && pnpm run test-tax && pnpm run test-imp && pnpm run test-prd"
   },
   "overrides": {
-    "d3-selection": "3.0.0"
+    "d3-selection": "3.0.1"
   },
   "private": true,
-  "packageManager": "pnpm@12.16.1",
+  "packageManager": "pnpm@12.21.0",
   "dependencies": {
     "3d-force-graph": "^1.80.2",
     "@angular/animations": "^22.2.3",
@@ -60,8 +60,8 @@
     "@angular/router": "^22.2.3",
     "@auth0/angular-jwt": "^5.2.0",
     "@jean-merelis/ngx-monaco-editor": "^21.0.0",
-    "@myrmidon/auth-jwt-admin": "10.0.1",
-    "@myrmidon/auth-jwt-login": "10.0.1",
+    "@myrmidon/auth-jwt-admin": "10.1.0",
+    "@myrmidon/auth-jwt-login": "10.1.0",
     "@myrmidon/cadmus-api": "link:./dist/myrmidon/cadmus-api",
     "@myrmidon/cadmus-mat-physical-size": "^10.0.4",
     "@myrmidon/cadmus-mat-physical-state": "^10.0.3",
@@ -82,6 +82,7 @@
     "@myrmidon/cadmus-text-ed": "^11.0.4",
     "@myrmidon/cadmus-text-ed-md": "^12.0.4",
     "@myrmidon/cadmus-text-ed-txt": "^11.0.3",
+    "@myrmidon/cadmus-text-segment": "^0.0.2",
     "@myrmidon/cadmus-thesaurus-store": "^1.0.1",
     "@myrmidon/cadmus-ui-flag-set": "^10.0.3",
     "@myrmidon/cadmus-ui-note-set": "^12.0.4",
@@ -94,11 +95,11 @@
     "d3-force": "^3.0.1",
     "echarts": "^6.1.0",
     "force-graph": "^1.52.0",
-    "marked": "^18.1.3",
+    "marked": "^18.2.1",
     "monaco-editor": "^0.47.0",
     "ngx-echarts": "^22.0.0",
     "rxjs": "~7.8.0",
-    "three": "^0.186.1",
+    "three": "^0.187.0",
     "ts-md5": "^2.0.1",
     "tslib": "^2.3.0"
   },
@@ -112,15 +113,10 @@
     "jsdom": "^30.1.3",
     "ng-packagr": "^22.2.1",
     "typescript": "~6.0.3",
-    "vitest": "^5.1.0",
+    "vitest": "^5.1.1",
     "zone.js": "~0.16.3"
   },
   "optionalDependencies": {
-    "@rollup/rollup-win32-arm64-msvc": "^4.67.5"
-  },
-  "pnpm": {
-    "overrides": {
-      "rollup": "npm:@rollup/wasm-node"
-    }
+    "@rollup/rollup-win32-arm64-msvc": "^4.68.7"
   }
 }

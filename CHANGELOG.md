@@ -1,5 +1,13 @@
 # History
 
+- 2026-11-19: 🆕 replaced old text-selection based text layer UI with text-segment based UI.
+- 2026-11-19: reimplemented the token-based text selection of text layers on top of the new `@myrmidon/cadmus-text-segment` package (⚠️ new dependency). The coordinates system is unchanged.
+  - `DecoratedTokenTextComponent` (`@myrmidon/cadmus-ui`) is now built on `SegmentedTextView`, with the new `TokenTextSegmenter` implementing the token-based coordinates exactly like the legacy `TextLayerService` and the backend (its tests check parity with the legacy service for every possible selection in a set of sample texts). Its selector and its `baseText`/`locations`/`selectedLocation` bindings are unchanged, so fragment editors using it to display their base text need no change. The characters of existing fragments are now blocked, so that users can no longer select text overlapping a fragment.
+  - text layer part editor (`@myrmidon/cadmus-part-general-pg`): click a fragment to select it for editing or deleting (rather than selecting some of its text); the toolbar shows the selected fragment and the selection location, and disables the commands which have nothing to act on. Editing a fragment uses its location as stored in the part, so that fragments stored with non-canonical locations (e.g. `1.1@1x1`) are found by the fragment editor.
+  - 🐛 `EditedLayerRepository.deleteFragment` (`@myrmidon/cadmus-state`) now prefers the fragment equal to the location to the first overlapping one, which could be a different fragment in the same token.
+  - the DOM-based methods of `TextLayerService` (`@myrmidon/cadmus-core`) are deprecated.
+  - refactored the text layers demo page (`@myrmidon/cadmus-layer-demo`).
+
 - 2026-11-06: revised the semantic graph libraries after the backend graph revision (Cadmus 17.1.0). No code change is required in consumers.
   - 🐛 `GraphService` (`@myrmidon/cadmus-api`):
     - multiple class IDs (`classIds`) and predicate IDs (`predicateIds`, `notPredicateIds`) in filters were sent as a single value (the last one), so that only the last class or predicate was used in filtering nodes, linked nodes, triples and triple groups.
