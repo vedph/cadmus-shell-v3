@@ -2,7 +2,7 @@
 (function (window) {
   // environment-dependent settings
   window.__env = window.__env || {};
-  window.__env.version = '18.0.0';
+  window.__env.version = "18.0.0";
   window.__env.apiUrl = "http://localhost:5050/api/";
 
   // enable thesaurus import in thesaurus list for admins
@@ -27,4 +27,7 @@
   // window.__env.helpUrlSeparator = "__";
   // set to false to skip checking page availability (e.g. when CORS is not allowed)
   // window.__env.helpUrlCheck = true;
+
+  window.__env.helpUrlTemplate = ["https://vedph.github.io/cadmus-help/parts/{typeId}{separator}{roleId}{separator}{frRoleId}.html"];
+  window.__env.helpUrlCheck = true;
 })(this);
