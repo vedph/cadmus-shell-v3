@@ -5,7 +5,7 @@ import {
   linkedSignal,
   signal,
 } from '@angular/core';
-import { TitleCasePipe } from '@angular/common';
+import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { take } from 'rxjs/operators';
 
 import {
@@ -24,7 +24,7 @@ import {
   MatExpansionPanelHeader,
 } from '@angular/material/expansion';
 
-import { NgxToolsSignalValidators, FlatLookupPipe } from '@myrmidon/ngx-tools';
+import { NgxToolsSignalValidators } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AssertedChronotopesPipe } from '@myrmidon/cadmus-refs-asserted-chronotope';
 
@@ -36,11 +36,20 @@ import {
   copyFormValue,
 } from '@myrmidon/cadmus-ui';
 
+import {
+  mergeThesOrTaxoSettings,
+  resolveThesOrTaxoEntries,
+  ThesOrTaxoLabelPipe,
+  ThesOrTaxoSettings,
+} from '@myrmidon/cadmus-ui-thestaxo';
+
 import { HistoricalEventEditorComponent } from '../historical-event-editor/historical-event-editor.component';
 
 import {
+  DEFAULT_EVENT_TYPE_SETTINGS,
   HistoricalEvent,
   HistoricalEventsPart,
+  HistoricalEventsPartSettings,
   HISTORICAL_EVENTS_PART_TYPEID,
 } from '../historical-events-part';
 
@@ -59,6 +68,8 @@ function toDraft(
  * Thesauri: event-types, event-tags, event-relations, chronotope-tags,
  * asserted-id-scopes, asserted-id-tags, assertion-tags, doc-reference-tags,
  * doc-reference-types, pin-link-scopes, pin-link-tags, asserted-id-features.
+ * Settings (HistoricalEventsPartSettings): eventType, to pick the event type
+ * from a taxonomy or another thesaurus rather than from event-types.
  */
 @Component({
   selector: 'cadmus-historical-events-part',
@@ -81,8 +92,9 @@ function toDraft(
     HistoricalEventEditorComponent,
     MatCardActions,
     TitleCasePipe,
+    AsyncPipe,
     AssertedChronotopesPipe,
-    FlatLookupPipe,
+    ThesOrTaxoLabelPipe,
     CloseSaveButtonsComponent,
   ],
 })
@@ -145,6 +157,36 @@ export class HistoricalEventsPartComponent extends ModelEditorComponentBase<Hist
     () => this.data()?.thesauri?.['asserted-id-features']?.entries,
   );
 
+  /**
+   * The editor settings, role-specific or global, if any. These are
+   * passed to the event editor.
+   */
+  public readonly settings = signal<HistoricalEventsPartSettings | undefined>(
+    undefined,
+  );
+
+  /**
+   * The effective event type picker settings, i.e. the editor settings
+   * applied over the defaults.
+   */
+  public readonly typePickerSettings = computed<ThesOrTaxoSettings>(() =>
+    mergeThesOrTaxoSettings(
+      DEFAULT_EVENT_TYPE_SETTINGS,
+      this.settings()?.eventType,
+    ),
+  );
+
+  /**
+   * The thesaurus entries used for the event type: the event-types entries,
+   * unless settings specify a thesaurus to load.
+   */
+  public readonly typeEntries = computed(() =>
+    resolveThesOrTaxoEntries(
+      this.typePickerSettings(),
+      this.eventTypeEntries(),
+    ),
+  );
+
   // form
   private readonly _draft = linkedSignal(() => toDraft(this.data()?.value));
   public readonly form = this.createForm(this._draft, (p) => {
@@ -153,6 +195,29 @@ export class HistoricalEventsPartComponent extends ModelEditorComponentBase<Hist
 
   constructor(private _dialogService: DialogService) {
     super();
+
+    // settings: role-specific if any, else global
+    this.initSettings<HistoricalEventsPartSettings>(
+      HISTORICAL_EVENTS_PART_TYPEID,
+      (settings) => {
+        if (settings || !this.identity()?.roleId) {
+          this.applySettings(settings);
+          return;
+        }
+        this._appRepository
+          ?.getSettingFor<HistoricalEventsPartSettings>(
+            HISTORICAL_EVENTS_PART_TYPEID,
+          )
+          .then((global) => this.applySettings(global))
+          .catch(() => this.applySettings(undefined));
+      },
+    );
+  }
+
+  private applySettings(
+    settings: HistoricalEventsPartSettings | undefined,
+  ): void {
+    this.settings.set(settings || undefined);
   }
 
   protected override onDataSet(): void {
@@ -177,9 +242,12 @@ export class HistoricalEventsPartComponent extends ModelEditorComponentBase<Hist
     this.editEvent(
       {
         eid: '',
-        type: this.eventTypeEntries()?.length
-          ? this.eventTypeEntries()![0].id
-          : '',
+        // in thesaurus mode, default to the first entry when available
+        type:
+          this.typePickerSettings().mode === 'thesaurus' &&
+          this.typeEntries()?.length
+            ? this.typeEntries()![0].id
+            : '',
       },
       -1,
     );

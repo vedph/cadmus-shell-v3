@@ -7,10 +7,14 @@ import { AppRepository } from '@myrmidon/cadmus-state';
 import { ItemService } from '@myrmidon/cadmus-api';
 import { EditedObject, ThesauriSet } from '@myrmidon/cadmus-core';
 
+import { By } from '@angular/platform-browser';
+
 import { HistoricalEventsPartComponent } from './historical-events-part.component';
+import { HistoricalEventEditorComponent } from '../historical-event-editor/historical-event-editor.component';
 import {
   HistoricalEvent,
   HistoricalEventsPart,
+  HistoricalEventsPartSettings,
   HISTORICAL_EVENTS_PART_TYPEID,
 } from '../historical-events-part';
 
@@ -49,6 +53,10 @@ describe('HistoricalEventsPartComponent', () => {
   let fixture: ComponentFixture<HistoricalEventsPartComponent>;
   let authUser$: BehaviorSubject<User | null>;
   let dialogService: { confirm: ReturnType<typeof vi.fn> };
+  let appRepository: {
+    getTypeThesaurus: ReturnType<typeof vi.fn>;
+    getSettingFor: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     authUser$ = new BehaviorSubject<User | null>(null);
@@ -58,7 +66,7 @@ describe('HistoricalEventsPartComponent', () => {
         return authUser$.value;
       },
     };
-    const appRepository = {
+    appRepository = {
       getTypeThesaurus: vi.fn().mockReturnValue(undefined),
       getSettingFor: vi.fn().mockResolvedValue(undefined),
     };
@@ -357,5 +365,126 @@ describe('HistoricalEventsPartComponent', () => {
     );
     expect(buttons).toBeTruthy();
     expect(buttons.closest('form')).toBeNull();
+  });
+
+  describe('event type settings', () => {
+    const TAXO: HistoricalEventsPartSettings = {
+      eventType: { mode: 'taxonomy', source: 'events', canAddNode: true },
+    };
+
+    async function setIdentity(roleId: string | null): Promise<void> {
+      fixture.componentRef.setInput('identity', {
+        itemId: 'item1',
+        typeId: HISTORICAL_EVENTS_PART_TYPEID,
+        partId: null,
+        roleId,
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      // let the fallback request, if any, resolve
+      await fixture.whenStable();
+    }
+
+    function typeThesauri(): ThesauriSet {
+      return {
+        'event-types': {
+          id: 'event-types@en',
+          entries: [{ id: 't1', value: 'T1' }],
+        },
+      };
+    }
+
+    it('should default to the event-types thesaurus as a tree', () => {
+      expect(component.settings()).toBeUndefined();
+      expect(component.typePickerSettings()).toEqual({
+        mode: 'thesaurus',
+        thesaurusView: 'tree',
+      });
+    });
+
+    it('should load global settings when there is no role', async () => {
+      appRepository.getSettingFor.mockResolvedValue(TAXO);
+      await setIdentity(null);
+      expect(appRepository.getSettingFor).toHaveBeenCalledWith(
+        HISTORICAL_EVENTS_PART_TYPEID,
+        undefined,
+      );
+      expect(appRepository.getSettingFor).toHaveBeenCalledTimes(1);
+      expect(component.settings()).toEqual(TAXO);
+      expect(component.typePickerSettings()).toEqual({
+        mode: 'taxonomy',
+        source: 'events',
+        thesaurusView: 'tree',
+        canAddNode: true,
+      });
+    });
+
+    it('should load role-specific settings', async () => {
+      appRepository.getSettingFor.mockImplementation(
+        (_typeId: string, roleId?: string) =>
+          Promise.resolve(roleId === 'birth' ? TAXO : undefined),
+      );
+      await setIdentity('birth');
+      expect(appRepository.getSettingFor).toHaveBeenCalledWith(
+        HISTORICAL_EVENTS_PART_TYPEID,
+        'birth',
+      );
+      expect(appRepository.getSettingFor).toHaveBeenCalledTimes(1);
+      expect(component.settings()).toEqual(TAXO);
+    });
+
+    it('should fall back to global settings when role-specific ones are missing', async () => {
+      appRepository.getSettingFor.mockImplementation(
+        (_typeId: string, roleId?: string) =>
+          Promise.resolve(roleId ? undefined : TAXO),
+      );
+      await setIdentity('other');
+      expect(appRepository.getSettingFor).toHaveBeenCalledWith(
+        HISTORICAL_EVENTS_PART_TYPEID,
+      );
+      expect(component.settings()).toEqual(TAXO);
+    });
+
+    it('should keep the defaults when no settings are found', async () => {
+      await setIdentity('other');
+      expect(component.settings()).toBeUndefined();
+      expect(component.typePickerSettings().mode).toBe('thesaurus');
+    });
+
+    it('should not default a new event type from the thesaurus in taxonomy mode', async () => {
+      appRepository.getSettingFor.mockResolvedValue(TAXO);
+      fixture.componentRef.setInput('data', {
+        value: makePart(),
+        thesauri: typeThesauri(),
+      });
+      await setIdentity(null);
+      component.addEvent();
+      expect(component.editedEvent()).toEqual({ eid: '', type: '' });
+    });
+
+    it('should ignore event-types entries when settings set a thesaurus ID', async () => {
+      appRepository.getSettingFor.mockResolvedValue({
+        eventType: { mode: 'thesaurus', source: 'lod-events@en' },
+      });
+      fixture.componentRef.setInput('data', {
+        value: makePart(),
+        thesauri: typeThesauri(),
+      });
+      await setIdentity(null);
+      expect(component.eventTypeEntries()).toEqual([{ id: 't1', value: 'T1' }]);
+      expect(component.typeEntries()).toBeUndefined();
+    });
+
+    it('should pass the settings to the event editor', async () => {
+      appRepository.getSettingFor.mockResolvedValue(TAXO);
+      await setIdentity(null);
+      component.addEvent();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const editor = fixture.debugElement.query(
+        By.directive(HistoricalEventEditorComponent),
+      );
+      expect(editor.componentInstance.settings()).toEqual(TAXO);
+    });
   });
 });

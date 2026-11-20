@@ -140,6 +140,38 @@ describe('RelatedEntityComponent', () => {
     expect(enter.defaultPrevented).toBe(true);
   });
 
+  it('picks the relation from a list of entries by default', () => {
+    fixture.componentRef.setInput('relationEntries', [
+      { id: 'person:birth:father', value: 'father' },
+    ]);
+    fixture.detectChanges();
+    expect(component.relationPickerSettings()).toEqual({
+      mode: 'thesaurus',
+      thesaurusView: 'flat',
+    });
+    expect(fixture.nativeElement.querySelector('.relation mat-select')).toBeTruthy();
+  });
+
+  it('types the relation without entries', () => {
+    fixture.componentRef.setInput('relationEntries', []);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.relation mat-select')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.relation input')).toBeTruthy();
+  });
+
+  it('applies relation settings over the defaults', () => {
+    fixture.componentRef.setInput('relationSettings', {
+      thesaurusView: 'tree',
+      canAddNode: true,
+    });
+    fixture.detectChanges();
+    expect(component.relationPickerSettings()).toEqual({
+      mode: 'thesaurus',
+      thesaurusView: 'tree',
+      canAddNode: true,
+    });
+  });
+
   it('should keep the dirty state of a user edit across change detection', () => {
     const input: HTMLInputElement = fixture.nativeElement.querySelector(
       'input',

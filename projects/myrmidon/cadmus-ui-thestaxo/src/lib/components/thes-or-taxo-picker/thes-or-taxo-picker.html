@@ -48,13 +48,13 @@
         <ng-container *ngTemplateOutlet="valueView" />
         @if (!locked()) {
           <ts-taxo-store-picker
-            [treeId]="source() || null"
+            [treeId]="currentSource()"
             [label]="label()"
-            [hasTopNodeFilter]="hasTopNodeFilter()"
+            [hasTopNodeFilter]="currentHasTopNodeFilter()"
             [hasFeaturesFilter]="false"
-            [canEdit]="canEditNode()"
-            [canAdd]="canAddNode()"
-            [canDelete]="canDeleteNode()"
+            [canEdit]="currentCanEditNode()"
+            [canAdd]="currentCanAddNode()"
+            [canDelete]="currentCanDeleteNode()"
             (nodePick)="onNodePick($event)"
           />
         }
@@ -89,7 +89,7 @@
     <!-- no source and no fallback -->
     @default {
       <div class="no-source muted">
-        {{ label() }}: no {{ mode() === "taxonomy" ? "taxonomy" : "thesaurus" }}
+        {{ label() }}: no {{ currentMode() === "taxonomy" ? "taxonomy" : "thesaurus" }}
         available
         @if (current) {
           <span class="value"> ({{ current }})</span>

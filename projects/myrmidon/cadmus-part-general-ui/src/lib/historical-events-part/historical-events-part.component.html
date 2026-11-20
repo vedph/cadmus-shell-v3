@@ -80,7 +80,9 @@
               </td>
               <td>
                 {{
-                  entry.type | flatLookup: eventTypeEntries() : "id" : "value"
+                  entry.type
+                    | thesOrTaxoLabel: typePickerSettings() : typeEntries()
+                    | async
                 }}
               </td>
               <td>{{ entry.tag }}</td>
@@ -107,6 +109,7 @@
           <cadmus-historical-event-editor
             [eventTagEntries]="eventTagEntries()"
             [eventTypeEntries]="eventTypeEntries()"
+            [settings]="settings()"
             [relationEntries]="relationEntries()"
             [ctTagEntries]="ctTagEntries()"
             [assTagEntries]="assTagEntries()"

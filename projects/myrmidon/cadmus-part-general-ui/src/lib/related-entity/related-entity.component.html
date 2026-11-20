@@ -1,62 +1,63 @@
-<div class="form-row" (keydown.enter)="onEnterKey($event)">
-  <!-- relation (bound) -->
-  @if (relationEntries()?.length) {
-    <mat-form-field class="long-text">
-      <mat-label>relation</mat-label>
-      <mat-select [formField]="form.relation">
-        @for (e of relationEntries(); track e.id) {
-          <mat-option [value]="e.id">{{ e.value }}</mat-option>
-        }
-      </mat-select>
-      @if (
-        form.relation().getError("required") && (form.relation().dirty() || form.relation().touched())
-      ) {
-        <mat-error>relation required</mat-error>
-      }
-    </mat-form-field>
-  }
-  <!-- relation (free) -->
-  @else {
-    <mat-form-field class="long-text">
-      <mat-label>relation</mat-label>
-      <input matInput [formField]="form.relation" />
-      @if (
-        form.relation().getError("required") && (form.relation().dirty() || form.relation().touched())
-      ) {
-        <mat-error>relation required</mat-error>
-      }
-      @if (
-        form.relation().getError("maxLength") && (form.relation().dirty() || form.relation().touched())
-      ) {
-        <mat-error>relation too long</mat-error>
-      }
-    </mat-form-field>
-  }
+<div class="related-entity" (keydown.enter)="onEnterKey($event)">
+  <!-- relation: from thesaurus (default), taxonomy, or free -->
+  <div class="relation">
+    <cadmus-thes-or-taxo-picker
+      label="relation"
+      [settings]="relationPickerSettings()"
+      [entries]="relationEntries()"
+      [formField]="form.relation"
+    />
+    @if (
+      form.relation().getError("required") && (form.relation().dirty() || form.relation().touched())
+    ) {
+      <mat-error>relation required</mat-error>
+    }
+    @if (
+      form.relation().getError("maxLength") && (form.relation().dirty() || form.relation().touched())
+    ) {
+      <mat-error>relation too long</mat-error>
+    }
+  </div>
 
   <!-- id -->
-  <cadmus-refs-asserted-composite-id
-    [idScopeEntries]="idScopeEntries()"
-    [idTagEntries]="idTagEntries()"
-    [assTagEntries]="assTagEntries()"
-    [refTagEntries]="refTagEntries()"
-    [refTypeEntries]="refTypeEntries()"
-    [featureEntries]="idFeatureEntries()"
-    [pinByTypeMode]="true"
-    [canSwitchMode]="true"
-    [canEditTarget]="true"
-    [id]="form.id().value() || undefined"
-    (idChange)="onIdChange($event!)"
-  />
+  <div class="id">
+    <cadmus-refs-asserted-composite-id
+      [idScopeEntries]="idScopeEntries()"
+      [idTagEntries]="idTagEntries()"
+      [assTagEntries]="assTagEntries()"
+      [refTagEntries]="refTagEntries()"
+      [refTypeEntries]="refTypeEntries()"
+      [featureEntries]="idFeatureEntries()"
+      [pinByTypeMode]="true"
+      [canSwitchMode]="true"
+      [canEditTarget]="true"
+      [id]="form.id().value() || undefined"
+      (idChange)="onIdChange($event!)"
+    />
+    @if (form.id().getError("required") && (form.id().dirty() || form.id().touched())) {
+      <mat-error>entity required</mat-error>
+    }
+  </div>
 
-  <button mat-icon-button type="button" (click)="cancel()">
-    <mat-icon class="mat-warn">close</mat-icon>
-  </button>
-  <button
-    mat-icon-button
-    type="button"
-    matTooltip="Save entity"
-    (click)="save()"
-  >
-    <mat-icon class="mat-primary">check_circle</mat-icon>
-  </button>
+  <!-- buttons -->
+  <div class="button-row">
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Discard changes"
+      aria-label="Discard changes"
+      (click)="cancel()"
+    >
+      <mat-icon class="mat-warn">close</mat-icon>
+    </button>
+    <button
+      type="button"
+      mat-flat-button
+      matTooltip="Save entity"
+      aria-label="Save entity"
+      (click)="save()"
+    >
+      <mat-icon>check_circle</mat-icon> entity
+    </button>
+  </div>
 </div>

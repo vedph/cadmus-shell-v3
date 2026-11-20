@@ -1,4 +1,17 @@
-.long-text {
-  width: 100%;
+:host {
+  display: block;
+}
+.related-entity {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.relation {
   max-width: 800px;
+}
+.button-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }

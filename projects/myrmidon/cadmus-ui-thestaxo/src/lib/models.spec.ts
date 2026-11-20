@@ -1,7 +1,9 @@
 import {
   getThesaurusEntryLabel,
   isHierarchicalThesaurus,
+  mergeThesOrTaxoSettings,
   resolveThesaurusView,
+  resolveThesOrTaxoEntries,
 } from './models';
 
 const FLAT = [
@@ -41,5 +43,36 @@ describe('models', () => {
     expect(getThesaurusEntryLabel(TREE, 'missing')).toBeUndefined();
     expect(getThesaurusEntryLabel(TREE, '')).toBeUndefined();
     expect(getThesaurusEntryLabel(undefined, 'person')).toBeUndefined();
+  });
+
+  it('mergeThesOrTaxoSettings applies defined properties in order', () => {
+    expect(
+      mergeThesOrTaxoSettings(
+        { mode: 'thesaurus', thesaurusView: 'tree', canAddNode: true },
+        undefined,
+        null,
+        { mode: 'taxonomy', source: 'events', thesaurusView: undefined },
+        { canAddNode: false },
+      ),
+    ).toEqual({
+      mode: 'taxonomy',
+      source: 'events',
+      thesaurusView: 'tree',
+      canAddNode: false,
+    });
+  });
+
+  it('mergeThesOrTaxoSettings returns empty settings for nothing', () => {
+    expect(mergeThesOrTaxoSettings()).toEqual({});
+    expect(mergeThesOrTaxoSettings(undefined, null)).toEqual({});
+  });
+
+  it('resolveThesOrTaxoEntries keeps entries unless a thesaurus ID is set', () => {
+    expect(resolveThesOrTaxoEntries(undefined, FLAT)).toBe(FLAT);
+    expect(resolveThesOrTaxoEntries({ mode: 'thesaurus' }, FLAT)).toBe(FLAT);
+    expect(resolveThesOrTaxoEntries({ mode: 'taxonomy', source: 't' }, FLAT)).toBe(FLAT);
+    expect(
+      resolveThesOrTaxoEntries({ mode: 'thesaurus', source: 'x@en' }, FLAT),
+    ).toBeUndefined();
   });
 });

@@ -26,6 +26,16 @@ describe('ThesOrTaxoSourceService', () => {
 
   afterEach(() => vi.restoreAllMocks());
 
+  it('needs no backend service until data is requested', () => {
+    TestBed.resetTestingModule();
+    // no ThesaurusService nor TaxoStoreService (nor HttpClient) provided
+    TestBed.configureTestingModule({});
+    const lazy = TestBed.inject(ThesOrTaxoSourceService);
+    expect(lazy).toBeTruthy();
+    lazy.setTaxoNodeLabel('tree', 'k', 'K');
+    lazy.clearCache();
+  });
+
   it('gets thesaurus entries, asking for an empty one if not found', async () => {
     thesService.getThesaurus.mockReturnValue(
       of({ id: 't@en', entries: [{ id: 'a', value: 'A' }] }),

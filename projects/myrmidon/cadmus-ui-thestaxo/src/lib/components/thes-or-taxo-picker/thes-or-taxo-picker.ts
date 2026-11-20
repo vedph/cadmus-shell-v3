@@ -29,6 +29,7 @@ import {
   ThesaurusViewMode,
   ThesOrTaxoMode,
   ThesOrTaxoPick,
+  ThesOrTaxoSettings,
 } from '../../models';
 import { ThesOrTaxoSourceService } from '../../services/thes-or-taxo-source.service';
 import { ThesaurusEntryPicker } from '../thesaurus-entry-picker/thesaurus-entry-picker';
@@ -149,6 +150,47 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
    * Whether users can delete taxonomy nodes. Default is false.
    */
   public readonly canDeleteNode = input<boolean>(false);
+
+  /**
+   * Settings for the picker, typically loaded from the editor settings.
+   * Each defined property of these settings overrides the corresponding
+   * input (mode, source, thesaurusView, hasTopNodeFilter, canEditNode,
+   * canAddNode, canDeleteNode), so that the inputs work as defaults.
+   */
+  public readonly settings = input<ThesOrTaxoSettings | null | undefined>();
+  // #endregion
+
+  // #region Effective settings
+  /**
+   * The requested mode, from settings or input.
+   */
+  public readonly currentMode = computed<ThesOrTaxoMode>(
+    () => this.settings()?.mode ?? this.mode() ?? 'unbound',
+  );
+  /**
+   * The source, from settings or input.
+   */
+  public readonly currentSource = computed<string | null>(
+    () => this.settings()?.source ?? this.source() ?? null,
+  );
+  /**
+   * The thesaurus view, from settings or input.
+   */
+  public readonly currentThesaurusView = computed<ThesaurusViewMode>(
+    () => this.settings()?.thesaurusView ?? this.thesaurusView() ?? 'auto',
+  );
+  public readonly currentHasTopNodeFilter = computed<boolean>(
+    () => this.settings()?.hasTopNodeFilter ?? this.hasTopNodeFilter(),
+  );
+  public readonly currentCanEditNode = computed<boolean>(
+    () => this.settings()?.canEditNode ?? this.canEditNode(),
+  );
+  public readonly currentCanAddNode = computed<boolean>(
+    () => this.settings()?.canAddNode ?? this.canAddNode(),
+  );
+  public readonly currentCanDeleteNode = computed<boolean>(
+    () => this.settings()?.canDeleteNode ?? this.canDeleteNode(),
+  );
   // #endregion
 
   // #region FormValueControl
@@ -201,8 +243,8 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
    * The ID of the thesaurus to load, if any.
    */
   private readonly _thesaurusId = computed<string | null>(() =>
-    this.mode() === 'thesaurus' && this.entries() === undefined
-      ? this.source() || null
+    this.currentMode() === 'thesaurus' && this.entries() === undefined
+      ? this.currentSource() || null
       : null,
   );
 
@@ -243,11 +285,11 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
    * True if the source for the requested mode is available.
    */
   public readonly hasSource = computed<boolean>(() => {
-    switch (this.mode()) {
+    switch (this.currentMode()) {
       case 'thesaurus':
         return this.loading() || this.thesEntries().length > 0;
       case 'taxonomy':
-        return !!this.source();
+        return !!this.currentSource();
       default:
         return true;
     }
@@ -259,7 +301,7 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
    * fallback is disabled.
    */
   public readonly effectiveMode = computed<ThesOrTaxoMode | null>(() => {
-    const mode = this.mode() || 'unbound';
+    const mode = this.currentMode() || 'unbound';
     if (mode === 'unbound' || this.hasSource()) {
       return mode;
     }
@@ -270,7 +312,7 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
    * The effective view for a thesaurus.
    */
   public readonly thesView = computed<'flat' | 'tree'>(() =>
-    resolveThesaurusView(this.thesEntries(), this.thesaurusView()),
+    resolveThesaurusView(this.thesEntries(), this.currentThesaurusView()),
   );
 
   /**
@@ -282,7 +324,7 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
 
   private readonly _taxoKey = computed<{ tree: string; key: string } | null>(
     () => {
-      const tree = this.source();
+      const tree = this.currentSource();
       const key = this.value();
       return this.effectiveMode() === 'taxonomy' && tree && key
         ? { tree, key }
@@ -352,7 +394,7 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
   public onNodePick(node: TaxoStoreNode | null): void {
     // the picker emits null when its lookup is cleared: this is not
     // a request to clear the value, which is done via the clear button
-    const tree = this.source();
+    const tree = this.currentSource();
     if (!node || !tree) {
       return;
     }
@@ -388,7 +430,7 @@ export class ThesOrTaxoPicker implements FormValueControl<string> {
       mode,
       source:
         mode === 'taxonomy'
-          ? this.source() || undefined
+          ? this.currentSource() || undefined
           : mode === 'thesaurus'
             ? (this._thesaurusId() ?? undefined)
             : undefined,

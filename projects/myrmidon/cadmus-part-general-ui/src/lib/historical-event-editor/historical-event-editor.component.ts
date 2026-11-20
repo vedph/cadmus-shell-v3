@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   model,
   output,
@@ -10,9 +11,12 @@ import {
   linkedSignal,
   untracked,
 } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, form, maxLength, required } from '@angular/forms/signals';
+import { of, switchMap } from 'rxjs';
 
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
@@ -26,7 +30,6 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 
-import { FlatLookupPipe } from '@myrmidon/ngx-tools';
 import {
   AssertedChronotope,
   AssertedChronotopeSetComponent,
@@ -34,20 +37,33 @@ import {
 import { Assertion, AssertionComponent } from '@myrmidon/cadmus-refs-assertion';
 
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
+import { renderLabelFromLastColon } from '@myrmidon/cadmus-thesaurus-store';
 import {
-  renderLabelFromLastColon,
-  ThesaurusTreeComponent,
-} from '@myrmidon/cadmus-thesaurus-store';
-
-import { HistoricalEvent, RelatedEntity } from '../historical-events-part';
+  mergeThesOrTaxoSettings,
+  resolveThesOrTaxoEntries,
+  ThesOrTaxoLabelPipe,
+  ThesOrTaxoPicker,
+  ThesOrTaxoSettings,
+  ThesOrTaxoSourceService,
+} from '@myrmidon/cadmus-ui-thestaxo';
 import {
   copyFormValue,
   isImplicitSubmission,
   setFieldFromChild,
 } from '@myrmidon/cadmus-ui';
-import { RelatedEntityComponent } from '../related-entity/related-entity.component';
 
-const RELATION_SEP = ':';
+import {
+  buildRelationPrefix,
+  DEFAULT_EVENT_TYPE_SETTINGS,
+  DEFAULT_RELATION_SETTINGS,
+  filterRelationEntries,
+  HistoricalEvent,
+  HistoricalEventRelationFilter,
+  HistoricalEventsPartSettings,
+  RelatedEntity,
+  resolveRelationFilter,
+} from '../historical-events-part';
+import { RelatedEntityComponent } from '../related-entity/related-entity.component';
 
 interface HistoricalEventControls {
   eid: string;
@@ -76,7 +92,19 @@ function toDraft(event?: HistoricalEvent): HistoricalEventControls {
 }
 
 /**
+ * Compare two related entities by value (their id is a nested object).
+ */
+function sameEntity(a: RelatedEntity, b: RelatedEntity): boolean {
+  return (
+    a.relation === b.relation && JSON.stringify(a.id) === JSON.stringify(b.id)
+  );
+}
+
+/**
  * Historical event editor.
+ * The event type and the relations of related entities are picked from
+ * thesauri (by default), taxonomies, or typed, according to settings.
+ * Relations picked from a thesaurus can be filtered by the event type.
  */
 @Component({
   selector: 'cadmus-historical-event-editor',
@@ -84,9 +112,11 @@ function toDraft(event?: HistoricalEvent): HistoricalEventControls {
   styleUrls: ['./historical-event-editor.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AsyncPipe,
     FormField,
     MatTabGroup,
     MatTab,
+    MatTabLabel,
     MatFormField,
     MatLabel,
     MatInput,
@@ -103,18 +133,21 @@ function toDraft(event?: HistoricalEvent): HistoricalEventControls {
     MatIconButton,
     MatTooltip,
     RelatedEntityComponent,
-    FlatLookupPipe,
-    ThesaurusTreeComponent,
+    ThesOrTaxoPicker,
+    ThesOrTaxoLabelPipe,
   ],
 })
 export class HistoricalEventEditorComponent {
+  private readonly _source = inject(ThesOrTaxoSourceService);
+
   /**
    * The event being edited.
    */
   public readonly event = model<HistoricalEvent>();
 
   /**
-   * Thesaurus event-types (hierarchical).
+   * Thesaurus event-types (hierarchical). These are used to pick the event
+   * type in thesaurus mode, unless settings specify a thesaurus ID.
    */
   public readonly eventTypeEntries = input<ThesaurusEntry[]>();
   /**
@@ -122,8 +155,9 @@ export class HistoricalEventEditorComponent {
    */
   public readonly eventTagEntries = input<ThesaurusEntry[]>();
   /**
-   * Thesaurus event-relations (pseudo-hierarchical; the
-   * separator used is : rather than .).
+   * Thesaurus event-relations (pseudo-hierarchical; the separator used is :
+   * rather than .). These are used to pick relations in thesaurus mode,
+   * unless settings specify a thesaurus ID.
    */
   public readonly relationEntries = input<ThesaurusEntry[]>();
   /**
@@ -156,14 +190,19 @@ export class HistoricalEventEditorComponent {
   public readonly idFeatureEntries = input<ThesaurusEntry[]>();
 
   /**
+   * The editor settings, typically got from the part editor settings.
+   * Their defined properties override the defaults: picking the type from
+   * eventTypeEntries as a tree, picking relations from relationEntries as
+   * a list, and filtering relations by the prefix built from the type.
+   */
+  public readonly settings = input<HistoricalEventsPartSettings | undefined>();
+
+  /**
    * The number of event type portions to cut from the event type ID when
    * building the prefix used to filter the corresponding relations IDs.
-   * By default this is 0, i.e. the whole type ID (plus a final :) is
-   * used as prefix. For instance, the ID "person.birth" generates prefix
-   * "person:birth:". The portions of an ID are defined by splitting it at
-   * each dot: so, should this property be 1, we would split the ID into
-   * "person" and "birth", remove the last 1 tail(s), thus getting "person",
-   * join back the portions and append a final colon, generating "person:".
+   * This is the default for the tailCut of the relation filter, which
+   * overrides it when specified in settings.
+   * @deprecated Use settings.relationFilter.tailCut.
    */
   public readonly eventTypeTailCut = input<number>(0);
 
@@ -173,6 +212,84 @@ export class HistoricalEventEditorComponent {
   public readonly noLookup = input<boolean>();
 
   public readonly editorClose = output();
+
+  // #region settings
+  /**
+   * The effective settings for the event type picker.
+   */
+  public readonly typePickerSettings = computed<ThesOrTaxoSettings>(() =>
+    mergeThesOrTaxoSettings(
+      DEFAULT_EVENT_TYPE_SETTINGS,
+      this.settings()?.eventType,
+    ),
+  );
+
+  /**
+   * The thesaurus entries for the event type picker: these are the
+   * event-types entries, unless settings specify a thesaurus to load.
+   */
+  public readonly typeEntries = computed(() =>
+    resolveThesOrTaxoEntries(
+      this.typePickerSettings(),
+      this.eventTypeEntries(),
+    ),
+  );
+
+  /**
+   * The effective settings for the relation picker.
+   */
+  public readonly relationPickerSettings = computed<ThesOrTaxoSettings>(() =>
+    mergeThesOrTaxoSettings(
+      DEFAULT_RELATION_SETTINGS,
+      this.settings()?.relation,
+    ),
+  );
+
+  /**
+   * The effective relation filter.
+   */
+  public readonly relationFilter = computed<
+    Required<HistoricalEventRelationFilter>
+  >(() =>
+    resolveRelationFilter(
+      this.settings()?.relationFilter,
+      this.eventTypeTailCut(),
+    ),
+  );
+
+  /**
+   * True if relations are picked from a thesaurus, and thus can be
+   * filtered by the event type.
+   */
+  public readonly relationsFromThesaurus = computed<boolean>(
+    () => this.relationPickerSettings().mode === 'thesaurus',
+  );
+
+  // the ID of the relations thesaurus to load, when set by settings
+  private readonly _relThesaurusId = computed<string | null>(() => {
+    const s = this.relationPickerSettings();
+    return s.mode === 'thesaurus' && s.source ? s.source : null;
+  });
+
+  private readonly _loadedRelEntries = toSignal(
+    toObservable(this._relThesaurusId).pipe(
+      switchMap((id) => (id ? this._source.getThesaurusEntries(id) : of(null))),
+    ),
+    { initialValue: null },
+  );
+
+  /**
+   * All the relation entries, from the thesaurus specified by settings
+   * (undefined while loading), or from relationEntries.
+   */
+  public readonly allRelEntries = computed<
+    readonly ThesaurusEntry[] | undefined
+  >(() =>
+    this._relThesaurusId()
+      ? (this._loadedRelEntries() ?? undefined)
+      : this.relationEntries(),
+  );
+  // #endregion
 
   // form
   private readonly _draft = linkedSignal(() => toDraft(this.event()));
@@ -186,37 +303,113 @@ export class HistoricalEventEditorComponent {
     maxLength(p.note, 1000);
   });
 
-  // related entity
-  // the prefix used to filter the relation entries, from the event type
-  public readonly typeEntryPrefix = computed<string | undefined>(() => {
-    const type = this.form.type().value();
-    return type ? this.getTypeEntryPrefix(type) : undefined;
-  });
+  /**
+   * True if any field in the general tab is invalid.
+   */
+  public readonly generalInvalid = computed<boolean>(
+    () =>
+      this.form.eid().invalid() ||
+      this.form.type().invalid() ||
+      this.form.tag().invalid() ||
+      this.form.description().invalid() ||
+      this.form.note().invalid(),
+  );
 
-  // the current relation entries, filtered by the type prefix
-  public readonly currentRelEntries = computed<ThesaurusEntry[]>(() => {
-    if (!this.relationEntries()?.length) {
-      return [];
-    }
+  // #region related entities
+  /**
+   * The current related entities.
+   */
+  public readonly relatedEntities = computed<RelatedEntity[]>(() =>
+    this.form.relatedEntities().value(),
+  );
+
+  /**
+   * The current chronotopes.
+   */
+  public readonly chronotopes = computed<AssertedChronotope[]>(() =>
+    this.form.chronotopes().value(),
+  );
+
+  /**
+   * The prefix used to filter the relation entries, from the event type,
+   * or undefined when relations are not filtered.
+   */
+  public readonly typeEntryPrefix = computed<string | undefined>(() =>
+    this.relationsFromThesaurus()
+      ? buildRelationPrefix(this.form.type().value(), this.relationFilter())
+      : undefined,
+  );
+
+  /**
+   * The current relation entries, filtered by the event type.
+   */
+  public readonly currentRelEntries = computed<ThesaurusEntry[]>(() =>
+    this.relationsFromThesaurus()
+      ? filterRelationEntries(
+          this.allRelEntries(),
+          this.form.type().value(),
+          this.relationFilter(),
+        )
+      : [],
+  );
+
+  /**
+   * The entries passed to the related entity editor: the current relation
+   * entries in thesaurus mode, once all the entries are available.
+   * Otherwise, undefined, so that the relation picker can load them by
+   * itself, or use a taxonomy.
+   */
+  public readonly relatedEntityEntries = computed<
+    readonly ThesaurusEntry[] | undefined
+  >(() =>
+    this.relationsFromThesaurus() && this.allRelEntries() !== undefined
+      ? this.currentRelEntries()
+      : undefined,
+  );
+
+  /**
+   * The indexes of the related entities whose relation does not fit the
+   * current event type, e.g. because the type was changed after adding
+   * them. This applies only when relations are filtered.
+   */
+  public readonly mismatchedEntities = computed<ReadonlySet<number>>(() => {
+    const result = new Set<number>();
     const prefix = this.typeEntryPrefix();
-    if (!prefix) {
-      return this.relationEntries()!;
+    const all = this.allRelEntries();
+    if (!prefix || !all?.length) {
+      return result;
     }
-    const filtered = this.relationEntries()!.filter((e) =>
-      e.id.startsWith(prefix),
-    );
-    return filtered;
+    // with fallback to all, any relation fits when none matches the prefix
+    if (
+      this.relationFilter().fallbackToAll &&
+      !all.some((e) => e.id.startsWith(prefix))
+    ) {
+      return result;
+    }
+    this.form
+      .relatedEntities()
+      .value()
+      .forEach((e, i) => {
+        if (!e.relation.startsWith(prefix)) {
+          result.add(i);
+        }
+      });
+    return result;
   });
 
   public readonly editedEntity = signal<RelatedEntity | undefined>(undefined);
   public readonly editedEntityIndex = signal<number>(-1);
+  // #endregion
 
   constructor() {
     // a new event was bound: no unsaved edits (keyed on the bound model:
-    // the draft also changes with each user edit)
+    // the draft also changes with each user edit), and no entity edited
     effect(() => {
       this.event();
-      untracked(() => this.form().reset());
+      untracked(() => {
+        this.form().reset();
+        this.closeEntity();
+      });
     });
   }
 
@@ -224,29 +417,11 @@ export class HistoricalEventEditorComponent {
     return renderLabelFromLastColon(label);
   }
 
-  private getTypeEntryPrefix(id: string): string {
-    let p = id;
-
-    // remove tail if any: by convention, an entry ID ending with ".-"
-    // is always treated as a tailed ID where the ending "-" should be removed.
-    // This is because that's the convention for representing parent entries
-    // like "person.job.-" with children like "person.job.bishop".
-    const tailSize = p.endsWith('.-')
-      ? 1 + this.eventTypeTailCut()
-      : this.eventTypeTailCut();
-
-    if (tailSize > 0) {
-      // split the event type ID (truly hierarchical, e.g. "person.birth")
-      const tokens = p.split('.');
-      if (tokens.length >= tailSize) {
-        tokens.splice(tokens.length - tailSize);
-      }
-      p = tokens.join(RELATION_SEP);
-      return p + RELATION_SEP;
-    }
-    return p.replace('.', RELATION_SEP) + RELATION_SEP;
-  }
-
+  /**
+   * Set the event type from the specified thesaurus entry. The type picker
+   * is bound to the form, so this is just for setting the type from code.
+   * @param entry The thesaurus entry.
+   */
   public onTypeEntryChange(entry: ThesaurusEntry): void {
     this.form.type().value.set(entry.id);
     this.form.type().markAsDirty();
@@ -279,12 +454,11 @@ export class HistoricalEventEditorComponent {
   }
 
   public addEntity(): void {
+    const entries = this.currentRelEntries();
     this.editEntity(
       {
         id: { target: { gid: '', label: '' } },
-        relation: this.currentRelEntries()?.length
-          ? this.currentRelEntries()[0].id
-          : '',
+        relation: entries.length ? entries[0].id : '',
       },
       -1,
     );
@@ -296,27 +470,19 @@ export class HistoricalEventEditorComponent {
   }
 
   public onEntityChange(entity: RelatedEntity): void {
-    // nope if already present (id is a nested object handed back as a new
-    // instance by the child editor, so it must be compared by value)
-    if (
-      this.form
-        .relatedEntities()
-        .value()
-        .find(
-          (e) =>
-            JSON.stringify(e.id) === JSON.stringify(entity.id) &&
-            e.relation === entity.relation,
-        )
-    ) {
+    const entities = [...this.form.relatedEntities().value()];
+
+    // nope if already present
+    if (entities.some((e) => sameEntity(e, entity))) {
       this.closeEntity();
       return;
     }
     // add or replace
-    const entities = [...this.form.relatedEntities().value()];
-    if (this.editedEntityIndex() === -1) {
+    const index = this.editedEntityIndex();
+    if (index < 0 || index >= entities.length) {
       entities.push(entity);
     } else {
-      entities.splice(this.editedEntityIndex(), 1, entity);
+      entities.splice(index, 1, entity);
     }
     this.form.relatedEntities().value.set(entities);
     this.form.relatedEntities().markAsDirty();
@@ -329,15 +495,19 @@ export class HistoricalEventEditorComponent {
   }
 
   public deleteEntity(index: number): void {
+    if (index < 0 || index >= this.form.relatedEntities().value().length) {
+      return;
+    }
     if (this.editedEntityIndex() === index) {
       this.closeEntity();
+    } else if (this.editedEntityIndex() > index) {
+      // keep pointing to the same entity after the removal
+      this.editedEntityIndex.update((i) => i - 1);
     }
-    if (index > -1) {
-      const entities = [...this.form.relatedEntities().value()];
-      entities.splice(index, 1);
-      this.form.relatedEntities().value.set(entities);
-      this.form.relatedEntities().markAsDirty();
-    }
+    const entities = [...this.form.relatedEntities().value()];
+    entities.splice(index, 1);
+    this.form.relatedEntities().value.set(entities);
+    this.form.relatedEntities().markAsDirty();
   }
 
   public cancel(): void {

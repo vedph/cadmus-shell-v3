@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import {
   catchError,
   map,
@@ -17,11 +17,22 @@ import { TaxoStoreService } from '@myrmidon/taxo-store-api';
  * the backend. Responses are cached, so that many pickers bound to the
  * same source (e.g. in a list of entries) share a single request.
  * Failed requests are not cached, so that they can be retried later.
+ * The backend services are resolved only when first needed, so that
+ * pickers using only provided entries or free text require no backend.
  */
 @Injectable({ providedIn: 'root' })
 export class ThesOrTaxoSourceService {
-  private readonly _thesService = inject(ThesaurusService);
-  private readonly _taxoService = inject(TaxoStoreService);
+  private readonly _injector = inject(Injector);
+  private _thesServiceInstance?: ThesaurusService;
+  private _taxoServiceInstance?: TaxoStoreService;
+
+  private get _thesService(): ThesaurusService {
+    return (this._thesServiceInstance ??= this._injector.get(ThesaurusService));
+  }
+
+  private get _taxoService(): TaxoStoreService {
+    return (this._taxoServiceInstance ??= this._injector.get(TaxoStoreService));
+  }
 
   private readonly _thesauri = new Map<string, Observable<ThesaurusEntry[]>>();
   private readonly _labels = new Map<string, Observable<string | null>>();

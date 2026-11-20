@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-part-general-ui",
-  "version": "20.0.0",
+  "version": "20.0.1",
   "description": "Cadmus - generic parts.",
   "keywords": [
     "Cadmus"
@@ -28,7 +28,8 @@
     "@myrmidon/cadmus-refs-proper-name": "11.0.2",
     "@myrmidon/cadmus-text-ed": "^11.0.2",
     "@myrmidon/cadmus-core": "^20.0.0",
-    "@myrmidon/cadmus-ui": "^20.0.0"
+    "@myrmidon/cadmus-ui": "^20.0.0",
+    "@myrmidon/cadmus-ui-thestaxo": "^0.0.1"
   },
   "dependencies": {
     "marked": "^18.0.14",

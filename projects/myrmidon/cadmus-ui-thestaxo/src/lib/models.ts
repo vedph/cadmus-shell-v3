@@ -47,6 +47,90 @@ export interface ThesOrTaxoPick {
 }
 
 /**
+ * Settings for a thesaurus-or-taxonomy picker. These are typically part of
+ * the settings of an editor, so that the source of a value can be configured
+ * per app and per editor role, without changing the editor. All properties
+ * are optional: an undefined property leaves the corresponding picker input
+ * untouched.
+ */
+export interface ThesOrTaxoSettings {
+  /**
+   * The mode: `thesaurus`, `taxonomy`, or `unbound`.
+   */
+  mode?: ThesOrTaxoMode;
+  /**
+   * The source: the thesaurus ID for thesaurus mode, or the tree ID for
+   * taxonomy mode. In thesaurus mode, when this is set the thesaurus is
+   * loaded by ID, rather than using the entries provided by the editor.
+   */
+  source?: string;
+  /**
+   * How to display a thesaurus: `auto`, `flat`, or `tree`.
+   */
+  thesaurusView?: ThesaurusViewMode;
+  /**
+   * True to show the top-level nodes filter in the taxonomy picker.
+   */
+  hasTopNodeFilter?: boolean;
+  /**
+   * Whether users can edit taxonomy nodes.
+   */
+  canEditNode?: boolean;
+  /**
+   * Whether users can add taxonomy nodes.
+   */
+  canAddNode?: boolean;
+  /**
+   * Whether users can delete taxonomy nodes.
+   */
+  canDeleteNode?: boolean;
+}
+
+/**
+ * Merge the specified picker settings, so that each defined property of
+ * a later settings object overrides the same property of the earlier ones.
+ * Unlike spreading, undefined and null properties override nothing. This is
+ * typically used to apply settings loaded from the app over the defaults of
+ * an editor.
+ * @param settings The settings to merge, in order of increasing priority.
+ * @returns The merged settings.
+ */
+export function mergeThesOrTaxoSettings(
+  ...settings: (ThesOrTaxoSettings | null | undefined)[]
+): ThesOrTaxoSettings {
+  const result: Record<string, unknown> = {};
+  for (const s of settings) {
+    if (!s) {
+      continue;
+    }
+    for (const [key, value] of Object.entries(s)) {
+      if (value !== undefined && value !== null) {
+        result[key] = value;
+      }
+    }
+  }
+  return result as ThesOrTaxoSettings;
+}
+
+/**
+ * Get the thesaurus entries to pass to a picker configured with the
+ * specified settings. When the settings specify a thesaurus mode with an
+ * explicit thesaurus ID, the picker must load that thesaurus, so this returns
+ * undefined; otherwise, it returns the entries provided by the editor.
+ * @param settings The picker settings.
+ * @param entries The entries provided by the editor.
+ * @returns The entries for the picker.
+ */
+export function resolveThesOrTaxoEntries(
+  settings: ThesOrTaxoSettings | null | undefined,
+  entries: readonly ThesaurusEntry[] | null | undefined,
+): readonly ThesaurusEntry[] | null | undefined {
+  return settings?.mode === 'thesaurus' && settings.source
+    ? undefined
+    : entries;
+}
+
+/**
  * The separator used in the IDs of hierarchical thesaurus entries.
  */
 export const THESAURUS_HIERARCHY_SEPARATOR = '.';

@@ -432,6 +432,66 @@ describe('ThesOrTaxoPicker', () => {
   });
   // #endregion
 
+  // #region settings
+  describe('settings', () => {
+    it('override the inputs', async () => {
+      await set({
+        mode: 'thesaurus',
+        entries: FLAT,
+        canAddNode: false,
+        settings: {
+          mode: 'taxonomy',
+          source: 'events',
+          canAddNode: true,
+          canEditNode: true,
+          hasTopNodeFilter: false,
+        },
+      });
+      expect(component.effectiveMode()).toBe('taxonomy');
+      const picker = query(FakeTaxoStorePicker)!;
+      expect(picker.treeId()).toBe('events');
+      expect(picker.canAdd()).toBe(true);
+      expect(picker.canEdit()).toBe(true);
+      expect(picker.canDelete()).toBe(false);
+      expect(picker.hasTopNodeFilter()).toBe(false);
+    });
+
+    it('leave inputs untouched for undefined properties', async () => {
+      await set({
+        mode: 'thesaurus',
+        entries: TREE,
+        thesaurusView: 'flat',
+        settings: { mode: undefined, canAddNode: true },
+      });
+      expect(component.currentMode()).toBe('thesaurus');
+      expect(component.thesView()).toBe('flat');
+    });
+
+    it('can set the thesaurus view', async () => {
+      await set({
+        mode: 'thesaurus',
+        entries: FLAT,
+        settings: { thesaurusView: 'tree' },
+      });
+      expect(component.thesView()).toBe('tree');
+      expect(query(FakeThesaurusTree)).toBeTruthy();
+    });
+
+    it('can set the thesaurus ID to load', async () => {
+      source.getThesaurusEntries.mockReturnValue(of(TREE));
+      await set({ settings: { mode: 'thesaurus', source: 'events@en' } });
+      expect(source.getThesaurusEntries).toHaveBeenCalledWith('events@en');
+      expect(component.thesEntries()).toEqual(TREE);
+    });
+
+    it('do not emit when changed', async () => {
+      await set({ value: 'x', settings: { mode: 'unbound' } });
+      await set({ settings: { mode: 'taxonomy', source: 'events' } });
+      expect(values).toEqual([]);
+    });
+  });
+  // #endregion
+
   it('switches mode at runtime', async () => {
     await set({ mode: 'thesaurus', entries: FLAT, value: 'red' });
     expect(component.effectiveMode()).toBe('thesaurus');

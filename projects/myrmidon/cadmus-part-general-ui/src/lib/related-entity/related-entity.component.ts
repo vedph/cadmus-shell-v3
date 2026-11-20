@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  computed,
   effect,
   Component,
   input,
@@ -10,11 +11,8 @@ import {
 } from '@angular/core';
 import { FormField, form, maxLength, required } from '@angular/forms/signals';
 
-import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
-import { MatInput } from '@angular/material/input';
-import { MatIconButton } from '@angular/material/button';
+import { MatError } from '@angular/material/form-field';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 
@@ -24,9 +22,17 @@ import {
 } from '@myrmidon/cadmus-refs-asserted-ids';
 
 import { ThesaurusEntry } from '@myrmidon/cadmus-core';
-
-import { RelatedEntity } from '../historical-events-part';
 import { isImplicitSubmission, setFieldFromChild } from '@myrmidon/cadmus-ui';
+import {
+  mergeThesOrTaxoSettings,
+  ThesOrTaxoPicker,
+  ThesOrTaxoSettings,
+} from '@myrmidon/cadmus-ui-thestaxo';
+
+import {
+  DEFAULT_RELATION_SETTINGS,
+  RelatedEntity,
+} from '../historical-events-part';
 
 interface RelatedEntityControls {
   relation: string;
@@ -42,6 +48,8 @@ function toDraft(entity?: RelatedEntity): RelatedEntityControls {
 
 /**
  * Related entity component to edit the entity related to a historical event.
+ * The relation is picked from a thesaurus (default), a taxonomy, or typed,
+ * according to relationSettings.
  */
 @Component({
   selector: 'cadmus-related-entity',
@@ -50,23 +58,36 @@ function toDraft(entity?: RelatedEntity): RelatedEntityControls {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormField,
-    MatFormField,
-    MatLabel,
-    MatSelect,
-    MatOption,
     MatError,
-    MatInput,
     AssertedCompositeIdComponent,
+    MatButton,
     MatIconButton,
     MatIcon,
     MatTooltip,
+    ThesOrTaxoPicker,
   ],
 })
 export class RelatedEntityComponent {
   public readonly entity = model<RelatedEntity>();
 
-  // relation entries
-  public readonly relationEntries = input<ThesaurusEntry[]>();
+  /**
+   * The relation entries to pick from, in thesaurus mode. When defined,
+   * these are used even if relationSettings specify a thesaurus ID: so the
+   * parent editor can pass entries already filtered by the event type.
+   * When there are no entries, the relation is typed.
+   */
+  public readonly relationEntries = input<readonly ThesaurusEntry[]>();
+
+  /**
+   * The settings for the relation picker. Their defined properties
+   * override the defaults (DEFAULT_RELATION_SETTINGS), i.e. picking the
+   * relation from relationEntries, displayed as a list.
+   */
+  public readonly relationSettings = input<ThesOrTaxoSettings | undefined>();
+
+  /**
+   * Thesaurus asserted-id-scopes.
+   */
   public readonly idScopeEntries = input<ThesaurusEntry[]>();
   /**
    * Thesaurus asserted-id-tags.
@@ -90,6 +111,13 @@ export class RelatedEntityComponent {
   public readonly idFeatureEntries = input<ThesaurusEntry[]>();
 
   public readonly editorClose = output();
+
+  /**
+   * The effective relation picker settings.
+   */
+  public readonly relationPickerSettings = computed<ThesOrTaxoSettings>(() =>
+    mergeThesOrTaxoSettings(DEFAULT_RELATION_SETTINGS, this.relationSettings()),
+  );
 
   // form
   private readonly _draft = linkedSignal(() => toDraft(this.entity()));
