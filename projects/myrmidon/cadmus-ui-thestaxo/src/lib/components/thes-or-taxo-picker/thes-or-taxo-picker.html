@@ -1,0 +1,131 @@
+@let current = value() ?? "";
+<div
+  class="thes-or-taxo"
+  [class.invalid]="invalid()"
+  [class.disabled]="disabled()"
+>
+  @switch (effectiveMode()) {
+    <!-- thesaurus -->
+    @case ("thesaurus") {
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      } @else if (thesView() === "flat") {
+        <div class="form-row">
+          <cadmus-thesaurus-entry-picker
+            class="flat"
+            view="flat"
+            [entries]="thesEntries()"
+            [value]="current"
+            [label]="label()"
+            [disabled]="locked()"
+            (entryChange)="onEntryChange($event)"
+            (touch)="onTouch()"
+          />
+          @if (canClear() && current && !locked()) {
+            <ng-container *ngTemplateOutlet="clearButton" />
+          }
+        </div>
+      } @else {
+        <fieldset>
+          <legend>{{ label() }}@if (required()) {<span> *</span>}</legend>
+          <ng-container *ngTemplateOutlet="valueView" />
+          <cadmus-thesaurus-entry-picker
+            view="tree"
+            [entries]="thesEntries()"
+            [value]="current"
+            [renderLabel]="renderLabel()"
+            [disabled]="locked()"
+            (entryChange)="onEntryChange($event)"
+          />
+        </fieldset>
+      }
+    }
+
+    <!-- taxonomy -->
+    @case ("taxonomy") {
+      <fieldset>
+        <legend>{{ label() }}@if (required()) {<span> *</span>}</legend>
+        <ng-container *ngTemplateOutlet="valueView" />
+        @if (!locked()) {
+          <ts-taxo-store-picker
+            [treeId]="source() || null"
+            [label]="label()"
+            [hasTopNodeFilter]="hasTopNodeFilter()"
+            [hasFeaturesFilter]="false"
+            [canEdit]="canEditNode()"
+            [canAdd]="canAddNode()"
+            [canDelete]="canDeleteNode()"
+            (nodePick)="onNodePick($event)"
+          />
+        }
+      </fieldset>
+    }
+
+    <!-- unbound -->
+    @case ("unbound") {
+      <div class="form-row">
+        <mat-form-field class="text">
+          <mat-label>{{ label() }}</mat-label>
+          <input
+            matInput
+            [value]="current"
+            [disabled]="disabled()"
+            [readonly]="readonly()"
+            [required]="required()"
+            [attr.maxlength]="maxLength() ?? null"
+            (input)="onTextInput($event)"
+            (blur)="onTouch()"
+          />
+          @if (maxLength(); as max) {
+            <mat-hint align="end">{{ current.length }}/{{ max }}</mat-hint>
+          }
+        </mat-form-field>
+        @if (canClear() && current && !locked()) {
+          <ng-container *ngTemplateOutlet="clearButton" />
+        }
+      </div>
+    }
+
+    <!-- no source and no fallback -->
+    @default {
+      <div class="no-source muted">
+        {{ label() }}: no {{ mode() === "taxonomy" ? "taxonomy" : "thesaurus" }}
+        available
+        @if (current) {
+          <span class="value"> ({{ current }})</span>
+        }
+      </div>
+    }
+  }
+</div>
+
+<!-- the current value with its label -->
+<ng-template #valueView>
+  <div class="value-view">
+    @if (current) {
+      <span class="value-label">{{ valueLabel() ?? current }}</span>
+      @if (valueLabel()) {
+        <span class="muted value-id">({{ current }})</span>
+      }
+      @if (canClear() && !locked()) {
+        <ng-container *ngTemplateOutlet="clearButton" />
+      }
+    } @else {
+      <span class="muted no-value">no value</span>
+    }
+  </div>
+</ng-template>
+
+<!-- the clear button -->
+<ng-template #clearButton>
+  <button
+    type="button"
+    class="clear-button"
+    mat-icon-button
+    matTooltip="Clear value"
+    aria-label="Clear value"
+    (click)="clear()"
+  >
+    <mat-icon class="mat-warn">clear</mat-icon>
+  </button>
+</ng-template>

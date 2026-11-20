@@ -13,6 +13,7 @@
     "build:api": "ng build @myrmidon/cadmus-api",
     "build:ui": "ng build @myrmidon/cadmus-state && ng build @myrmidon/cadmus-ui",
     "build:ths": "ng build @myrmidon/cadmus-profile-core && ng build @myrmidon/cadmus-thesaurus-ui && ng build @myrmidon/cadmus-thesaurus-editor && ng build @myrmidon/cadmus-thesaurus-list",
+    "build:tht": "ng build @myrmidon/cadmus-ui-thestaxo",
     "build:gen": "ng build @myrmidon/cadmus-part-general-ui && ng build @myrmidon/cadmus-part-general-pg",
     "build:imp": "ng build @myrmidon/cadmus-profile-import",
     "build:prd": "ng build @myrmidon/cadmus-profile-editor",
@@ -23,12 +24,13 @@
     "build:flg": "ng build @myrmidon/cadmus-flags-ui && ng build @myrmidon/cadmus-flags-pg",
     "build:sta": "ng build @myrmidon/cadmus-statistics",
     "build:tax": "ng build @myrmidon/cadmus-part-taxo-ui && ng build @myrmidon/cadmus-part-taxo-pg",
-    "build:lib": "pnpm run check-libs && pnpm run build-cor && pnpm run build-api && pnpm run build-ui && pnpm run build-itm && pnpm run build-ths && pnpm run build-gen && pnpm run build-phi && pnpm run build-grp && pnpm run build-pre && pnpm run build-flg && pnpm run build-sta && pnpm run build-tax && pnpm run build-imp && pnpm run build-prd",
-    "build:all": "pnpm run build-lib && ng build",
+    "build:lib": "pnpm run check-libs && pnpm run build:cor && pnpm run build:api && pnpm run build:ui && pnpm run build:itm && pnpm run build:ths && pnpm run build:tht && pnpm run build:gen && pnpm run build:phi && pnpm run build:grp && pnpm run build:pre && pnpm run build:flg && pnpm run build:sta && pnpm run build:tax && pnpm run build:imp && pnpm run build:prd",
+    "build:all": "pnpm run build:lib && ng build",
     "test:cor": "ng test @myrmidon/cadmus-core --watch=false",
     "test:api": "ng test @myrmidon/cadmus-api --watch=false",
     "test:ui": "ng test @myrmidon/cadmus-state --watch=false && ng test @myrmidon/cadmus-ui --watch=false",
     "test:ths": "ng test @myrmidon/cadmus-profile-core --watch=false && ng test @myrmidon/cadmus-thesaurus-ui --watch=false && ng test @myrmidon/cadmus-thesaurus-editor --watch=false && ng test @myrmidon/cadmus-thesaurus-list --watch=false",
+    "test:tht": "ng test @myrmidon/cadmus-ui-thestaxo --watch=false",
     "test:gen": "ng test @myrmidon/cadmus-part-general-ui --watch=false && ng test @myrmidon/cadmus-part-general-pg --watch=false",
     "test:imp": "ng test @myrmidon/cadmus-profile-import --watch=false",
     "test:prd": "ng test @myrmidon/cadmus-profile-editor --watch=false",
@@ -39,7 +41,7 @@
     "test:flg": "ng test @myrmidon/cadmus-flags-ui --watch=false && ng test @myrmidon/cadmus-flags-pg --watch=false",
     "test:sta": "ng test @myrmidon/cadmus-statistics --watch=false",
     "test:tax": "ng test @myrmidon/cadmus-part-taxo-ui --watch=false && ng test @myrmidon/cadmus-part-taxo-pg --watch=false",
-    "test:all": "pnpm run check-libs && pnpm run test-cor && pnpm run test-api && pnpm run test-ui && pnpm run test-itm && pnpm run test-ths && pnpm run test-gen && pnpm run test-phi && pnpm run test-grp && pnpm run test-pre && pnpm run test-flg && pnpm run test-sta && pnpm run test-tax && pnpm run test-imp && pnpm run test-prd"
+    "test:all": "pnpm run check-libs && pnpm run test:cor && pnpm run test:api && pnpm run test:ui && pnpm run test:itm && pnpm run test:ths && pnpm run test:tht && pnpm run test:gen && pnpm run test:phi && pnpm run test:grp && pnpm run test:pre && pnpm run test:flg && pnpm run test:sta && pnpm run test:tax && pnpm run test:imp && pnpm run test:prd"
   },
   "overrides": {
     "d3-selection": "3.0.1"

@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+.entry-select {
+  width: 100%;
+}
+.orphan {
+  font-style: italic;
+}

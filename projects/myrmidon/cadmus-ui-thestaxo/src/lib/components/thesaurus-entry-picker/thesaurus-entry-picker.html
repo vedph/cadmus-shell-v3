@@ -1,0 +1,28 @@
+@if (effectiveView() === "tree") {
+  @if (!disabled()) {
+    <cadmus-thesaurus-tree
+      [entries]="treeEntries()"
+      [renderLabel]="effectiveRenderLabel()"
+      (entryChange)="onTreeEntryChange($event)"
+    />
+  }
+} @else {
+  <mat-form-field class="entry-select">
+    <mat-label>{{ label() }}</mat-label>
+    <mat-select
+      [value]="value() || null"
+      [disabled]="disabled()"
+      (selectionChange)="onSelectionChange($event.value)"
+      (closed)="touch.emit()"
+    >
+      @if (orphanValue(); as orphan) {
+        <mat-option [value]="orphan" disabled class="orphan">
+          {{ orphan }} (not in list)
+        </mat-option>
+      }
+      @for (e of entries(); track e.id) {
+        <mat-option [value]="e.id">{{ e.value }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+}

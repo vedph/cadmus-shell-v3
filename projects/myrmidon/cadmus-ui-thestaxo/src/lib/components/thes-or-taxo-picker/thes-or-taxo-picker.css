@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row .flat,
+.form-row .text {
+  flex: 1 1 auto;
+}
+fieldset {
+  border: 1px solid silver;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.invalid fieldset {
+  border-color: var(--mat-sys-error, red);
+}
+.value-view {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+}
+.value-label {
+  font-weight: 500;
+}
+.muted {
+  color: var(--mat-sys-on-surface-variant, gray);
+}
+.no-source {
+  padding: 8px 0;
+}
