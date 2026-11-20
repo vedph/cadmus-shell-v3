@@ -1,5 +1,9 @@
 # History
 
+- 2026-11-20: 🆕 context help (`EditorHelpService` in `@myrmidon/cadmus-ui`) now supports fallback help sites and localized help. No change is required in existing apps: the previous settings work as before. See [Context Help](README.md#context-help) for the full documentation.
+  - `helpUrlTemplate` in `env.js` can now be an array of templates (or a string with whitespace-separated templates), tried in their order: so a project can provide only its specific help pages, and inherit all the others from a general-purpose help site.
+  - the new `helpUrlLanguage` setting (a language code, or `auto` for the browser language) fills the new `{language}` placeholder. Localized pages are tried first, falling back to non-localized ones (e.g. `help[-{language}]/` gives `help-it/`, then `help/`).
+  - new exported helpers: `parseHelpUrlTemplates`, `normalizeHelpLanguage`, `getHelpLanguageFallbacks`, `resolveHelpLanguage`. `buildHelpUrlCandidates` accepts an array of templates and an optional list of languages; `HelpUrlParams` has a new `language` property. `EditorHelpService` has a new `getCandidates` method and an overridable `getLanguages` method.
 - 2026-11-19: 🆕 replaced old text-selection based text layer UI with text-segment based UI.
 - 2026-11-19: reimplemented the token-based text selection of text layers on top of the new `@myrmidon/cadmus-text-segment` package (⚠️ new dependency). The coordinates system is unchanged.
   - `DecoratedTokenTextComponent` (`@myrmidon/cadmus-ui`) is now built on `SegmentedTextView`, with the new `TokenTextSegmenter` implementing the token-based coordinates exactly like the legacy `TextLayerService` and the backend (its tests check parity with the legacy service for every possible selection in a set of sample texts). Its selector and its `baseText`/`locations`/`selectedLocation` bindings are unchanged, so fragment editors using it to display their base text need no change. The characters of existing fragments are now blocked, so that users can no longer select text overlapping a fragment.
@@ -276,6 +280,8 @@ To use `setFieldFromEditor` in the template, expose it on the component as a fie
 ---
 
 ## Context Help Configuration
+
+>ℹ️ This section describes the original configuration. For the current documentation, including multiple templates and localization, see [Context Help](README.md#context-help).
 
 Help is configured in the app's `env.js`. When no template is set, no help button is shown:
 

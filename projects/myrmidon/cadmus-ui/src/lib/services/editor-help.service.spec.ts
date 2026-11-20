@@ -7,8 +7,17 @@ import {
   EditorHelpService,
   buildHelpUrlCandidates,
   fillHelpUrlTemplate,
+  getHelpLanguageFallbacks,
   getHelpUrlParams,
+  normalizeHelpLanguage,
+  parseHelpUrlTemplates,
+  resolveHelpLanguage,
 } from './editor-help.service';
+
+const PROJECT_TEMPLATE =
+  'https://project.org/help[-{language}]/{typeId}{separator}{roleId}{separator}{frRoleId}.html';
+const DEFAULT_TEMPLATE =
+  'https://cadmus.org/help[-{language}]/{typeId}{separator}{roleId}{separator}{frRoleId}.html';
 
 const TEMPLATE =
   'https://www.mysite.com/help/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html';
@@ -129,7 +138,175 @@ describe('fillHelpUrlTemplate', () => {
   });
 });
 
+describe('parseHelpUrlTemplates', () => {
+  it('should return empty for no value', () => {
+    expect(parseHelpUrlTemplates(undefined)).toEqual([]);
+    expect(parseHelpUrlTemplates('')).toEqual([]);
+    expect(parseHelpUrlTemplates('  ')).toEqual([]);
+    expect(parseHelpUrlTemplates([])).toEqual([]);
+    expect(parseHelpUrlTemplates(true)).toEqual([]);
+  });
+
+  it('should parse a single template', () => {
+    expect(parseHelpUrlTemplates(' https://x.org/{typeId} ')).toEqual([
+      'https://x.org/{typeId}',
+    ]);
+  });
+
+  it('should parse an array, skipping empty and non-string entries', () => {
+    expect(
+      parseHelpUrlTemplates(['https://a.org/{typeId}', '', 3, ' https://b.org/{typeId}'])
+    ).toEqual(['https://a.org/{typeId}', 'https://b.org/{typeId}']);
+  });
+
+  it('should parse a whitespace-separated string', () => {
+    expect(
+      parseHelpUrlTemplates('https://a.org/{typeId}\n  https://b.org/{typeId}')
+    ).toEqual(['https://a.org/{typeId}', 'https://b.org/{typeId}']);
+  });
+});
+
+describe('normalizeHelpLanguage', () => {
+  it('should normalize case and underscores', () => {
+    expect(normalizeHelpLanguage(' en_US ')).toBe('en-us');
+    expect(normalizeHelpLanguage('zh-Hant-TW')).toBe('zh-hant-tw');
+  });
+
+  it('should reject empty or invalid codes', () => {
+    expect(normalizeHelpLanguage(undefined)).toBeNull();
+    expect(normalizeHelpLanguage('')).toBeNull();
+    expect(normalizeHelpLanguage('e n')).toBeNull();
+    expect(normalizeHelpLanguage('../it')).toBeNull();
+    expect(normalizeHelpLanguage('it-')).toBeNull();
+  });
+});
+
+describe('getHelpLanguageFallbacks', () => {
+  it('should return empty for no language', () => {
+    expect(getHelpLanguageFallbacks(null)).toEqual([]);
+  });
+
+  it('should return a single code for a primary language', () => {
+    expect(getHelpLanguageFallbacks('it')).toEqual(['it']);
+  });
+
+  it('should truncate subtags', () => {
+    expect(getHelpLanguageFallbacks('it-IT')).toEqual(['it-it', 'it']);
+    expect(getHelpLanguageFallbacks('zh-Hant-TW')).toEqual([
+      'zh-hant-tw',
+      'zh-hant',
+      'zh',
+    ]);
+  });
+
+  it('should drop trailing singletons', () => {
+    expect(getHelpLanguageFallbacks('de-CH-x-phonebk')).toEqual([
+      'de-ch-x-phonebk',
+      'de-ch',
+      'de',
+    ]);
+  });
+});
+
+describe('resolveHelpLanguage', () => {
+  it('should return null when not set', () => {
+    expect(resolveHelpLanguage(undefined, 'it-IT')).toBeNull();
+    expect(resolveHelpLanguage(' ', 'it-IT')).toBeNull();
+  });
+
+  it('should return a literal code', () => {
+    expect(resolveHelpLanguage('IT', 'en-US')).toBe('it');
+  });
+
+  it('should use the browser language for auto', () => {
+    expect(resolveHelpLanguage('auto', 'it-IT')).toBe('it-it');
+    expect(resolveHelpLanguage('AUTO', 'it-IT')).toBe('it-it');
+    expect(resolveHelpLanguage('auto', undefined)).toBeNull();
+  });
+});
+
+describe('fillHelpUrlTemplate with language', () => {
+  it('should fill language in an optional group', () => {
+    const t = 'https://x.org/help[-{language}]/{typeId}.html';
+    expect(fillHelpUrlTemplate(t, { typeId: 't', language: 'it' })).toBe(
+      'https://x.org/help-it/t.html'
+    );
+    expect(fillHelpUrlTemplate(t, { typeId: 't' })).toBe(
+      'https://x.org/help/t.html'
+    );
+  });
+
+  it('should fill language as a path segment', () => {
+    const t = 'https://x.org/help/[{language}/]{typeId}.html';
+    expect(fillHelpUrlTemplate(t, { typeId: 't', language: 'it' })).toBe(
+      'https://x.org/help/it/t.html'
+    );
+    expect(fillHelpUrlTemplate(t, { typeId: 't' })).toBe(
+      'https://x.org/help/t.html'
+    );
+  });
+});
+
 describe('buildHelpUrlCandidates', () => {
+  it('should accept a single template as an array', () => {
+    expect(
+      buildHelpUrlCandidates(['{typeId}[_{roleId}]'], {
+        typeId: 't',
+        roleId: 'r',
+      })
+    ).toEqual(['t_r', 't']);
+  });
+
+  it('should try templates in order, each from most to least specific', () => {
+    expect(
+      buildHelpUrlCandidates(['a/{typeId}[_{roleId}]', 'b/{typeId}[_{roleId}]'], {
+        typeId: 't',
+        roleId: 'r',
+      })
+    ).toEqual(['a/t_r', 'a/t', 'b/t_r', 'b/t']);
+  });
+
+  it('should try languages within each topic, then no language', () => {
+    expect(
+      buildHelpUrlCandidates(
+        ['a[-{language}]/{typeId}[_{roleId}]', 'b[-{language}]/{typeId}[_{roleId}]'],
+        { typeId: 't', roleId: 'r' },
+        '__',
+        ['it-it', 'it']
+      )
+    ).toEqual([
+      'a-it-it/t_r',
+      'a-it/t_r',
+      'a/t_r',
+      'a-it-it/t',
+      'a-it/t',
+      'a/t',
+      'b-it-it/t_r',
+      'b-it/t_r',
+      'b/t_r',
+      'b-it-it/t',
+      'b-it/t',
+      'b/t',
+    ]);
+  });
+
+  it('should ignore languages for templates without language', () => {
+    expect(
+      buildHelpUrlCandidates('{typeId}[_{roleId}]', { typeId: 't' }, '__', [
+        'it',
+      ])
+    ).toEqual(['t']);
+  });
+
+  it('should ignore the language in params', () => {
+    expect(
+      buildHelpUrlCandidates('[{language}/]{typeId}', {
+        typeId: 't',
+        language: 'it',
+      })
+    ).toEqual(['t']);
+  });
+
   it('should build candidates from most to least specific', () => {
     expect(
       buildHelpUrlCandidates('{typeId}[_{roleId}][_{frRoleId}]', {
@@ -184,6 +361,7 @@ describe('EditorHelpService', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('should return undefined without template, with no requests', async () => {
@@ -275,5 +453,123 @@ describe('EditorHelpService', () => {
     expect(await service.resolveUrl(makePartIdentity('history'))).toBe(
       'https://www.mysite.com/help/topics/it.vedph.note-history.html'
     );
+  });
+
+  describe('with multiple templates', () => {
+    beforeEach(() => {
+      env.set('helpUrlTemplate', [PROJECT_TEMPLATE, DEFAULT_TEMPLATE]);
+    });
+
+    it('should fall back to the default site', async () => {
+      const url = 'https://cadmus.org/help/it.vedph.note.html';
+      respond([url]);
+      expect(await service.resolveUrl(makePartIdentity('history'))).toBe(
+        url
+      );
+      expect(fetchMock.mock.calls.map((c) => c[0])).toEqual([
+        'https://project.org/help/it.vedph.note__history.html',
+        'https://project.org/help/it.vedph.note.html',
+        'https://cadmus.org/help/it.vedph.note__history.html',
+        url,
+      ]);
+    });
+
+    it('should let the project site override the default site', async () => {
+      const url = 'https://project.org/help/it.vedph.note.html';
+      respond([url, 'https://cadmus.org/help/it.vedph.note__history.html']);
+      expect(await service.resolveUrl(makePartIdentity('history'))).toBe(
+        url
+      );
+    });
+
+    it('should accept a whitespace-separated string', async () => {
+      env.set('helpUrlTemplate', `${PROJECT_TEMPLATE} ${DEFAULT_TEMPLATE}`);
+      const url = 'https://cadmus.org/help/it.vedph.note.html';
+      respond([url]);
+      expect(await service.resolveUrl(makePartIdentity())).toBe(url);
+    });
+
+    it('should list candidates', () => {
+      expect(service.getCandidates(makeFragmentIdentity('sch'))).toEqual([
+        'https://project.org/help/fr.it.vedph.comment__sch.html',
+        'https://project.org/help/fr.it.vedph.comment.html',
+        'https://cadmus.org/help/fr.it.vedph.comment__sch.html',
+        'https://cadmus.org/help/fr.it.vedph.comment.html',
+      ]);
+    });
+
+    it('should use the first candidate without check', async () => {
+      env.set('helpUrlCheck', false);
+      expect(await service.resolveUrl(makePartIdentity('history'))).toBe(
+        'https://project.org/help/it.vedph.note__history.html'
+      );
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with language', () => {
+    beforeEach(() => {
+      env.set('helpUrlTemplate', [PROJECT_TEMPLATE, DEFAULT_TEMPLATE]);
+    });
+
+    it('should prefer the localized page', async () => {
+      env.set('helpUrlLanguage', 'it');
+      respond([
+        'https://cadmus.org/help-it/it.vedph.note.html',
+        'https://cadmus.org/help/it.vedph.note.html',
+      ]);
+      expect(await service.resolveUrl(makePartIdentity())).toBe(
+        'https://cadmus.org/help-it/it.vedph.note.html'
+      );
+    });
+
+    it('should fall back to the non-localized page', async () => {
+      env.set('helpUrlLanguage', 'it');
+      const url = 'https://cadmus.org/help/it.vedph.note.html';
+      respond([url]);
+      expect(await service.resolveUrl(makePartIdentity())).toBe(url);
+      expect(fetchMock.mock.calls.map((c) => c[0])).toEqual([
+        'https://project.org/help-it/it.vedph.note.html',
+        'https://project.org/help/it.vedph.note.html',
+        'https://cadmus.org/help-it/it.vedph.note.html',
+        url,
+      ]);
+    });
+
+    it('should prefer a more relevant page to a localized one', async () => {
+      env.set('helpUrlLanguage', 'it');
+      const url = 'https://project.org/help/it.vedph.note.html';
+      respond([url, 'https://cadmus.org/help-it/it.vedph.note.html']);
+      expect(await service.resolveUrl(makePartIdentity())).toBe(url);
+    });
+
+    it('should use the browser language for auto', async () => {
+      env.set('helpUrlLanguage', 'auto');
+      vi.spyOn(navigator, 'language', 'get').mockReturnValue('it-IT');
+      expect(service.getCandidates(makePartIdentity())).toEqual([
+        'https://project.org/help-it-it/it.vedph.note.html',
+        'https://project.org/help-it/it.vedph.note.html',
+        'https://project.org/help/it.vedph.note.html',
+        'https://cadmus.org/help-it-it/it.vedph.note.html',
+        'https://cadmus.org/help-it/it.vedph.note.html',
+        'https://cadmus.org/help/it.vedph.note.html',
+      ]);
+    });
+
+    it('should ignore an invalid language', () => {
+      env.set('helpUrlLanguage', '../x');
+      expect(service.getCandidates(makePartIdentity())).toEqual([
+        'https://project.org/help/it.vedph.note.html',
+        'https://cadmus.org/help/it.vedph.note.html',
+      ]);
+    });
+
+    it('should use the localized page without check', async () => {
+      env.set('helpUrlLanguage', 'it');
+      env.set('helpUrlCheck', 'false');
+      expect(await service.resolveUrl(makePartIdentity())).toBe(
+        'https://project.org/help-it/it.vedph.note.html'
+      );
+    });
   });
 });

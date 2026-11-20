@@ -181,6 +181,147 @@ Most of the libraries in this workspace contain infrastructure logic for Cadmus 
 
 Often, these parts use UI widgets from [Cadmus bricks](https://github.com/vedph/cadmus-bricks-shell-v3).
 
+## Context Help
+
+Part and fragment editors can show a help button (`HelpLinkComponent`), which opens the help page for the edited part or fragment type in a new tab. The page URL is resolved by `EditorHelpService` (`@myrmidon/cadmus-ui`) from the settings in the app's `env.js`. When no page is found, no button is shown.
+
+This lets you:
+
+- inherit help pages from a **general-purpose help site**, shared by all the Cadmus projects, and write project-specific pages only for the parts which are specific to your project, or which need a different help in it;
+- provide **localized help sites**, falling back to the default (usually English) help for the pages which are not translated.
+
+### Settings
+
+```js
+// URL template(s) for help pages, in their search order (required: no help without it)
+window.__env.helpUrlTemplate = [
+  "https://myproject.github.io/help[-{language}]/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html",
+  "https://cadmus.github.io/help[-{language}]/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html",
+];
+// value of {language} (optional): a language code like "it", or "auto" for the browser language
+window.__env.helpUrlLanguage = "auto";
+// value of {separator} (optional, default: __)
+window.__env.helpUrlSeparator = "__";
+// false to skip checking page availability (optional, default: true)
+window.__env.helpUrlCheck = true;
+```
+
+- `helpUrlTemplate`: a template, or an array of templates in their search order. A string with several templates separated by spaces or newlines is accepted too, which is handy when `env.js` is generated from environment variables (e.g. in Docker): URLs cannot contain spaces.
+- `helpUrlLanguage`: a language code (typically BCP47, e.g. `it` or `pt-BR`), or `auto` to use the browser language (`navigator.language`). When not set, `{language}` is always empty, i.e. only the default help is used. Invalid codes are ignored.
+- `helpUrlSeparator`: the value of `{separator}` (default `__`).
+- `helpUrlCheck`: set to `false` to skip the availability check (see below).
+
+### Templates
+
+A template can include these **placeholders**. Their values are URL-encoded; an empty value is replaced by nothing:
+
+| placeholder   | part editor        | fragment editor                               |
+| ------------- | ------------------ | --------------------------------------------- |
+| `{typeId}`    | part type ID       | fragment type ID (e.g. `fr.it.vedph.comment`) |
+| `{roleId}`    | part role ID       | always empty                                  |
+| `{frRoleId}`  | always empty       | fragment role ID                              |
+| `{language}`  | help language code | help language code                            |
+| `{separator}` | the separator      | the separator                                 |
+
+**Optional groups** in square brackets are output (without brackets) only when all the placeholders inside them have a value; otherwise, the whole group is dropped. `{separator}` immediately followed by a placeholder is a shortcut for such a group, so `{separator}{roleId}` is the same as `[{separator}{roleId}]`. Groups cannot be nested.
+
+⚠️ Always put `{language}` in an optional group, together with its delimiter, so that the default (non-localized) URL is well-formed: e.g. `help[-{language}]/` gives `help-it/` or `help/`; `help/[{language}/]` gives `help/it/` or `help/`. A bare `help-{language}/` would give `help-/` for the default help.
+
+### Search Order
+
+When `helpUrlCheck` is not false, the service builds a list of candidate URLs and uses the first available page. The rule is: **the most relevant content wins; language is preferred only among equally relevant pages**. So candidates are built like this:
+
+1. for each **template**, in their order (so a page found in the project site always wins over the general-purpose site: this is how a project overrides a default page);
+2. for each **topic**, from the most specific to the least specific: first with all the IDs, then without `{frRoleId}`, then without `{roleId}` (so a page for the type ID is used for all its roles, unless a role-specific page exists);
+3. for each **language**, from the most specific to the least specific (e.g. `it-it`, then `it`), and finally with no language (the default help).
+
+Duplicate URLs are removed: e.g. when a template has no `{language}`, or there is no role ID, fewer candidates are tried.
+
+**Language codes** are normalized to lowercase, with `_` replaced by `-`; when the code has more subtags (e.g. `it-IT` or `zh-Hant-TW`), they are removed one by one from the end, as in the BCP47 lookup algorithm (`zh-hant-tw`, `zh-hant`, `zh`). So with `auto`, a browser set to `it-IT` tries `it-it` and then `it`: name localized sites with the lowercase primary language code (e.g. `help-it`), unless you need regional variants.
+
+Checks use `fetch` (so no credentials are sent), and their results are cached for the session, so each URL is requested at most once. When no page is found, the URLs tried are logged in the browser console (as info), so you can see which topics are missing. The help sites must allow cross-origin requests (CORS); GitHub Pages does.
+
+If a help site does not allow CORS, set `helpUrlCheck` to false: then no check is made, and the first candidate (first template, most specific topic, most specific language) is always used, even if it does not exist. As fallbacks require checks, in this case use a single template with no `{language}`.
+
+### Scenarios
+
+In all these examples the separator is the default (`__`), and `.../` stands for the template's path to topics.
+
+**1. Single help site**:
+
+```js
+window.__env.helpUrlTemplate =
+  "https://myproject.github.io/help/topics/{typeId}{separator}{roleId}{separator}{frRoleId}.html";
+```
+
+| editor                             | URLs tried, in order                                                                                 |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| note part, no role                 | `.../topics/it.vedph.note.html`                                                                      |
+| note part, role `history`          | `.../topics/it.vedph.note__history.html`, `.../topics/it.vedph.note.html`                            |
+| comment fragment, fr. role `sch`   | `.../topics/fr.it.vedph.comment__sch.html`, `.../topics/fr.it.vedph.comment.html`                    |
+
+**2. Project site with fallback to a general-purpose site**:
+
+```js
+window.__env.helpUrlTemplate = [
+  "https://myproject.github.io/help/topics/{typeId}{separator}{roleId}.html",
+  "https://cadmus.github.io/help/topics/{typeId}{separator}{roleId}.html",
+];
+```
+
+For the note part with role `history`:
+
+1. `https://myproject.github.io/help/topics/it.vedph.note__history.html`
+2. `https://myproject.github.io/help/topics/it.vedph.note.html`
+3. `https://cadmus.github.io/help/topics/it.vedph.note__history.html`
+4. `https://cadmus.github.io/help/topics/it.vedph.note.html`
+
+So the project site contains only the pages for its own parts, and for the general parts it wants to document differently: for all the others, the general-purpose site is used. Note that a project page for a type (2) overrides also the role-specific pages of the general-purpose site for that type (3): once a project documents a type, it owns all of its help.
+
+**3. Localized help**:
+
+```js
+window.__env.helpUrlTemplate =
+  "https://cadmus.github.io/help[-{language}]/topics/{typeId}{separator}{roleId}.html";
+window.__env.helpUrlLanguage = "it";
+```
+
+For the note part with role `history`:
+
+1. `https://cadmus.github.io/help-it/topics/it.vedph.note__history.html`
+2. `https://cadmus.github.io/help/topics/it.vedph.note__history.html`
+3. `https://cadmus.github.io/help-it/topics/it.vedph.note.html`
+4. `https://cadmus.github.io/help/topics/it.vedph.note.html`
+
+When `helpUrlLanguage` is not set, only (2) and (4) are tried. Note that an English role-specific page (2) wins over an Italian generic page (3), because it is more relevant: so when translating, translate role-specific pages together with their generic page.
+
+**4. Both** (as in the [settings](#settings) above, with `auto` and a browser set to `it-IT`), for the note part with no role:
+
+1. `https://myproject.github.io/help-it-it/topics/it.vedph.note.html`
+2. `https://myproject.github.io/help-it/topics/it.vedph.note.html`
+3. `https://myproject.github.io/help/topics/it.vedph.note.html`
+4. `https://cadmus.github.io/help-it-it/topics/it.vedph.note.html`
+5. `https://cadmus.github.io/help-it/topics/it.vedph.note.html`
+6. `https://cadmus.github.io/help/topics/it.vedph.note.html`
+
+**Other template styles**:
+
+- one page per type, with a bookmark per role: `https://www.mysite.com/help/{typeId}.html[#{roleId}][#{frRoleId}]`. Bookmarks do not affect the availability check, so the check is done on the type page only.
+- query string: `https://www.mysite.com/help?type={typeId}[&role={roleId}][&frRole={frRoleId}][&lang={language}]`.
+- language as a path segment: `https://www.mysite.com/help/[{language}/]{typeId}.html`.
+- Jekyll with pretty permalinks: `https://www.mysite.com/help/{typeId}[-{roleId}][-{frRoleId}]/`.
+
+### Writing Help Sites with Jekyll
+
+Help sites are usually GitHub repositories published as GitHub Pages with Jekyll, where each Markdown file becomes an HTML page with the same name. A repository named `help` in the GitHub account `cadmus` is published at `https://cadmus.github.io/help/`.
+
+- **topics**: with the templates above, create a Markdown file for each part/fragment type, named after its type ID (e.g. `topics/it.vedph.note.md`, `topics/fr.it.vedph.comment.md`). For role-specific help, add a file named after type ID, separator and role ID (e.g. `topics/it.vedph.note__history.md`, `topics/fr.it.vedph.comment__sch.md`). Avoid characters in role IDs which are not valid in file names; when needed, pick a different separator or template.
+- **general-purpose site**: document there the parts and fragments of the shared libraries (e.g. `@myrmidon/cadmus-part-general-ui`). Every project using them gets their help for free by adding this site as its last template.
+- **project site**: document there only the project-specific parts, and the general ones which need a different help in the project. List its template first.
+- **localized site**: copy the files of a site into a new repository, named like the original one plus the language code (e.g. `help-it`), translate them, and publish it. You can translate only some pages: for the others, the default site is used.
+
+To get the help language from somewhere else than `env.js` and the browser (e.g. from a language setting of your app), derive a service from `EditorHelpService`, override its `getLanguages()` method (which returns the language codes to try, from the most specific to the least specific), and provide it in place of `EditorHelpService`.
+
 ## Workspace Setup
 
 This workspace was created with these commands:
