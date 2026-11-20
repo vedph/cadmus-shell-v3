@@ -220,6 +220,8 @@ ng g library @myrmidon/cadmus-thesaurus-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-ui --prefix cadmus --force
 ```
 
+>⚠️ Unlike the other workspace libraries, `@myrmidon/cadmus-api` is listed in the root `package.json` as `link:./dist/myrmidon/cadmus-api`. This is because some external npm packages (`@myrmidon/cadmus-refs-asserted-ids`, `@myrmidon/cadmus-text-ed-md`) declare it as a peer dependency, which pnpm must satisfy. Linking to the local build ensures that these packages use the same `cadmus-api` code as the workspace (via `tsconfig` `paths`), rather than a separate copy from npm. As a consequence, build `cadmus-api` (`pnpm run build:api`) before running `pnpm install`, or the link will point to a missing folder.
+
 ## History
 
 - ⌛ [history](CHANGELOG.md)
