@@ -14,7 +14,7 @@
 No change is required in apps not using the history: the history buttons are hidden by default. To enable it:
 
 1. update the backend API to Cadmus 18.1.0+ (history endpoints).
-2. add `@myrmidon/cadmus-ui-history` and `@myrmidon/timeline-view` to your app's dependencies.
+2. add `@myrmidon/cadmus-ui-history`, `@myrmidon/cadmus-ui-diff`, `@myrmidon/timeline-view` and `jsondiffpatch` (peer dependency of `cadmus-ui-diff`) to your app's dependencies, and update `@myrmidon/cadmus-core`, `@myrmidon/cadmus-api`, `@myrmidon/cadmus-ui`, `@myrmidon/cadmus-item-editor` and `@myrmidon/cadmus-item-list` to `^20.1.0` in your `package.json` (a range like `^20.0.2` lets the package manager keep an older installed version, which lacks e.g. `CADMUS_EDITOR_READONLY`).
 3. in your app routes, add the item history route, and wrap the routes of each parts library (yours too) with `withHistoryRoutes`, loading the history library lazily with them (so that it is not included in the main bundle):
 
    ```ts
