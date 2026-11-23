@@ -1,0 +1,15 @@
+@if (operations().length) {
+<div class="patch-toolbar">
+  <span class="patch-count">
+    {{ operations().length }}
+    {{ operations().length === 1 ? "operation" : "operations" }}
+  </span>
+  <button type="button" mat-button (click)="copy()">
+    <mat-icon>{{ copied() ? "check" : "content_copy" }}</mat-icon>
+    {{ copied() ? "Copied" : "Copy" }}
+  </button>
+</div>
+<pre class="patch-json">{{ json() }}</pre>
+} @else {
+<p class="cadmus-json-diff-empty">{{ emptyMessage() }}</p>
+}

@@ -1,0 +1,57 @@
+@if (errors().length) {
+<div class="cadmus-json-diff-view-errors" role="alert">
+  @for (error of errors(); track $index) {
+  <div>{{ error }}</div>
+  }
+</div>
+}
+<!-- summary and options -->
+<div class="cadmus-json-diff-view-bar">
+  @if (!hideSummary()) {
+  <span class="cadmus-json-diff-view-summary" role="status">{{
+    summaryText()
+  }}</span>
+  }
+  <mat-slide-toggle
+    class="cadmus-json-diff-view-toggle"
+    [checked]="showUnchanged()"
+    [disabled]="selectedTab() !== 0 || errors().length > 0"
+    (change)="onShowUnchangedChange($event.checked)"
+    >show unchanged</mat-slide-toggle
+  >
+</div>
+
+<!-- tabs -->
+<mat-tab-group
+  class="cadmus-json-diff-view-tabs"
+  [selectedIndex]="selectedTab()"
+  (selectedIndexChange)="onSelectedTabChange($event)"
+  [mat-stretch-tabs]="false"
+  mat-align-tabs="start"
+  animationDuration="0ms"
+>
+  <mat-tab label="Visual Diff">
+    <ng-template matTabContent>
+      <div class="cadmus-json-diff-view-pane">
+        <cadmus-json-diff-visual
+          [html]="visualHtml()"
+          [showUnchanged]="showUnchanged()"
+        />
+      </div>
+    </ng-template>
+  </mat-tab>
+  <mat-tab label="JSON (Annotated)">
+    <ng-template matTabContent>
+      <div class="cadmus-json-diff-view-pane">
+        <cadmus-json-diff-annotated [html]="annotatedHtml()" />
+      </div>
+    </ng-template>
+  </mat-tab>
+  <mat-tab label="JSONPatch (RFC 6902)">
+    <ng-template matTabContent>
+      <div class="cadmus-json-diff-view-pane">
+        <cadmus-json-patch-view [operations]="patch()" />
+      </div>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

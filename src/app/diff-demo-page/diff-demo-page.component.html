@@ -1,0 +1,70 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      <strong>JSON Diff Demo</strong>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="content">
+    <!-- documents -->
+    <div class="docs">
+      <mat-form-field class="doc">
+        <mat-label>left (original)</mat-label>
+        <textarea
+          matInput
+          rows="12"
+          spellcheck="false"
+          [value]="left()"
+          (input)="onLeftInput($event)"
+        ></textarea>
+      </mat-form-field>
+      <mat-form-field class="doc">
+        <mat-label>right (changed)</mat-label>
+        <textarea
+          matInput
+          rows="12"
+          spellcheck="false"
+          [value]="right()"
+          (input)="onRightInput($event)"
+        ></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- commands and options -->
+    <div class="form-row">
+      <button type="button" mat-stroked-button (click)="swap()">
+        <mat-icon>swap_horiz</mat-icon> swap
+      </button>
+      <button type="button" mat-stroked-button (click)="loadSample()">
+        <mat-icon>restart_alt</mat-icon> sample
+      </button>
+      <button type="button" mat-stroked-button (click)="clear()">
+        <mat-icon>clear</mat-icon> clear
+      </button>
+      <mat-checkbox
+        [checked]="detectMove()"
+        (change)="detectMove.set($event.checked)"
+        >detect moves</mat-checkbox
+      >
+      <mat-checkbox
+        [checked]="textDiffs()"
+        (change)="textDiffs.set($event.checked)"
+        >text diffs</mat-checkbox
+      >
+    </div>
+
+    <!-- diff: the view fills its (resizable) container -->
+    <div class="diff-host">
+      <cadmus-json-diff-view
+        [left]="left()"
+        [right]="right()"
+        [options]="options()"
+        [(showUnchanged)]="showUnchanged"
+        [(selectedTab)]="selectedTab"
+      />
+    </div>
+    <p class="hint">
+      Drag the bottom-right corner of the diff area to resize it: the view
+      adapts to the available space.
+    </p>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,66 @@
+// The component fills all the space given by its container: give the
+// container a definite height (or make it a flex/grid item) and the
+// tabs content will scroll inside it.
+
+.cadmus-json-diff-view {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--cadmus-json-diff-bg, transparent);
+  color: var(--mat-sys-on-surface);
+
+  .cadmus-json-diff-view-errors {
+    flex: 0 0 auto;
+    margin: 0 0 8px 0;
+    padding: 8px 12px;
+    border-radius: var(--mat-sys-corner-small, 8px);
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+    font: var(--mat-sys-body-medium);
+    overflow-wrap: anywhere;
+  }
+
+  .cadmus-json-diff-view-bar {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 4px 0;
+  }
+
+  .cadmus-json-diff-view-summary {
+    font: var(--mat-sys-label-large);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .cadmus-json-diff-view-toggle {
+    margin-left: auto;
+  }
+
+  // make tabs fill the remaining space
+  .cadmus-json-diff-view-tabs {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+
+    > .mat-mdc-tab-body-wrapper {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+  }
+
+  .cadmus-json-diff-view-pane {
+    box-sizing: border-box;
+    height: 100%;
+    min-width: 0;
+    padding: 8px 4px;
+    overflow: auto;
+  }
+}

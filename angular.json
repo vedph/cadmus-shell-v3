@@ -1051,6 +1051,35 @@
           }
         }
       }
+    },
+    "@myrmidon/cadmus-ui-diff": {
+      "projectType": "library",
+      "root": "projects/myrmidon/cadmus-ui-diff",
+      "sourceRoot": "projects/myrmidon/cadmus-ui-diff",
+      "prefix": "cadmus",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:library",
+          "options": {
+            "tsConfig": "projects/myrmidon/cadmus-ui-diff/tsconfig.lib.json",
+            "outputPath": "dist/myrmidon/cadmus-ui-diff"
+          },
+          "configurations": {
+            "production": {},
+            "development": {
+              "compilationMode": "full",
+              "declarationMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/myrmidon/cadmus-ui-diff/tsconfig.spec.json"
+          }
+        }
+      }
     }
   },
   "schematics": {

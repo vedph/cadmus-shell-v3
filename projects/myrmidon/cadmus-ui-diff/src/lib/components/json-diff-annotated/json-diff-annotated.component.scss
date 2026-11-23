@@ -1,0 +1,85 @@
+// Themed port of jsondiffpatch's formatters/styles/annotated.css.
+// Colors come from CSS custom properties, falling back to M3 system tokens.
+
+.cadmus-json-diff-annotated {
+  display: block;
+  min-width: 0;
+  color: var(--mat-sys-on-surface);
+
+  .cadmus-json-diff-annotated-content {
+    padding: 8px 0;
+  }
+
+  .cadmus-json-diff-empty {
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-medium);
+    font-style: italic;
+  }
+
+  .jsondiffpatch-annotated-delta {
+    font-family: var(
+      --cadmus-json-diff-font-family,
+      "Roboto Mono",
+      "DejaVu Sans Mono",
+      Menlo,
+      Consolas,
+      monospace
+    );
+    font-size: var(--cadmus-json-diff-font-size, 13px);
+    margin: 0;
+    padding: 0 0 0 12px;
+    display: inline-block;
+    border-collapse: collapse;
+  }
+  .jsondiffpatch-annotated-delta pre {
+    font-family: inherit;
+    font-size: inherit;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+  }
+  .jsondiffpatch-annotated-delta td {
+    margin: 0;
+    padding: 0;
+    vertical-align: top;
+  }
+  .jsondiffpatch-annotated-delta td pre:hover {
+    font-weight: bold;
+  }
+  td.jsondiffpatch-delta-note {
+    font-family: var(--mat-sys-body-medium-font);
+    font-style: italic;
+    padding-left: 16px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  .jsondiffpatch-delta-note > div {
+    margin: 0;
+    padding: 0;
+  }
+  .jsondiffpatch-delta-note pre {
+    font-style: normal;
+  }
+  .jsondiffpatch-delta-note a {
+    color: var(--mat-sys-primary);
+  }
+  .jsondiffpatch-annotated-delta tr:hover {
+    background: var(--cadmus-json-diff-hover-bg, var(--mat-sys-surface-container-high));
+  }
+  .jsondiffpatch-annotated-delta tr:hover > td.jsondiffpatch-delta-note {
+    color: var(--mat-sys-on-surface);
+  }
+  .jsondiffpatch-textdiff-added {
+    background: var(--cadmus-json-diff-added-bg, var(--mat-sys-primary-container));
+    color: var(--cadmus-json-diff-added-fg, var(--mat-sys-on-primary-container));
+  }
+  .jsondiffpatch-textdiff-deleted {
+    background: var(--cadmus-json-diff-deleted-bg, var(--mat-sys-error-container));
+    color: var(--cadmus-json-diff-deleted-fg, var(--mat-sys-on-error-container));
+    text-decoration: line-through;
+  }
+  .jsondiffpatch-error {
+    background: var(--mat-sys-error);
+    color: var(--mat-sys-on-error);
+    font-weight: bold;
+  }
+}

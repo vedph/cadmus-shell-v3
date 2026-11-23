@@ -1,0 +1,39 @@
+.content {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.docs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 8px;
+}
+.doc {
+  width: 100%;
+}
+.doc textarea {
+  font-family: "Roboto Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.diff-host {
+  height: 60vh;
+  min-height: 240px;
+  resize: vertical;
+  overflow: hidden;
+  padding: 8px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium, 12px);
+  background: var(--mat-sys-surface-container-lowest);
+}
+.hint {
+  margin: 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}

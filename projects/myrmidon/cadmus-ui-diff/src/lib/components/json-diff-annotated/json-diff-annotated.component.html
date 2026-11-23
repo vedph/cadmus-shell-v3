@@ -1,0 +1,9 @@
+@if (html()) {
+<div
+  class="cadmus-json-diff-annotated-content"
+  data-testid="annotated-diff"
+  [innerHTML]="safeHtml()"
+></div>
+} @else {
+<p class="cadmus-json-diff-empty">{{ emptyMessage() }}</p>
+}
