@@ -1,6 +1,9 @@
 {
   "name": "@myrmidon/cadmus-statistics",
-  "version": "20.0.0",
+  "version": "20.0.1",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "description": "Cadmus - data statistics.",
   "keywords": [
     "Cadmus"
@@ -19,9 +22,6 @@
     "ngx-echarts": "^22.0.0",
     "echarts": "^6.1.0",
     "@myrmidon/cadmus-api": "^20.0.0"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
   },
   "sideEffects": false
 }

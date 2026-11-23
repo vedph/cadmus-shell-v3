@@ -1,6 +1,9 @@
 {
   "name": "@myrmidon/cadmus-flags-ui",
-  "version": "20.0.0",
+  "version": "20.0.1",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "description": "Cadmus - item flags UI.",
   "keywords": [
     "Cadmus"
@@ -12,9 +15,6 @@
   },
   "author": {
     "name": "Daniele Fusi"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
   },
   "peerDependencies": {
     "@angular/common": "^22.2.1",

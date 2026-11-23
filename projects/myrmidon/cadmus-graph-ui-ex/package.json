@@ -1,6 +1,9 @@
 {
   "name": "@myrmidon/cadmus-graph-ui-ex",
-  "version": "20.0.1",
+  "version": "20.0.2",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "description": "Cadmus - extensions to semantic graph components.",
   "keywords": [
     "Cadmus"
@@ -28,9 +31,6 @@
     "d3-force": "^3.0.0",
     "three": "^0.186.1",
     "rxjs": "^7.0.0"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
   },
   "sideEffects": false
 }

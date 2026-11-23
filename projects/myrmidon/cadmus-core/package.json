@@ -1,6 +1,9 @@
 {
   "name": "@myrmidon/cadmus-core",
-  "version": "20.0.1",
+  "version": "20.0.2",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "description": "Cadmus - core.",
   "keywords": [
     "Cadmus"
@@ -17,8 +20,5 @@
     "@angular/common": "^22.2.1",
     "@angular/core": "^22.2.1",
     "@myrmidon/ngx-tools": "^3.0.2"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
   }
 }

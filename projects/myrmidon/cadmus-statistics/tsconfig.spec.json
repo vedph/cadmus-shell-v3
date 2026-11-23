@@ -7,7 +7,7 @@
     "types": ["vitest/globals"]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ],
   "angularCompilerOptions": {
     "extendedDiagnostics": {

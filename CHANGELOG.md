@@ -1,5 +1,6 @@
 # History
 
+- 2026-11-23: updated Angular and packages.
 - 2026-11-20: 🆕 new library `@myrmidon/cadmus-ui-thestaxo` with `ThesOrTaxoPicker`, a control for picking a string value from a thesaurus (flat or hierarchical), a TaxoStore taxonomy, or free text, according to its configuration. See its [README](projects/myrmidon/cadmus-ui-thestaxo/README.md).
   - the historical events part (`@myrmidon/cadmus-part-general-ui`) now picks the event type with this control (⚠️ new dependency). By default nothing changes: the type is picked from the `event-types` thesaurus as a tree, or typed when the thesaurus is not available. The new part settings (`eventType`, global or role-specific) let you pick it from another thesaurus or from a taxonomy instead. See the library [README](projects/myrmidon/cadmus-part-general-ui/README.md).
   - revised the historical event editor (`@myrmidon/cadmus-part-general-ui`):

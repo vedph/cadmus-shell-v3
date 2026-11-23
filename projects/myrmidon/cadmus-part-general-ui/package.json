@@ -1,7 +1,10 @@
 {
   "name": "@myrmidon/cadmus-part-general-ui",
-  "version": "20.0.1",
+  "version": "20.0.2",
   "description": "Cadmus - generic parts.",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "keywords": [
     "Cadmus"
   ],
@@ -32,7 +35,6 @@
     "@myrmidon/cadmus-ui-thestaxo": "^0.0.1"
   },
   "dependencies": {
-    "marked": "^18.0.14",
-    "tslib": "^2.3.0"
+    "marked": "^18.0.14"
   }
 }

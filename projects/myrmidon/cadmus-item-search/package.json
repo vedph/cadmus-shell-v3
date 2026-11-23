@@ -1,6 +1,9 @@
 {
   "name": "@myrmidon/cadmus-item-search",
-  "version": "20.0.1",
+  "version": "20.0.2",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "description": "Cadmus - items search.",
   "keywords": [
     "Cadmus"
@@ -24,8 +27,5 @@
     "@myrmidon/cadmus-state": "^20.0.0",
     "@myrmidon/cadmus-ui": "^20.0.0",
     "@myrmidon/cadmus-core": "^20.0.0"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
   }
 }

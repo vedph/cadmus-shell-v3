@@ -1,6 +1,9 @@
 {
   "name": "@myrmidon/cadmus-item-editor",
-  "version": "20.0.0",
+  "version": "20.0.1",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "description": "Cadmus - item editor.",
   "keywords": [
     "Cadmus"
@@ -25,8 +28,5 @@
     "@myrmidon/cadmus-ui": "^20.0.0",
     "@myrmidon/cadmus-state": "^20.0.0",
     "@myrmidon/cadmus-item-list": "^20.0.0"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
   }
 }

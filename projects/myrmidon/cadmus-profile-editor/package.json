@@ -1,6 +1,9 @@
 {
   "name": "@myrmidon/cadmus-profile-editor",
-  "version": "20.0.0",
+  "version": "20.0.1",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "description": "Cadmus - profile editor components.",
   "keywords": [
     "Cadmus"
@@ -18,9 +21,6 @@
     "@angular/core": "^22.2.1",
     "@myrmidon/cadmus-api": "^20.0.0",
     "@myrmidon/cadmus-core": "^20.0.0"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
   },
   "sideEffects": false
 }
