@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-ui",
-  "version": "20.0.3",
+  "version": "20.1.0",
   "exports": {
     ".": "./src/public-api.ts"
   },

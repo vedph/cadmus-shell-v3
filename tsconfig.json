@@ -93,6 +93,9 @@
       "@myrmidon/cadmus-ui-diff": [
         "./dist/myrmidon/cadmus-ui-diff"
       ],
+      "@myrmidon/cadmus-ui-history": [
+        "./dist/myrmidon/cadmus-ui-history"
+      ],
       "@myrmidon/cadmus-ui-thestaxo": [
         "./dist/myrmidon/cadmus-ui-thestaxo"
       ]
@@ -124,6 +127,12 @@
     },
     {
       "path": "./projects/myrmidon/cadmus-ui-diff/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/myrmidon/cadmus-ui-history/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/myrmidon/cadmus-ui-history/tsconfig.spec.json"
     }
   ]
 }

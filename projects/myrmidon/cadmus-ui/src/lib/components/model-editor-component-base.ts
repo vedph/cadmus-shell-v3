@@ -36,6 +36,7 @@ import {
 } from '@myrmidon/cadmus-core';
 import { getPartIdName } from './part-badge/part-badge.component';
 import { EditorHelpService } from '../services/editor-help.service';
+import { CADMUS_EDITOR_READONLY } from '../editor-readonly';
 
 /**
  * Base class for part/fragment editors dumb components.
@@ -51,6 +52,12 @@ import { EditorHelpService } from '../services/editor-help.service';
  * The base class provides the dirty state (`isDirty`, `dirtyChange`),
  * disables the whole form when `disabled` is true, clears the form's
  * interaction state whenever new data is bound, and saves via `save()`.
+ *
+ * The editor is read-only when its `readonly` input is true, or when the
+ * `CADMUS_EDITOR_READONLY` token is provided with true by a host (e.g. the
+ * edit history view). In read-only mode the whole form is disabled and
+ * `save()` does nothing, so that no data can be emitted for saving; derived
+ * editors can use `isReadonly()` to also hide their own editing controls.
  *
  * When deriving from this editor, be sure to call super.ngOnInit()
  * from the derived editor's ngOnInit handler, if you override it.
@@ -109,6 +116,25 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
    * True to disable the editor.
    */
   public readonly disabled = input<boolean>();
+
+  /**
+   * True to make the editor read-only. A read-only editor has its whole
+   * form disabled, and never saves. This is also forced when the
+   * `CADMUS_EDITOR_READONLY` token is provided with true.
+   */
+  public readonly readonly = input<boolean>();
+
+  private readonly _forcedReadonly = !!inject(CADMUS_EDITOR_READONLY, {
+    optional: true,
+  });
+
+  /**
+   * True when the editor is read-only, either because of its `readonly`
+   * input or of the `CADMUS_EDITOR_READONLY` token.
+   */
+  public readonly isReadonly = computed<boolean>(
+    () => this._forcedReadonly || !!this.readonly(),
+  );
 
   /**
    * Event emitted when the dirty state has changed.
@@ -220,7 +246,8 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
 
   /**
    * Create the root form of this editor from its editable draft. The
-   * whole form is disabled when the `disabled` input is true. Call this
+   * whole form is disabled when the `disabled` input is true, or when the
+   * editor is read-only (see `isReadonly`). Call this
    * from a field initializer of the derived class, after its draft.
    *
    * @param model The draft signal the form edits.
@@ -233,7 +260,10 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
   ): FieldTree<C> {
     return form(model, (path) => {
       // the root path: its disabled state is inherited by all the fields
-      disabledRule(path as SchemaPath<C>, () => !!this.disabled());
+      disabledRule(
+        path as SchemaPath<C>,
+        () => !!this.disabled() || this.isReadonly(),
+      );
       schema?.(path);
     });
   }
@@ -336,6 +366,11 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
    * @param value The value.
    */
   protected updateValue(value: T): void {
+    // a read-only editor never emits data to be saved
+    if (this.isReadonly()) {
+      console.warn('updateValue invoked on a read-only editor');
+      return;
+    }
     this.data.set({ ...(this.data() || { thesauri: {} }), value: value });
   }
 
@@ -409,9 +444,13 @@ export abstract class ModelEditorComponentBase<T extends Part | Fragment>
 
   /**
    * Save the edited data if valid; else mark the form as touched, so that
-   * its errors are displayed.
+   * its errors are displayed. A read-only editor never saves.
    */
   public save(): void {
+    if (this.isReadonly()) {
+      console.warn('Save invoked on a read-only editor');
+      return;
+    }
     if (this.form().invalid()) {
       console.warn('Save invoked with invalid form');
       this.form().markAsTouched();

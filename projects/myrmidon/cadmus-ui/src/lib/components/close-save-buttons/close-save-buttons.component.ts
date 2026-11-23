@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
 } from '@angular/core';
@@ -9,6 +10,8 @@ import { FieldTree } from '@angular/forms/signals';
 
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+
+import { CADMUS_EDITOR_READONLY } from '../../editor-readonly';
 
 /**
  * Close and save buttons for a part/fragment editor. Both are plain
@@ -31,6 +34,18 @@ export class CloseSaveButtonsComponent {
    * True to hide the save button.
    */
   public readonly noSave = input<boolean>();
+
+  private readonly _forcedReadonly = !!inject(CADMUS_EDITOR_READONLY, {
+    optional: true,
+  });
+
+  /**
+   * True when the save button is hidden, either because of `noSave` or
+   * because the `CADMUS_EDITOR_READONLY` token is provided with true.
+   */
+  public readonly saveHidden = computed<boolean>(
+    () => this._forcedReadonly || !!this.noSave(),
+  );
   /**
    * Emitted when the user clicks the close button.
    */
@@ -52,6 +67,9 @@ export class CloseSaveButtonsComponent {
   }
 
   public save(): void {
+    if (this.saveHidden()) {
+      return;
+    }
     this.saveRequest.emit();
   }
 }

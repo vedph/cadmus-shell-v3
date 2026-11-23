@@ -18,5 +18,6 @@ export * from './lib/components/model-editor-component-base';
 export * from './lib/services/user-ref-lookup.service';
 export * from './lib/services/editor-help.service';
 
+export * from './lib/editor-readonly';
 export * from './lib/utils';
 export * from './lib/signal-form-utils';

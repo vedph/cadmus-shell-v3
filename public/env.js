@@ -9,6 +9,9 @@
   window.__env.thesImportEnabled = true;
   // enable item metadata builders in item editor
   window.__env.hasMetadataBuilders = true;
+  // enable the edit history of items and parts (requires the history routes
+  // and a backend API with the history endpoints, Cadmus 18.1.0+)
+  window.__env.historyEnabled = true;
 
   // taxonomy API URL
   window.__env.taxoUrl = "http://localhost:5050/api/";

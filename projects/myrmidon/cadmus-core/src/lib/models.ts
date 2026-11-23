@@ -342,3 +342,84 @@ export interface EditedObject<T extends Part | Fragment> {
   layerPart?: TextLayerPart;
   baseText?: string;
 }
+
+/**
+ * The edit status of a history record.
+ */
+export enum EditStatus {
+  created = 0,
+  updated = 1,
+  deleted = 2,
+}
+
+/**
+ * Essential properties of a history record, i.e. of a saved version
+ * of an item or part. History stores the state of the item or part
+ * as it was saved, so the newest history record is the current state.
+ */
+export interface HistoryInfo extends HasVersion {
+  /**
+   * The ID of the history record (not of the item or part).
+   */
+  id: string;
+  /**
+   * The ID of the item or part this record refers to.
+   */
+  referenceId: string;
+  /**
+   * The edit status.
+   */
+  status: EditStatus;
+}
+
+/**
+ * Information about a history item.
+ */
+export interface HistoryItemInfo extends HistoryInfo {
+  title?: string;
+  description?: string;
+  facetId?: string;
+  groupId?: string;
+  sortKey?: string;
+  flags: number;
+}
+
+/**
+ * A history item, i.e. a saved version of an item's metadata (with no
+ * parts).
+ */
+export interface HistoryItem extends HistoryInfo {
+  title: string;
+  description: string;
+  facetId: string;
+  groupId?: string;
+  sortKey: string;
+  flags: number;
+}
+
+/**
+ * Information about a history part.
+ */
+export interface HistoryPartInfo extends HistoryInfo {
+  itemId?: string;
+  typeId?: string;
+  roleId?: string;
+}
+
+/**
+ * A history part, i.e. a saved version of a part, which is in its
+ * part property.
+ */
+export interface HistoryPart<T extends Part = Part> extends HistoryPartInfo {
+  part: T;
+}
+
+/**
+ * Filter for the history of a single item or part.
+ */
+export interface HistoryFilter {
+  minModified?: Date;
+  maxModified?: Date;
+  userId?: string;
+  status?: EditStatus;
+}

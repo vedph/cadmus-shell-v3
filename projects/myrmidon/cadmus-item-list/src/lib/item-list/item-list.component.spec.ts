@@ -12,6 +12,7 @@ import { ItemService, UserLevelService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
 import { UserRefLookupService } from '@myrmidon/cadmus-ui';
 import { ItemInfo } from '@myrmidon/cadmus-core';
+import { EnvService } from '@myrmidon/ngx-tools';
 
 function makeItem(overrides?: Partial<ItemInfo>): ItemInfo {
   return {
@@ -147,6 +148,15 @@ describe('ItemListComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/items', 'x1']);
   });
 
+  it('should navigate to /items/:id/history on viewItemHistory', () => {
+    component.viewItemHistory(makeItem({ id: 'x1' }));
+    expect(router.navigate).toHaveBeenCalledWith(['/items', 'x1', 'history']);
+  });
+
+  it('should disable the history unless historyEnabled is set in env', () => {
+    expect(component.historyEnabled()).toBe(false);
+  });
+
   it('should call repository.reset on reset()', () => {
     component.reset();
     expect(repository.reset).toHaveBeenCalled();
@@ -277,6 +287,60 @@ describe('ItemListComponent', () => {
         'OK',
       );
       expect(component.busy()).toBe(false);
+    });
+  });
+
+  describe('history button', () => {
+    async function render(historyEnabled?: string): Promise<void> {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [ItemListComponent],
+        providers: [
+          provideNativeDateAdapter(),
+          { provide: ItemListRepository, useValue: repository },
+          { provide: DialogService, useValue: dialogService },
+          { provide: Router, useValue: router },
+          { provide: AuthJwtService, useValue: authService },
+          { provide: UserLevelService, useValue: userLevelService },
+          { provide: AppRepository, useValue: appRepository },
+          { provide: UserRefLookupService, useValue: {} },
+          { provide: ItemService, useValue: itemService },
+          { provide: MatSnackBar, useValue: snackbar },
+          {
+            provide: EnvService,
+            useValue: {
+              get: (key: string) =>
+                key === 'historyEnabled' ? historyEnabled : undefined,
+            },
+          },
+        ],
+      }).compileComponents();
+      repository.page$ = new BehaviorSubject({
+        pageNumber: 1,
+        pageSize: 20,
+        pageCount: 1,
+        total: 1,
+        items: [makeItem({ id: 'x1' })],
+      });
+      fixture = TestBed.createComponent(ItemListComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('should not be shown when historyEnabled is not set', async () => {
+      await render(undefined);
+      expect(fixture.nativeElement.querySelector('.item-history')).toBeNull();
+    });
+
+    it('should be shown and navigate when historyEnabled is true', async () => {
+      await render('true');
+      const button: HTMLButtonElement =
+        fixture.nativeElement.querySelector('.item-history');
+      expect(button).toBeTruthy();
+      button.click();
+      expect(router.navigate).toHaveBeenCalledWith(['/items', 'x1', 'history']);
     });
   });
 });

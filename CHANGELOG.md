@@ -1,5 +1,55 @@
 # History
 
+- 2026-11-23: 🆕 **edit history**. New library `@myrmidon/cadmus-ui-history`, to browse the edit history of items and parts on a timeline, view each version in its editor (read-only), compare it with the current version (JSON diff), download and restore it. See its [README](projects/myrmidon/cadmus-ui-history/README.md) and [Edit History](README.md#edit-history). This requires the history API of the Cadmus backend 18.1.0+, and `@myrmidon/timeline-view` (⚠️ new dependency). See [Migration to edit history](#migration-to-edit-history) below.
+  - `@myrmidon/cadmus-core` (20.1.0): new history models (`EditStatus`, `HistoryInfo`, `HistoryItemInfo`, `HistoryItem`, `HistoryPartInfo`, `HistoryPart`, `HistoryFilter`).
+  - `@myrmidon/cadmus-api` (20.1.0): new `HistoryService`, for the history endpoints of the API.
+  - `@myrmidon/cadmus-ui` (20.1.0): read-only mode for part and fragment editors. `ModelEditorComponentBase` has a new `readonly` input and `isReadonly` signal; it is also forced into read-only mode when the new `CADMUS_EDITOR_READONLY` token is provided with true. In read-only mode the editor's root form is disabled, and `save()` never emits data. `CloseSaveButtonsComponent` hides its save button when the token is provided. No change is required in editors; those which want to hide their other editing controls too in read-only mode can use `isReadonly()`.
+  - `@myrmidon/cadmus-item-editor` (20.1.0): ⚠️ the item metadata form was moved from the item editor page (`ItemEditorComponent`) into the new "dumb" `ItemMetadataEditorComponent` (`cadmus-item-metadata-editor`). This edits the item received in its `item` input, and emits requests (`saveRequest`, `generateRequest`, `generateItemsRequest`, `dirtyChange`) rather than saving; it has a `readonly` input. The page still loads the item from its route and saves it, so its route and behavior are unchanged; its tabs now preserve their content, so that unsaved metadata edits are kept when switching tabs. The metadata form helpers (`ItemMetadata`, `ItemMetadataControls`, `toItemMetadataDraft`, `toItemMetadata`, `itemMetadataOf`) are exported with the new component. The parts and layers lists have a new history button.
+  - `@myrmidon/cadmus-item-list` (20.1.0): the items list has a new history button.
+  - the history buttons are shown only when `historyEnabled` is true in `env.js`, so that apps not using the history are not affected.
+  - 🐛 item editor: an error while generating the item's title or description left the editor busy.
+
+### Migration to edit history
+
+No change is required in apps not using the history: the history buttons are hidden by default. To enable it:
+
+1. update the backend API to Cadmus 18.1.0+ (history endpoints).
+2. add `@myrmidon/cadmus-ui-history` and `@myrmidon/timeline-view` to your app's dependencies.
+3. in your app routes, add the item history route, and wrap the routes of each parts library (yours too) with `withHistoryRoutes`, loading the history library lazily with them (so that it is not included in the main bundle):
+
+   ```ts
+   {
+     path: 'items/:id/history',
+     loadComponent: () =>
+       import('@myrmidon/cadmus-ui-history').then(
+         (module) => module.ItemHistoryPageComponent,
+       ),
+     canActivate: [jwtGuard],
+   },
+   // for each parts library:
+   {
+     path: 'items/:iid/general',
+     loadChildren: () =>
+       Promise.all([
+         import('@myrmidon/cadmus-part-general-pg'),
+         import('@myrmidon/cadmus-ui-history'),
+       ]).then(([module, history]) =>
+         history.withHistoryRoutes(module.CADMUS_PART_GENERAL_PG_ROUTES),
+       ),
+     canActivate: [jwtGuard],
+   },
+   ```
+
+4. set `window.__env.historyEnabled = true;` in your `env.js`.
+
+Other recommendations:
+
+- your part editor wrappers need no change, provided that they derive from `EditPartFeatureBase` and load their data in its `ngOnInit`, as all the standard wrappers do. Wrappers loading data in other ways get no editor view in history, just the code view.
+- in read-only mode, editors disable all the fields bound to their root form and never save; yet, controls not bound to the form (e.g. add/delete buttons, child editors with their own forms) may still look enabled, even if nothing done there can be saved. Consider using `isReadonly()` in your editors to hide them.
+- ⚠️ if your code accesses the metadata form of `ItemEditorComponent` (e.g. `metadata`, `save()`, `onFlagCheckedIdsChange`, `generateTitle`, `generateDescription`, `flagSetFlags`, `checkedFlagIds`), use `ItemMetadataEditorComponent` instead. The page now has `metadataEditor` (the editor component), `onMetadataSave`, `onGenerateMetadata`, `metadataDirty` and `viewPartHistory`.
+- if you have your own `ICadmusRepository` implementation in the backend, consider overriding `GetHistoryPartContent` (Cadmus 18.1.0) to return the stored part content as it is.
+
+
 - 2026-11-23: updated Angular and packages.
 - 2026-11-20: 🆕 new library `@myrmidon/cadmus-ui-thestaxo` with `ThesOrTaxoPicker`, a control for picking a string value from a thesaurus (flat or hierarchical), a TaxoStore taxonomy, or free text, according to its configuration. See its [README](projects/myrmidon/cadmus-ui-thestaxo/README.md).
   - the historical events part (`@myrmidon/cadmus-part-general-ui`) now picks the event type with this control (⚠️ new dependency). By default nothing changes: the type is picked from the `event-types` thesaurus as a tree, or typed when the thesaurus is not available. The new part settings (`eventType`, global or role-specific) let you pick it from another thesaurus or from a taxonomy instead. See the library [README](projects/myrmidon/cadmus-part-general-ui/README.md).

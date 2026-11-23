@@ -1,0 +1,46 @@
+.flex-field {
+  flex: 1 0 auto;
+}
+.admin-flags,
+.readonly-flags {
+  margin-bottom: 4px;
+}
+.admin-flag,
+.readonly-flag {
+  margin-left: 12px;
+}
+.no-flags {
+  margin-left: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.form-row * {
+  flex: 0 0 auto;
+}
+fieldset {
+  border: 1px solid var(--mat-sys-on-surface-variant);
+  border-radius: 6px;
+  padding: 6px;
+  margin: 8px 0;
+}
+.flex-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+.flex-row .item {
+  box-sizing: border-box;
+}
+/* items that must fit their content */
+.flex-row .item.fit {
+  flex: 0 0 auto;
+}
+/* items that take remaining horizontal space */
+.flex-row .item:not(.fit) {
+  flex: 1 1 auto;
+}

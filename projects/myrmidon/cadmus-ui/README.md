@@ -15,11 +15,26 @@ This library contains shared UI components, services and validators for Cadmus:
 - lookup pin.
 - part padge.
 - thesaurus entries tree.
-- base class for model (part/fragment) editors.
+- base class for model (part/fragment) editors, with their [read-only mode](#read-only-editors).
 - color service.
 - user lookup.
 - custom validators.
 - JSON validators.
+
+## Read-only Editors
+
+Part and fragment editors derived from `ModelEditorComponentBase` can be made read-only:
+
+- with their `readonly` input, e.g. `<cadmus-note-part [data]="data" [readonly]="true" />`;
+- or by providing the `CADMUS_EDITOR_READONLY` injection token with true in any ancestor injector. This forces read-only mode on all the editors in that subtree, without requiring their hosts to bind any input. It is used by the edit history view (`@myrmidon/cadmus-ui-history`) to display the versions of a part in its usual wrapper and editor.
+
+In read-only mode (`isReadonly()` is true):
+
+- the editor's root form is disabled, so all the fields bound to it are disabled;
+- `save()` (and the protected `updateValue`) do nothing, so the editor never emits data to be saved;
+- `CloseSaveButtonsComponent` hides its save button when the token is provided.
+
+Controls not bound to the root form (e.g. buttons adding or deleting entries, or child editors with their own forms) are not affected: whatever users do there cannot be saved, but editors can use `isReadonly()` to hide them.
 
 ## Decorated Token Text
 
@@ -215,6 +230,7 @@ private getData(): WordForm {
 
 ### Unreleased
 
+- 2026-11-23: read-only mode for part and fragment editors: `ModelEditorComponentBase` has a new `readonly` input and `isReadonly` signal, and the new `CADMUS_EDITOR_READONLY` token forces read-only mode (see [Read-only Editors](#read-only-editors)).
 - 2026-11-19: reimplemented `DecoratedTokenTextComponent` on top of `@myrmidon/cadmus-text-segment` (new dependency), adding `TokenTextSegmenter`. The selector and the `baseText`, `locations` and `selectedLocation` bindings are unchanged, so consumers using it just to display a fragment's base text need no change. New: `fontSize`, `showToolbar`, `settings`, `colors` inputs; `selectedLocation` is now a model; `selectionChange` output. The rendered HTML (`text` signal) was removed, and users can no longer select text across existing fragments.
 
 ### 16.0.0

@@ -50,10 +50,6 @@ function makePart(overrides?: Partial<Part>): Part {
   };
 }
 
-function makeFlag(id: number, isAdmin = false): FlagDefinition {
-  return { id, label: `flag${id}`, description: '', colorKey: 'ff0000', isAdmin };
-}
-
 function makeUser(overrides?: Partial<User>): User {
   return { userName: 'bob', email: 'bob@x.com', roles: [], ...overrides };
 }
@@ -214,221 +210,103 @@ describe('ItemEditorComponent', () => {
     });
   });
 
-  describe('metadata form sync', () => {
-    it('should reset the form when the item becomes undefined', async () => {
-      createComponent();
-      // item() must actually transition (signals no-op on an unchanged
-      // value, and it starts as undefined already), so first load a real
-      // item, then clear it
-      repository.item$.next(makeItem());
-      await fixture.whenStable();
-      component.metadata.title().value.set('x');
-      repository.item$.next(undefined);
-      await fixture.whenStable();
-      expect(component.metadata.title().value()).toBe('');
-    });
-
-    it('should populate the form fields from the loaded item', async () => {
-      createComponent();
-      repository.item$.next(makeItem());
-      await fixture.whenStable();
-      expect(component.metadata.title().value()).toBe('Item 1');
-      expect(component.metadata.sortKey().value()).toBe('sk');
-      expect(component.metadata.description().value()).toBe('Desc');
-      expect(component.metadata.facet().value()).toBe('facet1');
-      expect(component.metadata.group().value()).toBe('g1');
-      expect(component.metadata.flags().value()).toBe(0);
-      expect(component.metadata().dirty()).toBe(false);
-    });
-  });
-
   describe('canDeactivate', () => {
-    it('should return true when the metadata form is not dirty', () => {
+    it('should return true when the metadata editor is not dirty', () => {
       createComponent();
       expect(component.canDeactivate()).toBe(true);
     });
 
-    it('should return false when the metadata form is dirty', () => {
+    it('should return false when the metadata editor is dirty', () => {
       createComponent();
-      component.metadata.title().markAsDirty();
+      component.onMetadataDirtyChange(true);
+      expect(component.canDeactivate()).toBe(false);
+    });
+
+    it('should track the dirty state of the metadata editor', async () => {
+      // 'new' selects the metadata tab (mat-tab renders only the selected one)
+      createComponent('new');
+      repository.item$.next(makeItem());
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const editor = component.metadataEditor()!;
+      expect(editor).toBeTruthy();
+
+      editor.metadata.title().markAsDirty();
+      fixture.detectChanges();
+
       expect(component.canDeactivate()).toBe(false);
     });
   });
 
-  describe('flags computeds', () => {
-    it('should exclude admin flags from flagSetFlags for non-admin users', () => {
-      createComponent();
-      appRepository.flags$.next([makeFlag(1), makeFlag(2, true)]);
-      userLevelService.getCurrentUserLevel.mockReturnValue(3);
-      authService.currentUser$.next(makeUser({ roles: ['editor'] }));
-
-      expect(component.flagSetFlags().map((f) => f.id)).toEqual(['1']);
-      expect(component.adminFlagDefs().map((d) => d.id)).toEqual([2]);
-    });
-
-    it('should include admin flags for admin users', () => {
-      createComponent();
-      appRepository.flags$.next([makeFlag(1), makeFlag(2, true)]);
-      userLevelService.getCurrentUserLevel.mockReturnValue(4);
-      authService.currentUser$.next(makeUser({ roles: ['admin'] }));
-
-      expect(component.flagSetFlags().map((f) => f.id).sort()).toEqual([
-        '1',
-        '2',
-      ]);
-      expect(component.adminFlagDefs()).toEqual([]);
-    });
-
-    it('should compute checkedFlagIds from the flags control bitmask', () => {
-      createComponent();
-      appRepository.flags$.next([makeFlag(1), makeFlag(2), makeFlag(4)]);
-      component.metadata.flags().value.set(1 | 4);
-      expect(component.checkedFlagIds().sort()).toEqual(['1', '4']);
+  describe('metadata editor', () => {
+    it('should bind the loaded item to the metadata editor', async () => {
+      createComponent('new');
+      repository.item$.next(makeItem());
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const editor = component.metadataEditor()!;
+      expect(editor.item()?.id).toBe('item1');
+      expect(editor.metadata.title().value()).toBe('Item 1');
+      expect(editor.readonly()).toBe(false);
     });
   });
 
-  describe('onFlagCheckedIdsChange', () => {
-    it('should set the bitmask directly for admin users', () => {
-      createComponent();
-      appRepository.flags$.next([makeFlag(1), makeFlag(2, true)]);
-      userLevelService.getCurrentUserLevel.mockReturnValue(4);
-      authService.currentUser$.next(makeUser({ roles: ['admin'] }));
+  describe('onMetadataSave', () => {
+    const metadata = {
+      title: 'New Title',
+      sortKey: 'sk',
+      description: 'd',
+      facetId: 'facet1',
+      groupId: 'g1',
+      flags: 1,
+    };
 
-      component.onFlagCheckedIdsChange(['1', '2']);
-
-      expect(component.metadata.flags().value()).toBe(3);
-      expect(component.metadata.flags().dirty()).toBe(true);
-    });
-
-    it('should preserve existing admin-flag bits for non-admin users', () => {
-      createComponent();
-      appRepository.flags$.next([makeFlag(1), makeFlag(2, true)]);
-      userLevelService.getCurrentUserLevel.mockReturnValue(3);
-      authService.currentUser$.next(makeUser({ roles: ['editor'] }));
-      // admin flag 2 is already set on the item
-      component.metadata.flags().value.set(2);
-
-      // non-admin only toggles flag 1 via the UI
-      component.onFlagCheckedIdsChange(['1']);
-
-      // admin bit (2) must be preserved even though the non-admin's ids
-      // list didn't include it
-      expect(component.metadata.flags().value()).toBe(3);
-    });
-
-    it('should not let a non-admin add a new admin flag bit', () => {
-      createComponent();
-      appRepository.flags$.next([makeFlag(1), makeFlag(2, true)]);
-      userLevelService.getCurrentUserLevel.mockReturnValue(3);
-      authService.currentUser$.next(makeUser({ roles: ['editor'] }));
-      component.metadata.flags().value.set(0); // admin flag not currently set
-
-      component.onFlagCheckedIdsChange(['1', '2']);
-
-      // flag 2 wasn't already set, and the non-admin preservation loop
-      // only preserves bits already present - passing '2' in ids would
-      // still OR it in though, since the ids loop is unconditional
-      expect(component.metadata.flags().value()).toBe(3);
-    });
-  });
-
-  describe('save', () => {
     it('should do nothing when busy', () => {
       createComponent();
       (component as any).busy.set(true);
-      component.save();
-      expect(repository.save).not.toHaveBeenCalled();
-    });
-
-    it('should do nothing when the metadata form is invalid', () => {
-      createComponent();
-      // a new form is invalid: title, description and facet are required
-      expect(component.metadata().invalid()).toBe(true);
-      component.save();
+      component.onMetadataSave(metadata);
       expect(repository.save).not.toHaveBeenCalled();
     });
 
     it('should do nothing when there is no current item', () => {
       createComponent();
       repository.getItem.mockReturnValue(undefined);
-      // form must be valid to get past the first guard
-      component.metadata.title().value.set('t');
-      component.metadata.sortKey().value.set('s');
-      component.metadata.description().value.set('d');
-      component.metadata.facet().value.set('f');
-      component.save();
+      component.onMetadataSave(metadata);
       expect(repository.save).not.toHaveBeenCalled();
     });
 
-    it('should trim string fields and save, sending a reset message', async () => {
+    it('should merge the metadata into the item and save, sending a reset message', async () => {
       createComponent('item1');
       const current = makeItem();
       repository.getItem.mockReturnValue(current);
-      repository.item$.next(current);
-      component.metadata.title().value.set('  New Title  ');
-      component.metadata.sortKey().value.set('  sk  ');
-      component.metadata.description().value.set('  d  ');
-      component.metadata.facet().value.set('  facet1  ');
-      component.metadata.group().value.set('  g1  ');
-      const saved = makeItem({ title: 'New Title' });
-      repository.save.mockResolvedValue(saved);
+      repository.save.mockResolvedValue(makeItem({ title: 'New Title' }));
+      component.onMetadataDirtyChange(true);
 
-      component.save();
+      component.onMetadataSave(metadata);
       await Promise.resolve();
       await Promise.resolve();
 
-      expect(repository.save).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'New Title', sortKey: 'sk' })
-      );
+      expect(repository.save).toHaveBeenCalledWith({ ...current, ...metadata });
       expect(messaging.sendMessage).toHaveBeenCalled();
+      // the guard no more prompts for the item just saved
+      expect(component.canDeactivate()).toBe(true);
+      expect(component.busy()).toBe(false);
     });
 
     it('should navigate to the new item route only when the item had no id', async () => {
       createComponent('new');
-      const current = makeItem({ id: '' });
-      repository.getItem.mockReturnValue(current);
-      component.metadata.title().value.set('t');
-      component.metadata.sortKey().value.set('s');
-      component.metadata.description().value.set('d');
-      component.metadata.facet().value.set('f');
-      const saved = makeItem({ id: 'new-id' });
-      repository.save.mockResolvedValue(saved);
+      repository.getItem.mockReturnValue(makeItem({ id: '' }));
+      repository.save.mockResolvedValue(makeItem({ id: 'new-id' }));
 
-      component.save();
+      component.onMetadataSave(metadata);
       await Promise.resolve();
       await Promise.resolve();
 
       expect(component.id()).toBe('new-id');
       expect(router.navigate).toHaveBeenCalledWith(['/items', 'new-id']);
     });
-  });
 
-  describe('metadata signal form', () => {
-    function fillRequired(): void {
-      component.metadata.title().value.set('t');
-      component.metadata.description().value.set('d');
-      component.metadata.facet().value.set('f');
-    }
-
-    it('should not require the disabled (server-computed) sort key', () => {
-      createComponent('new');
-      fillRequired();
-      expect(component.metadata.sortKey().value()).toBe('');
-      expect(component.metadata.sortKey().disabled()).toBe(true);
-      expect(component.metadata().valid()).toBe(true);
-    });
-
-    it('should render the sort key input disabled', () => {
-      createComponent('new');
-      fixture.detectChanges();
-      const input: HTMLInputElement =
-        fixture.nativeElement.querySelector('#sortKey');
-      expect(input.disabled).toBe(true);
-    });
-
-    it('should save once when the metadata form is submitted', async () => {
-      userLevelService.getCurrentUserLevel.mockReturnValue(3);
-      // 'new' selects the metadata tab (mat-tab renders only the selected one)
+    it('should save when the metadata editor requests it', async () => {
       createComponent('new');
       const current = makeItem();
       repository.getItem.mockReturnValue(current);
@@ -436,85 +314,97 @@ describe('ItemEditorComponent', () => {
       repository.save.mockResolvedValue(current);
       fixture.detectChanges();
       await fixture.whenStable();
-      component.metadata.title().value.set('changed');
+      const editor = component.metadataEditor()!;
+      editor.metadata.title().value.set('changed');
 
-      const formEl: HTMLFormElement =
-        fixture.nativeElement.querySelector('form');
-      const event = new Event('submit', { cancelable: true });
-      formEl.dispatchEvent(event);
-      await Promise.resolve();
+      editor.save();
       await Promise.resolve();
 
-      // [formRoot] prevents the native submission (no page reload)
-      expect(event.defaultPrevented).toBe(true);
-      expect(repository.save).toHaveBeenCalledTimes(1);
       expect(repository.save).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'changed' })
       );
     });
+  });
 
-    it('should not save and should reveal errors when submitted invalid', async () => {
+  describe('onGenerateMetadata', () => {
+    it('should set the generated title into the metadata editor', async () => {
       createComponent('new');
-      fixture.detectChanges();
-      const formEl: HTMLFormElement =
-        fixture.nativeElement.querySelector('form');
-      formEl.dispatchEvent(new Event('submit', { cancelable: true }));
-      await Promise.resolve();
-
-      expect(repository.save).not.toHaveBeenCalled();
-      expect(component.metadata.title().touched()).toBe(true);
-    });
-
-    it('should mark the facet select as required', async () => {
-      createComponent('new');
+      repository.item$.next(makeItem());
       fixture.detectChanges();
       await fixture.whenStable();
-      const select: HTMLElement = fixture.nativeElement.querySelector(
-        'form mat-select'
+      component.id.set('item1');
+      itemService.getItemMetadata.mockReturnValue(of({ T: 'Generated' }));
+
+      component.onGenerateMetadata('T');
+
+      expect(itemService.getItemMetadata).toHaveBeenCalledWith('item1', 'T');
+      expect(component.metadataEditor()!.metadata.title().value()).toBe(
+        'Generated'
       );
-      expect(select).toBeTruthy();
-      const field = select.closest('mat-form-field')!;
-      expect(
-        field.querySelector('.mat-mdc-form-field-required-marker')
-      ).toBeTruthy();
+      expect(component.busy()).toBe(false);
     });
 
-    it('should rebuild the draft from the item saved by the server', async () => {
+    it('should notify when nothing was generated', () => {
       createComponent('item1');
-      const current = makeItem();
-      repository.getItem.mockReturnValue(current);
-      repository.item$.next(current);
-      await fixture.whenStable();
-      component.metadata.title().value.set('  New  ');
-      component.metadata.title().markAsDirty();
-      // the server computes a new sort key
-      const saved = makeItem({ title: 'New', sortKey: 'new-sk' });
-      repository.save.mockResolvedValue(saved);
-
-      component.save();
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(component.canDeactivate()).toBe(true);
-
-      repository.item$.next(saved);
-      await fixture.whenStable();
-      expect(component.metadata.sortKey().value()).toBe('new-sk');
-      expect(component.metadata.title().value()).toBe('New');
-      expect(component.metadata().dirty()).toBe(false);
+      itemService.getItemMetadata.mockReturnValue(of({}));
+      component.onGenerateMetadata('D');
+      expect(snackbar.open).toHaveBeenCalledWith(
+        'No description generated',
+        'OK',
+        expect.anything()
+      );
     });
 
-    it('should keep the draft on the exact echo of its own save', async () => {
+    it('should reset busy on error', () => {
       createComponent('item1');
-      const current = makeItem();
-      repository.getItem.mockReturnValue(current);
-      repository.item$.next(current);
-      await fixture.whenStable();
-      component.metadata.title().value.set('Item 1 ');
+      const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+      itemService.getItemMetadata.mockReturnValue(throwError(() => 'x'));
+      component.onGenerateMetadata('T');
+      expect(component.busy()).toBe(false);
+      err.mockRestore();
+    });
+  });
 
-      // the item comes back with exactly the normalized draft values
-      repository.item$.next({ ...current });
-      await fixture.whenStable();
-      expect(component.metadata.title().value()).toBe('Item 1 ');
+  describe('history', () => {
+    it('should be disabled unless historyEnabled is true in env', () => {
+      createComponent('item1');
+      expect(component.historyEnabled()).toBe(false);
+    });
+
+    it('should be enabled when historyEnabled is true in env', () => {
+      createComponent('item1', { historyEnabled: true });
+      expect(component.historyEnabled()).toBe(true);
+    });
+
+    it('should navigate to the part editor route with /history', () => {
+      createComponent('item1');
+      libraryRouteService.buildPartEditorRoute.mockReturnValue({
+        route: '/items/item1/general/it.vedph.note/p1',
+        rid: 'r',
+      });
+      component.viewPartHistory(makePart({ roleId: 'r' }));
+      expect(libraryRouteService.buildPartEditorRoute).toHaveBeenCalledWith(
+        'item1',
+        'p1',
+        'it.vedph.note',
+        'r'
+      );
+      expect(router.navigate).toHaveBeenCalledWith(
+        ['/items/item1/general/it.vedph.note/p1/history'],
+        { queryParams: { rid: 'r' } }
+      );
+    });
+
+    it('should navigate without query parameters when there is no role', () => {
+      createComponent('item1');
+      libraryRouteService.buildPartEditorRoute.mockReturnValue({
+        route: '/items/item1/general/it.vedph.note/p1',
+      });
+      component.viewPartHistory(makePart());
+      expect(router.navigate).toHaveBeenCalledWith(
+        ['/items/item1/general/it.vedph.note/p1/history'],
+        {}
+      );
     });
   });
 
@@ -614,48 +504,6 @@ describe('ItemEditorComponent', () => {
       createComponent('item1');
       component.setPartsScope({ ids: ['p1'], scope: 's1' });
       expect(repository.setPartThesaurusScope).toHaveBeenCalledWith(['p1'], 's1');
-    });
-  });
-
-  describe('reload of the edited item', () => {
-    it('keeps unsaved metadata edits when the item reloads unchanged', async () => {
-      createComponent('item1');
-      repository.item$.next(makeItem());
-      await fixture.whenStable();
-      component.metadata.title().value.set('edited title');
-      component.metadata.title().markAsDirty();
-
-      // e.g. the reload after setting the parts thesaurus scope
-      repository.item$.next(makeItem());
-      await fixture.whenStable();
-
-      expect(component.metadata.title().value()).toBe('edited title');
-      expect(component.canDeactivate()).toBe(false);
-    });
-
-    it('rebuilds the draft when the reloaded item has changed metadata', async () => {
-      createComponent('item1');
-      repository.item$.next(makeItem());
-      await fixture.whenStable();
-      component.metadata.title().value.set('edited title');
-
-      repository.item$.next(makeItem({ description: 'changed elsewhere' }));
-      await fixture.whenStable();
-
-      expect(component.metadata.title().value()).toBe('Item 1');
-      expect(component.metadata.description().value()).toBe('changed elsewhere');
-    });
-
-    it('rebuilds the draft for another item with the same metadata', async () => {
-      createComponent('item1');
-      repository.item$.next(makeItem());
-      await fixture.whenStable();
-      component.metadata.title().value.set('edited title');
-
-      repository.item$.next(makeItem({ id: 'item2' }));
-      await fixture.whenStable();
-
-      expect(component.metadata.title().value()).toBe('Item 1');
     });
   });
 });

@@ -25,7 +25,8 @@
     "build:sta": "ng build @myrmidon/cadmus-statistics",
     "build:tax": "ng build @myrmidon/cadmus-part-taxo-ui && ng build @myrmidon/cadmus-part-taxo-pg",
     "build:dif": "ng build @myrmidon/cadmus-ui-diff",
-    "build:lib": "pnpm run check-libs && pnpm run build:cor && pnpm run build:api && pnpm run build:ui && pnpm run build:itm && pnpm run build:ths && pnpm run build:tht && pnpm run build:gen && pnpm run build:phi && pnpm run build:grp && pnpm run build:pre && pnpm run build:flg && pnpm run build:sta && pnpm run build:tax && pnpm run build:dif && pnpm run build:imp && pnpm run build:prd",
+    "build:his": "ng build @myrmidon/cadmus-ui-history",
+    "build:lib": "pnpm run check-libs && pnpm run build:cor && pnpm run build:api && pnpm run build:ui && pnpm run build:itm && pnpm run build:ths && pnpm run build:tht && pnpm run build:gen && pnpm run build:phi && pnpm run build:grp && pnpm run build:pre && pnpm run build:flg && pnpm run build:sta && pnpm run build:tax && pnpm run build:dif && pnpm run build:his && pnpm run build:imp && pnpm run build:prd",
     "build:all": "pnpm run build:lib && ng build",
     "test:cor": "ng test @myrmidon/cadmus-core --watch=false",
     "test:api": "ng test @myrmidon/cadmus-api --watch=false",
@@ -43,7 +44,8 @@
     "test:sta": "ng test @myrmidon/cadmus-statistics --watch=false",
     "test:tax": "ng test @myrmidon/cadmus-part-taxo-ui --watch=false && ng test @myrmidon/cadmus-part-taxo-pg --watch=false",
     "test:dif": "ng test @myrmidon/cadmus-ui-diff --watch=false",
-    "test:all": "pnpm run check-libs && pnpm run test:cor && pnpm run test:api && pnpm run test:ui && pnpm run test:itm && pnpm run test:ths && pnpm run test:tht && pnpm run test:gen && pnpm run test:phi && pnpm run test:grp && pnpm run test:pre && pnpm run test:flg && pnpm run test:sta && pnpm run test:tax && pnpm run test:dif && pnpm run test:imp && pnpm run test:prd"
+    "test:his": "ng test @myrmidon/cadmus-ui-history --watch=false",
+    "test:all": "pnpm run check-libs && pnpm run test:cor && pnpm run test:api && pnpm run test:ui && pnpm run test:itm && pnpm run test:ths && pnpm run test:tht && pnpm run test:gen && pnpm run test:phi && pnpm run test:grp && pnpm run test:pre && pnpm run test:flg && pnpm run test:sta && pnpm run test:tax && pnpm run test:dif && pnpm run test:his && pnpm run test:imp && pnpm run test:prd"
   },
   "overrides": {
     "d3-selection": "3.0.1"
@@ -96,6 +98,7 @@
     "@myrmidon/taxo-store-api": "^1.3.0",
     "@myrmidon/taxo-store-editor": "^1.3.0",
     "@myrmidon/taxo-store-picker": "^1.3.0",
+    "@myrmidon/timeline-view": "0.0.2",
     "d3-force": "^3.0.1",
     "echarts": "^6.1.0",
     "force-graph": "^1.52.0",

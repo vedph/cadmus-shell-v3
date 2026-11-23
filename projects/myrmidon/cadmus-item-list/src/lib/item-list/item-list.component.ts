@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   Signal,
+  inject,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -24,8 +25,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-import { DataPage } from '@myrmidon/ngx-tools';
+import { DataPage, EnvService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 
@@ -76,6 +76,12 @@ export class ItemListComponent implements OnInit, OnDestroy {
   public readonly user = signal<User | undefined>(undefined);
   public readonly userLevel = signal<number>(0);
   public readonly busy = signal<boolean>(false);
+  /**
+   * True when the edit history view is enabled (historyEnabled in env).
+   */
+  public readonly historyEnabled = signal<boolean>(
+    String(inject(EnvService).get('historyEnabled')) === 'true',
+  );
 
   constructor(
     private _repository: ItemListRepository,
@@ -123,6 +129,16 @@ export class ItemListComponent implements OnInit, OnDestroy {
 
   public editItem(item: ItemInfo): void {
     this._router.navigate(['/items', item.id]);
+  }
+
+  /**
+   * Navigate to the edit history of the specified item. Its route is the
+   * item's editor route with a final /history.
+   *
+   * @param item The item.
+   */
+  public viewItemHistory(item: ItemInfo): void {
+    this._router.navigate(['/items', item.id, 'history']);
   }
 
   public deleteItem(item: ItemInfo): void {

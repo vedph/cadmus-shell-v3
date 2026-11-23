@@ -1,0 +1,149 @@
+<div class="history-view">
+  <!-- timeline -->
+  <section class="history-timeline" aria-label="versions timeline">
+    @if (timelineRange(); as total) {
+      <tm-timeline
+        [dataSource]="source()"
+        [timelineRange]="total"
+        [(viewRange)]="viewRange"
+        [(selection)]="selection"
+        selectionMode="single"
+        layout="alternating"
+        [presetRanges]="presetRanges()"
+        [parser]="parser"
+        [maxZoom]="maxZoom()"
+        [label]="label()"
+        ruler
+        (loadError)="onLoadError($event)"
+      />
+    }
+  </section>
+
+  @if (busy()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <!-- selected version -->
+  <section class="history-data">
+    @if (entry(); as e) {
+      <mat-tab-group
+        class="history-tabs"
+        [selectedIndex]="selectedTab()"
+        (selectedIndexChange)="selectedTab.set($event)"
+        mat-stretch-tabs="false"
+      >
+        @if (editorTemplate(); as tpl) {
+          <mat-tab label="editor">
+            <div class="history-editor">
+              <ng-container
+                *ngTemplateOutlet="tpl; context: { $implicit: e, entry: e }"
+              />
+            </div>
+          </mat-tab>
+        }
+        @if (current()) {
+          <mat-tab label="code">
+            <div class="history-code">
+              <p class="history-code-legend">
+                <span class="legend-left">left: selected version</span>
+                <span class="legend-right">right: current version</span>
+              </p>
+              <cadmus-json-diff-view
+                [left]="entryJson()"
+                [right]="currentJson()"
+              />
+            </div>
+          </mat-tab>
+        }
+      </mat-tab-group>
+    } @else if (!busy()) {
+      <div class="history-empty">
+        @if (latest() === null) {
+          <mat-icon>history_toggle_off</mat-icon>
+          <span>No saved versions in history.</span>
+        } @else {
+          <mat-icon>touch_app</mat-icon>
+          <span>Select a version in the timeline.</span>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- toolbar -->
+  <footer class="history-toolbar">
+    <div class="history-actions">
+      <button
+        type="button"
+        mat-stroked-button
+        class="history-download"
+        [disabled]="!entry()"
+        matTooltip="Download the selected version as a JSON file"
+        (click)="download()"
+      >
+        <mat-icon>download</mat-icon>
+        download
+      </button>
+      @if (canRestore() && current() !== null) {
+        <button
+          type="button"
+          mat-flat-button
+          class="history-restore"
+          [disabled]="!entry() || isCurrent() || busy()"
+          [matTooltip]="
+            isCurrent()
+              ? 'The selected version is equal to the current one'
+              : 'Save the selected version as the current one'
+          "
+          (click)="restore()"
+        >
+          <mat-icon>restore</mat-icon>
+          restore
+        </button>
+      }
+      @if (latest() && !isLatest()) {
+        <button
+          type="button"
+          mat-button
+          class="history-latest"
+          matTooltip="Select the newest version"
+          (click)="selectLatest()"
+        >
+          <mat-icon>last_page</mat-icon>
+          newest
+        </button>
+      }
+    </div>
+
+    @if (entry(); as e) {
+      <dl class="history-metadata">
+        <div class="history-meta-item">
+          <dt>status</dt>
+          <dd>
+            <span class="history-status" [class]="'status-' + statusName()">{{
+              statusName()
+            }}</span>
+            @if (isCurrent()) {
+              <span class="history-current-badge">current</span>
+            }
+          </dd>
+        </div>
+        <div class="history-meta-item">
+          <dt>saved by</dt>
+          <dd>{{ e.info.userId }}</dd>
+        </div>
+        <div class="history-meta-item">
+          <dt>saved at</dt>
+          <dd>{{ e.info.timeModified | date: "yyyy-MM-dd HH:mm:ss" }}</dd>
+        </div>
+        <div class="history-meta-item">
+          <dt>created by</dt>
+          <dd>{{ e.info.creatorId }}</dd>
+        </div>
+        <div class="history-meta-item">
+          <dt>created at</dt>
+          <dd>{{ e.info.timeCreated | date: "yyyy-MM-dd HH:mm:ss" }}</dd>
+        </div>
+      </dl>
+    }
+  </footer>
+</div>

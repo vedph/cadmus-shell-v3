@@ -155,6 +155,11 @@ call npm publish --access=public
 cd ..\..\..
 pause
 
+cd .\dist\myrmidon\cadmus-ui-history
+call npm publish --access=public
+cd ..\..\..
+pause
+
 cd .\dist\myrmidon\cadmus-ui-thestaxo
 call npm publish --access=public
 cd ..\..\..

@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FieldTree, form, required } from '@angular/forms/signals';
 
 import { CloseSaveButtonsComponent } from './close-save-buttons.component';
+import { CADMUS_EDITOR_READONLY } from '../../editor-readonly';
 
 describe('CloseSaveButtonsComponent', () => {
   let component: CloseSaveButtonsComponent;
@@ -140,6 +141,32 @@ describe('CloseSaveButtonsComponent', () => {
     buttons()[0].click();
 
     expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(saveSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('CloseSaveButtonsComponent (read-only host)', () => {
+  it('should hide the save button when CADMUS_EDITOR_READONLY is true', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CloseSaveButtonsComponent],
+      providers: [{ provide: CADMUS_EDITOR_READONLY, useValue: true }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CloseSaveButtonsComponent);
+    const f = runInInjectionContext(TestBed.inject(Injector), () =>
+      form(signal({ name: 'ok' })),
+    );
+    fixture.componentRef.setInput('form', f);
+    fixture.detectChanges();
+    const saveSpy = vi.fn();
+    fixture.componentInstance.saveRequest.subscribe(saveSpy);
+
+    const buttons = (fixture.nativeElement as HTMLElement).querySelectorAll(
+      'button',
+    );
+    expect(buttons.length).toBe(1);
+    expect(fixture.componentInstance.saveHidden()).toBe(true);
+    // even if invoked programmatically, nothing is emitted
+    fixture.componentInstance.save();
     expect(saveSpy).not.toHaveBeenCalled();
   });
 });

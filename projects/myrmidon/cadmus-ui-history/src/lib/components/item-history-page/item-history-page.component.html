@@ -1,0 +1,44 @@
+<mat-card appearance="outlined" class="history-page">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="history-avatar">history</mat-icon>
+    <mat-card-title>Item history</mat-card-title>
+    <mat-card-subtitle>
+      <span class="history-ids">item {{ itemId }}</span>
+    </mat-card-subtitle>
+    <div class="history-header-actions">
+      <button type="button" mat-stroked-button (click)="edit()">
+        <mat-icon>edit</mat-icon>
+        edit
+      </button>
+      <button type="button" mat-flat-button (click)="close()">
+        <mat-icon>arrow_back</mat-icon>
+        items
+      </button>
+    </div>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="history-notice">
+      <mat-icon>info</mat-icon>
+      <span
+        >This is the history of the item's metadata: each part has its own
+        history.</span
+      >
+    </p>
+    <cadmus-model-history-view
+      [adapter]="adapter"
+      [editorTemplate]="editorTpl"
+      [canRestore]="userLevel() > 1"
+      label="Item history"
+      (restored)="onRestored()"
+    />
+    <ng-template #editorTpl let-entry>
+      <cadmus-item-metadata-editor
+        [item]="asItem(entry.data)"
+        [readonly]="true"
+        [facets]="facets()"
+        [flagDefinitions]="flags()"
+        [userLevel]="userLevel()"
+      />
+    </ng-template>
+  </mat-card-content>
+</mat-card>

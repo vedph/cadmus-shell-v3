@@ -60,6 +60,17 @@
                 >
                   <mat-icon class="mat-primary">download</mat-icon>
                 </button>
+                @if (historyEnabled()) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="item-history"
+                  (click)="viewItemHistory(item)"
+                  matTooltip="View the edit history of this item"
+                >
+                  <mat-icon>history</mat-icon>
+                </button>
+                }
               </td>
               <td class="fit-width">
                 <cadmus-facet-badge

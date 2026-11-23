@@ -17,40 +17,6 @@ This is the third iteration of [Cadmus](https://myrmex.github.io/overview/cadmus
 
 ## Libraries
 
-Latest versions:
-
-- cadmus-api: 20.0.0
-- cadmus-core: 20.0.0
-- cadmus-flags-pg: 20.0.0
-- cadmus-flags-ui: 20.0.0
-- cadmus-graph-pg: 20.0.0
-- cadmus-graph-pg-ex: 20.0.0
-- cadmus-graph-ui: 20.0.0
-- cadmus-graph-ui-ex: 20.0.0
-- cadmus-item-editor: 20.0.1
-- cadmus-item-list: 20.0.1
-- cadmus-item-search: 20.0.0
-- cadmus-layer-demo: 20.0.0
-- cadmus-part-general-pg: 20.0.0
-- cadmus-part-general-ui: 20.0.0
-- cadmus-part-philology-pg: 20.0.1
-- cadmus-part-philology-ui: 20.0.1
-- cadmus-part-taxo-pg: 20.0.0
-- cadmus-part-taxo-ui: 20.0.0
-- cadmus-preview-pg: 20.0.0
-- cadmus-preview-ui: 20.0.0
-- cadmus-profile-core: 20.0.0
-- cadmus-profile-editor: 20.0.0
-- cadmus-profile-import: 20.0.0
-- cadmus-state: 20.0.0
-- cadmus-statistics: 20.0.0
-- cadmus-thesaurus-editor: 20.0.0
-- cadmus-thesaurus-list: 20.0.0
-- cadmus-thesaurus-ui: 20.0.0
-- cadmus-ui: 20.0.1
-
-> cadmus-ui-pg has been removed!
-
 Dependencies:
 
 ```mermaid
@@ -168,6 +134,13 @@ graph LR;
   cadmus-ui --> cadmus-refs-lookup
   cadmus-ui --> cadmus-core
   cadmus-ui --> cadmus-state
+  cadmus-ui-history --> timeline-view
+  cadmus-ui-history --> cadmus-api
+  cadmus-ui-history --> cadmus-state
+  cadmus-ui-history --> cadmus-ui
+  cadmus-ui-history --> cadmus-ui-diff
+  cadmus-ui-history --> cadmus-item-editor
+  cadmus-ui-history --> cadmus-item-list
 ```
 
 ### Parts
@@ -322,6 +295,23 @@ Help sites are usually GitHub repositories published as GitHub Pages with Jekyll
 
 To get the help language from somewhere else than `env.js` and the browser (e.g. from a language setting of your app), derive a service from `EditorHelpService`, override its `getLanguages()` method (which returns the language codes to try, from the most specific to the least specific), and provide it in place of `EditorHelpService`.
 
+## Edit History
+
+The backend stores in history each saved state of items and parts. The `@myrmidon/cadmus-ui-history` library lets users browse the history of an item or part on a timeline, view each version in its editor (read-only), compare it with the current version, download and restore it. See its [README](projects/myrmidon/cadmus-ui-history/README.md) for the full documentation.
+
+Its architecture in brief:
+
+- the generic `ModelHistoryViewComponent` shows the history of any object, getting its data from a `HistoryDataAdapter`, and rendering the editor of the selected version from a template provided by its host.
+- `ItemHistoryPageComponent` (route `items/:id/history`) hosts it for the metadata of an item, rendered by the "dumb" `ItemMetadataEditorComponent` (`@myrmidon/cadmus-item-editor`), which is the same editor used by the item editor page, with `readonly` set.
+- `PartHistoryPageComponent` hosts it for parts. Its routes are added to the routes of each parts library by `withHistoryRoutes`, which appends `/history` to each part editor route. It reuses unchanged the part editor wrapper (feature) of the part type, providing it with a `PartEditorService` which loads the selected version and refuses to save, and with the `CADMUS_EDITOR_READONLY` token, which forces any editor derived from `ModelEditorComponentBase` into read-only mode. Layer parts have only the code view.
+
+To enable it in an app:
+
+1. add the routes (see the library [README](projects/myrmidon/cadmus-ui-history/README.md#setup)): `items/:id/history`, and wrap the routes of each parts library with `withHistoryRoutes`.
+2. set `window.__env.historyEnabled = true;` in `env.js`, to show the history buttons in the items list and in the parts and layers lists of the item editor.
+
+The backend API must provide the history endpoints (Cadmus 18.1.0+).
+
 ## Workspace Setup
 
 This workspace was created with these commands:
@@ -359,6 +349,9 @@ ng g library @myrmidon/cadmus-thesaurus-editor --prefix cadmus --force
 ng g library @myrmidon/cadmus-thesaurus-list --prefix cadmus --force
 ng g library @myrmidon/cadmus-thesaurus-ui --prefix cadmus --force
 ng g library @myrmidon/cadmus-ui --prefix cadmus --force
+ng g library @myrmidon/cadmus-ui-diff --prefix cadmus --force
+ng g library @myrmidon/cadmus-ui-history --prefix cadmus --force
+ng g library @myrmidon/cadmus-ui-thestaxo --prefix cadmus --force
 ```
 
 >⚠️ Unlike the other workspace libraries, `@myrmidon/cadmus-api` is listed in the root `package.json` as `link:./dist/myrmidon/cadmus-api`. This is because some external npm packages (`@myrmidon/cadmus-refs-asserted-ids`, `@myrmidon/cadmus-text-ed-md`) declare it as a peer dependency, which pnpm must satisfy. Linking to the local build ensures that these packages use the same `cadmus-api` code as the workspace (via `tsconfig` `paths`), rather than a separate copy from npm. As a consequence, build `cadmus-api` (`pnpm run build:api`) before running `pnpm install`, or the link will point to a missing folder.

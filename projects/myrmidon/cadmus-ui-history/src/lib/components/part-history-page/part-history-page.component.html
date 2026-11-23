@@ -1,0 +1,46 @@
+<mat-card appearance="outlined" class="history-page">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="history-avatar">history</mat-icon>
+    <mat-card-title>{{ partName() }} history</mat-card-title>
+    <mat-card-subtitle>
+      <span class="history-ids">part {{ partId }} · item {{ itemId }}</span>
+    </mat-card-subtitle>
+    <div class="history-header-actions">
+      <button type="button" mat-stroked-button (click)="edit()">
+        <mat-icon>edit</mat-icon>
+        edit
+      </button>
+      <button type="button" mat-flat-button (click)="close()">
+        <mat-icon>arrow_back</mat-icon>
+        item
+      </button>
+    </div>
+  </mat-card-header>
+  <mat-card-content>
+    @if (feature() && !hasEditor()) {
+      <p class="history-notice">
+        <mat-icon>info</mat-icon>
+        <span
+          >This part has no read-only editor view: use the code view to
+          inspect its versions.</span
+        >
+      </p>
+    }
+    <cadmus-model-history-view
+      [adapter]="adapter"
+      [editorTemplate]="hasEditor() ? editorTpl : undefined"
+      [canRestore]="userLevel() > 1"
+      label="Part history"
+    />
+    <ng-template #editorTpl let-entry>
+      @if (feature(); as type) {
+        <!-- recreate the editor for each version -->
+        @for (e of [entry]; track e.info.id) {
+          <ng-container
+            *ngComponentOutlet="type; injector: getEditorInjector(e)"
+          />
+        }
+      }
+    </ng-template>
+  </mat-card-content>
+</mat-card>

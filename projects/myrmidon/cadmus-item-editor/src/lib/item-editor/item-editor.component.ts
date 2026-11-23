@@ -2,23 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
-  linkedSignal,
   OnInit,
   Signal,
   signal,
-  untracked,
-  WritableSignal,
+  viewChild,
 } from '@angular/core';
-import {
-  disabled,
-  FieldTree,
-  FormField,
-  FormRoot,
-  form,
-  maxLength,
-  required,
-} from '@angular/forms/signals';
+import { FormField, form, required } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -33,7 +22,6 @@ import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -49,7 +37,6 @@ import {
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 import { ItemRefLookupService } from '@myrmidon/cadmus-refs-asserted-ids';
-import { Flag, FlagSetComponent } from '@myrmidon/cadmus-ui-flag-set';
 
 import {
   Item,
@@ -82,73 +69,19 @@ import { ItemLookupDialogComponent } from '../item-lookup-dialog/item-lookup-dia
 import { ItemGenerateDialogComponent } from '../item-generate-dialog/item-generate-dialog.component';
 import { MissingPartsComponent } from '../missing-parts/missing-parts.component';
 import { HasPreviewPipe } from '../has-preview.pipe';
+import {
+  ItemMetadata,
+  ItemMetadataEditorComponent,
+  ItemMetadataGenerationKey,
+} from '../item-metadata-editor/item-metadata-editor.component';
 import { EnvService } from '@myrmidon/ngx-tools';
 
 /**
- * Item editor. This can edit a new or existing item's metadata and parts.
- * The ID of the item being edited is extracted from the route. For a new item
- * this is 'new', which here is stored as an empty string.
+ * Item editor page. This loads the item to edit from the route (whose ID is
+ * 'new' for a new item, here stored as undefined), and lets users edit its
+ * metadata via the "dumb" `ItemMetadataEditorComponent`, and its parts and
+ * layers.
  */
-/**
- * The editable shape behind the item metadata form. Text fields use '' as
- * their empty value, as they are bound to native inputs.
- */
-interface ItemMetadataControls {
-  title: string;
-  sortKey: string;
-  description: string;
-  facet: string | null;
-  group: string;
-  flags: number;
-}
-
-/**
- * The item metadata edited by the metadata form.
- */
-type ItemMetadata = Pick<
-  Item,
-  'title' | 'sortKey' | 'description' | 'facetId' | 'groupId' | 'flags'
->;
-
-function toMetadataDraft(item: Item | undefined): ItemMetadataControls {
-  return {
-    title: item?.title || '',
-    sortKey: item?.sortKey || '',
-    description: item?.description || '',
-    facet: item?.facetId ?? null,
-    group: item?.groupId ?? '',
-    flags: item?.flags ?? 0,
-  };
-}
-
-/**
- * Draft -> metadata. Normalizes values (trimming), so the metadata saved
- * from a draft may differ from the draft itself.
- */
-function toMetadata(v: ItemMetadataControls): ItemMetadata {
-  return {
-    title: v.title.trim(),
-    sortKey: v.sortKey.trim(),
-    description: v.description.trim(),
-    facetId: v.facet?.trim() || '',
-    groupId: v.group.trim(),
-    flags: v.flags,
-  };
-}
-
-function metadataOf(item: Item | undefined): ItemMetadata | undefined {
-  return item
-    ? {
-        title: item.title,
-        sortKey: item.sortKey,
-        description: item.description,
-        facetId: item.facetId,
-        groupId: item.groupId,
-        flags: item.flags,
-      }
-    : undefined;
-}
-
 @Component({
   selector: 'cadmus-item-editor',
   templateUrl: './item-editor.component.html',
@@ -163,10 +96,8 @@ function metadataOf(item: Item | undefined): ItemMetadata | undefined {
     MatTabGroup,
     MatTab,
     FormField,
-    FormRoot,
     MatFormField,
     MatLabel,
-    MatInput,
     MatError,
     MatSelect,
     MatOption,
@@ -184,7 +115,7 @@ function metadataOf(item: Item | undefined): ItemMetadata | undefined {
     PartsScopeEditorComponent,
     PartBadgeComponent,
     CurrentItemBarComponent,
-    FlagSetComponent,
+    ItemMetadataEditorComponent,
   ],
 })
 export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
@@ -208,15 +139,20 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   public readonly userLevel: Signal<number>;
   public readonly busy = signal<boolean>(false);
   public readonly hasMetadataBuilders = signal<boolean>(false);
+  /**
+   * True when the edit history view is enabled (historyEnabled in env).
+   */
+  public readonly historyEnabled = signal<boolean>(false);
+  /**
+   * True when the metadata editor has unsaved changes.
+   */
+  public readonly metadataDirty = signal<boolean>(false);
 
-  // flag-set signals
-  private readonly _flagsValue: Signal<number>;
-  /** Flags adapted for FlagSetComponent; admin flags excluded for non-admins. */
-  public readonly flagSetFlags: Signal<Flag[]>;
-  /** Admin-only flags shown read-only to non-admin users. */
-  public readonly adminFlagDefs: Signal<FlagDefinition[]>;
-  /** Currently checked flag IDs derived from the flags form control value. */
-  public readonly checkedFlagIds: Signal<string[]>;
+  /**
+   * The metadata editor. This is created once the metadata tab is shown,
+   * and preserved when switching tabs.
+   */
+  public readonly metadataEditor = viewChild(ItemMetadataEditorComponent);
 
   // new part form
   public readonly newPart = form(
@@ -225,10 +161,6 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       required(path.newPartType);
     },
   );
-
-  // item metadata form: derived from the edited item
-  private readonly _metadata: WritableSignal<ItemMetadataControls>;
-  public readonly metadata: FieldTree<ItemMetadataControls>;
 
   constructor(
     public itemLookupService: ItemRefLookupService,
@@ -253,6 +185,9 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
 
     this.hasMetadataBuilders.set(
       String(this._envService.get('hasMetadataBuilders')) === 'true',
+    );
+    this.historyEnabled.set(
+      String(this._envService.get('historyEnabled')) === 'true',
     );
 
     // signals from repositories
@@ -292,92 +227,6 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       this._currentUser();
       return this._userLevelService.getCurrentUserLevel();
     });
-
-    // item metadata form. The live draft is kept when the same item is
-    // reloaded with unchanged metadata, and on the echo of our own save;
-    // otherwise (another item, or a saved item coming back different, e.g.
-    // with a new sort key computed by the server) it is rebuilt.
-    this._metadata = linkedSignal<Item | undefined, ItemMetadataControls>({
-      source: this.item,
-      computation: (item, previous) =>
-        previous &&
-        // the same item reloaded with unchanged metadata (e.g. after a
-        // part operation): keep any unsaved edits
-        ((item?.id === previous.source?.id &&
-          JSON.stringify(metadataOf(item)) ===
-            JSON.stringify(metadataOf(previous.source))) ||
-          // the echo of our own save
-          JSON.stringify(metadataOf(item)) ===
-            JSON.stringify(toMetadata(previous.value)))
-          ? previous.value
-          : toMetadataDraft(item),
-    });
-    this.metadata = form(
-      this._metadata,
-      (path) => {
-        required(path.title);
-        maxLength(path.title, 500);
-        // the sort key is computed by the server
-        disabled(path.sortKey);
-        required(path.sortKey);
-        maxLength(path.sortKey, 500);
-        required(path.description);
-        maxLength(path.description, 1000);
-        required(path.facet);
-        maxLength(path.group, 100);
-      },
-      {
-        // this is a real submission root: the save button and Enter in its
-        // text inputs submit the item to the server
-        submission: {
-          action: async () => {
-            this.save();
-            return undefined;
-          },
-        },
-      },
-    );
-
-    // once the draft mirrors the edited item again, clear interaction state
-    effect(() => {
-      const draft = this._metadata();
-      untracked(() => {
-        if (
-          JSON.stringify(draft) ===
-          JSON.stringify(toMetadataDraft(this.item()))
-        ) {
-          this.metadata().reset();
-        }
-      });
-    });
-
-    // flags signal (tracks the flags field value)
-    this._flagsValue = computed(() => this.metadata.flags().value());
-
-    // flags for FlagSetComponent: exclude admin flags for non-admins
-    this.flagSetFlags = computed<Flag[]>(() =>
-      this.flagDefinitions()
-        .filter((def) => this.userLevel() >= 4 || !def.isAdmin)
-        .map((def) => ({
-          id: String(def.id),
-          label: def.label,
-          color: '#' + def.colorKey,
-        })),
-    );
-
-    // admin-only flags shown read-only when user is not admin
-    this.adminFlagDefs = computed<FlagDefinition[]>(() => {
-      if (this.userLevel() >= 4) return [];
-      return this.flagDefinitions().filter((def) => def.isAdmin === true);
-    });
-
-    // checked flag IDs derived from the bitmask value
-    this.checkedFlagIds = computed<string[]>(() => {
-      const value = this._flagsValue();
-      return this.flagDefinitions()
-        .filter((def) => (value & def.id) !== 0)
-        .map((def) => String(def.id));
-    });
   }
 
   public ngOnInit(): void {
@@ -385,30 +234,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public canDeactivate(): boolean | Observable<boolean> {
-    return !this.metadata().dirty();
-  }
-
-  /**
-   * Called when the FlagSetComponent emits new checked flag IDs.
-   * Converts the string IDs back to a bitmask integer and updates
-   * the flags form control, preserving admin-flag bits for non-admins.
-   */
-  public onFlagCheckedIdsChange(ids: string[]): void {
-    let value = 0;
-    // non-admins cannot change admin flags: preserve their current bits
-    if (this.userLevel() < 4) {
-      const current = this.metadata.flags().value();
-      for (const def of this.flagDefinitions()) {
-        if (def.isAdmin && (current & def.id) !== 0) {
-          value |= def.id;
-        }
-      }
-    }
-    for (const id of ids) {
-      value |= Number(id);
-    }
-    this.metadata.flags().value.set(value);
-    this.metadata.flags().markAsDirty();
+    return !this.metadataDirty();
   }
 
   public getTypeIdName(typeId: string): string {
@@ -432,15 +258,28 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     return this.getTypeIdName(roleId);
   }
 
-  public save(): void {
-    if (this.busy() || !this.metadata().valid()) {
+  /**
+   * Handle the metadata editor's dirty state change.
+   */
+  public onMetadataDirtyChange(dirty: boolean): void {
+    this.metadataDirty.set(dirty);
+  }
+
+  /**
+   * Save the item with the specified metadata, as edited by the metadata
+   * editor.
+   *
+   * @param metadata The metadata.
+   */
+  public onMetadataSave(metadata: ItemMetadata): void {
+    if (this.busy()) {
       return;
     }
     const currentItem = this._repository.getItem();
     if (!currentItem) {
       return;
     }
-    const item = { ...currentItem, ...toMetadata(this._metadata()) };
+    const item = { ...currentItem, ...metadata };
 
     this.busy.set(true);
     this._repository
@@ -449,7 +288,8 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
         this._messaging.sendMessage(MESSAGE_ITEM_LIST_REPOSITORY_RESET);
         // clear interaction state immediately, so that the pending-changes
         // guard does not prompt the user for an item just saved
-        this.metadata().reset();
+        this.metadataEditor()?.markSaved();
+        this.metadataDirty.set(false);
         // reload to force change in page URL for new items
         if (!item.id) {
           this.id.set(saved.id);
@@ -607,7 +447,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       if (!targetItem || part.itemId === targetItem.id) {
         return;
       }
-      if (this.metadata.facet().value() !== targetItem.facetId) {
+      if (this.item()?.facetId !== targetItem.facetId) {
         this._snackbar.open(
           'Cannot copy part to an item with a different facet',
           'OK',
@@ -677,24 +517,33 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       });
   }
 
-  public generateTitle(): void {
-    if (this.busy()) {
+  /**
+   * Generate the title (T) or description (D) of the item, as requested by
+   * the metadata editor, and set it into the editor.
+   *
+   * @param key The metadata key.
+   */
+  public onGenerateMetadata(key: ItemMetadataGenerationKey): void {
+    if (this.busy() || !this.id()) {
       return;
     }
+    const name = key === 'T' ? 'title' : 'description';
     this.busy.set(true);
-    this._itemService.getItemMetadata(this.id()!, 'T').subscribe({
-      next: (title) => {
-        const result = title['T'];
+    this._itemService.getItemMetadata(this.id()!, key).subscribe({
+      next: (metadata) => {
+        const result = metadata[key];
         if (result) {
-          this.metadata.title().value.set(result);
-          this.metadata.title().markAsDirty();
+          this.metadataEditor()?.setGenerated(key, result);
         } else {
-          this._snackbar.open('No title generated', 'OK', { duration: 3000 });
+          this._snackbar.open(`No ${name} generated`, 'OK', {
+            duration: 3000,
+          });
         }
       },
       error: (error) => {
         console.error(error);
-        this._snackbar.open('Error generating title', 'OK');
+        this._snackbar.open(`Error generating ${name}`, 'OK');
+        this.busy.set(false);
       },
       complete: () => {
         this.busy.set(false);
@@ -702,30 +551,22 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     });
   }
 
-  public generateDescription(): void {
-    if (this.busy()) {
-      return;
-    }
-    this.busy.set(true);
-    this._itemService.getItemMetadata(this.id()!, 'D').subscribe({
-      next: (description) => {
-        const result = description['D'];
-        if (result) {
-          this.metadata.description().value.set(result);
-          this.metadata.description().markAsDirty();
-        } else {
-          this._snackbar.open('No description generated', 'OK', {
-            duration: 3000,
-          });
-        }
-      },
-      error: (error) => {
-        console.error(error);
-        this._snackbar.open('Error generating description', 'OK');
-      },
-      complete: () => {
-        this.busy.set(false);
-      },
-    });
+  /**
+   * Navigate to the edit history of the specified part. Its route is the
+   * part's editor route with a final /history.
+   *
+   * @param part The part.
+   */
+  public viewPartHistory(part: Part): void {
+    const route = this._libraryRouteService.buildPartEditorRoute(
+      part.itemId,
+      part.id,
+      part.typeId,
+      part.roleId,
+    );
+    this._router.navigate(
+      [route.route + '/history'],
+      route.rid ? { queryParams: { rid: route.rid } } : {},
+    );
   }
 }

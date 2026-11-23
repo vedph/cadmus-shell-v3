@@ -13,6 +13,7 @@ import { EditedObject, Part, PartIdentity, Thesaurus } from '@myrmidon/cadmus-co
 
 import { ModelEditorComponentBase } from './model-editor-component-base';
 import { EditorHelpService } from '../services/editor-help.service';
+import { CADMUS_EDITOR_READONLY } from '../editor-readonly';
 
 @Component({
   template: '<input [formField]="form.title" />',
@@ -93,7 +94,9 @@ describe('ModelEditorComponentBase', () => {
   };
   let helpService: { resolveUrl: ReturnType<typeof vi.fn> };
 
-  function createComponent(): ComponentFixture<TestEditorComponent> {
+  function createComponent(
+    forcedReadonly?: boolean
+  ): ComponentFixture<TestEditorComponent> {
     authUser$ = new BehaviorSubject<User | null>(null);
     authService = {
       currentUser$: authUser$,
@@ -113,6 +116,9 @@ describe('ModelEditorComponentBase', () => {
         { provide: AuthJwtService, useValue: authService },
         { provide: AppRepository, useValue: appRepository },
         { provide: EditorHelpService, useValue: helpService },
+        ...(forcedReadonly !== undefined
+          ? [{ provide: CADMUS_EDITOR_READONLY, useValue: forcedReadonly }]
+          : []),
       ],
     });
     const fixture = TestBed.createComponent(TestEditorComponent);
@@ -180,6 +186,58 @@ describe('ModelEditorComponentBase', () => {
       fixture.detectChanges();
       expect(fixture.componentInstance.form().disabled()).toBe(false);
       expect(fixture.componentInstance.form.title().disabled()).toBe(false);
+    });
+  });
+
+  describe('readonly', () => {
+    it('should not be read-only by default', () => {
+      const fixture = createComponent();
+      expect(fixture.componentInstance.isReadonly()).toBe(false);
+      expect(fixture.componentInstance.form().disabled()).toBe(false);
+    });
+
+    it('should disable the form when the readonly input is true', () => {
+      const fixture = createComponent();
+      fixture.componentRef.setInput('readonly', true);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.isReadonly()).toBe(true);
+      expect(fixture.componentInstance.form.title().disabled()).toBe(true);
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('input');
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should be forced read-only by the CADMUS_EDITOR_READONLY token', () => {
+      const fixture = createComponent(true);
+      expect(fixture.componentInstance.isReadonly()).toBe(true);
+      expect(fixture.componentInstance.form().disabled()).toBe(true);
+      // the input cannot override the token
+      fixture.componentRef.setInput('readonly', false);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.isReadonly()).toBe(true);
+    });
+
+    it('should not be read-only when the token is false', () => {
+      const fixture = createComponent(false);
+      expect(fixture.componentInstance.isReadonly()).toBe(false);
+    });
+
+    it('should never save when read-only, even with a valid form', () => {
+      const fixture = createComponent();
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const bound = { value: makePart({ roleId: 'bound' }), thesauri: {} };
+      fixture.componentRef.setInput('data', bound);
+      fixture.componentRef.setInput('readonly', true);
+      fixture.detectChanges();
+      const emitted: unknown[] = [];
+      fixture.componentInstance.data.subscribe((d) => emitted.push(d));
+      fixture.componentInstance.getValueResult = makePart({ id: 'changed' });
+
+      fixture.componentInstance.save();
+
+      expect(fixture.componentInstance.data()).toBe(bound);
+      expect(emitted).toEqual([]);
+      warn.mockRestore();
     });
   });
 

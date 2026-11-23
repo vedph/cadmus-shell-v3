@@ -62,6 +62,14 @@ export const routes: Routes = [
   },
   // cadmus - items
   {
+    path: 'items/:id/history',
+    loadComponent: () =>
+      import('@myrmidon/cadmus-ui-history').then(
+        (module) => module.ItemHistoryPageComponent,
+      ),
+    canActivate: [jwtGuard],
+  },
+  {
     path: 'items/:id',
     loadComponent: () =>
       import('@myrmidon/cadmus-item-editor').then(
@@ -108,24 +116,36 @@ export const routes: Routes = [
   {
     path: 'items/:iid/general',
     loadChildren: () =>
-      import('@myrmidon/cadmus-part-general-pg').then(
-        (module) => module.CADMUS_PART_GENERAL_PG_ROUTES,
+      // the history routes are added lazily, with their library
+      Promise.all([
+        import('@myrmidon/cadmus-part-general-pg'),
+        import('@myrmidon/cadmus-ui-history'),
+      ]).then(([module, history]) =>
+        history.withHistoryRoutes(module.CADMUS_PART_GENERAL_PG_ROUTES),
       ),
     canActivate: [jwtGuard],
   },
   {
     path: 'items/:iid/philology',
     loadChildren: () =>
-      import('@myrmidon/cadmus-part-philology-pg').then(
-        (module) => module.CADMUS_PART_PHILOLOGY_PG_ROUTES,
+      // the history routes are added lazily, with their library
+      Promise.all([
+        import('@myrmidon/cadmus-part-philology-pg'),
+        import('@myrmidon/cadmus-ui-history'),
+      ]).then(([module, history]) =>
+        history.withHistoryRoutes(module.CADMUS_PART_PHILOLOGY_PG_ROUTES),
       ),
     canActivate: [jwtGuard],
   },
   {
     path: 'items/:iid/taxonomy',
     loadChildren: () =>
-      import('@myrmidon/cadmus-part-taxo-pg').then(
-        (module) => module.CADMUS_PART_TAXO_PG_ROUTES,
+      // the history routes are added lazily, with their library
+      Promise.all([
+        import('@myrmidon/cadmus-part-taxo-pg'),
+        import('@myrmidon/cadmus-ui-history'),
+      ]).then(([module, history]) =>
+        history.withHistoryRoutes(module.CADMUS_PART_TAXO_PG_ROUTES),
       ),
     canActivate: [jwtGuard],
   },

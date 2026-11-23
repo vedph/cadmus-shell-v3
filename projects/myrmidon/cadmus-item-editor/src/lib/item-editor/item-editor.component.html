@@ -8,178 +8,23 @@
     }
 
     <!-- item content -->
-    <mat-tab-group [selectedIndex]="id() ? 1 : 0">
+    <!-- preserveContent keeps the metadata editor (and its unsaved
+         edits) alive when switching tabs -->
+    <mat-tab-group [selectedIndex]="id() ? 1 : 0" [preserveContent]="true">
       <!-- metadata -->
       <mat-tab label="Metadata">
-        <form [formRoot]="metadata">
-          <div class="form-row">
-            <!-- title -->
-            <mat-form-field class="flex-field">
-              <mat-label>title</mat-label>
-              <input matInput type="text" id="title" [formField]="metadata.title" />
-              @if (
-                metadata.title().getError("required") && (metadata.title().touched() || metadata.title().dirty())
-              ) {
-                <mat-error>enter title</mat-error>
-              }
-              @if (
-                metadata.title().getError("maxLength") && (metadata.title().touched() || metadata.title().dirty())
-              ) {
-                <mat-error>title too long</mat-error>
-              }
-            </mat-form-field>
-
-            @if (hasMetadataBuilders()) {
-              <!-- auto title -->
-              <button
-                type="button"
-                mat-icon-button
-                [disabled]="busy()"
-                (click)="generateTitle()"
-              >
-                <mat-icon matTooltip="Generate title">auto_awesome</mat-icon>
-              </button>
-            }
-
-            <!-- sortKey -->
-            <mat-form-field class="flex-field">
-              <mat-label>sort key</mat-label>
-              <input
-                matInput
-                type="text"
-                id="sortKey"
-                [formField]="metadata.sortKey"
-              />
-              @if (
-                metadata.sortKey().getError("required") &&
-                (metadata.sortKey().touched() || metadata.sortKey().dirty())
-              ) {
-                <mat-error>enter sort key</mat-error>
-              }
-              @if (
-                metadata.sortKey().getError("maxLength") &&
-                (metadata.sortKey().touched() || metadata.sortKey().dirty())
-              ) {
-                <mat-error>sort key too long</mat-error>
-              }
-            </mat-form-field>
-          </div>
-
-          <!-- description -->
-          <div class="flex-row">
-            <mat-form-field class="item">
-              <mat-label>description</mat-label>
-              <textarea
-                rows="2"
-                matInput
-                id="description"
-                [formField]="metadata.description"
-              ></textarea>
-              @if (
-                metadata.description().getError("required") &&
-                (metadata.description().touched() || metadata.description().dirty())
-              ) {
-                <mat-error>enter description</mat-error>
-              }
-              @if (
-                metadata.description().getError("maxLength") &&
-                (metadata.description().touched() || metadata.description().dirty())
-              ) {
-                <mat-error>description too long</mat-error>
-              }
-            </mat-form-field>
-
-            @if (hasMetadataBuilders()) {
-              <!-- auto description -->
-              <button
-                class="item fit"
-                type="button"
-                mat-icon-button
-                [disabled]="busy()"
-                (click)="generateDescription()"
-              >
-                <mat-icon matTooltip="Generate description"
-                  >auto_awesome</mat-icon
-                >
-              </button>
-            }
-          </div>
-
-          <!-- facet -->
-          <div class="form-row">
-            <mat-form-field>
-              <mat-label>facet</mat-label>
-              <mat-select [formField]="metadata.facet">
-                @for (f of facets(); track f.id) {
-                  <mat-option [value]="f.id">
-                    {{ f.label }}
-                  </mat-option>
-                }
-              </mat-select>
-              <mat-error>please select a facet</mat-error>
-            </mat-form-field>
-
-            <!-- group -->
-            <mat-form-field>
-              <mat-label>group ID</mat-label>
-              <input matInput [formField]="metadata.group" />
-              @if (
-                metadata.group().getError("maxLength") && (metadata.group().dirty() || metadata.group().touched())
-              ) {
-                <mat-error>too long</mat-error>
-              }
-            </mat-form-field>
-          </div>
-
-          <!-- flags -->
-          <fieldset>
-            <legend>flags</legend>
-            <!-- read-only admin flags for non-admin users -->
-            @if (adminFlagDefs().length) {
-              <div class="admin-flags">
-                @for (def of adminFlagDefs(); track def.id) {
-                  <span class="admin-flag">
-                    <span [style.color]="'#' + def.colorKey">&#x25c6;</span>
-                    &nbsp;{{ def.label }}
-                  </span>
-                }
-              </div>
-            }
-            <!-- editable flags -->
-            @if (flagSetFlags().length) {
-              <cadmus-ui-flag-set
-                [hideToolbar]="true"
-                [flags]="flagSetFlags()"
-                [checkedIds]="checkedFlagIds()"
-                (checkedIdsChange)="onFlagCheckedIdsChange($event)"
-              />
-            }
-          </fieldset>
-          <br />
-
-          <!-- action buttons -->
-          @if (userLevel() > 1) {
-            <div class="form-row">
-              <button
-                type="button"
-                mat-flat-button
-                class="mat-warn"
-                (click)="onGenerateItems()"
-              >
-                <mat-icon>copy_all</mat-icon> generate
-              </button>
-              <button
-                type="submit"
-                mat-flat-button
-                class="mat-primary"
-                [disabled]="busy()"
-                matTooltip="Save metadata"
-              >
-                <mat-icon>save</mat-icon> save
-              </button>
-            </div>
-          }
-        </form>
+        <cadmus-item-metadata-editor
+          [item]="item()"
+          [facets]="facets()"
+          [flagDefinitions]="flagDefinitions()"
+          [userLevel]="userLevel()"
+          [busy]="busy()"
+          [hasMetadataBuilders]="hasMetadataBuilders()"
+          (saveRequest)="onMetadataSave($event)"
+          (generateRequest)="onGenerateMetadata($event)"
+          (generateItemsRequest)="onGenerateItems()"
+          (dirtyChange)="onMetadataDirtyChange($event)"
+        />
       </mat-tab>
 
       <!-- parts -->
@@ -283,6 +128,18 @@
                         >
                           <mat-icon>assignment</mat-icon>
                         </button>
+                        <!-- history -->
+                        @if (historyEnabled()) {
+                          <button
+                            mat-icon-button
+                            type="button"
+                            class="part-history"
+                            matTooltip="View the edit history of this part"
+                            (click)="viewPartHistory(part)"
+                          >
+                            <mat-icon>history</mat-icon>
+                          </button>
+                        }
                         <!-- copy into item -->
                         <button
                           mat-icon-button
@@ -402,6 +259,17 @@
                         [cdkCopyToClipboard]="part.id"
                       >
                         <mat-icon>assignment</mat-icon>
+                      </button>
+                    }
+                    @if (!part.isAbsent && historyEnabled()) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="layer-history"
+                        matTooltip="View the edit history of this layer part"
+                        (click)="viewPartHistory(part)"
+                      >
+                        <mat-icon>history</mat-icon>
                       </button>
                     }
                   </td>
