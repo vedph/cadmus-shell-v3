@@ -7,7 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, disabled, form, required } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,12 +21,17 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
-import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatDivider } from '@angular/material/divider';
+import {
+  MatMenu,
+  MatMenuContent,
+  MatMenuItem,
+  MatMenuTrigger,
+} from '@angular/material/menu';
 import {
   MatExpansionPanel,
   MatExpansionPanelHeader,
@@ -57,7 +62,11 @@ import {
   UserLevelService,
 } from '@myrmidon/cadmus-api';
 import { MESSAGE_ITEM_LIST_REPOSITORY_RESET } from '@myrmidon/cadmus-item-list';
-import { getPartIdName, PartBadgeComponent } from '@myrmidon/cadmus-ui';
+import {
+  DataTableComponent,
+  getPartIdName,
+  PartBadgeComponent,
+} from '@myrmidon/cadmus-ui';
 
 import {
   PartScopeSetRequest,
@@ -74,7 +83,7 @@ import {
   ItemMetadataEditorComponent,
   ItemMetadataGenerationKey,
 } from '../item-metadata-editor/item-metadata-editor.component';
-import { EnvService } from '@myrmidon/ngx-tools';
+import { ColorMap, ColorService, EnvService } from '@myrmidon/ngx-tools';
 
 /**
  * Item editor page. This loads the item to edit from the route (whose ID is
@@ -98,12 +107,14 @@ import { EnvService } from '@myrmidon/ngx-tools';
     FormField,
     MatFormField,
     MatLabel,
-    MatError,
     MatSelect,
     MatOption,
     MatButton,
     MatIcon,
-    MatDivider,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatMenuTrigger,
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
@@ -116,9 +127,19 @@ import { EnvService } from '@myrmidon/ngx-tools';
     PartBadgeComponent,
     CurrentItemBarComponent,
     ItemMetadataEditorComponent,
+    DataTableComponent,
   ],
 })
 export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
+  /**
+   * The colors of part groups headers, keyed by group ID. This is shared by
+   * all the instances of the editor, so that a group always gets the same
+   * color during the app's lifetime. It is seeded with the sorted group IDs
+   * of all the facets, so that colors are also stable across sessions with
+   * the same facets.
+   */
+  private static readonly _groupColorMap = new ColorMap();
+
   // signals from edited-item repository
   public readonly item: Signal<Item | undefined>;
   public readonly parts: Signal<Part[]>;
@@ -154,11 +175,65 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
    */
   public readonly metadataEditor = viewChild(ItemMetadataEditorComponent);
 
+  /**
+   * The background and foreground colors for the item's facet.
+   */
+  public readonly facetColors: Signal<{ bg: string; fg: string }>;
+
+  /**
+   * The count of parts defined by the item's facet.
+   */
+  public readonly facetPartCount = computed<number>(
+    () => this.facet()?.partDefinitions?.length || 0,
+  );
+
+  /**
+   * The tooltip for the parts count.
+   */
+  public readonly partsCountTip = computed<string>(
+    () =>
+      `${this.parts().length} part(s) in this item, ` +
+      `out of ${this.facetPartCount()} defined by its facet`,
+  );
+
+  /**
+   * The background and foreground colors for each part group, keyed by
+   * group ID.
+   */
+  public readonly groupColors: Signal<
+    Record<string, { bg: string; fg: string }>
+  >;
+
+  /**
+   * True if the current user can delete parts.
+   */
+  public readonly canDeleteParts: Signal<boolean>;
+
+  /**
+   * The maximum count of action buttons in a part row, used to size the
+   * actions column uniformly across all the groups.
+   */
+  public readonly partActionCount: Signal<number>;
+
+  /**
+   * The keys of the collapsed part groups.
+   */
+  public readonly collapsedGroups = signal<ReadonlySet<string>>(new Set());
+
+  /**
+   * True if any part group is expanded.
+   */
+  public readonly anyGroupExpanded = computed<boolean>(() =>
+    this.partGroups().some((g) => !this.collapsedGroups().has(g.key)),
+  );
+
   // new part form
   public readonly newPart = form(
     signal<{ newPartType: PartDefinition | null }>({ newPartType: null }),
     (path) => {
       required(path.newPartType);
+      // nothing to pick when all the facet's parts are already present
+      disabled(path.newPartType, () => !this.newPartDefinitions().length);
     },
   );
 
@@ -177,6 +252,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
     private _userLevelService: UserLevelService,
     private _messaging: MessagingService,
     private _envService: EnvService,
+    private _colorService: ColorService,
   ) {
     this.id.set(this._route.snapshot.params['id']);
     if (this.id() === 'new') {
@@ -217,6 +293,28 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       requireSync: true,
     });
 
+    // colors
+    this.facetColors = computed(() => {
+      const key = this.facet()?.colorKey;
+      const bg = key ? '#' + key : 'var(--mat-sys-secondary-container)';
+      return {
+        bg,
+        fg: key
+          ? this._colorService.getContrastColor(bg)
+          : 'var(--mat-sys-on-secondary-container)',
+      };
+    });
+    this.groupColors = computed(() => {
+      const map = ItemEditorComponent._groupColorMap;
+      ItemEditorComponent.seedGroupColors(this.facets());
+      const colors: Record<string, { bg: string; fg: string }> = {};
+      for (const g of this.partGroups()) {
+        const bg = map.getColorForKey(g.key);
+        colors[g.key] = { bg, fg: this._colorService.getContrastColor(bg) };
+      }
+      return colors;
+    });
+
     // user signals
     this._currentUser = toSignal(this._authService.currentUser$, {
       initialValue: null,
@@ -227,6 +325,72 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
       this._currentUser();
       return this._userLevelService.getCurrentUserLevel();
     });
+    this.canDeleteParts = computed(() => {
+      const roles = this.user()?.roles || [];
+      return roles.some(
+        (r) => r === 'admin' || r === 'editor' || r === 'operator',
+      );
+    });
+    this.partActionCount = computed(() => {
+      // edit, copy ID, copy into item, preview + optional delete and history
+      return (
+        4 + (this.canDeleteParts() ? 1 : 0) + (this.historyEnabled() ? 1 : 0)
+      );
+    });
+  }
+
+  /**
+   * Seed the group colors map with the sorted IDs of all the groups in the
+   * specified facets, so that colors do not depend on the order in which
+   * items are opened. This happens only once, when the map is empty.
+   *
+   * @param facets The facets definitions.
+   */
+  private static seedGroupColors(facets: FacetDefinition[]): void {
+    const map = ItemEditorComponent._groupColorMap;
+    if (map.size || !facets?.length) {
+      return;
+    }
+    const keys = new Set<string>();
+    for (const f of facets) {
+      for (const d of f.partDefinitions || []) {
+        if (d.groupKey) {
+          keys.add(d.groupKey);
+        }
+      }
+    }
+    [...keys].sort().forEach((k) => map.getColorForKey(k));
+  }
+
+  /**
+   * Set the expanded state of the specified part group.
+   *
+   * @param key The group key.
+   * @param expanded True if expanded.
+   */
+  public setGroupExpanded(key: string, expanded: boolean): void {
+    const collapsed = this.collapsedGroups();
+    if (collapsed.has(key) === !expanded) {
+      return;
+    }
+    const set = new Set(collapsed);
+    if (expanded) {
+      set.delete(key);
+    } else {
+      set.add(key);
+    }
+    this.collapsedGroups.set(set);
+  }
+
+  /**
+   * Collapse all the part groups if any is expanded, else expand them all.
+   */
+  public toggleAllGroups(): void {
+    this.collapsedGroups.set(
+      this.anyGroupExpanded()
+        ? new Set(this.partGroups().map((g) => g.key))
+        : new Set(),
+    );
   }
 
   public ngOnInit(): void {
@@ -324,7 +488,7 @@ export class ItemEditorComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public addPart(def?: PartDefinition): void {
-    if (!def && !this.newPart().valid()) {
+    if (!def && (!this.newPartDefinitions().length || !this.newPart().valid())) {
       return;
     }
     if (!this.id()) {

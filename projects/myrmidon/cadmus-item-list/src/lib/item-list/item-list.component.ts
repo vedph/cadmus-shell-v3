@@ -4,8 +4,10 @@ import {
   OnDestroy,
   OnInit,
   Signal,
+  computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -25,7 +27,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DataPage, EnvService } from '@myrmidon/ngx-tools';
+import { DataPage, EllipsisPipe, EnvService } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 
@@ -37,7 +39,11 @@ import {
 } from '@myrmidon/cadmus-core';
 import { ItemService, UserLevelService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { FacetBadgeComponent, FlagsBadgeComponent } from '@myrmidon/cadmus-ui';
+import {
+  DataTableComponent,
+  FacetBadgeComponent,
+  FlagsBadgeComponent,
+} from '@myrmidon/cadmus-ui';
 
 import { ItemListRepository } from '../state/item-list.repository';
 import { ItemFilterComponent } from '../item-filter/item-filter.component';
@@ -62,8 +68,10 @@ import { ItemFilterComponent } from '../item-filter/item-filter.component';
     MatButton,
     AsyncPipe,
     DatePipe,
+    EllipsisPipe,
     FacetBadgeComponent,
     FlagsBadgeComponent,
+    DataTableComponent,
   ],
 })
 export class ItemListComponent implements OnInit, OnDestroy {
@@ -81,6 +89,18 @@ export class ItemListComponent implements OnInit, OnDestroy {
    */
   public readonly historyEnabled = signal<boolean>(
     String(inject(EnvService).get('historyEnabled')) === 'true',
+  );
+
+  private readonly _table = viewChild(DataTableComponent);
+  /**
+   * The maximum number of characters displayed for an item's description,
+   * according to the space available to the list. The full description is
+   * shown in a tooltip when truncated.
+   */
+  public readonly descLimit = computed<number>(
+    () =>
+      this._table()?.pick({ xs: 60, sm: 100, md: 140, lg: 200, xl: 300 }) ??
+      300,
   );
 
   constructor(

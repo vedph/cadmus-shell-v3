@@ -17,22 +17,25 @@
           <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </div>
         }
+        <cadmus-data-table>
         <table>
           <thead>
-            <th></th>
-            <th>facet</th>
-            <th>flags</th>
-            <th>title</th>
-            <th>description</th>
-            <th class="noif-lt-md meta">group</th>
-            <th class="noif-lt-md meta">user</th>
-            <th class="noif-lt-md meta">last saved</th>
-            <th class="noif-lt-md meta">creator</th>
+            <tr>
+              <th class="dt-actions"></th>
+              <th class="dt-fit">facet</th>
+              <th class="dt-fit">flags</th>
+              <th>title</th>
+              <th>description</th>
+              <th class="dt-meta dt-hide-lt-md">group</th>
+              <th class="dt-meta dt-hide-lt-md">user</th>
+              <th class="dt-meta dt-hide-lt-sm">last saved</th>
+              <th class="dt-meta dt-hide-lt-lg">creator</th>
+            </tr>
           </thead>
           <tbody>
             @for (item of page.items; track item.id) {
             <tr>
-              <td class="fit-width">
+              <td class="dt-actions">
                 <button
                   mat-icon-button
                   type="button"
@@ -72,30 +75,40 @@
                 </button>
                 }
               </td>
-              <td class="fit-width">
+              <td class="dt-fit dt-badge">
                 <cadmus-facet-badge
                   [data]="{ definitions: facets(), facetId: item.facetId }"
                 />
               </td>
-              <td class="fit-width">
+              <td class="dt-fit dt-badge">
                 <cadmus-flags-badge
                   [data]="{ definitions: flags(), flags: item.flags }"
                 />
               </td>
-              <td class="title">{{ item.title }}</td>
-              <td>{{ item.description }}</td>
-              <td class="noif-lt-md meta">{{ item.groupId }}</td>
-              <td class="noif-lt-md meta">{{ item.userId }}</td>
-              <td class="noif-lt-md meta">
+              <td class="dt-truncate" [title]="item.title">{{ item.title }}</td>
+              <td
+                class="dt-wrap"
+                [matTooltip]="
+                  (item.description?.length || 0) > descLimit()
+                    ? item.description
+                    : ''
+                "
+              >
+                {{ item.description | ellipsis : descLimit() }}
+              </td>
+              <td class="dt-meta dt-hide-lt-md">{{ item.groupId }}</td>
+              <td class="dt-meta dt-hide-lt-md">{{ item.userId }}</td>
+              <td class="dt-meta dt-hide-lt-sm">
                 {{ item.timeModified | date : "yyyy-MM-dd HH:mm" }}
               </td>
-              <td class="noif-lt-md meta">{{ item.creatorId }}</td>
+              <td class="dt-meta dt-hide-lt-lg">{{ item.creatorId }}</td>
             </tr>
             }
           </tbody>
         </table>
+        </cadmus-data-table>
         <!-- paginator -->
-        <div class="form-row">
+        <div class="list-footer">
           <button
             type="button"
             mat-icon-button

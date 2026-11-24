@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-item-search",
-  "version": "20.0.2",
+  "version": "20.0.3",
   "exports": {
     ".": "./src/public-api.ts"
   },
@@ -25,7 +25,7 @@
     "@myrmidon/paged-data-browsers": "^6.0.1",
     "@myrmidon/cadmus-api": "^20.0.0",
     "@myrmidon/cadmus-state": "^20.0.0",
-    "@myrmidon/cadmus-ui": "^20.0.0",
+    "@myrmidon/cadmus-ui": "^20.2.0",
     "@myrmidon/cadmus-core": "^20.0.0"
   }
 }

@@ -7,3 +7,16 @@
 .form-row * {
   flex: 0 0 auto;
 }
+
+/* when hosted in a narrow side panel (see ItemListComponent), stack the
+   filters and let each of them fill the panel width */
+@container item-filters (max-width: 400px) {
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  mat-form-field {
+    width: 100%;
+  }
+}

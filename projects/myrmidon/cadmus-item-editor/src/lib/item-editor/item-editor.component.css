@@ -1,112 +1,125 @@
-.full-width {
-  width: 100%;
+/* ---------------------------------------------------------------
+ * Parts toolbar
+ * ------------------------------------------------------------- */
+.parts-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  /* the right padding hosts the 48px touch target of the trailing 40px icon
+     button, which would otherwise overflow by 4px and make the tab body
+     scroll horizontally */
+  padding: 16px 4px 16px 0;
 }
-.flex-field {
-  flex: 1 0 auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  color: var(--mat-sys-on-surface-variant);
-}
-tbody tr:nth-child(odd) {
-  background-color: var(--mat-sys-surface-container);
-}
-th {
-  text-align: left;
-  font-weight: normal;
-  color: var(--mat-sys-on-surface-variant);
-}
-tbody tr:hover {
-  background-color: var(--mat-sys-surface-container-high);
-}
-td.fit-width {
-  width: 1px;
+.facet-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font: var(--mat-sys-label-large);
   white-space: nowrap;
+  cursor: default;
 }
-tbody tr.selected {
-  background-color: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
+.new-part {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
-table#layers td {
-  padding: 0 6px;
-}
-table#layers th {
-  text-align: left;
-}
-div.new-part {
-  margin-left: 32px;
-}
-span.new-part-role {
-  color: var(--mat-sys-on-surface-variant);
-  margin-left: 8px;
-  vertical-align: middle;
+.new-part mat-form-field {
+  min-width: 220px;
 }
 span.new-part-icon {
   margin: 0 4px;
   vertical-align: middle;
 }
-td.count-n {
-  text-align: center;
-  color: var(--mat-sys-success);
-}
-td.count-z {
-  text-align: center;
-  color: var(--mat-sys-error);
-}
-input.id {
-  font-family: "Courier New", Courier, monospace;
+.parts-count {
+  font: var(--mat-sys-title-medium);
+  font-variant-numeric: tabular-nums;
   color: var(--mat-sys-on-surface-variant);
-  min-width: 22em;
+  cursor: default;
 }
-.admin-flags {
-  margin-bottom: 4px;
+.spacer {
+  flex: 1 1 auto;
 }
-.admin-flag {
-  margin-left: 12px;
-}
-.form-row {
+
+/* ---------------------------------------------------------------
+ * Part groups
+ * ------------------------------------------------------------- */
+.part-groups {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+  margin-bottom: 16px;
+  /* compact, uniform headers */
+  --mat-expansion-header-collapsed-state-height: 48px;
+  --mat-expansion-header-expanded-state-height: 48px;
 }
-.form-row * {
-  flex: 0 0 auto;
+.part-group {
+  /* no extra margin when expanded: the gap already separates panels */
+  margin: 0 !important;
 }
-.group-header {
-  margin-top: 6px;
+.part-group mat-expansion-panel-header {
+  transition: filter 150ms ease;
 }
+.part-group mat-expansion-panel-header:hover {
+  filter: brightness(0.95);
+}
+.part-group mat-panel-title {
+  font: var(--mat-sys-title-small);
+}
+.group-count {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  font: var(--mat-sys-label-medium);
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+  background-color: color-mix(in srgb, currentColor 14%, transparent);
+}
+.part-group cadmus-data-table {
+  margin-top: 8px;
+}
+
+/* Fixed layout, with the same column widths in all the groups, so that
+   columns are aligned across the tables of different groups */
 table.parts-table {
-  width: 100%;
+  table-layout: fixed;
 }
-table.parts-table th {
-  text-align: left;
+th.part-actions {
+  /* 40px per icon button */
+  width: calc(var(--part-actions, 6) * 40px);
 }
-fieldset {
-  border: 1px solid var(--mat-sys-on-surface-variant);
-  border-radius: 6px;
-  padding: 6px;
-  margin: 8px 0;
+th.part-role {
+  width: 22%;
 }
-/* xs */
-@media only screen and (max-width: 599px) {
-  .noif-lt-xs {
-    display: none;
+th.part-time {
+  width: 150px;
+}
+th.part-user {
+  width: 120px;
+}
+/* narrow: only edit button + actions menu */
+@container cadmus-data-table (max-width: 639px) {
+  th.part-actions {
+    width: 80px;
   }
 }
-.flex-row {
-  display: flex;
-  flex-wrap: wrap;
+
+/* ---------------------------------------------------------------
+ * Layers
+ * ------------------------------------------------------------- */
+table#layers td.count-n,
+table#layers td.count-z {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
-.flex-row .item {
-  box-sizing: border-box;
+td.count-n {
+  color: var(--mat-sys-primary);
 }
-/* items that must fit their content */
-.flex-row .item.fit {
-  flex: 0 0 auto;  /* no grow, no shrink, width = content */
-}
-/* items that take remaining horizontal space */
-.flex-row .item:not(.fit) {
-  flex: 1 1 auto;  /* grow to fill, shrink if needed */
+td.count-z {
+  color: var(--mat-sys-error);
 }

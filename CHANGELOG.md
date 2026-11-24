@@ -1,5 +1,12 @@
 # History
 
+- 2026-11-24: 💄 **responsive lists and item editor**.
+  - `@myrmidon/cadmus-ui` (20.2.0): new `DataTableComponent` (`cadmus-data-table`), a wrapper for plain HTML tables providing M3 styles (cells aligned to the top), horizontal scroll as a last resort, and columns shown or hidden according to the width available to the table (`dt-hide-lt-*`, `dt-only-lt-*` classes, via CSS container queries), plus `width`/`size` signals and a `pick` helper. See its [README](projects/myrmidon/cadmus-ui/README.md#data-table).
+  - `@myrmidon/cadmus-item-list` (20.1.1): the items list uses the new data table: cells aligned to the top, metadata columns hidden and description shortened (full text in tooltip) when space is short, filters below the list on narrow screens, with full-width fields in the side panel.
+  - `@myrmidon/cadmus-item-search` (20.0.3): the search results list uses the new data table, like the items list.
+  - `@myrmidon/cadmus-item-editor` (20.2.0): the parts tab has a new toolbar with the item's facet (colored, with its description as tooltip), the count of parts in the item vs. the parts defined by its facet, and an expand/collapse all button. Part groups have the same column widths, so that columns are aligned across groups, and their headers are colored by group ID (the same group always gets the same color). On narrow screens, the secondary part actions move into a menu. The new part selector and its add button are disabled when all the parts defined by the facet are present. The layers list uses the new data table too.
+  - ⚠️ these libraries require `@myrmidon/cadmus-ui` `^20.2.0`.
+
 - 2026-11-23: 🆕 **edit history**. New library `@myrmidon/cadmus-ui-history`, to browse the edit history of items and parts on a timeline, view each version in its editor (read-only), compare it with the current version (JSON diff), download and restore it. See its [README](projects/myrmidon/cadmus-ui-history/README.md) and [Edit History](README.md#edit-history). This requires the history API of the Cadmus backend 18.1.0+, and `@myrmidon/timeline-view` (⚠️ new dependency). See [Migration to edit history](#migration-to-edit-history) below.
   - `@myrmidon/cadmus-core` (20.1.0): new history models (`EditStatus`, `HistoryInfo`, `HistoryItemInfo`, `HistoryItem`, `HistoryPartInfo`, `HistoryPart`, `HistoryFilter`).
   - `@myrmidon/cadmus-api` (20.1.0): new `HistoryService`, for the history endpoints of the API.

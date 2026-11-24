@@ -30,10 +30,24 @@
       <!-- parts -->
       @if (id()) {
         <mat-tab label="Parts">
-          <div class="new-part">
-            <div class="form-row">
-              <mat-form-field>
-                <mat-label>part</mat-label>
+          <!-- toolbar -->
+          <div class="parts-toolbar">
+            <!-- facet -->
+            @if (facet(); as f) {
+              <span
+                class="facet-chip"
+                [style.background-color]="facetColors().bg"
+                [style.color]="facetColors().fg"
+                [matTooltip]="f.description || f.label"
+                >{{ f.label }}</span
+              >
+            }
+            <!-- new part -->
+            <div class="new-part">
+              <mat-form-field subscriptSizing="dynamic">
+                <mat-label>{{
+                  newPartDefinitions().length ? "part" : "all parts present"
+                }}</mat-label>
                 <mat-select [formField]="newPart.newPartType">
                   @for (
                     p of newPartDefinitions();
@@ -49,146 +63,254 @@
                     </mat-option>
                   }
                 </mat-select>
-                <mat-error>part type required</mat-error>
               </mat-form-field>
               <button
                 mat-flat-button
-                class="mat-primary"
                 type="button"
-                [disabled]="userLevel() < 2 || busy() || !newPart().valid()"
+                [disabled]="
+                  userLevel() < 2 ||
+                  busy() ||
+                  !newPartDefinitions().length ||
+                  !newPart().valid()
+                "
                 (click)="addPart()"
-                matTooltip="Add a new part of the selected type"
+                [matTooltip]="
+                  newPartDefinitions().length
+                    ? 'Add a new part of the selected type'
+                    : 'All the parts defined by the facet are present'
+                "
               >
                 <mat-icon>add_circle</mat-icon>
                 part
               </button>
             </div>
+            <!-- counts -->
+            <span class="parts-count" [matTooltip]="partsCountTip()"
+              >{{ parts().length }}/{{ facetPartCount() }}</span
+            >
+            <span class="spacer"></span>
+            <!-- expand/collapse all -->
+            @if (partGroups().length) {
+              <button
+                mat-icon-button
+                type="button"
+                [matTooltip]="anyGroupExpanded() ? 'Collapse all' : 'Expand all'"
+                [attr.aria-label]="
+                  anyGroupExpanded() ? 'Collapse all' : 'Expand all'
+                "
+                (click)="toggleAllGroups()"
+              >
+                <mat-icon>{{
+                  anyGroupExpanded() ? "unfold_less" : "unfold_more"
+                }}</mat-icon>
+              </button>
+            }
           </div>
-          <mat-divider></mat-divider>
-          @for (group of partGroups(); track group.key) {
-            <mat-expansion-panel expanded="true" class="group-header">
-              <mat-expansion-panel-header>
-                <mat-panel-title
-                  ><strong>{{ group.label }}</strong></mat-panel-title
+
+          <!-- groups -->
+          <div class="part-groups">
+            @for (group of partGroups(); track group.key) {
+              <mat-expansion-panel
+                class="part-group"
+                [expanded]="!collapsedGroups().has(group.key)"
+                (opened)="setGroupExpanded(group.key, true)"
+                (closed)="setGroupExpanded(group.key, false)"
+              >
+                <mat-expansion-panel-header
+                  [style.background-color]="groupColors()[group.key]?.bg"
+                  [style.--mat-expansion-header-text-color]="
+                    groupColors()[group.key]?.fg
+                  "
+                  [style.--mat-expansion-header-description-color]="
+                    groupColors()[group.key]?.fg
+                  "
+                  [style.--mat-expansion-header-indicator-color]="
+                    groupColors()[group.key]?.fg
+                  "
                 >
-                <mat-panel-description>{{
-                  group.parts.length
-                }}</mat-panel-description>
-              </mat-expansion-panel-header>
-              <table class="parts-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>type</th>
-                    <th>role</th>
-                    <th class="noif-lt-xs">modified</th>
-                    <th class="noif-lt-xs">user</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (
-                    part of group.parts;
-                    track part.typeId + ":" + (part.roleId || "")
-                  ) {
-                    <tr>
-                      <!-- edit -->
-                      <td class="fit-width">
-                        <button
-                          mat-icon-button
-                          type="button"
-                          [disabled]="busy()"
-                          (click)="editPart(part)"
-                          matTooltip="Edit this part"
-                        >
-                          <mat-icon class="mat-primary">create</mat-icon>
-                        </button>
-                        <!-- delete -->
-                        @if (
-                          user()?.roles?.length &&
-                          (user()?.roles?.includes("admin") ||
-                            user()?.roles?.includes("editor") ||
-                            user()?.roles?.includes("operator"))
-                        ) {
-                          <button
-                            mat-icon-button
-                            type="button"
-                            [disabled]="userLevel() < 2 || busy()"
-                            (click)="deletePart(part)"
-                            matTooltip="Delete this part"
+                  <mat-panel-title>{{ group.label }}</mat-panel-title>
+                  <mat-panel-description>
+                    <span class="group-count">{{ group.parts.length }}</span>
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+                <cadmus-data-table>
+                  <table
+                    class="parts-table"
+                    [style.--part-actions]="partActionCount()"
+                  >
+                    <thead>
+                      <tr>
+                        <th class="part-actions" aria-label="actions"></th>
+                        <th>type</th>
+                        <th class="part-role">role</th>
+                        <th class="part-time dt-meta dt-hide-lt-sm">modified</th>
+                        <th class="part-user dt-meta dt-hide-lt-md">user</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        part of group.parts;
+                        track part.typeId + ":" + (part.roleId || "")
+                      ) {
+                        <tr>
+                          <td class="dt-actions">
+                            <!-- edit -->
+                            <button
+                              mat-icon-button
+                              type="button"
+                              [disabled]="busy()"
+                              (click)="editPart(part)"
+                              matTooltip="Edit this part"
+                            >
+                              <mat-icon class="mat-primary">create</mat-icon>
+                            </button>
+                            <!-- other actions inline (wide) -->
+                            <span class="dt-hide-lt-sm">
+                              <!-- delete -->
+                              @if (canDeleteParts()) {
+                                <button
+                                  mat-icon-button
+                                  type="button"
+                                  [disabled]="userLevel() < 2 || busy()"
+                                  (click)="deletePart(part)"
+                                  matTooltip="Delete this part"
+                                >
+                                  <mat-icon class="mat-warn">delete</mat-icon>
+                                </button>
+                              }
+                              <!-- copy ID -->
+                              <button
+                                mat-icon-button
+                                type="button"
+                                matTooltip="Copy this part ID"
+                                [cdkCopyToClipboard]="part.id"
+                              >
+                                <mat-icon>assignment</mat-icon>
+                              </button>
+                              <!-- history -->
+                              @if (historyEnabled()) {
+                                <button
+                                  mat-icon-button
+                                  type="button"
+                                  class="part-history"
+                                  matTooltip="View the edit history of this part"
+                                  (click)="viewPartHistory(part)"
+                                >
+                                  <mat-icon>history</mat-icon>
+                                </button>
+                              }
+                              <!-- copy into item -->
+                              <button
+                                mat-icon-button
+                                type="button"
+                                matTooltip="Copy part into another item"
+                                (click)="onCopyPart(part)"
+                              >
+                                <mat-icon>open_in_new</mat-icon>
+                              </button>
+                              <!-- preview -->
+                              @if (
+                                part | hasPreview: previewJKeys() : previewFKeys()
+                              ) {
+                                <button
+                                  mat-icon-button
+                                  type="button"
+                                  matTooltip="Preview this part"
+                                  (click)="previewPart(part)"
+                                >
+                                  <mat-icon>preview</mat-icon>
+                                </button>
+                              }
+                            </span>
+                            <!-- other actions in a menu (narrow) -->
+                            <span class="dt-only-lt-sm">
+                              <button
+                                mat-icon-button
+                                type="button"
+                                matTooltip="More actions"
+                                aria-label="More actions"
+                                [matMenuTriggerFor]="partMenu"
+                                [matMenuTriggerData]="{ part: part }"
+                              >
+                                <mat-icon>more_vert</mat-icon>
+                              </button>
+                            </span>
+                          </td>
+                          <td class="dt-badge">
+                            <cadmus-part-badge
+                              [partTypeIds]="part"
+                              [facetDefinition]="facet()"
+                              [badgeType]="1"
+                              [typeThesaurus]="typeThesaurus()"
+                            />
+                          </td>
+                          <td class="dt-badge">
+                            <cadmus-part-badge
+                              [partTypeIds]="part"
+                              [facetDefinition]="facet()"
+                              [badgeType]="2"
+                              [typeThesaurus]="typeThesaurus()"
+                            />
+                          </td>
+                          <td class="dt-meta dt-hide-lt-sm">
+                            {{ part.timeModified | date: "yyyy-MM-dd HH:mm:ss" }}
+                          </td>
+                          <td
+                            class="dt-meta dt-truncate dt-hide-lt-md"
+                            [title]="part.userId"
                           >
-                            <mat-icon class="mat-warn">delete</mat-icon>
-                          </button>
-                        }
-                        <!-- copy ID -->
-                        <button
-                          mat-icon-button
-                          type="button"
-                          matTooltip="Copy this part ID"
-                          [cdkCopyToClipboard]="part.id"
-                        >
-                          <mat-icon>assignment</mat-icon>
-                        </button>
-                        <!-- history -->
-                        @if (historyEnabled()) {
-                          <button
-                            mat-icon-button
-                            type="button"
-                            class="part-history"
-                            matTooltip="View the edit history of this part"
-                            (click)="viewPartHistory(part)"
-                          >
-                            <mat-icon>history</mat-icon>
-                          </button>
-                        }
-                        <!-- copy into item -->
-                        <button
-                          mat-icon-button
-                          type="button"
-                          matTooltip="Copy part into another item"
-                          (click)="onCopyPart(part)"
-                        >
-                          <mat-icon>open_in_new</mat-icon>
-                        </button>
-                        <!-- preview -->
-                        @if (
-                          part | hasPreview: previewJKeys() : previewFKeys()
-                        ) {
-                          <button
-                            mat-icon-button
-                            type="button"
-                            matTooltip="Preview this part"
-                            (click)="previewPart(part)"
-                          >
-                            <mat-icon>preview</mat-icon>
-                          </button>
-                        }
-                      </td>
-                      <td>
-                        <cadmus-part-badge
-                          [partTypeIds]="part"
-                          [facetDefinition]="facet()"
-                          [badgeType]="1"
-                          [typeThesaurus]="typeThesaurus()"
-                        />
-                      </td>
-                      <td>
-                        <cadmus-part-badge
-                          [partTypeIds]="part"
-                          [facetDefinition]="facet()"
-                          [badgeType]="2"
-                          [typeThesaurus]="typeThesaurus()"
-                        />
-                      </td>
-                      <td class="noif-lt-xs">
-                        {{ part.timeModified | date: "yyyy-MM-dd HH:mm:ss" }}
-                      </td>
-                      <td class="noif-lt-xs">{{ part.userId }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </mat-expansion-panel>
-          }
+                            {{ part.userId }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </cadmus-data-table>
+              </mat-expansion-panel>
+            }
+          </div>
+
+          <!-- part actions menu (narrow layout) -->
+          <mat-menu #partMenu="matMenu">
+            <ng-template matMenuContent let-part="part">
+              @if (canDeleteParts()) {
+                <button
+                  mat-menu-item
+                  type="button"
+                  [disabled]="userLevel() < 2 || busy()"
+                  (click)="deletePart(part)"
+                >
+                  <mat-icon class="mat-warn">delete</mat-icon>
+                  <span>delete</span>
+                </button>
+              }
+              <button mat-menu-item type="button" [cdkCopyToClipboard]="part.id">
+                <mat-icon>assignment</mat-icon>
+                <span>copy ID</span>
+              </button>
+              @if (historyEnabled()) {
+                <button
+                  mat-menu-item
+                  type="button"
+                  (click)="viewPartHistory(part)"
+                >
+                  <mat-icon>history</mat-icon>
+                  <span>history</span>
+                </button>
+              }
+              <button mat-menu-item type="button" (click)="onCopyPart(part)">
+                <mat-icon>open_in_new</mat-icon>
+                <span>copy into item</span>
+              </button>
+              @if (part | hasPreview: previewJKeys() : previewFKeys()) {
+                <button mat-menu-item type="button" (click)="previewPart(part)">
+                  <mat-icon>preview</mat-icon>
+                  <span>preview</span>
+                </button>
+              }
+            </ng-template>
+          </mat-menu>
+
           <cadmus-missing-parts
             [facetDefinition]="facet()"
             [partDefinitions]="
@@ -204,13 +326,16 @@
       <!-- layers -->
       @if (id()) {
         <mat-tab label="Layers">
+          <cadmus-data-table>
           <table id="layers">
             <thead>
-              <th aria-label="actions"></th>
-              <th>type</th>
-              <th>role</th>
-              <th>frr.</th>
-              <th>last modified</th>
+              <tr>
+                <th class="dt-actions" aria-label="actions"></th>
+                <th>type</th>
+                <th>role</th>
+                <th class="dt-fit">frr.</th>
+                <th class="dt-meta dt-hide-lt-sm">last modified</th>
+              </tr>
             </thead>
             <tbody>
               @for (
@@ -218,7 +343,7 @@
                 track part.typeId + ":" + (part.roleId || "")
               ) {
                 <tr>
-                  <td class="fit-width">
+                  <td class="dt-actions">
                     @if (!part.isAbsent) {
                       <button
                         type="button"
@@ -273,7 +398,7 @@
                       </button>
                     }
                   </td>
-                  <td>
+                  <td class="dt-badge">
                     <cadmus-part-badge
                       [partTypeIds]="part"
                       [facetDefinition]="facet()"
@@ -281,7 +406,7 @@
                       [typeThesaurus]="typeThesaurus()"
                     />
                   </td>
-                  <td>
+                  <td class="dt-badge">
                     <cadmus-part-badge
                       [partTypeIds]="part"
                       [facetDefinition]="facet()"
@@ -290,12 +415,13 @@
                     />
                   </td>
                   <td
+                    class="dt-fit"
                     [class.count-n]="part.fragmentCount"
                     [class.count-z]="!part.fragmentCount"
                   >
                     {{ part.fragmentCount }}
                   </td>
-                  <td>
+                  <td class="dt-meta dt-hide-lt-sm">
                     @if (!part.isAbsent) {
                       <span>
                         {{ part.timeModified | date: "yyyy-MM-dd HH:mm:ss" }}
@@ -306,6 +432,7 @@
               }
             </tbody>
           </table>
+          </cadmus-data-table>
         </mat-tab>
       }
 

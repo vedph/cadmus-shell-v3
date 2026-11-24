@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -15,7 +23,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
-import { DataPage } from '@myrmidon/ngx-tools';
+import { DataPage, EllipsisPipe } from '@myrmidon/ngx-tools';
 import { DialogService } from '@myrmidon/ngx-mat-tools';
 import { AuthJwtService, User } from '@myrmidon/auth-jwt-login';
 
@@ -26,7 +34,11 @@ import {
 } from '@myrmidon/cadmus-core';
 import { UserLevelService } from '@myrmidon/cadmus-api';
 import { AppRepository } from '@myrmidon/cadmus-state';
-import { FacetBadgeComponent, FlagsBadgeComponent } from '@myrmidon/cadmus-ui';
+import {
+  DataTableComponent,
+  FacetBadgeComponent,
+  FlagsBadgeComponent,
+} from '@myrmidon/cadmus-ui';
 
 import { ItemQueryComponent } from '../item-query/item-query.component';
 import { ItemSearchRepository } from '../state/item-search.repository';
@@ -49,8 +61,10 @@ import { ItemSearchRepository } from '../state/item-search.repository';
     MatPaginator,
     AsyncPipe,
     DatePipe,
+    EllipsisPipe,
     FacetBadgeComponent,
     FlagsBadgeComponent,
+    DataTableComponent,
   ],
 })
 export class ItemSearchComponent implements OnInit, OnDestroy {
@@ -65,6 +79,18 @@ export class ItemSearchComponent implements OnInit, OnDestroy {
   public page$: Observable<DataPage<ItemInfo>>;
   public error$: Observable<string | undefined>;
   public lastQueries$: Observable<string[]>;
+
+  private readonly _table = viewChild(DataTableComponent);
+  /**
+   * The maximum number of characters displayed for an item's description,
+   * according to the space available to the list. The full description is
+   * shown in a tooltip when truncated.
+   */
+  public readonly descLimit = computed<number>(
+    () =>
+      this._table()?.pick({ xs: 60, sm: 100, md: 140, lg: 200, xl: 300 }) ??
+      300,
+  );
 
   constructor(
     private _repository: ItemSearchRepository,

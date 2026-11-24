@@ -1,6 +1,6 @@
 {
   "name": "@myrmidon/cadmus-item-list",
-  "version": "20.1.0",
+  "version": "20.1.1",
   "exports": {
     ".": "./src/public-api.ts"
   },
@@ -27,6 +27,6 @@
     "@myrmidon/cadmus-core": "^20.0.0",
     "@myrmidon/cadmus-api": "^20.0.0",
     "@myrmidon/cadmus-state": "^20.0.0",
-    "@myrmidon/cadmus-ui": "^20.0.0"
+    "@myrmidon/cadmus-ui": "^20.2.0"
   }
 }

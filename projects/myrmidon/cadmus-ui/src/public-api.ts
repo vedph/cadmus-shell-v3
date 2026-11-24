@@ -3,6 +3,7 @@
  */
 
 export * from './lib/components/close-save-buttons/close-save-buttons.component';
+export * from './lib/components/data-table/data-table.component';
 export * from './lib/components/decorated-token-text/decorated-token-text.component';
 export * from './lib/components/decorated-token-text/token-text-segmenter';
 export * from './lib/components/error-list/error-list.component';

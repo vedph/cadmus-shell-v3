@@ -7,6 +7,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 This library contains shared UI components, services and validators for Cadmus:
 
 - close/save buttons for part/fragment editors.
+- [responsive data table](#data-table) wrapper.
 - decorated token-based text for text layers and fragment editors, with its token-based text segmenter.
 - errors list.
 - facets badge.
@@ -20,6 +21,62 @@ This library contains shared UI components, services and validators for Cadmus:
 - user lookup.
 - custom validators.
 - JSON validators.
+
+## Data Table
+
+- class: `DataTableComponent`
+- selector: `cadmus-data-table` (exported as `cadmusDataTable`)
+
+A wrapper for plain HTML tables, providing M3-compliant styles (theme tokens, dividers, zebra rows, hover, `tr.selected`) with cells aligned to the top, horizontal scroll as a last resort, and columns shown or hidden according to the width actually available to the table (via CSS container queries, so that it works whatever the surrounding layout).
+
+```html
+<cadmus-data-table>
+  <table>
+    <thead>
+      <tr>
+        <th class="dt-actions"></th>
+        <th class="dt-fit">facet</th>
+        <th>title</th>
+        <th>description</th>
+        <th class="dt-meta dt-hide-lt-md">user</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items; track item.id) {
+      <tr>
+        <td class="dt-actions"><!-- icon buttons --></td>
+        <td class="dt-fit dt-badge"><!-- badge --></td>
+        <td class="dt-truncate" [title]="item.title">{{ item.title }}</td>
+        <td class="dt-wrap">{{ item.description | ellipsis: descLimit() }}</td>
+        <td class="dt-meta dt-hide-lt-md">{{ item.userId }}</td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</cadmus-data-table>
+```
+
+Size classes (from the table's width): `xs` < 640px, `sm` < 900px, `md` < 1100px, `lg` < 1400px, `xl` otherwise.
+
+Cell classes (on both `th` and `td` when they affect the column):
+
+- `dt-hide-lt-sm`, `dt-hide-lt-md`, `dt-hide-lt-lg`, `dt-hide-lt-xl`: hide the column when the table is narrower than the corresponding size.
+- `dt-only-lt-sm`, `dt-only-lt-md`, `dt-only-lt-lg`, `dt-only-lt-xl`: the opposite, show content only when the table is narrower than the corresponding size (e.g. an actions menu replacing inline buttons). Use them on inline wrappers like `span`, rather than directly on elements with their own `display`.
+- `dt-fit`: column as narrow as its content, which never wraps.
+- `dt-actions`: like `dt-fit`, for cells with icon buttons.
+- `dt-badge`: aligns badges with the row's text.
+- `dt-truncate`: single line, truncated with ellipsis beyond `--dt-truncate-max-width` (30ch, reduced to 20ch and 14ch in `sm` and `xs`).
+- `dt-wrap`: freely wrapping text absorbing the remaining width.
+- `dt-meta`: compact secondary data.
+
+The component exposes `width` and `size` signals, and a `pick` method to select a value by size, e.g. to adapt the length of a truncated text:
+
+```ts
+private readonly _table = viewChild(DataTableComponent);
+public readonly descLimit = computed(
+  () => this._table()?.pick({ xs: 60, sm: 100, md: 140, lg: 200, xl: 300 }) ?? 300
+);
+```
 
 ## Read-only Editors
 

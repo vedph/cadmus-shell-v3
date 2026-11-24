@@ -1,0 +1,140 @@
+/* Global styles (ViewEncapsulation.None), scoped by the cadmus-data-table tag.
+ * Breakpoints must match DATA_TABLE_BREAKPOINTS. */
+
+cadmus-data-table {
+  display: block;
+  min-width: 0;
+  /* last-resort safety net: never cut columns, scroll instead */
+  overflow-x: auto;
+  /* column visibility depends on the space actually available */
+  container: cadmus-data-table / inline-size;
+  --dt-truncate-max-width: 30ch;
+}
+
+cadmus-data-table > table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+cadmus-data-table > table > thead th {
+  text-align: left;
+  vertical-align: bottom;
+  padding: 8px;
+  font: var(--mat-sys-title-small);
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+cadmus-data-table > table > tbody td {
+  /* content aligned to the top of the cell; the top padding centers a
+     single line of text with the 40px icon buttons of the row */
+  vertical-align: top;
+  padding: 14px 8px 10px 8px;
+  line-height: 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+cadmus-data-table > table > tbody tr:nth-child(even) {
+  background-color: var(--mat-sys-surface-container-low);
+}
+cadmus-data-table > table > tbody tr:hover {
+  background-color: var(--mat-sys-surface-container-high);
+}
+cadmus-data-table > table > tbody tr.selected {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+/* ---- cell utilities ---- */
+
+/* column as narrow as its non-wrapping content */
+cadmus-data-table .dt-fit,
+cadmus-data-table .dt-actions {
+  width: 1px;
+  white-space: nowrap;
+}
+/* icon buttons */
+cadmus-data-table td.dt-actions {
+  padding: 4px 0;
+}
+/* badges, aligned with the row's text */
+cadmus-data-table td.dt-badge {
+  padding-top: 12px;
+}
+/* single line, truncated with ellipsis */
+cadmus-data-table td.dt-truncate {
+  white-space: nowrap;
+  max-width: var(--dt-truncate-max-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* free wrapping text absorbing the remaining width */
+cadmus-data-table td.dt-wrap {
+  min-width: 16ch;
+  overflow-wrap: anywhere;
+}
+/* compact secondary data */
+cadmus-data-table .dt-meta {
+  white-space: nowrap;
+}
+cadmus-data-table td.dt-meta {
+  font: var(--mat-sys-body-small);
+  line-height: 20px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+/* ---- responsive columns ---- */
+
+@container cadmus-data-table (max-width: 1399px) {
+  cadmus-data-table .dt-hide-lt-xl {
+    display: none;
+  }
+}
+@container cadmus-data-table (max-width: 1099px) {
+  cadmus-data-table .dt-hide-lt-lg {
+    display: none;
+  }
+}
+@container cadmus-data-table (max-width: 899px) {
+  cadmus-data-table .dt-hide-lt-md {
+    display: none;
+  }
+  cadmus-data-table > table {
+    --dt-truncate-max-width: 20ch;
+  }
+}
+@container cadmus-data-table (max-width: 639px) {
+  cadmus-data-table .dt-hide-lt-sm {
+    display: none;
+  }
+  cadmus-data-table > table {
+    --dt-truncate-max-width: 14ch;
+  }
+}
+
+/* ---- content shown only below a size (e.g. an actions menu replacing
+   inline buttons); use on inline wrappers like span ---- */
+
+@container cadmus-data-table (min-width: 640px) {
+  cadmus-data-table .dt-only-lt-sm {
+    display: none;
+  }
+}
+@container cadmus-data-table (min-width: 900px) {
+  cadmus-data-table .dt-only-lt-md {
+    display: none;
+  }
+}
+@container cadmus-data-table (min-width: 1100px) {
+  cadmus-data-table .dt-only-lt-lg {
+    display: none;
+  }
+}
+@container cadmus-data-table (min-width: 1400px) {
+  cadmus-data-table .dt-only-lt-xl {
+    display: none;
+  }
+}

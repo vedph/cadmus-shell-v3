@@ -1,85 +1,52 @@
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th,
-td {
-  padding: 4px 8px;
-  vertical-align: middle;
-}
-tbody tr:nth-child(odd) {
-  background-color: var(--mat-sys-surface-container);
-}
-th {
-  text-align: left;
-  font-weight: normal;
-  color: var(--mat-sys-on-surface-variant);
-}
-tbody tr:hover {
-  background-color: var(--mat-sys-surface-container-high);
-}
-td.fit-width {
-  width: 1px;
-  white-space: nowrap;
-  padding-left: 0;
-  padding-right: 0;
-}
-tbody tr.selected {
-  background-color: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
-}
-/* Title never wraps; description absorbs the remaining width and wraps instead */
-td.title {
-  white-space: nowrap;
-  max-width: 30ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* Compact metadata columns (group, user, date, creator) */
-td.meta,
-th.meta {
-  white-space: nowrap;
-  font-size: 0.8125rem;
-}
-
-.form-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.form-row * {
-  flex: 0 0 auto;
-}
-
+/* ---------------------------------------------------------------
+ * Page layout: filters on the side when there is room, otherwise
+ * below the list.
+ * ------------------------------------------------------------- */
 div#container {
   display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: auto 1fr;
+  /* minmax(0, 1fr) lets the list shrink instead of overflowing */
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   grid-template-areas: "filters list";
-  gap: 16px;
+  align-items: start;
+  gap: 24px;
 }
 div#filters {
   grid-area: filters;
-  max-width: 280px;
+  container: item-filters / inline-size;
+  padding-right: 16px;
+  border-right: 1px solid var(--mat-sys-outline-variant);
 }
 div#list {
   grid-area: list;
+  min-width: 0;
 }
 
-/* lt-md */
+/* lt-md: stack the list above the filters */
 @media only screen and (max-width: 959px) {
   div#container {
-    grid-template-rows: 1fr auto;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "list"
       "filters";
   }
   div#filters {
-    max-width: none;
+    padding-right: 0;
+    padding-top: 16px;
+    border-right: none;
+    border-top: 1px solid var(--mat-sys-outline-variant);
   }
-  .noif-lt-md {
-    display: none;
-  }
+}
+
+/* ---------------------------------------------------------------
+ * Footer
+ * ------------------------------------------------------------- */
+.list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.list-footer mat-paginator {
+  background: transparent;
 }
