@@ -181,6 +181,36 @@ describe('PartBadgeComponent', () => {
       expect(component.partDefinition()?.name).toBe('Scholarly text');
     });
 
+    it('should match the definition with the same typeId and roleId', () => {
+      const facet = makeFacet();
+      facet.partDefinitions.push(
+        {
+          typeId: 'it.vedph.token-text-layer',
+          roleId: 'fr.it.vedph.apparatus',
+          name: 'apparatus',
+          description: 'Critical apparatus.',
+          colorKey: 'C4D490',
+        },
+        {
+          typeId: 'it.vedph.token-text-layer',
+          roleId: 'fr.it.vedph.comment',
+          name: 'comments',
+          description: 'Comments to text portions.',
+          colorKey: '90D4C0',
+        },
+      );
+      fixture.componentRef.setInput('partTypeIds', {
+        typeId: 'it.vedph.token-text-layer',
+        roleId: 'fr.it.vedph.comment',
+      } as PartTypeIds);
+      fixture.componentRef.setInput('facetDefinition', facet);
+      fixture.detectChanges();
+
+      expect(component.partDefinition()?.description).toBe(
+        'Comments to text portions.',
+      );
+    });
+
     it('should fall back to a plain typeId match', () => {
       fixture.componentRef.setInput('partTypeIds', {
         typeId: 'it.vedph.note',

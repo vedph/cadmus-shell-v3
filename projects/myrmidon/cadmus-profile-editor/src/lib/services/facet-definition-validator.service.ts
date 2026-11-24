@@ -30,6 +30,9 @@ export interface FacetValidationResult {
  * - duplicate facet color          → info
  * - duplicate facet description    → info
  * - facet with no part definitions → error
+ * - facet ID with whitespace or URL-reserved characters → error
+ * - facet or part color which is not a 6-digit hex value → warning
+ * - part with empty type ID or name → error
  * - within a facet: two parts with same typeId AND same roleId
  *   (including both empty/null)    → error
  *   (one with a roleId and one without is valid: they serve different roles)
@@ -40,6 +43,9 @@ export interface FacetValidationResult {
  *   existing thesauri: missing required thesauri (prefixed with "*") → error;
  *   missing optional thesauri → info.
  */
+const VALID_ID = /^[^\s/\\?#%]+$/;
+const VALID_COLOR = /^[0-9a-fA-F]{6}$/;
+
 @Injectable({ providedIn: 'root' })
 export class FacetDefinitionValidatorService {
   constructor(private _thesaurusService: ThesaurusService) {}
@@ -117,6 +123,18 @@ export class FacetDefinitionValidatorService {
       } else {
         seenIds.add(facet.id);
       }
+      if (facet.id && !VALID_ID.test(facet.id)) {
+        issues.push({
+          severity: 'error',
+          message: `${label} has an ID with spaces or reserved characters (/ \\ ? # %).`,
+        });
+      }
+      if (facet.colorKey && !VALID_COLOR.test(facet.colorKey)) {
+        issues.push({
+          severity: 'warning',
+          message: `${label} has an invalid color "${facet.colorKey}" (expected RRGGBB).`,
+        });
+      }
 
       // duplicate label
       if (facet.label) {
@@ -155,7 +173,7 @@ export class FacetDefinitionValidatorService {
       }
 
       // no part definitions
-      if (!facet.partDefinitions.length) {
+      if (!facet.partDefinitions?.length) {
         issues.push({
           severity: 'error',
           message: `${label} has no part definitions.`,
@@ -167,7 +185,26 @@ export class FacetDefinitionValidatorService {
       const seenPartColors = new Set<string>();
       const seenPartDescriptions = new Set<string>();
 
-      for (const part of facet.partDefinitions) {
+      for (const part of facet.partDefinitions || []) {
+        if (!part.typeId?.trim()) {
+          issues.push({
+            severity: 'error',
+            message: `A part in ${label} has an empty type ID.`,
+          });
+        }
+        if (!part.name?.trim()) {
+          issues.push({
+            severity: 'error',
+            message: `Part "${part.typeId}" in ${label} has an empty name.`,
+          });
+        }
+        if (part.colorKey && !VALID_COLOR.test(part.colorKey)) {
+          issues.push({
+            severity: 'warning',
+            message: `Part "${part.name}" in ${label} has an invalid color "${part.colorKey}".`,
+          });
+        }
+
         // duplicate typeId + roleId combination
         // key uses empty string for absent roleId so that
         // (typeId, undefined) vs (typeId, "r1") are treated as different

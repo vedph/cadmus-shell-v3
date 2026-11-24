@@ -145,19 +145,27 @@ export class PartBadgeComponent {
       return undefined;
     }
 
-    // First try to find exact match with typeId:roleId
-    if (partTypeIds.roleId) {
-      const exactMatch = facetDefinition.partDefinitions.find(
-        (pd) => pd.typeId === `${partTypeIds.typeId}:${partTypeIds.roleId}`
-      );
+    const { typeId } = partTypeIds;
+    const roleId = partTypeIds.roleId || undefined;
+    const defs = facetDefinition.partDefinitions;
+
+    // first try to find an exact match with typeId and roleId; this is
+    // essential for parts sharing the same type and differing only by role,
+    // like text layers
+    if (roleId) {
+      const exactMatch =
+        defs.find((pd) => pd.typeId === typeId && pd.roleId === roleId) ||
+        // legacy definitions with a typeId:roleId type
+        defs.find((pd) => pd.typeId === `${typeId}:${roleId}`);
       if (exactMatch) {
         return exactMatch;
       }
     }
 
-    // Fallback to match by typeId only
-    return facetDefinition.partDefinitions.find(
-      (pd) => pd.typeId === partTypeIds.typeId
+    // fallback to a match by typeId, preferring definitions without a role
+    return (
+      defs.find((pd) => pd.typeId === typeId && !pd.roleId) ||
+      defs.find((pd) => pd.typeId === typeId)
     );
   });
 

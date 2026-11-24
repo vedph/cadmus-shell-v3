@@ -224,4 +224,40 @@ describe('FacetDefinitionValidatorService', () => {
       ).toBe(true);
     });
   });
+
+  describe('format checks', () => {
+    it('should report an error for a facet ID with reserved characters', () => {
+      const result = validateSync([makeFacet({ id: 'a/b' })]);
+      expect(result.hasErrors).toBe(true);
+    });
+
+    it('should report a warning for an invalid facet color', () => {
+      const result = validateSync([makeFacet({ colorKey: 'default' })]);
+      expect(result.hasWarnings).toBe(true);
+      expect(result.hasErrors).toBe(false);
+    });
+
+    it('should report an error for a part with empty type ID or name', () => {
+      const result = validateSync([
+        makeFacet({
+          partDefinitions: [
+            { typeId: ' ', name: 'x' },
+            { typeId: 'p2', name: '' },
+          ],
+        }),
+      ]);
+      expect(
+        result.issues.filter((i: any) => i.severity === 'error').length,
+      ).toBe(2);
+    });
+
+    it('should report a warning for an invalid part color', () => {
+      const result = validateSync([
+        makeFacet({
+          partDefinitions: [{ typeId: 'p1', name: 'P', colorKey: 'red' }],
+        }),
+      ]);
+      expect(result.hasWarnings).toBe(true);
+    });
+  });
 });

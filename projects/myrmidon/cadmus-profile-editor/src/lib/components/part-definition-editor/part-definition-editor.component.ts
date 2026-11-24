@@ -18,7 +18,7 @@ import {
 } from '@angular/forms/signals';
 
 // material
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
   MatError,
@@ -98,6 +98,7 @@ function toData(v: PartDefinitionControls): PartDefinition {
     MatError,
     MatFormField,
     MatIcon,
+    MatButton,
     MatIconButton,
     MatInput,
     MatLabel,
@@ -177,8 +178,11 @@ export class PartDefinitionEditorComponent {
   public readonly form = form(this._draft, (path) => {
     required(path.typeId);
     maxLength(path.typeId, 100);
+    maxLength(path.roleId, 100);
     required(path.name);
     maxLength(path.name, 100);
+    maxLength(path.groupKey, 100);
+    maxLength(path.sortKey, 100);
     maxLength(path.description, 1000);
     // color key has form RRGGBB, where RR, GG and BB are hex values
     // for red, green and blue
@@ -195,6 +199,27 @@ export class PartDefinitionEditorComponent {
   public readonly isBaseTextPart = computed<boolean>(() => {
     const settings = this.facetModelSettings();
     return settings?.parts?.[this.form.typeId().value()]?.baseText === true;
+  });
+
+  /**
+   * The type IDs offered by the type selector: the available ones, plus the
+   * current one when missing from them, so that an existing definition
+   * never shows an empty selector, nor loses its type when saved.
+   */
+  public readonly typeIdOptions = computed<string[]>(() => {
+    const ids = this.availablePartTypeIds();
+    const current = this.form.typeId().value();
+    return current && !ids.includes(current) ? [current, ...ids] : ids;
+  });
+
+  /**
+   * The role IDs offered by the role selector of base text parts: the
+   * available fragment IDs, plus the current one when missing from them.
+   */
+  public readonly roleIdOptions = computed<string[]>(() => {
+    const ids = this.availableFragmentIds();
+    const current = this.form.roleId().value();
+    return current && !ids.includes(current) ? [current, ...ids] : ids;
   });
 
   constructor() {

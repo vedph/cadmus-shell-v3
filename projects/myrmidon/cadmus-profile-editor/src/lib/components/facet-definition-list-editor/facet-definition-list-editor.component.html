@@ -1,66 +1,132 @@
-<div>
-  <div class="form-row">
-    <button type="button" mat-flat-button color="primary" (click)="addFacet()">
-      <mat-icon>add_circle</mat-icon> facet
+<div class="facets-editor">
+  <!-- toolbar -->
+  <div class="toolbar">
+    <button
+      type="button"
+      mat-flat-button
+      [disabled]="busy() || loadFailed()"
+      (click)="addFacet()"
+    >
+      <mat-icon>add_circle</mat-icon>
+      facet
     </button>
-    <button type="button" mat-flat-button (click)="validate()">
-      <mat-icon>fact_check</mat-icon> validate
+    <button
+      type="button"
+      mat-stroked-button
+      [disabled]="busy() || !facets().length"
+      (click)="validate()"
+    >
+      <mat-icon>fact_check</mat-icon>
+      validate
     </button>
-    <button type="button" mat-flat-button (click)="downloadFacets()">
-      <mat-icon>download</mat-icon> download
+    <button
+      type="button"
+      mat-stroked-button
+      [disabled]="!facets().length"
+      matTooltip="Download the facets as JSON, including unsaved changes"
+      (click)="downloadFacets()"
+    >
+      <mat-icon>download</mat-icon>
+      download
     </button>
-    <button type="button" mat-flat-button color="warn" (click)="save()">
-      <mat-icon>save</mat-icon> save
+    <span class="spacer"></span>
+    @if (dirty()) {
+      <span
+        class="changes-count"
+        [matTooltip]="
+          changes().upserts.length +
+          ' to add or update, ' +
+          changes().deletions.length +
+          ' to delete'
+        "
+      >
+        {{ changeCount() }} unsaved change{{ changeCount() === 1 ? "" : "s" }}
+      </span>
+      <button
+        type="button"
+        mat-button
+        [disabled]="busy()"
+        matTooltip="Discard all the unsaved changes"
+        (click)="discardChanges()"
+      >
+        <mat-icon>undo</mat-icon>
+        discard
+      </button>
+    }
+    <button
+      type="button"
+      mat-flat-button
+      class="save-button"
+      [disabled]="busy() || loadFailed() || !dirty() || !!edited()"
+      [matTooltip]="
+        edited()
+          ? 'Accept or discard the facet being edited before saving'
+          : dirty()
+            ? 'Save the changes to the server'
+            : 'No changes to save'
+      "
+      (click)="save()"
+    >
+      <mat-icon>save</mat-icon>
+      save
     </button>
   </div>
-  <div>
+
+  <div class="progress">
     @if (busy()) {
-      <mat-progress-bar mode="indeterminate" color="accent" />
+      <mat-progress-bar mode="indeterminate" />
     }
   </div>
-  @if (validationResult(); as vr) {
-    <mat-expansion-panel [expanded]="true">
-      <mat-expansion-panel-header>
-        <mat-panel-title>Validation result</mat-panel-title>
-        <mat-panel-description
-          [style.color]="validationResultHasIssues() ? 'warn' : 'primary'"
-        >
-          {{ vr.issues.length }} result{{ vr.issues.length !== 1 ? "s" : "" }}
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-      <div class="validation-result">
-        @if (!vr.issues.length) {
-          <span>No issues found.</span>
-        } @else {
-          <div class="validation-issues">
-            @for (issue of vr.issues; track $index) {
-              <div class="validation-issue {{ issue.severity }}">
-                <mat-icon>{{
-                  issue.severity === "error"
-                    ? "error"
-                    : issue.severity === "warning"
-                      ? "warning"
-                      : "info"
-                }}</mat-icon>
-                <span>{{ issue.message }}</span>
-              </div>
-            }
-          </div>
+
+  @if (loadFailed()) {
+    <div class="notice error" role="alert">
+      <mat-icon>error</mat-icon>
+      <span>Facets could not be loaded: editing is disabled.</span>
+    </div>
+  }
+
+  <!-- save result -->
+  @if (saveResult(); as sr) {
+    <div
+      class="notice"
+      [class.error]="sr.failed.length || sr.skipped.length"
+      role="status"
+    >
+      <mat-icon>{{
+        sr.failed.length || sr.skipped.length ? "error" : "check_circle"
+      }}</mat-icon>
+      <div class="notice-lines">
+        @if (sr.saved.length) {
+          <span>Saved: {{ sr.saved.join(", ") }}</span>
+        }
+        @if (sr.deleted.length) {
+          <span>Deleted: {{ sr.deleted.join(", ") }}</span>
+        }
+        @if (sr.failed.length) {
+          <span>Failed: {{ sr.failed.join(", ") }}</span>
+        }
+        @if (sr.skipped.length) {
+          <span
+            >Not deleted because of the failures above:
+            {{ sr.skipped.join(", ") }}</span
+          >
         }
       </div>
-    </mat-expansion-panel>
+    </div>
   }
+
   @if (reloadNeeded()) {
-    <div class="reload-notice">
+    <div class="notice info">
       <mat-icon>info</mat-icon>
-      <span
-        >Facet definitions are cached at startup. Please reload the app to apply
-        the changes.</span
+      <span class="grow"
+        >Facet definitions are cached at startup. Reload the app to apply the
+        changes.</span
       >
       <button
         type="button"
-        mat-flat-button
-        color="primary"
+        mat-stroked-button
+        [disabled]="dirty()"
+        [matTooltip]="dirty() ? 'Save or discard the changes first' : ''"
         (click)="reloadApp()"
       >
         <mat-icon>refresh</mat-icon>
@@ -68,96 +134,175 @@
       </button>
     </div>
   }
-  @if (facets().length) {
-    <table class="margin-top">
-      <thead>
-        <tr>
-          <th></th>
-          <th>ID</th>
-          <th>label</th>
-          <th>color</th>
-          <th>parts</th>
-          <th>description</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (
-          entry of facets();
-          track entry;
-          let i = $index;
-          let first = $first;
-          let last = $last
-        ) {
-          <tr [class.selected]="i === editedIndex()">
-            <td class="fit-width">
-              <button
-                type="button"
-                mat-icon-button
-                color="primary"
-                matTooltip="Edit this facet"
-                (click)="editFacet(entry, i)"
+
+  <!-- validation result -->
+  @if (validationResult(); as vr) {
+    <mat-expansion-panel class="validation" [expanded]="validationResultHasIssues()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Validation</mat-panel-title>
+        <mat-panel-description>
+          @if (!vr.issues.length) {
+            <span class="count ok">no issues</span>
+          } @else {
+            @if (validationCounts().error) {
+              <span class="count error">{{ validationCounts().error }} error(s)</span>
+            }
+            @if (validationCounts().warning) {
+              <span class="count warning"
+                >{{ validationCounts().warning }} warning(s)</span
               >
-                <mat-icon class="mat-primary">edit</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this facet up"
-                [disabled]="first"
-                (click)="moveFacetUp(i)"
-              >
-                <mat-icon>arrow_upward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                matTooltip="Move this facet down"
-                [disabled]="last"
-                (click)="moveFacetDown(i)"
-              >
-                <mat-icon>arrow_downward</mat-icon>
-              </button>
-              <button
-                type="button"
-                mat-icon-button
-                color="warn"
-                matTooltip="Delete this facet"
-                (click)="deleteFacet(i)"
-              >
-                <mat-icon class="mat-warn">remove_circle</mat-icon>
-              </button>
-            </td>
-            <td>{{ entry.id }}</td>
-            <td>{{ entry.label }}</td>
-            <td>
-              <span
-                class="color-swatch"
-                [style.background-color]="'#' + entry.colorKey"
-                [style.color]="'#' + entry.colorKey | colorToContrast"
-              >
-                {{ entry.colorKey }}
-              </span>
-            </td>
-            <td>{{ entry.partDefinitions.length }}</td>
-            <td>{{ entry.description | ellipsis: 50 }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+            }
+            @if (validationCounts().info) {
+              <span class="count">{{ validationCounts().info }} info</span>
+            }
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      @if (!vr.issues.length) {
+        <p>No issues found.</p>
+      } @else {
+        <ul class="validation-issues">
+          @for (issue of vr.issues; track $index) {
+            <li class="validation-issue {{ issue.severity }}">
+              <mat-icon>{{
+                issue.severity === "error"
+                  ? "error"
+                  : issue.severity === "warning"
+                    ? "warning"
+                    : "info"
+              }}</mat-icon>
+              <span>{{ issue.message }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </mat-expansion-panel>
   }
+
+  <!-- list -->
+  @if (entries().length) {
+    <cadmus-data-table>
+      <table class="facets-table">
+        <thead>
+          <tr>
+            <th class="dt-fit"></th>
+            <th>facet</th>
+            <th class="dt-hide-lt-sm">ID</th>
+            <th class="dt-fit">parts</th>
+            <th>description</th>
+            <th class="dt-fit dt-hide-lt-md">status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of entries(); track entry.key) {
+            @let status = getStatus(entry);
+            <tr [class.selected]="entry.key === editedKey()">
+              <td class="dt-actions">
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Edit this facet"
+                  [disabled]="busy()"
+                  (click)="editFacet(entry)"
+                >
+                  <mat-icon class="mat-primary">edit</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  matTooltip="Delete this facet"
+                  [disabled]="busy()"
+                  (click)="deleteFacet(entry)"
+                >
+                  <mat-icon class="mat-warn">delete</mat-icon>
+                </button>
+              </td>
+              <td class="dt-badge">
+                <span
+                  class="facet-chip"
+                  [style.background-color]="
+                    entry.facet.colorKey ? '#' + entry.facet.colorKey : null
+                  "
+                  [style.color]="
+                    entry.facet.colorKey
+                      ? ('#' + entry.facet.colorKey | colorToContrast)
+                      : null
+                  "
+                  [matTooltip]="
+                    entry.facet.colorKey ? '#' + entry.facet.colorKey : ''
+                  "
+                  >{{ entry.facet.label }}</span
+                >
+                <!-- status on narrow tables -->
+                @if (status !== "saved") {
+                  <span class="dt-only-lt-md">
+                    <span class="status-dot {{ status }}" [matTooltip]="status"></span>
+                  </span>
+                }
+              </td>
+              <td class="dt-truncate dt-hide-lt-sm" [title]="entry.facet.id">
+                <code>{{ entry.facet.id }}</code>
+                @if (status === "renamed") {
+                  <div class="dt-meta">was {{ entry.original?.id }}</div>
+                }
+              </td>
+              <td class="num">{{ entry.facet.partDefinitions.length }}</td>
+              <td
+                class="dt-wrap"
+                [matTooltip]="
+                  (entry.facet.description || '').length > descLimit()
+                    ? entry.facet.description
+                    : ''
+                "
+              >
+                {{ entry.facet.description | ellipsis: descLimit() }}
+              </td>
+              <td class="dt-badge dt-hide-lt-md">
+                @if (status !== "saved") {
+                  <span class="status-chip {{ status }}">{{ status }}</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </cadmus-data-table>
+  } @else if (!busy() && !loadFailed()) {
+    <p class="empty">No facets defined.</p>
+  }
+
+  @if (changes().deletions.length) {
+    <div class="pending-deletions">
+      <mat-icon>delete_sweep</mat-icon>
+      <span
+        >To be deleted from the server on save:
+        <code>{{ changes().deletions.join(", ") }}</code></span
+      >
+    </div>
+  }
+
+  <!-- editor -->
   @if (edited()) {
-    <fieldset>
-      <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>Facet #{{ editedIndex() + 1 }}</mat-panel-title>
-        </mat-expansion-panel-header>
-        <cadmus-facet-definition-editor
-          [facetModelSettings]="facetModelSettings()"
-          [definition]="edited()"
-          (definitionChange)="saveFacet($event!)"
-          (cancelEdit)="closeFacet()"
-        />
-      </mat-expansion-panel>
-    </fieldset>
+    <section class="editor-panel" aria-label="facet editor">
+      <header class="editor-header">
+        <mat-icon>edit_note</mat-icon>
+        <h3>
+          @if (editedKey() === 0) {
+            New facet
+          } @else {
+            Facet <code>{{ editedEntry()?.facet.id }}</code>
+          }
+        </h3>
+        @if (editorDirty()) {
+          <span class="status-chip modified">unaccepted</span>
+        }
+      </header>
+      <cadmus-facet-definition-editor
+        [facetModelSettings]="facetModelSettings()"
+        [definition]="edited()"
+        (definitionChange)="saveFacet($event!)"
+        (cancelEdit)="closeFacet()"
+      />
+    </section>
   }
 </div>

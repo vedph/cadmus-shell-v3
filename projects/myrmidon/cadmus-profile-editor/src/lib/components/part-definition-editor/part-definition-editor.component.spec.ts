@@ -231,7 +231,7 @@ describe('PartDefinitionEditorComponent', () => {
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelector('form')).toBeNull();
       const save: HTMLButtonElement = fixture.nativeElement.querySelector(
-        'button[mattooltip="Accept changes"]'
+        '.editor-actions button[mat-flat-button]'
       );
       expect(save.type).toBe('button');
       expect(save.disabled).toBe(true);
@@ -246,6 +246,42 @@ describe('PartDefinitionEditorComponent', () => {
 
       save.click();
       expect(component.definition()?.name).toBe('Renamed');
+    });
+  });
+
+  describe('options', () => {
+    it('keeps a type ID missing from the settings among the options', () => {
+      fixture.componentRef.setInput('facetModelSettings', makeSettings());
+      fixture.componentRef.setInput(
+        'definition',
+        makePartDefinition({ typeId: 'legacy' }),
+      );
+      fixture.detectChanges();
+      expect(component.typeIdOptions()).toEqual(['legacy', 'base_text', 'note']);
+    });
+
+    it('keeps a role ID missing from the settings among the options', () => {
+      fixture.componentRef.setInput('facetModelSettings', makeSettings());
+      fixture.componentRef.setInput(
+        'definition',
+        makePartDefinition({ typeId: 'base_text', roleId: 'fr.old' }),
+      );
+      fixture.detectChanges();
+      expect(component.roleIdOptions()).toEqual([
+        'fr.old',
+        'comment',
+        'orthography',
+      ]);
+    });
+
+    it('limits the length of role, group and sort keys', () => {
+      const long = 'x'.repeat(101);
+      component.form.roleId().value.set(long);
+      component.form.groupKey().value.set(long);
+      component.form.sortKey().value.set(long);
+      expect(component.form.roleId().getError('maxLength')).toBeTruthy();
+      expect(component.form.groupKey().getError('maxLength')).toBeTruthy();
+      expect(component.form.sortKey().getError('maxLength')).toBeTruthy();
     });
   });
 });

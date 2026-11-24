@@ -13,6 +13,9 @@
           @if (form.id().getError('maxLength') && (form.id().dirty() || form.id().touched())) {
             <mat-error>ID too long</mat-error>
           }
+          @if (form.id().getError('pattern') && (form.id().dirty() || form.id().touched())) {
+            <mat-error>no spaces or / \ ? # %</mat-error>
+          }
         </mat-form-field>
 
         <!-- label -->
@@ -79,140 +82,183 @@
     </mat-tab>
 
     <!-- PARTS -->
-    <mat-tab label="parts">
-      <div>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        parts
+        <span class="tab-count">{{ form.partDefinitions().value().length }}</span>
+      </ng-template>
+      <div class="parts-toolbar">
         <button
           type="button"
           mat-flat-button
-          color="primary"
+          [disabled]="editingPart()"
           (click)="addPartDefinition()"
         >
-          <mat-icon>add_circle</mat-icon> part
+          <mat-icon>add_circle</mat-icon>
+          part
         </button>
+        <span class="parts-summary">
+          {{ form.partDefinitions().value().length }} part(s),
+          {{ requiredCount() }} required
+        </span>
       </div>
-      @if (form.partDefinitions().value().length) {
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>required</th>
-              <th>type ID</th>
-              <th>role ID</th>
-              <th>name</th>
-              <th>group</th>
-              <th>color</th>
-              <th>description</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (
-              entry of form.partDefinitions().value();
-              track entry;
-              let i = $index;
-              let first = $first;
-              let last = $last
-            ) {
-              <tr [class.selected]="i === editedIndex()">
-                <td class="fit-width">
-                  <button
-                    type="button"
-                    mat-icon-button
-                    color="primary"
-                    matTooltip="Edit this part definition"
-                    (click)="editPartDefinition(entry, i)"
-                  >
-                    <mat-icon class="mat-primary">edit</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this part definition up"
-                    [disabled]="first"
-                    (click)="movePartDefinitionUp(i)"
-                  >
-                    <mat-icon>arrow_upward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    matTooltip="Move this part definition down"
-                    [disabled]="last"
-                    (click)="movePartDefinitionDown(i)"
-                  >
-                    <mat-icon>arrow_downward</mat-icon>
-                  </button>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    color="warn"
-                    matTooltip="Delete this part definition"
-                    (click)="deletePartDefinition(i)"
-                  >
-                    <mat-icon class="mat-warn">remove_circle</mat-icon>
-                  </button>
-                </td>
-                <td class="fit-width">
-                  <mat-checkbox
-                    [checked]="entry.isRequired"
-                    disabled
-                  ></mat-checkbox>
-                </td>
-                <td>{{ entry.typeId }}</td>
-                <td>{{ entry.roleId }}</td>
-                <td>{{ entry.name }}</td>
-                <td>{{ entry.groupKey }}</td>
-                <td>
-                  <span
-                    class="color-swatch"
-                    [style.background-color]="'#' + entry.colorKey"
-                    [style.color]="('#' + entry.colorKey) | colorToContrast"
-                  >
-                    {{ entry.colorKey }}
-                  </span>
-                </td>
-                <td>{{ entry.description | ellipsis: 50 }}</td>
+      @if (!form.partDefinitions().value().length) {
+        <p class="error-text" role="alert">
+          A facet must have at least 1 part definition.
+        </p>
+      } @else {
+        <cadmus-data-table>
+          <table>
+            <thead>
+              <tr>
+                <th class="dt-fit"></th>
+                <th>name</th>
+                <th>type ID</th>
+                <th class="dt-hide-lt-sm">role ID</th>
+                <th class="dt-fit dt-hide-lt-sm">group</th>
+                <th class="dt-hide-lt-lg">description</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (
+                entry of form.partDefinitions().value();
+                track $index;
+                let i = $index;
+                let first = $first;
+                let last = $last
+              ) {
+                <tr [class.selected]="i === editedIndex()">
+                  <td class="dt-actions">
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Edit this part definition"
+                      [disabled]="editingPart() && i !== editedIndex()"
+                      (click)="editPartDefinition(entry, i)"
+                    >
+                      <mat-icon class="mat-primary">edit</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Move this part definition up"
+                      [disabled]="first || editingPart()"
+                      (click)="movePartDefinitionUp(i)"
+                    >
+                      <mat-icon>arrow_upward</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Move this part definition down"
+                      [disabled]="last || editingPart()"
+                      (click)="movePartDefinitionDown(i)"
+                    >
+                      <mat-icon>arrow_downward</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Delete this part definition"
+                      [disabled]="editingPart()"
+                      (click)="deletePartDefinition(i)"
+                    >
+                      <mat-icon class="mat-warn">delete</mat-icon>
+                    </button>
+                  </td>
+                  <td class="dt-badge">
+                    <span
+                      class="part-chip"
+                      [style.background-color]="
+                        entry.colorKey ? '#' + entry.colorKey : null
+                      "
+                      [style.color]="
+                        entry.colorKey
+                          ? ('#' + entry.colorKey | colorToContrast)
+                          : null
+                      "
+                      [matTooltip]="entry.description || ''"
+                      >{{ entry.name }}</span
+                    >
+                    @if (entry.isRequired) {
+                      <mat-icon
+                        class="required-icon"
+                        matTooltip="Required part"
+                        aria-label="required"
+                        >star</mat-icon
+                      >
+                    }
+                  </td>
+                  <td class="dt-truncate" [title]="entry.typeId">
+                    <code>{{ entry.typeId }}</code>
+                    <!-- role on narrow tables -->
+                    @if (entry.roleId) {
+                      <div class="dt-only-lt-sm dt-meta">
+                        {{ entry.roleId }}
+                      </div>
+                    }
+                  </td>
+                  <td
+                    class="dt-truncate dt-hide-lt-sm"
+                    [title]="entry.roleId || ''"
+                  >
+                    @if (entry.roleId) {
+                      <code>{{ entry.roleId }}</code>
+                    }
+                  </td>
+                  <td class="dt-meta dt-hide-lt-sm">{{ entry.groupKey }}</td>
+                  <td class="dt-wrap dt-hide-lt-lg">
+                    {{ entry.description | ellipsis: 80 }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </cadmus-data-table>
       }
       @if (edited()) {
-        <fieldset>
-          <mat-expansion-panel [expanded]="edited()" [disabled]="!edited()">
-            <mat-expansion-panel-header>
-              <mat-panel-title>Part #{{ editedIndex() + 1 }}</mat-panel-title>
-            </mat-expansion-panel-header>
-            <cadmus-part-definition-editor
-              [facetModelSettings]="facetModelSettings()"
-              [hideSortKey]="true"
-              [definition]="edited()"
-              (definitionChange)="savePartDefinition($event!)"
-              (cancelEdit)="closePartDefinition()"
-            />
-          </mat-expansion-panel>
-        </fieldset>
+        <section class="part-editor-panel" aria-label="part editor">
+          <header class="editor-header">
+            <mat-icon>tune</mat-icon>
+            <h4>
+              {{
+                editedIndex() === -1
+                  ? "New part"
+                  : "Part #" + (editedIndex() + 1)
+              }}
+            </h4>
+          </header>
+          <cadmus-part-definition-editor
+            [facetModelSettings]="facetModelSettings()"
+            [hideSortKey]="true"
+            [definition]="edited()"
+            (definitionChange)="savePartDefinition($event!)"
+            (cancelEdit)="closePartDefinition()"
+          />
+        </section>
       }
     </mat-tab>
   </mat-tab-group>
 
   <!-- buttons -->
-  <div>
-    <button
-      type="button"
-      mat-icon-button
-      matTooltip="Discard changes"
-      (click)="cancel()"
-    >
-      <mat-icon class="mat-warn">clear</mat-icon>
+  <div class="editor-actions">
+    <button type="button" mat-button (click)="cancel()">
+      <mat-icon>clear</mat-icon>
+      discard
     </button>
     <button
       type="button"
-      mat-icon-button
-      matTooltip="Accept changes"
-      [disabled]="form().invalid() || !form().dirty()"
+      mat-flat-button
+      [matTooltip]="
+        editingPart()
+          ? 'Accept or discard the part being edited first'
+          : 'Accept the changes to this facet (they are saved with the list)'
+      "
+      [disabled]="editingPart() || form().invalid() || !form().dirty()"
       (click)="save()"
     >
-      <mat-icon class="mat-primary">check_circle</mat-icon>
+      <mat-icon>check_circle</mat-icon>
+      accept
     </button>
   </div>
 </div>

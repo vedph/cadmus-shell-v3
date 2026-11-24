@@ -21,21 +21,15 @@ import {
 
 // material
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
 import {
   MatError,
   MatFormField,
   MatLabel,
   MatSuffix,
 } from '@angular/material/form-field';
-import {
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle,
-} from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
-import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 
 import { ColorToContrastPipe, EllipsisPipe } from '@myrmidon/ngx-tools';
@@ -43,6 +37,7 @@ import { DialogService } from '@myrmidon/ngx-mat-tools';
 
 import { FacetDefinition, PartDefinition } from '@myrmidon/cadmus-core';
 import { FacetModelSettings } from '@myrmidon/cadmus-api';
+import { DataTableComponent } from '@myrmidon/cadmus-ui';
 
 import { PartDefinitionEditorComponent } from '../part-definition-editor/part-definition-editor.component';
 
@@ -84,7 +79,12 @@ function toDraft(data: FacetDefinition | undefined): FacetDefinitionControls {
     colorKey: data?.colorKey || '',
     description: data?.description || '',
     partDefinitions: [...(data?.partDefinitions || [])]
-      .sort((a, b) => (a.sortKey ?? '').localeCompare(b.sortKey ?? ''))
+      // numeric collation, so that e.g. "2" sorts before "10"
+      .sort((a, b) =>
+        (a.sortKey ?? '').localeCompare(b.sortKey ?? '', undefined, {
+          numeric: true,
+        }),
+      )
       .map(copyPart),
   };
 }
@@ -108,11 +108,7 @@ function toData(v: FacetDefinitionControls): FacetDefinition {
   imports: [
     FormField,
     MatButtonModule,
-    MatCheckbox,
     MatError,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
     MatFormField,
     MatIcon,
     MatInput,
@@ -120,9 +116,11 @@ function toData(v: FacetDefinitionControls): FacetDefinition {
     MatSuffix,
     MatTab,
     MatTabGroup,
+    MatTabLabel,
     MatTooltip,
     ColorToContrastPipe,
     EllipsisPipe,
+    DataTableComponent,
     PartDefinitionEditorComponent,
   ],
   templateUrl: './facet-definition-editor.component.html',
@@ -182,6 +180,12 @@ export class FacetDefinitionEditorComponent {
   public readonly form = form(this._draft, (path) => {
     required(path.id);
     maxLength(path.id, 100);
+    // the ID is used in API URLs (e.g. facets/{id}): once trimmed, it must
+    // have no spaces or URL-reserved characters
+    validate(path.id, ({ value }) => {
+      const id = value().trim();
+      return !id || /^[^\s/\\?#%]+$/.test(id) ? null : { kind: 'pattern' };
+    });
     required(path.label);
     maxLength(path.label, 100);
     // color key is a 6-digit hex string (without #)
@@ -194,7 +198,28 @@ export class FacetDefinitionEditorComponent {
     );
   });
 
+  /**
+   * True if a part definition is being edited. The facet cannot be
+   * accepted meanwhile, as the part's changes would be lost.
+   */
+  public readonly editingPart = computed<boolean>(() => !!this.edited());
+
+  /**
+   * The count of required part definitions.
+   */
+  public readonly requiredCount = computed<number>(
+    () =>
+      this.form.partDefinitions().value().filter((d) => d.isRequired).length,
+  );
+
   constructor(private _dialogService: DialogService) {
+    // a new definition (e.g. another facet) closes any open part editor,
+    // which refers to the parts of the previous one
+    effect(() => {
+      this.definition();
+      untracked(() => this.closePartDefinition());
+    });
+
     // once the draft mirrors the bound definition again, clear interaction
     // state
     effect(() => {
@@ -215,8 +240,10 @@ export class FacetDefinitionEditorComponent {
    */
   private setPartDefinitions(definitions: PartDefinition[]): void {
     this.form.partDefinitions().value.set(
+      // copyPart rather than a spread, which would copy the form's hidden
+      // identity Symbol of the item
       definitions.map((entry, index) => ({
-        ...entry,
+        ...copyPart(entry),
         sortKey: (index + 1).toString().padStart(2, '0'),
       })),
     );
@@ -326,6 +353,9 @@ export class FacetDefinitionEditorComponent {
    * Set to false for auto-save if you want the form to remain dirty.
    */
   public save(pristine = true): void {
+    if (this.editingPart()) {
+      return;
+    }
     if (this.form().invalid()) {
       // show validation errors
       this.form().markAsTouched();

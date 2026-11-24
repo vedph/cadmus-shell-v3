@@ -5,7 +5,7 @@
       <mat-form-field>
         <mat-label>type</mat-label>
         <mat-select [formField]="form.typeId">
-          @for (id of availablePartTypeIds(); track id) {
+          @for (id of typeIdOptions(); track id) {
             <mat-option [value]="id">{{ id }}</mat-option>
           }
         </mat-select>
@@ -38,7 +38,8 @@
       <mat-form-field>
         <mat-label>role ID</mat-label>
         <mat-select [formField]="form.roleId">
-          @for (e of availableFragmentIds(); track e) {
+          <mat-option value="">(none)</mat-option>
+          @for (e of roleIdOptions(); track e) {
             <mat-option [value]="e">{{ e }}</mat-option>
           }
         </mat-select>
@@ -155,23 +156,20 @@
   </div>
 
   <!-- buttons -->
-  <div>
-    <button
-      type="button"
-      mat-icon-button
-      matTooltip="Discard changes"
-      (click)="cancel()"
-    >
-      <mat-icon class="mat-warn">clear</mat-icon>
+  <div class="editor-actions">
+    <button type="button" mat-button (click)="cancel()">
+      <mat-icon>clear</mat-icon>
+      discard
     </button>
     <button
       type="button"
-      mat-icon-button
-      matTooltip="Accept changes"
+      mat-flat-button
+      matTooltip="Accept the changes to this part definition"
       [disabled]="form().invalid() || !form().dirty()"
       (click)="save()"
     >
-      <mat-icon class="mat-primary">check_circle</mat-icon>
+      <mat-icon>check_circle</mat-icon>
+      accept
     </button>
   </div>
 </div>

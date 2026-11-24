@@ -369,9 +369,104 @@ describe('FacetDefinitionEditorComponent', () => {
       // editor has its own spec for this; here check the outer one
       expect(fixture.nativeElement.querySelector('form')).toBeNull();
       const save: HTMLButtonElement = fixture.nativeElement.querySelector(
-        'button[mattooltip="Accept changes"]'
+        '.editor-actions button[mat-flat-button]'
       );
       expect(save.type).toBe('button');
+    });
+  });
+
+  describe('robustness', () => {
+    it('sorts part definitions by numeric sort key', () => {
+      fixture.componentRef.setInput(
+        'definition',
+        makeFacet({
+          partDefinitions: [
+            makePart({ typeId: 'c', sortKey: '10' }),
+            makePart({ typeId: 'a', sortKey: '2' }),
+            makePart({ typeId: 'b', sortKey: '9' }),
+          ],
+        }),
+      );
+      fixture.detectChanges();
+      expect(
+        component.form.partDefinitions().value().map((d) => d.typeId),
+      ).toEqual(['a', 'b', 'c']);
+    });
+
+    it('closes the part editor when another definition is bound', () => {
+      fixture.componentRef.setInput(
+        'definition',
+        makeFacet({ partDefinitions: [makePart()] }),
+      );
+      fixture.detectChanges();
+      component.editPartDefinition(makePart(), 0);
+      expect(component.editingPart()).toBe(true);
+
+      fixture.componentRef.setInput(
+        'definition',
+        makeFacet({ id: 'f2', partDefinitions: [makePart()] }),
+      );
+      fixture.detectChanges();
+
+      expect(component.editingPart()).toBe(false);
+      expect(component.editedIndex()).toBe(-1);
+    });
+
+    it('does not accept the facet while a part is being edited', () => {
+      fixture.componentRef.setInput(
+        'definition',
+        makeFacet({ partDefinitions: [makePart()] }),
+      );
+      fixture.detectChanges();
+      component.form.label().value.set('changed');
+      component.addPartDefinition();
+
+      component.save();
+
+      expect(component.definition()?.label).toBe('Facet 1');
+    });
+
+    it('rejects IDs with spaces or URL-reserved characters', () => {
+      for (const id of ['a b', 'a/b', 'a?b', 'a#b', 'a%b', 'a\\b']) {
+        component.form.id().value.set(id);
+        expect(component.form.id().getError('pattern')).toBeTruthy();
+      }
+      component.form.id().value.set('  inscription.v2  ');
+      expect(component.form.id().getError('pattern')).toBeFalsy();
+    });
+
+    it('re-keys parts without copying hidden form tags', () => {
+      fixture.componentRef.setInput(
+        'definition',
+        makeFacet({
+          partDefinitions: [makePart({ typeId: 'a' }), makePart({ typeId: 'b' })],
+        }),
+      );
+      fixture.detectChanges();
+      component.movePartDefinitionDown(0);
+      const parts = component.form.partDefinitions().value();
+      expect(parts.map((d) => [d.typeId, d.sortKey])).toEqual([
+        ['b', '01'],
+        ['a', '02'],
+      ]);
+      component.save();
+      for (const d of component.definition()!.partDefinitions) {
+        expect(Object.getOwnPropertySymbols(d)).toEqual([]);
+      }
+    });
+
+    it('counts the required parts', () => {
+      fixture.componentRef.setInput(
+        'definition',
+        makeFacet({
+          partDefinitions: [
+            makePart({ typeId: 'a', isRequired: true }),
+            makePart({ typeId: 'b' }),
+          ],
+        }),
+      );
+      fixture.detectChanges();
+      expect(component.requiredCount()).toBe(1);
     });
   });
 });
